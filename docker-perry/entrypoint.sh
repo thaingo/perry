@@ -2,7 +2,7 @@
 
 if ([ -z "$DEV_MODE" ] || ! $DEV_MODE); then
   echo "PROD MODE"
-  PERRY_CONFIG="--spring.config.location=config/perry-prod.yml"
+  PERRY_CONFIG="--spring.config.location=config/cognito.yml"
   JAVA_OPTS="-Dspring.profiles.active=prod"
 
 else
