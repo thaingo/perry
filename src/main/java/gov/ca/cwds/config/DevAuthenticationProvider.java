@@ -4,6 +4,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import gov.ca.cwds.PerryProperties;
 import gov.ca.cwds.UniversalUserToken;
 import org.apache.commons.lang3.StringUtils;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -22,6 +23,8 @@ import java.util.Collections;
 import java.util.Properties;
 import java.util.UUID;
 
+import static gov.ca.cwds.config.Constants.IDENTITY;
+
 /**
  * username format: user:role1,role2
  * password can by any
@@ -33,15 +36,27 @@ public class DevAuthenticationProvider implements AuthenticationProvider {
   @Autowired
   PerryProperties perryProperties;
 
+  private ObjectMapper objectMapper = new ObjectMapper();
+
   @Override
   public Authentication authenticate(Authentication authentication) throws AuthenticationException {
     tryAuthenticate(authentication);
-    String userName = authentication.getName();
+    String json = authentication.getName();
+    String userName = getUserName(json);
     UniversalUserToken userToken = new UniversalUserToken();
     userToken.setToken(UUID.randomUUID().toString());
     userToken.setUserId(userName);
+    userToken.setParameter(IDENTITY, json);
     return new UsernamePasswordAuthenticationToken(
             userToken, "N/A", Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")));
+  }
+
+  private String getUserName(String json) {
+    try {
+      return objectMapper.readTree(json).get("user").getTextValue();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override
