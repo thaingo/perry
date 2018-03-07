@@ -3,6 +3,7 @@ package gov.ca.cwds.web;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import gov.ca.cwds.PerryProperties;
 import gov.ca.cwds.service.WhiteList;
+import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -32,7 +33,9 @@ public class PerryLogoutSuccessHandler extends SimpleUrlLogoutSuccessHandler imp
 
   @PostConstruct
   public void init() {
-    this.setDefaultTargetUrl(properties.getHomePageUrl());
+    if(StringUtils.isNotBlank(properties.getHomePageUrl())) {
+      this.setDefaultTargetUrl(properties.getHomePageUrl());
+    }
   }
 
   @Override
