@@ -30,7 +30,7 @@ project.ext {
     projectGroup = 'gov.ca.cwds.api'
     configPath = "$rootProject.projectDir/config/"
     springVersion = "1.5.3.RELEASE"
-    projectMajorVersion = '1.5.7'
+    projectMajorVersion = '1-COGNITO'
     mainclass = 'gov.ca.cwds.PerryApplication'
     targetDockerHubOrganization = System.env.DOCKERHUB_ORG ?: 'cwds'
     
@@ -43,7 +43,7 @@ project.ext {
     buildNumber = System.getProperty('BuildNumber')
     customVersion = System.getProperty('CustomVersion')
 
-    projectSnapshotVersion = projectMajorVersion + "-COGNITO"
+    projectSnapshotVersion = projectMajorVersion + "-SNAPSHOT"
     projectReleaseVersion = (customVersion == null || customVersion == "" || customVersion.startsWith('$') ? projectMajorVersion + '_' + buildNumber + '-RC' : customVersion )
     projectVersion = (isRelease ? projectReleaseVersion : projectSnapshotVersion )
 
