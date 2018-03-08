@@ -4,7 +4,6 @@ import gov.ca.cwds.PerryProperties;
 import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.data.reissue.TokenRepository;
 import gov.ca.cwds.data.reissue.model.PerryTokenEntity;
-import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.security.jwt.JwtConfiguration;
 import org.junit.Before;
 import org.junit.Test;
