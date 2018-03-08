@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
  * Created by TPT2 on 10/24/2017.
  */
 @Entity
-@SuppressWarnings("serial")
+@SuppressWarnings({"squid:S3437", "squid:S2160"}) //LocalDate is serializable
 @Table(name = "perry_token")
 public class PerryTokenEntity implements Serializable {
   @Id
