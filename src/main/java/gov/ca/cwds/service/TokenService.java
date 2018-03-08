@@ -43,7 +43,7 @@ public class TokenService {
     tokenRepository.deleteByCreatedDateBefore(createdDateTime);
   }
 
-  public String getAccessTokenByAccessCode(String accessCode) {
+  public String getPerryTokenByAccessCode(String accessCode) {
     List<PerryTokenEntity> tokens = tokenRepository.findByAccessCode(accessCode);
     if (tokens.isEmpty()) {
       throw new PerryException("Access Code: " + accessCode + " is not found");
@@ -53,7 +53,7 @@ public class TokenService {
       throw new PerryException("Access Code: " + accessCode + " is not unique");
     }
     PerryTokenEntity perryTokenEntity = tokens.get(0);
-    if(LocalDateTime.now().isAfter(perryTokenEntity.getCreatedDate().plusMinutes(properties.getJwt().getTimeout()))) {
+    if (LocalDateTime.now().isAfter(perryTokenEntity.getCreatedDate().plusMinutes(properties.getJwt().getTimeout()))) {
       tokenRepository.delete(perryTokenEntity);
       throw new PerryException("Access Code: " + accessCode + " is expired");
     }
@@ -66,10 +66,14 @@ public class TokenService {
   }
 
   public OAuth2AccessToken deleteToken(String token) {
-    PerryTokenEntity perryTokenEntity = tokenRepository.findOne(token);
-    OAuth2AccessToken accessToken = perryTokenEntity.readAccessToken();
-    tokenRepository.delete(token);
-    return accessToken;
+    Optional<OAuth2AccessToken> accessToken =
+        Optional.ofNullable(tokenRepository.findOne(token)).map(PerryTokenEntity::readAccessToken);
+    try {
+      tokenRepository.delete(token);
+    } catch (Exception e) {
+      throw new PerryException("token: " + token + " is not present!", e);
+    }
+    return accessToken.orElseThrow(() -> new PerryException("token entry: '" + token + "' is invalid!"));
   }
 
   public OAuth2AccessToken getAccessTokenByPerryToken(String token) {

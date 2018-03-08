@@ -14,15 +14,15 @@ import java.time.LocalDateTime;
 @Table(name = "perry_token")
 public class PerryTokenEntity implements Serializable {
   @Id
-  @Column(name = "token")
+  @Column(name = "token", nullable = false)
   private String token;
   @Column(name = "access_code")
   private String accessCode;
-  @Column(name = "user_id")
+  @Column(name = "user_id", nullable = false)
   private String user;
-  @Column(name = "access_token", length = 20000)
+  @Column(name = "access_token", length = 20000, nullable = false)
   private byte[] accessToken;
-  @Column(name = "created_date")
+  @Column(name = "created_date", nullable = false)
   private LocalDateTime createdDate = LocalDateTime.now();
 
   public String getUser() {
