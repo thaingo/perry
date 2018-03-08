@@ -1,27 +1,28 @@
 package gov.ca.cwds.service;
 
+import gov.ca.cwds.PerryProperties;
 import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.data.reissue.TokenRepository;
 import gov.ca.cwds.data.reissue.model.PerryTokenEntity;
 import gov.ca.cwds.rest.api.domain.PerryException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.util.RandomValueStringGenerator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Created by TPT2 on 10/27/2017.
  */
 @Service
-@Transactional("tokenTransactionManager")
+@Transactional(value = "tokenTransactionManager", noRollbackFor = PerryException.class)
 public class TokenService {
-  @Value("${perry.jwt.timeout:10}")
-  private int accessCodeTimeout;
+  private PerryProperties properties;
   private TokenRepository tokenRepository;
   private RandomValueStringGenerator generator = new RandomValueStringGenerator();
 
@@ -32,9 +33,14 @@ public class TokenService {
     perryTokenEntity.setAccessCode(accessCode);
     perryTokenEntity.writeAccessToken(accessToken);
     perryTokenEntity.setToken(userToken.getToken());
-    tokenRepository.deleteByUser(userToken.getUserId());
+    deleteExpiredRecords();
     tokenRepository.save(perryTokenEntity);
     return accessCode;
+  }
+
+  private void deleteExpiredRecords() {
+    LocalDateTime createdDateTime = LocalDateTime.now().minusDays(properties.getTokenRecordTimeout());
+    tokenRepository.deleteByCreatedDateBefore(createdDateTime);
   }
 
   public String getAccessTokenByAccessCode(String accessCode) {
@@ -47,8 +53,7 @@ public class TokenService {
       throw new PerryException("Access Code: " + accessCode + " is not unique");
     }
     PerryTokenEntity perryTokenEntity = tokens.get(0);
-    long expirationTime = perryTokenEntity.getCreatedDate().getTime() + accessCodeTimeout * 60 * 1000;
-    if (System.currentTimeMillis() > expirationTime) {
+    if(LocalDateTime.now().isAfter(perryTokenEntity.getCreatedDate().plusMinutes(properties.getJwt().getTimeout()))) {
       tokenRepository.delete(perryTokenEntity);
       throw new PerryException("Access Code: " + accessCode + " is expired");
     }
@@ -68,8 +73,14 @@ public class TokenService {
   }
 
   public OAuth2AccessToken getAccessTokenByPerryToken(String token) {
-    PerryTokenEntity perryTokenEntity = tokenRepository.findOne(token);
-    return perryTokenEntity.readAccessToken();
+    return Optional.ofNullable(tokenRepository.findOne(token))
+        .map(PerryTokenEntity::readAccessToken)
+        .orElse(null);
+  }
+
+  @Autowired
+  public void setProperties(PerryProperties properties) {
+    this.properties = properties;
   }
 
   @Autowired

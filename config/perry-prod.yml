@@ -37,7 +37,7 @@ perry:
     identityProvider:
       idpMapping: ${IDP_MAPPING_SCRIPT:config/idp.groovy}
     jwt:
-      timeout: ${TOKEN_TIMEOUT:30} #minutes
+      timeout: ${TOKEN_TIMEOUT:10} #minutes
       issuer: ${TOKEN_ISSUER:perry}
       encryptionEnabled: ${TOKEN_ENCRYPTION_ENABLED:true}
       encryptionMethod: ${TOKEN_ENCRYPTION_METHOD:A256GCM}
@@ -57,6 +57,7 @@ perry:
     whiteList: ${WHITE_LIST:*} # urls separated by spaces.
     homePageUrl: ${HOME_PAGE_URL:/}
     showErrors: ${SHOW_ERRORS:true}
+    tokenRecordTimeout: ${TOKEN_RECORD_TIMEOUT:7} # days
     tokenStore:
         datasource:
             driver-class-name: org.postgresql.Driver
