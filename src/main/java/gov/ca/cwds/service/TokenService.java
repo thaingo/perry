@@ -5,6 +5,7 @@ import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.data.reissue.TokenRepository;
 import gov.ca.cwds.data.reissue.model.PerryTokenEntity;
 import gov.ca.cwds.rest.api.domain.PerryException;
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.util.RandomValueStringGenerator;
@@ -12,7 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,7 +30,6 @@ public class TokenService {
   public String issueAccessCode(UniversalUserToken userToken, OAuth2AccessToken accessToken) {
     String accessCode = generator.generate();
     PerryTokenEntity perryTokenEntity = new PerryTokenEntity();
-    perryTokenEntity.setCreatedDate(LocalDateTime.now());
     perryTokenEntity.setUser(userToken.getUserId());
     perryTokenEntity.setAccessCode(accessCode);
     perryTokenEntity.writeAccessToken(accessToken);
@@ -40,7 +40,7 @@ public class TokenService {
   }
 
   private void deleteExpiredRecords() {
-    LocalDateTime createdDateTime = LocalDateTime.now().minusDays(properties.getTokenRecordTimeout());
+    Date createdDateTime = DateUtils.addDays(new Date(), -properties.getTokenRecordTimeout());
     tokenRepository.deleteByCreatedDateBefore(createdDateTime);
   }
 
@@ -54,7 +54,7 @@ public class TokenService {
       throw new PerryException("Access Code: " + accessCode + " is not unique");
     }
     PerryTokenEntity perryTokenEntity = tokens.get(0);
-    if (LocalDateTime.now().isAfter(perryTokenEntity.getCreatedDate().plusMinutes(properties.getJwt().getTimeout()))) {
+    if (new Date().after(DateUtils.addMinutes(perryTokenEntity.getCreatedDate(), properties.getJwt().getTimeout()))) {
       tokenRepository.delete(perryTokenEntity);
       throw new PerryException("Access Code: " + accessCode + " is expired");
     }

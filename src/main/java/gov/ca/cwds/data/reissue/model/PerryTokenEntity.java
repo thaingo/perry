@@ -5,7 +5,7 @@ import org.springframework.util.SerializationUtils;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.time.LocalDateTime;
+import java.util.Date;
 
 /**
  * Created by TPT2 on 10/24/2017.
@@ -23,7 +23,8 @@ public class PerryTokenEntity implements Serializable {
   @Column(name = "access_token", length = 20000, nullable = false)
   private byte[] accessToken;
   @Column(name = "created_date", nullable = false)
-  private LocalDateTime createdDate;
+  @Temporal(TemporalType.TIMESTAMP)
+  private Date createdDate = new Date();
 
   public String getUser() {
     return user;
@@ -51,11 +52,11 @@ public class PerryTokenEntity implements Serializable {
     accessToken = SerializationUtils.serialize(oAuth2AccessToken);
   }
 
-  public LocalDateTime getCreatedDate() {
+  public Date getCreatedDate() {
     return createdDate;
   }
 
-  public void setCreatedDate(LocalDateTime createdDate) {
+  public void setCreatedDate(Date createdDate) {
     this.createdDate = createdDate;
   }
 
