@@ -31,13 +31,16 @@ public class StaffUnitAuthorityDaoIT {
   @Test
   public void testFindByStaffPersonId() {
     String userId = "userId";
-    entityManager.merge(entity("id", userId));
+    entityManager.merge(entity("id", userId, null));
+    entityManager.merge(entity("id1", userId, new Date()));
+    entityManager.merge(entity("id2", userId, new Date()));
     List<StaffUnitAuthority> authorities = staffUnitAuthorityDao.findByStaffPersonId(userId);
     assertThat(authorities.size(), is(1));
+
   }
 
-  private StaffUnitAuthority entity(String id, String userId) {
-    return new StaffUnitAuthority("A", "19", null, "NZGDRrd00E", userId, new Date(), id);
+  private StaffUnitAuthority entity(String id, String userId, Date endDate) {
+    return new StaffUnitAuthority("A", "19", endDate, "NZGDRrd00E", userId, new Date(), id);
   }
 
 }

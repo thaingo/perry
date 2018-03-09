@@ -2,6 +2,8 @@ package gov.ca.cwds.data.auth;
 
 
 import gov.ca.cwds.data.persistence.auth.StaffUnitAuthority;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -15,5 +17,8 @@ import java.util.List;
 @Repository
 public interface StaffUnitAuthorityDao extends ReadOnlyRepository<StaffUnitAuthority, String> {
 
-  List<StaffUnitAuthority> findByStaffPersonId(String staffPersonId);
+  @Query("SELECT S FROM StaffUnitAuthority S WHERE S.staffPersonId = :staffPersonId"
+      + " AND S.endDate is null")
+  List<StaffUnitAuthority> findByStaffPersonId(@Param("staffPersonId") String staffPersonId);
+
 }

@@ -136,7 +136,7 @@ public class UserAuthorizationService {
    * @return Set of StaffAuthorityPrivilege for the User
    */
   private Set<StaffAuthorityPrivilege> getStaffAuthorityPriveleges(String userId) {
-    return this.staffAuthorityPrivilegeDao.findByFkuseridT(userId).
+    return this.staffAuthorityPrivilegeDao.findByUserId(userId).
             stream().
             map(priv ->
                     new StaffAuthorityPrivilege(

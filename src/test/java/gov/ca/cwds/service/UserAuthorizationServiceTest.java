@@ -72,7 +72,7 @@ public class UserAuthorizationServiceTest {
     Mockito.when(staffUnitAuthorityDao.findByStaffPersonId(STAFF_ID))
             .thenReturn(Collections.singletonList(staffUnitAuthority));
 
-    Mockito.when(staffAuthorityPrivilegeDao.findByFkuseridT(userId.getId()))
+    Mockito.when(staffAuthorityPrivilegeDao.findByUserId(userId.getId()))
             .thenReturn(Collections.singletonList(staffAuthorityPrivilege));
 
 

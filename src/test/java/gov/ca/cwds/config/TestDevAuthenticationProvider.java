@@ -21,7 +21,7 @@ public class TestDevAuthenticationProvider {
   }
 
   private Authentication authentication() {
-    return new UsernamePasswordAuthenticationToken("user", "password");
+    return new UsernamePasswordAuthenticationToken("{\"user\":\"user\"}", "password");
   }
 
   @Test

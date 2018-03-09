@@ -16,7 +16,8 @@ import java.util.List;
 @Repository
 public interface StaffAuthorityPrivilegeDao extends ReadOnlyRepository<StaffAuthorityPrivilege, String> {
 
-  List<StaffAuthorityPrivilege> findByFkuseridT(String userId);
+  @Query("SELECT S FROM StaffAuthorityPrivilege S WHERE S.fkuseridT = :userId AND S.endDate is null")
+  List<StaffAuthorityPrivilege> findByUserId(@Param("userId") String userId);
 
   @Query("SELECT S FROM StaffAuthorityPrivilege S WHERE S.fkuseridT = :userId AND "
           + "S.levelOfAuthPrivilegeType = '1468' AND "
