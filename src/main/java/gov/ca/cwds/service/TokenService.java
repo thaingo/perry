@@ -29,6 +29,7 @@ public class TokenService {
   public String issueAccessCode(UniversalUserToken userToken, OAuth2AccessToken accessToken) {
     String accessCode = generator.generate();
     PerryTokenEntity perryTokenEntity = new PerryTokenEntity();
+    perryTokenEntity.setCreatedDate(LocalDateTime.now());
     perryTokenEntity.setUser(userToken.getUserId());
     perryTokenEntity.setAccessCode(accessCode);
     perryTokenEntity.writeAccessToken(accessToken);

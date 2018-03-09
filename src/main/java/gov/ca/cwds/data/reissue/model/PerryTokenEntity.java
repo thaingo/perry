@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
  * Created by TPT2 on 10/24/2017.
  */
 @Entity
-@SuppressWarnings({"squid:S3437", "squid:S2160"}) //LocalDate is serializable
 @Table(name = "perry_token")
 public class PerryTokenEntity implements Serializable {
   @Id
@@ -24,7 +23,7 @@ public class PerryTokenEntity implements Serializable {
   @Column(name = "access_token", length = 20000, nullable = false)
   private byte[] accessToken;
   @Column(name = "created_date", nullable = false)
-  private LocalDateTime createdDate = LocalDateTime.now();
+  private LocalDateTime createdDate;
 
   public String getUser() {
     return user;
