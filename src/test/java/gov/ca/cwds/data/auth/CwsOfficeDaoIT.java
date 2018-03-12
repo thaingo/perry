@@ -11,7 +11,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,16 +45,16 @@ public class CwsOfficeDaoIT {
 
   private CwsOffice getCwsOffice(String officeId, String staffPersonId) {
     return new CwsOffice(officeId,
-            new BigDecimal(0),
+            0L,
             "19",
             (short) 1088,
             "N",
             "N",
             " ",
-            new BigDecimal(0),
+            0L,
             0,
             " ",
-            new BigDecimal(0),
+            0L,
             0,
             staffPersonId,
             " ",

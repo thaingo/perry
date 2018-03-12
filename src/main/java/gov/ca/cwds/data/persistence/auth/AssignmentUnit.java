@@ -26,7 +26,7 @@ public class AssignmentUnit extends CmsPersistentObject {
    */
   private static final long serialVersionUID = 1L;
   @Column(name = "PHONE_NO")
-  private BigDecimal phoneNo;
+  private Long phoneNo;
 
   @Column(name = "TEL_EXT_NO")
   private int telExtNo;
@@ -76,7 +76,7 @@ public class AssignmentUnit extends CmsPersistentObject {
    * @param startDate                   the startDate
    * @param id                          the id
    */
-  public AssignmentUnit(BigDecimal phoneNo, int telExtNo, String assignmentUnitDeskIndicator,
+  public AssignmentUnit(Long phoneNo, int telExtNo, String assignmentUnitDeskIndicator,
                         String countySpecificCode, Date endDate, String cwsOfficeId, String assignmentUnitName,
                         Date startDate, String id) {
     super();
@@ -95,7 +95,7 @@ public class AssignmentUnit extends CmsPersistentObject {
   /**
    * @return the phoneNo
    */
-  public BigDecimal getPhoneNo() {
+  public Long getPhoneNo() {
     return phoneNo;
   }
 

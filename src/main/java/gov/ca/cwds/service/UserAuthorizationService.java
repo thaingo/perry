@@ -1,10 +1,16 @@
 package gov.ca.cwds.service;
 
-import gov.ca.cwds.data.auth.*;
+import gov.ca.cwds.data.auth.AssignmentUnitDao;
+import gov.ca.cwds.data.auth.CwsOfficeDao;
+import gov.ca.cwds.data.auth.StaffAuthorityPrivilegeDao;
+import gov.ca.cwds.data.auth.StaffPersonDao;
+import gov.ca.cwds.data.auth.StaffUnitAuthorityDao;
+import gov.ca.cwds.data.auth.UserIdDao;
 import gov.ca.cwds.data.persistence.auth.StaffPerson;
 import gov.ca.cwds.data.persistence.auth.UserId;
+import gov.ca.cwds.data.persistence.auth.CwsOffice;
 import gov.ca.cwds.rest.api.domain.DomainChef;
-import gov.ca.cwds.rest.api.domain.auth.CwsOffice;
+import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType;
 import gov.ca.cwds.rest.api.domain.auth.StaffAuthorityPrivilege;
 import gov.ca.cwds.rest.api.domain.auth.StaffUnitAuthority;
 import gov.ca.cwds.rest.api.domain.auth.UserAuthorization;
@@ -70,12 +76,26 @@ public class UserAuthorizationService {
 
       Set<StaffUnitAuthority> setStaffUnitAuths = getStaffUnitAuthorities(staffPersonIdentifier);
 
-      Set<CwsOffice> setCwsOffices = getCwsOffices(staffPersonIdentifier);
-
       StaffPerson staffPerson = getStaffPerson(staffPersonIdentifier);
+      if (staffPerson == null) {
+        LOGGER.warn("No staff person found for {}", staffPersonIdentifier);
+        return null;
+      }
+
+      String cwsOfficeIdentifier = staffPerson.getCwsOffice();
+      CwsOffice cwsOffice = getCwsOffices(cwsOfficeIdentifier);
+      if (cwsOffice == null) {
+        LOGGER.warn("No cws office found for {}", cwsOfficeIdentifier);
+        return null;
+      }
+
+      GovernmentEntityType governmentEntityType = GovernmentEntityType.findByCountyCd(cwsOffice.getCountySpecificCode());
+      String countyName = governmentEntityType.getDescription();
+      String countyCode = governmentEntityType.getCountyCd();
+      String countyCwsCode = String.valueOf(governmentEntityType.getSysId());
 
       return new UserAuthorization(user.getLogonId(), user.getStaffPersonId(),
-              socialWorker, false, true, userAuthPrivs, setStaffUnitAuths, setCwsOffices, staffPerson);
+              socialWorker, false, true, userAuthPrivs, setStaffUnitAuths, countyName, countyCode, countyCwsCode);
     } else {
       LOGGER.warn("No user id found for {}", primaryKey);
     }
@@ -86,16 +106,11 @@ public class UserAuthorizationService {
   /**
    * Gets the {@link CwsOffice} for a Staff Person
    *
-   * @param staffPersonId The Staff Person Id
-   * @return Set of CwsOffice for the Staff Person
+   * @param cwsOfficeId The CWS Office Id
+   * @return CwsOffice by id
    */
-  private Set<CwsOffice> getCwsOffices(String staffPersonId) {
-    return this.cwsOfficeDao.findByStaffPersonId(staffPersonId).
-            stream().
-            map(cwsOffice ->
-                    new CwsOffice(cwsOffice.getOfficeId(),
-                            cwsOffice.getGovernmentEntityType().toString(),
-                            cwsOffice.getCountySpecificCode())).collect(Collectors.toSet());
+  private CwsOffice getCwsOffices(String cwsOfficeId) {
+    return cwsOfficeDao.findOne(cwsOfficeId);
   }
 
   private StaffPerson getStaffPerson(String staffPersonId) {

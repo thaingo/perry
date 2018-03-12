@@ -2,7 +2,10 @@ package gov.ca.cwds.service;
 
 import gov.ca.cwds.data.auth.*;
 import gov.ca.cwds.data.persistence.auth.*;
-import gov.ca.cwds.rest.api.domain.auth.UserAuthorization;
+import gov.ca.cwds.data.persistence.auth.CwsOffice;
+import gov.ca.cwds.data.persistence.auth.StaffAuthorityPrivilege;
+import gov.ca.cwds.data.persistence.auth.StaffUnitAuthority;
+import gov.ca.cwds.rest.api.domain.auth.*;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -39,61 +42,49 @@ public class UserAuthorizationServiceTest {
     userAuthorizationService.setStaffPersonDao(staffPersonDao);
 
     String racfid = "racfid";
-
-    UserId userId = Mockito.mock(UserId.class);
-    Mockito.when(userId.getId()).thenReturn(ID);
-    Mockito.when(userId.getLogonId()).thenReturn(LOGONID);
-    Mockito.when(userId.getStaffPersonId()).thenReturn(STAFF_ID);
-
+    UserId userId = new UserId(null, null, null, STAFF_ID, ID, LOGONID, null);
     Mockito.when(userIdDao.findActiveByLogonId(racfid))
             .thenReturn(Collections.singletonList(userId));
 
     Mockito.when(staffAuthorityPrivilegeDao.findSocialWorkerPrivileges(userId.getId()))
             .thenReturn(Collections.emptyList());
 
-    StaffPerson staffPerson = Mockito.mock(StaffPerson.class);
-    Mockito.when(staffPerson.getCountyCode()).thenReturn(COUNTY_CODE);
-    Mockito.when(staffPerson.getId()).thenReturn(STAFF_ID);
+    StaffPerson staffPerson = new StaffPerson();
+    staffPerson.setId(STAFF_ID);
+    staffPerson.setCwsOffice(CWSOFFICE);
+
     Mockito.when(staffPersonDao.findOne(STAFF_ID)).thenReturn(staffPerson);
 
-    StaffAuthorityPrivilege staffAuthorityPrivilege = Mockito.mock(StaffAuthorityPrivilege.class);
-    Mockito.when(staffAuthorityPrivilege.getCountySpecificCode()).thenReturn(COUNTY_CODE);
-    Mockito.when(staffAuthorityPrivilege.getLevelOfAuthPrivilegeCode()).thenReturn("L");
-    Mockito.when(staffAuthorityPrivilege.getLevelOfAuthPrivilegeType()).thenReturn((short) 1);
+    StaffAuthorityPrivilege staffAuthorityPrivilege = new StaffAuthorityPrivilege(
+        COUNTY_CODE, null, null, null, null, "L", (short) 1, null, null);
 
+    Mockito.when(staffAuthorityPrivilegeDao.findByUserId(userId.getId()))
+        .thenReturn(Collections.singletonList(staffAuthorityPrivilege));
 
-    StaffUnitAuthority staffUnitAuthority = Mockito.mock(StaffUnitAuthority.class);
-    Mockito.when(staffUnitAuthority.getFkasgUnit()).thenReturn(UNIT);
-    Mockito.when(staffUnitAuthority.getEndDate()).thenReturn(new Date());
-    Mockito.when(staffUnitAuthority.getStartDate()).thenReturn(new Date());
-    Mockito.when(staffUnitAuthority.getStaffPersonId()).thenReturn(STAFF_ID);
-    Mockito.when(staffUnitAuthority.getAuthorityCode()).thenReturn("S");
+    StaffUnitAuthority staffUnitAuthority = new StaffUnitAuthority(
+        "S", null, new Date(), UNIT, STAFF_ID, new Date(), null);
 
     Mockito.when(staffUnitAuthorityDao.findByStaffPersonId(STAFF_ID))
             .thenReturn(Collections.singletonList(staffUnitAuthority));
 
-    Mockito.when(staffAuthorityPrivilegeDao.findByUserId(userId.getId()))
-            .thenReturn(Collections.singletonList(staffAuthorityPrivilege));
-
-
-    AssignmentUnit assignmentUnit = Mockito.mock(AssignmentUnit.class);
-    Mockito.when(assignmentUnit.getCwsOfficeId()).thenReturn(CWSOFFICE);
-    Mockito.when(assignmentUnit.getEndDate()).thenReturn(new Date());
-    Mockito.when(assignmentUnit.getStartDate()).thenReturn(new Date());
-    Mockito.when(assignmentUnit.getCountySpecificCode()).thenReturn(COUNTY_CODE);
+    AssignmentUnit assignmentUnit = new AssignmentUnit(
+        null, 0, null, COUNTY_CODE, new Date(), CWSOFFICE, null, new Date(), null);
 
     Mockito.when(assignmentUnitDao.findOne(UNIT))
             .thenReturn(assignmentUnit);
 
-    CwsOffice cwsOffice = Mockito.mock(CwsOffice.class);
-    Mockito.when(cwsOffice.getCountySpecificCode()).thenReturn(COUNTY_CODE);
-    Mockito.when(cwsOfficeDao.findByStaffPersonId(STAFF_ID)).thenReturn(Collections.singletonList(cwsOffice));
+    CwsOffice cwsOffice = new CwsOffice(
+        CWSOFFICE, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
+        COUNTY_CODE, null, null, null);
+
+    Mockito.when(cwsOfficeDao.findOne(CWSOFFICE)).thenReturn(cwsOffice);
 
     UserAuthorization userAuthorization = userAuthorizationService.find(racfid);
     assert userAuthorization.getUserId().equals(LOGONID);
+    assert userAuthorization.getCountyName().equals("Humboldt");
+    assert userAuthorization.getCountyCode().equals(COUNTY_CODE);
+    assert userAuthorization.getCountyCwsCode().equals("1079");
     assert !userAuthorization.getSocialWorker();
-    assert userAuthorization.getStaffPerson() != null;
-    assert userAuthorization.getStaffPerson().getId().equals(STAFF_ID);
     assert userAuthorization.getAuthorityPrivilege().size() == 1;
     gov.ca.cwds.rest.api.domain.auth.StaffAuthorityPrivilege authorityPrivilege = userAuthorization.getAuthorityPrivilege().iterator().next();
     assert authorityPrivilege.getAuthPrivilegeCode().equals("L");

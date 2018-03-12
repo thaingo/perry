@@ -1,6 +1,5 @@
 package gov.ca.cwds.data.persistence.auth;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import gov.ca.cwds.data.persistence.cms.CmsPersistentObject;
 import org.hibernate.annotations.Type;
 
@@ -9,7 +8,6 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import java.io.Serializable;
-import java.math.BigDecimal;
 
 /**
  * {@link CmsPersistentObject} representing a CWS Office.
@@ -31,7 +29,7 @@ public class CwsOffice extends CmsPersistentObject {
   private String officeId;
 
   @Column(name = "FAX_NO")
-  private BigDecimal faxNumber;
+  private Long faxNumber;
 
   @Column(name = "GEO_RGNTCD")
   private String geographicRegionTextCode;
@@ -50,7 +48,7 @@ public class CwsOffice extends CmsPersistentObject {
   private String mailStopDescription;
 
   @Column(name = "MSG_TEL_NO")
-  private BigDecimal messagePhoneNumber;
+  private Long messagePhoneNumber;
 
   @Type(type = "integer")
   @Column(name = "MSG_EXT_NO")
@@ -60,7 +58,7 @@ public class CwsOffice extends CmsPersistentObject {
   private String cwsOffNumber;
 
   @Column(name = "PRM_TEL_NO")
-  private BigDecimal primaryPhoneNumber;
+  private Long primaryPhoneNumber;
 
   @Type(type = "integer")
   @Column(name = "PRM_EXT_NO")
@@ -127,10 +125,10 @@ public class CwsOffice extends CmsPersistentObject {
    * @param locationCountyType          the locationCountyType
    * @param directorsNameTitle          the directorsNameTitle
    */
-  public CwsOffice(String officeId, BigDecimal faxNumber, String geographicRegionTextCode,
+  public CwsOffice(String officeId, Long faxNumber, String geographicRegionTextCode,
                    Short governmentEntityType, String headquarterIndicator, String inactiveIndicator,
-                   String mailStopDescription, BigDecimal messagePhoneNumber,
-                   Integer messagePhoneExtensionNumber, String cwsOffNumber, BigDecimal primaryPhoneNumber,
+                   String mailStopDescription, Long messagePhoneNumber,
+                   Integer messagePhoneExtensionNumber, String cwsOffNumber, Long primaryPhoneNumber,
                    Integer primaryPhoneExtensionNumber, String staffPersonId, String commentDescription,
                    String agencyName, String departmentDivisionName, String cwsOfficeName,
                    String countySpecificCode, Short agencyCodeNumber, Short locationCountyType,
@@ -175,7 +173,7 @@ public class CwsOffice extends CmsPersistentObject {
   /**
    * @return the faxNumber
    */
-  public BigDecimal getFaxNumber() {
+  public Long getFaxNumber() {
     return faxNumber;
   }
 
@@ -217,7 +215,7 @@ public class CwsOffice extends CmsPersistentObject {
   /**
    * @return the messagePhoneNumber
    */
-  public BigDecimal getMessagePhoneNumber() {
+  public Long getMessagePhoneNumber() {
     return messagePhoneNumber;
   }
 
@@ -238,7 +236,7 @@ public class CwsOffice extends CmsPersistentObject {
   /**
    * @return the primaryPhoneNumber
    */
-  public BigDecimal getPrimaryPhoneNumber() {
+  public Long getPrimaryPhoneNumber() {
     return primaryPhoneNumber;
   }
 
@@ -367,7 +365,6 @@ public class CwsOffice extends CmsPersistentObject {
    * @see java.lang.Object#equals(java.lang.Object)
    */
   @Override
-  @SuppressFBWarnings("MDM_BIGDECIMAL_EQUALS") //BigDecimal.equals used for equals/hashCode only
   public final boolean equals(Object obj) {
     if (this == obj) {
       return true;

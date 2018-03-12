@@ -1,6 +1,5 @@
-import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType
-
 def authorization = user.authorization
+
 if (authorization == null) {
     return [user : user.userId,
             roles: user.roles]
@@ -26,8 +25,8 @@ def supervisor = authorization.unitAuthority != null && authorization.unitAuthor
 [user       : authorization.userId,
  roles      : [supervisor ? "Supervisor" : "SocialWorker"],
  staffId    : authorization.staffPersonId,
- county_name: authorization.county,
- county_code: authorization.staffPerson.countyCode,
- county_cws_code: GovernmentEntityType.findByCountyCd(authorization.staffPerson.countyCode).sysId,
+ county_name: authorization.countyName,
+ county_code: authorization.countyCode,
+ county_cws_code: authorization.countyCwsCode,
  privileges : privileges]
 

@@ -54,10 +54,10 @@ public class AbstractRealmTest {
     private String staffId;
     @JsonProperty("county_code")
     private String countyCode;
+    @JsonProperty("county_cws_code")
+    private String countyCwsCode;
     @JsonProperty("county_name")
     private String countyName;
-    @JsonProperty("government_entity_type")
-    private String governmentEntityType;
     @JsonProperty
     private Set<String> privileges;
 
@@ -103,20 +103,22 @@ public class AbstractRealmTest {
       this.countyCode = countyCode;
     }
 
+    @Override
+    public String getCountyCwsCode() {
+      return countyCwsCode;
+    }
+
+    @Override
+    public void setCountyCwsCode(String countyCwsCode) {
+      this.countyCwsCode = countyCwsCode;
+    }
+
     public String getCountyName() {
       return countyName;
     }
 
     public void setCountyName(String countyName) {
       this.countyName = countyName;
-    }
-
-    public String getGovernmentEntityType() {
-      return governmentEntityType;
-    }
-
-    public void setGovernmentEntityType(String governmentEntityType) {
-      this.governmentEntityType = governmentEntityType;
     }
 
     public Set<String> getPrivileges() {
