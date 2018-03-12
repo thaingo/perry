@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.sql.Timestamp;
 import java.util.List;
 
 
@@ -19,7 +19,7 @@ public interface TokenRepository extends JpaRepository<PerryTokenEntity, String>
   List<PerryTokenEntity> findByAccessCode(String accessCode);
 
   @Modifying
-  long deleteByCreatedDateBefore(Date date);
+  long deleteByCreatedDateBefore(Timestamp date);
 
   @Modifying
   @Query("UPDATE PerryTokenEntity pte SET pte.accessToken = ?2 WHERE pte.token = ?1")

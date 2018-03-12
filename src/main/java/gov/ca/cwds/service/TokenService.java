@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -41,7 +42,7 @@ public class TokenService {
 
   private void deleteExpiredRecords() {
     Date createdDateTime = DateUtils.addDays(new Date(), -properties.getTokenRecordTimeout());
-    tokenRepository.deleteByCreatedDateBefore(createdDateTime);
+    tokenRepository.deleteByCreatedDateBefore(new Timestamp(createdDateTime.getTime()));
   }
 
   public String getPerryTokenByAccessCode(String accessCode) {
