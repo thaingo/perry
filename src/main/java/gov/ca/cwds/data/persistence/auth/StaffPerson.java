@@ -1,5 +1,6 @@
 package gov.ca.cwds.data.persistence.auth;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.jackson.JsonSnakeCase;
 import io.swagger.annotations.ApiModel;
@@ -31,6 +32,10 @@ public class StaffPerson {
   @JsonProperty("county_code")
   private String countyCode;
 
+  @Column(name = "FKCWS_OFFT")
+  @JsonIgnore
+  private String cwsOffice;
+
   public String getId() {
     return id;
   }
@@ -45,5 +50,13 @@ public class StaffPerson {
 
   public void setCountyCode(String countyCode) {
     this.countyCode = countyCode;
+  }
+
+  public String getCwsOffice() {
+    return cwsOffice;
+  }
+
+  public void setCwsOffice(String cwsOffice) {
+    this.cwsOffice = cwsOffice;
   }
 }

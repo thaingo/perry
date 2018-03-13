@@ -1,10 +1,15 @@
 package gov.ca.cwds.service;
 
-import gov.ca.cwds.data.auth.*;
+import gov.ca.cwds.data.auth.AssignmentUnitDao;
+import gov.ca.cwds.data.auth.CwsOfficeDao;
+import gov.ca.cwds.data.auth.StaffAuthorityPrivilegeDao;
+import gov.ca.cwds.data.auth.StaffPersonDao;
+import gov.ca.cwds.data.auth.StaffUnitAuthorityDao;
+import gov.ca.cwds.data.auth.UserIdDao;
 import gov.ca.cwds.data.persistence.auth.StaffPerson;
 import gov.ca.cwds.data.persistence.auth.UserId;
+import gov.ca.cwds.data.persistence.auth.CwsOffice;
 import gov.ca.cwds.rest.api.domain.DomainChef;
-import gov.ca.cwds.rest.api.domain.auth.CwsOffice;
 import gov.ca.cwds.rest.api.domain.auth.StaffAuthorityPrivilege;
 import gov.ca.cwds.rest.api.domain.auth.StaffUnitAuthority;
 import gov.ca.cwds.rest.api.domain.auth.UserAuthorization;
@@ -53,53 +58,40 @@ public class UserAuthorizationService {
    * @see CrudsService#find(Serializable)
    */
   public UserAuthorization find(Serializable primaryKey) {
-    assert primaryKey instanceof String;
-    LOGGER.info(primaryKey.toString());
-
     final String userId = ((String) primaryKey).trim();
+    LOGGER.info(userId);
+
     List<UserId> userList = userIdDao.findActiveByLogonId(userId);
 
-
-    if (userList != null && !userList.isEmpty()) {
-      final UserId user = userList.get(0);
-      String userIdentifier = user.getId();
-      String staffPersonIdentifier = user.getStaffPersonId();
-      boolean socialWorker = !staffAuthorityPrivilegeDao.findSocialWorkerPrivileges(userIdentifier).isEmpty();
-
-      Set<StaffAuthorityPrivilege> userAuthPrivs = getStaffAuthorityPriveleges(userIdentifier);
-
-      Set<StaffUnitAuthority> setStaffUnitAuths = getStaffUnitAuthorities(staffPersonIdentifier);
-
-      Set<CwsOffice> setCwsOffices = getCwsOffices(staffPersonIdentifier);
-
-      StaffPerson staffPerson = getStaffPerson(staffPersonIdentifier);
-
-      return new UserAuthorization(user.getLogonId(), user.getStaffPersonId(),
-              socialWorker, false, true, userAuthPrivs, setStaffUnitAuths, setCwsOffices, staffPerson);
-    } else {
+    if (userList == null || userList.isEmpty()) {
       LOGGER.warn("No user id found for {}", primaryKey);
+      return null;
     }
 
-    return null;
-  }
+    final UserId user = userList.get(0);
+    String userIdentifier = user.getId();
+    String staffPersonIdentifier = user.getStaffPersonId();
+    boolean socialWorker = !staffAuthorityPrivilegeDao.findSocialWorkerPrivileges(userIdentifier).isEmpty();
 
-  /**
-   * Gets the {@link CwsOffice} for a Staff Person
-   *
-   * @param staffPersonId The Staff Person Id
-   * @return Set of CwsOffice for the Staff Person
-   */
-  private Set<CwsOffice> getCwsOffices(String staffPersonId) {
-    return this.cwsOfficeDao.findByStaffPersonId(staffPersonId).
-            stream().
-            map(cwsOffice ->
-                    new CwsOffice(cwsOffice.getOfficeId(),
-                            cwsOffice.getGovernmentEntityType().toString(),
-                            cwsOffice.getCountySpecificCode())).collect(Collectors.toSet());
-  }
+    Set<StaffAuthorityPrivilege> userAuthPrivs = getStaffAuthorityPriveleges(userIdentifier);
 
-  private StaffPerson getStaffPerson(String staffPersonId) {
-    return staffPersonDao.findOne(staffPersonId);
+    Set<StaffUnitAuthority> setStaffUnitAuths = getStaffUnitAuthorities(staffPersonIdentifier);
+
+    StaffPerson staffPerson = staffPersonDao.findOne(staffPersonIdentifier);
+    if (staffPerson == null) {
+      LOGGER.warn("No staff person found for {}", staffPersonIdentifier);
+      return null;
+    }
+
+    String cwsOfficeIdentifier = staffPerson.getCwsOffice();
+    CwsOffice cwsOffice = cwsOfficeDao.findOne(cwsOfficeIdentifier);
+    if (cwsOffice == null) {
+      LOGGER.warn("No cws office found for {}", cwsOfficeIdentifier);
+      return null;
+    }
+
+    return new UserAuthorization(user.getLogonId(), socialWorker, false, true,
+        userAuthPrivs, setStaffUnitAuths, cwsOffice, staffPerson);
   }
 
   /**
