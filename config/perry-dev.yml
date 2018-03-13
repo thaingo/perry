@@ -19,7 +19,7 @@ spring:
           port: ${REDIS_PORT:6379}
 perry:
     jwt:
-      timeout: ${TOKEN_TIMEOUT:30} #minutes
+      timeout: ${TOKEN_TIMEOUT:10} #minutes
       issuer: ${TOKEN_ISSUER:perry}
       encryptionEnabled: ${TOKEN_ENCRYPTION_ENABLED:true}
       encryptionMethod: ${TOKEN_ENCRYPTION_METHOD:A128GCM}
@@ -53,6 +53,7 @@ perry:
     whiteList: ${WHITE_LIST:*}
     homePageUrl: ${HOME_PAGE_URL:/}
     showErrors: ${SHOW_ERRORS:true}
+    tokenRecordTimeout: ${TOKEN_RECORD_TIMEOUT:7} # days
 management:
   context-path: /manage
   port: ${ADMIN_PORT:9082}
