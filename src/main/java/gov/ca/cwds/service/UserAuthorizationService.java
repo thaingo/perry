@@ -89,7 +89,7 @@ public class UserAuthorizationService {
         return null;
       }
 
-      GovernmentEntityType governmentEntityType = GovernmentEntityType.findByCountyCd(cwsOffice.getCountySpecificCode());
+      GovernmentEntityType governmentEntityType = GovernmentEntityType.findBySysId(cwsOffice.getGovernmentEntityType());
       String countyName = governmentEntityType.getDescription();
       String countyCode = governmentEntityType.getCountyCd();
       String countyCwsCode = String.valueOf(governmentEntityType.getSysId());

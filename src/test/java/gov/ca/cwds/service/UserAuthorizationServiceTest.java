@@ -23,6 +23,7 @@ public class UserAuthorizationServiceTest {
   public static final String UNIT = "unit";
   public static final String CWSOFFICE = "cwsoffice";
   public static final String COUNTY_CODE = "12";
+  public static final short COUNTY_CWS_CODE = 1079;
 
   @Test
   public void test() {
@@ -74,7 +75,7 @@ public class UserAuthorizationServiceTest {
             .thenReturn(assignmentUnit);
 
     CwsOffice cwsOffice = new CwsOffice(
-        CWSOFFICE, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
+        CWSOFFICE, null, null, COUNTY_CWS_CODE , null, null, null, null, null, null, null, null, null, null, null, null, null,
         COUNTY_CODE, null, null, null);
 
     Mockito.when(cwsOfficeDao.findOne(CWSOFFICE)).thenReturn(cwsOffice);
