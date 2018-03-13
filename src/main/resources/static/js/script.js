@@ -40,7 +40,8 @@ function validateLoginString() {
         + "\t\"county_cws_code\": \"1123\",\n"
         + "\t\"county_name\": \"Ventura\",\n"
         + "\t\"privileges\": [\n"
-        + "\t\t\"Countywide Read\",\n"
+        + "\t\t\"CWS Case Management System\",\n"
+        + "\t\t\"Resource Management\",\n"
         + "\t\t\"Sensitive Persons\"\n"
         + "\t]\n"
         + "}";
