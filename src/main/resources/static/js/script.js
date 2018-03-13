@@ -42,6 +42,8 @@ function validateLoginString() {
         + "\t\"privileges\": [\n"
         + "\t\t\"CWS Case Management System\",\n"
         + "\t\t\"Resource Management\",\n"
+        + "\t\t\"Resource Mgmt Placement Facility Maint\",\n"
+        + "\t\t\"Sealed\",\n"
         + "\t\t\"Sensitive Persons\"\n"
         + "\t]\n"
         + "}";
