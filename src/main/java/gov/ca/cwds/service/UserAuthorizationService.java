@@ -83,10 +83,9 @@ public class UserAuthorizationService {
       return null;
     }
 
-    String cwsOfficeIdentifier = staffPerson.getCwsOffice();
-    CwsOffice cwsOffice = cwsOfficeDao.findOne(cwsOfficeIdentifier);
+    CwsOffice cwsOffice = cwsOfficeDao.findOne(staffPerson.getCwsOffice());
     if (cwsOffice == null) {
-      LOGGER.warn("No cws office found for {}", cwsOfficeIdentifier);
+      LOGGER.warn("No cws office found for {}", staffPerson.getCwsOffice());
       return null;
     }
 
