@@ -1,39 +1,32 @@
 {
   "user_id": "userabc",
-  "staff_person_id": "q1p",
   "social_worker": true,
   "supervisor": false,
   "override_authority": true,
   "authority_privilege": [
     {
-    "auth_privilege_type": "1483",
-    "auth_privilege_code": "P",
-    "county_code": "21",
-    "auth_privilege_type_desc": "Countywide Read",
-    "auth_privilege_code_desc": "Staff Person Privilege Type",
-    "county": "Marin"
-     }
+      "auth_privilege_type": "1483",
+      "auth_privilege_code": "P",
+      "county_code": "21",
+      "auth_privilege_type_desc": "Countywide Read",
+      "auth_privilege_code_desc": "Staff Person Privilege Type",
+      "county": "Marin"
+    }
   ],
   "unit_authority": [
     {
-    "unit_authority_code": "S",
-    "assigned_unit": "ABC123",
-    "county_code": "21",
-    "unit_authority_code_desc": "Supervisor",
-    "county": "Marin"
+      "unit_authority_code": "S",
+      "assigned_unit": "ABC123",
+      "county_code": "21",
+      "unit_authority_code_desc": "Supervisor",
+      "county": "Marin"
     }
   ],
-  "cws_office": [
-    {
-      "office_id": "ABcDmKx00E",
-      "government_entity_type": "1088",
-      "county_code": "21",
-      "government_entity_type_desc": "Marin",
-      "county": "Marin"
-     }
-  ],
-  "staff_person" : {
-    "county_code": "21"
+  "cws_office": {
+    "office_id": "ABcDmKx00E",
+    "government_entity_type": "1088"
   },
-  "county": "Marin"
+  "staff_person": {
+    "id": "q1p"
+  }
 }

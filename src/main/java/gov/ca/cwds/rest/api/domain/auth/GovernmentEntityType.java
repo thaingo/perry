@@ -343,8 +343,8 @@ public enum GovernmentEntityType implements ApiSysCodeAware {
     return mapBySysId.get(sysId);
   }
 
-  public static GovernmentEntityType getGovernmentEntityTypeBySysId(int sysId) {
-    return mapBySysId.get(sysId);
+  public static GovernmentEntityType findBySysId(int sysId) {
+    return mapBySysId.containsKey(sysId) ? mapBySysId.get(sysId): GovernmentEntityType.NONE;
   }
 
   public static GovernmentEntityType findByCountyCd(String countyCd) {

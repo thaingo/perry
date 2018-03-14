@@ -1,7 +1,11 @@
 package gov.ca.cwds.data.persistence.auth;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import gov.ca.cwds.data.persistence.cms.CmsPersistentObject;
+import io.dropwizard.jackson.JsonSnakeCase;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.Column;
@@ -9,7 +13,6 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import java.io.Serializable;
-import java.math.BigDecimal;
 
 /**
  * {@link CmsPersistentObject} representing a CWS Office.
@@ -19,6 +22,8 @@ import java.math.BigDecimal;
 
 @Entity
 @Table(name = "CWS_OFFT")
+@ApiModel
+@JsonSnakeCase
 public class CwsOffice extends CmsPersistentObject {
 
   /**
@@ -28,71 +33,94 @@ public class CwsOffice extends CmsPersistentObject {
 
   @Id
   @Column(name = "IDENTIFIER")
+  @ApiModelProperty(example = "Office")
+  @JsonProperty("office_id")
   private String officeId;
-
-  @Column(name = "FAX_NO")
-  private BigDecimal faxNumber;
-
-  @Column(name = "GEO_RGNTCD")
-  private String geographicRegionTextCode;
 
   @Type(type = "short")
   @Column(name = "GVR_ENTC")
+  @ApiModelProperty(example = "1011")
+  @JsonProperty("government_entity_type")
   private Short governmentEntityType;
 
+  @Column(name = "FAX_NO")
+  @JsonIgnore
+  private Long faxNumber;
+
+  @Column(name = "GEO_RGNTCD")
+  @JsonIgnore
+  private String geographicRegionTextCode;
+
   @Column(name = "HDQRTR_IND")
+  @JsonIgnore
   private String headquarterIndicator;
 
   @Column(name = "INACTV_IND")
+  @JsonIgnore
   private String inactiveIndicator;
 
   @Column(name = "MAILST_DSC")
+  @JsonIgnore
   private String mailStopDescription;
 
   @Column(name = "MSG_TEL_NO")
-  private BigDecimal messagePhoneNumber;
+  @JsonIgnore
+  private Long messagePhoneNumber;
 
   @Type(type = "integer")
   @Column(name = "MSG_EXT_NO")
+  @JsonIgnore
   private Integer messagePhoneExtensionNumber;
 
   @Column(name = "CWS_OFF_NO")
+  @JsonIgnore
   private String cwsOffNumber;
 
   @Column(name = "PRM_TEL_NO")
-  private BigDecimal primaryPhoneNumber;
+  @JsonIgnore
+  private Long primaryPhoneNumber;
 
   @Type(type = "integer")
   @Column(name = "PRM_EXT_NO")
+  @JsonIgnore
   private Integer primaryPhoneExtensionNumber;
 
   @Column(name = "FKSTFPERST")
+  @JsonIgnore
   private String staffPersonId;
 
   @Column(name = "COMNT_DSC")
+  @JsonIgnore
   private String commentDescription;
 
   @Column(name = "AGENCY_NM")
+  @JsonIgnore
   private String agencyName;
 
   @Column(name = "DPT_DIV_NM")
+  @JsonIgnore
   private String departmentDivisionName;
 
   @Column(name = "CWS_OFF_NM")
+  @JsonIgnore
   private String cwsOfficeName;
 
   @Column(name = "CNTY_SPFCD")
+  @JsonIgnore
   private String countySpecificCode;
 
   @Type(type = "short")
   @Column(name = "AGCY_CD_NO")
+  @JsonIgnore
   private Short agencyCodeNumber;
 
   @Type(type = "short")
   @Column(name = "LOC_CNTY")
+  @JsonIgnore
   private Short locationCountyType;
 
   @Column(name = "DIR_NM_TL")
+  @JsonIgnore
   private String directorsNameTitle;
 
   /**
@@ -127,10 +155,10 @@ public class CwsOffice extends CmsPersistentObject {
    * @param locationCountyType          the locationCountyType
    * @param directorsNameTitle          the directorsNameTitle
    */
-  public CwsOffice(String officeId, BigDecimal faxNumber, String geographicRegionTextCode,
+  public CwsOffice(String officeId, Long faxNumber, String geographicRegionTextCode,
                    Short governmentEntityType, String headquarterIndicator, String inactiveIndicator,
-                   String mailStopDescription, BigDecimal messagePhoneNumber,
-                   Integer messagePhoneExtensionNumber, String cwsOffNumber, BigDecimal primaryPhoneNumber,
+                   String mailStopDescription, Long messagePhoneNumber,
+                   Integer messagePhoneExtensionNumber, String cwsOffNumber, Long primaryPhoneNumber,
                    Integer primaryPhoneExtensionNumber, String staffPersonId, String commentDescription,
                    String agencyName, String departmentDivisionName, String cwsOfficeName,
                    String countySpecificCode, Short agencyCodeNumber, Short locationCountyType,
@@ -175,7 +203,7 @@ public class CwsOffice extends CmsPersistentObject {
   /**
    * @return the faxNumber
    */
-  public BigDecimal getFaxNumber() {
+  public Long getFaxNumber() {
     return faxNumber;
   }
 
@@ -217,7 +245,7 @@ public class CwsOffice extends CmsPersistentObject {
   /**
    * @return the messagePhoneNumber
    */
-  public BigDecimal getMessagePhoneNumber() {
+  public Long getMessagePhoneNumber() {
     return messagePhoneNumber;
   }
 
@@ -238,7 +266,7 @@ public class CwsOffice extends CmsPersistentObject {
   /**
    * @return the primaryPhoneNumber
    */
-  public BigDecimal getPrimaryPhoneNumber() {
+  public Long getPrimaryPhoneNumber() {
     return primaryPhoneNumber;
   }
 
@@ -367,7 +395,6 @@ public class CwsOffice extends CmsPersistentObject {
    * @see java.lang.Object#equals(java.lang.Object)
    */
   @Override
-  @SuppressFBWarnings("MDM_BIGDECIMAL_EQUALS") //BigDecimal.equals used for equals/hashCode only
   public final boolean equals(Object obj) {
     if (this == obj) {
       return true;
