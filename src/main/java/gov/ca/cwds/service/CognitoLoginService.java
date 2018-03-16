@@ -1,5 +1,7 @@
 package gov.ca.cwds.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Primary;
@@ -17,6 +19,8 @@ import org.springframework.util.MultiValueMap;
 @Primary
 @ConfigurationProperties(prefix = "cognito")
 public class CognitoLoginService extends LoginServiceImpl {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(CognitoLoginService.class);
 
   private String host;
   private String mediaSubtype;
@@ -42,8 +46,10 @@ public class CognitoLoginService extends LoginServiceImpl {
   private HttpHeaders validationHeaders() {
     if (validationHeaders == null) {
       validationHeaders = new HttpHeaders();
-      validationHeaders.set("Authorization", authorization);
+
+      validationHeaders.set("Authorization", "Basic " + authorization);
       validationHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+      LOGGER.debug("validationHeader:" + validationHeaders.toString());
     }
     return validationHeaders;
   }
