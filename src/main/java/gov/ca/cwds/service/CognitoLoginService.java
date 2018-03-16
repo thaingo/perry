@@ -97,37 +97,11 @@ public class CognitoLoginService extends LoginServiceImpl {
     this.mediaSubtype = mediaSubtype;
   }
 
+  public String getAuthorization() {
+    return authorization;
+  }
 
-
-  // OAuth2AccessToken accessToken = tokenService.getAccessTokenByPerryToken(perryToken);
-  // OAuth2RestTemplate restTemplate = restClientService.restTemplate(accessToken);
-  //
-  // HttpHeaders headers = new HttpHeaders();
-  // headers.set("Authorization",
-  // "Basic
-  // MWxxcWtxNXBnamVhdjhuZWgzY2t2cDF0MW06MXJqYXJrczQxZTg5cnVubjg5NHNjYXFpcHRybXJoMDB0ajBwZmYxbGM4ZDZnNWM1YnJzcw==");
-  // // headers.set("Authorization",
-  // // "Basic
-  // //
-  // cnFhcTAwM3BuYmw1MWk3ZHRjazU1ZHZudDpmaGplY2s4dTNnYjlyaDFibzg3cWltMzVudjA2bXZkOHM3dWI4YnJrYXJxdGFxNHAwczk=");
-  //
-  // headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-  //
-  //
-  // MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-  // params.add("grant_type", "refresh_token");
-  // // params.add("client_id", "rqaq003pnbl51i7dtck55dvnt");
-  // params.add("client_id", "1lqqkq5pgjeav8neh3ckvp1t1m");
-  // params.add("refresh_token", accessToken.getRefreshToken().getValue());
-  //
-  // HttpEntity request = new HttpEntity<>(params, headers);
-  // String response = restTemplate
-  // .postForEntity(resourceServerProperties.getTokenInfoUri(), request, String.class).getBody();
-  // String identity = (String) accessToken.getAdditionalInformation().get(IDENTITY);
-  // OAuth2AccessToken reissuedAccessToken = restTemplate.getOAuth2ClientContext().getAccessToken();
-  // if (reissuedAccessToken != accessToken) {
-  // reissuedAccessToken.getAdditionalInformation().put(IDENTITY, identity);
-  // tokenService.updateAccessToken(perryToken, reissuedAccessToken);
-  // }
-  // return identity;
+  public void setAuthorization(String authorization) {
+    this.authorization = authorization;
+  }
 }
