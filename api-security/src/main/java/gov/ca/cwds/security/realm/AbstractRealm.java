@@ -54,9 +54,9 @@ public abstract class AbstractRealm extends AuthorizingRealm {
     List principalsList = principals.asList();
     if (principalsList.size() == PRINCIPALS_COUNT) {
       PerryAccount perryAccount = (PerryAccount) principalsList.get(1);
-      SimpleAuthorizationInfo authorizationInfo = new SimpleAuthorizationInfo(perryAccount.getRoles());
-      authorizationInfo.addObjectPermission(new AbacPermission());
-      SecurityModule.injector().getInstance(StaticAuthorizer.class).authorize(perryAccount, authorizationInfo);
+      SimpleAuthorizationInfo authorizationInfo = new SimpleAuthorizationInfo();
+      SecurityModule.getStaticAuthorizers()
+          .forEach(staticAuthorizer -> staticAuthorizer.authorize(perryAccount, authorizationInfo));
       return authorizationInfo;
     }
     throw new AuthenticationException("User authorization failed!");

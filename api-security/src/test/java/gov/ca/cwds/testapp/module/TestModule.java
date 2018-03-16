@@ -23,7 +23,7 @@ public class TestModule extends AbstractModule {
     bind(TestService.class).to(TestServiceImpl.class);
     install(new SecurityModule(null)
         .addAuthorizer("case:read", CaseAuthorizer.class)
-        .setStaticAuthorizer(TestStaticAuthorizer.class)
+        .addStaticAuthorizer(TestStaticAuthorizer.class)
     );
 
     bindInterceptor(Matchers.any(), Matchers.any(), new MethodInterceptor() {
