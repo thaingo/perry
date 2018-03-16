@@ -3,6 +3,7 @@ cognito:
   mediaSubtype: x-amz-json-1.1
   revokeTokenTarget: AWSCognitoIdentityProviderService.GlobalSignOut
   getUserTarget: AWSCognitoIdentityProviderService.GetUser
+  authorization: ${COGNITO_AUTHORIZATION:}
 security:
  oauth2:
    client:

@@ -59,7 +59,9 @@ public class LoginServiceImpl implements LoginService {
   public String validate(String perryToken) {
     OAuth2AccessToken accessToken = tokenService.getAccessTokenByPerryToken(perryToken);
     OAuth2RestTemplate restTemplate = restClientService.restTemplate(accessToken);
-    restTemplate.postForObject(resourceServerProperties.getTokenInfoUri(), null, String.class);
+    restTemplate.postForObject(resourceServerProperties.getTokenInfoUri(),
+        httpEntityForValidation(accessToken), String.class);
+
     String identity = (String) accessToken.getAdditionalInformation().get(IDENTITY);
     OAuth2AccessToken reissuedAccessToken = restTemplate.getOAuth2ClientContext().getAccessToken();
     if (reissuedAccessToken != accessToken) {
@@ -82,6 +84,12 @@ public class LoginServiceImpl implements LoginService {
           e);
     }
   }
+
+  @SuppressWarnings("rawtypes")
+  protected HttpEntity httpEntityForValidation(OAuth2AccessToken accessToken) {
+    return null;
+  }
+
 
   @SuppressWarnings("rawtypes")
   protected HttpEntity httpEntityForInvalidation(OAuth2AccessToken accessToken) {
