@@ -14,16 +14,16 @@ import java.util.Date;
 @Table(name = "perry_token")
 public class PerryTokenEntity implements Serializable {
   @Id
-  @Column(name = "token")
+  @Column(name = "token", nullable = false)
   private String token;
   @Column(name = "access_code")
   private String accessCode;
-  @Column(name = "user_id")
+  @Column(name = "user_id", nullable = false)
   private String user;
-  @Column(name = "access_token", length = 20000)
+  @Column(name = "access_token", length = 20000, nullable = false)
   private byte[] accessToken;
+  @Column(name = "created_date", nullable = false)
   @Temporal(TemporalType.TIMESTAMP)
-  @Column(name = "created_date")
   private Date createdDate = new Date();
 
   public String getUser() {

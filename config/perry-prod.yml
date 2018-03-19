@@ -20,6 +20,10 @@ spring:
           url: ${DB_CMS_JDBC_URL:jdbc:db2://192.168.99.100:50000/DB0TDEV}
           username: ${DB_CMS_USER:db2inst1}
           password: ${DB_CMS_PASSWORD:db2inst1}
+          testOnBorrow: ${DB_CMS_TEST_ON_BORROW:true}
+          testWhileIdle: ${DB_CMS_TEST_WHILE_IDLE:true}
+          validationQuery: select 1 from ${spring.jpa.properties.hibernate.default_schema}.userid_t fetch first 1 row only with ur
+          logValidationErrors: ${DB_CMS_LOG_VALIDATION_ERRORS:false}
       jpa:
           database: db2
           show_sql: ${SHOW_SQL:false}
@@ -37,7 +41,7 @@ perry:
     identityProvider:
       idpMapping: ${IDP_MAPPING_SCRIPT:config/idp.groovy}
     jwt:
-      timeout: ${TOKEN_TIMEOUT:30} #minutes
+      timeout: ${TOKEN_TIMEOUT:10} #minutes
       issuer: ${TOKEN_ISSUER:perry}
       encryptionEnabled: ${TOKEN_ENCRYPTION_ENABLED:true}
       encryptionMethod: ${TOKEN_ENCRYPTION_METHOD:A256GCM}
@@ -57,12 +61,17 @@ perry:
     whiteList: ${WHITE_LIST:*} # urls separated by spaces.
     homePageUrl: ${HOME_PAGE_URL:/}
     showErrors: ${SHOW_ERRORS:true}
+    tokenRecordTimeout: ${TOKEN_RECORD_TIMEOUT:7} # days
     tokenStore:
         datasource:
             driver-class-name: org.postgresql.Driver
             url: ${TOKEN_STORE_JDBC_URL:jdbc:postgresql://192.168.99.100:5432/postgres_data?currentSchema=perry}
             username: ${TOKEN_STORE_DB_USER:postgres_data}
             password: ${TOKEN_STORE_DB_PASSWORD:postgres_data}
+            testOnBorrow: ${TOKEN_STORE_TEST_ON_BORROW:true}
+            testWhileIdle: ${TOKEN_STORE_TEST_WHILE_IDLE:true}
+            validationQuery: select 1
+            logValidationErrors: ${TOKEN_STORE_LOG_VALIDATION_ERRORS:false}
         jpa:
            database: POSTGRESQL
            show_sql: true

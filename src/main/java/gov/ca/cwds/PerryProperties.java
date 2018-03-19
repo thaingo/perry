@@ -30,6 +30,8 @@ public class PerryProperties {
 
     private boolean showErrors;
 
+    private int tokenRecordTimeout;
+
     public static class IdentityProviderConfiguration {
         private IdpMappingScript idpMapping;
 
@@ -118,4 +120,12 @@ public class PerryProperties {
     public void setShowErrors(boolean showErrors) {
         this.showErrors = showErrors;
     }
+
+  public int getTokenRecordTimeout() {
+    return tokenRecordTimeout;
+  }
+
+  public void setTokenRecordTimeout(int tokenRecordTimeout) {
+    this.tokenRecordTimeout = tokenRecordTimeout;
+  }
 }

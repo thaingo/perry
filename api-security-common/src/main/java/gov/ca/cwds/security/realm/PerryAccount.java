@@ -22,8 +22,6 @@ public class PerryAccount {
     private String countyCwsCode;
     @JsonProperty("county_name")
     private String countyName;
-    @JsonProperty("government_entity_type")
-    private String governmentEntityType;
     @JsonProperty
     private Set<String> privileges;
 
@@ -83,14 +81,6 @@ public class PerryAccount {
 
     public void setCountyName(String countyName) {
         this.countyName = countyName;
-    }
-
-    public String getGovernmentEntityType() {
-        return governmentEntityType;
-    }
-
-    public void setGovernmentEntityType(String governmentEntityType) {
-        this.governmentEntityType = governmentEntityType;
     }
 
     public Set<String> getPrivileges() {

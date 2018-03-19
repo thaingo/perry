@@ -52,7 +52,7 @@ public class LoginServiceImpl implements LoginService {
 
   @Override
   public String issueToken(String accessCode) {
-    return tokenService.getAccessTokenByAccessCode(accessCode);
+    return tokenService.getPerryTokenByAccessCode(accessCode);
   }
 
   @Override

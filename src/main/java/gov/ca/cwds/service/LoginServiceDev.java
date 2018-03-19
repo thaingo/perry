@@ -29,13 +29,13 @@ public class LoginServiceDev implements LoginService {
     DefaultOAuth2AccessToken accessToken = new DefaultOAuth2AccessToken("test");
     accessToken.setAdditionalInformation(new HashMap<>());
     UniversalUserToken userToken = (UniversalUserToken) securityContext.getAuthentication().getPrincipal();
-    accessToken.getAdditionalInformation().put(Constants.IDENTITY, userToken.getUserId());
+    accessToken.getAdditionalInformation().put(Constants.IDENTITY, userToken.getParameter(IDENTITY));
     return tokenService.issueAccessCode(userToken, accessToken);
   }
 
   @Override
   public String issueToken(String accessCode) {
-    return tokenService.getAccessTokenByAccessCode(accessCode);
+    return tokenService.getPerryTokenByAccessCode(accessCode);
   }
 
   @Override

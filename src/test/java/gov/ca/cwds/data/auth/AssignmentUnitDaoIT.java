@@ -40,7 +40,7 @@ public class AssignmentUnitDaoIT {
   }
 
   private AssignmentUnit entity(String id) {
-    return new AssignmentUnit(new BigDecimal(1234567), 123, "A", "19", null, "NZGDRrd00E", "75D",
+    return new AssignmentUnit(1234567L, 123, "A", "19", null, "NZGDRrd00E", "75D",
             startDate, id);
   }
 }
