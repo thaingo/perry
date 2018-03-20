@@ -5,6 +5,7 @@ import com.google.inject.Injector;
 import gov.ca.cwds.security.module.InjectorProvider;
 import gov.ca.cwds.security.module.SecurityModule;
 import gov.ca.cwds.testapp.module.TestModule;
+import java.lang.reflect.Field;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.UnavailableSecurityManagerException;
 import org.apache.shiro.config.IniSecurityManagerFactory;
@@ -16,9 +17,8 @@ import org.apache.shiro.util.Factory;
 import org.apache.shiro.util.LifecycleUtils;
 import org.apache.shiro.util.ThreadState;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
-
-import java.lang.reflect.Field;
 
 /**
  * Created by dmitry.rudenko on 10/6/2017.
@@ -29,6 +29,11 @@ public class AbstractApiSecurityTest {
   @BeforeClass
   public static void beforeClass() throws NoSuchFieldException, IllegalAccessException {
     initShiro();
+  }
+
+  @Before
+  public void before() throws Exception {
+    initInjector();
   }
 
   void initInjector() throws Exception {

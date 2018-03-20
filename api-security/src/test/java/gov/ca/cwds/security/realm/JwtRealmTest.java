@@ -1,7 +1,14 @@
 package gov.ca.cwds.security.realm;
 
+import gov.ca.cwds.security.AbstractApiSecurityTest;
 import gov.ca.cwds.security.PerryShiroToken;
 import gov.ca.cwds.security.jwt.JwtConfiguration;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.authz.AuthorizationInfo;
@@ -11,14 +18,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-public class JwtRealmTest {
+public class JwtRealmTest extends AbstractApiSecurityTest {
 
   private static JwtRealm jwtRealm;
 
