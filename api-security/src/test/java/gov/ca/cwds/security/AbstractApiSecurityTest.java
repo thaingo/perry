@@ -37,7 +37,6 @@ public class AbstractApiSecurityTest {
     Field field = SecurityModule.class.getDeclaredField("injectorProvider");
     field.setAccessible(true);
     field.set(null, (InjectorProvider) () -> injector);
-    //new SecurityModule(() -> injector);
   }
 
   private static void initShiro() {
