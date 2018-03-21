@@ -15,4 +15,8 @@ if [ "$REDIS_ENABLED" = true ] ; then
     JAVA_OPTS="$JAVA_OPTS,redis"
 fi
 
-java ${CWDS_OPTS} ${JAVA_OPTS} -jar perry.jar server ${PERRY_CONFIG}
+if [ -f /opt/newrelic/newrelic.yml ]; then
+    java -javaagent:/opt/newrelic/newrelic.jar  ${JAVA_OPTS} -jar perry.jar server ${PERRY_CONFIG}
+else
+    java  ${JAVA_OPTS} -jar perry.jar server ${PERRY_CONFIG}
+fi
