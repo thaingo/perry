@@ -34,9 +34,9 @@ perry:
     tokenStore:
       datasource:
         driver-class-name: org.h2.Driver
-        url: ${TOKEN_STORE_JDBC_URL:jdbc:h2:mem:token_store}
-        username: ${TOKEN_STORE_USER:}
-        password: ${TOKEN_STORE_PASSWORD:}
+        url: jdbc:h2:mem:token_store
+        username:
+        password:
       jpa:
         database: h2
         show_sql: true
@@ -45,7 +45,7 @@ perry:
            hibernate.current_session_context_class : org.springframework.orm.hibernate5.SpringSessionContext
            hibernate.dialect: org.hibernate.dialect.H2Dialect
            hibernate.ddl-auto: create
-           hibernate.default_schema: ${TOKEN_STORE_SCHEMA:}
+           hibernate.default_schema:
     serviceProviders:
       default:
         identityMapping: config/default.groovy
