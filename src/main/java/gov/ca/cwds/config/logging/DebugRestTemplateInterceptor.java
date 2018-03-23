@@ -8,6 +8,7 @@ import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 public class DebugRestTemplateInterceptor implements ClientHttpRequestInterceptor {
 
@@ -15,7 +16,9 @@ public class DebugRestTemplateInterceptor implements ClientHttpRequestIntercepto
 
     @Override
     public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
-        traceRequest(request, body);
+        if(log.isDebugEnabled()) {
+            traceRequest(request, body);
+        }
         return execution.execute(request, body);
     }
 
@@ -24,7 +27,7 @@ public class DebugRestTemplateInterceptor implements ClientHttpRequestIntercepto
         log.debug("URI         : {}", request.getURI());
         log.debug("Method      : {}", request.getMethod());
         log.debug("Headers     : {}", request.getHeaders());
-        log.debug("Request body: {}", new String(body, "UTF-8"));
+        log.debug("Request body: {}", new String(body, Charset.defaultCharset()));
         log.debug("==========================request end================================================");
     }
 }
