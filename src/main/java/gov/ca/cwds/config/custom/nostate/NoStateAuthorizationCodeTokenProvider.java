@@ -16,13 +16,16 @@ public class NoStateAuthorizationCodeTokenProvider extends AuthorizationCodeAcce
 
   @Override
   public OAuth2AccessToken obtainAccessToken(OAuth2ProtectedResourceDetails details, AccessTokenRequest request) {
+    ignoreState((AuthorizationCodeResourceDetails) details, request);
+    return super.obtainAccessToken(details, request);
+  }
+
+  void ignoreState(AuthorizationCodeResourceDetails details, AccessTokenRequest request) {
     if (request.getAuthorizationCode() != null && request.getPreservedState() == null) {
-      AuthorizationCodeResourceDetails authorizationCodeResourceDetails = (AuthorizationCodeResourceDetails) details;
-      String redirectUrl = authorizationCodeResourceDetails.getRedirectUri(request);
+      String redirectUrl = details.getRedirectUri(request);
       String redirectUrlNoParams = getUrlWithoutParameters(redirectUrl);
       request.setPreservedState(redirectUrlNoParams);
     }
-    return super.obtainAccessToken(details, request);
   }
 
   private String getUrlWithoutParameters(String url) {
