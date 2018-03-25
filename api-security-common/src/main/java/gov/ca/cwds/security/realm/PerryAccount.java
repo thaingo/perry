@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Set;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
  * Created by dmitry.rudenko on 6/2/2017.
@@ -94,14 +96,6 @@ public class PerryAccount {
 
   @Override
   public String toString() {
-    return "PerryAccount{" +
-        "user='" + user + '\'' +
-        ", roles=" + roles +
-        ", staffId='" + staffId + '\'' +
-        ", countyCode='" + countyCode + '\'' +
-        ", countyCwsCode='" + countyCwsCode + '\'' +
-        ", countyName='" + countyName + '\'' +
-        ", privileges=" + privileges +
-        '}';
+    return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE, true);
   }
 }
