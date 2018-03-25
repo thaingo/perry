@@ -17,6 +17,7 @@ repositories {
 dependencies {
 
     compileOnly('com.fasterxml.jackson.core:jackson-databind:' + jacksonVersion)
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: commonsLangVersion
 }
 
 publishing {
