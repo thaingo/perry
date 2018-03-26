@@ -4,90 +4,98 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Set;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
  * Created by dmitry.rudenko on 6/2/2017.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PerryAccount {
-    @JsonProperty
-    private String user;
-    @JsonProperty
-    private Set<String> roles;
-    @JsonProperty
-    private String staffId;
-    @JsonProperty("county_code")
-    private String countyCode;
-    @JsonProperty("county_cws_code")
-    private String countyCwsCode;
-    @JsonProperty("county_name")
-    private String countyName;
-    @JsonProperty
-    private Set<String> privileges;
 
-    public PerryAccount(String user) {
-        this.user = user;
-    }
+  @JsonProperty
+  private String user;
+  @JsonProperty
+  private Set<String> roles;
+  @JsonProperty
+  private String staffId;
+  @JsonProperty("county_code")
+  private String countyCode;
+  @JsonProperty("county_cws_code")
+  private String countyCwsCode;
+  @JsonProperty("county_name")
+  private String countyName;
+  @JsonProperty
+  private Set<String> privileges;
 
-    /**
-     * Default Constructor
-     */
-    public PerryAccount() {
-    }
+  public PerryAccount(String user) {
+    this.user = user;
+  }
 
-    public String getUser() {
-        return user;
-    }
+  /**
+   * Default Constructor
+   */
+  public PerryAccount() {
+  }
 
-    public void setUser(String user) {
-        this.user = user;
-    }
+  public String getUser() {
+    return user;
+  }
 
-    public Set<String> getRoles() {
-        return roles;
-    }
+  public void setUser(String user) {
+    this.user = user;
+  }
 
-    public void setRoles(Set<String> roles) {
-        this.roles = roles;
-    }
+  public Set<String> getRoles() {
+    return roles;
+  }
 
-    public String getStaffId() {
-        return staffId;
-    }
+  public void setRoles(Set<String> roles) {
+    this.roles = roles;
+  }
 
-    public void setStaffId(String staffId) {
-        this.staffId = staffId;
-    }
+  public String getStaffId() {
+    return staffId;
+  }
 
-    public String getCountyCode() {
-        return countyCode;
-    }
+  public void setStaffId(String staffId) {
+    this.staffId = staffId;
+  }
 
-    public void setCountyCode(String countyCode) {
-        this.countyCode = countyCode;
-    }
+  public String getCountyCode() {
+    return countyCode;
+  }
 
-    public String getCountyCwsCode() {
-        return countyCwsCode;
-    }
+  public void setCountyCode(String countyCode) {
+    this.countyCode = countyCode;
+  }
 
-    public void setCountyCwsCode(String countyCwsCode) {
-        this.countyCwsCode = countyCwsCode;
-    }
+  public String getCountyCwsCode() {
+    return countyCwsCode;
+  }
 
-    public String getCountyName() {
-        return countyName;
-    }
+  public void setCountyCwsCode(String countyCwsCode) {
+    this.countyCwsCode = countyCwsCode;
+  }
 
-    public void setCountyName(String countyName) {
-        this.countyName = countyName;
-    }
+  public String getCountyName() {
+    return countyName;
+  }
 
-    public Set<String> getPrivileges() {
-        return privileges;
-    }
+  public void setCountyName(String countyName) {
+    this.countyName = countyName;
+  }
 
-    public void setPrivileges(Set<String> privileges) {
-        this.privileges = privileges;
-    }
+  public Set<String> getPrivileges() {
+    return privileges;
+  }
+
+  public void setPrivileges(Set<String> privileges) {
+    this.privileges = privileges;
+  }
+
+  @Override
+  public String toString() {
+    return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE, true);
+  }
 }
