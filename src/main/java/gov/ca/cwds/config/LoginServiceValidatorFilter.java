@@ -1,7 +1,6 @@
 package gov.ca.cwds.config;
 
 
-import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.service.WhiteList;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,24 +45,15 @@ public class LoginServiceValidatorFilter extends GenericFilterBean {
   }
 
   protected void validate(HttpServletRequest servletRequest) {
-    required(CALLBACK_PARAM, servletRequest);
-    registered(CALLBACK_PARAM, servletRequest);
-  }
-
-  protected void required(String name, HttpServletRequest servletRequest) {
-    if (StringUtils.isBlank(servletRequest.getParameter(name))) {
-      throw new PerryException("parameter is required: " + name);
+    String callback = servletRequest.getParameter(CALLBACK_PARAM);
+    if(StringUtils.isNotBlank(callback)) {
+      whiteList.validate(CALLBACK_PARAM, callback);
     }
   }
 
   @Autowired
   public void setWhiteList(WhiteList whiteList) {
     this.whiteList = whiteList;
-  }
-
-  private void registered(String param, HttpServletRequest servletRequest) {
-    String paramValue = servletRequest.getParameter(param);
-    whiteList.validate(param, paramValue);
   }
 
   public void setRequestMatcher(RequestMatcher requestMatcher) {
