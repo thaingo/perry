@@ -1,5 +1,6 @@
 package gov.ca.cwds.config;
 
+import gov.ca.cwds.PerryProperties;
 import gov.ca.cwds.web.PerryLogoutSuccessHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -29,8 +30,11 @@ public class FormLoginConfiguration extends WebSecurityConfigurerAdapter {
   @Autowired
   private PerryLogoutSuccessHandler perryLogoutSuccessHandler;
 
+  @Autowired
+  PerryProperties properties;
+
   @Override
-  protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+  protected void configure(AuthenticationManagerBuilder auth) {
     auth.authenticationProvider(authProvider);
   }
 
@@ -43,7 +47,7 @@ public class FormLoginConfiguration extends WebSecurityConfigurerAdapter {
                 .and()
                 .formLogin()
                 .loginPage("/login.html")
-                .defaultSuccessUrl("/index.html")
+                .defaultSuccessUrl(properties.getHomePageUrl())
                 .loginProcessingUrl("/login")
                 .failureUrl("/login.html?error=true")
                 .and()

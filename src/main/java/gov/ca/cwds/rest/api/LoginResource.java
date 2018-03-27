@@ -1,11 +1,13 @@
 package gov.ca.cwds.rest.api;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import gov.ca.cwds.PerryProperties;
 import gov.ca.cwds.config.Constants;
 import gov.ca.cwds.service.LoginService;
 import gov.ca.cwds.service.WhiteList;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,6 +24,7 @@ import javax.ws.rs.core.Context;
 @Controller
 public class LoginResource {
   private LoginService loginService;
+  private PerryProperties properties;
 
   private WhiteList whiteList;
 
@@ -34,18 +37,28 @@ public class LoginResource {
 
 
   public void login(@NotNull @Context final HttpServletResponse response,
-                    @ApiParam(required = true, name = "callback",
-                            value = "URL to send the user back to after authentication") @RequestParam(Constants.CALLBACK_PARAM) String callback,
-                    @ApiParam(name = "sp_id",
-                            value = "Service provider id") @RequestParam(name = "sp_id", required = false) String spId) throws Exception {
+                    @ApiParam(name = "callback", value = "URL to send the user back to after authentication")
+                    @RequestParam(name = Constants.CALLBACK_PARAM, required = false) String callback,
+                    @ApiParam(name = "sp_id", value = "Service provider id")
+                    @RequestParam(name = "sp_id", required = false) String spId) throws Exception {
     String accessCode = loginService.issueAccessCode(spId);
-    whiteList.validate("callback", callback);
+    if(StringUtils.isBlank(callback)) {
+      callback = properties.getHomePageUrl();
+    }
+    else {
+      whiteList.validate("callback", callback);
+    }
     response.sendRedirect(callback + "?accessCode=" + accessCode);
   }
 
   @Autowired
   public void setLoginService(LoginService loginService) {
     this.loginService = loginService;
+  }
+
+  @Autowired
+  public void setProperties(PerryProperties properties) {
+    this.properties = properties;
   }
 
   @Autowired
