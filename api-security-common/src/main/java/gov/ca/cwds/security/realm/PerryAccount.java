@@ -12,9 +12,12 @@ import org.apache.commons.lang3.builder.ToStringStyle;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PerryAccount {
-
   @JsonProperty
   private String user;
+  @JsonProperty("first_name")
+  private String firstName;
+  @JsonProperty("last_name")
+  private String lastName;
   @JsonProperty
   private Set<String> roles;
   @JsonProperty
@@ -27,75 +30,86 @@ public class PerryAccount {
   private String countyName;
   @JsonProperty
   private Set<String> privileges;
+  @JsonProperty
+  private Set<String> authorityCodes;
 
-  public PerryAccount(String user) {
-    this.user = user;
-  }
+    public PerryAccount(String user) {
+        this.user = user;
+    }
 
-  /**
-   * Default Constructor
-   */
-  public PerryAccount() {
-  }
+    /**
+     * Default Constructor
+     */
+    public PerryAccount() {
+    }
 
-  public String getUser() {
-    return user;
-  }
+    public String getUser() {
+        return user;
+    }
 
-  public void setUser(String user) {
-    this.user = user;
-  }
+    public void setUser(String user) {
+        this.user = user;
+    }
 
-  public Set<String> getRoles() {
-    return roles;
-  }
+    public Set<String> getRoles() {
+        return roles;
+    }
 
-  public void setRoles(Set<String> roles) {
-    this.roles = roles;
-  }
+    public void setRoles(Set<String> roles) {
+        this.roles = roles;
+    }
 
-  public String getStaffId() {
-    return staffId;
-  }
+    public String getStaffId() {
+        return staffId;
+    }
 
-  public void setStaffId(String staffId) {
-    this.staffId = staffId;
-  }
+    public void setStaffId(String staffId) {
+        this.staffId = staffId;
+    }
 
-  public String getCountyCode() {
-    return countyCode;
-  }
+    public String getCountyCode() {
+        return countyCode;
+    }
 
-  public void setCountyCode(String countyCode) {
-    this.countyCode = countyCode;
-  }
+    public void setCountyCode(String countyCode) {
+        this.countyCode = countyCode;
+    }
 
-  public String getCountyCwsCode() {
-    return countyCwsCode;
-  }
+    public String getCountyCwsCode() {
+        return countyCwsCode;
+    }
 
-  public void setCountyCwsCode(String countyCwsCode) {
-    this.countyCwsCode = countyCwsCode;
-  }
+    public void setCountyCwsCode(String countyCwsCode) {
+        this.countyCwsCode = countyCwsCode;
+    }
 
-  public String getCountyName() {
-    return countyName;
-  }
+    public String getCountyName() {
+        return countyName;
+    }
 
-  public void setCountyName(String countyName) {
-    this.countyName = countyName;
-  }
+    public void setCountyName(String countyName) {
+        this.countyName = countyName;
+    }
 
-  public Set<String> getPrivileges() {
-    return privileges;
-  }
+    public Set<String> getPrivileges() {
+        return privileges;
+    }
 
   public void setPrivileges(Set<String> privileges) {
     this.privileges = privileges;
+  }
+
+  public Set<String> getAuthorityCodes() {
+    return authorityCodes;
+  }
+
+  public void setAuthorityCodes(Set<String> authorityCodes) {
+    this.authorityCodes = authorityCodes;
   }
 
   @Override
   public String toString() {
     return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE, true);
   }
+
 }

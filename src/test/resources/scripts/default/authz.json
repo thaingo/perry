@@ -27,6 +27,8 @@
     "government_entity_type": "1088"
   },
   "staff_person": {
-    "id": "q1p"
+    "id": "q1p",
+    "last_name": "Smith",
+    "first_name": "John"
   }
 }
