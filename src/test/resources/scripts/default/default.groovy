@@ -30,8 +30,8 @@ authorization.unitAuthority.each {
 def governmentEntityType = GovernmentEntityType.findBySysId(authorization.cwsOffice?.governmentEntityType)
 
 [user           : authorization.userId,
- first_name      : authorization.staffPerson?.firstName,
- last_name       : authorization.staffPerson?.lastName,
+ first_name     : authorization.staffPerson?.firstName,
+ last_name      : authorization.staffPerson?.lastName,
  roles          : user.roles + [supervisor ? "Supervisor" : "SocialWorker"],
  staffId        : authorization.staffPerson?.id,
  county_name    : governmentEntityType.description,

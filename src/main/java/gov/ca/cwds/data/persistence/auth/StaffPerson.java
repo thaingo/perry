@@ -12,11 +12,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-/**
- * Created by dmitry.rudenko on 8/21/2017.
- */
-
-
+/** Created by dmitry.rudenko on 8/21/2017. */
 @Entity
 @Table(name = "STFPERST")
 @ApiModel
@@ -38,12 +34,10 @@ public class StaffPerson {
   @JsonProperty("first_name")
   private String firstName;
 
-
   @Column(name = "LAST_NM")
   @ApiModelProperty(example = "Smith")
   @JsonProperty("last_name")
   private String lastName;
-
 
   @Column(name = "FKCWS_OFFT")
   @JsonIgnore
