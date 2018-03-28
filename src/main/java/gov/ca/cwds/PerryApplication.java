@@ -64,11 +64,6 @@ public class PerryApplication {
 
   private static void upgradePerryDB(TokenServiceConfiguration tokenServiceConfiguration) {
     LOG.info("Upgrading Perry DB...");
-    String ddlAuto = tokenServiceConfiguration.tokenJpaProperties().getProperties()
-        .get(HIBERNATE_DDL_AUTO);
-    if ("create" == ddlAuto) {
-      return;
-    }
     DataSource dataSource = tokenServiceConfiguration.tokenDataSource();
     DatabaseHelper databaseHelper = new DatabaseHelper(dataSource);
     try {

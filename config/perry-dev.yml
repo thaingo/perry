@@ -44,7 +44,7 @@ perry:
            hibernate.cache.use_query_cache: false
            hibernate.current_session_context_class : org.springframework.orm.hibernate5.SpringSessionContext
            hibernate.dialect: org.hibernate.dialect.H2Dialect
-           hibernate.ddl-auto: create
+           hibernate.ddl-auto: none
            hibernate.default_schema:
     serviceProviders:
       default:
