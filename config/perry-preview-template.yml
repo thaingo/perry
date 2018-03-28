@@ -1,0 +1,100 @@
+security:
+ oauth2:
+   client:
+     clientId: preview
+     clientSecret: preview
+     accessTokenUri: ${SAF_RETRIEVE_TOKEN_PATH:http://localhost:9081/identity-provider/oauth/token}
+     userAuthorizationUri: ${SAF_AUTH_PATH:http://localhost:9081/identity-provider/oauth/authorize}
+     tokenName: access_token
+     authenticationScheme: query
+     clientAuthenticationScheme: header
+     useCurrentUri: ${USE_CURRENT_URI:true}
+     preEstablishedRedirectUri: ${REDIRECT_URI:http://localhost:8080/perry/login}
+     scope: ${SAF_SCOPE:read}
+   resource:
+     userInfoUri: ${SAF_VALIDATE_TOKEN_PATH:http://localhost:9081/identity-provider/resource/me}
+     tokenInfoUri: ${SAF_VALIDATE_TOKEN_URI:http://localhost:9081/identity-provider/resource/validatetoken}
+     revokeTokenUri: ${SAF_REVOKE_TOKEN_URI:http://localhost:9081/identity-provider/oauth/invalidate}
+     logoutTokenUri: ${SAF_LOGOUT_URI:http://localhost:9081/identity-provider/logout}
+spring:
+      datasource:
+          driver-class-name: com.ibm.db2.jcc.DB2Driver
+          url: ${DB_CMS_JDBC_URL:jdbc:db2://localhost:50000/DB0TDEV}
+          username: ${DB_CMS_USER:db2inst1}
+          password: ${DB_CMS_PASSWORD:db2inst1-pwd}
+          testOnBorrow: ${DB_CMS_TEST_ON_BORROW:true}
+          testWhileIdle: ${DB_CMS_TEST_WHILE_IDLE:true}
+          validationQuery: select 1 from ${spring.jpa.properties.hibernate.default_schema}.userid_t fetch first 1 row only with ur
+          logValidationErrors: ${LOG_VALIDATION_ERRORS:true}
+      jpa:
+          database: db2
+          show_sql: true
+          properties:
+              hibernate.cache.use_query_cache: false
+              hibernate.current_session_context_class : org.springframework.orm.hibernate5.SpringSessionContext
+              hibernate.dialect: org.hibernate.dialect.DB2Dialect
+              hibernate.ddl-auto: none
+              hibernate.default_schema: ${DB_CMS_SCHEMA:CWSCMS}
+perry:
+    identityProvider:
+      idpMapping: 'config/idp-preview.groovy'
+    jwt:
+      timeout: ${TOKEN_TIMEOUT:10} #minutes
+      issuer: ${TOKEN_ISSUER:perry}
+      encryptionEnabled: ${TOKEN_ENCRYPTION_ENABLED:true}
+      encryptionMethod: ${TOKEN_ENCRYPTION_METHOD:A256GCM}
+      headless: ${HEADLESS_JWT:true}
+      keyStore:
+        path: ${KEYSTORE_PATH:config/enc.jceks}
+        alias: ${KEYSTORE_ALIAS:test}
+        password: ${KEYSTORE_PASSWORD:test}
+        keyPassword : ${KEYSTORE_KEY_PASSWORD:test}
+        encAlias:  ${KEYSTORE_ENC_ALIAS:enc}
+        encKeyPassword: ${KEYSTORE_ENC_KEY_PASSWORD:test}
+    serviceProviders:
+      default:
+        identityMapping: 'config/default-preview.groovy'
+    suppressErrorPage: true
+    whiteList: /perry/demo-sp.html
+    homePageUrl: ${HOME_PAGE_URL:/}
+    showErrors: ${SHOW_ERRORS:true}
+    tokenRecordTimeout: ${TOKEN_RECORD_TIMEOUT:7} # days
+    tokenStore:
+       datasource:
+            driver-class-name: org.h2.Driver
+            url: ${TOKEN_STORE_JDBC_URL:jdbc:h2:mem:token_store}
+            username: ${TOKEN_STORE_USER:}
+            password: ${TOKEN_STORE_PASSWORD:}
+       jpa:
+         database: h2
+         show_sql: true
+         properties:
+            hibernate.cache.use_query_cache: false
+            hibernate.current_session_context_class : org.springframework.orm.hibernate5.SpringSessionContext
+            hibernate.dialect: org.hibernate.dialect.H2Dialect
+            hibernate.ddl-auto: create
+            hibernate.default_schema: ${TOKEN_STORE_SCHEMA:}
+server:
+  context-path: /perry
+  use-forward-headers: ${USE_FORWARD_HEADERS:true}
+  port: ${HTTPS_PORT:9090}
+  ssl:
+    enabled: true
+    keyStoreType: JCEKS
+    trustStoreType: JCEKS
+    keyStore: ${KEYSTORE_PATH:config/enc.jceks}
+    keyStorePassword: ${KEYSTORE_PASSWORD:test}
+    keyPassword: ${KEYSTORE_KEY_PASSWORD:test}
+  http:
+    port: ${HTTP_PORT:8080}
+
+logging:
+  file: logs/dev_app.log
+  pattern:
+    console: "%d %-5level %logger : %msg%n"
+    file: "%d %-5level [%thread] %logger : %msg%n"
+  level:
+    gov.ca.cwds.config.logging: DEBUG
+    org.springframework.web: DEBUG
+    guru.springframework.controllers: DEBUG
+    org.hibernate: DEBUG

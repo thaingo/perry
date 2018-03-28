@@ -10,7 +10,7 @@ repositories {
     mavenCentral()
     mavenLocal()
     maven {
-        url "http://sonar.dev.cwds.io:8081/artifactory/repo"
+        url "http://pr.dev.cwds.io/artifactory/repo"
     }
 }
 
@@ -28,6 +28,7 @@ dependencies {
     compileOnly group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
     compileOnly('com.fasterxml.jackson.core:jackson-databind:' + jacksonVersion)
     compileOnly group: 'com.google.inject', name: 'guice', version: guiceVersion
+    compileOnly group: 'com.google.inject.extensions', name: 'guice-multibindings', version: guiceVersion
     compileOnly('javax.servlet:javax.servlet-api:' + servletApiVersion)
     compileOnly('org.glassfish.jersey.core:jersey-client:2.25.1')
     compileOnly('javax.ws.rs:javax.ws.rs-api:2.0.1')
@@ -38,6 +39,7 @@ dependencies {
     testCompile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
     testCompile('com.fasterxml.jackson.core:jackson-databind:' + jacksonVersion)
     testCompile group: 'com.google.inject', name: 'guice', version: guiceVersion
+    testCompile group: 'com.google.inject.extensions', name: 'guice-multibindings', version: guiceVersion
     testCompile('org.apache.shiro:shiro-core:' + shiroVersion)
     testCompile('org.apache.shiro:shiro-web:' + shiroVersion)
     testCompile('javax.servlet:javax.servlet-api:3.1.0')

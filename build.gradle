@@ -30,7 +30,11 @@ project.ext {
     projectGroup = 'gov.ca.cwds.api'
     configPath = "$rootProject.projectDir/config/"
     springVersion = "1.5.3.RELEASE"
+<<<<<<< HEAD
     projectMajorVersion = '1-COGNITO'
+=======
+    projectMajorVersion = '1.6.2'
+>>>>>>> development
     mainclass = 'gov.ca.cwds.PerryApplication'
     targetDockerHubOrganization = System.env.DOCKERHUB_ORG ?: 'cwds'
     
@@ -48,8 +52,8 @@ project.ext {
     projectVersion = (isRelease ? projectReleaseVersion : projectSnapshotVersion )
 
     // Publishing configuration
-    snapshotMavenRepo = "http://sonar.dev.cwds.io:8081/artifactory/repo"
-    releaseMavenRepo = "http://sonar.dev.cwds.io:8081/artifactory/libs-release"
+    snapshotMavenRepo = "http://pr.dev.cwds.io/artifactory/repo"
+    releaseMavenRepo = "http://pr.dev.cwds.io/artifactory/libs-release"
     artifactoryRepo = (isRelease ? releaseMavenRepo : snapshotMavenRepo)
 
     shiroVersion = '1.2.3'
@@ -100,7 +104,7 @@ bootRepackage {
 
 repositories {
     maven {
-        url "http://sonar.dev.cwds.io:8081/artifactory/repo"
+        url "http://pr.dev.cwds.io/artifactory/repo"
     }
 }
 

@@ -1,5 +1,7 @@
 package gov.ca.cwds.security.realm;
 
+import gov.ca.cwds.security.authorizer.StaticAuthorizer;
+import gov.ca.cwds.security.authorizer.TestStaticAuthorizer;
 import gov.ca.cwds.security.permission.AbacPermission;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
@@ -10,16 +12,14 @@ import org.apache.shiro.subject.PrincipalCollection;
  */
 public class TestRealm extends JwtRealm {
   private static SimpleAuthorizationInfo authorizationInfo;
+  private StaticAuthorizer staticAuthorizer = new TestStaticAuthorizer();
   static {
     authorizationInfo = new SimpleAuthorizationInfo();
     authorizationInfo.addObjectPermission(new AbacPermission());
   }
 
-  public static void addPermission(String permission) {
-    authorizationInfo.addStringPermission(permission);
-  }
-
   protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
+    staticAuthorizer.authorize(null, authorizationInfo);
     return authorizationInfo;
   }
 

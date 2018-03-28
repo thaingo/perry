@@ -4,12 +4,10 @@ import com.google.inject.Inject;
 import gov.ca.cwds.testapp.domain.Case;
 import gov.ca.cwds.testapp.domain.CaseDTO;
 import gov.ca.cwds.testapp.service.TestService;
+import java.util.List;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.UnauthorizedException;
-import org.junit.Before;
 import org.junit.Test;
-
-import java.util.List;
 
 /**
  * Created by dmitry.rudenko on 10/6/2017.
@@ -19,12 +17,6 @@ public class ApiSecurityTest extends AbstractApiSecurityTest {
   @Inject
   TestService testService;
 
-
-  @Before
-  public void before() throws Exception {
-    initInjector();
-  }
-
   @Test(expected = UnauthorizedException.class)
   public void testUnauthorized() throws Exception {
     testService.testArg("2");
@@ -33,6 +25,16 @@ public class ApiSecurityTest extends AbstractApiSecurityTest {
   @Test
   public void testAuthorized() throws Exception {
     testService.testArg("1");
+  }
+
+  @Test
+  public void testStaticAuthorized()  {
+    testService.getById(1L);
+  }
+
+  @Test(expected = UnauthorizedException.class)
+  public void testStaticUnauthorized()  {
+    testService.updateCase(1L, "name");
   }
 
   @Test

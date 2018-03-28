@@ -2,6 +2,8 @@ package gov.ca.cwds.security.realm;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.ca.cwds.security.PerryShiroToken;
+import gov.ca.cwds.security.authorizer.StaticAuthorizer;
+import gov.ca.cwds.security.module.SecurityModule;
 import gov.ca.cwds.security.permission.AbacPermission;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
@@ -52,8 +54,9 @@ public abstract class AbstractRealm extends AuthorizingRealm {
     List principalsList = principals.asList();
     if (principalsList.size() == PRINCIPALS_COUNT) {
       PerryAccount perryAccount = (PerryAccount) principalsList.get(1);
-      SimpleAuthorizationInfo authorizationInfo = new SimpleAuthorizationInfo(perryAccount.getRoles());
-      authorizationInfo.addObjectPermission(new AbacPermission());
+      SimpleAuthorizationInfo authorizationInfo = new SimpleAuthorizationInfo();
+      SecurityModule.getStaticAuthorizers()
+          .forEach(staticAuthorizer -> staticAuthorizer.authorize(perryAccount, authorizationInfo));
       return authorizationInfo;
     }
     throw new AuthenticationException("User authorization failed!");

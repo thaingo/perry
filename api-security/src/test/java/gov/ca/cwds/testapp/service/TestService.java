@@ -1,5 +1,6 @@
 package gov.ca.cwds.testapp.service;
 
+import gov.ca.cwds.testapp.domain.Case;
 import gov.ca.cwds.testapp.domain.CaseDTO;
 
 import java.util.List;
@@ -17,6 +18,10 @@ public interface TestService {
   CaseDTO testReturnInstance();
 
   CaseDTO testReturnProtectedInstance() ;
+
+  Case getById(Long id);
+
+  void updateCase(Long id, String name);
 
   List<CaseDTO> testFilter() ;
 }

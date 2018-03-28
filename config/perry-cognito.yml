@@ -3,12 +3,12 @@ cognito:
   mediaSubtype: x-amz-json-1.1
   revokeTokenTarget: AWSCognitoIdentityProviderService.GlobalSignOut
   getUserTarget: AWSCognitoIdentityProviderService.GetUser
-  authorization: ${COGNITO_AUTHORIZATION:}
+  authorization: ${COGNITO_AUTHORIZATION:MWxxcWtxNXBnamVhdjhuZWgzY2t2cDF0MW06MXJqYXJrczQxZTg5cnVubjg5NHNjYXFpcHRybXJoMDB0ajBwZmYxbGM4ZDZnNWM1YnJzcw==}
 security:
  oauth2:
    client:
-     clientId: ${SAF_CLIENT_ID:} 
-     clientSecret: ${SAF_CLIENT_SECRET:} 
+     clientId: ${SAF_CLIENT_ID:1lqqkq5pgjeav8neh3ckvp1t1m} 
+     clientSecret: ${SAF_CLIENT_SECRET:1rjarks41e89runn894scaqiptrmrh00tj0pff1lc8d6g5c5brss} 
      accessTokenUri: ${SAF_RETRIEVE_TOKEN_PATH:https://preintcwds.auth.us-west-2.amazoncognito.com/oauth2/token} 
      userAuthorizationUri: ${SAF_AUTH_PATH:https://preintcwds.auth.us-west-2.amazoncognito.com/login} 
      tokenName: ${TOKEN_NAME:access_token}  
@@ -70,9 +70,9 @@ perry:
     tokenStore:
         datasource:
             driver-class-name: org.postgresql.Driver
-            url: ${TOKEN_STORE_JDBC_URL:jdbc:postgresql://localhost:5432/postgres_data?currentSchema=perry}
-            username: ${TOKEN_STORE_DB_USER:postgres_data}
-            password: ${TOKEN_STORE_DB_PASSWORD:postgres_data}
+            url: ${TOKEN_STORE_JDBC_URL:jdbc:postgresql://postgres.preint02.cwds.io:5432/postgres}
+            username: ${TOKEN_STORE_DB_USER:postgres}
+            password: ${TOKEN_STORE_DB_PASSWORD:postgres}
             testOnBorrow: ${TOKEN_STORE_TEST_ON_BORROW:true}
             testWhileIdle: ${TOKEN_STORE_TEST_WHILE_IDLE:true}
             validationQuery: select 1

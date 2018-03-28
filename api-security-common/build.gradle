@@ -10,13 +10,14 @@ repositories {
     mavenCentral()
     mavenLocal()
     maven {
-        url "http://sonar.dev.cwds.io:8081/artifactory/repo"
+        url "http://pr.dev.cwds.io/artifactory/repo"
     }
 }
 
 dependencies {
 
     compileOnly('com.fasterxml.jackson.core:jackson-databind:' + jacksonVersion)
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: commonsLangVersion
 }
 
 publishing {

@@ -3,6 +3,7 @@ package gov.ca.cwds.testapp.service;
 import gov.ca.cwds.security.annotations.Authorize;
 import gov.ca.cwds.testapp.domain.Case;
 import gov.ca.cwds.testapp.domain.CaseDTO;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +42,18 @@ public class TestServiceImpl implements TestService {
     CaseDTO caseDTO = new CaseDTO();
     caseDTO.setCaseObject(caseObject);
     return caseDTO;
+  }
+
+  @Override
+  @RequiresPermissions("case:read")
+  public Case getById(Long id) {
+    return new Case(1L, "name");
+  }
+
+  @Override
+  @RequiresPermissions("case:update")
+  public void updateCase(Long id, String name) {
+
   }
 
   @Override

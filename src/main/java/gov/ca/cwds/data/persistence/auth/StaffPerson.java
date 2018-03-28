@@ -5,17 +5,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.jackson.JsonSnakeCase;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-/**
- * Created by dmitry.rudenko on 8/21/2017.
- */
-
-
+/** Created by dmitry.rudenko on 8/21/2017. */
 @Entity
 @Table(name = "STFPERST")
 @ApiModel
@@ -31,6 +28,16 @@ public class StaffPerson {
   @ApiModelProperty(example = "12")
   @JsonProperty("county_code")
   private String countyCode;
+
+  @Column(name = "FIRST_NM")
+  @ApiModelProperty(example = "John")
+  @JsonProperty("first_name")
+  private String firstName;
+
+  @Column(name = "LAST_NM")
+  @ApiModelProperty(example = "Smith")
+  @JsonProperty("last_name")
+  private String lastName;
 
   @Column(name = "FKCWS_OFFT")
   @JsonIgnore
@@ -58,5 +65,21 @@ public class StaffPerson {
 
   public void setCwsOffice(String cwsOffice) {
     this.cwsOffice = cwsOffice;
+  }
+
+  public String getFirstName() {
+    return StringUtils.trimToEmpty(firstName);
+  }
+
+  public void setFirstName(String firstName) {
+    this.firstName = firstName;
+  }
+
+  public String getLastName() {
+    return StringUtils.trimToEmpty(lastName);
+  }
+
+  public void setLastName(String lastName) {
+    this.lastName = lastName;
   }
 }

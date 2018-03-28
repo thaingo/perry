@@ -26,7 +26,7 @@ public class PerryProperties {
 
   private Map<String, ServiceProviderConfiguration> serviceProviders = new HashMap<>();
 
-    private String homePageUrl;
+    private String homePageUrl = "/";
 
     private boolean showErrors;
 
