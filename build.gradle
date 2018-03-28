@@ -32,7 +32,8 @@ project.ext {
     projectMajorVersion = '1.6.2'
     mainclass = 'gov.ca.cwds.PerryApplication'
     targetDockerHubOrganization = System.env.DOCKERHUB_ORG ?: 'cwds'
-    
+    cwdsModelVersion = '0.6.2_492-RC'
+
     // assume that Windows users use the Docker Toolbox
     buildEnv = System.env.BUILD_ENV ?: (Os.isFamily(Os.FAMILY_WINDOWS) ? 'WIN_DEV' : 'JENKINS')
     devDockerHost = System.env.DEV_DOCKER_HOST ?: '192.168.99.100'
@@ -120,6 +121,9 @@ dependencies {
     compile group: 'io.swagger', name: 'swagger-jersey2-jaxrs', version: '1.5.9'
     compile group: 'io.swagger', name: 'swagger-annotations', version: '1.5.9'
     compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.4.11'
+    compile group: 'org.liquibase', name: 'liquibase-core', version: '3.5.3'
+    compile (group: 'gov.ca.cwds.cals', name: 'perry-data-model', version: cwdsModelVersion, changing: true)
+
     //h2 dev mode
     compile group: 'com.h2database', name: 'h2', version: '1.4.196'
 

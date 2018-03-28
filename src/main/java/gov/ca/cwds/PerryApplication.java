@@ -1,6 +1,10 @@
 package gov.ca.cwds;
 
+import gov.ca.cwds.config.TokenServiceConfiguration;
 import gov.ca.cwds.security.jwt.JwtService;
+import javax.sql.DataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -24,6 +28,16 @@ import javax.persistence.EntityManagerFactory;
 @EntityScan("gov.ca.cwds.data.persistence.auth")
 @EnableConfigurationProperties({PerryProperties.class})
 public class PerryApplication {
+
+  private static final Logger LOG = LoggerFactory.getLogger(PerryApplication.class);
+  private static final String LIQUIBASE_PERRY_DATABASE_CREATE_SCHEMA_XML = "liquibase/perry_schema.xml";
+  private static final String LIQUIBASE_PERRY_MASTER_XML = "liquibase/perry_database_master.xml";
+  private static final String HIBERNATE_DEFAULT_SCHEMA_PROPERTY_NAME = "hibernate.default_schema";
+  private static final String HIBERNATE_DDL_AUTO = "hibernate.ddl-auto";
+
+  @Autowired
+  private static TokenServiceConfiguration tokenServiceConfiguration;
+
   @Bean
   public RestTemplate client() {
     return new RestTemplate();
@@ -44,6 +58,27 @@ public class PerryApplication {
   }
 
   public static void main(String[] args) {
+    upgradePerryDB(tokenServiceConfiguration);
     SpringApplication.run(PerryApplication.class, args);
+  }
+
+  private static void upgradePerryDB(TokenServiceConfiguration tokenServiceConfiguration) {
+    LOG.info("Upgrading Perry DB...");
+    String ddlAuto = tokenServiceConfiguration.tokenJpaProperties().getProperties()
+        .get(HIBERNATE_DDL_AUTO);
+    if ("create" == ddlAuto) {
+      return;
+    }
+    DataSource dataSource = tokenServiceConfiguration.tokenDataSource();
+    DatabaseHelper databaseHelper = new DatabaseHelper(dataSource);
+    try {
+      databaseHelper.runScript(LIQUIBASE_PERRY_DATABASE_CREATE_SCHEMA_XML);
+      databaseHelper.runScript(LIQUIBASE_PERRY_MASTER_XML,
+          tokenServiceConfiguration.tokenJpaProperties().getProperties().get(HIBERNATE_DEFAULT_SCHEMA_PROPERTY_NAME));
+    } catch (Exception e) {
+      LOG.error("Upgrading of Perry DB is failed. ", e);
+    }
+
+    LOG.info("Finish Upgrading Perry DB");
   }
 }
