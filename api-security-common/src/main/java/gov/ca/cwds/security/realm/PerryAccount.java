@@ -2,41 +2,43 @@ package gov.ca.cwds.security.realm;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.util.Set;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-/**
- * Created by dmitry.rudenko on 6/2/2017.
- */
+import java.util.Set;
+
+/** Created by dmitry.rudenko on 6/2/2017. */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PerryAccount {
+  @JsonProperty private String user;
 
-  @JsonProperty
-  private String user;
-  @JsonProperty
-  private Set<String> roles;
-  @JsonProperty
-  private String staffId;
+  @JsonProperty("first_name")
+  private String firstName;
+
+  @JsonProperty("last_name")
+  private String lastName;
+
+  @JsonProperty private Set<String> roles;
+  @JsonProperty private String staffId;
+
   @JsonProperty("county_code")
   private String countyCode;
+
   @JsonProperty("county_cws_code")
   private String countyCwsCode;
+
   @JsonProperty("county_name")
   private String countyName;
-  @JsonProperty
-  private Set<String> privileges;
+
+  @JsonProperty private Set<String> privileges;
+  @JsonProperty private Set<String> authorityCodes;
 
   public PerryAccount(String user) {
     this.user = user;
   }
 
-  /**
-   * Default Constructor
-   */
-  public PerryAccount() {
-  }
+  /** Default Constructor */
+  public PerryAccount() {}
 
   public String getUser() {
     return user;
@@ -92,6 +94,14 @@ public class PerryAccount {
 
   public void setPrivileges(Set<String> privileges) {
     this.privileges = privileges;
+  }
+
+  public Set<String> getAuthorityCodes() {
+    return authorityCodes;
+  }
+
+  public void setAuthorityCodes(Set<String> authorityCodes) {
+    this.authorityCodes = authorityCodes;
   }
 
   @Override

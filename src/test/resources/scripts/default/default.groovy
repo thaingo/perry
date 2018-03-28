@@ -22,13 +22,21 @@ def supervisor = authorization.unitAuthority != null && authorization.unitAuthor
     }
 }
 
+def authorityCodes = []
+authorization.unitAuthority.each {
+    authorityCodes.push it.unitAuthorityCode
+}
+
 def governmentEntityType = GovernmentEntityType.findBySysId(authorization.cwsOffice?.governmentEntityType)
 
-[user       : authorization.userId,
- roles      : user.roles + [supervisor ? "Supervisor" : "SocialWorker"],
- staffId    : authorization.staffPerson?.id,
- county_name: governmentEntityType.description,
- county_code: governmentEntityType.countyCd,
+[user           : authorization.userId,
+ first_name     : authorization.staffPerson?.firstName,
+ last_name      : authorization.staffPerson?.lastName,
+ roles          : user.roles + [supervisor ? "Supervisor" : "SocialWorker"],
+ staffId        : authorization.staffPerson?.id,
+ county_name    : governmentEntityType.description,
+ county_code    : governmentEntityType.countyCd,
  county_cws_code: governmentEntityType.sysId,
- privileges : privileges]
+ privileges     : privileges,
+ authorityCodes : authorityCodes]
 
