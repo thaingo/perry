@@ -11,12 +11,14 @@ spring:
               hibernate.cache.use_query_cache: false
               hibernate.current_session_context_class : org.springframework.orm.hibernate5.SpringSessionContext
               hibernate.dialect: org.hibernate.dialect.DB2Dialect
-              hibernate.ddl-auto: none
+              hibernate.ddl-auto: create
               hibernate.default_schema: test
       redis:
           host: ${REDIS_HOST:192.168.99.100}
           password: ${REDIS_PASSWORD:}
           port: ${REDIS_PORT:6379}
+      liquibase:
+          change-log: liquibase/perry_database_master.xml
 perry:
     jwt:
       timeout: ${TOKEN_TIMEOUT:10} #minutes

@@ -39,6 +39,8 @@ spring:
           host: ${REDIS_HOST:192.168.99.100}
           password: ${REDIS_PASSWORD:}
           port: ${REDIS_PORT:6379}
+      liquibase:
+          change-log: liquibase/perry_database_master.xml
 perry:
     identityProvider:
       idpMapping: ${IDP_MAPPING_SCRIPT:config/idp.groovy}

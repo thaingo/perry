@@ -4,6 +4,7 @@ import gov.ca.cwds.data.reissue.TokenRepository;
 import gov.ca.cwds.data.reissue.model.PerryTokenEntity;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.boot.autoconfigure.liquibase.LiquibaseDataSource;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -31,6 +32,7 @@ public class TokenServiceConfiguration {
   }
 
   @Bean
+  @LiquibaseDataSource
   @ConfigurationProperties("perry.tokenStore.datasource")
   public DataSource tokenDataSource() {
     return tokenStoreDataSourceProperties().initializeDataSourceBuilder().build();
