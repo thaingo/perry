@@ -19,7 +19,7 @@ public class BaseScriptTest {
   private static final ObjectMapper MAPPER = Jackson.newObjectMapper();
   public void test(String script, String json, String userAuthorization) throws Exception {
     IdentityMappingScript identityMappingScript = loadScript(script);
-    UniversalUserToken user = new UniversalUserToken();
+    UniversalUserToken user = createUniversalUserToken();
     UserAuthorization authorization = MAPPER.readValue(
             fixture(userAuthorization),
             UserAuthorization.class);
@@ -29,6 +29,10 @@ public class BaseScriptTest {
     String expectedResult = readResource(json);
     Assert.assertEquals(expectedResult, result);
 
+  }
+
+  protected UniversalUserToken createUniversalUserToken() {
+    return new UniversalUserToken();
   }
 
   private IdentityMappingScript loadScript(String script) throws Exception {
