@@ -1,12 +1,14 @@
 package gov.ca.cwds;
 
 import gov.ca.cwds.security.jwt.JwtService;
+import javax.persistence.EntityManagerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
+import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -15,11 +17,10 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.client.RestTemplate;
 
-import javax.persistence.EntityManagerFactory;
-
 @SpringBootApplication
 @EnableTransactionManagement(proxyTargetClass = true)
-@EnableAutoConfiguration(exclude = {FlywayAutoConfiguration.class, SessionAutoConfiguration.class})
+@EnableAutoConfiguration(exclude = {FlywayAutoConfiguration.class, SessionAutoConfiguration.class,
+    LiquibaseAutoConfiguration.class})
 @ComponentScan("gov.ca.cwds")
 @EntityScan("gov.ca.cwds.data.persistence.auth")
 @EnableConfigurationProperties({PerryProperties.class})

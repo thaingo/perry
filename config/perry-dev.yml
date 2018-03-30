@@ -17,8 +17,7 @@ spring:
           host: ${REDIS_HOST:192.168.99.100}
           password: ${REDIS_PASSWORD:}
           port: ${REDIS_PORT:6379}
-      liquibase:
-          change-log: liquibase/perry_database_master.xml
+
 perry:
     jwt:
       timeout: ${TOKEN_TIMEOUT:10} #minutes
@@ -56,6 +55,11 @@ perry:
     homePageUrl: ${HOME_PAGE_URL:/}
     showErrors: ${SHOW_ERRORS:true}
     tokenRecordTimeout: ${TOKEN_RECORD_TIMEOUT:7} # days
+    liquibase:
+      schema:
+        change-log: classpath:/liquibase/perry_schema.xml
+      structure:
+        change-log: classpath:/liquibase/perry_database_master.xml
 management:
   context-path: /manage
   port: ${ADMIN_PORT:9082}

@@ -39,8 +39,7 @@ spring:
           host: ${REDIS_HOST:192.168.99.100}
           password: ${REDIS_PASSWORD:}
           port: ${REDIS_PORT:6379}
-      liquibase:
-          change-log: liquibase/perry_database_master.xml
+
 perry:
     identityProvider:
       idpMapping: ${IDP_MAPPING_SCRIPT:config/idp.groovy}
@@ -85,6 +84,13 @@ perry:
               hibernate.dialect: org.hibernate.dialect.ProgressDialect
               hibernate.ddl-auto: none
               hibernate.default_schema: ${TOKEN_STORE_SCHEMA:perry}
+    liquibase:
+        schema:
+            change-log: classpath:/liquibase/perry_schema.xml
+            default-schema: public
+        structure:
+            change-log: classpath:/liquibase/perry_database_master.xml
+            default-schema: perry
 management:
   context-path: /manage
   port: ${ADMIN_PORT:9082}
