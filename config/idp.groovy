@@ -7,8 +7,13 @@ def parse = { text ->
     new JsonSlurper().parseText(text);
 }
 universalUserToken.userId = idpToken["safid.racfid"]?.toUpperCase()
+def userProperties = parse(idpToken.basicprofile)?.User_Properties
 
-universalUserToken.roles = parse(parse(idpToken.basicprofile)?.User_Properties?.Roles)?.Selections?.keySet() as HashSet
+if(!universalUserToken.userId?.trim()) {
+    universalUserToken.userId = userProperties?.UserName
+}
+
+universalUserToken.roles = parse(userProperties?.Roles)?.Selections?.keySet() as HashSet
 if(!universalUserToken.roles) {
     universalUserToken.roles = new HashSet<>()
     println "INFO: There are no IDP roles provided"
