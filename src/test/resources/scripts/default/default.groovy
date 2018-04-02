@@ -2,6 +2,15 @@ import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType
 
 def authorization = user.authorization
 
+if (user.roles?.contains("External CALS")) {
+    return [user           : user.userId,
+            roles          : ["External CALS"],
+            county_code    : "99",
+            county_cws_code: 1126,
+            county_name    : "State of California",
+            privileges     : ["CWS Case Management System", "Resource Management"]]
+}
+
 if (authorization == null) {
     return [user : user.userId,
             roles: user.roles]
