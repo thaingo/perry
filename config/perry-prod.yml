@@ -29,16 +29,18 @@ spring:
       jpa:
           database: db2
           show_sql: ${SHOW_SQL:false}
+          hibernate:
+              ddl-auto: none
           properties:
               hibernate.cache.use_query_cache: false
               hibernate.current_session_context_class : org.springframework.orm.hibernate5.SpringSessionContext
               hibernate.dialect: org.hibernate.dialect.DB2Dialect
-              hibernate.ddl-auto: none
               hibernate.default_schema: ${DB_CMS_SCHEMA:CWSINT}
       redis:
           host: ${REDIS_HOST:192.168.99.100}
           password: ${REDIS_PASSWORD:}
           port: ${REDIS_PORT:6379}
+
 perry:
     identityProvider:
       idpMapping: ${IDP_MAPPING_SCRIPT:config/idp.groovy}
@@ -77,12 +79,20 @@ perry:
         jpa:
            database: POSTGRESQL
            show_sql: true
+           hibernate:
+              ddl-auto: none
            properties:
               hibernate.cache.use_query_cache: false
               hibernate.current_session_context_class : org.springframework.orm.hibernate5.SpringSessionContext
               hibernate.dialect: org.hibernate.dialect.ProgressDialect
-              hibernate.ddl-auto: none
               hibernate.default_schema: ${TOKEN_STORE_SCHEMA:perry}
+    liquibase:
+        schema:
+            change-log: classpath:/liquibase/perry_schema.xml
+            default-schema: public
+        structure:
+            change-log: classpath:/liquibase/perry_database_master.xml
+            default-schema: perry
 management:
   context-path: /manage
   port: ${ADMIN_PORT:9082}

@@ -14,6 +14,7 @@ import java.util.*;
  */
 @ConfigurationProperties(prefix = "perry")
 public class PerryProperties {
+
   @NestedConfigurationProperty
   private JwtConfiguration jwt;
 
@@ -22,18 +23,19 @@ public class PerryProperties {
 
   private String users;
 
-    private List<String> whiteList = new ArrayList<>();
+  private List<String> whiteList = new ArrayList<>();
 
   private Map<String, ServiceProviderConfiguration> serviceProviders = new HashMap<>();
 
-    private String homePageUrl = "/";
+  private String homePageUrl = "/";
 
-    private boolean showErrors;
+  private boolean showErrors;
 
-    private int tokenRecordTimeout;
+  private int tokenRecordTimeout;
 
-    public static class IdentityProviderConfiguration {
-        private IdpMappingScript idpMapping;
+  public static class IdentityProviderConfiguration {
+
+    private IdpMappingScript idpMapping;
 
     public IdpMappingScript getIdpMapping() {
       return idpMapping;
@@ -45,6 +47,7 @@ public class PerryProperties {
   }
 
   public static class ServiceProviderConfiguration {
+
     private String id;
     private IdentityMappingScript identityMapping;
 
@@ -101,25 +104,25 @@ public class PerryProperties {
     return users;
   }
 
-    public void setUsers(String users) {
-        this.users = users;
-    }
+  public void setUsers(String users) {
+    this.users = users;
+  }
 
-    public String getHomePageUrl() {
-        return homePageUrl;
-    }
+  public String getHomePageUrl() {
+    return homePageUrl;
+  }
 
-    public void setHomePageUrl(String homePageUrl) {
-        this.homePageUrl = homePageUrl;
-    }
+  public void setHomePageUrl(String homePageUrl) {
+    this.homePageUrl = homePageUrl;
+  }
 
-    public boolean isShowErrors() {
-        return showErrors;
-    }
+  public boolean isShowErrors() {
+    return showErrors;
+  }
 
-    public void setShowErrors(boolean showErrors) {
-        this.showErrors = showErrors;
-    }
+  public void setShowErrors(boolean showErrors) {
+    this.showErrors = showErrors;
+  }
 
   public int getTokenRecordTimeout() {
     return tokenRecordTimeout;

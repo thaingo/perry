@@ -2,19 +2,21 @@ package gov.ca.cwds.config;
 
 import gov.ca.cwds.data.reissue.TokenRepository;
 import gov.ca.cwds.data.reissue.model.PerryTokenEntity;
+import javax.sql.DataSource;
+import liquibase.integration.spring.SpringLiquibase;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
-
-import javax.sql.DataSource;
 
 /**
  * Created by TPT2 on 10/24/2017.
@@ -40,6 +42,28 @@ public class TokenServiceConfiguration {
   @ConfigurationProperties("perry.tokenStore.jpa")
   public HibernateJpaVendorAdapter tokenJpaVendorAdapter() {
     return new HibernateJpaVendorAdapter();
+  }
+
+
+  @Bean("perryLiquibaseSchema")
+  @Profile("liquibase")
+  @ConfigurationProperties("perry.liquibase.schema")
+  public SpringLiquibase perryLiquibaseSchema() {
+    return getSpringLiquibase(tokenDataSource());
+  }
+
+  @Bean
+  @DependsOn("perryLiquibaseSchema")
+  @Profile("liquibase")
+  @ConfigurationProperties("perry.liquibase.structure")
+  public SpringLiquibase perryLiquibaseStructure() {
+    return getSpringLiquibase(tokenDataSource());
+  }
+
+  private SpringLiquibase getSpringLiquibase(DataSource dataSource) {
+    SpringLiquibase springLiquibase = new SpringLiquibase();
+    springLiquibase.setDataSource(dataSource);
+    return springLiquibase;
   }
 
   @Bean

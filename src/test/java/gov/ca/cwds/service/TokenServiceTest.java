@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
+import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
@@ -19,7 +20,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.TransactionSystemException;
 
 @RunWith(SpringRunner.class)
-@DataJpaTest(excludeAutoConfiguration = {FlywayAutoConfiguration.class})
+@DataJpaTest(excludeAutoConfiguration = {FlywayAutoConfiguration.class,
+    LiquibaseAutoConfiguration.class})
 @DirtiesContext
 @ActiveProfiles("dev")
 public class TokenServiceTest {
