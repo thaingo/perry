@@ -5,7 +5,7 @@ node ('dora-slave'){
    parameters([
       string(defaultValue: 'SNAPSHOT', description: 'Release version (if not SNAPSHOT will be released to lib-release repository)', name: 'VERSION'),
       string(defaultValue: 'latest', description: '', name: 'APP_VERSION'),
-      string(defaultValue: 'rbach_cognito', description: '', name: 'branch'),
+      string(defaultValue: 'development', description: '', name: 'branch'),
       string(defaultValue: '', description: 'Used for mergerequest default is empty', name: 'refspec'),
       booleanParam(defaultValue: false, description: 'Default release version template is: <majorVersion>_<buildNumber>-RC', name: 'RELEASE_PROJECT'),
       string(defaultValue: "", description: 'Fill this field if need to specify custom version ', name: 'OVERRIDE_VERSION'),
@@ -32,6 +32,11 @@ node ('dora-slave'){
    stage('Unit Tests') {
        buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'test jacocoTestReport', switches: '--info'
    }
+   stage('SonarQube analysis'){
+		withSonarQubeEnv('Core-SonarQube') {
+			buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'sonarqube'
+        }
+    }
    stage('License Report') {
    		buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'downloadLicenses'
    }
@@ -59,14 +64,14 @@ node ('dora-slave'){
 	stage('Clean Workspace') {
 		archiveArtifacts artifacts: '**/perry*.jar,readme.txt', fingerprint: true
 	}
-//	stage('Deploy Application'){
-//	   checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '433ac100-b3c2-4519-b4d6-207c029a103b', url: 'git@github.com:ca-cwds/de-ansible.git']]]
-//	   sh 'ansible-playbook -e NEW_RELIC_AGENT=$USE_NEWRELIC -e VERSION_NUMBER=$APP_VERSION -i $inventory deploy-perry.yml --vault-password-file ~/.ssh/vault.txt -vv'
-//  }
+	stage('Deploy Application'){
+	   checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '433ac100-b3c2-4519-b4d6-207c029a103b', url: 'git@github.com:ca-cwds/de-ansible.git']]]
+	   sh 'ansible-playbook -e NEW_RELIC_AGENT=$USE_NEWRELIC -e VERSION_NUMBER=$APP_VERSION -i $inventory deploy-perry.yml --vault-password-file ~/.ssh/vault.txt -vv'
+  }
 //  stage('Smoke Tests') {
 //      git branch: 'master', url: 'https://github.com/ca-cwds/perry.git'
 //      sleep 40
-//      buildInfo = rtGradle.run buildFile: './build.gradle', tasks: 'smokeTest --stacktrace'
+//     buildInfo = rtGradle.run buildFile: './build.gradle', tasks: 'smokeTest --stacktrace'
 //      publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: 'build/reports/tests/smokeTest', reportFiles: 'index.html', reportName: 'Smoke Tests Report', reportTitles: 'Smoke tests summary'])
 //    }
 
@@ -82,4 +87,3 @@ node ('dora-slave'){
        cleanWs()
  }
 }
-

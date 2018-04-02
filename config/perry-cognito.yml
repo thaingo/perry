@@ -18,8 +18,8 @@ security:
    resource:
      userInfoUri: ${SAF_VALIDATE_TOKEN_PATH:https://cognito-idp.us-west-2.amazonaws.com} 
      tokenInfoUri: ${SAF_VALIDATE_TOKEN_URI:https://preintcwds.auth.us-west-2.amazoncognito.com/oauth2/token} 
-     revokeTokenUri: ${SAF_REVOKE_TOKEN_URI:https://cognito-idp.us-west-2.amazonaws.com} #TODO
-     logoutTokenUri: ${SAF_LOGOUT_URI:https://preintcwds.auth.us-west-2.amazoncognito.com/logout} #TODO
+     revokeTokenUri: ${SAF_REVOKE_TOKEN_URI:https://cognito-idp.us-west-2.amazonaws.com} 
+     logoutTokenUri: ${SAF_LOGOUT_URI:https://preintcwds.auth.us-west-2.amazoncognito.com/logout}
 spring:
       datasource:
           driver-class-name: com.ibm.db2.jcc.DB2Driver
