@@ -30,11 +30,7 @@ project.ext {
     projectGroup = 'gov.ca.cwds.api'
     configPath = "$rootProject.projectDir/config/"
     springVersion = "1.5.3.RELEASE"
-<<<<<<< HEAD
     projectMajorVersion = '1-COGNITO'
-=======
-    projectMajorVersion = '1.6.2'
->>>>>>> development
     mainclass = 'gov.ca.cwds.PerryApplication'
     targetDockerHubOrganization = System.env.DOCKERHUB_ORG ?: 'cwds'
     
