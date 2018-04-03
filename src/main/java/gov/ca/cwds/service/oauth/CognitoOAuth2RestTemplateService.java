@@ -18,7 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @ConfigurationProperties(prefix = "cognito")
 public class CognitoOAuth2RestTemplateService extends OAuth2RestTemplateService {
 
-  private String mediaSubtype;
+  private String apiVersion;
 
   @Override
   protected List<HttpMessageConverter<?>> augmentMessageConverters(
@@ -28,18 +28,19 @@ public class CognitoOAuth2RestTemplateService extends OAuth2RestTemplateService 
         MappingJackson2HttpMessageConverter jsonConverter =
             (MappingJackson2HttpMessageConverter) converter;
         jsonConverter.setObjectMapper(new ObjectMapper());
-        jsonConverter.setSupportedMediaTypes(Arrays.asList(new MediaType("application",
-            mediaSubtype, MappingJackson2HttpMessageConverter.DEFAULT_CHARSET)));
+        jsonConverter.setSupportedMediaTypes(Arrays.asList(new MediaType("application", apiVersion,
+            MappingJackson2HttpMessageConverter.DEFAULT_CHARSET)));
       }
     }
     return messageConverters;
   }
 
-  public String getMediaSubtype() {
-    return mediaSubtype;
+  public String getApiVersion() {
+    return apiVersion;
   }
 
-  public void setMediaSubtype(String mediaSubtype) {
-    this.mediaSubtype = mediaSubtype;
+  public void setApiVersion(String apiVersion) {
+    this.apiVersion = apiVersion;
   }
+
 }

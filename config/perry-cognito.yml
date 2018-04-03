@@ -1,6 +1,5 @@
 cognito:
-  host: ${COGNITO_HOST:cognito-idp.us-west-2.amazonaws.com}
-  mediaSubtype: x-amz-json-1.1
+  apiVersion: x-amz-json-1.1
   revokeTokenTarget: AWSCognitoIdentityProviderService.GlobalSignOut
   getUserTarget: AWSCognitoIdentityProviderService.GetUser
   authorization: ${COGNITO_AUTHORIZATION:MWxxcWtxNXBnamVhdjhuZWgzY2t2cDF0MW06MXJqYXJrczQxZTg5cnVubjg5NHNjYXFpcHRybXJoMDB0ajBwZmYxbGM4ZDZnNWM1YnJzcw==}

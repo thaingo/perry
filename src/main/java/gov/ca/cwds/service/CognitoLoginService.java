@@ -2,17 +2,18 @@ package gov.ca.cwds.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import gov.ca.cwds.service.http.CognitoHeaders;
 
 @Service
 @Profile("prod")
@@ -22,33 +23,29 @@ public class CognitoLoginService extends LoginServiceImpl {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CognitoLoginService.class);
 
-  private String host;
-  private String mediaSubtype;
   private String revokeTokenTarget;
   private String authorization;
 
   @Value("${security.oauth2.client.clientId}")
   private String clientId;
 
+  @Autowired
+  private CognitoHeaders cognitoHeaders;
+
+
   private HttpHeaders invalidationHeaders;
   private HttpHeaders validationHeaders;
 
   private HttpHeaders invalidationHeaders() {
     if (invalidationHeaders == null) {
-      invalidationHeaders = new HttpHeaders();
-      invalidationHeaders.set("HOST", host);
-      invalidationHeaders.set("Content-Type", "application/" + mediaSubtype);
-      invalidationHeaders.set("X-Amz-Target", revokeTokenTarget);
+      invalidationHeaders = cognitoHeaders.getHeadersForApiCall(revokeTokenTarget);
     }
     return invalidationHeaders;
   }
 
   private HttpHeaders validationHeaders() {
     if (validationHeaders == null) {
-      validationHeaders = new HttpHeaders();
-
-      validationHeaders.set("Authorization", "Basic " + authorization);
-      validationHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+      validationHeaders = cognitoHeaders.getHeadersForApplicationFormUrlEncoded();
       LOGGER.debug("validationHeader:" + validationHeaders.toString());
     }
     return validationHeaders;
@@ -73,28 +70,12 @@ public class CognitoLoginService extends LoginServiceImpl {
     return new HttpEntity<String>(json, invalidationHeaders());
   }
 
-  public String getHost() {
-    return host;
-  }
-
-  public void setHost(String host) {
-    this.host = host;
-  }
-
   public String getRevokeTokenTarget() {
     return revokeTokenTarget;
   }
 
   public void setRevokeTokenTarget(String revokeTokenTarget) {
     this.revokeTokenTarget = revokeTokenTarget;
-  }
-
-  public String getMediaSubtype() {
-    return mediaSubtype;
-  }
-
-  public void setMediaSubtype(String mediaSubtype) {
-    this.mediaSubtype = mediaSubtype;
   }
 
   public String getAuthorization() {

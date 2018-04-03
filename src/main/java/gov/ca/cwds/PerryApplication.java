@@ -1,6 +1,5 @@
 package gov.ca.cwds;
 
-import gov.ca.cwds.security.jwt.JwtService;
 import javax.persistence.EntityManagerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -16,6 +15,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.client.RestTemplate;
+import gov.ca.cwds.security.jwt.JwtService;
 
 @SpringBootApplication
 @EnableTransactionManagement(proxyTargetClass = true)
