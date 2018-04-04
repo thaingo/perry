@@ -8,12 +8,14 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.stereotype.Component;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
-@Profile("prod")
+@Profile("cognito")
+@Primary
 @Component
 @ConfigurationProperties(prefix = "security.oauth2.resource")
 public class PerryCognitoLogoutSuccessHandler extends PerryLogoutSuccessHandler

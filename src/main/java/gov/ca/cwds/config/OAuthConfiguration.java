@@ -11,8 +11,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 import gov.ca.cwds.service.OauthLogoutHandler;
-import gov.ca.cwds.service.oauth.CognitoUserInfoTokenService;
-import gov.ca.cwds.web.PerryCognitoLogoutSuccessHandler;
+import gov.ca.cwds.service.oauth.CaresUserInfoTokenService;
+import gov.ca.cwds.web.PerryLogoutSuccessHandler;
 
 /**
  * Created by dmitry.rudenko on 5/23/2017.
@@ -26,15 +26,16 @@ public class OAuthConfiguration extends WebSecurityConfigurerAdapter {
   private LoginServiceValidatorFilter loginServiceValidatorFilter;
   @Autowired
   private OauthLogoutHandler tokenRevocationLogoutHandler;
+
   @Autowired
-  private PerryCognitoLogoutSuccessHandler logoutSuccessHandler;
+  private PerryLogoutSuccessHandler logoutSuccessHandler;
 
   @Bean
   @Primary
   @Autowired
-  public CognitoUserInfoTokenService userInfoTokenServices(
+  public CaresUserInfoTokenService userInfoTokenServices(
       ResourceServerProperties resourceServerProperties) {
-    return new CognitoUserInfoTokenService(resourceServerProperties);
+    return new CaresUserInfoTokenService(resourceServerProperties);
   }
 
   @Override

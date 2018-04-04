@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 @Service
-@Profile("prod")
+@Profile("cognito")
 @Primary
 @ConfigurationProperties(prefix = "cognito")
 public class CognitoOAuth2RestTemplateService extends OAuth2RestTemplateService {

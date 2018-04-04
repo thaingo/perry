@@ -1,39 +1,39 @@
 package gov.ca.cwds.web;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Profile;
-import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
-import org.springframework.stereotype.Component;
-
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Optional;
+import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
+import org.springframework.stereotype.Component;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
  * @author CWDS CALS API Team
  */
 @Profile("prod")
+@Primary
 @Component
 @ConfigurationProperties(prefix = "security.oauth2.resource")
-public class PerrySAFLogoutSuccessHandler extends PerryLogoutSuccessHandler implements
-        LogoutSuccessHandler {
+public class PerrySAFLogoutSuccessHandler extends PerryLogoutSuccessHandler
+    implements LogoutSuccessHandler {
 
   private String logoutTokenUri;
 
   @Override
-  @SuppressFBWarnings("UNVALIDATED_REDIRECT")//white list usage right before redirect
+  @SuppressFBWarnings("UNVALIDATED_REDIRECT") // white list usage right before redirect
   protected boolean tryRedirect(HttpServletResponse response, String callback) throws IOException {
     assert (StringUtils.isNotBlank(logoutTokenUri));
     StringBuilder safLogoutUrlBuilder = new StringBuilder(logoutTokenUri);
     safLogoutUrlBuilder.append('?');
     Optional.ofNullable(callback).ifPresent(s -> {
       whiteList.validate("callback", callback);
-      safLogoutUrlBuilder.append("redirectToClientLogin=").append(s)
-              .append("&message=");
+      safLogoutUrlBuilder.append("redirectToClientLogin=").append(s).append("&message=");
     });
 
     URI safLogoutURI;

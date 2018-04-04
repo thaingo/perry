@@ -16,7 +16,7 @@ import org.springframework.util.MultiValueMap;
 import gov.ca.cwds.service.http.CognitoHeaders;
 
 @Service
-@Profile("prod")
+@Profile("cognito")
 @Primary
 @ConfigurationProperties(prefix = "cognito")
 public class CognitoLoginService extends LoginServiceImpl {
