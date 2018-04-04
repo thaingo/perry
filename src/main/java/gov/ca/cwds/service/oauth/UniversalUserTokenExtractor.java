@@ -28,7 +28,6 @@ public class UniversalUserTokenExtractor implements PrincipalExtractor {
   @Override
   public UniversalUserToken extractPrincipal(Map<String, Object> map) {
     try {
-      LOGGER.debug("Map:" + map);
       UniversalUserToken userToken = configuration.getIdentityProvider().getIdpMapping().map(map);
       userToken.setToken(generateToken());
       return userToken;

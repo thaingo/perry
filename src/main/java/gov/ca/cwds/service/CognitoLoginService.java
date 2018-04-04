@@ -1,7 +1,5 @@
 package gov.ca.cwds.service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -20,8 +18,6 @@ import gov.ca.cwds.service.http.CognitoHeaders;
 @Primary
 @ConfigurationProperties(prefix = "cognito")
 public class CognitoLoginService extends LoginServiceImpl {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(CognitoLoginService.class);
 
   private String revokeTokenTarget;
   private String authorization;
@@ -46,7 +42,6 @@ public class CognitoLoginService extends LoginServiceImpl {
   private HttpHeaders validationHeaders() {
     if (validationHeaders == null) {
       validationHeaders = cognitoHeaders.getHeadersForApplicationFormUrlEncoded();
-      LOGGER.debug("validationHeader:" + validationHeaders.toString());
     }
     return validationHeaders;
   }
