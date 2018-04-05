@@ -14,6 +14,7 @@ import gov.ca.cwds.rest.api.domain.auth.StaffAuthorityPrivilege;
 import gov.ca.cwds.rest.api.domain.auth.StaffUnitAuthority;
 import gov.ca.cwds.rest.api.domain.auth.UserAuthorization;
 import gov.ca.cwds.rest.services.CrudsService;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -35,6 +37,7 @@ import java.util.stream.Collectors;
 @Transactional("transactionManager")
 @Service
 public class UserAuthorizationService {
+  private static final int RACFID_MAX_LENGTH = 8;
 
   private static final Logger LOGGER = LoggerFactory.getLogger(UserAuthorizationService.class);
 
@@ -58,17 +61,12 @@ public class UserAuthorizationService {
    * @see CrudsService#find(Serializable)
    */
   public UserAuthorization find(Serializable primaryKey) {
-    final String userId = ((String) primaryKey).trim();
-    LOGGER.info(userId);
-
-    List<UserId> userList = userIdDao.findActiveByLogonId(userId);
-
-    if (userList == null || userList.isEmpty()) {
-      LOGGER.warn("No user id found for {}", primaryKey);
+    Optional<UserId> userId = findUserId(primaryKey);
+    if(!userId.isPresent()) {
+      LOGGER.warn("No RACFID found for {}", primaryKey);
       return null;
     }
-
-    final UserId user = userList.get(0);
+    UserId user = userId.get();
     String userIdentifier = user.getId();
     String staffPersonIdentifier = user.getStaffPersonId();
     boolean socialWorker = !staffAuthorityPrivilegeDao.findSocialWorkerPrivileges(userIdentifier).isEmpty();
@@ -91,6 +89,19 @@ public class UserAuthorizationService {
 
     return new UserAuthorization(user.getLogonId(), socialWorker, false, true,
         userAuthPrivs, setStaffUnitAuths, cwsOffice, staffPerson);
+  }
+
+  private Optional<UserId> findUserId(Serializable primaryKey) {
+    LOGGER.info("Trying to find RACFID for user id {}", primaryKey);
+    final String logonId = ((String) primaryKey).trim();
+    if(logonId.length() > RACFID_MAX_LENGTH) {
+      return Optional.empty();
+    }
+    List<UserId> userList = userIdDao.findActiveByLogonId(logonId);
+    if (CollectionUtils.isEmpty(userList)) {
+      return Optional.empty();
+    }
+    return Optional.of(userList.get(0));
   }
 
   /**
