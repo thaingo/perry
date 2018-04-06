@@ -1,8 +1,8 @@
 security:
  oauth2:
    client:
-     clientId: ${SAF_CLIENT_ID}
-     clientSecret: ${SAF_CLIENT_SECRET}
+     clientId: ${SAF_CLIENT_ID:aa0415d3-779f-4be4-ac3e-43fb1a596d76}
+     clientSecret: ${SAF_CLIENT_SECRET:AM2Z3iiEWwwqjzXi1ShMviac4N/INdbxsgm6V1lrw2db2CAT1KizYFtTsPfkXzPAZnyPey1CkPk3ChHz+k6Jo+d6e/kagcbQXW0xSB/MDJUf1Wp/QOzLB3CJjumfe5rHAE7YSJn+9M3dJJUS6bv36WjH/FhrKGrjlP5fl12FYmZFWXFiTMLaXHy8DSW8JnD7MptGkoxtD/9VhPB/C7Y5SVLiUpxXB8eQ+EC4lYXENTAVsZvey6xFCrnV79fi4KhTTsrLVR4kJ0wkOYX8uJn3z/kaIOUupF9kkuQfvhClp4zgXIQDNZ0nsreYmcl3eAF9dFjk2ux6BppvCOEzoTFqQQ==}
      accessTokenUri: ${SAF_RETRIEVE_TOKEN_PATH:https://sectest.dss.ca.gov/web1/dss_saf/auth/v2/token}
      userAuthorizationUri: ${SAF_AUTH_PATH:https://sectest.dss.ca.gov/web1/dss_saf/auth/v2/oauth2/authorize}
      tokenName: ${TOKEN_NAME:oauth_token}
@@ -19,9 +19,9 @@ security:
 spring:
       datasource:
           driver-class-name: com.ibm.db2.jcc.DB2Driver
-          url: ${DB_CMS_JDBC_URL:jdbc:db2://192.168.99.100:50000/DB0TDEV}
+          url: ${DB_CMS_JDBC_URL:jdbc:db2://localhost:50000/DB0TDEV}
           username: ${DB_CMS_USER:db2inst1}
-          password: ${DB_CMS_PASSWORD:db2inst1}
+          password: ${DB_CMS_PASSWORD:db2inst1-pwd}
           testOnBorrow: ${DB_CMS_TEST_ON_BORROW:true}
           testWhileIdle: ${DB_CMS_TEST_WHILE_IDLE:true}
           validationQuery: select 1 from ${spring.jpa.properties.hibernate.default_schema}.userid_t fetch first 1 row only with ur
@@ -35,7 +35,7 @@ spring:
               hibernate.cache.use_query_cache: false
               hibernate.current_session_context_class : org.springframework.orm.hibernate5.SpringSessionContext
               hibernate.dialect: org.hibernate.dialect.DB2Dialect
-              hibernate.default_schema: ${DB_CMS_SCHEMA:CWSINT}
+              hibernate.default_schema: ${DB_CMS_SCHEMA:CWSCMSRS}
       redis:
           host: ${REDIS_HOST:192.168.99.100}
           password: ${REDIS_PASSWORD:}
@@ -69,9 +69,9 @@ perry:
     tokenStore:
         datasource:
             driver-class-name: org.postgresql.Driver
-            url: ${TOKEN_STORE_JDBC_URL:jdbc:postgresql://192.168.99.100:5432/postgres_data?currentSchema=perry}
-            username: ${TOKEN_STORE_DB_USER:postgres_data}
-            password: ${TOKEN_STORE_DB_PASSWORD:postgres_data}
+            url: ${TOKEN_STORE_JDBC_URL:jdbc:postgresql://postgres.preint02.cwds.io:5432/postgres}
+            username: ${TOKEN_STORE_DB_USER:postgres}
+            password: ${TOKEN_STORE_DB_PASSWORD:postgres}
             testOnBorrow: ${TOKEN_STORE_TEST_ON_BORROW:true}
             testWhileIdle: ${TOKEN_STORE_TEST_WHILE_IDLE:true}
             validationQuery: select 1
