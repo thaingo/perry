@@ -29,16 +29,7 @@ public class CognitoLoginService extends LoginServiceImpl {
 
   Map<String, String> validateTokenBody;
 
-
-  private HttpHeaders invalidationHeaders;
   private HttpHeaders validationHeaders;
-
-  private HttpHeaders invalidationHeaders() {
-    if (invalidationHeaders == null) {
-      invalidationHeaders = cognitoHeaders.getHeadersForApiCall(revokeTokenTarget);
-    }
-    return invalidationHeaders;
-  }
 
   private HttpHeaders validationHeaders() {
     if (validationHeaders == null) {
@@ -54,13 +45,6 @@ public class CognitoLoginService extends LoginServiceImpl {
     params.setAll(validateTokenBody);
     params.add("refresh_token", accessToken.getRefreshToken().getValue());
     return new HttpEntity<>(params, validationHeaders());
-  }
-
-  @SuppressWarnings("rawtypes")
-  @Override
-  protected HttpEntity httpEntityForInvalidation(OAuth2AccessToken accessToken) {
-    String json = String.format("{\"AccessToken\": \"%s\"}", accessToken);
-    return new HttpEntity<String>(json, invalidationHeaders());
   }
 
   public String getRevokeTokenTarget() {
@@ -85,5 +69,10 @@ public class CognitoLoginService extends LoginServiceImpl {
 
   public void setValidateTokenBody(Map<String, String> validateTokenBody) {
     this.validateTokenBody = validateTokenBody;
+  }
+
+  @Override
+  protected void callRevokeTokenOnIdp(OAuth2AccessToken accessToken) {
+    // do nothing - session already invalidated on call to Logout
   }
 }

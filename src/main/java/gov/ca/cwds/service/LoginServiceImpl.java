@@ -71,11 +71,15 @@ public class LoginServiceImpl implements LoginService {
     return identity;
   }
 
-  @SuppressWarnings("rawtypes")
   @Override
   public void invalidate(String perryToken) {
     OAuth2AccessToken accessToken = tokenService.deleteToken(perryToken);
+    callRevokeTokenOnIdp(accessToken);
+  }
+
+  protected void callRevokeTokenOnIdp(OAuth2AccessToken accessToken) {
     try {
+      @SuppressWarnings("rawtypes")
       HttpEntity request = httpEntityForInvalidation(accessToken);
       restClientService.clientRestTemplate().postForEntity(revokeTokenUri, request, String.class)
           .getBody();
