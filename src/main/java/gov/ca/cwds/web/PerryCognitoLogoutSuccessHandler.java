@@ -6,7 +6,6 @@ import java.net.URISyntaxException;
 import java.util.Optional;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
@@ -20,9 +19,6 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 @ConfigurationProperties(prefix = "security.oauth2.resource")
 public class PerryCognitoLogoutSuccessHandler extends PerryLogoutSuccessHandler
     implements LogoutSuccessHandler {
-
-  @Value("${security.oauth2.client.clientId}")
-  private String clientId;
 
   private String logoutTokenUri;
 
