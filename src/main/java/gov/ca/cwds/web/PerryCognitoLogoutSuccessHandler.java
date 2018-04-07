@@ -31,11 +31,9 @@ public class PerryCognitoLogoutSuccessHandler extends PerryLogoutSuccessHandler
   protected boolean tryRedirect(HttpServletResponse response, String callback) throws IOException {
     assert (StringUtils.isNotBlank(logoutTokenUri));
     StringBuilder safLogoutUrlBuilder = new StringBuilder(logoutTokenUri);
-    safLogoutUrlBuilder.append('?');
-    safLogoutUrlBuilder.append("response_type=code&client_id=").append(clientId).append('&');
     Optional.ofNullable(callback).ifPresent(s -> {
       whiteList.validate("callback", callback);
-      safLogoutUrlBuilder.append("redirect_uri=").append(s);
+      safLogoutUrlBuilder.append("&redirect_uri=").append(s);
     });
 
     URI safLogoutURI;

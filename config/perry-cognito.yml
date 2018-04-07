@@ -3,6 +3,9 @@ cognito:
   revokeTokenTarget: AWSCognitoIdentityProviderService.GlobalSignOut
   getUserTarget: AWSCognitoIdentityProviderService.GetUser
   authorization: ${COGNITO_AUTHORIZATION:MWxxcWtxNXBnamVhdjhuZWgzY2t2cDF0MW06MXJqYXJrczQxZTg5cnVubjg5NHNjYXFpcHRybXJoMDB0ajBwZmYxbGM4ZDZnNWM1YnJzcw==}
+  validateTokenBody:
+     grant_type: 'refresh_token'
+     client_id: '${security.oauth2.client.clientId}'
 security:
  oauth2:
    client:
@@ -18,7 +21,7 @@ security:
      userInfoUri: ${SAF_VALIDATE_TOKEN_PATH:https://cognito-idp.us-west-2.amazonaws.com} 
      tokenInfoUri: ${SAF_VALIDATE_TOKEN_URI:https://preintcwds.auth.us-west-2.amazoncognito.com/oauth2/token} 
      revokeTokenUri: ${SAF_REVOKE_TOKEN_URI:https://cognito-idp.us-west-2.amazonaws.com} 
-     logoutTokenUri: ${SAF_LOGOUT_URI:https://preintcwds.auth.us-west-2.amazoncognito.com/logout}
+     logoutTokenUri: ${SAF_LOGOUT_URI:https://preintcwds.auth.us-west-2.amazoncognito.com/logout?response_type=code&client_id=${security.oauth2.client.clientId}}
 spring:
       datasource:
           driver-class-name: com.ibm.db2.jcc.DB2Driver

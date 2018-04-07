@@ -1,8 +1,9 @@
 package gov.ca.cwds.service;
 
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpEntity;
@@ -16,17 +17,17 @@ import gov.ca.cwds.service.http.CognitoHeaders;
 @Service
 @Profile("cognito")
 @Primary
+@EnableConfigurationProperties
 @ConfigurationProperties(prefix = "cognito")
 public class CognitoLoginService extends LoginServiceImpl {
 
   private String revokeTokenTarget;
   private String authorization;
 
-  @Value("${security.oauth2.client.clientId}")
-  private String clientId;
-
   @Autowired
   private CognitoHeaders cognitoHeaders;
+
+  Map<String, String> validateTokenBody;
 
 
   private HttpHeaders invalidationHeaders;
@@ -50,17 +51,14 @@ public class CognitoLoginService extends LoginServiceImpl {
   @Override
   protected HttpEntity httpEntityForValidation(OAuth2AccessToken accessToken) {
     MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-    params.add("grant_type", "refresh_token");
-    params.add("client_id", clientId);
+    params.setAll(validateTokenBody);
     params.add("refresh_token", accessToken.getRefreshToken().getValue());
-
     return new HttpEntity<>(params, validationHeaders());
   }
 
   @SuppressWarnings("rawtypes")
   @Override
   protected HttpEntity httpEntityForInvalidation(OAuth2AccessToken accessToken) {
-
     String json = String.format("{\"AccessToken\": \"%s\"}", accessToken);
     return new HttpEntity<String>(json, invalidationHeaders());
   }
@@ -79,5 +77,13 @@ public class CognitoLoginService extends LoginServiceImpl {
 
   public void setAuthorization(String authorization) {
     this.authorization = authorization;
+  }
+
+  public Map<String, String> getValidateTokenBody() {
+    return validateTokenBody;
+  }
+
+  public void setValidateTokenBody(Map<String, String> validateTokenBody) {
+    this.validateTokenBody = validateTokenBody;
   }
 }
