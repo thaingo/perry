@@ -15,9 +15,3 @@ while (counter <= idpToken.UserAttributes.size()) {
     }
     counter++
 }
-
-//universalUserToken.roles = parse(parse(idpToken.basicprofile)?.User_Properties?.Roles)?.Selections?.keySet() as HashSet
-//if(!universalUserToken.roles) {
-//    universalUserToken.roles = new HashSet<>()
-//    println "INFO: There are no IDP roles provided"
-//}
