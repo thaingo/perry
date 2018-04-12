@@ -24,7 +24,6 @@ apply plugin: 'application'
 apply plugin: 'maven-publish'
 apply plugin: 'maven'
 apply plugin: 'jacoco'
-apply plugin: 'eclipse'
 
 project.ext {
     projectGroup = 'gov.ca.cwds.api'
