@@ -87,4 +87,3 @@ node ('dora-slave'){
        cleanWs()
  }
 }
-

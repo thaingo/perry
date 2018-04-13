@@ -1,8 +1,11 @@
 package gov.ca.cwds.service.oauth;
 
+import java.util.List;
+import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.ResourceServerProperties;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.security.oauth2.client.DefaultOAuth2ClientContext;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
@@ -10,8 +13,6 @@ import org.springframework.security.oauth2.client.token.grant.client.ClientCrede
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.stereotype.Service;
-
-import javax.annotation.PostConstruct;
 
 /**
  * Created by TPT2 on 10/27/2017.
@@ -39,7 +40,17 @@ public class OAuth2RestTemplateService {
   }
 
   public OAuth2RestTemplate restTemplate(String accessToken) {
-    return new OAuth2RestTemplate(resourceDetails, new DefaultOAuth2ClientContext(new DefaultOAuth2AccessToken(accessToken)));
+    OAuth2RestTemplate restTemplate = new OAuth2RestTemplate(resourceDetails,
+        new DefaultOAuth2ClientContext(new DefaultOAuth2AccessToken(accessToken)));
+    List<HttpMessageConverter<?>> messageConverters =
+        augmentMessageConverters(restTemplate.getMessageConverters());
+    restTemplate.setMessageConverters(messageConverters);
+    return restTemplate;
+  }
+
+  protected List<HttpMessageConverter<?>> augmentMessageConverters(
+      List<HttpMessageConverter<?>> messageConverters) {
+    return messageConverters;
   }
 
   public OAuth2RestTemplate clientRestTemplate() {

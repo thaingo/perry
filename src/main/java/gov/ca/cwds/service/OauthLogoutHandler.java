@@ -1,6 +1,7 @@
 package gov.ca.cwds.service;
 
-import gov.ca.cwds.UniversalUserToken;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,14 +9,12 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Component;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import gov.ca.cwds.UniversalUserToken;
 
 /**
  * @author CWDS CALS API Team
  */
-@Profile("prod")
+@Profile({"prod", "cognito"})
 @Component
 public class OauthLogoutHandler implements LogoutHandler {
 
@@ -24,7 +23,7 @@ public class OauthLogoutHandler implements LogoutHandler {
 
   @Override
   public void logout(HttpServletRequest request, HttpServletResponse response,
-                     Authentication authentication) {
+      Authentication authentication) {
     try {
       if (authentication == null) {
         LOGGER.warn("Authentication is NULL");

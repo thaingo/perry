@@ -1,25 +1,36 @@
+cognito:
+  apiVersion: x-amz-json-1.1
+  getUserTarget: AWSCognitoIdentityProviderService.GetUser
+  authorization: ${COGNITO_AUTHORIZATION:}
+  validateTokenBody:
+     grant_type: 'refresh_token'
+     client_id: '${security.oauth2.client.clientId}'
 security:
  oauth2:
    client:
-     clientId: ${SAF_CLIENT_ID:} #DONE
-     clientSecret: ${SAF_CLIENT_SECRET:} #DONE
-     accessTokenUri: ${SAF_RETRIEVE_TOKEN_PATH:https://donchadtest.auth.us-east-1.amazoncognito.com/oauth2/token} #DONE
-     userAuthorizationUri: ${SAF_AUTH_PATH:https://donchadtest.auth.us-east-1.amazoncognito.com/login} #DONE
-     tokenName: {$TOKEN_NAME:access_token}  #DONE
-     authenticationScheme: ${SAF_AUTH_SCHEME:form} #DONE
-     clientAuthenticationScheme: ${SAF_CLIENT_AUTH_SCHEME:header} #DONE
-     scope: ${SAF_SCOPE:} #TODO
+     clientId: ${SAF_CLIENT_ID:}
+     clientSecret: ${SAF_CLIENT_SECRET:}
+     accessTokenUri: ${SAF_RETRIEVE_TOKEN_PATH:https://preintcwds.auth.us-west-2.amazoncognito.com/oauth2/token} 
+     userAuthorizationUri: ${SAF_AUTH_PATH:https://preintcwds.auth.us-west-2.amazoncognito.com/login} 
+     tokenName: ${TOKEN_NAME:access_token}  
+     authenticationScheme: ${SAF_AUTH_SCHEME:form} 
+     clientAuthenticationScheme: ${SAF_CLIENT_AUTH_SCHEME:header} 
+     scope: ${SAF_SCOPE:} 
    resource:
-     userInfoUri: ${SAF_VALIDATE_TOKEN_PATH:} #TODO
-     tokenInfoUri: ${SAF_VALIDATE_TOKEN_URI:} #TODO
-     revokeTokenUri: ${SAF_REVOKE_TOKEN_URI:} #TODO
-     logoutTokenUri: ${SAF_LOGOUT_URI:} #TODO
+     userInfoUri: ${SAF_VALIDATE_TOKEN_PATH:https://cognito-idp.us-west-2.amazonaws.com} 
+     tokenInfoUri: ${SAF_VALIDATE_TOKEN_URI:https://preintcwds.auth.us-west-2.amazoncognito.com/oauth2/token} 
+     revokeTokenUri: ${SAF_REVOKE_TOKEN_URI:https://cognito-idp.us-west-2.amazonaws.com} 
+     logoutTokenUri: ${SAF_LOGOUT_URI:https://preintcwds.auth.us-west-2.amazoncognito.com/logout?response_type=code&client_id=${security.oauth2.client.clientId}&redirect_uri=http://localhost:8080/perry/authn/login?callback=http://google.com}
 spring:
       datasource:
           driver-class-name: com.ibm.db2.jcc.DB2Driver
-          url: ${DB_CMS_JDBC_URL:jdbc:db2://192.168.99.100:50000/DB0TDEV}
+          url: ${DB_CMS_JDBC_URL:jdbc:db2://localhost:50000/DB0TDEV}
           username: ${DB_CMS_USER:db2inst1}
           password: ${DB_CMS_PASSWORD:db2inst1-pwd}
+          testOnBorrow: ${DB_CMS_TEST_ON_BORROW:true}
+          testWhileIdle: ${DB_CMS_TEST_WHILE_IDLE:true}
+          validationQuery: select 1 from ${spring.jpa.properties.hibernate.default_schema}.userid_t fetch first 1 row only with ur
+          logValidationErrors: ${DB_CMS_LOG_VALIDATION_ERRORS:false}
       jpa:
           database: db2
           show_sql: ${SHOW_SQL:false}
@@ -33,11 +44,9 @@ spring:
           host: ${REDIS_HOST:192.168.99.100}
           password: ${REDIS_PASSWORD:}
           port: ${REDIS_PORT:6379}
-      liquibase:
-          change-log: liquibase/perry_database_master.xml
 perry:
     identityProvider:
-      idpMapping: ${IDP_MAPPING_SCRIPT:config/idp.groovy} #TODO depends on "security.oauth2.resource.userInfoUri" param
+      idpMapping: ${IDP_MAPPING_SCRIPT:config/cognito.groovy} 
     jwt:
       timeout: ${TOKEN_TIMEOUT:30} #minutes
       issuer: ${TOKEN_ISSUER:perry}
@@ -62,9 +71,13 @@ perry:
     tokenStore:
         datasource:
             driver-class-name: org.postgresql.Driver
-            url: ${TOKEN_STORE_JDBC_URL:jdbc:postgresql://192.168.99.100:5432/postgres_data?currentSchema=perry}
-            username: ${TOKEN_STORE_DB_USER:postgres_data}
-            password: ${TOKEN_STORE_DB_PASSWORD:postgres_data}
+            url: ${TOKEN_STORE_JDBC_URL:jdbc:postgresql://postgres.preint02.cwds.io:5432/postgres}
+            username: ${TOKEN_STORE_DB_USER:postgres}
+            password: ${TOKEN_STORE_DB_PASSWORD:postgres}
+            testOnBorrow: ${TOKEN_STORE_TEST_ON_BORROW:true}
+            testWhileIdle: ${TOKEN_STORE_TEST_WHILE_IDLE:true}
+            validationQuery: select 1
+            logValidationErrors: ${TOKEN_STORE_LOG_VALIDATION_ERRORS:false}
         jpa:
            database: POSTGRESQL
            show_sql: true
@@ -74,6 +87,13 @@ perry:
               hibernate.dialect: org.hibernate.dialect.ProgressDialect
               hibernate.ddl-auto: none
               hibernate.default_schema: ${TOKEN_STORE_SCHEMA:perry}
+    liquibase:
+        schema:
+            change-log: classpath:/liquibase/perry_schema.xml
+            default-schema: public
+        structure:
+            change-log: classpath:/liquibase/perry_database_master.xml
+            default-schema: perry              
 management:
   context-path: /manage
   port: ${ADMIN_PORT:9082}
