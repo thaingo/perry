@@ -1,16 +1,10 @@
-import groovy.json.JsonSlurper
-
-def parse = { text ->
-    if (text == null || "" == text) {
-        return null
-    }
-    new JsonSlurper().parseText(text);
-}
-
 counter = 0
-while (counter <= idpToken.UserAttributes.size()) {
-    if(idpToken.UserAttributes[counter].Name?.toUpperCase().equals("CUSTOM:RACFID")) {
-		universalUserToken.userId = idpToken.UserAttributes[counter].Value?.toUpperCase()
+
+print "!!!!!TOKEN: $idpToken"
+
+while (counter < idpToken.Attributes.size()) {
+    if(idpToken.Attributes[counter].Name?.toUpperCase().equals("CUSTOM:RACFID")) {
+		universalUserToken.userId = idpToken.Attributes[counter].Value?.toUpperCase()
 		break;    
     }
     counter++
