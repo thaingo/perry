@@ -77,10 +77,11 @@ public class OAuth2ServiceImpl implements OAuth2Service {
   @Override
   public Map getUserInfo(String accessToken) {
     try {
-      return objectMapper.readValue(userRestTemplate(accessToken)
+      String response = userRestTemplate(accessToken)
           .postForObject(resourceServerProperties.getUserInfoUri(),
               httpEntityFactory.build(resourceServerProperties.getUserInfoUri(), accessToken),
-              String.class), Map.class);
+              String.class);
+      return objectMapper.readValue(response, Map.class);
     } catch (IOException e) {
       throw new PerryException("user info access error", e);
     }
