@@ -16,8 +16,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 /**
  * @author CWDS CALS API Team
  */
-@Profile("prod")
-@Primary
+@Profile("saf")
 @Component
 @ConfigurationProperties(prefix = "security.oauth2.resource")
 public class PerrySAFLogoutSuccessHandler extends PerryLogoutSuccessHandler

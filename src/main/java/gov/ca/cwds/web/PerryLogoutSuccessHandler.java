@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
@@ -20,6 +21,7 @@ import gov.ca.cwds.service.WhiteList;
  * @author CWDS CALS API Team
  */
 @Component
+@Profile("dev")
 public class PerryLogoutSuccessHandler extends SimpleUrlLogoutSuccessHandler
     implements LogoutSuccessHandler {
 

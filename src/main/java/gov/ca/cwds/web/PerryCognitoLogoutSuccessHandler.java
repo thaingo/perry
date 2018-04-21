@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 @Profile("cognito")
-@Primary
 @Component
 @ConfigurationProperties(prefix = "security.oauth2.resource")
 public class PerryCognitoLogoutSuccessHandler extends PerryLogoutSuccessHandler
