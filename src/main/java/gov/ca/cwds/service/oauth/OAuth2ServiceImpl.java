@@ -50,15 +50,6 @@ public class OAuth2ServiceImpl implements OAuth2Service {
     objectMapper = new ObjectMapper();
   }
 
-  protected OAuth2RestTemplate userRestTemplate() {
-    return new OAuth2RestTemplate(resourceDetails, clientContext);
-  }
-
-  protected OAuth2RestTemplate userRestTemplate(String accessToken) {
-    return new OAuth2RestTemplate(resourceDetails,
-        new DefaultOAuth2ClientContext(new DefaultOAuth2AccessToken(accessToken)));
-  }
-
   @Autowired
   public void setResourceServerProperties(ResourceServerProperties resourceServerProperties) {
     this.resourceServerProperties = resourceServerProperties;
@@ -70,45 +61,55 @@ public class OAuth2ServiceImpl implements OAuth2Service {
   }
 
   @Override
-  public Map getUserInfo() {
-    return getUserInfo(getAccessToken().getValue());
-  }
-
-  @Override
   public Map getUserInfo(String accessToken) {
-    try {
-      String response = userRestTemplate(accessToken)
-          .postForObject(resourceServerProperties.getUserInfoUri(),
-              httpEntityFactory.build(resourceServerProperties.getUserInfoUri(), accessToken),
-              String.class);
-      return objectMapper.readValue(response, Map.class);
-    } catch (IOException e) {
-      throw new PerryException("user info access error", e);
-    }
+    return doPost(userRestTemplate(accessToken),
+        resourceServerProperties.getUserInfoUri(),
+        accessToken,
+        Map.class);
   }
 
   @Override
   public OAuth2AccessToken validate() {
-    OAuth2RestTemplate restTemplate = userRestTemplate();
-    restTemplate.postForObject(resourceServerProperties.getTokenInfoUri(),
-        httpEntityFactory.build(resourceServerProperties.getTokenInfoUri(), getAccessToken().getValue()),
-        String.class);
+    doPost(userRestTemplate(), resourceServerProperties.getTokenInfoUri(), getAccessToken().getValue());
     return clientContext.getAccessToken();
   }
 
   @Override
   public void invalidate() {
     try {
-      clientTemplate.postForEntity(revokeTokenUri,
-          httpEntityFactory.build(revokeTokenUri, getAccessToken().getValue()),
-          String.class);
+      doPost(clientTemplate, revokeTokenUri, getAccessToken().getValue());
     } catch (UnsupportedOperationException e) {
-      LOGGER.error("Invalidation problems: ", e);
+      //TODO: implement for Cognito
+      LOGGER.error("OPERATION is not supported: invalidate!");
     }
   }
 
   @Override
   public OAuth2AccessToken getAccessToken() {
     return clientContext.getAccessToken();
+  }
+
+  private OAuth2RestTemplate userRestTemplate() {
+    return new OAuth2RestTemplate(resourceDetails, clientContext);
+  }
+
+  private OAuth2RestTemplate userRestTemplate(String accessToken) {
+    return new OAuth2RestTemplate(resourceDetails,
+        new DefaultOAuth2ClientContext(new DefaultOAuth2AccessToken(accessToken)));
+  }
+
+  private String doPost(OAuth2RestTemplate restTemplate, String url, String accessToken) {
+    return restTemplate.postForObject(url,
+        httpEntityFactory.build(url, accessToken),
+        String.class);
+  }
+
+  private <T> T doPost(OAuth2RestTemplate restTemplate, String url, String accessToken, Class<T> clazz) {
+    String response = doPost(restTemplate, url, accessToken);
+    try {
+      return objectMapper.readValue(response, clazz);
+    } catch (IOException e) {
+      throw new PerryException("url: " + url + ". error parsing response: " + response);
+    }
   }
 }
