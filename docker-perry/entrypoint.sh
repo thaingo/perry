@@ -3,7 +3,7 @@
 
 if ( ${COGNITO_MODE:?} ) ; then
   echo "COGNITO MODE"
-  PERRY_CONFIG="--spring.config.location=config/perry-cognito.yml"
+  PERRY_CONFIG="--spring.config.location=config/perry-prod.yml"
   JAVA_OPTS="-Dspring.profiles.active=prod,cognito,liquibase"
 elif ([ -z "$DEV_MODE" ] || ! $DEV_MODE); then
   echo "PROD MODE"
