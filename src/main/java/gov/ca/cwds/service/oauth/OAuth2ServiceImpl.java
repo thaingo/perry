@@ -76,12 +76,7 @@ public class OAuth2ServiceImpl implements OAuth2Service {
 
   @Override
   public void invalidate() {
-    try {
-      doPost(clientTemplate, revokeTokenUri, getAccessToken().getValue());
-    } catch (UnsupportedOperationException e) {
-      //TODO: implement for Cognito
-      LOGGER.error("OPERATION is not supported: invalidate!");
-    }
+    doPost(clientTemplate, revokeTokenUri, getAccessToken().getValue());
   }
 
   @Override
