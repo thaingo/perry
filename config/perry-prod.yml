@@ -65,7 +65,6 @@ perry:
     whiteList: ${WHITE_LIST:*} # urls separated by spaces.
     homePageUrl: ${HOME_PAGE_URL:/}
     showErrors: ${SHOW_ERRORS:true}
-    authorizationCodeEndpoint: ${AUTHORIZATION_CODE_ENDPOINT:}
     tokenRecordTimeout: ${TOKEN_RECORD_TIMEOUT:7} # days
     tokenStore:
         datasource:

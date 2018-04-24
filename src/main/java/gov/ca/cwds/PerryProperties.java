@@ -31,8 +31,6 @@ public class PerryProperties {
 
   private boolean showErrors;
 
-  private String authorizationCodeEndpoint;
-
   private int tokenRecordTimeout;
 
   public static class IdentityProviderConfiguration {
@@ -134,11 +132,4 @@ public class PerryProperties {
     this.tokenRecordTimeout = tokenRecordTimeout;
   }
 
-  public String getAuthorizationCodeEndpoint() {
-    return authorizationCodeEndpoint;
-  }
-
-  public void setAuthorizationCodeEndpoint(String authorizationCodeEndpoint) {
-    this.authorizationCodeEndpoint = authorizationCodeEndpoint;
-  }
 }
