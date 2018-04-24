@@ -8,7 +8,7 @@ security:
      tokenName: ${TOKEN_NAME:oauth_token}
      authenticationScheme: ${SAF_AUTH_SCHEME:}
      clientAuthenticationScheme: ${SAF_CLIENT_AUTH_SCHEME:}
-     scope: ${SAF_SCOPE}
+     scope: ${SAF_SCOPE:}
      useCurrentUri: ${USE_CURRENT_URI:true}
      preEstablishedRedirectUri: ${REDIRECT_URI:http://localhost:8080/perry}
    resource:
