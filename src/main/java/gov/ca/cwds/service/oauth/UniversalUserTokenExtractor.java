@@ -18,7 +18,7 @@ import gov.ca.cwds.UniversalUserToken;
  */
 @Component
 @Primary
-@Profile({"prod", "cognito"})
+@Profile({"prod"})
 public class UniversalUserTokenExtractor implements PrincipalExtractor {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(UniversalUserTokenExtractor.class);

@@ -14,7 +14,7 @@ import gov.ca.cwds.UniversalUserToken;
 /**
  * @author CWDS CALS API Team
  */
-@Profile({"prod", "cognito"})
+@Profile({"prod"})
 @Component
 public class OauthLogoutHandler implements LogoutHandler {
 

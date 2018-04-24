@@ -6,36 +6,35 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.PrincipalExtractor;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.ResourceServerProperties;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.UserInfoTokenServices;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Request;
+import org.springframework.stereotype.Component;
 
-public class CaresUserInfoTokenService extends UserInfoTokenServices {
+@Profile("prod")
+@Component
+@Primary
+public class PerryUserInfoTokenService extends UserInfoTokenServices {
 
   private PrincipalExtractor principalExtractor;
-  private OAuth2RestTemplateService restClientService;
   private ResourceServerProperties resourceServerProperties;
+  private OAuth2Service oAuth2Service;
 
-  public CaresUserInfoTokenService(ResourceServerProperties resourceServerProperties) {
+  @Autowired
+  public PerryUserInfoTokenService(ResourceServerProperties resourceServerProperties) {
     super(resourceServerProperties.getUserInfoUri(), resourceServerProperties.getClientId());
     this.resourceServerProperties = resourceServerProperties;
-  }
-
-  @SuppressWarnings("rawtypes")
-  protected HttpEntity httpEntityForGetUser(String accessToken) {
-    return null;
   }
 
   @Override
   @SuppressWarnings("unchecked")
   public OAuth2Authentication loadAuthentication(String accessToken) {
-
-    @SuppressWarnings("rawtypes")
-    Map userInfo = restClientService.restTemplate(accessToken).postForObject(
-        resourceServerProperties.getUserInfoUri(), httpEntityForGetUser(accessToken), Map.class);
+    Map userInfo = oAuth2Service.getUserInfo(accessToken);
     Object principal = principalExtractor.extractPrincipal(userInfo);
     OAuth2Request request = new OAuth2Request(null, resourceServerProperties.getClientId(), null,
         true, null, null, null, null, null);
@@ -56,7 +55,7 @@ public class CaresUserInfoTokenService extends UserInfoTokenServices {
   }
 
   @Autowired
-  public void setRestClientService(OAuth2RestTemplateService restClientService) {
-    this.restClientService = restClientService;
+  public void setoAuth2Service(OAuth2Service oAuth2Service) {
+    this.oAuth2Service = oAuth2Service;
   }
 }

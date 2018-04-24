@@ -1,6 +1,7 @@
 package gov.ca.cwds.web;
 
 import java.io.IOException;
+import java.util.Optional;
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -8,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
@@ -30,6 +32,8 @@ public class PerryLogoutSuccessHandler extends SimpleUrlLogoutSuccessHandler
   @Autowired
   protected PerryProperties properties;
 
+  private LogoutUrlProvider logoutUrlProvider;
+
   @PostConstruct
   public void init() {
     if (StringUtils.isNotBlank(properties.getHomePageUrl())) {
@@ -48,11 +52,17 @@ public class PerryLogoutSuccessHandler extends SimpleUrlLogoutSuccessHandler
 
   @SuppressFBWarnings("UNVALIDATED_REDIRECT") // white list usage right before redirect
   protected boolean tryRedirect(HttpServletResponse response, String callback) throws IOException {
-    if (callback != null) {
-      whiteList.validate("callback", callback);
-      response.sendRedirect(callback);
+    Optional.ofNullable(callback).ifPresent(c -> whiteList.validate("callback", c));
+    Optional<String> redirectUrl = logoutUrlProvider.apply(callback);
+    if(redirectUrl.isPresent()) {
+      response.sendRedirect(redirectUrl.get());
       return true;
     }
     return false;
+  }
+
+  @Autowired
+  public void setLogoutUrlProvider(LogoutUrlProvider logoutUrlProvider) {
+    this.logoutUrlProvider = logoutUrlProvider;
   }
 }
