@@ -104,7 +104,7 @@ public class OAuth2ServiceImpl implements OAuth2Service {
     try {
       return objectMapper.readValue(response, clazz);
     } catch (IOException e) {
-      throw new PerryException("url: " + url + ". error parsing response: " + response);
+      throw new PerryException("url: " + url + ". error parsing response: " + response, e);
     }
   }
 }
