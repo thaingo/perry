@@ -11,6 +11,9 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 
+
+import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
+
 @Service
 @Profile("cognito")
 public class CognitoUserInfoCustomizer extends OAuth2RequestCustomizer {
@@ -26,8 +29,8 @@ public class CognitoUserInfoCustomizer extends OAuth2RequestCustomizer {
   @Override
   public HttpEntity apply(String accessToken) {
     HttpHeaders headers = new HttpHeaders();
-    headers.add("Content-Type", "application/x-amz-json-1.1");
-    headers.add("X-Amz-Target", "AWSCognitoIdentityProviderService.GetUser");
+    headers.add(CONTENT_TYPE, "application/x-amz-json-1.1");
+    headers.set("X-Amz-Target", "AWSCognitoIdentityProviderService.GetUser");
     CognitoUserPoolRequest request = new CognitoUserPoolRequest();
     request.setAccessToken(accessToken);
     try {
