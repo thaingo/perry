@@ -25,12 +25,9 @@ import gov.ca.cwds.service.WhiteList;
 public class PerryLogoutSuccessHandler extends SimpleUrlLogoutSuccessHandler
     implements LogoutSuccessHandler {
 
-  @JsonIgnore
-  @Autowired
-  protected WhiteList whiteList;
+  private WhiteList whiteList;
 
-  @Autowired
-  protected PerryProperties properties;
+  private PerryProperties properties;
 
   private LogoutUrlProvider logoutUrlProvider;
 
@@ -38,6 +35,7 @@ public class PerryLogoutSuccessHandler extends SimpleUrlLogoutSuccessHandler
   public void init() {
     if (StringUtils.isNotBlank(properties.getHomePageUrl())) {
       this.setDefaultTargetUrl(properties.getHomePageUrl());
+      this.setAlwaysUseDefaultTargetUrl(true);
     }
   }
 
@@ -51,7 +49,7 @@ public class PerryLogoutSuccessHandler extends SimpleUrlLogoutSuccessHandler
   }
 
   @SuppressFBWarnings("UNVALIDATED_REDIRECT") // white list usage right before redirect
-  protected boolean tryRedirect(HttpServletResponse response, String callback) throws IOException {
+  private boolean tryRedirect(HttpServletResponse response, String callback) throws IOException {
     Optional.ofNullable(callback).ifPresent(c -> whiteList.validate("callback", c));
     Optional<String> redirectUrl = logoutUrlProvider.apply(callback);
     if(redirectUrl.isPresent()) {
@@ -64,5 +62,15 @@ public class PerryLogoutSuccessHandler extends SimpleUrlLogoutSuccessHandler
   @Autowired
   public void setLogoutUrlProvider(LogoutUrlProvider logoutUrlProvider) {
     this.logoutUrlProvider = logoutUrlProvider;
+  }
+
+  @Autowired
+  public void setProperties(PerryProperties properties) {
+    this.properties = properties;
+  }
+
+  @Autowired
+  public void setWhiteList(WhiteList whiteList) {
+    this.whiteList = whiteList;
   }
 }

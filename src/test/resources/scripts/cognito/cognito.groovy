@@ -1,3 +1,5 @@
+package scripts.cognito
+
 def attribute = {name -> idpToken.UserAttributes?.find {it.Name.equalsIgnoreCase(name)}?.Value}
 
 universalUserToken.userId = attribute("CUSTOM:RACFID")?.toUpperCase()

@@ -1,8 +1,5 @@
 package gov.ca.cwds.data.reissue.model;
 
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.util.SerializationUtils;
-
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
@@ -20,8 +17,10 @@ public class PerryTokenEntity implements Serializable {
   private String accessCode;
   @Column(name = "user_id", nullable = false)
   private String user;
-  @Column(name = "access_token", length = 20000, nullable = false)
-  private byte[] accessToken;
+  @Column(name = "sso_token", length = 20000, nullable = false)
+  private String ssoToken;
+  @Column(name = "json_token", nullable = false)
+  private String jsonToken;
   @Column(name = "created_date", nullable = false)
   @Temporal(TemporalType.TIMESTAMP)
   private Date createdDate = new Date();
@@ -34,22 +33,20 @@ public class PerryTokenEntity implements Serializable {
     this.user = user;
   }
 
-  public byte[] getAccessToken() {
-    return accessToken;
+  public String getSsoToken() {
+    return ssoToken;
   }
 
-  public void setAccessToken(byte[] accessToken) {
-    this.accessToken = accessToken;
+  public void setSsoToken(String ssoToken) {
+    this.ssoToken = ssoToken;
   }
 
-  @Transient
-  public OAuth2AccessToken readAccessToken() {
-    return (OAuth2AccessToken) SerializationUtils.deserialize(accessToken);
+  public String getJsonToken() {
+    return jsonToken;
   }
 
-  @Transient
-  public void writeAccessToken(OAuth2AccessToken oAuth2AccessToken) {
-    accessToken = SerializationUtils.serialize(oAuth2AccessToken);
+  public void setJsonToken(String jsonToken) {
+    this.jsonToken = jsonToken;
   }
 
   public Date getCreatedDate() {

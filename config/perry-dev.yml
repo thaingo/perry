@@ -13,7 +13,6 @@ spring:
               hibernate.cache.use_query_cache: false
               hibernate.current_session_context_class : org.springframework.orm.hibernate5.SpringSessionContext
               hibernate.dialect: org.hibernate.dialect.DB2Dialect
-              hibernate.default_schema: test
       redis:
           host: ${REDIS_HOST:192.168.99.100}
           password: ${REDIS_PASSWORD:}
@@ -51,7 +50,7 @@ perry:
            hibernate.default_schema:
     serviceProviders:
       default:
-        identityMapping: config/default.groovy
+        identityMapping: config/dev.groovy
     users: ${USERS:}
     whiteList: ${WHITE_LIST:*}
     homePageUrl: ${HOME_PAGE_URL:/}

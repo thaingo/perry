@@ -1,0 +1,29 @@
+{
+  "UserAttributes": [
+    {
+      "Name": "email_verified",
+      "Value": "true"
+    },
+    {
+      "Name": "nickname",
+      "Value": "perry"
+    },
+    {
+      "Name": "phone_number_verified",
+      "Value": "true"
+    },
+    {
+      "Name": "phone_number",
+      "Value": "+19161111111"
+    },
+    {
+      "Name": "custom:RacfId",
+      "Value": "RACFID"
+    },
+    {
+      "Name": "custom:appRole",
+      "Value": "first-role :second-role:third-role"
+    }
+  ],
+  "Username": "perry"
+}

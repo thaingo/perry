@@ -7,12 +7,10 @@ import gov.ca.cwds.data.reissue.model.PerryTokenEntity;
 import gov.ca.cwds.rest.api.domain.PerryException;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.util.RandomValueStringGenerator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
@@ -28,12 +26,13 @@ public class TokenService {
   private TokenRepository tokenRepository;
   private RandomValueStringGenerator generator = new RandomValueStringGenerator();
 
-  public String issueAccessCode(UniversalUserToken userToken, OAuth2AccessToken accessToken) {
+  public String issueAccessCode(UniversalUserToken userToken, String ssoToken, String jsonToken) {
     String accessCode = generator.generate();
     PerryTokenEntity perryTokenEntity = new PerryTokenEntity();
     perryTokenEntity.setUser(userToken.getUserId());
     perryTokenEntity.setAccessCode(accessCode);
-    perryTokenEntity.writeAccessToken(accessToken);
+    perryTokenEntity.setSsoToken(ssoToken);
+    perryTokenEntity.setJsonToken(jsonToken);
     perryTokenEntity.setToken(userToken.getToken());
     deleteExpiredRecords();
     tokenRepository.save(perryTokenEntity);
@@ -63,13 +62,13 @@ public class TokenService {
     return perryTokenEntity.getToken();
   }
 
-  public void updateAccessToken(String token, OAuth2AccessToken accessToken) {
-    tokenRepository.updateAccessToken(token, (Serializable) accessToken);
+  public void updateSsoToken(String token, String  ssoToken) {
+    tokenRepository.updateSsoToken(token, ssoToken);
   }
 
-  public OAuth2AccessToken deleteToken(String token) {
-    Optional<OAuth2AccessToken> accessToken =
-        Optional.ofNullable(tokenRepository.findOne(token)).map(PerryTokenEntity::readAccessToken);
+  public String deleteToken(String token) {
+    Optional<String> accessToken =
+        Optional.ofNullable(tokenRepository.findOne(token)).map(PerryTokenEntity::getSsoToken);
     try {
       tokenRepository.delete(token);
     } catch (Exception e) {
@@ -78,10 +77,8 @@ public class TokenService {
     return accessToken.orElseThrow(() -> new PerryException("token entry: '" + token + "' is invalid!"));
   }
 
-  public OAuth2AccessToken getAccessTokenByPerryToken(String token) {
-    return Optional.ofNullable(tokenRepository.findOne(token))
-        .map(PerryTokenEntity::readAccessToken)
-        .orElse(null);
+  public PerryTokenEntity getPerryToken(String token) {
+    return tokenRepository.findOne(token);
   }
 
   @Autowired

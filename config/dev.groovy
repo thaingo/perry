@@ -1,0 +1,1 @@
+user.getParameter(gov.ca.cwds.config.Constants.IDENTITY)

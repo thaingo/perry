@@ -1,40 +1,30 @@
 package gov.ca.cwds.service;
 
 import gov.ca.cwds.UniversalUserToken;
-import gov.ca.cwds.config.Constants;
-import gov.ca.cwds.service.oauth.OAuth2Service;
+import gov.ca.cwds.data.reissue.model.PerryTokenEntity;
+import gov.ca.cwds.service.sso.SsoService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Service;
-
-
-import static gov.ca.cwds.config.Constants.IDENTITY;
 
 /**
  * Created by TPT2 on 10/24/2017.
  */
 @Service
-@Profile("prod")
 public class LoginServiceImpl implements LoginService {
 
   private IdentityMappingService identityMappingService;
   private TokenService tokenService;
-  private OAuth2Service oAuth2Service;
+  private SsoService ssoService;
 
   @Override
   public String issueAccessCode(String providerId) {
     SecurityContext securityContext = SecurityContextHolder.getContext();
-    OAuth2Authentication authentication =
-        (OAuth2Authentication) securityContext.getAuthentication();
-    UniversalUserToken userToken = (UniversalUserToken) authentication.getPrincipal();
-    OAuth2AccessToken accessToken = oAuth2Service.getAccessToken();
+    UniversalUserToken userToken = (UniversalUserToken) securityContext.getAuthentication().getPrincipal();
+    String ssoToken = ssoService.getSsoToken();
     String identity = identityMappingService.map(userToken, providerId);
-    accessToken.getAdditionalInformation().put(Constants.IDENTITY, identity);
-    return tokenService.issueAccessCode(userToken, accessToken);
+    return tokenService.issueAccessCode(userToken, ssoToken, identity);
   }
 
   @Override
@@ -44,20 +34,18 @@ public class LoginServiceImpl implements LoginService {
 
   @Override
   public String validate(String perryToken) {
-    OAuth2AccessToken currentAccessToken = oAuth2Service.validate();
-    OAuth2AccessToken persistentAccessToken = tokenService.getAccessTokenByPerryToken(perryToken);
-    String identity = (String) persistentAccessToken.getAdditionalInformation().get(IDENTITY);
-    if (!currentAccessToken.getValue().equals(persistentAccessToken.getValue())) {
-      currentAccessToken.getAdditionalInformation().put(IDENTITY, identity);
-      tokenService.updateAccessToken(perryToken, currentAccessToken);
+    String currentSsoToken = ssoService.validate();
+    PerryTokenEntity perryTokenEntity = tokenService.getPerryToken(perryToken);
+    if (!currentSsoToken.equals(perryTokenEntity.getSsoToken())) {
+      tokenService.updateSsoToken(perryToken, currentSsoToken);
     }
-    return identity;
+    return perryTokenEntity.getJsonToken();
   }
 
   @Override
   public void invalidate(String perryToken) {
     tokenService.deleteToken(perryToken);
-    oAuth2Service.invalidate();
+    ssoService.invalidate();
   }
 
   @Autowired
@@ -71,7 +59,7 @@ public class LoginServiceImpl implements LoginService {
   }
 
   @Autowired
-  public void setoAuth2Service(OAuth2Service oAuth2Service) {
-    this.oAuth2Service = oAuth2Service;
+  public void setSsoService(SsoService ssoService) {
+    this.ssoService = ssoService;
   }
 }
