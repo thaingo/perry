@@ -84,10 +84,6 @@ public class OAuth2Service implements SsoService {
     return clientContext.getAccessToken().getValue();
   }
 
-  private OAuth2RestTemplate userRestTemplate() {
-    return new OAuth2RestTemplate(resourceDetails, clientContext);
-  }
-
   private OAuth2RestTemplate userRestTemplate(String accessToken) {
     return new OAuth2RestTemplate(resourceDetails,
         new DefaultOAuth2ClientContext(new DefaultOAuth2AccessToken(accessToken)));
