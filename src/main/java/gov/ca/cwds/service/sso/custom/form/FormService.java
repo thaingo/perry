@@ -20,12 +20,12 @@ public class FormService implements SsoService {
   }
 
   @Override
-  public String validate() {
-    return (String) getUniversalUserToken().getParameter(Constants.IDENTITY_JSON);
+  public String validate(String ssoToken) {
+    return ssoToken;
   }
 
   @Override
-  public void invalidate() {
+  public void invalidate(String ssoToken) {
 
   }
 

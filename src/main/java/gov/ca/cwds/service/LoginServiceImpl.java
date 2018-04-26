@@ -34,8 +34,8 @@ public class LoginServiceImpl implements LoginService {
 
   @Override
   public String validate(String perryToken) {
-    String currentSsoToken = ssoService.validate();
     PerryTokenEntity perryTokenEntity = tokenService.getPerryToken(perryToken);
+    String currentSsoToken = ssoService.validate(perryTokenEntity.getSsoToken());
     if (!currentSsoToken.equals(perryTokenEntity.getSsoToken())) {
       tokenService.updateSsoToken(perryToken, currentSsoToken);
     }
@@ -44,8 +44,8 @@ public class LoginServiceImpl implements LoginService {
 
   @Override
   public void invalidate(String perryToken) {
-    tokenService.deleteToken(perryToken);
-    ssoService.invalidate();
+    String ssoToken = tokenService.deleteToken(perryToken);
+    ssoService.invalidate(ssoToken);
   }
 
   @Autowired
