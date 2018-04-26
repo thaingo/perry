@@ -50,7 +50,7 @@ public class TokenServiceTest {
     assert accessCode != null;
     PerryTokenEntity perryTokenEntity = tokenRepository.findOne(PERRY_TOKEN);
     assert perryTokenEntity != null;
-    assert perryTokenEntity.readAccessToken().getValue().equals(ACCESS_TOKEN);
+    assert perryTokenEntity.getSsoToken().equals(ACCESS_TOKEN);
     assert perryTokenEntity.getCreatedDate() != null;
     assert perryTokenEntity.getAccessCode().equals(accessCode);
     assert perryTokenEntity.getToken().equals(PERRY_TOKEN);
@@ -73,8 +73,8 @@ public class TokenServiceTest {
   @Test
   public void testDeleteToken() {
     issueAccessCode();
-    OAuth2AccessToken accessToken = tokenService.deleteToken(PERRY_TOKEN);
-    assert accessToken.getValue().equals(ACCESS_TOKEN);
+    String accessToken = tokenService.deleteToken(PERRY_TOKEN);
+    assert accessToken.equals(ACCESS_TOKEN);
     assert tokenRepository.findAll().isEmpty();
   }
 
@@ -101,6 +101,6 @@ public class TokenServiceTest {
     UniversalUserToken universalUserToken = new UniversalUserToken();
     universalUserToken.setUserId(USER_ID);
     universalUserToken.setToken(perryToken);
-    return tokenService.issueAccessCode(universalUserToken, accessToken);
+    return tokenService.issueAccessCode(universalUserToken, accessToken.getValue(), "");
   }
 }
