@@ -125,6 +125,9 @@ dependencies {
     compile group: 'org.liquibase', name: 'liquibase-core', version: '3.5.3'
     compile group: 'gov.ca.cwds.cals', name: 'perry-data-model', version: cwdsModelVersion, changing: true
 
+    compile group: 'com.amazonaws', name: 'aws-java-sdk', version: '1.11.232'
+
+
     //h2 dev mode
     compile group: 'com.h2database', name: 'h2', version: '1.4.196'
 
