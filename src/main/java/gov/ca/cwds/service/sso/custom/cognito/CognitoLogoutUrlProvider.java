@@ -1,4 +1,4 @@
-package gov.ca.cwds.web.custom.cognito;
+package gov.ca.cwds.service.sso.custom.cognito;
 
 import java.net.URL;
 import java.util.Optional;

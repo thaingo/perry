@@ -1,4 +1,4 @@
-package gov.ca.cwds.config.custom.nostate;
+package gov.ca.cwds.config.nostate;
 
 import org.junit.Test;
 import org.mockito.Mockito;

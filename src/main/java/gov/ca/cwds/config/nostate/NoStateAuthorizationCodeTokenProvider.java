@@ -1,4 +1,4 @@
-package gov.ca.cwds.config.custom.nostate;
+package gov.ca.cwds.config.nostate;
 
 import gov.ca.cwds.rest.api.domain.PerryException;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;

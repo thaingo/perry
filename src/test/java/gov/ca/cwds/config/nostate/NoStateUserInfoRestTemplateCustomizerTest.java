@@ -1,9 +1,8 @@
-package gov.ca.cwds.config.custom.nostate;
+package gov.ca.cwds.config.nostate;
 
 import gov.ca.cwds.config.logging.DebugRestTemplateInterceptor;
 import org.junit.Test;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
-import org.springframework.security.oauth2.client.token.AccessTokenProvider;
 import org.springframework.security.oauth2.client.token.AccessTokenProviderChain;
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsAccessTokenProvider;
 import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeResourceDetails;

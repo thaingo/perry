@@ -1,4 +1,4 @@
-package gov.ca.cwds.config.custom.nostate;
+package gov.ca.cwds.config.nostate;
 
 import gov.ca.cwds.config.logging.DebugRestTemplateInterceptor;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.UserInfoRestTemplateCustomizer;

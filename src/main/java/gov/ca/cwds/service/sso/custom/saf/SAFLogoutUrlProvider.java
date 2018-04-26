@@ -1,4 +1,4 @@
-package gov.ca.cwds.web.custom.saf;
+package gov.ca.cwds.service.sso.custom.saf;
 
 import java.io.IOException;
 import java.net.URI;

@@ -30,6 +30,8 @@ public class OauthLogoutHandler implements LogoutHandler {
         return;
       }
       loginService.invalidate(((UniversalUserToken) authentication.getPrincipal()).getToken());
+    } catch (UnsupportedOperationException e) {
+      LOGGER.debug("Token invalidation error.", e);
     } catch (Exception e) {
       LOGGER.error("Token invalidation error.", e);
     }
