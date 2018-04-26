@@ -22,7 +22,7 @@ public interface TokenRepository extends JpaRepository<PerryTokenEntity, String>
   long deleteByCreatedDateBefore(Timestamp date);
 
   @Modifying
-  @Query("UPDATE PerryTokenEntity pte SET pte.accessToken = ?2 WHERE pte.token = ?1")
-  int updateAccessToken(String token, Serializable accessToken);
+  @Query("UPDATE PerryTokenEntity pte SET pte.ssoToken = ?2 WHERE pte.token = ?1")
+  int updateSsoToken(String token, String ssoToken);
 
 }

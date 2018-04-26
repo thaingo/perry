@@ -18,7 +18,6 @@ import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -69,19 +68,19 @@ public class OAuth2ServiceImpl implements OAuth2Service {
   }
 
   @Override
-  public OAuth2AccessToken validate() {
-    doPost(userRestTemplate(), resourceServerProperties.getTokenInfoUri(), getAccessToken().getValue());
-    return clientContext.getAccessToken();
+  public String validate() {
+    doPost(userRestTemplate(), resourceServerProperties.getTokenInfoUri(), getSsoToken());
+    return clientContext.getAccessToken().getValue();
   }
 
   @Override
   public void invalidate() {
-    doPost(clientTemplate, revokeTokenUri, getAccessToken().getValue());
+    doPost(clientTemplate, revokeTokenUri, getSsoToken());
   }
 
   @Override
-  public OAuth2AccessToken getAccessToken() {
-    return clientContext.getAccessToken();
+  public String getSsoToken() {
+    return clientContext.getAccessToken().getValue();
   }
 
   private OAuth2RestTemplate userRestTemplate() {

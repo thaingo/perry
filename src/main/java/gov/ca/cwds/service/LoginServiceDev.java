@@ -2,6 +2,7 @@ package gov.ca.cwds.service;
 
 import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.config.Constants;
+import gov.ca.cwds.data.reissue.model.PerryTokenEntity;
 import gov.ca.cwds.rest.api.domain.PerryException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
@@ -26,11 +27,8 @@ public class LoginServiceDev implements LoginService {
   @Override
   public String issueAccessCode(String providerId) {
     SecurityContext securityContext = SecurityContextHolder.getContext();
-    DefaultOAuth2AccessToken accessToken = new DefaultOAuth2AccessToken("test");
-    accessToken.setAdditionalInformation(new HashMap<>());
     UniversalUserToken userToken = (UniversalUserToken) securityContext.getAuthentication().getPrincipal();
-    accessToken.getAdditionalInformation().put(Constants.IDENTITY, userToken.getParameter(IDENTITY));
-    return tokenService.issueAccessCode(userToken, accessToken);
+    return tokenService.issueAccessCode(userToken, userToken.getToken(), (String)userToken.getParameter(IDENTITY));
   }
 
   @Override
@@ -39,12 +37,12 @@ public class LoginServiceDev implements LoginService {
   }
 
   @Override
-  public String validate(String perryToken) {
-    OAuth2AccessToken accessToken = tokenService.getAccessTokenByPerryToken(perryToken);
-    if (accessToken == null) {
+  public String validate(String token) {
+    PerryTokenEntity perryToken = tokenService.getPerryToken(token);
+    if (perryToken == null) {
       throw new PerryException("invalid token");
     }
-    return (String) accessToken.getAdditionalInformation().get(IDENTITY);
+    return perryToken.getJsonToken();
   }
 
   @Override

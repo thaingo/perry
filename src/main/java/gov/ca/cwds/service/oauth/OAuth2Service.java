@@ -5,7 +5,7 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
 public interface OAuth2Service {
   Map getUserInfo(String accessToken);
-  OAuth2AccessToken validate();
+  String validate();
   void invalidate();
-  OAuth2AccessToken getAccessToken();
+  String getSsoToken();
 }
