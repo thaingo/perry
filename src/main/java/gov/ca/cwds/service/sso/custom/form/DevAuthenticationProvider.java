@@ -1,4 +1,4 @@
-package gov.ca.cwds.config;
+package gov.ca.cwds.service.sso.custom.form;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import gov.ca.cwds.PerryProperties;

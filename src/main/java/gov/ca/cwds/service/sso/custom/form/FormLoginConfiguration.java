@@ -1,6 +1,7 @@
-package gov.ca.cwds.config;
+package gov.ca.cwds.service.sso.custom.form;
 
 import gov.ca.cwds.PerryProperties;
+import gov.ca.cwds.config.LoginServiceValidatorFilter;
 import gov.ca.cwds.web.PerryLogoutSuccessHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

@@ -1,7 +1,8 @@
-package gov.ca.cwds.config;
+package gov.ca.cwds.service.sso.custom.form;
 
 import gov.ca.cwds.PerryProperties;
 import gov.ca.cwds.UniversalUserToken;
+import gov.ca.cwds.service.sso.custom.form.DevAuthenticationProvider;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
