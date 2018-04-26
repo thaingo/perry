@@ -2,7 +2,7 @@ package gov.ca.cwds.service.scripts;
 
 import gov.ca.cwds.PerryProperties;
 import gov.ca.cwds.UniversalUserToken;
-import gov.ca.cwds.service.oauth.UniversalUserTokenExtractor;
+import gov.ca.cwds.service.sso.UniversalUserTokenExtractor;
 import org.junit.Test;
 
 import java.nio.file.Paths;

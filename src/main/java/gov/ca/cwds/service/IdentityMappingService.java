@@ -13,7 +13,6 @@ import gov.ca.cwds.service.scripts.IdentityMappingScript;
 /**
  * Created by dmitry.rudenko on 5/9/2017.
  */
-@Profile({"prod", "cognito"})
 @Service
 public class IdentityMappingService {
 

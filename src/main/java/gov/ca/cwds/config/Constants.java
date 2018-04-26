@@ -9,6 +9,7 @@ public interface Constants {
   String TOKEN_SERVICE_URL = "/authn/token";
   String CALLBACK_PARAM = "callback";
   String IDENTITY = "identity";
+  String IDENTITY_JSON = "identity_json";
   String ERROR_CONTROLLER = "error";
 }
 

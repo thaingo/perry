@@ -1,8 +1,8 @@
-package gov.ca.cwds.service.oauth.custom.cognito;
+package gov.ca.cwds.service.sso.custom.cognito;
 
 import java.io.IOException;
 import gov.ca.cwds.rest.api.domain.PerryException;
-import gov.ca.cwds.service.oauth.custom.OAuth2RequestCustomizer;
+import gov.ca.cwds.service.sso.custom.OAuth2RequestCustomizer;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

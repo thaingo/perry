@@ -1,6 +1,6 @@
-package gov.ca.cwds.service.oauth.custom.cognito;
+package gov.ca.cwds.service.sso.custom.cognito;
 
-import gov.ca.cwds.service.oauth.custom.OAuth2RequestCustomizer;
+import gov.ca.cwds.service.sso.custom.OAuth2RequestCustomizer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;

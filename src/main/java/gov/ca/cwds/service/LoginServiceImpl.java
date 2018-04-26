@@ -2,9 +2,8 @@ package gov.ca.cwds.service;
 
 import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.data.reissue.model.PerryTokenEntity;
-import gov.ca.cwds.service.oauth.OAuth2Service;
+import gov.ca.cwds.service.sso.SsoService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -13,18 +12,17 @@ import org.springframework.stereotype.Service;
  * Created by TPT2 on 10/24/2017.
  */
 @Service
-@Profile("prod")
 public class LoginServiceImpl implements LoginService {
 
   private IdentityMappingService identityMappingService;
   private TokenService tokenService;
-  private OAuth2Service oAuth2Service;
+  private SsoService ssoService;
 
   @Override
   public String issueAccessCode(String providerId) {
     SecurityContext securityContext = SecurityContextHolder.getContext();
     UniversalUserToken userToken = (UniversalUserToken) securityContext.getAuthentication().getPrincipal();
-    String ssoToken = oAuth2Service.getSsoToken();
+    String ssoToken = ssoService.getSsoToken();
     String identity = identityMappingService.map(userToken, providerId);
     return tokenService.issueAccessCode(userToken, ssoToken, identity);
   }
@@ -36,7 +34,7 @@ public class LoginServiceImpl implements LoginService {
 
   @Override
   public String validate(String perryToken) {
-    String currentSsoToken = oAuth2Service.validate();
+    String currentSsoToken = ssoService.validate();
     PerryTokenEntity perryTokenEntity = tokenService.getPerryToken(perryToken);
     if (!currentSsoToken.equals(perryTokenEntity.getSsoToken())) {
       tokenService.updateSsoToken(perryToken, currentSsoToken);
@@ -47,7 +45,7 @@ public class LoginServiceImpl implements LoginService {
   @Override
   public void invalidate(String perryToken) {
     tokenService.deleteToken(perryToken);
-    oAuth2Service.invalidate();
+    ssoService.invalidate();
   }
 
   @Autowired
@@ -61,7 +59,7 @@ public class LoginServiceImpl implements LoginService {
   }
 
   @Autowired
-  public void setoAuth2Service(OAuth2Service oAuth2Service) {
-    this.oAuth2Service = oAuth2Service;
+  public void setSsoService(SsoService ssoService) {
+    this.ssoService = ssoService;
   }
 }

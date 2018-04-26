@@ -1,4 +1,4 @@
-package gov.ca.cwds.service.oauth;
+package gov.ca.cwds.service.sso;
 
 import java.util.List;
 import java.util.Map;
@@ -8,7 +8,6 @@ import org.springframework.boot.autoconfigure.security.oauth2.resource.ResourceS
 import org.springframework.boot.autoconfigure.security.oauth2.resource.UserInfoTokenServices;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
-import org.springframework.http.HttpEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -23,7 +22,7 @@ public class PerryUserInfoTokenService extends UserInfoTokenServices {
 
   private PrincipalExtractor principalExtractor;
   private ResourceServerProperties resourceServerProperties;
-  private OAuth2Service oAuth2Service;
+  private SsoService oAuth2Service;
 
   @Autowired
   public PerryUserInfoTokenService(ResourceServerProperties resourceServerProperties) {
@@ -55,7 +54,7 @@ public class PerryUserInfoTokenService extends UserInfoTokenServices {
   }
 
   @Autowired
-  public void setoAuth2Service(OAuth2Service oAuth2Service) {
+  public void setoAuth2Service(SsoService oAuth2Service) {
     this.oAuth2Service = oAuth2Service;
   }
 }

@@ -20,10 +20,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 
 import static gov.ca.cwds.config.Constants.IDENTITY;
+import static gov.ca.cwds.config.Constants.IDENTITY_JSON;
 
 /**
  * username format: user:role1,role2
@@ -42,18 +44,20 @@ public class DevAuthenticationProvider implements AuthenticationProvider {
   public Authentication authenticate(Authentication authentication) throws AuthenticationException {
     tryAuthenticate(authentication);
     String json = authentication.getName();
-    String userName = getUserName(json);
+    Map userInfo = getUserInfo(json);
+    String userName = (String) userInfo.get("user");
     UniversalUserToken userToken = new UniversalUserToken();
     userToken.setToken(UUID.randomUUID().toString());
     userToken.setUserId(userName);
-    userToken.setParameter(IDENTITY, json);
+    userToken.setParameter(IDENTITY, userInfo);
+    userToken.setParameter(IDENTITY_JSON, json);
     return new UsernamePasswordAuthenticationToken(
             userToken, "N/A", Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")));
   }
 
-  private String getUserName(String json) {
+  private Map getUserInfo(String json) {
     try {
-      return objectMapper.readTree(json).get("user").getTextValue();
+      return  objectMapper.readValue(json, Map.class);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

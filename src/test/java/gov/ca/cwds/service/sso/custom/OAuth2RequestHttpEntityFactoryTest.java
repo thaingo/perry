@@ -1,11 +1,11 @@
-package gov.ca.cwds.service.oauth.custom;
+package gov.ca.cwds.service.sso.custom;
 
 import java.util.Arrays;
 import java.util.Collections;
-import gov.ca.cwds.service.oauth.custom.cognito.CognitoInvalidateCustomizer;
-import gov.ca.cwds.service.oauth.custom.cognito.CognitoUserInfoCustomizer;
-import gov.ca.cwds.service.oauth.custom.cognito.CognitoUserPoolRequest;
-import gov.ca.cwds.service.oauth.custom.saf.SAFInvalidateCustomizer;
+import gov.ca.cwds.service.sso.custom.cognito.CognitoInvalidateCustomizer;
+import gov.ca.cwds.service.sso.custom.cognito.CognitoUserInfoCustomizer;
+import gov.ca.cwds.service.sso.custom.cognito.CognitoUserPoolRequest;
+import gov.ca.cwds.service.sso.custom.saf.SAFInvalidateCustomizer;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;

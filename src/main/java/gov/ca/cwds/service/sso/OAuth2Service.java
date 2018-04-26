@@ -1,10 +1,10 @@
-package gov.ca.cwds.service.oauth;
+package gov.ca.cwds.service.sso;
 
 import java.io.IOException;
 import java.util.Map;
 import javax.annotation.PostConstruct;
 import gov.ca.cwds.rest.api.domain.PerryException;
-import gov.ca.cwds.service.oauth.custom.OAuth2RequestHttpEntityFactory;
+import gov.ca.cwds.service.sso.custom.OAuth2RequestHttpEntityFactory;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,8 +22,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Profile("prod")
-public class OAuth2ServiceImpl implements OAuth2Service {
-  private static final Logger LOGGER = LoggerFactory.getLogger(OAuth2ServiceImpl.class);
+public class OAuth2Service implements SsoService {
+  private static final Logger LOGGER = LoggerFactory.getLogger(OAuth2Service.class);
 
   private OAuth2ProtectedResourceDetails resourceDetails;
   private OAuth2RestTemplate clientTemplate;
@@ -60,10 +60,10 @@ public class OAuth2ServiceImpl implements OAuth2Service {
   }
 
   @Override
-  public Map getUserInfo(String accessToken) {
-    return doPost(userRestTemplate(accessToken),
+  public Map getUserInfo(String ssoToken) {
+    return doPost(userRestTemplate(ssoToken),
         resourceServerProperties.getUserInfoUri(),
-        accessToken,
+        ssoToken,
         Map.class);
   }
 

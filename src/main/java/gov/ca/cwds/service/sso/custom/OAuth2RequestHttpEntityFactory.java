@@ -1,4 +1,4 @@
-package gov.ca.cwds.service.oauth.custom;
+package gov.ca.cwds.service.sso.custom;
 
 import java.util.List;
 import java.util.Map;

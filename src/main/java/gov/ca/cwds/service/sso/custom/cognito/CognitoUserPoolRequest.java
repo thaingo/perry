@@ -1,4 +1,4 @@
-package gov.ca.cwds.service.oauth.custom.cognito;
+package gov.ca.cwds.service.sso.custom.cognito;
 
 
 import org.codehaus.jackson.annotate.JsonProperty;
