@@ -2,6 +2,7 @@ package gov.ca.cwds.config;
 
 import gov.ca.cwds.data.reissue.TokenRepository;
 import gov.ca.cwds.data.reissue.model.PerryTokenEntity;
+import gov.ca.cwds.idm.persistence.RoleRepository;
 import javax.sql.DataSource;
 import liquibase.integration.spring.SpringLiquibase;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -22,7 +23,8 @@ import org.springframework.transaction.PlatformTransactionManager;
  * Created by TPT2 on 10/24/2017.
  */
 @Configuration
-@EnableJpaRepositories(entityManagerFactoryRef = "tokenEntityManagerFactory", transactionManagerRef = "tokenTransactionManager", basePackageClasses = TokenRepository.class)
+@EnableJpaRepositories(entityManagerFactoryRef = "tokenEntityManagerFactory", transactionManagerRef = "tokenTransactionManager",
+    basePackageClasses = {TokenRepository.class, RoleRepository.class})
 @EntityScan(basePackageClasses = PerryTokenEntity.class)
 public class TokenServiceConfiguration {
 
@@ -77,7 +79,7 @@ public class TokenServiceConfiguration {
     LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
     em.setDataSource(tokenDataSource());
     em.setJpaPropertyMap(tokenJpaProperties().getHibernateProperties(tokenDataSource()));
-    em.setPackagesToScan("gov.ca.cwds.data.reissue.model");
+    em.setPackagesToScan("gov.ca.cwds.data.reissue.model", "gov.ca.cwds.idm.persistence.model");
     em.setPersistenceUnitName("token");
     em.setJpaVendorAdapter(tokenJpaVendorAdapter());
     return em;

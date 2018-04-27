@@ -32,7 +32,8 @@ project.ext {
     projectMajorVersion = '3.0.0'
     mainclass = 'gov.ca.cwds.PerryApplication'
     targetDockerHubOrganization = System.env.DOCKERHUB_ORG ?: 'cwds'
-    cwdsModelVersion = '0.6.4_517-RC'
+//    cwdsModelVersion = '0.6.4_517-RC'
+    cwdsModelVersion = '0.6.4-SNAPSHOT'
 
     // assume that Windows users use the Docker Toolbox
     buildEnv = System.env.BUILD_ENV ?: (Os.isFamily(Os.FAMILY_WINDOWS) ? 'WIN_DEV' : 'JENKINS')
@@ -127,6 +128,7 @@ dependencies {
 
     compile group: 'com.amazonaws', name: 'aws-java-sdk', version: '1.11.232'
 
+    compile group: 'org.hibernate', name: 'hibernate-ehcache', version: '5.2.16.Final'
 
     //h2 dev mode
     compile group: 'com.h2database', name: 'h2', version: '1.4.196'
