@@ -11,7 +11,7 @@ public class RoleService {
 
   private RoleRepository roleRepository;
 
-  @Transactional(readOnly = true)
+  @Transactional(value = "tokenTransactionManager", readOnly = true)
   public List<String> getRoleNames() {
     return roleRepository.findRoleNames();
   }
