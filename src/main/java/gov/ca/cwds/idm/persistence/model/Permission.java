@@ -10,8 +10,8 @@ import javax.validation.constraints.NotNull;
 
 @Entity
 @Cacheable
-@Table(name = "role")
-public class Role {
+@Table(name = "permission")
+public class Permission {
 
   @Id
   @NotNull
@@ -31,10 +31,10 @@ public class Role {
     if (this == o) {
       return true;
     }
-    if (!(o instanceof Role)) {
+    if (!(o instanceof Permission)) {
       return false;
     }
-    Role role = (Role) o;
+    Permission role = (Permission) o;
     return Objects.equals(getName(), role.getName());
   }
 

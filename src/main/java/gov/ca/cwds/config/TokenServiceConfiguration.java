@@ -2,7 +2,7 @@ package gov.ca.cwds.config;
 
 import gov.ca.cwds.data.reissue.TokenRepository;
 import gov.ca.cwds.data.reissue.model.PerryTokenEntity;
-import gov.ca.cwds.idm.persistence.RoleRepository;
+import gov.ca.cwds.idm.persistence.PermissionRepository;
 import javax.sql.DataSource;
 import liquibase.integration.spring.SpringLiquibase;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -24,7 +24,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  */
 @Configuration
 @EnableJpaRepositories(entityManagerFactoryRef = "tokenEntityManagerFactory", transactionManagerRef = "tokenTransactionManager",
-    basePackageClasses = {TokenRepository.class, RoleRepository.class})
+    basePackageClasses = {TokenRepository.class, PermissionRepository.class})
 @EntityScan(basePackageClasses = PerryTokenEntity.class)
 public class TokenServiceConfiguration {
 
