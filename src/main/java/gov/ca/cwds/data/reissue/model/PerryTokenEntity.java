@@ -24,6 +24,8 @@ public class PerryTokenEntity implements Serializable {
   @Column(name = "created_date", nullable = false)
   @Temporal(TemporalType.TIMESTAMP)
   private Date createdDate = new Date();
+  @Column(name = "security_context", length = 20000, nullable = false)
+  private byte[] securityContext;
 
   public String getUser() {
     return user;
@@ -73,4 +75,11 @@ public class PerryTokenEntity implements Serializable {
     this.token = token;
   }
 
+  public byte[] getSecurityContext() {
+    return securityContext;
+  }
+
+  public void setSecurityContext(byte[] securityContext) {
+    this.securityContext = securityContext;
+  }
 }

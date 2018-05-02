@@ -1,5 +1,6 @@
 package gov.ca.cwds.service.sso.custom.form;
 
+import java.io.Serializable;
 import java.util.Map;
 import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.config.Constants;
@@ -28,6 +29,12 @@ public class FormService implements SsoService {
   public void invalidate(String ssoToken) {
 
   }
+
+  @Override
+  public Serializable getSecurityContext() {
+    return SecurityContextHolder.getContext();
+  }
+
 
   @Override
   public String getSsoToken() {

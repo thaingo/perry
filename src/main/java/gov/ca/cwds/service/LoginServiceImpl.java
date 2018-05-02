@@ -24,7 +24,7 @@ public class LoginServiceImpl implements LoginService {
     UniversalUserToken userToken = (UniversalUserToken) securityContext.getAuthentication().getPrincipal();
     String ssoToken = ssoService.getSsoToken();
     String identity = identityMappingService.map(userToken, providerId);
-    return tokenService.issueAccessCode(userToken, ssoToken, identity);
+    return tokenService.issueAccessCode(userToken, ssoToken, identity, ssoService.getSecurityContext());
   }
 
   @Override
@@ -37,7 +37,7 @@ public class LoginServiceImpl implements LoginService {
     PerryTokenEntity perryTokenEntity = tokenService.getPerryToken(perryToken);
     String currentSsoToken = ssoService.validate(perryTokenEntity.getSsoToken());
     if (!currentSsoToken.equals(perryTokenEntity.getSsoToken())) {
-      tokenService.updateSsoToken(perryToken, currentSsoToken);
+      tokenService.updateSsoToken(perryToken, currentSsoToken, ssoService.getSecurityContext());
     }
     return perryTokenEntity.getJsonToken();
   }
