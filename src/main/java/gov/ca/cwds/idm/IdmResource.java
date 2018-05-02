@@ -15,7 +15,7 @@ public class IdmResource {
 
   @Autowired private IdmService idmService;
 
-  @Autowired private PermissionService roleService;
+  @Autowired private PermissionService permissionService;
 
   @RequestMapping(method = RequestMethod.GET, value = "/users", produces = "application/json")
   public List<User> getUsers() {
@@ -24,6 +24,6 @@ public class IdmResource {
 
   @RequestMapping(method = RequestMethod.GET, value = "/permissions", produces = "application/json")
   public List<String> getPermissions() {
-    return roleService.getPermissionNames();
+    return permissionService.getPermissionNames();
   }
 }
