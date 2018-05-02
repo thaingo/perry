@@ -44,7 +44,7 @@ public class SpApiSecurityFilter extends AbstractPreAuthenticatedProcessingFilte
           SerializationUtils.deserialize(perryTokenEntity.getSecurityContext()),
           Collections.singletonList(new SimpleGrantedAuthority("SP_API_CLIENT")));
     } catch (Exception e) {
-      throw new BadCredentialsException("invalid token");
+      throw new BadCredentialsException("invalid token", e);
     }
   }
 
