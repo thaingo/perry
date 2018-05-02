@@ -2,7 +2,7 @@ def attribute = {name -> idpToken.UserAttributes?.find {it.Name.equalsIgnoreCase
 
 universalUserToken.userId = attribute("CUSTOM:RACFID")?.toUpperCase()
 
-universalUserToken.roles = attribute("custom:appRole")?.split('\\s*:\\s*') as HashSet
+universalUserToken.roles = attribute("zoneinfo")?.split('\\s*:\\s*') as HashSet
 
 if(!universalUserToken.roles) {
     universalUserToken.roles = new HashSet<>()

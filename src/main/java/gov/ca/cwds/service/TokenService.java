@@ -1,20 +1,21 @@
 package gov.ca.cwds.service;
 
+import java.io.Serializable;
+import java.sql.Timestamp;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 import gov.ca.cwds.PerryProperties;
 import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.data.reissue.TokenRepository;
 import gov.ca.cwds.data.reissue.model.PerryTokenEntity;
 import gov.ca.cwds.rest.api.domain.PerryException;
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.common.util.RandomValueStringGenerator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.sql.Timestamp;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
 
 /**
  * Created by TPT2 on 10/27/2017.
@@ -26,7 +27,7 @@ public class TokenService {
   private TokenRepository tokenRepository;
   private RandomValueStringGenerator generator = new RandomValueStringGenerator();
 
-  public String issueAccessCode(UniversalUserToken userToken, String ssoToken, String jsonToken) {
+  public String issueAccessCode(UniversalUserToken userToken, String ssoToken, String jsonToken, Serializable securityContext) {
     String accessCode = generator.generate();
     PerryTokenEntity perryTokenEntity = new PerryTokenEntity();
     perryTokenEntity.setUser(userToken.getUserId());
@@ -34,6 +35,7 @@ public class TokenService {
     perryTokenEntity.setSsoToken(ssoToken);
     perryTokenEntity.setJsonToken(jsonToken);
     perryTokenEntity.setToken(userToken.getToken());
+    perryTokenEntity.setSecurityContext(SerializationUtils.serialize(securityContext));
     deleteExpiredRecords();
     tokenRepository.save(perryTokenEntity);
     return accessCode;
@@ -62,8 +64,8 @@ public class TokenService {
     return perryTokenEntity.getToken();
   }
 
-  public void updateSsoToken(String token, String  ssoToken) {
-    tokenRepository.updateSsoToken(token, ssoToken);
+  public void updateSsoToken(String token, String ssoToken, Serializable context) {
+    tokenRepository.updateSsoToken(token, ssoToken, SerializationUtils.serialize(context));
   }
 
   public String deleteToken(String token) {
