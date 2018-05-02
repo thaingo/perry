@@ -10,7 +10,6 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.ResourceServerProperties;
 import org.springframework.context.annotation.Profile;
@@ -73,7 +72,7 @@ public class OAuth2Service implements SsoService {
   @Override
   public String validate(String ssoToken) {
     OAuth2RestTemplate restTemplate = userRestTemplate();
-    doPost(restTemplate, resourceServerProperties.getTokenInfoUri(), ssoToken);
+    doPost(restTemplate, resourceServerProperties.getTokenInfoUri(), restTemplate.getAccessToken().getValue());
     return restTemplate.getOAuth2ClientContext().getAccessToken().getValue();
   }
 
@@ -96,17 +95,17 @@ public class OAuth2Service implements SsoService {
   private Serializable getApiSecurityContext() {
     try {
       Object credential = SecurityContextHolder.getContext().getAuthentication().getCredentials();
-      if(credential instanceof OAuth2ClientContext) {
+      if (credential instanceof OAuth2ClientContext) {
         return (Serializable) credential;
       }
       return null;
-    }catch (Exception e) {
+    } catch (Exception e) {
       return null;
     }
   }
 
   private Serializable getWebSecurityContext() {
-    if(clientContext != null) {
+    if (clientContext != null) {
       DefaultOAuth2ClientContext context = new DefaultOAuth2ClientContext(clientContext.getAccessTokenRequest());
       context.setAccessToken(clientContext.getAccessToken());
       return context;
