@@ -37,18 +37,15 @@ public class SpApiSecurityFilter extends AbstractPreAuthenticatedProcessingFilte
 
   @Override
   public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-    PerryTokenEntity perryTokenEntity = tokenService.getPerryToken((String) authentication.getPrincipal());
-    if (perryTokenEntity == null) {
-      fail();
+    try {
+      PerryTokenEntity perryTokenEntity = tokenService.getPerryToken((String) authentication.getPrincipal());
+      return new PreAuthenticatedAuthenticationToken(
+          perryTokenEntity.getUser(),
+          SerializationUtils.deserialize(perryTokenEntity.getSecurityContext()),
+          Collections.singletonList(new SimpleGrantedAuthority("SP_API_CLIENT")));
+    } catch (Exception e) {
+      throw new BadCredentialsException("invalid token");
     }
-
-    return new PreAuthenticatedAuthenticationToken(
-        perryTokenEntity.getUser(),
-        SerializationUtils.deserialize(perryTokenEntity.getSecurityContext()),
-        Collections.singletonList(new SimpleGrantedAuthority("SP_API_CLIENT")));
   }
 
-  private void fail() {
-    throw new BadCredentialsException("invalid token");
-  }
 }
