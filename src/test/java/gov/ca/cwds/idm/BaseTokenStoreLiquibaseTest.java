@@ -34,7 +34,7 @@ public abstract class BaseTokenStoreLiquibaseTest implements ApplicationContextA
   private String springBootH2url;
 
   @Before
-  public void before() throws Exception {
+  public void beforeSuper() throws Exception {
     createDatabase(springBootH2url);
   }
 
