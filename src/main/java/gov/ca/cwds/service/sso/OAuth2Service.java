@@ -1,6 +1,7 @@
 package gov.ca.cwds.service.sso;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Map;
 import javax.annotation.PostConstruct;
 import gov.ca.cwds.rest.api.domain.PerryException;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.ResourceServerProperties;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.DefaultOAuth2ClientContext;
 import org.springframework.security.oauth2.client.OAuth2ClientContext;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
@@ -68,14 +70,15 @@ public class OAuth2Service implements SsoService {
   }
 
   @Override
-  public String validate() {
-    doPost(userRestTemplate(), resourceServerProperties.getTokenInfoUri(), getSsoToken());
-    return clientContext.getAccessToken().getValue();
+  public String validate(String ssoToken) {
+    OAuth2RestTemplate restTemplate = userRestTemplate();
+    doPost(restTemplate, resourceServerProperties.getTokenInfoUri(), restTemplate.getAccessToken().getValue());
+    return restTemplate.getOAuth2ClientContext().getAccessToken().getValue();
   }
 
   @Override
-  public void invalidate() {
-    doPost(clientTemplate, revokeTokenUri, getSsoToken());
+  public void invalidate(String ssoToken) {
+    doPost(clientTemplate, revokeTokenUri, ssoToken);
   }
 
   @Override
@@ -83,8 +86,37 @@ public class OAuth2Service implements SsoService {
     return clientContext.getAccessToken().getValue();
   }
 
+  @Override
+  public Serializable getSecurityContext() {
+    Serializable apiSecurityContext = getApiSecurityContext();
+    return apiSecurityContext != null ? apiSecurityContext : getWebSecurityContext();
+  }
+
+  private Serializable getApiSecurityContext() {
+    try {
+      Object credential = SecurityContextHolder.getContext().getAuthentication().getCredentials();
+      if (credential instanceof OAuth2ClientContext) {
+        return (Serializable) credential;
+      }
+      return null;
+    } catch (Exception e) {
+      return null;
+    }
+  }
+
+  private Serializable getWebSecurityContext() {
+    if (clientContext != null) {
+      DefaultOAuth2ClientContext context = new DefaultOAuth2ClientContext(clientContext.getAccessTokenRequest());
+      context.setAccessToken(clientContext.getAccessToken());
+      return context;
+    }
+    return null;
+  }
+
   private OAuth2RestTemplate userRestTemplate() {
-    return new OAuth2RestTemplate(resourceDetails, clientContext);
+    return new OAuth2RestTemplate(
+        resourceDetails,
+        (OAuth2ClientContext) getSecurityContext());
   }
 
   private OAuth2RestTemplate userRestTemplate(String accessToken) {

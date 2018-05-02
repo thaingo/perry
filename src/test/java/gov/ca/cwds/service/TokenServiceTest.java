@@ -101,6 +101,6 @@ public class TokenServiceTest {
     UniversalUserToken universalUserToken = new UniversalUserToken();
     universalUserToken.setUserId(USER_ID);
     universalUserToken.setToken(perryToken);
-    return tokenService.issueAccessCode(universalUserToken, accessToken.getValue(), "");
+    return tokenService.issueAccessCode(universalUserToken, accessToken.getValue(), "", "");
   }
 }
