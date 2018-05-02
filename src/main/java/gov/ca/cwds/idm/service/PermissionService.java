@@ -17,7 +17,7 @@ public class PermissionService {
   }
 
   @Autowired
-  public void setPermissionRepository(PermissionRepository roleRepository) {
-    this.permissionRepository = roleRepository;
+  public void setPermissionRepository(PermissionRepository permissionRepository) {
+    this.permissionRepository = permissionRepository;
   }
 }

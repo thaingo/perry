@@ -28,7 +28,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 @EntityScan(basePackageClasses = PerryTokenEntity.class)
 public class TokenServiceConfiguration {
 
-  @Bean
+  @Bean("tokenStoreDatasourceProperties")
   @ConfigurationProperties("perry.tokenStore.datasource")
   public DataSourceProperties tokenStoreDataSourceProperties() {
     return new DataSourceProperties();
