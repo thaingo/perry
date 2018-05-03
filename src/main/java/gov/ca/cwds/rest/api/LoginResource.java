@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletResponse;
@@ -29,7 +30,7 @@ public class LoginResource {
   private WhiteList whiteList;
 
   @GET
-  @RequestMapping(Constants.LOGIN_SERVICE_URL)
+  @RequestMapping(value = Constants.LOGIN_SERVICE_URL, method = RequestMethod.GET)
   @ApiOperation(
           value = "Login. Applications should direct users to this endpoint for login.  When authentication complete, user will be redirected back to callback with auth 'token' as a query parameter",
           code = 200)

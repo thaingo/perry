@@ -6,14 +6,14 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Created by dmitry.rudenko on 5/22/2017.
@@ -24,7 +24,8 @@ public class TokenResource {
   private LoginService loginService;
 
   @GET
-  @RequestMapping(value = Constants.TOKEN_SERVICE_URL, produces = "application/json")
+  @RequestMapping(value = Constants.TOKEN_SERVICE_URL, produces = "application/json",
+      method = RequestMethod.GET)
   @ApiOperation(value = "Get perry token")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "authorized"),
           @ApiResponse(code = 401, message = "Unauthorized")})
@@ -35,7 +36,8 @@ public class TokenResource {
 
   //back-end only!
   @GET
-  @RequestMapping(value = Constants.VALIDATE_SERVICE_URL, produces = "application/json")
+  @RequestMapping(value = Constants.VALIDATE_SERVICE_URL, produces = "application/json",
+      method = RequestMethod.GET)
   @ApiOperation(value = "Validate an authentication token")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "authorized"),
           @ApiResponse(code = 401, message = "Unauthorized")})
@@ -45,7 +47,7 @@ public class TokenResource {
   }
 
   @POST
-  @RequestMapping("/authn/invalidate")
+  @RequestMapping(value = "/authn/invalidate", method = RequestMethod.GET)
   @ApiOperation(value = "Invalidate token")
   public String invalidate(@NotNull @ApiParam(required = true, name = "token", value = "The token to invalidate")
                            @RequestParam("token") String token) {
