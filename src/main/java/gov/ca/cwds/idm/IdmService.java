@@ -14,7 +14,7 @@ import java.util.List;
 public class IdmService {
 
   public List<User> getUsers() {
-    List<User> resultList = new ArrayList<>();
+    List<User> resultList = new ArrayList<>(20);
     for (int i = 0; i < 20; i++) {
       resultList.add(createUser(i));
     }
@@ -42,7 +42,7 @@ public class IdmService {
     user.setUserCreateDate(new Date());
     user.setUserLastModifiedDate(new Date());
     user.setStatus("userStatus" + i);
-    user.setLastLoginDateTime(LocalDateTime.now().minusHours(i).plusMinutes(i).minusDays(i+5));
+    user.setLastLoginDateTime(LocalDateTime.now().minusHours(i).plusMinutes(i).minusDays(i+5L));
     return user;
   }
 
