@@ -12,7 +12,7 @@ import static gov.ca.cwds.rest.api.domain.DomainObject.TIME_FORMAT;
 
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class User {
-  private String username;
+  private String id;
   private String firstName;
   private String lastName;
   private String countyName;
@@ -40,12 +40,12 @@ public class User {
   private Boolean enabled;
   private String status;
 
-  public String getUsername() {
-    return username;
+  public String getId() {
+    return id;
   }
 
-  public void setUsername(String username) {
-    this.username = username;
+  public void setId(String id) {
+    this.id = id;
   }
 
   public String getCountyName() {

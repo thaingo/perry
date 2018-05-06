@@ -1,18 +1,17 @@
-package gov.ca.cwds.idm;
+package gov.ca.cwds.idm.service;
 
 import gov.ca.cwds.idm.dto.User;
-import org.joda.time.DateTime;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 @Service
-public class IdmService {
+public class CognitoIdmService implements IdmService {
 
+  @Override
   public List<User> getUsers() {
     List<User> resultList = new ArrayList<>(20);
     for (int i = 0; i < 20; i++) {
@@ -21,19 +20,22 @@ public class IdmService {
     return resultList;
   }
 
-  public List getRoles() {
-    return Collections.emptyList();
+  @Override
+  public User findUser(String id) {
+    User mocked = createUser(0);
+    mocked.setId(id);
+    return mocked;
   }
 
   private User createUser(int i) {
     User user = new User();
 
     user.setCountyName("MyCounty");
-    user.setUsername("userName" + i);
+    user.setId("userName" + i);
     user.setEnabled(i % 2 == 0);
-    user.setEmail("email"+i+"@test.com");
-    user.setOffice("Office address "+i);
-    user.setPhoneNumber("+1916999999"+i%10);
+    user.setEmail("email" + i + "@test.com");
+    user.setOffice("Office " + i);
+    user.setPhoneNumber("+1916999999" + i % 10);
     user.setEndDate(new Date());
     user.setStartDate(new Date());
     user.setFirstName("Firstname" + i);
@@ -42,7 +44,7 @@ public class IdmService {
     user.setUserCreateDate(new Date());
     user.setUserLastModifiedDate(new Date());
     user.setStatus("userStatus" + i);
-    user.setLastLoginDateTime(LocalDateTime.now().minusHours(i).plusMinutes(i).minusDays(i+5L));
+    user.setLastLoginDateTime(LocalDateTime.now().minusHours(i).plusMinutes(i).minusDays(i + 5L));
     return user;
   }
 
