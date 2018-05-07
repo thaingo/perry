@@ -18,7 +18,7 @@ buildscript {
 
 apply plugin: 'java'
 //TODO: resolve build failure
-// apply plugin: 'net.serenity-bdd.aggregator'
+ apply plugin: 'net.serenity-bdd.aggregator'
 
 dependencies {
     testCompile 'net.serenity-bdd:serenity-core:' + serenityVersion

@@ -59,7 +59,7 @@ project.ext {
 
     commonsLangVersion = '3.6'
     commonsIoVersion = '2.5'
-    serenityVersion = '1.9.13'
+    serenityVersion = '1.1.1'
 
 }
 
