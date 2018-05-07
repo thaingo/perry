@@ -18,7 +18,7 @@ buildscript {
 
 apply plugin: 'java'
 //TODO: resolve build failure
- apply plugin: 'net.serenity-bdd.aggregator'
+ //apply plugin: 'net.serenity-bdd.aggregator'
 
 dependencies {
     testCompile 'net.serenity-bdd:serenity-core:' + serenityVersion
@@ -37,6 +37,10 @@ test {
     exclude '**/**'
 }
 
-task integrationTest(type: Test, dependsOn: testClasses) {
-    include '**/**'
+task testDevMode(type: Test, dependsOn: testClasses) {
+    include '**/TestDevMode*'
+}
+
+task testCognitoMode(type: Test, dependsOn: testClasses) {
+    include '**/TestCognitoMode*'
 }

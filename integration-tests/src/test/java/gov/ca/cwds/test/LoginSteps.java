@@ -57,9 +57,9 @@ public class LoginSteps {
   }
 
   @Step
-  public String waitForAccessCodeParameter() {
+  public String waitForAccessCodeParameter() throws Exception{
     new WebDriverWait(driver, 5).until(urlContains("accessCode"));
-    String accessCode = URLEncodedUtils.parse(driver.getCurrentUrl(), Charset.defaultCharset())
+    String accessCode = URLEncodedUtils.parse(new URI(driver.getCurrentUrl()), Charset.defaultCharset())
         .stream().collect(Collectors.toMap(NameValuePair::getName, NameValuePair::getValue)).get("accessCode");
     driver.close();
     return accessCode;

@@ -17,11 +17,11 @@ import org.openqa.selenium.WebDriver;
 
 @RunWith(SerenityParameterizedRunner.class)
 @Concurrent
-public class TestCognito {
+public class TestCognitoMode {
 
   @Managed(driver = "chrome", uniqueSession = true)
   private WebDriver driver;
-  private String basePerryUrl;
+  final private TestDataBean testDataBean;
 
   @Steps
   private LoginSteps loginSteps;
@@ -29,35 +29,33 @@ public class TestCognito {
   @TestData
   public static Collection<Object[]> testData() {
     //TODO: separate data per thread
-    int threadsCount = Integer.valueOf(System.getProperty("perry.threads.count", "4"));
+    int threadsCount = Integer.valueOf(System.getProperty("perry.threads.count", "1"));
     return IntStream.range(0, threadsCount).boxed().map(i -> {
-      Object[] item = new Integer[1];
-      item[0] = i;
+      Object[] item = new TestDataBean[1];
+      item[0] = new TestDataBean();
       return item;
     }).collect(Collectors.toList());
   }
 
-  public TestCognito(int number) {
-    //TODO: separate data per thread
+  public TestCognitoMode(TestDataBean testDataBean) {
+    this.testDataBean = testDataBean;
   }
 
   @Before
   public void init() {
     loginSteps.setDriver(driver);
-    basePerryUrl = System.getProperty("perry.url", "http://localhost:8080/perry");
   }
 
   @Test
   public void testCognitoMode() throws Exception {
-    loginSteps.goToPerryLoginUrl(basePerryUrl + "/authn/login?callback=/perry/demo-sp.html");
+    loginSteps.goToPerryLoginUrl(testDataBean.getUrl() + "/authn/login?callback=/perry/demo-sp.html");
     loginSteps.isElementPresent("username");
-    loginSteps.type("username", "perry");
-    loginSteps.type("password", "Password123!");
+    loginSteps.type("username", testDataBean.getUsername());
+    loginSteps.type("password", testDataBean.getPassword());
     loginSteps.click("signInSubmitButton");
     String accessCode = loginSteps.waitForAccessCodeParameter();
-    String perryToken = loginSteps.mapAccessCode(basePerryUrl + "/authn/token?accessCode=" + accessCode);
-    String jsonToken = loginSteps.validateToken(basePerryUrl + "/authn/validate?token=" + perryToken);
-    String expectedJsonToken = IOUtils.toString(getClass().getResourceAsStream("/cognito.json"), Charset.defaultCharset());
-    loginSteps.validateTokenContent(expectedJsonToken, jsonToken);
+    String perryToken = loginSteps.mapAccessCode(testDataBean.getUrl() + "/authn/token?accessCode=" + accessCode);
+    String jsonToken = loginSteps.validateToken(testDataBean.getUrl() + "/authn/validate?token=" + perryToken);
+    loginSteps.validateTokenContent(testDataBean.getJson(), jsonToken);
   }
 }
