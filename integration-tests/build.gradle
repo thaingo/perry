@@ -26,6 +26,8 @@ dependencies {
     testCompile 'net.serenity-bdd:serenity-junit:1.9.13'
     // https://mvnrepository.com/artifact/com.jayway.restassured/rest-assured
     testCompile group: 'com.jayway.restassured', name: 'rest-assured', version: '2.9.0'
+// https://mvnrepository.com/artifact/org.skyscreamer/jsonassert
+    testCompile group: 'org.skyscreamer', name: 'jsonassert', version: '1.5.0'
 
     testCompile('junit:junit:4.12')
     testCompile('org.assertj:assertj-core:1.7.0')
