@@ -1,0 +1,1 @@
+In order to run tests put your web driver into the root of integration-tests module.
