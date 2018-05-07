@@ -1,5 +1,5 @@
-group 'gov.ca.cwds.api'
-version '3.0.1-SNAPSHOT'
+group projectGroup
+version parent.version
 
 repositories {
     mavenLocal()
@@ -12,7 +12,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath("net.serenity-bdd:serenity-gradle-plugin:1.9.13")
+        classpath("net.serenity-bdd:serenity-gradle-plugin:" + serenityVersion)
     }
 }
 
@@ -21,8 +21,8 @@ apply plugin: 'java'
 // apply plugin: 'net.serenity-bdd.aggregator'
 
 dependencies {
-    testCompile 'net.serenity-bdd:serenity-core:1.9.13'
-    testCompile 'net.serenity-bdd:serenity-junit:1.9.13'
+    testCompile 'net.serenity-bdd:serenity-core:' + serenityVersion
+    testCompile 'net.serenity-bdd:serenity-junit:' + serenityVersion
     // https://mvnrepository.com/artifact/com.jayway.restassured/rest-assured
     testCompile group: 'com.jayway.restassured', name: 'rest-assured', version: '2.9.0'
 // https://mvnrepository.com/artifact/org.skyscreamer/jsonassert
