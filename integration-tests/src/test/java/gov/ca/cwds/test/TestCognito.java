@@ -29,6 +29,7 @@ public class TestCognito {
 
   @TestData
   public static Collection<Object[]> testData(){
+    //TODO: separate data per thread
     int threadsCount = Integer.valueOf(System.getProperty("perry.threads.count", "4"));
     return IntStream.range(0, threadsCount).boxed().map(i -> {
       Object [] item = new Integer[1];
@@ -38,7 +39,7 @@ public class TestCognito {
   }
 
   public TestCognito(int number) {
-
+    //TODO: separate data per thread
   }
 
   @Before
