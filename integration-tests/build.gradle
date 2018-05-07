@@ -17,9 +17,8 @@ buildscript {
 }
 
 apply plugin: 'java'
-apply plugin: 'eclipse'
-apply plugin: 'idea'
-apply plugin: 'net.serenity-bdd.aggregator'
+//TODO: resolve build failure
+// apply plugin: 'net.serenity-bdd.aggregator'
 
 dependencies {
     testCompile 'net.serenity-bdd:serenity-core:1.9.13'
@@ -32,4 +31,12 @@ dependencies {
     testCompile('junit:junit:4.12')
     testCompile('org.assertj:assertj-core:1.7.0')
     testCompile('org.slf4j:slf4j-simple:1.7.7')
+}
+
+test {
+    exclude '**/**'
+}
+
+task integrationTest(type: Test, dependsOn: testClasses) {
+    include '**/**'
 }
