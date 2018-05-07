@@ -9,7 +9,9 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.json.JSONException;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.skyscreamer.jsonassert.JSONAssert;
 
@@ -38,12 +40,20 @@ public class LoginSteps {
 
   @Step
   public void type(String id, String username) {
-    driver.findElement(By.id(id)).sendKeys(username);
+    find(id).sendKeys(username);
+  }
+
+  private WebElement find(String selector) {
+    try {
+      return driver.findElement(By.id(selector));
+    } catch (NoSuchElementException e) {
+      return driver.findElement(By.name(selector));
+    }
   }
 
   @Step
   public void click(String id) {
-    driver.findElement(By.id(id)).click();
+    find(id).click();
   }
 
   @Step
@@ -66,7 +76,7 @@ public class LoginSteps {
   }
 
   @Step
-  public void compareInputAndToken(String input, String token) throws JSONException {
+  public void validateTokenContent(String input, String token) throws JSONException {
     JSONAssert.assertEquals(input, token, false);
   }
 

@@ -11,7 +11,7 @@ import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
 
 @RunWith(SerenityRunner.class)
-public class TestDevMode {
+public class TestCognito {
 
   @Managed(driver = "chrome")
   private WebDriver driver;
@@ -27,17 +27,16 @@ public class TestDevMode {
   }
 
   @Test
-  public void devModeTest() throws Exception {
-    String inputJson = IOUtils.toString(getClass().getResourceAsStream("/dev.json"), Charset.defaultCharset());
+  public void testCognitoMode() throws Exception {
     loginSteps.goToPerryLoginUrl(basePerryUrl + "/authn/login?callback=/perry/demo-sp.html");
     loginSteps.isElementPresent("username");
-    loginSteps.type("username", inputJson);
-    loginSteps.click("submitBtn");
+    loginSteps.type("username", "perry");
+    loginSteps.type("password", "Password123!");
+    loginSteps.click("signInSubmitButton");
     String accessCode = loginSteps.waitForAccessCodeParameter();
     String perryToken = loginSteps.mapAccessCode(basePerryUrl + "/authn/token?accessCode=" + accessCode);
     String jsonToken = loginSteps.validateToken(basePerryUrl + "/authn/validate?token=" + perryToken);
-    loginSteps.validateTokenContent(inputJson, jsonToken);
+    String expectedJsonToken = IOUtils.toString(getClass().getResourceAsStream("/cognito.json"), Charset.defaultCharset());
+    loginSteps.validateTokenContent(expectedJsonToken, jsonToken);
   }
 }
-
-
