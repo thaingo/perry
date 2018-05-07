@@ -72,7 +72,13 @@ public class OAuth2Service implements SsoService {
   @Override
   public String validate(String ssoToken) {
     OAuth2RestTemplate restTemplate = userRestTemplate();
-    doPost(restTemplate, resourceServerProperties.getTokenInfoUri(), restTemplate.getAccessToken().getValue());
+    try {
+      doPost(restTemplate, resourceServerProperties.getTokenInfoUri(), restTemplate.getAccessToken().getValue());
+    }
+    catch (Exception e) {
+      //retry
+      doPost(restTemplate, resourceServerProperties.getTokenInfoUri(), restTemplate.getAccessToken().getValue());
+    }
     return restTemplate.getOAuth2ClientContext().getAccessToken().getValue();
   }
 
