@@ -23,7 +23,8 @@ import org.springframework.web.context.annotation.RequestScope;
 @EnableWebSecurity
 public class PerryIdmConfiguration extends BaseApiConfiguration {
   @Override
-  protected String pattern() {
-    return "/idm/**";
+  protected void configure(HttpSecurity http) throws Exception {
+    http.antMatcher("/idm/**").authorizeRequests().anyRequest().hasAuthority("CARES admin");
+    super.configure(http);
   }
 }

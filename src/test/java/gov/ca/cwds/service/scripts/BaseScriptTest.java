@@ -39,11 +39,11 @@ public class BaseScriptTest {
     return new IdentityMappingScript(getPath(script).toString());
   }
 
-  private String readResource(String resource) throws Exception {
+  public static String readResource(String resource) throws Exception {
     return new String(Files.readAllBytes(getPath(resource)));
   }
 
-  private Path getPath(String resource) throws Exception {
-    return Paths.get(getClass().getResource(resource).toURI());
+  private static Path getPath(String resource) throws Exception {
+    return Paths.get(BaseScriptTest.class.getResource(resource).toURI());
   }
 }

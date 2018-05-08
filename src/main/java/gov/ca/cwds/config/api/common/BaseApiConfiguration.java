@@ -13,13 +13,14 @@ public abstract class BaseApiConfiguration extends WebSecurityConfigurerAdapter 
   private SpApiAuthenticationErrorHandler errorHandler;
   @Autowired
   private SpApiAuthenticationProvider authProvider;
+  @Autowired
+  private SpApiAccessDeniedHandler apiAccessDeniedHandler;
 
   @Override
   protected void configure(HttpSecurity http) throws Exception {
-    http.antMatcher(pattern()).authorizeRequests().anyRequest().authenticated()
-        .and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+    http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .and().addFilterBefore(getFilter(), UsernamePasswordAuthenticationFilter.class)
-        .exceptionHandling().authenticationEntryPoint(errorHandler);
+        .exceptionHandling().authenticationEntryPoint(errorHandler).accessDeniedHandler(apiAccessDeniedHandler);
   }
 
   @Override
@@ -31,6 +32,4 @@ public abstract class BaseApiConfiguration extends WebSecurityConfigurerAdapter 
   public SpApiSecurityFilter getFilter() throws Exception{
     return new SpApiSecurityFilter(authenticationManager());
   }
-
-  protected abstract String pattern();
 }
