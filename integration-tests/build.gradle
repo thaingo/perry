@@ -37,9 +37,11 @@ test {
 }
 
 task testDevMode(type: Test, dependsOn: testClasses) {
+    systemProperties System.properties
     include '**/TestDevMode*'
 }
 
 task testCognitoMode(type: Test, dependsOn: testClasses) {
+    systemProperties System.properties
     include '**/TestCognitoMode*'
 }

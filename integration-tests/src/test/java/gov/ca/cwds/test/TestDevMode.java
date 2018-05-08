@@ -45,7 +45,7 @@ public class TestDevMode {
   @Test
   public void devModeTest() throws Exception {
     loginSteps.goToPerryLoginUrl(testDataBean.getUrl() + "/authn/login?callback=/perry/demo-sp.html");
-    loginSteps.isElementPresent(testDataBean.getUsername());
+    loginSteps.isElementPresent("username");
     loginSteps.type("username", testDataBean.getJson());
     loginSteps.click("submitBtn");
     String accessCode = loginSteps.waitForAccessCodeParameter();
