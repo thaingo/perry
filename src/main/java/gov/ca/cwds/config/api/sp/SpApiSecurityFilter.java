@@ -3,6 +3,7 @@ package gov.ca.cwds.config.api.sp;
 import java.util.Collections;
 import javax.servlet.http.HttpServletRequest;
 import gov.ca.cwds.data.reissue.model.PerryTokenEntity;
+import gov.ca.cwds.service.LoginService;
 import gov.ca.cwds.service.TokenService;
 import org.apache.commons.lang3.SerializationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,8 @@ public class SpApiSecurityFilter extends AbstractPreAuthenticatedProcessingFilte
   private static final String TOKEN_PARAMETER_NAME = "token";
   @Autowired
   private TokenService tokenService;
+  @Autowired
+  private LoginService loginService;
 
   public SpApiSecurityFilter() {
     setAuthenticationManager(this);
@@ -38,11 +41,15 @@ public class SpApiSecurityFilter extends AbstractPreAuthenticatedProcessingFilte
   @Override
   public Authentication authenticate(Authentication authentication) throws AuthenticationException {
     try {
-      PerryTokenEntity perryTokenEntity = tokenService.getPerryToken((String) authentication.getPrincipal());
-      return new PreAuthenticatedAuthenticationToken(
+      String perryToken = (String) authentication.getPrincipal();
+      loginService.validate(perryToken);
+      PerryTokenEntity perryTokenEntity = tokenService.getPerryToken(perryToken);
+      PreAuthenticatedAuthenticationToken authenticationToken = new PreAuthenticatedAuthenticationToken(
           perryTokenEntity.getUser(),
           SerializationUtils.deserialize(perryTokenEntity.getSecurityContext()),
           Collections.singletonList(new SimpleGrantedAuthority("SP_API_CLIENT")));
+      authenticationToken.setDetails(perryTokenEntity);
+      return authenticationToken;
     } catch (Exception e) {
       throw new BadCredentialsException("invalid token", e);
     }
