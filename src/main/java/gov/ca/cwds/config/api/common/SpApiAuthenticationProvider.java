@@ -1,42 +1,25 @@
-package gov.ca.cwds.config.api.sp;
+package gov.ca.cwds.config.api.common;
 
 import java.util.Collections;
-import javax.servlet.http.HttpServletRequest;
 import gov.ca.cwds.data.reissue.model.PerryTokenEntity;
 import gov.ca.cwds.service.LoginService;
 import gov.ca.cwds.service.TokenService;
 import org.apache.commons.lang3.SerializationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SpApiSecurityFilter extends AbstractPreAuthenticatedProcessingFilter implements AuthenticationManager {
-  private static final String TOKEN_PARAMETER_NAME = "token";
+public class SpApiAuthenticationProvider implements AuthenticationProvider {
   @Autowired
   private TokenService tokenService;
   @Autowired
   private LoginService loginService;
-
-  public SpApiSecurityFilter() {
-    setAuthenticationManager(this);
-  }
-
-  @Override
-  protected Object getPreAuthenticatedPrincipal(HttpServletRequest request) {
-    return request.getParameter(TOKEN_PARAMETER_NAME);
-  }
-
-  @Override
-  protected Object getPreAuthenticatedCredentials(HttpServletRequest request) {
-    return "N/A";
-  }
 
   @Override
   public Authentication authenticate(Authentication authentication) throws AuthenticationException {
@@ -55,4 +38,8 @@ public class SpApiSecurityFilter extends AbstractPreAuthenticatedProcessingFilte
     }
   }
 
+  @Override
+  public boolean supports(Class<?> authentication) {
+    return authentication.isAssignableFrom(PreAuthenticatedAuthenticationToken.class);
+  }
 }
