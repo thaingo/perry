@@ -6,4 +6,7 @@ System properties:
 **perry.threads.count**: integer, amount of parallel perry clients  
 **perry.username**: idp user name  
 **perry.password**: idp password  
-**perry.json**: expected json token content  
+**perry.json**: expected json token content 
+
+Gradle task for testing dev mode:  **:integration-tests:testDevMode**  
+Gradle task for testing Cognito mode: **:integration-tests:testCognitoMode**
