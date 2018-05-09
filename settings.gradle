@@ -4,4 +4,5 @@ include 'jwt-security'
 include 'api-security'
 include 'api-security-test-support'
 include 'api-security-common'
+include 'integration-tests'
 

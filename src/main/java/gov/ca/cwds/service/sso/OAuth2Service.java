@@ -70,9 +70,16 @@ public class OAuth2Service implements SsoService {
   }
 
   @Override
-  public String validate(String ssoToken) {
-    OAuth2RestTemplate restTemplate = userRestTemplate();
-    doPost(restTemplate, resourceServerProperties.getTokenInfoUri(), restTemplate.getAccessToken().getValue());
+  public String validate(Serializable ssoContext) {
+    OAuth2ClientContext oAuth2ClientContext = (OAuth2ClientContext)ssoContext;
+    OAuth2RestTemplate restTemplate = userRestTemplate(oAuth2ClientContext);
+    try {
+      doPost(restTemplate, resourceServerProperties.getTokenInfoUri(), restTemplate.getAccessToken().getValue());
+    }
+    catch (Exception e) {
+      //retry
+      doPost(restTemplate, resourceServerProperties.getTokenInfoUri(), restTemplate.getAccessToken().getValue());
+    }
     return restTemplate.getOAuth2ClientContext().getAccessToken().getValue();
   }
 
@@ -113,10 +120,8 @@ public class OAuth2Service implements SsoService {
     return null;
   }
 
-  private OAuth2RestTemplate userRestTemplate() {
-    return new OAuth2RestTemplate(
-        resourceDetails,
-        (OAuth2ClientContext) getSecurityContext());
+  private OAuth2RestTemplate userRestTemplate(OAuth2ClientContext oAuth2ClientContext) {
+    return new OAuth2RestTemplate(resourceDetails, oAuth2ClientContext);
   }
 
   private OAuth2RestTemplate userRestTemplate(String accessToken) {

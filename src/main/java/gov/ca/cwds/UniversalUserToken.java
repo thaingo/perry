@@ -1,7 +1,12 @@
 package gov.ca.cwds;
 
+import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.rest.api.domain.auth.UserAuthorization;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.map.ObjectMapper;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -11,7 +16,9 @@ import java.util.Set;
 /**
  * Created by dmitry.rudenko on 7/28/2017.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class UniversalUserToken implements Serializable {
+  @JsonProperty("user")
   private String userId;
   private Set<String> roles = new LinkedHashSet<>();
   private String token;
@@ -60,5 +67,13 @@ public class UniversalUserToken implements Serializable {
 
   public void setToken(String token) {
     this.token = token;
+  }
+
+  public static UniversalUserToken fromJson(String json)  {
+    try {
+      return new ObjectMapper().readValue(json, UniversalUserToken.class);
+    } catch (IOException e) {
+      throw new PerryException(e.getMessage(), e);
+    }
   }
 }
