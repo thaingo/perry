@@ -1,4 +1,4 @@
-package gov.ca.cwds.config.api.sp;
+package gov.ca.cwds.config.api.common;
 
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;

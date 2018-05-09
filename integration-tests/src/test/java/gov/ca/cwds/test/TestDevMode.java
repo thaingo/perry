@@ -1,5 +1,6 @@
 package gov.ca.cwds.test;
 
+import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -8,6 +9,7 @@ import net.thucydides.core.annotations.Managed;
 import net.thucydides.core.annotations.Steps;
 import net.thucydides.junit.annotations.Concurrent;
 import net.thucydides.junit.annotations.TestData;
+import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,14 +46,17 @@ public class TestDevMode {
 
   @Test
   public void devModeTest() throws Exception {
+    String json =
+        IOUtils.toString(getClass().getResourceAsStream("/dev.json"), Charset
+        .defaultCharset());
     loginSteps.goToPerryLoginUrl(testDataBean.getUrl() + "/authn/login?callback=/perry/demo-sp.html");
-    loginSteps.isElementPresent(testDataBean.getUsername());
-    loginSteps.type("username", testDataBean.getJson());
+    loginSteps.isElementPresent("username");
+    loginSteps.type("username", json);
     loginSteps.click("submitBtn");
     String accessCode = loginSteps.waitForAccessCodeParameter();
     String perryToken = loginSteps.mapAccessCode(testDataBean.getUrl() + "/authn/token?accessCode=" + accessCode);
     String jsonToken = loginSteps.validateToken(testDataBean.getUrl() + "/authn/validate?token=" + perryToken);
-    loginSteps.validateTokenContent(testDataBean.getJson(), jsonToken);
+    loginSteps.validateTokenContent(json, jsonToken);
   }
 }
 

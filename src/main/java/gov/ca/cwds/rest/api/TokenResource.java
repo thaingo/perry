@@ -1,6 +1,7 @@
 package gov.ca.cwds.rest.api;
 
 import gov.ca.cwds.config.Constants;
+import gov.ca.cwds.data.reissue.model.PerryTokenEntity;
 import gov.ca.cwds.service.LoginService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -10,6 +11,7 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -43,7 +45,9 @@ public class TokenResource {
           @ApiResponse(code = 401, message = "Unauthorized")})
   public String validateToken(@NotNull @ApiParam(required = true, name = "token", value = "The token to validate")
                               @RequestParam("token") String token) {
-    return loginService.validate(token);
+    PerryTokenEntity perryTokenEntity =
+        (PerryTokenEntity) SecurityContextHolder.getContext().getAuthentication().getDetails();
+    return perryTokenEntity.getJsonToken();
   }
 
   @POST
