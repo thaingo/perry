@@ -1,14 +1,13 @@
 package gov.ca.cwds.idm.dto;
 
+import static gov.ca.cwds.rest.api.domain.DomainObject.DATE_FORMAT;
+import static gov.ca.cwds.rest.api.domain.DomainObject.TIME_FORMAT;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-
 import java.time.LocalDateTime;
 import java.util.Date;
-
-import static gov.ca.cwds.rest.api.domain.DomainObject.DATE_FORMAT;
-import static gov.ca.cwds.rest.api.domain.DomainObject.TIME_FORMAT;
 
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class User {
