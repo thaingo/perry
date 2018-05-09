@@ -2,7 +2,8 @@
   "user": "RACFID",
   "staffId": "0X5",
   "roles": [
-    "Supervisor"
+    "Supervisor",
+    "CARES admin"
   ],
   "county_code": "56",
   "county_cws_code": "1123",
