@@ -12,7 +12,7 @@ elif ([ -z "$DEV_MODE" ] || ! $DEV_MODE); then
 else
   echo "DEV MODE"
   PERRY_CONFIG="--spring.config.location=config/perry-dev.yml"
-  JAVA_OPTS="-Dspring.profiles.active=dev,liquibase"
+  JAVA_OPTS="-Dspring.profiles.active=dev,liquibase,swagger"
 fi
 
 if [ "$REDIS_ENABLED" = true ] ; then
