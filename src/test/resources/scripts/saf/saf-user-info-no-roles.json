@@ -1,0 +1,8 @@
+{
+  "ok": true,
+  "basicprofile": "{\"User_Properties\":{\"UserName\":\"adf.ad@dasf.adsf.adf\",\"UserStatus\":\"Active\",\"AuthenticationModes\":\"{\\\"Selections\\\":{\\\"RACF\\\":aaa}}\",\"DateCreated\":\"2018-05-04T00:00:00\",\"LastActivityDate\":\"2018-05-09T12:00:40.313\",\"EmailAddress\":\"adf.fd@df.fd.fd\",\"Roles\":\"{\\\"Selections\\\":{}}\",\"UserGuid\":\"sdaasdfdfasf\"}}",
+  "safid.username": "asdf.asdf@ad.cdfa.fd",
+  "safid.userguid": null,
+  "safid.racfid": "AAAA",
+  "safid.ad": ""
+}
