@@ -33,7 +33,7 @@ project.ext {
     mainclass = 'gov.ca.cwds.PerryApplication'
     targetDockerHubOrganization = System.env.DOCKERHUB_ORG ?: 'cwds'
     cwdsModelVersion = '0.6.4_533-RC'
-    springfoxSwaggerVersion = '2.7.0'
+    springfoxSwaggerVersion = '2.6.1'
 
     // assume that Windows users use the Docker Toolbox
     buildEnv = System.env.BUILD_ENV ?: (Os.isFamily(Os.FAMILY_WINDOWS) ? 'WIN_DEV' : 'JENKINS')
