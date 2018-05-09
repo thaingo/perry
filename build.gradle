@@ -32,8 +32,7 @@ project.ext {
     projectMajorVersion = '3.0.1'
     mainclass = 'gov.ca.cwds.PerryApplication'
     targetDockerHubOrganization = System.env.DOCKERHUB_ORG ?: 'cwds'
-    cwdsModelVersion = '0.6.4-SNAPSHOT'
-//    cwdsModelVersion = '0.6.4_533-RC'
+    cwdsModelVersion = '0.6.4_538-RC'
 
     // assume that Windows users use the Docker Toolbox
     buildEnv = System.env.BUILD_ENV ?: (Os.isFamily(Os.FAMILY_WINDOWS) ? 'WIN_DEV' : 'JENKINS')

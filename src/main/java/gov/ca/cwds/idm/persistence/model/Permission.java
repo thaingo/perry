@@ -34,8 +34,8 @@ public class Permission {
     if (!(o instanceof Permission)) {
       return false;
     }
-    Permission role = (Permission) o;
-    return Objects.equals(getName(), role.getName());
+    Permission permission = (Permission) o;
+    return Objects.equals(getName(), permission.getName());
   }
 
   @Override
