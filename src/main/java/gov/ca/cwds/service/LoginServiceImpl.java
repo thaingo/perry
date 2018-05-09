@@ -1,8 +1,10 @@
 package gov.ca.cwds.service;
 
+import java.io.Serializable;
 import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.data.reissue.model.PerryTokenEntity;
 import gov.ca.cwds.service.sso.SsoService;
+import org.apache.commons.lang3.SerializationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -33,13 +35,14 @@ public class LoginServiceImpl implements LoginService {
   }
 
   @Override
-  public String validate(String perryToken) {
+  public UniversalUserToken validate(String perryToken) {
     PerryTokenEntity perryTokenEntity = tokenService.getPerryToken(perryToken);
-    String currentSsoToken = ssoService.validate(perryTokenEntity.getSsoToken());
+    Serializable securityContext = SerializationUtils.deserialize(perryTokenEntity.getSecurityContext());
+    String currentSsoToken = ssoService.validate(securityContext);
     if (!currentSsoToken.equals(perryTokenEntity.getSsoToken())) {
-      tokenService.updateSsoToken(perryToken, currentSsoToken, ssoService.getSecurityContext());
+      tokenService.updateSsoToken(perryToken, currentSsoToken, securityContext);
     }
-    return perryTokenEntity.getJsonToken();
+    return UniversalUserToken.fromJson(perryTokenEntity.getJsonToken());
   }
 
   @Override
