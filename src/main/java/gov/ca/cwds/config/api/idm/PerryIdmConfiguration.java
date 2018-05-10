@@ -13,7 +13,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 public class PerryIdmConfiguration extends BaseApiConfiguration {
   @Override
   protected void configure(HttpSecurity http) throws Exception {
-    http.antMatcher("/idm/**").authorizeRequests().anyRequest().hasAuthority("CARES admin");
+    http.antMatcher("/idm/**").authorizeRequests().anyRequest().hasAuthority("CWS-admin");
     super.configure(http);
   }
 }
