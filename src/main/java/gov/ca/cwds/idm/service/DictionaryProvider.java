@@ -1,14 +1,23 @@
 package gov.ca.cwds.idm.service;
 
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
-
-import java.util.Collections;
+import gov.ca.cwds.idm.persistence.PermissionRepository;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class DictionaryProvider {
+
+  private PermissionRepository permissionRepository;
+
+  @Transactional(value = "tokenTransactionManager", readOnly = true)
   public List<String> getPermissions() {
-    return Collections.emptyList();
+    return permissionRepository.findPermissionNames();
+  }
+
+  @Autowired
+  public void setPermissionRepository(PermissionRepository permissionRepository) {
+    this.permissionRepository = permissionRepository;
   }
 }
