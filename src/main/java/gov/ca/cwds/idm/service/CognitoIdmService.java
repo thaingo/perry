@@ -1,14 +1,22 @@
 package gov.ca.cwds.idm.service;
 
+import com.amazonaws.services.cognitoidp.model.AdminGetUserResult;
+import com.amazonaws.services.cognitoidp.model.AttributeType;
+import gov.ca.cwds.PerryProperties;
 import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.service.CwsUserInfoService;
+import gov.ca.cwds.service.dto.CwsUserInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.script.ScriptException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 
 @Service
@@ -18,36 +26,61 @@ public class CognitoIdmService implements IdmService {
 
   @Autowired CognitoServiceFacade cognitoService;
 
+  @Autowired CwsUserInfoService cwsUserInfoService;
+
+  @Autowired private PerryProperties configuration;
+
   @Override
   public List<User> getUsers() {
     List<User> resultList = new ArrayList<>(20);
     for (int i = 0; i < 20; i++) {
       resultList.add(createUser(i));
     }
-    // ** TMP FOR TEST
-    LOGGER.info(cognitoService.getById("24051d54-9321-4dd2-a92f-6425d6c455be"));
-
     return resultList;
   }
 
   @Override
   public User findUser(String id) {
-    User mocked = createUser(0);
-    mocked.setId(id);
-    return mocked;
+    AdminGetUserResult cognitoUser = cognitoService.getById(id);
+    if (cognitoUser == null) {
+      return null;
+    }
+    String racfId =
+        cognitoUser
+            .getUserAttributes()
+            .stream()
+            .filter(e -> e.getName().equals("custom:RACFID"))
+            .findAny()
+            .map(AttributeType::getValue)
+            .orElse(null);
+
+    CwsUserInfo cwsUser = null;
+    if (racfId != null) {
+      cwsUser = cwsUserInfoService.composeForIdm(racfId);
+    }
+
+    try {
+      return configuration.getIdentityManager().getIdmMapping().map(cognitoUser, cwsUser);
+    } catch (ScriptException e) {
+      LOGGER.error("Error running the IdmMappingScript");
+      throw new RuntimeException();
+    }
   }
 
+  // tmp mock
   private User createUser(int i) {
     User user = new User();
 
     user.setCountyName("MyCounty");
-    user.setId("userName" + i);
+    user.setId("24051d54-9321-4dd2-a92f-6425d6c455be");
     user.setEnabled(i % 2 == 0);
     user.setEmail("email" + i + "@test.com");
     user.setOffice("Office " + i);
     user.setPhoneNumber("+1916999999" + i % 10);
+    user.setPhoneExtensionNumber("" + i + i);
     user.setEndDate(new Date());
     user.setStartDate(new Date());
+    user.setPermissions(new HashSet<>(Arrays.asList("Snapshot-rollout", "Hotline-rollout")));
     user.setFirstName("Firstname" + i);
     user.setLastName("Lastname" + i);
     user.setRacfid("RACFID" + i);

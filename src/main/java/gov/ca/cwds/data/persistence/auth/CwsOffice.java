@@ -6,6 +6,7 @@ import gov.ca.cwds.data.persistence.cms.CmsPersistentObject;
 import io.dropwizard.jackson.JsonSnakeCase;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.Column;
@@ -309,7 +310,7 @@ public class CwsOffice extends CmsPersistentObject {
    * @return the cwsOfficeName
    */
   public String getCwsOfficeName() {
-    return cwsOfficeName;
+    return StringUtils.trimToEmpty(cwsOfficeName);
   }
 
   /**

@@ -34,13 +34,16 @@ public class UserAuthorizationServiceTest {
     AssignmentUnitDao assignmentUnitDao = Mockito.mock(AssignmentUnitDao.class);
     StaffPersonDao staffPersonDao = Mockito.mock(StaffPersonDao.class);
 
+    CwsUserInfoService cwsUserInfoService = new CwsUserInfoService();
+    cwsUserInfoService.setAssignmentUnitDao(assignmentUnitDao);
+    cwsUserInfoService.setCwsOfficeDao(cwsOfficeDao);
+    cwsUserInfoService.setStaffAuthorityPrivilegeDao(staffAuthorityPrivilegeDao);
+    cwsUserInfoService.setUserIdDao(userIdDao);
+    cwsUserInfoService.setStaffUnitAuthorityDao(staffUnitAuthorityDao);
+    cwsUserInfoService.setStaffPersonDao(staffPersonDao);
+
     UserAuthorizationService userAuthorizationService = new UserAuthorizationService();
-    userAuthorizationService.setAssignmentUnitDao(assignmentUnitDao);
-    userAuthorizationService.setCwsOfficeDao(cwsOfficeDao);
-    userAuthorizationService.setStaffAuthorityPrivilegeDao(staffAuthorityPrivilegeDao);
-    userAuthorizationService.setUserIdDao(userIdDao);
-    userAuthorizationService.setStaffUnitAuthorityDao(staffUnitAuthorityDao);
-    userAuthorizationService.setStaffPersonDao(staffPersonDao);
+    userAuthorizationService.setCwsUserInfoService(cwsUserInfoService);
 
     String racfid = "racfid";
     UserId userId = new UserId(null, null, null, STAFF_ID, ID, LOGON_ID, null);

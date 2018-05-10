@@ -7,6 +7,7 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProviderClientBuilder;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserRequest;
+import com.amazonaws.services.cognitoidp.model.AdminGetUserResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,8 +31,6 @@ public class CognitoServiceFacade {
 
   private AWSCognitoIdentityProvider identityProvider;
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(CognitoServiceFacade.class);
-
   @PostConstruct
   public void init() {
     AWSCredentialsProvider credentialsProvider =
@@ -43,9 +42,9 @@ public class CognitoServiceFacade {
             .build();
   }
 
-  public String getById(String id) {
+  public AdminGetUserResult getById(String id) {
     AdminGetUserRequest request =
         new AdminGetUserRequest().withUsername(id).withUserPoolId(userpool);
-    return identityProvider.adminGetUser(request).toString();
+    return identityProvider.adminGetUser(request);
   }
 }

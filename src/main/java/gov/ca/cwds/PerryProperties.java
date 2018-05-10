@@ -2,6 +2,7 @@ package gov.ca.cwds;
 
 import gov.ca.cwds.security.jwt.JwtConfiguration;
 import gov.ca.cwds.service.scripts.IdentityMappingScript;
+import gov.ca.cwds.service.scripts.IdmMappingScript;
 import gov.ca.cwds.service.scripts.IdpMappingScript;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
@@ -20,6 +21,9 @@ public class PerryProperties {
 
   @NestedConfigurationProperty
   private IdentityProviderConfiguration identityProvider;
+
+  @NestedConfigurationProperty
+  private IdentityManagerConfiguration identityManager;
 
   private String users;
 
@@ -68,6 +72,19 @@ public class PerryProperties {
     }
   }
 
+  public static class IdentityManagerConfiguration {
+
+    private IdmMappingScript idmMapping;
+
+    public IdmMappingScript getIdmMapping() {
+      return idmMapping;
+    }
+
+    public void setIdmMapping(String path) throws IOException {
+      this.idmMapping = new IdmMappingScript(path);
+    }
+  }
+
   public List<String> getWhiteList() {
     return whiteList;
   }
@@ -98,6 +115,14 @@ public class PerryProperties {
 
   public void setIdentityProvider(IdentityProviderConfiguration identityProvider) {
     this.identityProvider = identityProvider;
+  }
+
+  public IdentityManagerConfiguration getIdentityManager() {
+    return identityManager;
+  }
+
+  public void setIdentityManager(IdentityManagerConfiguration identityManager) {
+    this.identityManager = identityManager;
   }
 
   public String getUsers() {
