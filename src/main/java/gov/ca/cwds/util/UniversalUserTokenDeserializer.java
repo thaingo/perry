@@ -15,11 +15,11 @@ public class UniversalUserTokenDeserializer extends JsonDeserializer<UniversalUs
 
   @Override
   public UniversalUserToken deserialize(JsonParser jp, DeserializationContext ctxt)
-      throws IOException, JsonProcessingException {
+      throws IOException {
     JsonNode node = jp.getCodec().readTree(jp);
     String userId = node.get("user").asText();
     String countyName = node.get("county_name").asText();
-    Set<String> roles = new HashSet<>();
+    Set<String> roles = new HashSet<>(1);
     for (JsonNode child : node.get("roles")) {
       roles.add(child.asText());
     }
