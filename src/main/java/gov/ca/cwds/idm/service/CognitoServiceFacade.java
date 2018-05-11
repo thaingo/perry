@@ -8,8 +8,7 @@ import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProviderClientBuilder;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserResult;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import gov.ca.cwds.rest.api.domain.PerryException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -43,8 +42,12 @@ public class CognitoServiceFacade {
   }
 
   public AdminGetUserResult getById(String id) {
-    AdminGetUserRequest request =
-        new AdminGetUserRequest().withUsername(id).withUserPoolId(userpool);
-    return identityProvider.adminGetUser(request);
+    try {
+      AdminGetUserRequest request =
+          new AdminGetUserRequest().withUsername(id).withUserPoolId(userpool);
+      return identityProvider.adminGetUser(request);
+    } catch (Exception e) {
+      throw new PerryException("Exception while connecting to AWS Cognito", e);
+    }
   }
 }
