@@ -110,8 +110,11 @@ public class UserAuthorizationService {
     } else {
       LOGGER.warn("No staff person found for {}", staffPersonIdentifier);
     }
-    return new UserAuthorization(
-        user.getLogonId(), false, false, true, null, null, cwsOffice, staffPerson);
+    return UserAuthorization.UserAuthorizationBuilder.anUserAuthorization()
+        .withUserId(user.getLogonId())
+        .withStaffPerson(staffPerson)
+        .withCwsOffice(cwsOffice)
+        .build();
   }
 
   private Optional<UserId> findUserId(Serializable primaryKey, boolean activeOnly) {
