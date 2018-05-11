@@ -5,11 +5,12 @@ import com.amazonaws.services.cognitoidp.model.AttributeType;
 import gov.ca.cwds.PerryProperties;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.rest.api.domain.PerryException;
-import gov.ca.cwds.service.CwsUserInfoService;
-import gov.ca.cwds.service.dto.CwsUserInfo;
+import gov.ca.cwds.rest.api.domain.auth.UserAuthorization;
+import gov.ca.cwds.service.UserAuthorizationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -22,13 +23,15 @@ import java.util.HashSet;
 import java.util.List;
 
 @Service
+@Profile("idm")
 public class CognitoIdmService implements IdmService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CognitoIdmService.class);
 
   @Autowired CognitoServiceFacade cognitoService;
 
-  @Autowired CwsUserInfoService cwsUserInfoService;
+  @Autowired
+  UserAuthorizationService userAuthorizationService;
 
   @Autowired private PerryProperties configuration;
 
@@ -57,9 +60,9 @@ public class CognitoIdmService implements IdmService {
             .map(AttributeType::getValue)
             .orElse(null);
 
-    CwsUserInfo cwsUser = null;
+    UserAuthorization cwsUser = null;
     if (racfId != null) {
-      cwsUser = cwsUserInfoService.composeForIdm(racfId);
+      cwsUser = userAuthorizationService.composeForIdm(racfId);
     }
 
     try {

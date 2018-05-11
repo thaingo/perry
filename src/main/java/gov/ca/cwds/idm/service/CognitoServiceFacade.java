@@ -8,43 +8,37 @@ import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProviderClientBuilder;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserResult;
+import gov.ca.cwds.idm.CognitoProperties;
 import gov.ca.cwds.rest.api.domain.PerryException;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 
 @Service
+@Profile("idm")
 public class CognitoServiceFacade {
-  @Value("${cognito.iamAccessKeyId:000}")
-  private String accessKeyId;
-
-  @Value("${cognito.iamSecretKey:000}")
-  private String secretKey;
-
-  @Value("${cognito.region:ca-central-1}")
-  private String region;
-
-  @Value("${cognito.userpool:000}")
-  private String userpool;
+  @Autowired private CognitoProperties properties;
 
   private AWSCognitoIdentityProvider identityProvider;
 
   @PostConstruct
   public void init() {
     AWSCredentialsProvider credentialsProvider =
-        new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKeyId, secretKey));
+        new AWSStaticCredentialsProvider(
+            new BasicAWSCredentials(properties.getIamAccessKeyId(), properties.getIamSecretKey()));
     identityProvider =
         AWSCognitoIdentityProviderClientBuilder.standard()
             .withCredentials(credentialsProvider)
-            .withRegion(Regions.fromName(region))
+            .withRegion(Regions.fromName(properties.getRegion()))
             .build();
   }
 
   public AdminGetUserResult getById(String id) {
     try {
       AdminGetUserRequest request =
-          new AdminGetUserRequest().withUsername(id).withUserPoolId(userpool);
+          new AdminGetUserRequest().withUsername(id).withUserPoolId(properties.getUserpool());
       return identityProvider.adminGetUser(request);
     } catch (Exception e) {
       throw new PerryException("Exception while connecting to AWS Cognito", e);

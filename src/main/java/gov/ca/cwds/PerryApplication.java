@@ -1,5 +1,6 @@
 package gov.ca.cwds;
 
+import gov.ca.cwds.idm.CognitoProperties;
 import gov.ca.cwds.security.jwt.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -26,7 +27,7 @@ import javax.persistence.EntityManagerFactory;
 @ComponentScan("gov.ca.cwds")
 @EnableGlobalMethodSecurity(prePostEnabled=true)
 @EntityScan("gov.ca.cwds.data.persistence.auth")
-@EnableConfigurationProperties({PerryProperties.class})
+@EnableConfigurationProperties({PerryProperties.class, CognitoProperties.class})
 public class PerryApplication {
 
   @Bean
