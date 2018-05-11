@@ -12,7 +12,6 @@ import gov.ca.cwds.data.persistence.auth.UserId;
 import gov.ca.cwds.rest.api.domain.DomainChef;
 import gov.ca.cwds.rest.api.domain.auth.StaffAuthorityPrivilege;
 import gov.ca.cwds.rest.api.domain.auth.StaffUnitAuthority;
-import gov.ca.cwds.rest.services.CrudsService;
 import gov.ca.cwds.service.dto.CwsUserInfo;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -43,11 +42,6 @@ public class CwsUserInfoService {
   @Autowired private AssignmentUnitDao assignmentUnitDao;
   @Autowired private StaffPersonDao staffPersonDao;
 
-  /**
-   * {@inheritDoc}
-   *
-   * @see CrudsService#find(Serializable)
-   */
   public CwsUserInfo composeForUserAuthorization(Serializable primaryKey) {
     Optional<UserId> userId = findUserId(primaryKey, true);
     if (!userId.isPresent()) {
@@ -60,7 +54,7 @@ public class CwsUserInfoService {
     boolean socialWorker =
         !staffAuthorityPrivilegeDao.findSocialWorkerPrivileges(userIdentifier).isEmpty();
     Set<StaffAuthorityPrivilege> userAuthPrivs = getStaffAuthorityPriveleges(userIdentifier);
-    Set<StaffUnitAuthority> setStaffUnitAuths = getStaffUnitAuthorities(staffPersonIdentifier);
+    Set<StaffUnitAuthority> staffUnitAuths = getStaffUnitAuthorities(staffPersonIdentifier);
     StaffPerson staffPerson = staffPersonDao.findOne(staffPersonIdentifier);
     if (staffPerson == null) {
       LOGGER.warn("No staff person found for {}", staffPersonIdentifier);
@@ -71,18 +65,11 @@ public class CwsUserInfoService {
       LOGGER.warn("No cws office found for {}", staffPerson.getCwsOffice());
       return null;
     }
-    return CwsUserInfo.UserInfoDTOBuilder.anUserInfoDTO()
-        .withUser(user)
-        .withCwsOffice(cwsOffice)
-        .withStaffUnitAuths(setStaffUnitAuths)
-        .withSocialWorker(socialWorker)
-        .withUserAuthPrivs(userAuthPrivs)
-        .withStaffPerson(staffPerson)
-        .build();
+    return composeUserInfo(
+        user, cwsOffice, staffPerson, socialWorker, userAuthPrivs, staffUnitAuths);
   }
 
   public CwsUserInfo composeForIdm(Serializable primaryKey) {
-
     Optional<UserId> userId = findUserId(primaryKey, false);
     if (!userId.isPresent()) {
       LOGGER.warn("No RACFID found for {}", primaryKey);
@@ -101,10 +88,23 @@ public class CwsUserInfoService {
     } else {
       LOGGER.warn("No staff person found for {}", staffPersonIdentifier);
     }
+    return composeUserInfo(user, cwsOffice, staffPerson, false, null, null);
+  }
 
+  //codeclimate fix refactoring..
+  private CwsUserInfo composeUserInfo(
+      UserId user,
+      CwsOffice cwsOffice,
+      StaffPerson staffPerson,
+      boolean socialWorker,
+      Set<StaffAuthorityPrivilege> userAuthPrivs,
+      Set<StaffUnitAuthority> staffUnitAuths) {
     return CwsUserInfo.UserInfoDTOBuilder.anUserInfoDTO()
         .withUser(user)
         .withCwsOffice(cwsOffice)
+        .withStaffUnitAuths(staffUnitAuths)
+        .withSocialWorker(socialWorker)
+        .withUserAuthPrivs(userAuthPrivs)
         .withStaffPerson(staffPerson)
         .build();
   }
