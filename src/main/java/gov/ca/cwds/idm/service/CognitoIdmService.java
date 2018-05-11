@@ -4,11 +4,13 @@ import com.amazonaws.services.cognitoidp.model.AdminGetUserResult;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import gov.ca.cwds.PerryProperties;
 import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.service.CwsUserInfoService;
 import gov.ca.cwds.service.dto.CwsUserInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
 import javax.script.ScriptException;
@@ -40,6 +42,7 @@ public class CognitoIdmService implements IdmService {
   }
 
   @Override
+  @PostAuthorize("returnObject.countyName == principal.getParameter('county_name')")
   public User findUser(String id) {
     AdminGetUserResult cognitoUser = cognitoService.getById(id);
     if (cognitoUser == null) {
@@ -63,7 +66,7 @@ public class CognitoIdmService implements IdmService {
       return configuration.getIdentityManager().getIdmMapping().map(cognitoUser, cwsUser);
     } catch (ScriptException e) {
       LOGGER.error("Error running the IdmMappingScript");
-      throw new RuntimeException();
+      throw new PerryException(e.getMessage(), e);
     }
   }
 
