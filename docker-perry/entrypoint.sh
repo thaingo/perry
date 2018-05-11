@@ -15,6 +15,9 @@ else
   JAVA_OPTS="-Dspring.profiles.active=dev,liquibase"
 fi
 
+if [ "$IDM_MODE" = true ] ; then
+    JAVA_OPTS="$JAVA_OPTS,idm"
+
 if [ "$REDIS_ENABLED" = true ] ; then
     JAVA_OPTS="$JAVA_OPTS,redis"
 fi
