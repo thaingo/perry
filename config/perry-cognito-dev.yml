@@ -39,7 +39,9 @@ spring:
           port: ${REDIS_PORT:6379}
 perry:
     identityProvider:
-      idpMapping: ${IDP_MAPPING_SCRIPT:config/cognito.groovy} 
+      idpMapping: ${IDP_MAPPING_SCRIPT:config/cognito.groovy}
+    identityManager:
+          idmMapping: ${IMP_MAPPING_SCRIPT:config/idm.groovy}
     jwt:
       timeout: ${TOKEN_TIMEOUT:30} #minutes
       issuer: ${TOKEN_ISSUER:perry}
