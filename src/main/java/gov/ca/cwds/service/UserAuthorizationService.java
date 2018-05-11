@@ -54,15 +54,14 @@ public class UserAuthorizationService {
    */
   public UserAuthorization find(Serializable primaryKey) {
     Optional<UserId> userId = findUserId(primaryKey, true);
-    if (!userId.isPresent()) {
+    if(!userId.isPresent()) {
       LOGGER.warn("No RACFID found for {}", primaryKey);
       return null;
     }
     UserId user = userId.get();
     String userIdentifier = user.getId();
     String staffPersonIdentifier = user.getStaffPersonId();
-    boolean socialWorker =
-        !staffAuthorityPrivilegeDao.findSocialWorkerPrivileges(userIdentifier).isEmpty();
+    boolean socialWorker = !staffAuthorityPrivilegeDao.findSocialWorkerPrivileges(userIdentifier).isEmpty();
 
     Set<StaffAuthorityPrivilege> userAuthPrivs = getStaffAuthorityPriveleges(userIdentifier);
 
@@ -80,15 +79,8 @@ public class UserAuthorizationService {
       return null;
     }
 
-    return new UserAuthorization(
-        user.getLogonId(),
-        socialWorker,
-        false,
-        true,
-        userAuthPrivs,
-        setStaffUnitAuths,
-        cwsOffice,
-        staffPerson);
+    return new UserAuthorization(user.getLogonId(), socialWorker, false, true,
+        userAuthPrivs, setStaffUnitAuths, cwsOffice, staffPerson);
   }
 
   public UserAuthorization composeForIdm(Serializable primaryKey) {
