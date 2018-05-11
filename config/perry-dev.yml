@@ -94,6 +94,11 @@ server:
   error:
     whitelabel:
       enabled: false
+cognito:
+  iamAccessKeyId: ${COGNITO_IAM_ACCESS_ID:}
+  iamSecretKey: ${COGNITO_IAM_SECRET:}
+  region: ${COGNITO_REGION:us-east-2}
+  userpool: ${COGNITO_USERPOOL:us-east-2_O6J5giLUg}
 logging:
   file: ${LOG_FILE:perry-log.txt}
   pattern:

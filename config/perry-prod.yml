@@ -128,6 +128,11 @@ server:
   error:
     whitelabel:
       enabled: false
+cognito:
+  iamAccessKeyId: ${COGNITO_IAM_ACCESS_ID:}
+  iamSecretKey: ${COGNITO_IAM_SECRET:}
+  region: ${COGNITO_REGION:}
+  userpool: ${COGNITO_USERPOOL:}
 logging:
   file: ${LOG_FILE:perry-log.txt}
   pattern:

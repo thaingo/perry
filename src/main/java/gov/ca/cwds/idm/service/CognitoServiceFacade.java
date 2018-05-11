@@ -17,16 +17,16 @@ import javax.annotation.PostConstruct;
 
 @Service
 public class CognitoServiceFacade {
-  @Value("${cognito.iamAccessKeyId}")
+  @Value("${cognito.iamAccessKeyId:000}")
   private String accessKeyId;
 
-  @Value("${cognito.iamSecretKey}")
+  @Value("${cognito.iamSecretKey:000}")
   private String secretKey;
 
-  @Value("${cognito.region}")
+  @Value("${cognito.region:ca-central-1}")
   private String region;
 
-  @Value("${cognito.userpool}")
+  @Value("${cognito.userpool:000}")
   private String userpool;
 
   private AWSCognitoIdentityProvider identityProvider;
