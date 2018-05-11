@@ -59,23 +59,18 @@ public class CwsUserInfoService {
     String staffPersonIdentifier = user.getStaffPersonId();
     boolean socialWorker =
         !staffAuthorityPrivilegeDao.findSocialWorkerPrivileges(userIdentifier).isEmpty();
-
     Set<StaffAuthorityPrivilege> userAuthPrivs = getStaffAuthorityPriveleges(userIdentifier);
-
     Set<StaffUnitAuthority> setStaffUnitAuths = getStaffUnitAuthorities(staffPersonIdentifier);
-
     StaffPerson staffPerson = staffPersonDao.findOne(staffPersonIdentifier);
     if (staffPerson == null) {
       LOGGER.warn("No staff person found for {}", staffPersonIdentifier);
       return null;
     }
-
     CwsOffice cwsOffice = cwsOfficeDao.findOne(staffPerson.getCwsOffice());
     if (cwsOffice == null) {
       LOGGER.warn("No cws office found for {}", staffPerson.getCwsOffice());
       return null;
     }
-
     return CwsUserInfo.UserInfoDTOBuilder.anUserInfoDTO()
         .withUser(user)
         .withCwsOffice(cwsOffice)
