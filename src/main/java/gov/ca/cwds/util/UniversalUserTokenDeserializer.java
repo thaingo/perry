@@ -24,7 +24,7 @@ public class UniversalUserTokenDeserializer extends JsonDeserializer<UniversalUs
     Set<String> roles = new HashSet<>();
     JsonNode rolesNode = node.get("roles");
     if (rolesNode != null && rolesNode.isArray()) {
-      StreamSupport.stream(node.get("roles").spliterator(), false)
+      StreamSupport.stream(rolesNode.spliterator(), false)
           .forEach(r -> roles.add(r.asText()));
     }
     UniversalUserToken result = new UniversalUserToken();
