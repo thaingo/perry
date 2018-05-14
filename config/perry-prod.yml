@@ -82,7 +82,9 @@ perry:
            hibernate:
               ddl-auto: none
            properties:
-              hibernate.cache.use_query_cache: false
+              hibernate.cache.use_second_level_cache: true
+              hibernate.cache.region.factory_class: org.hibernate.cache.ehcache.EhCacheRegionFactory
+              hibernate.cache.use_query_cache: true
               hibernate.current_session_context_class : org.springframework.orm.hibernate5.SpringSessionContext
               hibernate.dialect: org.hibernate.dialect.ProgressDialect
               hibernate.default_schema: ${TOKEN_STORE_SCHEMA:perry}

@@ -32,8 +32,7 @@ project.ext {
     projectMajorVersion = '3.0.1'
     mainclass = 'gov.ca.cwds.PerryApplication'
     targetDockerHubOrganization = System.env.DOCKERHUB_ORG ?: 'cwds'
-    cwdsModelVersion = '0.6.4_533-RC'
-    springfoxSwaggerVersion = '2.9.0'
+    cwdsModelVersion = '0.6.4_538-RC'
 
     // assume that Windows users use the Docker Toolbox
     buildEnv = System.env.BUILD_ENV ?: (Os.isFamily(Os.FAMILY_WINDOWS) ? 'WIN_DEV' : 'JENKINS')
@@ -126,6 +125,10 @@ dependencies {
     compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.4.11'
     compile group: 'org.liquibase', name: 'liquibase-core', version: '3.5.3'
     compile group: 'gov.ca.cwds.cals', name: 'perry-data-model', version: cwdsModelVersion, changing: true
+
+    compile group: 'com.amazonaws', name: 'aws-java-sdk', version: '1.11.232'
+
+    compile group: 'org.hibernate', name: 'hibernate-ehcache', version: '5.2.16.Final'
 
     //h2 dev mode
     compile group: 'com.h2database', name: 'h2', version: '1.4.196'
