@@ -17,6 +17,7 @@ fi
 
 if [ "$IDM_MODE" = true ] ; then
     JAVA_OPTS="$JAVA_OPTS,idm"
+fi
 
 if [ "$REDIS_ENABLED" = true ] ; then
     JAVA_OPTS="$JAVA_OPTS,redis"
