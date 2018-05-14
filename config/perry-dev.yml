@@ -97,8 +97,8 @@ server:
     whitelabel:
       enabled: false
 cognito:
-  iamAccessKeyId: ${COGNITO_IAM_ACCESS_ID:AKIAJHZTTS36NDBH7FHA}
-  iamSecretKey: ${COGNITO_IAM_SECRET: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}
+  iamAccessKeyId: ${COGNITO_IAM_ACCESS_ID:}
+  iamSecretKey: ${COGNITO_IAM_SECRET:}
   region: ${COGNITO_REGION:us-east-2}
   userpool: ${COGNITO_USERPOOL:us-east-2_O6J5giLUg}
 logging:
