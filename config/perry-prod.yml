@@ -45,7 +45,7 @@ perry:
     identityProvider:
       idpMapping: ${IDP_MAPPING_SCRIPT:config/idp.groovy}
     identityManager:
-          idmMapping: ${IMP_MAPPING_SCRIPT:config/idm.groovy}
+          idmMapping: ${IDM_MAPPING_SCRIPT:config/idm.groovy}
     jwt:
       timeout: ${TOKEN_TIMEOUT:10} #minutes
       issuer: ${TOKEN_ISSUER:perry}
