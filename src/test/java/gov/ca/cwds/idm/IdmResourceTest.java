@@ -4,6 +4,7 @@ import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertStrict;
 
 import java.nio.charset.Charset;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -14,6 +15,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+@Ignore
 public class IdmResourceTest extends BaseTokenStoreLiquibaseTest {
 
   private static final MediaType CONTENT_TYPE = new MediaType(MediaType.APPLICATION_JSON.getType(),

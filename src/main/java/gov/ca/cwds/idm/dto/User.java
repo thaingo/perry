@@ -1,20 +1,28 @@
 package gov.ca.cwds.idm.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
+
+import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import static gov.ca.cwds.rest.api.domain.DomainObject.DATE_FORMAT;
 import static gov.ca.cwds.rest.api.domain.DomainObject.TIME_FORMAT;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import java.time.LocalDateTime;
-import java.util.Date;
-
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class User {
   private String id;
   private String firstName;
   private String lastName;
   private String countyName;
+
+  @JsonProperty("RACFID")
   private String racfid;
 
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_FORMAT)
@@ -25,6 +33,7 @@ public class User {
 
   private String office;
   private String phoneNumber;
+  private String phoneExtensionNumber;
   private String email;
 
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_FORMAT)
@@ -38,6 +47,8 @@ public class User {
 
   private Boolean enabled;
   private String status;
+
+  private Set<String> permissions = new LinkedHashSet<>();
 
   public String getId() {
     return id;
@@ -157,5 +168,21 @@ public class User {
 
   public void setLastLoginDateTime(LocalDateTime lastLoginDateTime) {
     this.lastLoginDateTime = lastLoginDateTime;
+  }
+
+  public Set<String> getPermissions() {
+    return permissions;
+  }
+
+  public void setPermissions(Set<String> permissions) {
+    this.permissions = permissions;
+  }
+
+  public String getPhoneExtensionNumber() {
+    return phoneExtensionNumber;
+  }
+
+  public void setPhoneExtensionNumber(String phoneExtensionNumber) {
+    this.phoneExtensionNumber = phoneExtensionNumber;
   }
 }
