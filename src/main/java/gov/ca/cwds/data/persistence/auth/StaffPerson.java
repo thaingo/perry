@@ -6,11 +6,13 @@ import io.dropwizard.jackson.JsonSnakeCase;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.util.Date;
 
 /** Created by dmitry.rudenko on 8/21/2017. */
 @Entity
@@ -42,6 +44,15 @@ public class StaffPerson {
   @Column(name = "FKCWS_OFFT")
   @JsonIgnore
   private String cwsOffice;
+
+  @Column(name = "END_DT")
+  @Type(type = "date")
+  private Date endDate;
+
+  @Column(name = "START_DT")
+  @Type(type = "date")
+  private Date startDate;
+
 
   public String getId() {
     return id;
@@ -81,5 +92,21 @@ public class StaffPerson {
 
   public void setLastName(String lastName) {
     this.lastName = lastName;
+  }
+
+  public Date getEndDate() {
+    return endDate;
+  }
+
+  public void setEndDate(Date endDate) {
+    this.endDate = endDate;
+  }
+
+  public Date getStartDate() {
+    return startDate;
+  }
+
+  public void setStartDate(Date startDate) {
+    this.startDate = startDate;
   }
 }

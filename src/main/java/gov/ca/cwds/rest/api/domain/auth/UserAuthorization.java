@@ -246,4 +246,67 @@ public final class UserAuthorization extends DomainObject implements Request, Re
   }
 
 
+  public static final class UserAuthorizationBuilder {
+    private String userId;
+    private Boolean socialWorker;
+    private Boolean supervisor;
+    private Boolean overrideAuthority;
+    private Set<StaffAuthorityPrivilege> authorityPrivilege;
+    private Set<StaffUnitAuthority> unitAuthority;
+    private CwsOffice cwsOffice;
+    private StaffPerson staffPerson;
+
+    private UserAuthorizationBuilder() {
+    }
+
+    public static UserAuthorizationBuilder anUserAuthorization() {
+      return new UserAuthorizationBuilder();
+    }
+
+    public UserAuthorizationBuilder withUserId(String userId) {
+      this.userId = userId;
+      return this;
+    }
+
+    public UserAuthorizationBuilder withSocialWorker(Boolean socialWorker) {
+      this.socialWorker = socialWorker;
+      return this;
+    }
+
+    public UserAuthorizationBuilder withSupervisor(Boolean supervisor) {
+      this.supervisor = supervisor;
+      return this;
+    }
+
+    public UserAuthorizationBuilder withOverrideAuthority(Boolean overrideAuthority) {
+      this.overrideAuthority = overrideAuthority;
+      return this;
+    }
+
+    public UserAuthorizationBuilder withAuthorityPrivilege(Set<StaffAuthorityPrivilege> authorityPrivilege) {
+      this.authorityPrivilege = authorityPrivilege;
+      return this;
+    }
+
+    public UserAuthorizationBuilder withUnitAuthority(Set<StaffUnitAuthority> unitAuthority) {
+      this.unitAuthority = unitAuthority;
+      return this;
+    }
+
+    public UserAuthorizationBuilder withCwsOffice(CwsOffice cwsOffice) {
+      this.cwsOffice = cwsOffice;
+      return this;
+    }
+
+    public UserAuthorizationBuilder withStaffPerson(StaffPerson staffPerson) {
+      this.staffPerson = staffPerson;
+      return this;
+    }
+
+    public UserAuthorization build() {
+      UserAuthorization userAuthorization = new UserAuthorization(userId, socialWorker, supervisor, overrideAuthority, null, unitAuthority, cwsOffice, staffPerson);
+      userAuthorization.authorityPrivilege = this.authorityPrivilege;
+      return userAuthorization;
+    }
+  }
 }

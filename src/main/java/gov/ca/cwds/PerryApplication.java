@@ -1,6 +1,7 @@
 package gov.ca.cwds;
 
-import javax.persistence.EntityManagerFactory;
+import gov.ca.cwds.idm.CognitoProperties;
+import gov.ca.cwds.security.jwt.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -13,17 +14,20 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.client.RestTemplate;
-import gov.ca.cwds.security.jwt.JwtService;
+
+import javax.persistence.EntityManagerFactory;
 
 @SpringBootApplication
 @EnableTransactionManagement(proxyTargetClass = true)
 @EnableAutoConfiguration(exclude = {FlywayAutoConfiguration.class, SessionAutoConfiguration.class,
     LiquibaseAutoConfiguration.class})
 @ComponentScan("gov.ca.cwds")
+@EnableGlobalMethodSecurity(prePostEnabled=true)
 @EntityScan("gov.ca.cwds.data.persistence.auth")
-@EnableConfigurationProperties({PerryProperties.class})
+@EnableConfigurationProperties({PerryProperties.class, CognitoProperties.class})
 public class PerryApplication {
 
   @Bean

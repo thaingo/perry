@@ -44,6 +44,8 @@ spring:
 perry:
     identityProvider:
       idpMapping: ${IDP_MAPPING_SCRIPT:config/idp.groovy}
+    identityManager:
+          idmMapping: ${IDM_MAPPING_SCRIPT:config/idm.groovy}
     jwt:
       timeout: ${TOKEN_TIMEOUT:10} #minutes
       issuer: ${TOKEN_ISSUER:perry}
@@ -128,6 +130,11 @@ server:
   error:
     whitelabel:
       enabled: false
+cognito:
+  iamAccessKeyId: ${COGNITO_IAM_ACCESS_ID:}
+  iamSecretKey: ${COGNITO_IAM_SECRET:}
+  region: ${COGNITO_REGION:}
+  userpool: ${COGNITO_USERPOOL:}
 logging:
   file: ${LOG_FILE:perry-log.txt}
   pattern:
