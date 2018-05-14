@@ -29,6 +29,7 @@ project.ext {
     projectGroup = 'gov.ca.cwds.api'
     configPath = "$rootProject.projectDir/config/"
     springVersion = "1.5.13.RELEASE"
+    springfoxSwaggerVersion = "2.9.0"
     projectMajorVersion = '3.0.1'
     mainclass = 'gov.ca.cwds.PerryApplication'
     targetDockerHubOrganization = System.env.DOCKERHUB_ORG ?: 'cwds'
