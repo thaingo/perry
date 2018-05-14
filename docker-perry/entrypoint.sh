@@ -1,26 +1,19 @@
-#!/bin/bash
+!/bin/bash
 
 
 if ( ${COGNITO_MODE:?} ) ; then
   echo "COGNITO MODE"
   PERRY_CONFIG="--spring.config.location=config/perry-prod.yml"
-  if [ "$SWAGGER" = true ] ; then
-    JAVA_OPTS="-Dspring.profiles.active=prod,cognito,liquibase,swagger"
-  else
-    JAVA_OPTS="-Dspring.profiles.active=prod,cognito,liquibase"
-  fi
+  JAVA_OPTS="-Dspring.profiles.active=prod,cognito,liquibase"
 elif ([ -z "$DEV_MODE" ] || ! $DEV_MODE); then
   echo "PROD MODE"
   PERRY_CONFIG="--spring.config.location=config/perry-prod.yml"
-  if [ "$SWAGGER" = true ] ; then
-    JAVA_OPTS="-Dspring.profiles.active=prod,saf,liquibase,swagger"
-  else
-    JAVA_OPTS="-Dspring.profiles.active=prod,saf,liquibase"
+  JAVA_OPTS="-Dspring.profiles.active=prod,saf,liquibase"
   fi
 else
   echo "DEV MODE"
   PERRY_CONFIG="--spring.config.location=config/perry-dev.yml"
-  JAVA_OPTS="-Dspring.profiles.active=dev,liquibase,swagger"
+  JAVA_OPTS="-Dspring.profiles.active=dev,liquibase"
 fi
 
 if [ "$IDM_MODE" = true ] ; then
@@ -33,6 +26,10 @@ fi
 
 if [ "$IGNORE_OAUTH2_STATE" = true ] ; then
     JAVA_OPTS="$JAVA_OPTS,nostate"
+fi
+
+if [ "$SWAGGER" = true ] ; then
+    JAVA_OPTS="$JAVA_OPTS,swagger"
 fi
 
 if [ -f /opt/newrelic/newrelic.yml ]; then
