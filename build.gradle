@@ -128,8 +128,6 @@ dependencies {
 
     compile group: 'com.amazonaws', name: 'aws-java-sdk', version: '1.11.325'
 
-    compile group: 'org.hibernate', name: 'hibernate-ehcache', version: '5.2.16.Final'
-
     //h2 dev mode
     compile group: 'com.h2database', name: 'h2', version: '1.4.196'
 

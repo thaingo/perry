@@ -9,7 +9,6 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
 @Entity
-@Cacheable
 @Table(name = "permission")
 public class Permission {
 

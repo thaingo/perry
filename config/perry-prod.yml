@@ -35,7 +35,7 @@ spring:
               hibernate.cache.use_query_cache: false
               hibernate.current_session_context_class : org.springframework.orm.hibernate5.SpringSessionContext
               hibernate.dialect: org.hibernate.dialect.DB2Dialect
-              hibernate.default_schema: ${DB_CMS_SCHEMA:CWSCMSRS}
+              hibernate.default_schema: ${DB_CMS_SCHEMA:}
       redis:
           host: ${REDIS_HOST:192.168.99.100}
           password: ${REDIS_PASSWORD:}
@@ -45,7 +45,7 @@ perry:
     identityProvider:
       idpMapping: ${IDP_MAPPING_SCRIPT:config/idp.groovy}
     identityManager:
-          idmMapping: ${IDM_MAPPING_SCRIPT:config/idm.groovy}
+      idmMapping: ${IDM_MAPPING_SCRIPT:config/idm.groovy}
     jwt:
       timeout: ${TOKEN_TIMEOUT:10} #minutes
       issuer: ${TOKEN_ISSUER:perry}
@@ -84,9 +84,7 @@ perry:
            hibernate:
               ddl-auto: none
            properties:
-              hibernate.cache.use_second_level_cache: true
-              hibernate.cache.region.factory_class: org.hibernate.cache.ehcache.EhCacheRegionFactory
-              hibernate.cache.use_query_cache: true
+              hibernate.cache.use_query_cache: false
               hibernate.current_session_context_class : org.springframework.orm.hibernate5.SpringSessionContext
               hibernate.dialect: org.hibernate.dialect.ProgressDialect
               hibernate.default_schema: ${TOKEN_STORE_SCHEMA:perry}
