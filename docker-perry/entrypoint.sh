@@ -28,7 +28,7 @@ if [ "$IGNORE_OAUTH2_STATE" = true ] ; then
     JAVA_OPTS="$JAVA_OPTS,nostate"
 fi
 
-if [ "$SWAGGER" = true ] ; then
+if [ $SWAGGER ] ; then
     JAVA_OPTS="$JAVA_OPTS,swagger"
 fi
 
