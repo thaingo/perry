@@ -1,21 +1,21 @@
 security:
  oauth2:
    client:
-     clientId: ${SAF_CLIENT_ID:6bcpa28rst8iqv12oi0bm04d6p}
-     clientSecret: ${SAF_CLIENT_SECRET:venru3tk7nkbagk9qjptn54gf55og64f1d67dfp6s9cm9b3qc6g}
-     accessTokenUri: ${SAF_RETRIEVE_TOKEN_PATH:https://newcapdevcwds.auth.us-east-2.amazoncognito.com/oauth2/token}
-     userAuthorizationUri: ${SAF_AUTH_PATH:https://newcapdevcwds.auth.us-east-2.amazoncognito.com/login}
-     tokenName: ${TOKEN_NAME:access_token}
+     clientId: ${SAF_CLIENT_ID:}
+     clientSecret: ${SAF_CLIENT_SECRET:}
+     accessTokenUri: ${SAF_RETRIEVE_TOKEN_PATH:}
+     userAuthorizationUri: ${SAF_AUTH_PATH:}
+     tokenName: ${TOKEN_NAME:oauth_token}
      authenticationScheme: ${SAF_AUTH_SCHEME:}
      clientAuthenticationScheme: ${SAF_CLIENT_AUTH_SCHEME:}
      scope: ${SAF_SCOPE:}
      useCurrentUri: ${USE_CURRENT_URI:true}
      preEstablishedRedirectUri: ${REDIRECT_URI:http://localhost:8080/perry}
    resource:
-     userInfoUri: ${SAF_VALIDATE_TOKEN_PATH:https://cognito-idp.us-east-2.amazonaws.com}
-     tokenInfoUri: ${SAF_VALIDATE_TOKEN_URI:https://cognito-idp.us-east-2.amazonaws.com}
+     userInfoUri: ${SAF_USER_INFO_URI:}
+     tokenInfoUri: ${SAF_VALIDATE_TOKEN_URI:}
      revokeTokenUri: ${SAF_REVOKE_TOKEN_URI:}
-     logoutTokenUri: ${SAF_LOGOUT_URI:https://newcapdevcwds.auth.us-east-2.amazoncognito.com/logo
+     logoutTokenUri: ${SAF_LOGOUT_URI:}
 spring:
       datasource:
           driver-class-name: com.ibm.db2.jcc.DB2Driver
@@ -35,7 +35,7 @@ spring:
               hibernate.cache.use_query_cache: false
               hibernate.current_session_context_class : org.springframework.orm.hibernate5.SpringSessionContext
               hibernate.dialect: org.hibernate.dialect.DB2Dialect
-              hibernate.default_schema: ${DB_CMS_SCHEMA:CWSCMS}
+              hibernate.default_schema: ${DB_CMS_SCHEMA:}
       redis:
           host: ${REDIS_HOST:192.168.99.100}
           password: ${REDIS_PASSWORD:}
@@ -43,7 +43,7 @@ spring:
 
 perry:
     identityProvider:
-      idpMapping: ${IDP_MAPPING_SCRIPT:config/cognito.groovy}
+      idpMapping: ${IDP_MAPPING_SCRIPT:config/idp.groovy}
     identityManager:
       idmMapping: ${IDM_MAPPING_SCRIPT:config/idm.groovy}
     jwt:
@@ -71,9 +71,9 @@ perry:
     tokenStore:
         datasource:
             driver-class-name: org.postgresql.Driver
-            url: ${TOKEN_STORE_JDBC_URL:jdbc:postgresql://localhost:5432/postgres_data}
-            username: ${TOKEN_STORE_DB_USER:postgres_data}
-            password: ${TOKEN_STORE_DB_PASSWORD:postgres_data}
+            url: ${TOKEN_STORE_JDBC_URL:jdbc:postgresql://postgres.preint02.cwds.io:5432/postgres}
+            username: ${TOKEN_STORE_DB_USER:postgres}
+            password: ${TOKEN_STORE_DB_PASSWORD:postgres}
             testOnBorrow: ${TOKEN_STORE_TEST_ON_BORROW:true}
             testWhileIdle: ${TOKEN_STORE_TEST_WHILE_IDLE:true}
             validationQuery: select 1
@@ -124,15 +124,15 @@ server:
     keyStorePassword: ${KEYSTORE_PASSWORD:test}
     keyPassword: ${KEYSTORE_KEY_PASSWORD:test}
   http:
-    port: ${HTTP_PORT:18080}
+    port: ${HTTP_PORT:8080}
   error:
     whitelabel:
       enabled: false
 cognito:
-  iamAccessKeyId: ${COGNITO_IAM_ACCESS_ID:AKIAJHZTTS36NDBH7FHA}
-  iamSecretKey: ${COGNITO_IAM_SECRET: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}
-  region: ${COGNITO_REGION:us-east-2}
-  userpool: ${COGNITO_USERPOOL:us-east-2_O6J5giLUg}
+  iamAccessKeyId: ${COGNITO_IAM_ACCESS_ID:}
+  iamSecretKey: ${COGNITO_IAM_SECRET:}
+  region: ${COGNITO_REGION:}
+  userpool: ${COGNITO_USERPOOL:}
 logging:
   file: ${LOG_FILE:perry-log.txt}
   pattern:
