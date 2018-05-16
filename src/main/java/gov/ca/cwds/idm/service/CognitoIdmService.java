@@ -1,68 +1,91 @@
 package gov.ca.cwds.idm.service;
 
-import com.amazonaws.services.cognitoidp.model.AdminGetUserResult;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
+import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.PerryProperties;
 import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.idm.util.UsersSearchParametersUtil;
 import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.rest.api.domain.auth.UserAuthorization;
 import gov.ca.cwds.service.UserAuthorizationService;
+import gov.ca.cwds.service.scripts.IdmMappingScript;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.stereotype.Service;
 
 import javax.script.ScriptException;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Profile("idm")
 public class CognitoIdmService implements IdmService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CognitoIdmService.class);
+  private static final String RACFID_ATTRIBUTE = "CUSTOM:RACFID";
 
   @Autowired CognitoServiceFacade cognitoService;
 
-  @Autowired
-  UserAuthorizationService userAuthorizationService;
+  @Autowired UserAuthorizationService userAuthorizationService;
 
   @Autowired private PerryProperties configuration;
 
   @Override
-  public List<User> getUsers() {
-    List<User> resultList = new ArrayList<>(20);
-    for (int i = 0; i < 20; i++) {
-      resultList.add(createUser(i));
-    }
-    return resultList;
+  @PostFilter("filterObject.countyName == principal.getParameter('county_name')")
+  public List<User> getUsers(String lastName) {
+    Collection<UserType> cognitoUsers =
+        cognitoService.search(UsersSearchParametersUtil.composeSearchParameter(lastName));
+
+    Map<String, String> userNameToRacfId =
+        cognitoUsers
+            .stream()
+            .collect(Collectors.toMap(UserType::getUsername, CognitoIdmService::getRACFId));
+
+    Map<String, UserAuthorization> idToCmsUser =
+        userAuthorizationService
+            .findUsers(userNameToRacfId.values())
+            .stream()
+            .collect(Collectors.toMap(UserAuthorization::getUserId, e -> e));
+
+    IdmMappingScript mapping = configuration.getIdentityManager().getIdmMapping();
+    return cognitoUsers
+        .stream()
+        .map(
+            e -> {
+              try {
+                return mapping.map(e, idToCmsUser.get(userNameToRacfId.get(e.getUsername())));
+              } catch (ScriptException ex) {
+                LOGGER.error("Error running the IdmMappingScript");
+                throw new PerryException(ex.getMessage(), ex);
+              }
+            })
+        .collect(Collectors.toList());
   }
 
   @Override
   @PostAuthorize("returnObject.countyName == principal.getParameter('county_name')")
   public User findUser(String id) {
-    AdminGetUserResult cognitoUser = cognitoService.getById(id);
+    UserType cognitoUser = cognitoService.getById(id);
     if (cognitoUser == null) {
       return null;
     }
-    String racfId =
-        cognitoUser
-            .getUserAttributes()
-            .stream()
-            .filter(e -> e.getName().equals("custom:RACFID"))
-            .findAny()
-            .map(AttributeType::getValue)
-            .orElse(null);
+    String racfId = getRACFId(cognitoUser);
 
     UserAuthorization cwsUser = null;
     if (racfId != null) {
-      cwsUser = userAuthorizationService.composeForIdm(racfId);
+      List<UserAuthorization> users =
+          userAuthorizationService.findUsers(Collections.singletonList(racfId));
+      if (!CollectionUtils.isEmpty(users)) {
+        cwsUser = users.get(0);
+      }
     }
 
     try {
@@ -73,27 +96,12 @@ public class CognitoIdmService implements IdmService {
     }
   }
 
-  // tmp mock
-  private User createUser(int i) {
-    User user = new User();
-
-    user.setCountyName("MyCounty");
-    user.setId("24051d54-9321-4dd2-a92f-6425d6c455be");
-    user.setEnabled(i % 2 == 0);
-    user.setEmail("email" + i + "@test.com");
-    user.setOffice("Office " + i);
-    user.setPhoneNumber("+1916999999" + i % 10);
-    user.setPhoneExtensionNumber("" + i + i);
-    user.setEndDate(new Date());
-    user.setStartDate(new Date());
-    user.setPermissions(new HashSet<>(Arrays.asList("Snapshot-rollout", "Hotline-rollout")));
-    user.setFirstName("Firstname" + i);
-    user.setLastName("Lastname" + i);
-    user.setRacfid("RACFID" + i);
-    user.setUserCreateDate(new Date());
-    user.setUserLastModifiedDate(new Date());
-    user.setStatus("userStatus" + i);
-    user.setLastLoginDateTime(LocalDateTime.now().minusHours(i).plusMinutes(i).minusDays(i + 5L));
-    return user;
+  private static String getRACFId(UserType user) {
+    return user.getAttributes()
+        .stream()
+        .filter(a -> a.getName().equalsIgnoreCase(RACFID_ATTRIBUTE))
+        .findAny()
+        .map(AttributeType::getValue)
+        .orElse(null);
   }
 }
