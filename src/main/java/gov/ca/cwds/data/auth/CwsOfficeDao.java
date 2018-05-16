@@ -15,5 +15,5 @@ import java.util.Collection;
 @Repository
 public interface CwsOfficeDao extends ReadOnlyRepository<CwsOffice, String> {
 
-  Iterable<CwsOffice> findAllByOfficeId(Collection<String> ids);
+  Iterable<CwsOffice> findByOfficeIdIn(Collection<String> ids);
 }

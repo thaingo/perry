@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -95,16 +96,16 @@ public class UserAuthorizationService {
     }
     List<UserId> userIdList = userIdDao.findByLogonId(filtered);
     List<String> staffPersonIds =
-        userIdList.stream().map(UserId::getStaffPersonId).collect(Collectors.toList());
+        userIdList.stream().map(UserId::getStaffPersonId).filter(Objects::nonNull).collect(Collectors.toList());
 
     Map<String, StaffPerson> idToStaffperson =
-        StreamSupport.stream(staffPersonDao.findAllById(staffPersonIds).spliterator(), false)
+        StreamSupport.stream(staffPersonDao.findByIdIn(staffPersonIds).spliterator(), false)
             .collect(Collectors.toMap(StaffPerson::getId, e -> e));
 
-    List<String> offices = idToStaffperson.values().stream().map(StaffPerson::getCwsOffice).collect(Collectors.toList());
+    List<String> offices = idToStaffperson.values().stream().map(StaffPerson::getCwsOffice).filter(Objects::nonNull).collect(Collectors.toList());
 
     Map<String, CwsOffice> idToOffice =
-        StreamSupport.stream(cwsOfficeDao.findAllByOfficeId(offices).spliterator(), false)
+        StreamSupport.stream(cwsOfficeDao.findByOfficeIdIn(offices).spliterator(), false)
             .collect(Collectors.toMap(CwsOffice::getOfficeId, e -> e));
 
     return userIdList

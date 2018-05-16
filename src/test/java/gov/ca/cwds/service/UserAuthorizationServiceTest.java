@@ -182,7 +182,7 @@ public class UserAuthorizationServiceTest {
             null);
 
 
-    Mockito.when(cwsOfficeDao.findAllByOfficeId(Mockito.anyCollection())).thenReturn(Arrays.asList(cwsOffice1, cwsOffice2));
+    Mockito.when(cwsOfficeDao.findByOfficeIdIn(Mockito.anyCollection())).thenReturn(Arrays.asList(cwsOffice1, cwsOffice2));
 
     StaffPerson staffPerson1 = new StaffPerson();
     staffPerson1.setId(STAFF_ID_1);
@@ -195,7 +195,7 @@ public class UserAuthorizationServiceTest {
     StaffPerson staffPerson3 = new StaffPerson();
     staffPerson3.setId(STAFF_ID_3);
 
-    Mockito.when(staffPersonDao.findAllById(Mockito.anyCollection())).thenReturn(Arrays.asList(staffPerson1, staffPerson2, staffPerson3));
+    Mockito.when(staffPersonDao.findByIdIn(Mockito.anyCollection())).thenReturn(Arrays.asList(staffPerson1, staffPerson2, staffPerson3));
 
     List<UserAuthorization> result = userAuthorizationService.findUsers(keys);
 
