@@ -3,7 +3,7 @@ import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType
 def authorization = user.authorization
 
 //NON-RACFID CALS USER
-if (user.roles?.contains("External CALS")) {
+if (user.roles?.contains("CALS-external-worker")) {
     return [user           : user.userId,
             roles          : user.roles,
             county_code    : "99",

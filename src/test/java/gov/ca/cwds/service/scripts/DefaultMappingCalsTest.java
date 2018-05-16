@@ -10,7 +10,7 @@ public class DefaultMappingCalsTest extends BaseScriptTest {
   protected UniversalUserToken createUniversalUserToken() {
     UniversalUserToken universalUserToken = super.createUniversalUserToken();
     universalUserToken.setUserId("uuid");
-    universalUserToken.setRoles(Collections.singleton("External CALS"));
+    universalUserToken.setRoles(Collections.singleton("CALS-external-worker"));
     return universalUserToken;
   }
 

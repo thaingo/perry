@@ -11,7 +11,7 @@ public class UniversalUserTokenDeserializerTest {
     UniversalUserToken universalUserToken = UniversalUserToken.fromJson(json);
     assert universalUserToken.getUserId().equals("uuid");
     assert universalUserToken.getRoles().size() == 1;
-    assert universalUserToken.getRoles().iterator().next().equals("External CALS");
+    assert universalUserToken.getRoles().iterator().next().equals("CALS-external-worker");
     assert universalUserToken.getParameter("county_name").equals("State of California");
 
   }
