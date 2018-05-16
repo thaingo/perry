@@ -25,7 +25,6 @@ import java.util.Collections;
 @Service
 @Profile("idm")
 public class CognitoServiceFacade {
-  private static final int DEFAULT_PAGESIZE = 10;
   @Autowired private CognitoProperties properties;
 
   private AWSCognitoIdentityProvider identityProvider;
@@ -59,7 +58,7 @@ public class CognitoServiceFacade {
     }
   }
 
-  public Collection<UserType> getByCounty(String countyName) {
+  public Collection<UserType> getByCounty(String countyName, int pageSize) {
     if (StringUtils.isEmpty(countyName)) {
       return Collections.emptyList();
     }
@@ -67,7 +66,7 @@ public class CognitoServiceFacade {
         new ListUsersRequest()
             .withUserPoolId(properties.getUserpool())
             .withFilter("preferred_username ^= \"" + countyName + "\"")
-            .withLimit(DEFAULT_PAGESIZE);
+            .withLimit(pageSize);
     try {
       ListUsersResult result = identityProvider.listUsers(request);
       return result.getUsers();

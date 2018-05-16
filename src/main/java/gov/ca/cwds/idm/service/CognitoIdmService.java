@@ -32,6 +32,8 @@ public class CognitoIdmService implements IdmService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CognitoIdmService.class);
   private static final String RACFID_ATTRIBUTE = "CUSTOM:RACFID";
+  private static final int DEFAULT_PAGESIZE = 64;
+
 
   @Autowired CognitoServiceFacade cognitoService;
 
@@ -45,7 +47,7 @@ public class CognitoIdmService implements IdmService {
     UniversalUserToken userToken =
         (UniversalUserToken) securityContext.getAuthentication().getPrincipal();
     String currentUserCounty = (String) userToken.getParameter("county_name");
-    Collection<UserType> cognitoUsers = cognitoService.getByCounty(currentUserCounty);
+    Collection<UserType> cognitoUsers = cognitoService.getByCounty(currentUserCounty, DEFAULT_PAGESIZE);
 
     Map<String, String> userNameToRacfId =
         cognitoUsers
