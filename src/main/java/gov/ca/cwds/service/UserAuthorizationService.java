@@ -101,12 +101,7 @@ public class UserAuthorizationService {
         StreamSupport.stream(staffPersonDao.findAllById(staffPersonIds).spliterator(), false)
             .collect(Collectors.toMap(StaffPerson::getId, e -> e));
 
-    List<String> offices =
-        idToStaffperson
-            .values()
-            .stream()
-            .map(StaffPerson::getCwsOffice)
-            .collect(Collectors.toList());
+    List<String> offices = idToStaffperson.values().stream().map(StaffPerson::getCwsOffice).collect(Collectors.toList());
 
     Map<String, CwsOffice> idToOffice =
         StreamSupport.stream(cwsOfficeDao.findAllByOfficeId(offices).spliterator(), false)
@@ -114,21 +109,22 @@ public class UserAuthorizationService {
 
     return userIdList
         .stream()
-        .map(
-            e -> {
-              StaffPerson staffPerson = idToStaffperson.get(e.getStaffPersonId());
-              CwsOffice office =
-                  Optional.ofNullable(staffPerson)
-                      .map(st -> idToOffice.get(st.getCwsOffice()))
-                      .orElse(null);
-
-              return UserAuthorization.UserAuthorizationBuilder.anUserAuthorization()
-                  .withUserId(e.getLogonId())
-                  .withStaffPerson(staffPerson)
-                  .withCwsOffice(office)
-                  .build();
-            })
+        .map(e -> buildUserAuthority(e, idToStaffperson, idToOffice))
         .collect(Collectors.toList());
+  }
+
+  private UserAuthorization buildUserAuthority(UserId userId, Map<String, StaffPerson> idToStaffperson, Map<String, CwsOffice> idToOffice) {
+    StaffPerson staffPerson = idToStaffperson.get(userId.getStaffPersonId());
+    CwsOffice office =
+            Optional.ofNullable(staffPerson)
+                    .map(st -> idToOffice.get(st.getCwsOffice()))
+                    .orElse(null);
+
+    return UserAuthorization.UserAuthorizationBuilder.anUserAuthorization()
+            .withUserId(userId.getLogonId())
+            .withStaffPerson(staffPerson)
+            .withCwsOffice(office)
+            .build();
   }
 
   private Optional<UserId> findUserId(Serializable primaryKey, boolean activeOnly) {
