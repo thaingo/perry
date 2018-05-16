@@ -26,13 +26,14 @@ public class TokenResource {
   private LoginService loginService;
 
   @GET
-  @RequestMapping(value = Constants.TOKEN_SERVICE_URL, produces = "application/json",
+  @RequestMapping(value = Constants.TOKEN_SERVICE_URL, produces = "plain/text",
       method = RequestMethod.GET)
   @ApiOperation(value = "Get perry token")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "authorized"),
-          @ApiResponse(code = 401, message = "Unauthorized")})
-  public String getToken(@NotNull @ApiParam(required = true, name = "accessCode", value = "Access Code to map")
-                         @RequestParam("accessCode") String accessCode) {
+      @ApiResponse(code = 401, message = "Unauthorized")})
+  public String getToken(
+      @NotNull @ApiParam(required = true, name = "accessCode", value = "Access Code to map")
+      @RequestParam("accessCode") String accessCode) {
     return loginService.issueToken(accessCode);
   }
 
@@ -42,9 +43,10 @@ public class TokenResource {
       method = RequestMethod.GET)
   @ApiOperation(value = "Validate an authentication token")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "authorized"),
-          @ApiResponse(code = 401, message = "Unauthorized")})
-  public String validateToken(@NotNull @ApiParam(required = true, name = "token", value = "The token to validate")
-                              @RequestParam("token") String token) {
+      @ApiResponse(code = 401, message = "Unauthorized")})
+  public String validateToken(
+      @NotNull @ApiParam(required = true, name = "token", value = "The token to validate")
+      @RequestParam("token") String token) {
     PerryTokenEntity perryTokenEntity =
         (PerryTokenEntity) SecurityContextHolder.getContext().getAuthentication().getDetails();
     return perryTokenEntity.getJsonToken();
@@ -53,8 +55,9 @@ public class TokenResource {
   @POST
   @RequestMapping(value = "/authn/invalidate", method = RequestMethod.GET)
   @ApiOperation(value = "Invalidate token")
-  public String invalidate(@NotNull @ApiParam(required = true, name = "token", value = "The token to invalidate")
-                           @RequestParam("token") String token) {
+  public String invalidate(
+      @NotNull @ApiParam(required = true, name = "token", value = "The token to invalidate")
+      @RequestParam("token") String token) {
     loginService.invalidate(token);
     return "OK";
   }

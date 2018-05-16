@@ -5,6 +5,7 @@ import static com.google.common.base.Predicates.or;
 import static com.google.common.collect.Lists.newArrayList;
 import static springfox.documentation.builders.PathSelectors.regex;
 
+import io.swagger.models.auth.In;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.context.annotation.Bean;
@@ -30,8 +31,17 @@ public class SwaggerConfig {
 
   private static final ApiInfo DEFAULT_API_INFO =
       new ApiInfo(
-          "Perry API", "RESTful Perry API", "", "", DEFAULT_CONTACT, "", "", new ArrayList<>());
+          "Perry API",
+          "RESTful Perry API",
+          "",
+          "",
+          DEFAULT_CONTACT,
+          "",
+          "",
+          new ArrayList<>());
+
   public static final String AUTHORIZATION = "Authorization";
+  public static final String TOKEN = "token";
 
   @Bean
   public Docket api() {
@@ -47,16 +57,18 @@ public class SwaggerConfig {
         .build()
         .securitySchemes(newArrayList(apiKey()))
         .securityContexts(newArrayList(securityContext()));
+
   }
 
   private ApiKey apiKey() {
-    return new ApiKey(AUTHORIZATION, AUTHORIZATION, "header");
+    return new ApiKey(AUTHORIZATION, TOKEN, In.QUERY.name());
+
   }
 
   private SecurityContext securityContext() {
     return SecurityContext.builder()
         .securityReferences(defaultAuth())
-        .forPaths(PathSelectors.any())
+        .forPaths(PathSelectors.ant("/idm/**"))
         .build();
   }
 
