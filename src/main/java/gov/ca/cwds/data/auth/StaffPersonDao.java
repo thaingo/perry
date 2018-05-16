@@ -7,5 +7,5 @@ import java.util.Collection;
 /** Created by dmitry.rudenko on 8/21/2017. */
 public interface StaffPersonDao extends ReadOnlyRepository<StaffPerson, String> {
 
-  Iterable<StaffPerson> findAllById(Collection<String> ids);
+  Iterable<StaffPerson> findByIdIn(Collection<String> ids);
 }
