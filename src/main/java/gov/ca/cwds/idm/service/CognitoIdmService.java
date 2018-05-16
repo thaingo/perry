@@ -3,8 +3,8 @@ package gov.ca.cwds.idm.service;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.PerryProperties;
-import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.idm.util.UsersSearchParametersUtil;
 import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.rest.api.domain.auth.UserAuthorization;
 import gov.ca.cwds.service.UserAuthorizationService;
@@ -15,8 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PostAuthorize;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.stereotype.Service;
 
 import javax.script.ScriptException;
@@ -32,8 +31,6 @@ public class CognitoIdmService implements IdmService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CognitoIdmService.class);
   private static final String RACFID_ATTRIBUTE = "CUSTOM:RACFID";
-  private static final int DEFAULT_PAGESIZE = 64;
-
 
   @Autowired CognitoServiceFacade cognitoService;
 
@@ -42,12 +39,10 @@ public class CognitoIdmService implements IdmService {
   @Autowired private PerryProperties configuration;
 
   @Override
-  public List<User> getUsers() {
-    SecurityContext securityContext = SecurityContextHolder.getContext();
-    UniversalUserToken userToken =
-        (UniversalUserToken) securityContext.getAuthentication().getPrincipal();
-    String currentUserCounty = (String) userToken.getParameter("county_name");
-    Collection<UserType> cognitoUsers = cognitoService.getByCounty(currentUserCounty, DEFAULT_PAGESIZE);
+  @PostFilter("filterObject.countyName == principal.getParameter('county_name')")
+  public List<User> getUsers(String lastName) {
+    Collection<UserType> cognitoUsers =
+        cognitoService.search(UsersSearchParametersUtil.composeSearchParameter(lastName));
 
     Map<String, String> userNameToRacfId =
         cognitoUsers
@@ -59,8 +54,8 @@ public class CognitoIdmService implements IdmService {
             .findUsers(userNameToRacfId.values())
             .stream()
             .collect(Collectors.toMap(UserAuthorization::getUserId, e -> e));
-    IdmMappingScript mapping = configuration.getIdentityManager().getIdmMapping();
 
+    IdmMappingScript mapping = configuration.getIdentityManager().getIdmMapping();
     return cognitoUsers
         .stream()
         .map(
