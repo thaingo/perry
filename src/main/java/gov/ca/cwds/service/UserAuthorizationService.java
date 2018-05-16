@@ -23,10 +23,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 /**
  * Business layer object to work on {@link UserAuthorization}
@@ -54,7 +58,7 @@ public class UserAuthorizationService {
    */
   public UserAuthorization find(Serializable primaryKey) {
     Optional<UserId> userId = findUserId(primaryKey, true);
-    if(!userId.isPresent()) {
+    if (!userId.isPresent()) {
       LOGGER.warn("No RACFID found for {}", primaryKey);
       return null;
     }
@@ -83,30 +87,48 @@ public class UserAuthorizationService {
         userAuthPrivs, setStaffUnitAuths, cwsOffice, staffPerson);
   }
 
-  public UserAuthorization composeForIdm(Serializable primaryKey) {
-    Optional<UserId> userId = findUserId(primaryKey, false);
-    if (!userId.isPresent()) {
-      LOGGER.warn("No RACFID found for {}", primaryKey);
-      return null;
+  public List<UserAuthorization> findUsers(Collection<String> racfIds) {
+    List<String> filtered =
+        racfIds.stream().filter(e -> e.length() <= RACFID_MAX_LENGTH).collect(Collectors.toList());
+    if (CollectionUtils.isEmpty(filtered)) {
+      return Collections.emptyList();
     }
-    UserId user = userId.get();
-    String staffPersonIdentifier = user.getStaffPersonId();
+    List<UserId> userIdList = userIdDao.findByLogonId(filtered);
+    List<String> staffPersonIds =
+        userIdList.stream().map(UserId::getStaffPersonId).collect(Collectors.toList());
 
-    StaffPerson staffPerson = staffPersonDao.findOne(staffPersonIdentifier);
-    CwsOffice cwsOffice = null;
-    if (staffPerson != null) {
-      cwsOffice = cwsOfficeDao.findOne(staffPerson.getCwsOffice());
-      if (cwsOffice == null) {
-        LOGGER.warn("No cws office found for {}", staffPerson.getCwsOffice());
-      }
-    } else {
-      LOGGER.warn("No staff person found for {}", staffPersonIdentifier);
-    }
-    return UserAuthorization.UserAuthorizationBuilder.anUserAuthorization()
-        .withUserId(user.getLogonId())
-        .withStaffPerson(staffPerson)
-        .withCwsOffice(cwsOffice)
-        .build();
+    Map<String, StaffPerson> idToStaffperson =
+        StreamSupport.stream(staffPersonDao.findAllById(staffPersonIds).spliterator(), false)
+            .collect(Collectors.toMap(StaffPerson::getId, e -> e));
+
+    List<String> offices =
+        idToStaffperson
+            .values()
+            .stream()
+            .map(StaffPerson::getCwsOffice)
+            .collect(Collectors.toList());
+
+    Map<String, CwsOffice> idToOffice =
+        StreamSupport.stream(cwsOfficeDao.findAllByOfficeId(offices).spliterator(), false)
+            .collect(Collectors.toMap(CwsOffice::getOfficeId, e -> e));
+
+    return userIdList
+        .stream()
+        .map(
+            e -> {
+              StaffPerson staffPerson = idToStaffperson.get(e.getStaffPersonId());
+              CwsOffice office =
+                  Optional.ofNullable(staffPerson)
+                      .map(st -> idToOffice.get(st.getCwsOffice()))
+                      .orElse(null);
+
+              return UserAuthorization.UserAuthorizationBuilder.anUserAuthorization()
+                  .withUserId(e.getLogonId())
+                  .withStaffPerson(staffPerson)
+                  .withCwsOffice(office)
+                  .build();
+            })
+        .collect(Collectors.toList());
   }
 
   private Optional<UserId> findUserId(Serializable primaryKey, boolean activeOnly) {
@@ -119,7 +141,7 @@ public class UserAuthorizationService {
     if (activeOnly) {
       userList = userIdDao.findActiveByLogonId(logonId);
     } else {
-      userList = userIdDao.findByLogonId(logonId);
+      userList = userIdDao.findByLogonId(Collections.singletonList(logonId));
     }
     if (CollectionUtils.isEmpty(userList)) {
       return Optional.empty();
