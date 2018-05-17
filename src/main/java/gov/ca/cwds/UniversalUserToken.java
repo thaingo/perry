@@ -25,6 +25,7 @@ public class UniversalUserToken implements Serializable {
   @JsonProperty("user")
   private String userId;
   private Set<String> roles = new LinkedHashSet<>();
+  private Set<String> permissions = new LinkedHashSet<>();
   private String token;
   private Map<String, Object> parameters = new HashMap<>();
   private UserAuthorization authorization;
@@ -35,6 +36,14 @@ public class UniversalUserToken implements Serializable {
 
   public Object setParameter(String parameterName, Object parameter) {
     return parameters.put(parameterName, parameter);
+  }
+
+  public Map<String, Object> getParameters() {
+    return parameters;
+  }
+
+  public void setParameters(Map<String, Object> parameters) {
+    this.parameters = parameters;
   }
 
   public String getUserId() {
@@ -71,6 +80,14 @@ public class UniversalUserToken implements Serializable {
 
   public void setToken(String token) {
     this.token = token;
+  }
+
+  public Set<String> getPermissions() {
+    return permissions;
+  }
+
+  public void setPermissions(Set<String> permissions) {
+    this.permissions = permissions;
   }
 
   public static UniversalUserToken fromJson(String json)  {

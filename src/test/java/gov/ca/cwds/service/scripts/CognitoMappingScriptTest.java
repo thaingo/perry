@@ -27,6 +27,10 @@ public class CognitoMappingScriptTest {
         "first-role",
         "second-role",
         "third-role")), userToken.getRoles());
+    Assert.assertEquals(new HashSet<>(Arrays.asList(
+        "first-permission",
+        "second-permission",
+        "third-permission")), userToken.getPermissions());
 
   }
 

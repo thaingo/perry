@@ -1,1 +1,1 @@
-{"user":"userabc","first_name":"John","last_name":"Smith","roles":["Supervisor"],"staffId":"q1p","county_name":"Marin","county_code":"21","county_cws_code":1088,"privileges":["Countywide Read"],"authorityCodes":["S"]}
+{"user":"userabc","first_name":"John","last_name":"Smith","roles":["role1","role2","Supervisor"],"staffId":"q1p","county_name":"Marin","county_code":"21","county_cws_code":1088,"privileges":["Countywide Read","permission1","permission2"],"authorityCodes":["S"]}

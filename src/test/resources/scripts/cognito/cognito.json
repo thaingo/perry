@@ -21,8 +21,12 @@
       "Value": "RACFID"
     },
     {
-      "Name": "custom:appRole",
+      "Name": "custom:Role",
       "Value": "first-role :second-role:third-role"
+    },
+    {
+      "Name": "custom:Permission",
+      "Value": "first-permission :second-permission:third-permission"
     }
   ],
   "Username": "perry"
