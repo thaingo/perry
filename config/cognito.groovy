@@ -1,15 +1,20 @@
 def attribute = {name -> idpToken.UserAttributes?.find {it.Name.equalsIgnoreCase(name)}?.Value}
 
-universalUserToken.userId = attribute("CUSTOM:RACFID")?.toUpperCase()
+def listAttribute = {
+ name ->
+     def result = attribute(name)?.split('\\s*:\\s*') as HashSet
+     return result ? result : new HashSet<>()
+}
 
-if(!universalUserToken.userId?.trim()) {
+def racfid = attribute("custom:racfid")?.toUpperCase()?.trim()
+
+if(racfid) {
+    universalUserToken.userId = racfid
+    universalUserToken.parameters["perry.racfid"] = racfid
+}
+else {
     universalUserToken.userId = attribute("email")
 }
 
-universalUserToken.roles = attribute("zoneinfo")?.split('\\s*:\\s*') as HashSet
-
-if(!universalUserToken.roles) {
-    universalUserToken.roles = new HashSet<>()
-    println "INFO: There are no IDP roles provided"
-}
-
+universalUserToken.roles = listAttribute("custom:role")
+universalUserToken.permissions = listAttribute("custom:permission");

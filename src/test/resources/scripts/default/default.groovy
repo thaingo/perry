@@ -2,20 +2,24 @@ import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType
 
 def authorization = user.authorization
 
+//NON-RACFID CALS USER
 if (user.roles?.contains("CALS-external-worker")) {
     return [user           : user.userId,
-            roles          : ["CALS-external-worker"],
+            roles          : user.roles,
             county_code    : "99",
             county_cws_code: 1126,
             county_name    : "State of California",
-            privileges     : ["CWS Case Management System", "Resource Management"]]
+            privileges     : ["CWS Case Management System", "Resource Management"] + user.permissions]
 }
 
+//NON-RACFID USER
 if (authorization == null) {
     return [user : user.userId,
-            roles: user.roles]
+            roles: user.roles,
+            privileges: user.permissions]
 }
 
+//RACFID USER
 def privileges = []
 authorization.authorityPrivilege.findAll {
     it.authPrivilegeCode == "P" && it.endDate == null
@@ -46,6 +50,6 @@ def governmentEntityType = GovernmentEntityType.findBySysId(authorization.cwsOff
  county_name    : governmentEntityType.description,
  county_code    : governmentEntityType.countyCd,
  county_cws_code: governmentEntityType.sysId,
- privileges     : privileges,
+ privileges     : privileges + user.permissions,
  authorityCodes : authorityCodes]
 
