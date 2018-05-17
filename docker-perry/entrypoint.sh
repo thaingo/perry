@@ -1,4 +1,4 @@
-!/bin/bash
+#!/bin/bash
 
 
 if ( ${COGNITO_MODE:?} ) ; then
@@ -9,7 +9,6 @@ elif ([ -z "$DEV_MODE" ] || ! $DEV_MODE); then
   echo "PROD MODE"
   PERRY_CONFIG="--spring.config.location=config/perry-prod.yml"
   JAVA_OPTS="-Dspring.profiles.active=prod,saf,liquibase"
-  fi
 else
   echo "DEV MODE"
   PERRY_CONFIG="--spring.config.location=config/perry-dev.yml"
