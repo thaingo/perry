@@ -1,4 +1,4 @@
-!/bin/bash
+#/bin/bash
 
 
 if ( ${COGNITO_MODE:?} ) ; then
