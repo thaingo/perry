@@ -27,6 +27,10 @@ if [ "$IGNORE_OAUTH2_STATE" = true ] ; then
     JAVA_OPTS="$JAVA_OPTS,nostate"
 fi
 
+if [ "$SWAGGER" = true ] ; then
+    JAVA_OPTS="$JAVA_OPTS,swagger"
+fi
+
 if [ -f /opt/newrelic/newrelic.yml ]; then
     java -javaagent:/opt/newrelic/newrelic.jar  ${JAVA_OPTS} -jar perry.jar server ${PERRY_CONFIG}
 else

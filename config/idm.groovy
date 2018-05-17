@@ -1,4 +1,4 @@
-def attribute = {name -> cognitoUser.userAttributes?.find {it.name.equalsIgnoreCase(name)}?.value}
+def attribute = {name -> cognitoUser.attributes?.find {it.name.equalsIgnoreCase(name)}?.value}
 
 
 result.id = cognitoUser.username
