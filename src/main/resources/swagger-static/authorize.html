@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Authorize</title>
+</head>
+<body>
+Authorization...
+
+<script src="./js/superagent.min.js"></script>
+
+<script type="text/javascript">
+  window.onload = function(e) {
+    const request = superagent;
+    const accessCode = /accessCode=([^&]+)/.exec(window.location.href);
+    //var accessCode = "";
+    if (accessCode && accessCode.length > 0) {
+      var ac = decodeURIComponent(accessCode[1]);
+      request.get(getBaseUrl() + "/authn/token?accessCode=" + ac).then(function (res) {
+        redirectLocation = getBaseUrl() + "/swagger-ui.html";
+        console.log(res.text);
+        if (res.text) {
+          redirectLocation += "?token=" + res.text;
+        }
+        window.location = redirectLocation;
+      }).catch(function (err) {
+        console.log(err);
+      });
+    }
+
+    function getBaseUrl() {
+      const urlMatches = /(.*)\/authorize.html.*/.exec(window.location.href);
+      return urlMatches[1];
+    }
+  }
+</script>
+
+</body>
+</html>

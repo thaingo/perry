@@ -28,7 +28,8 @@ apply plugin: 'jacoco'
 project.ext {
     projectGroup = 'gov.ca.cwds.api'
     configPath = "$rootProject.projectDir/config/"
-    springVersion = "1.5.3.RELEASE"
+    springVersion = "1.5.13.RELEASE"
+    springfoxSwaggerVersion = "2.9.0"
     projectMajorVersion = '3.0.1'
     mainclass = 'gov.ca.cwds.PerryApplication'
     targetDockerHubOrganization = System.env.DOCKERHUB_ORG ?: 'cwds'
@@ -120,8 +121,8 @@ dependencies {
     compile group: 'org.webjars', name: 'jquery', version:'2.1.1'
     compile group: 'org.webjars', name: 'bootstrap', version:'3.2.0'
     compile group: 'org.webjars', name: 'webjars-locator', version:'0.32'
-    compile group: 'io.swagger', name: 'swagger-jersey2-jaxrs', version: '1.5.9'
-    compile group: 'io.swagger', name: 'swagger-annotations', version: '1.5.9'
+    compile group: 'io.springfox', name: 'springfox-swagger2', version: springfoxSwaggerVersion
+    compile group: 'io.springfox', name: 'springfox-swagger-ui', version: springfoxSwaggerVersion
     compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.4.11'
     compile group: 'org.liquibase', name: 'liquibase-core', version: '3.5.3'
     compile group: 'gov.ca.cwds.cals', name: 'perry-data-model', version: cwdsModelVersion, changing: true
@@ -145,7 +146,7 @@ dependencies {
             exclude(module: 'commons-logging')
     }
     testCompile 'org.springframework:spring-test:4.3.0.RELEASE'
-    testCompile 'org.mockito:mockito-core:2.0.54-beta'
+    testCompile 'org.mockito:mockito-core:2.18.3'
     testCompile group: 'org.hamcrest', name: 'hamcrest-junit', version: '2.0.0.0'
     testCompile('org.glassfish.jersey.test-framework.providers:jersey-test-framework-provider-grizzly2:2.23.2') {
         exclude group: 'javax.servlet', module: 'javax.servlet-api'
