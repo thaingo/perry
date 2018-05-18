@@ -4,6 +4,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
 import gov.ca.cwds.data.persistence.auth.UserId;
+
+import java.util.Collections;
 import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,7 +36,7 @@ public class UserIdDaoIT {
   public void testFindByLogonId() {
     String logonId = "logonId";
     entityManager.merge(entity("id", logonId));
-    List<UserId> users = userIdDao.findActiveByLogonId(logonId);
+    List<UserId> users = userIdDao.findActiveByLogonIdIn(Collections.singletonList(logonId));
     assertThat(users.size(), is(1));
   }
 

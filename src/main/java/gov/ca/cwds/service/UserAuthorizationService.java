@@ -58,7 +58,7 @@ public class UserAuthorizationService {
    * @see CrudsService#find(Serializable)
    */
   public UserAuthorization find(Serializable primaryKey) {
-    Optional<UserId> userId = findUserId(primaryKey, true);
+    Optional<UserId> userId = findUserId(primaryKey);
     if (!userId.isPresent()) {
       LOGGER.warn("No RACFID found for {}", primaryKey);
       return null;
@@ -94,7 +94,7 @@ public class UserAuthorizationService {
     if (CollectionUtils.isEmpty(filtered)) {
       return Collections.emptyList();
     }
-    List<UserId> userIdList = userIdDao.findByLogonId(filtered);
+    List<UserId> userIdList = userIdDao.findActiveByLogonIdIn(filtered);
     List<String> staffPersonIds =
         userIdList.stream().map(UserId::getStaffPersonId).filter(Objects::nonNull).collect(Collectors.toList());
 
@@ -128,18 +128,13 @@ public class UserAuthorizationService {
             .build();
   }
 
-  private Optional<UserId> findUserId(Serializable primaryKey, boolean activeOnly) {
+  private Optional<UserId> findUserId(Serializable primaryKey) {
     LOGGER.info("Trying to find RACFID for user id {}", primaryKey);
     final String logonId = ((String) primaryKey).trim();
     if (logonId.length() > RACFID_MAX_LENGTH) {
       return Optional.empty();
     }
-    List<UserId> userList;
-    if (activeOnly) {
-      userList = userIdDao.findActiveByLogonId(logonId);
-    } else {
-      userList = userIdDao.findByLogonId(Collections.singletonList(logonId));
-    }
+    List<UserId> userList = userIdDao.findActiveByLogonIdIn(Collections.singletonList(logonId));
     if (CollectionUtils.isEmpty(userList)) {
       return Optional.empty();
     }

@@ -65,7 +65,7 @@ public class UserAuthorizationServiceTest {
 
     String racfid = "racfid";
     UserId userId = new UserId(null, null, null, STAFF_ID, ID, LOGON_ID, null);
-    Mockito.when(userIdDao.findActiveByLogonId(racfid))
+    Mockito.when(userIdDao.findActiveByLogonIdIn(Collections.singletonList(racfid)))
             .thenReturn(Collections.singletonList(userId));
 
     Mockito.when(staffAuthorityPrivilegeDao.findSocialWorkerPrivileges(userId.getId()))
@@ -130,7 +130,7 @@ public class UserAuthorizationServiceTest {
     String racfid3 = "5bb";
     UserId userId3 = new UserId(null, null, null, STAFF_ID_3, "id3", racfid3, null);
 
-    Mockito.when(userIdDao.findByLogonId(Mockito.anyCollection()))
+    Mockito.when(userIdDao.findActiveByLogonIdIn(Mockito.anyCollection()))
             .thenReturn(Arrays.asList(userId1, userId2, userId3));
 
     CwsOffice cwsOffice1 =
