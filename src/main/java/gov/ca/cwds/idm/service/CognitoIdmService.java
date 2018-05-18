@@ -49,11 +49,12 @@ public class CognitoIdmService implements IdmService {
             .stream()
             .collect(Collectors.toMap(UserType::getUsername, CognitoIdmService::getRACFId));
 
-    Map<String, UserAuthorization> idToCmsUser =
-        userAuthorizationService
-            .findUsers(userNameToRacfId.values())
-            .stream()
-            .collect(Collectors.toMap(UserAuthorization::getUserId, e -> e));
+    Map<String, UserAuthorization> idToCmsUser = userAuthorizationService.findUsers(userNameToRacfId.values())
+            .stream().collect(Collectors.toMap(UserAuthorization::getUserId, e -> e,
+                    (user1, user2) -> {
+                      LOGGER.warn("UserAuthorization - duplicate UserId for RACFid: {}", user1.getUserId());
+                      return user1;
+                    }));
 
     IdmMappingScript mapping = configuration.getIdentityManager().getIdmMapping();
     return cognitoUsers
