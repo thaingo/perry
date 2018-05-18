@@ -134,7 +134,7 @@ public class UserAuthorizationService {
     if (logonId.length() > RACFID_MAX_LENGTH) {
       return Optional.empty();
     }
-    List<UserId> userList = userIdDao.findActiveByLogonIdIn(Collections.singletonList(logonId));
+    List<UserId> userList = userIdDao.findActiveByLogonId(logonId);
     if (CollectionUtils.isEmpty(userList)) {
       return Optional.empty();
     }

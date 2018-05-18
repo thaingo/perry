@@ -65,7 +65,7 @@ public class UserAuthorizationServiceTest {
 
     String racfid = "racfid";
     UserId userId = new UserId(null, null, null, STAFF_ID, ID, LOGON_ID, null);
-    Mockito.when(userIdDao.findActiveByLogonIdIn(Collections.singletonList(racfid)))
+    Mockito.when(userIdDao.findActiveByLogonId(racfid))
             .thenReturn(Collections.singletonList(userId));
 
     Mockito.when(staffAuthorityPrivilegeDao.findSocialWorkerPrivileges(userId.getId()))
