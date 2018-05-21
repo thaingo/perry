@@ -1,0 +1,30 @@
+version: '2.1'
+services:
+  perry:
+    image: cwds/perry:3.0.1_609-RC
+    hostname: perry
+    depends_on:
+      cals_db2_data:
+        condition: service_started
+      postgresql_data:
+        condition: service_started
+    restart: on-failure
+    ports:
+          - 18080:8080
+          - 5005:5005
+    env_file: .env
+
+  cals_db2_data:
+    image: cwds/cals_db2_data
+    hostname: cals_db2_data
+    ports:
+      - ${DB_CMS_DB2_PORT}:50000
+    env_file: .env
+
+  postgresql_data:
+    image: cwds/postgresql_data
+    hostname: postgresql_data
+    ports:
+      - ${DB_POSTGRES_PORT}:${DB_POSTGRES_PORT}
+    env_file: .env
+
