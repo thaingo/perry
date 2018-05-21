@@ -2,9 +2,8 @@ import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType
 
 def authorization = user.authorization
 
-if(authorization) {
-
 //RACFID USER
+if (authorization) {
     def privileges = []
     authorization.authorityPrivilege.findAll {
         it.authPrivilegeCode == "P" && it.endDate == null
@@ -27,16 +26,16 @@ if(authorization) {
 
     def governmentEntityType = GovernmentEntityType.findBySysId(authorization.cwsOffice?.governmentEntityType)
 
- return    [user           : authorization.userId,
-            first_name     : authorization.staffPerson?.firstName,
-            last_name      : authorization.staffPerson?.lastName,
-            roles          : user.roles + [supervisor ? "Supervisor" : "SocialWorker"],
-            staffId        : authorization.staffPerson?.id,
-            county_name    : governmentEntityType.description,
-            county_code    : governmentEntityType.countyCd,
-            county_cws_code: governmentEntityType.sysId,
-            privileges     : privileges + user.permissions,
-            authorityCodes : authorityCodes]
+ return [user           : authorization.userId,
+         first_name     : authorization.staffPerson?.firstName,
+         last_name      : authorization.staffPerson?.lastName,
+         roles          : user.roles + [supervisor ? "Supervisor" : "SocialWorker"],
+         staffId        : authorization.staffPerson?.id,
+         county_name    : governmentEntityType.description,
+         county_code    : governmentEntityType.countyCd,
+         county_cws_code: governmentEntityType.sysId,
+         privileges     : privileges + user.permissions,
+         authorityCodes : authorityCodes]
 
 }
 
