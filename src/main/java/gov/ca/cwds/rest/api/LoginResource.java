@@ -13,6 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotNull;
@@ -49,7 +50,8 @@ public class LoginResource {
     else {
       whiteList.validate("callback", callback);
     }
-    response.sendRedirect(callback + "?accessCode=" + accessCode);
+    String redirectUrl = addAccessCode(callback, accessCode);
+    response.sendRedirect(redirectUrl);
   }
 
   @Autowired
@@ -65,5 +67,13 @@ public class LoginResource {
   @Autowired
   public void setWhiteList(WhiteList whiteList) {
     this.whiteList = whiteList;
+  }
+
+  protected String addAccessCode(String callback, String accessCode) {
+    return UriComponentsBuilder
+        .fromHttpUrl(callback)
+        .queryParam("accessCode", accessCode)
+        .build()
+        .toUriString();
   }
 }
