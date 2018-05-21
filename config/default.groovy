@@ -38,21 +38,25 @@ if (authorization) {
          authorityCodes : authorityCodes]
 
 }
-
-//NON-RACFID CALS USER
-if (user.roles?.contains("CALS-external-worker")) {
-    return [user           : user.userId,
-            roles          : user.roles,
-            county_code    : "99",
-            county_cws_code: 1126,
-            county_name    : "State of California",
-            privileges     : ["CWS Case Management System", "Resource Management"] + user.permissions]
-}
-
 //NON-RACFID USER
-if (authorization == null) {
-    return [user : user.userId,
-            roles: user.roles,
-            privileges: user.permissions]
-}
+else {
+    def countyName = user.parameters["county_name"];
+    def cwsCounty = GovernmentEntityType.findByDescription(countyName)
 
+    def token = [user           : user.userId,
+                 roles          : user.roles,
+                 first_name     : user.parameters["first_name"],
+                 last_name      : user.parameters["last_name"],
+                 email          : user.parameters["email"],
+                 county_code    : cwsCounty.countyCd,
+                 county_cws_code: cwsCounty.sysId,
+                 county_name    : countyName,
+                 privileges     : user.permissions]
+
+    //NON-RACFID CALS USER
+    if (user.roles?.contains("CALS-external-worker")) {
+        token.privileges += ["CWS Case Management System", "Resource Management"]
+    }
+
+    return token
+}

@@ -344,24 +344,33 @@ public enum GovernmentEntityType implements ApiSysCodeAware {
   }
 
   public static GovernmentEntityType findBySysId(int sysId) {
-    return mapBySysId.containsKey(sysId) ? mapBySysId.get(sysId): GovernmentEntityType.NONE;
+    return mapBySysId.getOrDefault(sysId, GovernmentEntityType.NONE);
   }
 
   public static GovernmentEntityType findByCountyCd(String countyCd) {
-    return mapByCountyCd.containsKey(countyCd) ? mapByCountyCd.get(countyCd)
-            : GovernmentEntityType.NONE;
+    return mapByCountyCd.getOrDefault(countyCd, GovernmentEntityType.NONE);
+  }
+
+  public static GovernmentEntityType findByDescription(String description) {
+    return mapByDescription.getOrDefault(descriptionToKey(description), GovernmentEntityType.NONE);
   }
 
 
   private static final Map<Integer, GovernmentEntityType> mapBySysId = new HashMap<>();
   private static final Map<String, GovernmentEntityType> mapByCountyCd = new HashMap<>();
+  private static final Map<String, GovernmentEntityType> mapByDescription = new HashMap<>();
 
 
   static {
     for (GovernmentEntityType e : GovernmentEntityType.values()) {
       mapBySysId.put(e.sysId, e);
       mapByCountyCd.put(e.countyCd, e);
+      mapByDescription.put(descriptionToKey(e.description), e);
     }
+  }
+
+  private static String descriptionToKey(String description) {
+    return description.toLowerCase();
   }
 
 }
