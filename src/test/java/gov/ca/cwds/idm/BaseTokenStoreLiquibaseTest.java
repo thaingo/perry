@@ -22,7 +22,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(properties = "spring.jpa.hibernate.ddl-auto=none")
-@ActiveProfiles("dev")
 public abstract class BaseTokenStoreLiquibaseTest implements ApplicationContextAware {
 
   private static final String H2_DRIVER_CLASS_NAME = "org.h2.Driver";
