@@ -26,30 +26,30 @@ if (authorization) {
 
     def governmentEntityType = GovernmentEntityType.findBySysId(authorization.cwsOffice?.governmentEntityType)
 
- return [user           : authorization.userId,
-         first_name     : authorization.staffPerson?.firstName,
-         last_name      : authorization.staffPerson?.lastName,
-         roles          : user.roles + [supervisor ? "Supervisor" : "SocialWorker"],
-         staffId        : authorization.staffPerson?.id,
-         county_name    : governmentEntityType.description,
-         county_code    : governmentEntityType.countyCd,
-         county_cws_code: governmentEntityType.sysId,
-         privileges     : privileges + user.permissions,
-         authorityCodes : authorityCodes]
+    return [user           : authorization.userId,
+            first_name     : authorization.staffPerson?.firstName,
+            last_name      : authorization.staffPerson?.lastName,
+            roles          : user.roles + [supervisor ? "Supervisor" : "SocialWorker"],
+            staffId        : authorization.staffPerson?.id,
+            county_name    : governmentEntityType.description,
+            county_code    : governmentEntityType.countyCd,
+            county_cws_code: governmentEntityType.sysId,
+            privileges     : privileges + user.permissions,
+            authorityCodes : authorityCodes]
 
 }
 //NON-RACFID USER
 else {
-    def countyName = user.parameters["custom:county"];
-    def cwsCounty = GovernmentEntityType.findByDescription(countyName)
+    def countyName = user.parameters["custom:county"]
+    def cwsCounty = countyName ? GovernmentEntityType.findByDescription(countyName) : null
 
     def token = [user           : user.userId,
                  roles          : user.roles,
                  first_name     : user.parameters["given_name"],
                  last_name      : user.parameters["family_name"],
                  email          : user.parameters["email"],
-                 county_code    : cwsCounty.countyCd,
-                 county_cws_code: cwsCounty.sysId,
+                 county_code    : cwsCounty?.countyCd,
+                 county_cws_code: cwsCounty?.sysId,
                  county_name    : countyName,
                  privileges     : user.permissions]
 
