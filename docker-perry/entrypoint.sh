@@ -31,6 +31,10 @@ if [ "$SWAGGER" = true ] ; then
     JAVA_OPTS="$JAVA_OPTS,swagger"
 fi
 
+if [ -x /paramfolder/parameters.sh ]; then
+    source /paramfolder/parameters.sh
+fi
+
 if [ -f /opt/newrelic/newrelic.yml ]; then
     java -javaagent:/opt/newrelic/newrelic.jar  ${JAVA_OPTS} -jar perry.jar server ${PERRY_CONFIG}
 else
