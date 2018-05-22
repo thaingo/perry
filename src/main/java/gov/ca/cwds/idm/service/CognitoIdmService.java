@@ -45,7 +45,7 @@ public class CognitoIdmService implements IdmService {
     Collection<UserType> cognitoUsers =
         cognitoService.search(UsersSearchParametersUtil.composeSearchParameter(lastName));
 
-    Map<String, String> userNameToRacfId = new HashMap<>();
+    Map<String, String> userNameToRacfId = new HashMap<>(cognitoUsers.size());
     for (UserType user : cognitoUsers) {
       userNameToRacfId.put(user.getUsername(), getRACFId(user));
     }
