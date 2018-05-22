@@ -11,7 +11,6 @@ services:
     restart: on-failure
     ports:
           - 18080:8080
-          - 5005:5005
     env_file: .env
 
   cals_db2_data:
