@@ -40,13 +40,13 @@ if (authorization) {
 }
 //NON-RACFID USER
 else {
-    def countyName = user.parameters["county_name"];
+    def countyName = user.parameters["custom:county"];
     def cwsCounty = GovernmentEntityType.findByDescription(countyName)
 
     def token = [user           : user.userId,
                  roles          : user.roles,
-                 first_name     : user.parameters["first_name"],
-                 last_name      : user.parameters["last_name"],
+                 first_name     : user.parameters["given_name"],
+                 last_name      : user.parameters["family_name"],
                  email          : user.parameters["email"],
                  county_code    : cwsCounty.countyCd,
                  county_cws_code: cwsCounty.sysId,

@@ -1,1 +1,1 @@
-{"user":"uuid","roles":["CALS-external-worker"],"county_code":"99","county_cws_code":1126,"county_name":"State of California","privileges":["CWS Case Management System","Resource Management"]}
+{"user":"uuid","roles":["CALS-external-worker"],"first_name":"first","last_name":"last","email":"e-mail","county_code":"99","county_cws_code":1126,"county_name":"State of California","privileges":["CWS Case Management System","Resource Management"]}

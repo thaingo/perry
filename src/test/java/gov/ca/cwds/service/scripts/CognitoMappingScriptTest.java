@@ -31,7 +31,7 @@ public class CognitoMappingScriptTest {
         "first-permission",
         "second-permission",
         "third-permission")), userToken.getPermissions());
-
+    Assert.assertTrue(userToken.getParameter("custom:permission") instanceof Set);
   }
 
   @Test
