@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import javax.script.ScriptException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -44,10 +45,10 @@ public class CognitoIdmService implements IdmService {
     Collection<UserType> cognitoUsers =
         cognitoService.search(UsersSearchParametersUtil.composeSearchParameter(lastName));
 
-    Map<String, String> userNameToRacfId =
-        cognitoUsers
-            .stream()
-            .collect(Collectors.toMap(UserType::getUsername, CognitoIdmService::getRACFId));
+    Map<String, String> userNameToRacfId = new HashMap<>();
+    for (UserType user : cognitoUsers) {
+      userNameToRacfId.put(user.getUsername(), getRACFId(user));
+    }
 
     Map<String, UserAuthorization> idToCmsUser = userAuthorizationService.findUsers(userNameToRacfId.values())
             .stream().collect(Collectors.toMap(UserAuthorization::getUserId, e -> e,

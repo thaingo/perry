@@ -1,7 +1,7 @@
 version: '2.1'
 services:
   perry:
-    image: cwds/perry:3.0.1_609-RC
+    image: cwds/perry
     hostname: perry
     depends_on:
       cals_db2_data:
@@ -15,7 +15,7 @@ services:
     env_file: .env
 
   cals_db2_data:
-    image: cwds/cals_db2_data
+    image: cwds/db2data
     hostname: cals_db2_data
     ports:
       - ${DB_CMS_DB2_PORT}:50000
