@@ -1,5 +1,6 @@
 package gov.ca.cwds.idm;
 
+import gov.ca.cwds.idm.dto.UpdateUserDto;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.DictionaryProvider;
 import gov.ca.cwds.idm.service.IdmService;
@@ -46,6 +47,21 @@ public class IdmResource {
     return Optional.ofNullable(idmService.findUser(id))
         .map(user -> ResponseEntity.ok().body(user))
         .orElseGet(() -> ResponseEntity.notFound().build());
+  }
+
+  @RequestMapping(method = RequestMethod.PUT, value = "/users/{id}", produces = "application/json")
+  @ApiOperation(value = "Update User", response = User.class)
+  public ResponseEntity<User> updateUser(
+      @ApiParam(required = true, value = "The unique user ID", example = "userId1")
+      @PathVariable
+      @NotNull
+      String id,
+      @ApiParam(required = true, name = "userUpdateData", value = "The User update data")
+      @NotNull
+      UpdateUserDto updateUserDto) {
+
+    User updatedUser = idmService.updateUser(id, updateUserDto);
+    return ResponseEntity.ok().body(updatedUser);
   }
 
   @RequestMapping(method = RequestMethod.GET, value = "/permissions", produces = "application/json")

@@ -3,6 +3,7 @@ package gov.ca.cwds.idm.service;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.PerryProperties;
+import gov.ca.cwds.idm.dto.UpdateUserDto;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.util.UsersSearchParametersUtil;
 import gov.ca.cwds.rest.api.domain.PerryException;
@@ -76,9 +77,18 @@ public class CognitoIdmService implements IdmService {
   @PostAuthorize("returnObject.countyName == principal.getParameter('county_name')")
   public User findUser(String id) {
     UserType cognitoUser = cognitoService.getById(id);
-    if (cognitoUser == null) {
-      return null;
-    }
+    return cognitoUser != null ? enrichCognitoUser(cognitoUser) : null;
+  }
+
+  @Override
+  @PostAuthorize("returnObject.countyName == principal.getParameter('county_name')")
+  public User updateUser(String id, UpdateUserDto updateUserDto) {
+    UserType cognitoUser = cognitoService.updateUser(id, updateUserDto);
+    return cognitoUser != null ? enrichCognitoUser(cognitoUser) : null;
+  }
+
+  private User enrichCognitoUser(UserType cognitoUser) {
+
     String racfId = getRACFId(cognitoUser);
 
     UserAuthorization cwsUser = null;

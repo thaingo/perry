@@ -6,12 +6,15 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProviderClientBuilder;
+import com.amazonaws.services.cognitoidp.model.AdminDisableUserRequest;
+import com.amazonaws.services.cognitoidp.model.AdminEnableUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserResult;
 import com.amazonaws.services.cognitoidp.model.ListUsersRequest;
 import com.amazonaws.services.cognitoidp.model.ListUsersResult;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.CognitoProperties;
+import gov.ca.cwds.idm.dto.UpdateUserDto;
 import gov.ca.cwds.idm.dto.UsersSearchParameter;
 import gov.ca.cwds.rest.api.domain.PerryException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,11 +35,13 @@ public class CognitoServiceFacade {
   public void init() {
     AWSCredentialsProvider credentialsProvider =
         new AWSStaticCredentialsProvider(
-            new BasicAWSCredentials(properties.getIamAccessKeyId(), properties.getIamSecretKey()));
+//            new BasicAWSCredentials(properties.getIamAccessKeyId(), properties.getIamSecretKey()));
+            new BasicAWSCredentials("AKIAJHZTTS36NDBH7FHA", "tIvBBOXTYq8MtJEJWT8jq0CmXOL/pQUsHCsN4l2c"));
     identityProvider =
         AWSCognitoIdentityProviderClientBuilder.standard()
             .withCredentials(credentialsProvider)
-            .withRegion(Regions.fromName(properties.getRegion()))
+//            .withRegion(Regions.fromName(properties.getRegion()))
+            .withRegion(Regions.fromName("us-east-2"))
             .build();
   }
 
@@ -53,6 +58,18 @@ public class CognitoServiceFacade {
           .withUserLastModifiedDate(agur.getUserLastModifiedDate())
           .withUserStatus(agur.getUserStatus());
     } catch (Exception e) {
+      throw new PerryException("Exception while updating user in AWS Cognito", e);
+    }
+  }
+
+  public UserType updateUser(String id, UpdateUserDto updateUserDto) {
+    try {
+      UserType existedCognitoUser = getById(id);
+
+      changeUserEnabledStatus(id, existedCognitoUser.getEnabled(), updateUserDto.getEnabled());
+
+      return getById(id);
+    } catch (Exception e) {
       throw new PerryException("Exception while connecting to AWS Cognito", e);
     }
   }
@@ -64,6 +81,20 @@ public class CognitoServiceFacade {
       return result.getUsers();
     } catch (Exception e) {
       throw new PerryException("Exception while connecting to AWS Cognito", e);
+    }
+  }
+
+  private void changeUserEnabledStatus(String id, Boolean existedEnabled, Boolean newEnabled) {
+    if(newEnabled != null && !newEnabled.equals(existedEnabled)) {
+      if(newEnabled){
+        AdminEnableUserRequest adminEnableUserRequest =
+            new AdminEnableUserRequest().withUsername(id).withUserPoolId(properties.getUserpool());
+        identityProvider.adminEnableUser(adminEnableUserRequest);
+      } else {
+        AdminDisableUserRequest adminDisableUserRequest =
+            new AdminDisableUserRequest().withUsername(id).withUserPoolId(properties.getUserpool());
+        identityProvider.adminDisableUser(adminDisableUserRequest);
+      }
     }
   }
 
