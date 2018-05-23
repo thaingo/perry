@@ -20,10 +20,12 @@ public class BaseScriptTest {
   public void test(String script, String json, String userAuthorization) throws Exception {
     IdentityMappingScript identityMappingScript = loadScript(script);
     UniversalUserToken user = createUniversalUserToken();
-    UserAuthorization authorization = MAPPER.readValue(
-            fixture(userAuthorization),
-            UserAuthorization.class);
-    user.setAuthorization(authorization);
+    if(userAuthorization != null) {
+      UserAuthorization authorization = MAPPER.readValue(
+          fixture(userAuthorization),
+          UserAuthorization.class);
+      user.setAuthorization(authorization);
+    }
     String result = identityMappingScript.map(user);
     System.out.println(result);
     String expectedResult = readResource(json);
