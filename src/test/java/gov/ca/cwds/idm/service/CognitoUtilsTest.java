@@ -1,6 +1,7 @@
 package gov.ca.cwds.idm.service;
 
 import static gov.ca.cwds.idm.service.CognitoUtils.PERMISSIONS_ATTR_NAME;
+import static gov.ca.cwds.idm.service.CognitoUtils.createPermissionsAttribute;
 import static gov.ca.cwds.idm.service.CognitoUtils.getAttribute;
 import static gov.ca.cwds.idm.service.CognitoUtils.getPermissions;
 import static gov.ca.cwds.idm.service.CognitoUtils.getPermissionsAttributeValue;
@@ -145,5 +146,15 @@ public class CognitoUtilsTest {
     permissions.add("one");
     permissions.add("two");
     assertThat(getPermissionsAttributeValue(permissions), is("one:two"));
+  }
+
+  @Test
+  public void testCreatePermissionsAttribute() {
+    Set<String> permissions = new HashSet<>();
+    permissions.add("one");
+    permissions.add("two");
+    AttributeType attr = createPermissionsAttribute(permissions);
+    assertThat(attr.getName(), is(PERMISSIONS_ATTR_NAME));
+    assertThat(attr.getValue(), is("one:two"));
   }
 }

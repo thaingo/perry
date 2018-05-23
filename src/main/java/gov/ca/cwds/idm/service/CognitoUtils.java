@@ -54,4 +54,11 @@ public class CognitoUtils {
       return "";
     }
   }
+
+  public static AttributeType createPermissionsAttribute(Set<String> permissions) {
+    AttributeType permissionsAttr = new AttributeType();
+    permissionsAttr.setName(PERMISSIONS_ATTR_NAME);
+    permissionsAttr.setValue(getPermissionsAttributeValue(permissions));
+    return permissionsAttr;
+  }
 }
