@@ -12,6 +12,7 @@ public class DefaultMappingTest extends BaseScriptTest {
     UniversalUserToken result = new UniversalUserToken();
     result.setUserId("userId");
     result.getRoles().addAll(Arrays.asList("role1", "role2"));
+    result.setParameter("sub", "test-sub");
     result.getPermissions().addAll(Arrays.asList("permission1", "permission2"));
     return result;
   }
