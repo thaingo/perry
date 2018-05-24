@@ -29,6 +29,7 @@ if (authorization) {
     return [user           : authorization.userId,
             first_name     : authorization.staffPerson?.firstName,
             last_name      : authorization.staffPerson?.lastName,
+            email          : user.parameters["email"],
             roles          : user.roles + [supervisor ? "Supervisor" : "SocialWorker"],
             staffId        : authorization.staffPerson?.id,
             county_name    : governmentEntityType.description,
