@@ -26,18 +26,23 @@ if (authorization) {
 
     def governmentEntityType = GovernmentEntityType.findBySysId(authorization.cwsOffice?.governmentEntityType)
 
-    return [user           : authorization.userId,
-            first_name     : authorization.staffPerson?.firstName,
-            last_name      : authorization.staffPerson?.lastName,
-            roles          : user.roles + [supervisor ? "Supervisor" : "SocialWorker"],
-            staffId        : authorization.staffPerson?.id,
-            county_name    : governmentEntityType.description,
-            county_code    : governmentEntityType.countyCd,
-            county_cws_code: governmentEntityType.sysId,
-            privileges     : privileges + user.permissions,
-            authorityCodes : authorityCodes,
-            sub            : user.parameters["sub"]]
+    def token=
+            [user           : authorization.userId,
+             first_name     : authorization.staffPerson?.firstName,
+             last_name      : authorization.staffPerson?.lastName,
+             roles          : user.roles + [supervisor ? "Supervisor" : "SocialWorker"],
+             staffId        : authorization.staffPerson?.id,
+             county_name    : governmentEntityType.description,
+             county_code    : governmentEntityType.countyCd,
+             county_cws_code: governmentEntityType.sysId,
+             privileges     : privileges + user.permissions,
+             authorityCodes : authorityCodes]
 
+    if (user.roles?.contains("CWS-admin")) {
+        token.userName = user.parameters["userName"]
+    }
+
+    return token
 }
 //NON-RACFID USER
 else {
@@ -52,12 +57,15 @@ else {
                  county_code    : cwsCounty?.countyCd,
                  county_cws_code: cwsCounty?.sysId,
                  county_name    : countyName,
-                 privileges     : user.permissions,
-                 sub            : user.parameters["sub"]]
+                 privileges     : user.permissions]
 
     //NON-RACFID CALS USER
     if (user.roles?.contains("CALS-external-worker")) {
         token.privileges += ["CWS Case Management System", "Resource Management"]
+    }
+
+    if (user.roles?.contains("CWS-admin")) {
+        token.userName = user.parameters["userName"]
     }
 
     return token

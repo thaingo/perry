@@ -15,7 +15,7 @@ public class DefaultMappingCalsTest extends BaseScriptTest {
     universalUserToken.setParameter("given_name", "first");
     universalUserToken.setParameter("family_name", "last");
     universalUserToken.setParameter("email", "e-mail");
-    universalUserToken.setParameter("sub", "test-sub");
+    universalUserToken.setParameter("userName", "testUserName");
     return universalUserToken;
   }
 
