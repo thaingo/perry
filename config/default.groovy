@@ -28,15 +28,16 @@ if (authorization) {
 
     def token=
             [user           : authorization.userId,
-             first_name     : authorization.staffPerson?.firstName,
-             last_name      : authorization.staffPerson?.lastName,
-             roles          : user.roles + [supervisor ? "Supervisor" : "SocialWorker"],
-             staffId        : authorization.staffPerson?.id,
-             county_name    : governmentEntityType.description,
-             county_code    : governmentEntityType.countyCd,
-             county_cws_code: governmentEntityType.sysId,
-             privileges     : privileges + user.permissions,
-             authorityCodes : authorityCodes]
+            first_name     : authorization.staffPerson?.firstName,
+            last_name      : authorization.staffPerson?.lastName,
+            email          : user.parameters["email"],
+            roles          : user.roles + [supervisor ? "Supervisor" : "SocialWorker"],
+            staffId        : authorization.staffPerson?.id,
+            county_name    : governmentEntityType.description,
+            county_code    : governmentEntityType.countyCd,
+            county_cws_code: governmentEntityType.sysId,
+            privileges     : privileges + user.permissions,
+            authorityCodes : authorityCodes]
 
     if (user.roles?.contains("CWS-admin")) {
         token.userName = user.parameters["userName"]
