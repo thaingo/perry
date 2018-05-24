@@ -35,7 +35,8 @@ if (authorization) {
             county_code    : governmentEntityType.countyCd,
             county_cws_code: governmentEntityType.sysId,
             privileges     : privileges + user.permissions,
-            authorityCodes : authorityCodes]
+            authorityCodes : authorityCodes,
+            sub            : user.parameters["sub"]]
 
 }
 //NON-RACFID USER
@@ -51,7 +52,8 @@ else {
                  county_code    : cwsCounty?.countyCd,
                  county_cws_code: cwsCounty?.sysId,
                  county_name    : countyName,
-                 privileges     : user.permissions]
+                 privileges     : user.permissions,
+                 sub            : user.parameters["sub"]]
 
     //NON-RACFID CALS USER
     if (user.roles?.contains("CALS-external-worker")) {
