@@ -20,7 +20,8 @@ public abstract class BaseApiConfiguration extends WebSecurityConfigurerAdapter 
   protected void configure(HttpSecurity http) throws Exception {
     http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .and().addFilterBefore(getFilter(), UsernamePasswordAuthenticationFilter.class)
-        .exceptionHandling().authenticationEntryPoint(errorHandler).accessDeniedHandler(apiAccessDeniedHandler);
+        .exceptionHandling().authenticationEntryPoint(errorHandler).accessDeniedHandler(apiAccessDeniedHandler)
+            .and().csrf().disable();
   }
 
   @Override
