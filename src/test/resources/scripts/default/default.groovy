@@ -26,7 +26,8 @@ if (authorization) {
 
     def governmentEntityType = GovernmentEntityType.findBySysId(authorization.cwsOffice?.governmentEntityType)
 
-    return [user           : authorization.userId,
+    def token=
+            [user           : authorization.userId,
             first_name     : authorization.staffPerson?.firstName,
             last_name      : authorization.staffPerson?.lastName,
             roles          : user.roles + [supervisor ? "Supervisor" : "SocialWorker"],
@@ -37,6 +38,11 @@ if (authorization) {
             privileges     : privileges + user.permissions,
             authorityCodes : authorityCodes]
 
+    if (user.roles?.contains("CWS-admin")) {
+        token.userName = user.parameters["userName"]
+    }
+
+    return token
 }
 //NON-RACFID USER
 else {
@@ -56,6 +62,10 @@ else {
     //NON-RACFID CALS USER
     if (user.roles?.contains("CALS-external-worker")) {
         token.privileges += ["CWS Case Management System", "Resource Management"]
+    }
+
+    if (user.roles?.contains("CWS-admin")) {
+        token.userName = user.parameters["userName"]
     }
 
     return token
