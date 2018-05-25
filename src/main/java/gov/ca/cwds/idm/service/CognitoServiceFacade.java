@@ -41,14 +41,14 @@ public class CognitoServiceFacade {
   public void init() {
     AWSCredentialsProvider credentialsProvider =
         new AWSStaticCredentialsProvider(
-//            new BasicAWSCredentials(properties.getIamAccessKeyId(), properties.getIamSecretKey()));
-            new BasicAWSCredentials("AKIAJHZTTS36NDBH7FHA",
-                "tIvBBOXTYq8MtJEJWT8jq0CmXOL/pQUsHCsN4l2c"));
+            new BasicAWSCredentials(properties.getIamAccessKeyId(), properties.getIamSecretKey()));
+//            new BasicAWSCredentials("AKIAJHZTTS36NDBH7FHA",
+//                "tIvBBOXTYq8MtJEJWT8jq0CmXOL/pQUsHCsN4l2c"));
     identityProvider =
         AWSCognitoIdentityProviderClientBuilder.standard()
             .withCredentials(credentialsProvider)
-//            .withRegion(Regions.fromName(properties.getRegion()))
-            .withRegion(Regions.fromName("us-east-2"))
+            .withRegion(Regions.fromName(properties.getRegion()))
+//            .withRegion(Regions.fromName("us-east-2"))
             .build();
   }
 
