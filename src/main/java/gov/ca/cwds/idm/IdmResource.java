@@ -4,8 +4,11 @@ import gov.ca.cwds.idm.dto.UpdateUserDto;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.DictionaryProvider;
 import gov.ca.cwds.idm.service.IdmService;
+import gov.ca.cwds.rest.api.domain.UserNotFoundPerryException;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
@@ -51,7 +54,7 @@ public class IdmResource {
 
   @RequestMapping(method = RequestMethod.PUT, value = "/users/{id}", produces = "application/json")
   @ApiOperation(value = "Update User", response = User.class)
-  public ResponseEntity<User> updateUser(
+  public Response updateUser(
       @ApiParam(required = true, value = "The unique user ID", example = "userId1")
       @PathVariable
       @NotNull
@@ -60,8 +63,12 @@ public class IdmResource {
       @NotNull
       UpdateUserDto updateUserDto) {
 
-    User updatedUser = idmService.updateUser(id, updateUserDto);
-    return ResponseEntity.ok().body(updatedUser);
+      try {
+        idmService.updateUser(id, updateUserDto);
+        return Response.ok().build();
+      } catch (UserNotFoundPerryException e) {
+        return Response.status(Status.NOT_FOUND).build();
+      }
   }
 
   @RequestMapping(method = RequestMethod.GET, value = "/permissions", produces = "application/json")

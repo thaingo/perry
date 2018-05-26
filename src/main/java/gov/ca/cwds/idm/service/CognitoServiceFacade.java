@@ -16,12 +16,16 @@ import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesRequest;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.ListUsersRequest;
 import com.amazonaws.services.cognitoidp.model.ListUsersResult;
+import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.CognitoProperties;
 import gov.ca.cwds.idm.dto.UpdateUserDto;
 import gov.ca.cwds.idm.dto.UsersSearchParameter;
 import gov.ca.cwds.rest.api.domain.PerryException;
+import gov.ca.cwds.rest.api.domain.UserNotFoundPerryException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,35 +46,30 @@ public class CognitoServiceFacade {
     AWSCredentialsProvider credentialsProvider =
         new AWSStaticCredentialsProvider(
             new BasicAWSCredentials(properties.getIamAccessKeyId(), properties.getIamSecretKey()));
-//            new BasicAWSCredentials("AKIAJHZTTS36NDBH7FHA",
-//                "tIvBBOXTYq8MtJEJWT8jq0CmXOL/pQUsHCsN4l2c"));
     identityProvider =
         AWSCognitoIdentityProviderClientBuilder.standard()
             .withCredentials(credentialsProvider)
             .withRegion(Regions.fromName(properties.getRegion()))
-//            .withRegion(Regions.fromName("us-east-2"))
             .build();
   }
 
   public UserType getById(String id) {
     try {
       return getCognitoUserById(id);
+    } catch (UserNotFoundException e) {
+      return null;
     } catch (Exception e) {
       throw new PerryException("Exception while getting user from AWS Cognito", e);
     }
   }
 
-  public UserType updateUser(String id, UpdateUserDto updateUserDto) {
+  public void updateUser(String id, UpdateUserDto updateUserDto) {
     try {
       UserType existedCognitoUser = getCognitoUserById(id);
-
-      Set<String> existedUserPermissions = CognitoUtils.getPermissions(existedCognitoUser);
-      Set<String> newUserPermissions = updateUserDto.getPermissions();
-      changeUserPermissions(id, existedUserPermissions, newUserPermissions);
-
+      updateUserAttributes(id, existedCognitoUser, updateUserDto);
       changeUserEnabledStatus(id, existedCognitoUser.getEnabled(), updateUserDto.getEnabled());
-
-      return getCognitoUserById(id);
+    } catch (UserNotFoundException e) {
+      throw new UserNotFoundPerryException("User with id=" + id + " is not found", e);
     } catch (Exception e) {
       throw new PerryException("Exception while updating user in AWS Cognito", e);
     }
@@ -86,7 +85,38 @@ public class CognitoServiceFacade {
     }
   }
 
-  private UserType getCognitoUserById(String id){
+  private void updateUserAttributes(String id, UserType existedCognitoUser,
+      UpdateUserDto updateUserDto) {
+
+    List<AttributeType> updateAttributes = getUpdateAttributes(existedCognitoUser, updateUserDto);
+
+    if (!updateAttributes.isEmpty()) {
+      AdminUpdateUserAttributesRequest adminUpdateUserAttributesRequest =
+          new AdminUpdateUserAttributesRequest()
+              .withUsername(id)
+              .withUserPoolId(properties.getUserpool())
+              .withUserAttributes(updateAttributes);
+
+      identityProvider.adminUpdateUserAttributes(adminUpdateUserAttributesRequest);
+    }
+  }
+
+  private List<AttributeType> getUpdateAttributes(UserType existedCognitoUser,
+      UpdateUserDto updateUserDto) {
+    List<AttributeType> updateAttributes = new ArrayList<>();
+
+    Set<String> existedUserPermissions = CognitoUtils.getPermissions(existedCognitoUser);
+    Set<String> newUserPermissions = updateUserDto.getPermissions();
+
+    if (!existedUserPermissions.equals(newUserPermissions)) {
+      AttributeType permissionsAttr = createPermissionsAttribute(newUserPermissions);
+      updateAttributes.add(permissionsAttr);
+    }
+
+    return updateAttributes;
+  }
+
+  private UserType getCognitoUserById(String id) {
     AdminGetUserRequest request =
         new AdminGetUserRequest().withUsername(id).withUserPoolId(properties.getUserpool());
     AdminGetUserResult agur = identityProvider.adminGetUser(request);
@@ -97,22 +127,6 @@ public class CognitoServiceFacade {
         .withUserCreateDate(agur.getUserCreateDate())
         .withUserLastModifiedDate(agur.getUserLastModifiedDate())
         .withUserStatus(agur.getUserStatus());
-  }
-
-  private void changeUserPermissions(String id, Set<String> existedUserPermissions,
-      Set<String> newUserPermissions) {
-    if (!existedUserPermissions.equals(newUserPermissions)) {
-
-      AttributeType permissionsAttr = createPermissionsAttribute(newUserPermissions);
-
-      AdminUpdateUserAttributesRequest adminUpdateUserAttributesRequest =
-          new AdminUpdateUserAttributesRequest()
-              .withUsername(id)
-              .withUserPoolId(properties.getUserpool())
-              .withUserAttributes(permissionsAttr);
-
-      identityProvider.adminUpdateUserAttributes(adminUpdateUserAttributesRequest);
-    }
   }
 
   private void changeUserEnabledStatus(String id, Boolean existedEnabled, Boolean newEnabled) {

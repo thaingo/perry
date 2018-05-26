@@ -74,17 +74,16 @@ public class CognitoIdmService implements IdmService {
   }
 
   @Override
-  @PostAuthorize("returnObject.countyName == principal.getParameter('county_name')")
+  @PostAuthorize("returnObject == null || returnObject.countyName == principal.getParameter('county_name')")
   public User findUser(String id) {
     UserType cognitoUser = cognitoService.getById(id);
     return cognitoUser != null ? enrichCognitoUser(cognitoUser) : null;
   }
 
   @Override
-  @PostAuthorize("returnObject.countyName == principal.getParameter('county_name')")
-  public User updateUser(String id, UpdateUserDto updateUserDto) {
-    UserType cognitoUser = cognitoService.updateUser(id, updateUserDto);
-    return cognitoUser != null ? enrichCognitoUser(cognitoUser) : null;
+  @PostAuthorize("returnObject == null || returnObject.countyName == principal.getParameter('county_name')")
+  public void updateUser(String id, UpdateUserDto updateUserDto) {
+    cognitoService.updateUser(id, updateUserDto);
   }
 
   private User enrichCognitoUser(UserType cognitoUser) {
