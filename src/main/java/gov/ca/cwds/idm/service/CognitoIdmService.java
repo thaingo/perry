@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PostFilter;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import javax.script.ScriptException;
@@ -74,16 +75,17 @@ public class CognitoIdmService implements IdmService {
   }
 
   @Override
-  @PostAuthorize("returnObject == null || returnObject.countyName == principal.getParameter('county_name')")
+  @PostAuthorize("returnObject.countyName == principal.getParameter('county_name')")
   public User findUser(String id) {
     UserType cognitoUser = cognitoService.getById(id);
-    return cognitoUser != null ? enrichCognitoUser(cognitoUser) : null;
+    return enrichCognitoUser(cognitoUser);
   }
 
   @Override
-  @PostAuthorize("returnObject == null || returnObject.countyName == principal.getParameter('county_name')")
-  public void updateUser(String id, UpdateUserDto updateUserDto) {
-    cognitoService.updateUser(id, updateUserDto);
+  @PreAuthorize("@cognitoServiceFacade.getCountyName(#id) == principal.getParameter('county_name')")
+  public User updateUser(String id, UpdateUserDto updateUserDto) {
+    UserType cognitoUser =  cognitoService.updateUser(id, updateUserDto);
+    return enrichCognitoUser(cognitoUser);
   }
 
   private User enrichCognitoUser(UserType cognitoUser) {

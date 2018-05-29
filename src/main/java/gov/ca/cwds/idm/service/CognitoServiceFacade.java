@@ -32,7 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
-@Service
+@Service(value = "cognitoServiceFacade")
 @Profile("idm")
 public class CognitoServiceFacade {
 
@@ -57,21 +57,30 @@ public class CognitoServiceFacade {
     try {
       return getCognitoUserById(id);
     } catch (UserNotFoundException e) {
-      return null;
+      throw new UserNotFoundPerryException("User with id=" + id + " is not found", e);
     } catch (Exception e) {
       throw new PerryException("Exception while getting user from AWS Cognito", e);
     }
   }
 
-  public void updateUser(String id, UpdateUserDto updateUserDto) {
+  public UserType updateUser(String id, UpdateUserDto updateUserDto) {
     try {
       UserType existedCognitoUser = getCognitoUserById(id);
       updateUserAttributes(id, existedCognitoUser, updateUserDto);
       changeUserEnabledStatus(id, existedCognitoUser.getEnabled(), updateUserDto.getEnabled());
+      return getCognitoUserById(id);
     } catch (UserNotFoundException e) {
       throw new UserNotFoundPerryException("User with id=" + id + " is not found", e);
     } catch (Exception e) {
       throw new PerryException("Exception while updating user in AWS Cognito", e);
+    }
+  }
+
+  public String getCountyName(String userId) {
+    try {
+      return CognitoUtils.getCountyName(getCognitoUserById(userId));
+    } catch (UserNotFoundException e) {
+      throw new UserNotFoundPerryException("User with id=" + userId + " is not found", e);
     }
   }
 
@@ -83,6 +92,19 @@ public class CognitoServiceFacade {
     } catch (Exception e) {
       throw new PerryException("Exception while connecting to AWS Cognito", e);
     }
+  }
+
+  private UserType getCognitoUserById(String id) {
+    AdminGetUserRequest request =
+        new AdminGetUserRequest().withUsername(id).withUserPoolId(properties.getUserpool());
+    AdminGetUserResult agur = identityProvider.adminGetUser(request);
+    return new UserType()
+        .withUsername(agur.getUsername())
+        .withAttributes(agur.getUserAttributes())
+        .withEnabled(agur.getEnabled())
+        .withUserCreateDate(agur.getUserCreateDate())
+        .withUserLastModifiedDate(agur.getUserLastModifiedDate())
+        .withUserStatus(agur.getUserStatus());
   }
 
   private void updateUserAttributes(String id, UserType existedCognitoUser,
@@ -114,19 +136,6 @@ public class CognitoServiceFacade {
     }
 
     return updateAttributes;
-  }
-
-  private UserType getCognitoUserById(String id) {
-    AdminGetUserRequest request =
-        new AdminGetUserRequest().withUsername(id).withUserPoolId(properties.getUserpool());
-    AdminGetUserResult agur = identityProvider.adminGetUser(request);
-    return new UserType()
-        .withUsername(agur.getUsername())
-        .withAttributes(agur.getUserAttributes())
-        .withEnabled(agur.getEnabled())
-        .withUserCreateDate(agur.getUserCreateDate())
-        .withUserLastModifiedDate(agur.getUserLastModifiedDate())
-        .withUserStatus(agur.getUserStatus());
   }
 
   private void changeUserEnabledStatus(String id, Boolean existedEnabled, Boolean newEnabled) {

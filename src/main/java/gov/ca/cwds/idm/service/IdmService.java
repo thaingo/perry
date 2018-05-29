@@ -10,5 +10,5 @@ public interface IdmService {
 
   User findUser(String id);
 
-  void updateUser(String id, UpdateUserDto updateUserDto);
+  User updateUser(String id, UpdateUserDto updateUserDto);
 }
