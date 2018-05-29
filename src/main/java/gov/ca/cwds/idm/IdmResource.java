@@ -54,7 +54,7 @@ public class IdmResource {
     }
   }
 
-  @RequestMapping(method = RequestMethod.PUT, value = "/users/{id}", produces = "application/json")
+  @RequestMapping(method = RequestMethod.PATCH, value = "/users/{id}", produces = "application/json")
   @ApiOperation(value = "Update User", response = User.class)
   public ResponseEntity<User> updateUser(
       @ApiParam(required = true, value = "The unique user ID", example = "userId1")
