@@ -1,12 +1,15 @@
 package gov.ca.cwds.idm.service;
 
+import static gov.ca.cwds.idm.service.CognitoUtils.COUNTY_ATTR_NAME;
 import static gov.ca.cwds.idm.service.CognitoUtils.PERMISSIONS_ATTR_NAME;
 import static gov.ca.cwds.idm.service.CognitoUtils.createPermissionsAttribute;
 import static gov.ca.cwds.idm.service.CognitoUtils.getAttribute;
+import static gov.ca.cwds.idm.service.CognitoUtils.getCountyName;
 import static gov.ca.cwds.idm.service.CognitoUtils.getPermissions;
 import static gov.ca.cwds.idm.service.CognitoUtils.getPermissionsAttributeValue;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
@@ -157,4 +160,23 @@ public class CognitoUtilsTest {
     assertThat(attr.getName(), is(PERMISSIONS_ATTR_NAME));
     assertThat(attr.getValue(), is("one:two"));
   }
+
+  @Test
+  public void testGetCountyName() {
+    UserType cognitoUser = new UserType();
+
+    AttributeType attr = new AttributeType();
+    attr.setName(COUNTY_ATTR_NAME);
+    attr.setValue("Yolo");
+    cognitoUser.withAttributes(attr);
+
+    assertThat(getCountyName(cognitoUser), is("Yolo"));
+  }
+
+  @Test
+  public void testGetCountyNameNoCountyAttr() {
+    UserType cognitoUser = new UserType();
+    assertThat(getCountyName(cognitoUser), is(nullValue()));
+  }
+
 }

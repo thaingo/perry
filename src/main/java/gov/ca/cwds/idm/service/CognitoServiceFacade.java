@@ -165,4 +165,21 @@ public class CognitoServiceFacade {
     }
     return request;
   }
+
+  public CognitoProperties getProperties() {
+    return properties;
+  }
+
+  public void setProperties(CognitoProperties properties) {
+    this.properties = properties;
+  }
+
+  public AWSCognitoIdentityProvider getIdentityProvider() {
+    return identityProvider;
+  }
+
+  public void setIdentityProvider(
+      AWSCognitoIdentityProvider identityProvider) {
+    this.identityProvider = identityProvider;
+  }
 }

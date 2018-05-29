@@ -30,9 +30,13 @@ public class CognitoUtils {
     }
   }
 
-  public static String getCountyName(UserType cognitoUser) {
-    return getAttribute(cognitoUser, COUNTY_ATTR_NAME)
+  public static String getAttributeValue(UserType cognitoUser, String attributeName) {
+    return getAttribute(cognitoUser, attributeName)
         .map(attr -> attr.getValue()).orElse(null);
+  }
+
+  public static String getCountyName(UserType cognitoUser) {
+    return getAttributeValue(cognitoUser, COUNTY_ATTR_NAME);
   }
 
   public static Set<String> getPermissions(UserType cognitoUser) {
