@@ -81,9 +81,8 @@ public class CognitoIdmService implements IdmService {
 
   @Override
   @PreAuthorize("@cognitoServiceFacade.getCountyName(#id) == principal.getParameter('county_name')")
-  public User updateUser(String id, UpdateUserDto updateUserDto) {
-    UserType cognitoUser =  cognitoService.updateUser(id, updateUserDto);
-    return enrichCognitoUser(cognitoUser);
+  public void updateUser(String id, UpdateUserDto updateUserDto) {
+    cognitoService.updateUser(id, updateUserDto);
   }
 
   private User enrichCognitoUser(UserType cognitoUser) {

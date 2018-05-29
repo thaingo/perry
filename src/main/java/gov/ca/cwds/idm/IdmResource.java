@@ -54,8 +54,8 @@ public class IdmResource {
     }
   }
 
-  @RequestMapping(method = RequestMethod.PATCH, value = "/users/{id}", produces = "application/json")
-  @ApiOperation(value = "Update User", response = User.class)
+  @RequestMapping(method = RequestMethod.PATCH, value = "/users/{id}")
+  @ApiOperation(value = "Update User")
   public ResponseEntity<User> updateUser(
       @ApiParam(required = true, value = "The unique user ID", example = "userId1")
       @PathVariable
@@ -66,8 +66,8 @@ public class IdmResource {
       UpdateUserDto updateUserDto) {
 
       try {
-        User user = idmService.updateUser(id, updateUserDto);
-        return ResponseEntity.ok().body(user);
+        idmService.updateUser(id, updateUserDto);
+        return ResponseEntity.noContent().build();
       } catch (UserNotFoundPerryException e) {
         return ResponseEntity.notFound().build();
       }

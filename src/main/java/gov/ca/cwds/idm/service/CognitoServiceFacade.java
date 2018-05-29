@@ -63,12 +63,11 @@ public class CognitoServiceFacade {
     }
   }
 
-  public UserType updateUser(String id, UpdateUserDto updateUserDto) {
+  public void updateUser(String id, UpdateUserDto updateUserDto) {
     try {
       UserType existedCognitoUser = getCognitoUserById(id);
       updateUserAttributes(id, existedCognitoUser, updateUserDto);
       changeUserEnabledStatus(id, existedCognitoUser.getEnabled(), updateUserDto.getEnabled());
-      return getCognitoUserById(id);
     } catch (UserNotFoundException e) {
       throw new UserNotFoundPerryException("User with id=" + id + " is not found", e);
     } catch (Exception e) {
