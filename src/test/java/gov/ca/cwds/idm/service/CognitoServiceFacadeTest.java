@@ -139,7 +139,7 @@ public class CognitoServiceFacadeTest {
 
     AdminGetUserRequest expectedRequest = new AdminGetUserRequest().withUsername("id")
         .withUserPoolId("userpool");
-    verify(identityProvider, times(2)).adminGetUser(expectedRequest);
+    verify(identityProvider, times(1)).adminGetUser(expectedRequest);
     verify(identityProvider, times(0)).updateUserAttributes(any(UpdateUserAttributesRequest.class));
     verify(identityProvider, times(0)).adminDisableUser(any(AdminDisableUserRequest.class));
     verify(identityProvider, times(0)).adminEnableUser(any(AdminEnableUserRequest.class));
@@ -171,7 +171,7 @@ public class CognitoServiceFacadeTest {
 
     AdminGetUserRequest expectedAdminGetUserRequest =
         new AdminGetUserRequest().withUsername("id").withUserPoolId("userpool");
-    verify(identityProvider, times(2))
+    verify(identityProvider, times(1))
         .adminGetUser(expectedAdminGetUserRequest);
 
 

@@ -90,7 +90,7 @@ public class UserAuthorizationService {
 
   public List<UserAuthorization> findUsers(Collection<String> racfIds) {
     List<String> filtered =
-        racfIds.stream().filter(e -> e.length() <= RACFID_MAX_LENGTH).collect(Collectors.toList());
+        racfIds.stream().filter(Objects::nonNull).filter(e -> e.length() <= RACFID_MAX_LENGTH).collect(Collectors.toList());
     if (CollectionUtils.isEmpty(filtered)) {
       return Collections.emptyList();
     }
