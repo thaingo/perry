@@ -11,6 +11,11 @@ public class DefaultMappingCalsTest extends BaseScriptTest {
     UniversalUserToken universalUserToken = super.createUniversalUserToken();
     universalUserToken.setUserId("uuid");
     universalUserToken.setRoles(Collections.singleton("CALS-external-worker"));
+    universalUserToken.setParameter("custom:county", "State of California");
+    universalUserToken.setParameter("given_name", "first");
+    universalUserToken.setParameter("family_name", "last");
+    universalUserToken.setParameter("email", "e-mail");
+    universalUserToken.setParameter("userName", "testUserName");
     return universalUserToken;
   }
 
@@ -18,6 +23,6 @@ public class DefaultMappingCalsTest extends BaseScriptTest {
   public void testGroovyMapping() throws Exception {
     test("/scripts/default/default.groovy",
         "/scripts/default/default-cals.json",
-        "scripts/default/authz-cals.json");
+        null);
   }
 }
