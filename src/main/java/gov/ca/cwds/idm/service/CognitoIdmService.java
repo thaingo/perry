@@ -1,14 +1,21 @@
 package gov.ca.cwds.idm.service;
 
-import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.PerryProperties;
+import gov.ca.cwds.idm.dto.UpdateUserDto;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.util.UsersSearchParametersUtil;
 import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.rest.api.domain.auth.UserAuthorization;
 import gov.ca.cwds.service.UserAuthorizationService;
 import gov.ca.cwds.service.scripts.IdmMappingScript;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import javax.script.ScriptException;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,22 +23,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PostFilter;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-
-import javax.script.ScriptException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @Profile("idm")
 public class CognitoIdmService implements IdmService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CognitoIdmService.class);
-  private static final String RACFID_ATTRIBUTE = "CUSTOM:RACFID";
+  static final String RACFID_ATTRIBUTE = "CUSTOM:RACFID";
 
   @Autowired CognitoServiceFacade cognitoService;
 
@@ -76,9 +76,17 @@ public class CognitoIdmService implements IdmService {
   @PostAuthorize("returnObject.countyName == principal.getParameter('county_name')")
   public User findUser(String id) {
     UserType cognitoUser = cognitoService.getById(id);
-    if (cognitoUser == null) {
-      return null;
-    }
+    return enrichCognitoUser(cognitoUser);
+  }
+
+  @Override
+  @PreAuthorize("@cognitoServiceFacade.getCountyName(#id) == principal.getParameter('county_name')")
+  public void updateUser(String id, UpdateUserDto updateUserDto) {
+    cognitoService.updateUser(id, updateUserDto);
+  }
+
+  private User enrichCognitoUser(UserType cognitoUser) {
+
     String racfId = getRACFId(cognitoUser);
 
     UserAuthorization cwsUser = null;
@@ -98,12 +106,7 @@ public class CognitoIdmService implements IdmService {
     }
   }
 
-  private static String getRACFId(UserType user) {
-    return user.getAttributes()
-        .stream()
-        .filter(a -> a.getName().equalsIgnoreCase(RACFID_ATTRIBUTE))
-        .findAny()
-        .map(AttributeType::getValue)
-        .orElse(null);
+  static String getRACFId(UserType user) {
+    return CognitoUtils.getAttributeValue(user, RACFID_ATTRIBUTE);
   }
 }
