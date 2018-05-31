@@ -4,11 +4,14 @@ import gov.ca.cwds.security.jwt.JwtConfiguration;
 import gov.ca.cwds.service.scripts.IdentityMappingScript;
 import gov.ca.cwds.service.scripts.IdmMappingScript;
 import gov.ca.cwds.service.scripts.IdpMappingScript;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
-
-import java.io.IOException;
-import java.util.*;
 
 /**
  * Created by dmitry.rudenko on 5/22/2017.

@@ -14,9 +14,17 @@ public final class AssertFixtureUtils {
   }
 
   public static void assertStrict(MvcResult result, String fixturePath) throws IOException, JSONException {
+    assertWithFixture(result, fixturePath, true);
+  }
+
+  public static void assertNonStrict(MvcResult result, String fixturePath) throws IOException, JSONException {
+    assertWithFixture(result, fixturePath, false);
+  }
+
+  private static void assertWithFixture(MvcResult result, String fixturePath, boolean strict) throws IOException, JSONException {
     MockHttpServletResponse response = result.getResponse();
     String strResponse = response.getContentAsString();
-    JSONAssert.assertEquals(fixture(fixturePath), strResponse, true);
+    JSONAssert.assertEquals(fixture(fixturePath), strResponse, strict);
   }
 
 }
