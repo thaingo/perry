@@ -136,13 +136,13 @@ public class IdmResourceTest extends BaseTokenStoreLiquibaseTest {
 
     private final static String USERPOOL = "userpool";
 
-    private AWSCognitoIdentityProvider identityProvider;
+    private AWSCognitoIdentityProvider cognito;
 
 
     @PostConstruct
     @Override
     public void init() {
-      identityProvider = mock(AWSCognitoIdentityProvider.class);
+      cognito = mock(AWSCognitoIdentityProvider.class);
 
       CognitoProperties properties = new CognitoProperties();
       properties.setIamAccessKeyId("iamAccessKeyId");
@@ -151,7 +151,7 @@ public class IdmResourceTest extends BaseTokenStoreLiquibaseTest {
       properties.setRegion("us-east-2");
 
       setProperties(properties);
-      setIdentityProvider(identityProvider);
+      setIdentityProvider(cognito);
 
       setUpGetUser1requestAndResult();
       setUpGetAbsentUserRequestAndResult();
@@ -177,7 +177,7 @@ public class IdmResourceTest extends BaseTokenStoreLiquibaseTest {
           attr("custom:permission", "RFA-rollout:Snapshot-rollout:")
       );
 
-      when(identityProvider.adminGetUser(getUserRequest1))
+      when(cognito.adminGetUser(getUserRequest1))
           .thenReturn(getUserResult1);
     }
 
@@ -186,7 +186,7 @@ public class IdmResourceTest extends BaseTokenStoreLiquibaseTest {
       AdminGetUserRequest getUserAbsentRequest = new AdminGetUserRequest()
           .withUsername(ABSENT_USER_ID).withUserPoolId(USERPOOL);
 
-      when(identityProvider.adminGetUser(getUserAbsentRequest))
+      when(cognito.adminGetUser(getUserAbsentRequest))
           .thenThrow(new UserNotFoundException("user not found"));
     }
   }
