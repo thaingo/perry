@@ -50,9 +50,6 @@ node('dora-slave') {
                 }
             }
         }
-        stage('Clean Workspace') {
-            archiveArtifacts artifacts: '**/perry*.jar,readme.txt', fingerprint: true
-        }
         stage('Deploy Application') {
             checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: '*/master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '433ac100-b3c2-4519-b4d6-207c029a103b', url: 'git@github.com:ca-cwds/de-ansible.git']]]
             sh 'ansible-playbook -e NEW_RELIC_AGENT=$USE_NEWRELIC -e VERSION_NUMBER=$APP_VERSION -i $inventory deploy-perry.yml --vault-password-file ~/.ssh/vault.txt -vv'
@@ -90,7 +87,12 @@ node('dora-slave') {
                     buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'publishDocker -DRelease=false -DBuildNumber=$BUILD_NUMBER'
                 }
             }
+            // Clean Workspace
+            archiveArtifacts artifacts: '**/perry*.jar,readme.txt', fingerprint: true
         }
+//        stage('Clean Workspace') {
+//            archiveArtifacts artifacts: '**/perry*.jar,readme.txt', fingerprint: true
+//        }
 
     } catch (Exception e) {
         emailext attachLog: true, body: "Failed: ${e}", recipientProviders: [[$class: 'DevelopersRecipientProvider']],
