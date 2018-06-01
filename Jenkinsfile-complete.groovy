@@ -10,7 +10,8 @@ node('dora-slave') {
                         booleanParam(defaultValue: true, description: 'Default release version template is: <majorVersion>_<buildNumber>-RC', name: 'RELEASE_PROJECT'),
                         string(defaultValue: "", description: 'Fill this field if need to specify custom version ', name: 'OVERRIDE_VERSION'),
                         booleanParam(defaultValue: true, description: 'Enable NewRelic APM', name: 'USE_NEWRELIC'),
-                        string(defaultValue: 'inventories/tpt2dev/hosts.yml', description: '', name: 'inventory')
+                        string(defaultValue: 'inventories/tpt2dev/hosts.yml', description: '', name: 'inventory'),
+                        string(defaultValue: 'https://web.dev.cwds.io/perry', description: 'Perry base URL', name: 'PERRY_URL'),
                 ]), pipelineTriggers([pollSCM('H/5 * * * *')])])
     try {
         stage('Preparation') {
@@ -62,6 +63,14 @@ node('dora-slave') {
 //            buildInfo = rtGradle.run buildFile: './build.gradle', tasks: 'smokeTest --stacktrace'
 //            publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: 'build/reports/tests/smokeTest', reportFiles: 'index.html', reportName: 'Smoke Tests Report', reportTitles: 'Smoke tests summary'])
 //        }
+        stage('Integration Tests') {
+            def gradlePropsText = """
+            perry.url=${PERRY_URL}
+            perry.threads.count=5            
+            """
+            writeFile file: "gradle.properties", text: gradlePropsText
+            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'integrationTestDev --stacktrace'
+        }
         stage('Push artifacts') {
             // Artifactory
             rtGradle.deployer.deployArtifacts = true

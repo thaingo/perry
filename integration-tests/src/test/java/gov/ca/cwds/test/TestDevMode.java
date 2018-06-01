@@ -1,33 +1,48 @@
 package gov.ca.cwds.test;
 
+import io.github.bonigarcia.wdm.WebDriverManager;
 import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import net.serenitybdd.junit.runners.SerenityParameterizedRunner;
-import net.thucydides.core.annotations.Managed;
 import net.thucydides.core.annotations.Steps;
 import net.thucydides.junit.annotations.Concurrent;
 import net.thucydides.junit.annotations.TestData;
 import org.apache.commons.io.IOUtils;
+import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
 
 @RunWith(SerenityParameterizedRunner.class)
 @Concurrent
 public class TestDevMode {
 
-  @Managed(driver = "chrome", uniqueSession = true)
   private WebDriver driver;
   final private TestDataBean testDataBean;
   @Steps
   private LoginSteps loginSteps;
 
+  @BeforeClass
+  public static void setupClass() {
+    WebDriverManager.chromedriver().setup();
+  }
+
   @Before
   public void init() {
+    driver = new ChromeDriver();
     loginSteps.setDriver(driver);
+  }
+
+  @After
+  public void teardown() {
+    if (driver != null) {
+      driver.quit();
+    }
   }
 
   @TestData
@@ -49,7 +64,7 @@ public class TestDevMode {
     String json =
         IOUtils.toString(getClass().getResourceAsStream("/dev.json"), Charset
         .defaultCharset());
-    loginSteps.goToPerryLoginUrl(testDataBean.getUrl() + "/authn/login?callback=/perry/demo-sp.html");
+    loginSteps.goToPerryLoginUrl(testDataBean.getUrl() + "/authn/login?callback=" + testDataBean.getUrl() + "/demo-sp.html");
     loginSteps.isElementPresent("username");
     loginSteps.type("username", json);
     loginSteps.click("submitBtn");

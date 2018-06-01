@@ -224,9 +224,17 @@ task buildDocker(dependsOn: ':docker-perry:dockerCreateImage') {
     }
 }
 
+task integrationTestDev(dependsOn: ':integration-test:testDevMode') {
+    doLast {
+        println 'Integration Test Passed'
+    }
+}
+
 javadoc {
     options.addStringOption("charset", "UTF-8")
 }
+
+
 
 task integrationTest(type: Test, dependsOn: testClasses) {
     include '**/*IT*'

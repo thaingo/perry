@@ -1,5 +1,6 @@
 package gov.ca.cwds.test;
 
+import io.github.bonigarcia.wdm.WebDriverManager;
 import java.util.Collection;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -8,16 +9,18 @@ import net.thucydides.core.annotations.Managed;
 import net.thucydides.core.annotations.Steps;
 import net.thucydides.junit.annotations.Concurrent;
 import net.thucydides.junit.annotations.TestData;
+import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
 
 @RunWith(SerenityParameterizedRunner.class)
 @Concurrent
 public class TestCognitoMode {
 
-  @Managed(driver = "chrome", uniqueSession = true)
   private WebDriver driver;
   final private TestDataBean testDataBean;
 
@@ -39,14 +42,27 @@ public class TestCognitoMode {
     this.testDataBean = testDataBean;
   }
 
+  @BeforeClass
+  public static void setupClass() {
+    WebDriverManager.chromedriver().setup();
+  }
+
   @Before
   public void init() {
+    driver = new ChromeDriver();
     loginSteps.setDriver(driver);
+  }
+
+  @After
+  public void teardown() {
+    if (driver != null) {
+      driver.quit();
+    }
   }
 
   @Test
   public void testCognitoMode() throws Exception {
-    loginSteps.goToPerryLoginUrl(testDataBean.getUrl() + "/authn/login?callback=/perry/demo-sp.html");
+    loginSteps.goToPerryLoginUrl(testDataBean.getUrl() + "/authn/login?callback=" + testDataBean.getUrl() + "/demo-sp.html");
     loginSteps.isElementPresent("username");
     loginSteps.type("username", testDataBean.getUsername());
     loginSteps.type("password", testDataBean.getPassword());
