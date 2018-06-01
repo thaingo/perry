@@ -72,6 +72,12 @@ public class CognitoUtilsTest {
     AttributeType attr = attrOpt.get();
     assertThat(attr.getName(), is("someName"));
     assertThat(attr.getValue(), is("someValue"));
+
+    Optional<AttributeType> attrOptUpCase = getAttribute(cognitoUser, "SOMENAME");
+    assertTrue(attrOptUpCase.isPresent());
+    AttributeType attrUpCase = attrOptUpCase.get();
+    assertThat(attrUpCase.getName(), is("someName"));
+    assertThat(attrUpCase.getValue(), is("someValue"));
   }
 
   @Test

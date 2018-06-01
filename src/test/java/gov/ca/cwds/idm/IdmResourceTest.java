@@ -42,7 +42,7 @@ import org.springframework.web.context.WebApplicationContext;
 @TestPropertySource(locations = "classpath:test.properties")
 public class IdmResourceTest extends BaseTokenStoreLiquibaseTest {
 
-  private final static String USER_ID_1 = "2be3221f-8c2f-4386-8a95-a68f0282efb0";
+  private final static String USER_NO_RACFID_ID = "2be3221f-8c2f-4386-8a95-a68f0282efb0";
   private final static String ABSENT_USER_ID = "absentUserId";
 
   private static final MediaType CONTENT_TYPE = new MediaType(MediaType.APPLICATION_JSON.getType(),
@@ -74,12 +74,12 @@ public class IdmResourceTest extends BaseTokenStoreLiquibaseTest {
   }
 
   @Test
-  public void testGetUser() throws Exception {
+  public void testGetUserNoRacfid() throws Exception {
 
     authenticate("Yolo", "CARES admin");
 
     MvcResult result = mockMvc
-        .perform(MockMvcRequestBuilders.get("/idm/users/" + USER_ID_1))
+        .perform(MockMvcRequestBuilders.get("/idm/users/" + USER_NO_RACFID_ID))
         .andExpect(MockMvcResultMatchers.status().isOk())
         .andExpect(MockMvcResultMatchers.content().contentType(CONTENT_TYPE))
         .andReturn();
@@ -138,7 +138,6 @@ public class IdmResourceTest extends BaseTokenStoreLiquibaseTest {
 
     private AWSCognitoIdentityProvider cognito;
 
-
     @PostConstruct
     @Override
     public void init() {
@@ -153,40 +152,39 @@ public class IdmResourceTest extends BaseTokenStoreLiquibaseTest {
       setProperties(properties);
       setIdentityProvider(cognito);
 
-      setUpGetUser1requestAndResult();
+      setUpGetUserNoRacfidRequestAndResult();
       setUpGetAbsentUserRequestAndResult();
     }
 
-    private void setUpGetUser1requestAndResult(){
-      AdminGetUserRequest getUserRequest1 = new AdminGetUserRequest()
-          .withUsername(USER_ID_1).withUserPoolId(USERPOOL);
+    private void setUpGetUserNoRacfidRequestAndResult(){
+      AdminGetUserRequest getUserRequest = new AdminGetUserRequest()
+          .withUsername(USER_NO_RACFID_ID).withUserPoolId(USERPOOL);
 
-      AdminGetUserResult getUserResult1 = new AdminGetUserResult();
-      getUserResult1.setUsername(USER_ID_1);
-      getUserResult1.setEnabled(Boolean.TRUE);
-      getUserResult1.setUserStatus("FORCE_CHANGE_PASSWORD");
-      getUserResult1.setUserCreateDate(date(2018, 5, 4));
-      getUserResult1.setUserLastModifiedDate(date(2018, 5, 30));
+      AdminGetUserResult getUserResult = new AdminGetUserResult();
+      getUserResult.setUsername(USER_NO_RACFID_ID);
+      getUserResult.setEnabled(Boolean.TRUE);
+      getUserResult.setUserStatus("FORCE_CHANGE_PASSWORD");
+      getUserResult.setUserCreateDate(date(2018, 5, 4));
+      getUserResult.setUserLastModifiedDate(date(2018, 5, 30));
 
-      getUserResult1.withUserAttributes(
+      getUserResult.withUserAttributes(
           attr("email", "donzano@gmail.com"),
           attr("given_name", "Don"),
           attr("family_name", "Manzano"),
           attr("custom:County", "Yolo"),
-          attr("custom:RACFID", "SMITHBR"),
           attr("custom:permission", "RFA-rollout:Snapshot-rollout:")
       );
 
-      when(cognito.adminGetUser(getUserRequest1))
-          .thenReturn(getUserResult1);
+      when(cognito.adminGetUser(getUserRequest))
+          .thenReturn(getUserResult);
     }
 
     private void setUpGetAbsentUserRequestAndResult() {
 
-      AdminGetUserRequest getUserAbsentRequest = new AdminGetUserRequest()
+      AdminGetUserRequest getUserRequest = new AdminGetUserRequest()
           .withUsername(ABSENT_USER_ID).withUserPoolId(USERPOOL);
 
-      when(cognito.adminGetUser(getUserAbsentRequest))
+      when(cognito.adminGetUser(getUserRequest))
           .thenThrow(new UserNotFoundException("user not found"));
     }
   }

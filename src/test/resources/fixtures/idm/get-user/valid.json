@@ -11,6 +11,5 @@
   "permissions": [
     "Snapshot-rollout",
     "RFA-rollout"
-  ],
-  "RACFID": "SMITHBR"
+  ]
 }
