@@ -2,7 +2,6 @@ package gov.ca.cwds.idm;
 
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertStrict;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -10,6 +9,7 @@ import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserResult;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
+import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
 import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.service.CognitoServiceFacade;
 import java.nio.charset.Charset;
@@ -41,6 +41,9 @@ import org.springframework.web.context.WebApplicationContext;
 @ActiveProfiles({"dev", "idm"})
 @TestPropertySource(locations = "classpath:test.properties")
 public class IdmResourceTest extends BaseTokenStoreLiquibaseTest {
+
+  private final static String USER_ID_1 = "2be3221f-8c2f-4386-8a95-a68f0282efb0";
+  private final static String ABSENT_USER_ID = "absentUserId";
 
   private static final MediaType CONTENT_TYPE = new MediaType(MediaType.APPLICATION_JSON.getType(),
       MediaType.APPLICATION_JSON.getSubtype(),
@@ -76,12 +79,23 @@ public class IdmResourceTest extends BaseTokenStoreLiquibaseTest {
     authenticate("Yolo", "CARES admin");
 
     MvcResult result = mockMvc
-        .perform(MockMvcRequestBuilders.get("/idm/users/2be3221f-8c2f-4386-8a95-a68f0282efb0"))
+        .perform(MockMvcRequestBuilders.get("/idm/users/" + USER_ID_1))
         .andExpect(MockMvcResultMatchers.status().isOk())
         .andExpect(MockMvcResultMatchers.content().contentType(CONTENT_TYPE))
         .andReturn();
 
     assertNonStrict(result, "fixtures/idm/get-user/valid.json");
+  }
+
+  @Test
+  public void testGetAbsentUser() throws Exception {
+
+    authenticate("Yolo", "CARES admin");
+
+    MvcResult result = mockMvc
+        .perform(MockMvcRequestBuilders.get("/idm/users/" + ABSENT_USER_ID))
+        .andExpect(MockMvcResultMatchers.status().isNotFound())
+        .andReturn();
   }
 
   private void authenticate(String county, String... roles) {
@@ -104,7 +118,7 @@ public class IdmResourceTest extends BaseTokenStoreLiquibaseTest {
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName)
         throws BeansException {
-      if(beanName.equals("cognitoServiceFacade")){
+      if (beanName.equals("cognitoServiceFacade")) {
         return new TestCognitoServiceFacade();
       } else {
         return bean;
@@ -112,34 +126,49 @@ public class IdmResourceTest extends BaseTokenStoreLiquibaseTest {
     }
 
     @Override
-    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+    public Object postProcessAfterInitialization(Object bean, String beanName)
+        throws BeansException {
       return bean;
     }
   }
 
   static class TestCognitoServiceFacade extends CognitoServiceFacade {
+
+    private final static String USERPOOL = "userpool";
+
+    private AWSCognitoIdentityProvider identityProvider;
+
+
     @PostConstruct
     @Override
     public void init() {
-      AWSCognitoIdentityProvider identityProvider = mock(AWSCognitoIdentityProvider.class);
+      identityProvider = mock(AWSCognitoIdentityProvider.class);
 
       CognitoProperties properties = new CognitoProperties();
       properties.setIamAccessKeyId("iamAccessKeyId");
       properties.setIamSecretKey("iamSecretKey");
-      properties.setUserpool("userpool");
+      properties.setUserpool(USERPOOL);
       properties.setRegion("us-east-2");
 
       setProperties(properties);
       setIdentityProvider(identityProvider);
 
-      AdminGetUserResult mockResult = new AdminGetUserResult();
-      mockResult.setUsername("2be3221f-8c2f-4386-8a95-a68f0282efb0");
-      mockResult.setEnabled(Boolean.TRUE);
-      mockResult.setUserStatus("FORCE_CHANGE_PASSWORD");
-      mockResult.setUserCreateDate(date(2018, 5, 4));
-      mockResult.setUserLastModifiedDate(date(2018, 5, 30));
+      setUpGetUser1requestAndResult();
+      setUpGetAbsentUserRequestAndResult();
+    }
 
-      mockResult.withUserAttributes(
+    private void setUpGetUser1requestAndResult(){
+      AdminGetUserRequest getUserRequest1 = new AdminGetUserRequest()
+          .withUsername(USER_ID_1).withUserPoolId(USERPOOL);
+
+      AdminGetUserResult getUserResult1 = new AdminGetUserResult();
+      getUserResult1.setUsername(USER_ID_1);
+      getUserResult1.setEnabled(Boolean.TRUE);
+      getUserResult1.setUserStatus("FORCE_CHANGE_PASSWORD");
+      getUserResult1.setUserCreateDate(date(2018, 5, 4));
+      getUserResult1.setUserLastModifiedDate(date(2018, 5, 30));
+
+      getUserResult1.withUserAttributes(
           attr("email", "donzano@gmail.com"),
           attr("given_name", "Don"),
           attr("family_name", "Manzano"),
@@ -148,8 +177,17 @@ public class IdmResourceTest extends BaseTokenStoreLiquibaseTest {
           attr("custom:permission", "RFA-rollout:Snapshot-rollout:")
       );
 
-      when(identityProvider.adminGetUser(any(AdminGetUserRequest.class)))
-          .thenReturn(mockResult);
+      when(identityProvider.adminGetUser(getUserRequest1))
+          .thenReturn(getUserResult1);
+    }
+
+    private void setUpGetAbsentUserRequestAndResult() {
+
+      AdminGetUserRequest getUserAbsentRequest = new AdminGetUserRequest()
+          .withUsername(ABSENT_USER_ID).withUserPoolId(USERPOOL);
+
+      when(identityProvider.adminGetUser(getUserAbsentRequest))
+          .thenThrow(new UserNotFoundException("user not found"));
     }
   }
 
