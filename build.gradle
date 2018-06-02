@@ -224,7 +224,7 @@ task buildDocker(dependsOn: ':docker-perry:dockerCreateImage') {
     }
 }
 
-task integrationTestDev(dependsOn: ':integration-test:testDevMode') {
+task integrationTestDev(dependsOn: ':integration-tests:testDevMode') {
     doLast {
         println 'Integration Test Passed'
     }
