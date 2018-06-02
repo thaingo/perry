@@ -66,6 +66,7 @@ node('dora-slave') {
         stage('Integration Tests') {
 
             def gradlePropsText = """
+            perry.health.check.url=http://10.110.12.162:9082/manage/health
             perry.url=${PERRY_URL}
             perry.threads.count=5            
             """
