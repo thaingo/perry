@@ -40,6 +40,10 @@ test {
 }
 
 task testDevMode(type: Test, dependsOn: testClasses) {
+    systemProperty 'perry.health.check.url', project.property('perry.health.check.url')
+    systemProperty 'perry.url', project.property('perry.url')
+    systemProperty 'perry.threads.count', project.property('perry.threads.count')
+    systemProperty 'selenium.grid.url', project.property('selenium.grid.url')
     systemProperties System.properties
     include '**/TestDevMode*'
 }

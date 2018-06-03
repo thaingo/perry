@@ -69,6 +69,7 @@ node('dora-slave') {
 //            perry.health.check.url=http://10.110.12.162:9082/manage/health
 //            perry.url=${PERRY_URL}
 //            perry.threads.count=5
+//            selenium.grid.url=http://localhost:4444/wd/hub
 //            """
 //            writeFile file: "gradle.properties", text: gradlePropsText
 //            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'integrationTestDev --stacktrace'
