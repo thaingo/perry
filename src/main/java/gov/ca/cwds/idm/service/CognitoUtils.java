@@ -25,7 +25,7 @@ public class CognitoUtils {
     if(CollectionUtils.isEmpty(attributes)) {
       return Optional.empty();
     } else {
-      return attributes.stream().filter(attr -> attr.getName().equals(attrName))
+      return attributes.stream().filter(attr -> attr.getName().equalsIgnoreCase(attrName))
           .findFirst();
     }
   }
