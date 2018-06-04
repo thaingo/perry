@@ -41,6 +41,7 @@ import org.springframework.web.context.WebApplicationContext;
 public class IdmResourceTest extends BaseLiquibaseTest {
 
   private final static String USER_NO_RACFID_ID = "2be3221f-8c2f-4386-8a95-a68f0282efb0";
+  private final static String USER_WITH_RACFID_ID = "24051d54-9321-4dd2-a92f-6425d6c455be";
   private final static String ABSENT_USER_ID = "absentUserId";
 
   private static final MediaType CONTENT_TYPE = new MediaType(MediaType.APPLICATION_JSON.getType(),
@@ -82,7 +83,21 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         .andExpect(MockMvcResultMatchers.content().contentType(CONTENT_TYPE))
         .andReturn();
 
-    assertNonStrict(result, "fixtures/idm/get-user/valid.json");
+    assertNonStrict(result, "fixtures/idm/get-user/no-racfid-valid.json");
+  }
+
+  @Test
+  public void testGetUserWithRacfid() throws Exception {
+
+    authenticate("Yolo", "CARES admin");
+
+    MvcResult result = mockMvc
+        .perform(MockMvcRequestBuilders.get("/idm/users/" + USER_WITH_RACFID_ID))
+        .andExpect(MockMvcResultMatchers.status().isOk())
+        .andExpect(MockMvcResultMatchers.content().contentType(CONTENT_TYPE))
+        .andReturn();
+
+    assertNonStrict(result, "fixtures/idm/get-user/with-racfid-valid.json");
   }
 
   @Test
@@ -151,6 +166,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
       setIdentityProvider(cognito);
 
       setUpGetUserNoRacfidRequestAndResult();
+      setUpGetUserWithRacfidRequestAndResult();
       setUpGetAbsentUserRequestAndResult();
     }
 
@@ -171,6 +187,30 @@ public class IdmResourceTest extends BaseLiquibaseTest {
           attr("family_name", "Manzano"),
           attr("custom:County", "Yolo"),
           attr("custom:permission", "RFA-rollout:Snapshot-rollout:")
+      );
+
+      when(cognito.adminGetUser(getUserRequest))
+          .thenReturn(getUserResult);
+    }
+
+    private void setUpGetUserWithRacfidRequestAndResult(){
+      AdminGetUserRequest getUserRequest = new AdminGetUserRequest()
+          .withUsername(USER_WITH_RACFID_ID).withUserPoolId(USERPOOL);
+
+      AdminGetUserResult getUserResult = new AdminGetUserResult();
+      getUserResult.setUsername(USER_WITH_RACFID_ID);
+      getUserResult.setEnabled(Boolean.TRUE);
+      getUserResult.setUserStatus("CONFIRMED");
+      getUserResult.setUserCreateDate(date(2018, 5, 4));
+      getUserResult.setUserLastModifiedDate(date(2018, 5, 29));
+
+      getUserResult.withUserAttributes(
+          attr("email", "julio@gmail.com"),
+          attr("given_name", "Julio"),
+          attr("family_name", "Iglecias"),
+          attr("custom:County", "Yolo"),
+          attr("custom:permission", "Hotline-rollout"),
+          attr("custom:RACFID", "YOLOD")
       );
 
       when(cognito.adminGetUser(getUserRequest))
