@@ -14,7 +14,9 @@ import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.service.CognitoServiceFacade;
 import java.nio.charset.Charset;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import javax.annotation.PostConstruct;
@@ -42,6 +44,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
   private final static String USER_NO_RACFID_ID = "2be3221f-8c2f-4386-8a95-a68f0282efb0";
   private final static String USER_WITH_RACFID_ID = "24051d54-9321-4dd2-a92f-6425d6c455be";
+  private final static String USER_WITH_RACFID_AND_DB_DATA_ID = "d740ec1d-80ae-4d84-a8c4-9bed7a942f5b";
   private final static String ABSENT_USER_ID = "absentUserId";
 
   private static final MediaType CONTENT_TYPE = new MediaType(MediaType.APPLICATION_JSON.getType(),
@@ -73,31 +76,21 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   }
 
   @Test
-  public void testGetUserNoRacfid() throws Exception {
-
-    authenticate("Yolo", "CARES admin");
-
-    MvcResult result = mockMvc
-        .perform(MockMvcRequestBuilders.get("/idm/users/" + USER_NO_RACFID_ID))
-        .andExpect(MockMvcResultMatchers.status().isOk())
-        .andExpect(MockMvcResultMatchers.content().contentType(CONTENT_TYPE))
-        .andReturn();
-
-    assertNonStrict(result, "fixtures/idm/get-user/no-racfid-valid.json");
+  public void testGetUserNoRacfId() throws Exception {
+    testGetValidYoloUser(USER_NO_RACFID_ID,
+        "fixtures/idm/get-user/no-racfid-valid.json");
   }
 
   @Test
-  public void testGetUserWithRacfid() throws Exception {
+  public void testGetUserWithRacfId() throws Exception {
+    testGetValidYoloUser(USER_WITH_RACFID_ID,
+        "fixtures/idm/get-user/with-racfid-valid.json");
+  }
 
-    authenticate("Yolo", "CARES admin");
-
-    MvcResult result = mockMvc
-        .perform(MockMvcRequestBuilders.get("/idm/users/" + USER_WITH_RACFID_ID))
-        .andExpect(MockMvcResultMatchers.status().isOk())
-        .andExpect(MockMvcResultMatchers.content().contentType(CONTENT_TYPE))
-        .andReturn();
-
-    assertNonStrict(result, "fixtures/idm/get-user/with-racfid-valid.json");
+  @Test
+  public void testGetUserWithRacfIdAndDbData() throws Exception {
+    testGetValidYoloUser(USER_WITH_RACFID_AND_DB_DATA_ID,
+        "fixtures/idm/get-user/with-racfid-and-db-data-valid.json");
   }
 
   @Test
@@ -105,10 +98,22 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
     authenticate("Yolo", "CARES admin");
 
-    MvcResult result = mockMvc
+    mockMvc
         .perform(MockMvcRequestBuilders.get("/idm/users/" + ABSENT_USER_ID))
         .andExpect(MockMvcResultMatchers.status().isNotFound())
         .andReturn();
+  }
+
+  private void testGetValidYoloUser(String userId, String fixtureFilePath) throws Exception {
+    authenticate("Yolo", "CARES admin");
+
+    MvcResult result = mockMvc
+        .perform(MockMvcRequestBuilders.get("/idm/users/" + userId))
+        .andExpect(MockMvcResultMatchers.status().isOk())
+        .andExpect(MockMvcResultMatchers.content().contentType(CONTENT_TYPE))
+        .andReturn();
+
+    assertNonStrict(result, fixtureFilePath);
   }
 
   private void authenticate(String county, String... roles) {
@@ -165,53 +170,71 @@ public class IdmResourceTest extends BaseLiquibaseTest {
       setProperties(properties);
       setIdentityProvider(cognito);
 
-      setUpGetUserNoRacfidRequestAndResult();
-      setUpGetUserWithRacfidRequestAndResult();
+      CognitoUser noRacfIdUser = cognitoUser(USER_NO_RACFID_ID, Boolean.TRUE,
+          "FORCE_CHANGE_PASSWORD", date(2018, 5, 4),
+          date(2018, 5, 30), "donzano@gmail.com", "Don",
+          "Manzano", "Yolo", "RFA-rollout:Snapshot-rollout:", null);
+
+      CognitoUser withRacfIdUser = cognitoUser(USER_WITH_RACFID_ID, Boolean.TRUE,
+          "CONFIRMED", date(2018, 5, 4),
+          date(2018, 5, 29), "julio@gmail.com", "Julio",
+          "Iglecias", "Yolo", "Hotline-rollout", "YOLOD");
+
+      CognitoUser withRacfIdAndDbDataUser = cognitoUser(USER_WITH_RACFID_AND_DB_DATA_ID, Boolean.TRUE,
+          "CONFIRMED", date(2018, 5, 3),
+          date(2018, 5, 31), "garcia@gmail.com", "Garcia",
+          "Gonzales", "Yolo", "test", "SMITHBO");
+
       setUpGetAbsentUserRequestAndResult();
     }
 
-    private void setUpGetUserNoRacfidRequestAndResult(){
-      AdminGetUserRequest getUserRequest = new AdminGetUserRequest()
-          .withUsername(USER_NO_RACFID_ID).withUserPoolId(USERPOOL);
+    private CognitoUser cognitoUser(String id, Boolean enabled, String status, Date userCreateDate,
+        Date lastModifiedDate, String email, String firstName, String lastName, String county,
+        String permissions, String racfId) {
 
-      AdminGetUserResult getUserResult = new AdminGetUserResult();
-      getUserResult.setUsername(USER_NO_RACFID_ID);
-      getUserResult.setEnabled(Boolean.TRUE);
-      getUserResult.setUserStatus("FORCE_CHANGE_PASSWORD");
-      getUserResult.setUserCreateDate(date(2018, 5, 4));
-      getUserResult.setUserLastModifiedDate(date(2018, 5, 30));
+      CognitoUser cognitoUser = new CognitoUser(id, enabled, status, userCreateDate,
+          lastModifiedDate, email, firstName, lastName, county,
+          permissions, racfId);
 
-      getUserResult.withUserAttributes(
-          attr("email", "donzano@gmail.com"),
-          attr("given_name", "Don"),
-          attr("family_name", "Manzano"),
-          attr("custom:County", "Yolo"),
-          attr("custom:permission", "RFA-rollout:Snapshot-rollout:")
-      );
+      setUpGetUserRequestAndResult(cognitoUser);
 
-      when(cognito.adminGetUser(getUserRequest))
-          .thenReturn(getUserResult);
+      return cognitoUser;
     }
 
-    private void setUpGetUserWithRacfidRequestAndResult(){
+    private void setUpGetUserRequestAndResult(CognitoUser coqnitoUser) {
+
       AdminGetUserRequest getUserRequest = new AdminGetUserRequest()
-          .withUsername(USER_WITH_RACFID_ID).withUserPoolId(USERPOOL);
+          .withUsername(coqnitoUser.getId()).withUserPoolId(USERPOOL);
 
       AdminGetUserResult getUserResult = new AdminGetUserResult();
-      getUserResult.setUsername(USER_WITH_RACFID_ID);
-      getUserResult.setEnabled(Boolean.TRUE);
-      getUserResult.setUserStatus("CONFIRMED");
-      getUserResult.setUserCreateDate(date(2018, 5, 4));
-      getUserResult.setUserLastModifiedDate(date(2018, 5, 29));
+      getUserResult.setUsername(coqnitoUser.getId());
+      getUserResult.setEnabled(coqnitoUser.getEnabled());
+      getUserResult.setUserStatus(coqnitoUser.getStatus());
+      getUserResult.setUserCreateDate(coqnitoUser.getUserCreateDate());
+      getUserResult.setUserLastModifiedDate(coqnitoUser.getLastModifiedDate());
 
-      getUserResult.withUserAttributes(
-          attr("email", "julio@gmail.com"),
-          attr("given_name", "Julio"),
-          attr("family_name", "Iglecias"),
-          attr("custom:County", "Yolo"),
-          attr("custom:permission", "Hotline-rollout"),
-          attr("custom:RACFID", "YOLOD")
-      );
+      Collection<AttributeType> attrs = new ArrayList<>();
+
+      if(coqnitoUser.getEmail() != null) {
+        attrs.add(attr("email", coqnitoUser.getEmail()));
+      }
+      if(coqnitoUser.getFirstName() != null) {
+        attrs.add(attr("given_name", coqnitoUser.getFirstName()));
+      }
+      if(coqnitoUser.getLastName() != null) {
+        attrs.add(attr("family_name", coqnitoUser.getLastName()));
+      }
+      if(coqnitoUser.getCounty() != null) {
+        attrs.add(attr("custom:County", coqnitoUser.getCounty()));
+      }
+      if(coqnitoUser.getPermissions() != null) {
+        attrs.add(attr("custom:permission", coqnitoUser.getPermissions()));
+      }
+      if(coqnitoUser.getRacfId() != null) {
+        attrs.add(attr("custom:RACFID", coqnitoUser.getRacfId()));
+      }
+
+      getUserResult.withUserAttributes(attrs);
 
       when(cognito.adminGetUser(getUserRequest))
           .thenReturn(getUserResult);
@@ -236,5 +259,79 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
   private static Date date(int year, int month, int dayOfMonth) {
     return java.sql.Date.valueOf((LocalDate.of(year, month, dayOfMonth)));
+  }
+
+  static class CognitoUser {
+    private String id;
+    private Boolean enabled;
+    private String status;
+    private Date userCreateDate;
+    private Date lastModifiedDate;
+    private String email;
+    private String firstName;
+    private String lastName;
+    private String county;
+    private String permissions;
+    private String racfId;
+
+    public CognitoUser(String id, Boolean enabled, String status, Date userCreateDate,
+        Date lastModifiedDate, String email, String firstName, String lastName, String county,
+        String permissions, String racfId) {
+      this.id = id;
+      this.enabled = enabled;
+      this.status = status;
+      this.userCreateDate = userCreateDate;
+      this.lastModifiedDate = lastModifiedDate;
+      this.email = email;
+      this.firstName = firstName;
+      this.lastName = lastName;
+      this.county = county;
+      this.permissions = permissions;
+      this.racfId = racfId;
+    }
+
+    public String getId() {
+      return id;
+    }
+
+    public Boolean getEnabled() {
+      return enabled;
+    }
+
+    public String getStatus() {
+      return status;
+    }
+
+    public Date getUserCreateDate() {
+      return userCreateDate;
+    }
+
+    public Date getLastModifiedDate() {
+      return lastModifiedDate;
+    }
+
+    public String getEmail() {
+      return email;
+    }
+
+    public String getFirstName() {
+      return firstName;
+    }
+
+    public String getLastName() {
+      return lastName;
+    }
+
+    public String getCounty() {
+      return county;
+    }
+
+    public String getPermissions() {
+      return permissions;
+    }
+
+    public String getRacfId() {
+      return racfId;
+    }
   }
 }
