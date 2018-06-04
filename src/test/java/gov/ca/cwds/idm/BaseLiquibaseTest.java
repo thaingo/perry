@@ -30,12 +30,22 @@ public abstract class BaseLiquibaseTest  {
   private static final String H2_DRIVER_CLASS_NAME = "org.h2.Driver";
   private static final String SPRING_BOOT_H2_USER = "sa";
   private static final String SPRING_BOOT_H2_PASSWORD = "";
+
+  public static final String TOKEN_STORE_SCHEMA = "perry";
+  public static final String CMS_STORE_SCHEMA = "cwscms";
+
+  public static final String DATABASE_URL = "jdbc:h2:file:C:/Workspace/perry/testdb;";
+  public static final String TOKEN_STORE_URL = DATABASE_URL + "schema=" + TOKEN_STORE_SCHEMA;
+  public static final String CMS_STORE_URL = DATABASE_URL + "schema=" + CMS_STORE_SCHEMA;
+//    public static final String DATABASE_URL = "jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;";
+//    public static final String TOKEN_STORE_URL = DATABASE_URL + "INIT=create schema if not exists " + TOKEN_STORE_SCHEMA + "\\;set schema " + TOKEN_STORE_SCHEMA;
+//    public static final String CMS_STORE_URL = DATABASE_URL + "INIT=create schema if not exists " +  CMS_STORE_SCHEMA + "\\;set schema " + CMS_STORE_SCHEMA;
+
   private static final String TOKEN_STORE_CHANGE_LOG = "liquibase/perry_database_master.xml";
   private static final String CMS_CHANGE_LOG = "liquibase/cwscms_database_base_with_lookups.xml";
-  public static final String TOKEN_STORE_URL = "jdbc:h2:file:C:/Workspace/perry/testdb;schema=perry";
-  public static final String CMS_STORE_URL = "jdbc:h2:file:C:/Workspace/perry/testdb;schema=cwscms";
-//  public static final String TOKEN_STORE_URL = "jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;create schema if not exists perry\\;schema=perry";
-//  public static final String CMS_STORE_URL = "jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;create schema if not exists cwscms\\;schema=cwscms";
+
+
+
 
   @BeforeClass
   public static void beforeClass() throws Exception {
