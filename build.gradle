@@ -214,13 +214,27 @@ publishing {
 
 task publishDocker(dependsOn: ':docker-perry:dockerPerryPublish') {
     doLast {
-        println 'Published'
+        println 'Docker published'
+    }
+}
+
+task buildDocker(dependsOn: ':docker-perry:dockerCreateImage') {
+    doLast {
+        println 'Docker built'
+    }
+}
+
+task integrationTestDev(dependsOn: ':integration-tests:testDevMode') {
+    doLast {
+        println 'Integration Test Passed'
     }
 }
 
 javadoc {
     options.addStringOption("charset", "UTF-8")
 }
+
+
 
 task integrationTest(type: Test, dependsOn: testClasses) {
     include '**/*IT*'

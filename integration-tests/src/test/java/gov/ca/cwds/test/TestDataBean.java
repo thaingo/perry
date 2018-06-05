@@ -5,12 +5,14 @@ public class TestDataBean {
   private String password;
   private String url;
   private String json;
+  private String gridUrl;
 
   public TestDataBean() {
     username = System.getProperty("perry.username");
     password = System.getProperty("perry.password");
     url = System.getProperty("perry.url");
     json = System.getProperty("perry.json");
+    gridUrl = System.getProperty("selenium.grid.url");
   }
 
   public String getUsername() {
@@ -27,5 +29,9 @@ public class TestDataBean {
 
   public String getJson() {
     return json;
+  }
+
+  public String getGridUrl() {
+    return gridUrl;
   }
 }
