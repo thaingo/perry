@@ -2,6 +2,7 @@ package gov.ca.cwds.idm;
 
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertStrict;
+import static gov.ca.cwds.idm.util.UsersSearchParametersUtil.DEFAULT_PAGESIZE;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
@@ -12,7 +13,10 @@ import com.amazonaws.services.cognitoidp.model.AdminGetUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserResult;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.InternalErrorException;
+import com.amazonaws.services.cognitoidp.model.ListUsersRequest;
+import com.amazonaws.services.cognitoidp.model.ListUsersResult;
 import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
+import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.service.CognitoServiceFacade;
 import gov.ca.cwds.rest.api.domain.PerryException;
@@ -23,6 +27,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -127,6 +133,19 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     }
   }
 
+  @Test
+  public void testGetAllYoloUsers() throws Exception {
+    authenticate("Yolo", "CARES admin");
+
+    MvcResult result = mockMvc
+        .perform(MockMvcRequestBuilders.get("/idm/users"))
+        .andExpect(MockMvcResultMatchers.status().isOk())
+        .andExpect(MockMvcResultMatchers.content().contentType(CONTENT_TYPE))
+        .andReturn();
+
+    assertNonStrict(result, "fixtures/idm/get-users/all-valid.json");
+  }
+
   private void testGetValidYoloUser(String userId, String fixtureFilePath) throws Exception {
     authenticate("Yolo", "CARES admin");
 
@@ -193,17 +212,17 @@ public class IdmResourceTest extends BaseLiquibaseTest {
       setProperties(properties);
       setIdentityProvider(cognito);
 
-      CognitoUser noRacfIdUser = cognitoUser(USER_NO_RACFID_ID, Boolean.TRUE,
+      TestUser noRacfIdUser = testUser(USER_NO_RACFID_ID, Boolean.TRUE,
           "FORCE_CHANGE_PASSWORD", date(2018, 5, 4),
           date(2018, 5, 30), "donzano@gmail.com", "Don",
           "Manzano", "Yolo", "RFA-rollout:Snapshot-rollout:", null);
 
-      CognitoUser withRacfIdUser = cognitoUser(USER_WITH_RACFID_ID, Boolean.TRUE,
+      TestUser withRacfIdUser = testUser(USER_WITH_RACFID_ID, Boolean.TRUE,
           "CONFIRMED", date(2018, 5, 4),
           date(2018, 5, 29), "julio@gmail.com", "Julio",
           "Iglecias", "Yolo", "Hotline-rollout", "YOLOD");
 
-      CognitoUser withRacfIdAndDbDataUser = cognitoUser(USER_WITH_RACFID_AND_DB_DATA_ID, Boolean.TRUE,
+      TestUser withRacfIdAndDbDataUser = testUser(USER_WITH_RACFID_AND_DB_DATA_ID, Boolean.TRUE,
           "CONFIRMED", date(2018, 5, 3),
           date(2018, 5, 31), "garcia@gmail.com", "Garcia",
           "Gonzales", "Yolo", "test", "SMITHBO");
@@ -211,55 +230,87 @@ public class IdmResourceTest extends BaseLiquibaseTest {
       setUpGetAbsentUserRequestAndResult();
 
       setUpGetErrorUserRequestAndResult();
+
+      setListAllUsersRequestAndResult(noRacfIdUser, withRacfIdUser, withRacfIdAndDbDataUser);
     }
 
-    private CognitoUser cognitoUser(String id, Boolean enabled, String status, Date userCreateDate,
+    private void setListAllUsersRequestAndResult(TestUser... testUsers) {
+      ListUsersRequest request =
+          new ListUsersRequest()
+              .withUserPoolId(USERPOOL)
+              .withLimit(DEFAULT_PAGESIZE)
+              .withFilter("preferred_username = \"Yolo\"");
+
+      List<UserType> userTypes = Arrays.stream(testUsers)
+          .map(testUser -> userType(testUser)).collect(Collectors.toList());
+
+      ListUsersResult result = new ListUsersResult().withUsers(userTypes);
+
+      when(cognito.listUsers(request)).thenReturn(result);
+    }
+
+    private TestUser testUser(String id, Boolean enabled, String status, Date userCreateDate,
         Date lastModifiedDate, String email, String firstName, String lastName, String county,
         String permissions, String racfId) {
 
-      CognitoUser cognitoUser = new CognitoUser(id, enabled, status, userCreateDate,
+      TestUser testUser = new TestUser(id, enabled, status, userCreateDate,
           lastModifiedDate, email, firstName, lastName, county,
           permissions, racfId);
 
-      setUpGetUserRequestAndResult(cognitoUser);
+      setUpGetUserRequestAndResult(testUser);
 
-      return cognitoUser;
+      return testUser;
     }
 
-    private void setUpGetUserRequestAndResult(CognitoUser coqnitoUser) {
-
-      AdminGetUserRequest getUserRequest = new AdminGetUserRequest()
-          .withUsername(coqnitoUser.getId()).withUserPoolId(USERPOOL);
-
-      AdminGetUserResult getUserResult = new AdminGetUserResult();
-      getUserResult.setUsername(coqnitoUser.getId());
-      getUserResult.setEnabled(coqnitoUser.getEnabled());
-      getUserResult.setUserStatus(coqnitoUser.getStatus());
-      getUserResult.setUserCreateDate(coqnitoUser.getUserCreateDate());
-      getUserResult.setUserLastModifiedDate(coqnitoUser.getLastModifiedDate());
-
+    private static Collection<AttributeType> attrs(TestUser testUser){
       Collection<AttributeType> attrs = new ArrayList<>();
 
-      if(coqnitoUser.getEmail() != null) {
-        attrs.add(attr("email", coqnitoUser.getEmail()));
+      if(testUser.getEmail() != null) {
+        attrs.add(attr("email", testUser.getEmail()));
       }
-      if(coqnitoUser.getFirstName() != null) {
-        attrs.add(attr("given_name", coqnitoUser.getFirstName()));
+      if(testUser.getFirstName() != null) {
+        attrs.add(attr("given_name", testUser.getFirstName()));
       }
-      if(coqnitoUser.getLastName() != null) {
-        attrs.add(attr("family_name", coqnitoUser.getLastName()));
+      if(testUser.getLastName() != null) {
+        attrs.add(attr("family_name", testUser.getLastName()));
       }
-      if(coqnitoUser.getCounty() != null) {
-        attrs.add(attr("custom:County", coqnitoUser.getCounty()));
+      if(testUser.getCounty() != null) {
+        attrs.add(attr("custom:County", testUser.getCounty()));
       }
-      if(coqnitoUser.getPermissions() != null) {
-        attrs.add(attr("custom:permission", coqnitoUser.getPermissions()));
+      if(testUser.getPermissions() != null) {
+        attrs.add(attr("custom:permission", testUser.getPermissions()));
       }
-      if(coqnitoUser.getRacfId() != null) {
-        attrs.add(attr("custom:RACFID", coqnitoUser.getRacfId()));
+      if(testUser.getRacfId() != null) {
+        attrs.add(attr("custom:RACFID", testUser.getRacfId()));
       }
+      return attrs;
+    }
 
-      getUserResult.withUserAttributes(attrs);
+    private static UserType userType(TestUser testUser) {
+      UserType userType = new UserType()
+        .withUsername(testUser.getId())
+        .withEnabled(testUser.getEnabled())
+        .withUserCreateDate(testUser.getUserCreateDate())
+        .withUserLastModifiedDate(testUser.getLastModifiedDate())
+        .withUserStatus(testUser.getStatus());
+
+      userType.withAttributes(attrs(testUser));
+      return userType;
+    }
+
+    private void setUpGetUserRequestAndResult(TestUser testUser) {
+
+      AdminGetUserRequest getUserRequest = new AdminGetUserRequest()
+          .withUsername(testUser.getId()).withUserPoolId(USERPOOL);
+
+      AdminGetUserResult getUserResult = new AdminGetUserResult();
+      getUserResult.setUsername(testUser.getId());
+      getUserResult.setEnabled(testUser.getEnabled());
+      getUserResult.setUserStatus(testUser.getStatus());
+      getUserResult.setUserCreateDate(testUser.getUserCreateDate());
+      getUserResult.setUserLastModifiedDate(testUser.getLastModifiedDate());
+
+      getUserResult.withUserAttributes(attrs(testUser));
 
       when(cognito.adminGetUser(getUserRequest))
           .thenReturn(getUserResult);
@@ -295,7 +346,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     return java.sql.Date.valueOf((LocalDate.of(year, month, dayOfMonth)));
   }
 
-  static class CognitoUser {
+  static class TestUser {
     private String id;
     private Boolean enabled;
     private String status;
@@ -308,7 +359,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     private String permissions;
     private String racfId;
 
-    public CognitoUser(String id, Boolean enabled, String status, Date userCreateDate,
+    public TestUser(String id, Boolean enabled, String status, Date userCreateDate,
         Date lastModifiedDate, String email, String firstName, String lastName, String county,
         String permissions, String racfId) {
       this.id = id;

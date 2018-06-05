@@ -9,7 +9,7 @@ public class UsersSearchParametersUtil {
 
   private UsersSearchParametersUtil() {}
 
-  private static final int DEFAULT_PAGESIZE = 60;
+  public static final int DEFAULT_PAGESIZE = 60;
   private static final String COUNTY_NAME_PARAM = "county_name";
 
   public static UsersSearchParameter composeSearchParameter(String searchLastName) {
