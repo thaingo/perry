@@ -63,17 +63,17 @@ node('dora-slave') {
 //            buildInfo = rtGradle.run buildFile: './build.gradle', tasks: 'smokeTest --stacktrace'
 //            publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: 'build/reports/tests/smokeTest', reportFiles: 'index.html', reportName: 'Smoke Tests Report', reportTitles: 'Smoke tests summary'])
 //        }
-//        stage('Integration Tests') {
-//
-//            def gradlePropsText = """
-//            perry.health.check.url=http://10.110.12.162:9082/manage/health
-//            perry.url=${PERRY_URL}
-//            perry.threads.count=5
-//            selenium.grid.url=http://localhost:4444/wd/hub
-//            """
-//            writeFile file: "gradle.properties", text: gradlePropsText
-//            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'integrationTestDev --stacktrace'
-//        }
+        stage('Integration Tests') {
+
+            def gradlePropsText = """
+            perry.health.check.url=http://10.110.12.162:9082/manage/health
+            perry.url=${PERRY_URL}
+            perry.threads.count=5
+            selenium.grid.url=http://grid.dev.cwds.io:4444/wd/hub
+            """
+            writeFile file: "gradle.properties", text: gradlePropsText
+            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'integrationTestDev --stacktrace'
+        }
         stage('Push artifacts') {
             // Artifactory
             rtGradle.deployer.deployArtifacts = true
