@@ -12,7 +12,7 @@ import org.apache.commons.collections.CollectionUtils;
 
 public class CognitoUtils {
 
-  static final String PERMISSIONS_ATTR_NAME = "custom:permission";
+  static final String PERMISSIONS_ATTR_NAME = "custom:Permission";
   static final String COUNTY_ATTR_NAME = "custom:County";
   static final String PERMISSIONS_DELIMITER = ":";
 
@@ -32,7 +32,7 @@ public class CognitoUtils {
 
   public static String getAttributeValue(UserType cognitoUser, String attributeName) {
     return getAttribute(cognitoUser, attributeName)
-        .map(attr -> attr.getValue()).orElse(null);
+        .map(AttributeType::getValue).orElse(null);
   }
 
   public static String getCountyName(UserType cognitoUser) {
