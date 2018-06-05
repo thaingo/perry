@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
+import liquibase.util.StringUtils;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -146,6 +147,19 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     assertNonStrict(result, "fixtures/idm/get-users/all-valid.json");
   }
 
+  @Test
+  public void testSearchUsers() throws Exception {
+    authenticate("Yolo", "CARES admin");
+
+    MvcResult result = mockMvc
+        .perform(MockMvcRequestBuilders.get("/idm/users?lastName=Ma"))
+        .andExpect(MockMvcResultMatchers.status().isOk())
+        .andExpect(MockMvcResultMatchers.content().contentType(CONTENT_TYPE))
+        .andReturn();
+
+    assertNonStrict(result, "fixtures/idm/get-users/search-valid.json");
+  }
+
   private void testGetValidYoloUser(String userId, String fixtureFilePath) throws Exception {
     authenticate("Yolo", "CARES admin");
 
@@ -212,17 +226,17 @@ public class IdmResourceTest extends BaseLiquibaseTest {
       setProperties(properties);
       setIdentityProvider(cognito);
 
-      TestUser noRacfIdUser = testUser(USER_NO_RACFID_ID, Boolean.TRUE,
+      TestUser user0 = testUser(USER_NO_RACFID_ID, Boolean.TRUE,
           "FORCE_CHANGE_PASSWORD", date(2018, 5, 4),
           date(2018, 5, 30), "donzano@gmail.com", "Don",
           "Manzano", "Yolo", "RFA-rollout:Snapshot-rollout:", null);
 
-      TestUser withRacfIdUser = testUser(USER_WITH_RACFID_ID, Boolean.TRUE,
+      TestUser user1 = testUser(USER_WITH_RACFID_ID, Boolean.TRUE,
           "CONFIRMED", date(2018, 5, 4),
           date(2018, 5, 29), "julio@gmail.com", "Julio",
           "Iglecias", "Yolo", "Hotline-rollout", "YOLOD");
 
-      TestUser withRacfIdAndDbDataUser = testUser(USER_WITH_RACFID_AND_DB_DATA_ID, Boolean.TRUE,
+      TestUser user2 = testUser(USER_WITH_RACFID_AND_DB_DATA_ID, Boolean.TRUE,
           "CONFIRMED", date(2018, 5, 3),
           date(2018, 5, 31), "garcia@gmail.com", "Garcia",
           "Gonzales", "Yolo", "test", "SMITHBO");
@@ -231,15 +245,21 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
       setUpGetErrorUserRequestAndResult();
 
-      setListAllUsersRequestAndResult(noRacfIdUser, withRacfIdUser, withRacfIdAndDbDataUser);
+      setSearchYoloUsersRequestAndResult("", user0, user1, user2);
+
+      setSearchYoloUsersRequestAndResult("Ma", user0);
     }
 
-    private void setListAllUsersRequestAndResult(TestUser... testUsers) {
+    private void setSearchYoloUsersRequestAndResult(String lastNameSubstr, TestUser... testUsers) {
       ListUsersRequest request =
           new ListUsersRequest()
               .withUserPoolId(USERPOOL)
               .withLimit(DEFAULT_PAGESIZE)
               .withFilter("preferred_username = \"Yolo\"");
+
+              if(StringUtils.isNotEmpty(lastNameSubstr)) {
+                request.withFilter("family_name ^= \"" + lastNameSubstr + "\"");
+              }
 
       List<UserType> userTypes = Arrays.stream(testUsers)
           .map(testUser -> userType(testUser)).collect(Collectors.toList());
