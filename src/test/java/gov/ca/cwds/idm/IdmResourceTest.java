@@ -2,6 +2,8 @@ package gov.ca.cwds.idm;
 
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertStrict;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -9,9 +11,11 @@ import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserResult;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
+import com.amazonaws.services.cognitoidp.model.InternalErrorException;
 import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
 import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.service.CognitoServiceFacade;
+import gov.ca.cwds.rest.api.domain.PerryException;
 import java.nio.charset.Charset;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -39,6 +43,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.util.NestedServletException;
 
 @ActiveProfiles({"dev", "idm"})
 public class IdmResourceTest extends BaseLiquibaseTest {
@@ -47,6 +52,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   private final static String USER_WITH_RACFID_ID = "24051d54-9321-4dd2-a92f-6425d6c455be";
   private final static String USER_WITH_RACFID_AND_DB_DATA_ID = "d740ec1d-80ae-4d84-a8c4-9bed7a942f5b";
   private final static String ABSENT_USER_ID = "absentUserId";
+  private final static String ERROR_USER_ID = "errorUserId";
 
   private static final MediaType CONTENT_TYPE = new MediaType(MediaType.APPLICATION_JSON.getType(),
       MediaType.APPLICATION_JSON.getSubtype(),
@@ -101,13 +107,24 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
   @Test
   public void testGetAbsentUser() throws Exception {
-
     authenticate("Yolo", "CARES admin");
 
     mockMvc
         .perform(MockMvcRequestBuilders.get("/idm/users/" + ABSENT_USER_ID))
         .andExpect(MockMvcResultMatchers.status().isNotFound())
         .andReturn();
+  }
+
+  @Test
+  public void testGetUserError() throws Exception {
+    authenticate("Yolo", "CARES admin");
+
+    try {
+      mockMvc.perform(MockMvcRequestBuilders.get("/idm/users/" + ERROR_USER_ID));
+      fail("NestedServletException should be thrown");
+    } catch (NestedServletException e) {
+      assertTrue(e.getCause() instanceof PerryException);
+    }
   }
 
   private void testGetValidYoloUser(String userId, String fixtureFilePath) throws Exception {
@@ -192,6 +209,8 @@ public class IdmResourceTest extends BaseLiquibaseTest {
           "Gonzales", "Yolo", "test", "SMITHBO");
 
       setUpGetAbsentUserRequestAndResult();
+
+      setUpGetErrorUserRequestAndResult();
     }
 
     private CognitoUser cognitoUser(String id, Boolean enabled, String status, Date userCreateDate,
@@ -253,6 +272,15 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
       when(cognito.adminGetUser(getUserRequest))
           .thenThrow(new UserNotFoundException("user not found"));
+    }
+
+    private void setUpGetErrorUserRequestAndResult() {
+
+      AdminGetUserRequest getUserRequest = new AdminGetUserRequest()
+          .withUsername(ERROR_USER_ID).withUserPoolId(USERPOOL);
+
+      when(cognito.adminGetUser(getUserRequest))
+          .thenThrow(new InternalErrorException("internal error"));
     }
   }
 
