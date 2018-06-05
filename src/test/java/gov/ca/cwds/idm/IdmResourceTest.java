@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.HashSet;
 import javax.annotation.PostConstruct;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +56,11 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   private WebApplicationContext webApplicationContext;
 
   private MockMvc mockMvc;
+
+  @BeforeClass
+  public static void beforeClass() throws Exception {
+    runLiquibaseScript(CMS_STORE_URL, "liquibase/cms-data.xml");
+  }
 
   @Before
   public void before() {
