@@ -56,6 +56,7 @@ node('dora-slave') {
         }
         stage('Deploy Application') {
             sh 'cd ansible ; ansible-playbook -e NEW_RELIC_AGENT=$USE_NEWRELIC -e VERSION_NUMBER=$APP_VERSION -i $inventory deploy-perry.yml --vault-password-file ~/.ssh/vault.txt -vv'
+            sleep(20)
         }
 //        stage('Smoke Tests') {
 //            git branch: 'master', url: 'https://github.com/ca-cwds/perry.git'
