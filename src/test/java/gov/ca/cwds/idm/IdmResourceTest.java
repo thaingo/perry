@@ -4,13 +4,12 @@ import static gov.ca.cwds.idm.service.CognitoUtils.PERMISSIONS_ATTR_NAME;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertStrict;
 import static gov.ca.cwds.idm.util.UsersSearchParametersUtil.DEFAULT_PAGESIZE;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
 import com.amazonaws.services.cognitoidp.model.AdminDisableUserRequest;
@@ -28,10 +27,8 @@ import com.amazonaws.services.cognitoidp.model.ListUsersResult;
 import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.dto.UpdateUserDto;
 import gov.ca.cwds.idm.service.CognitoServiceFacade;
-import gov.ca.cwds.rest.api.domain.PerryException;
 import java.nio.charset.Charset;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -51,11 +48,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.http.MediaType;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.TestingAuthenticationToken;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -64,7 +56,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.util.NestedServletException;
 
 @ActiveProfiles({"dev", "idm"})
 public class IdmResourceTest extends BaseLiquibaseTest {
@@ -99,12 +90,13 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   public void before() {
     this.mockMvc = MockMvcBuilders
         .webAppContextSetup(webApplicationContext)
+        .apply(springSecurity())
         .build();
     cognito = cognitoServiceFacade.getIdentityProvider();
   }
 
   @Test
-  @WithAnonymousUser
+  @WithMockCustomUser
   public void testGetPermissions() throws Exception {
 
     MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/idm/permissions"))
@@ -116,26 +108,29 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   }
 
   @Test
+  @WithMockCustomUser
   public void testGetUserNoRacfId() throws Exception {
     testGetValidYoloUser(USER_NO_RACFID_ID,
         "fixtures/idm/get-user/no-racfid-valid.json");
   }
 
   @Test
+  @WithMockCustomUser
   public void testGetUserWithRacfId() throws Exception {
     testGetValidYoloUser(USER_WITH_RACFID_ID,
         "fixtures/idm/get-user/with-racfid-valid.json");
   }
 
   @Test
+  @WithMockCustomUser
   public void testGetUserWithRacfIdAndDbData() throws Exception {
     testGetValidYoloUser(USER_WITH_RACFID_AND_DB_DATA_ID,
         "fixtures/idm/get-user/with-racfid-and-db-data-valid.json");
   }
 
   @Test
+  @WithMockCustomUser
   public void testGetAbsentUser() throws Exception {
-    authenticate("Yolo", "CARES admin");
 
     mockMvc
         .perform(MockMvcRequestBuilders.get("/idm/users/" + ABSENT_USER_ID))
@@ -144,32 +139,35 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   }
 
   @Test
+  @WithMockCustomUser
   public void testGetUserError() throws Exception {
-    authenticate("Yolo", "CARES admin");
-
-    try {
-      mockMvc.perform(MockMvcRequestBuilders.get("/idm/users/" + ERROR_USER_ID));
-      fail("NestedServletException should be thrown");
-    } catch (NestedServletException e) {
-      assertTrue(e.getCause() instanceof PerryException);
-    }
+      mockMvc.perform(MockMvcRequestBuilders.get("/idm/users/" + ERROR_USER_ID))
+          .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+          .andReturn();
   }
 
   @Test
+  @WithMockCustomUser(county = "Madera")
   public void testGetUserByOtherCountyAdmin() throws Exception {
-    authenticate("Madera", "CARES admin");
 
-    try {
-      mockMvc.perform(MockMvcRequestBuilders.get("/idm/users/" + USER_NO_RACFID_ID));
-      fail("NestedServletException should be thrown");
-    } catch (NestedServletException e) {
-      assertTrue(e.getCause() instanceof AccessDeniedException);
-    }
+      mockMvc.perform(MockMvcRequestBuilders.get("/idm/users/" + USER_NO_RACFID_ID))
+          .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+          .andReturn();
   }
 
   @Test
+  @WithMockCustomUser(roles = {"OtherRole"})
+  public void testGetUserOtherRole() throws Exception {
+
+    mockMvc
+        .perform(MockMvcRequestBuilders.get("/idm/users/" + USER_NO_RACFID_ID))
+        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+        .andReturn();
+  }
+
+  @Test
+  @WithMockCustomUser
   public void testGetAllYoloUsers() throws Exception {
-    authenticate("Yolo", "CARES admin");
 
     MvcResult result = mockMvc
         .perform(MockMvcRequestBuilders.get("/idm/users"))
@@ -181,8 +179,8 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   }
 
   @Test
+  @WithMockCustomUser
   public void testSearchUsers() throws Exception {
-    authenticate("Yolo", "CARES admin");
 
     MvcResult result = mockMvc
         .perform(MockMvcRequestBuilders.get("/idm/users?lastName=Ma"))
@@ -194,8 +192,8 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   }
 
   @Test
+  @WithMockCustomUser
   public void testUpdateUser() throws Exception {
-    authenticate("Yolo", "CARES admin");
 
     UpdateUserDto updateUserDto = new UpdateUserDto();
     updateUserDto.setEnabled(Boolean.FALSE);
@@ -227,8 +225,8 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   }
 
   @Test
+  @WithMockCustomUser
   public void testUpdateUserNoChanges() throws Exception {
-    authenticate("Yolo", "CARES admin");
 
     UpdateUserDto updateUserDto = new UpdateUserDto();
     updateUserDto.setEnabled(Boolean.TRUE);
@@ -254,25 +252,21 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   }
 
   @Test
+  @WithMockCustomUser(county = "Madera")
   public void testUpdateUserByOtherCountyAdmin() throws Exception {
-    authenticate("Madera", "CARES admin");
 
     UpdateUserDto updateUserDto = new UpdateUserDto();
     updateUserDto.setEnabled(Boolean.FALSE);
     updateUserDto.setPermissions(new HashSet<>(Arrays.asList("RFA-rollout", "Hotline-rollout")));
 
-    try {
       mockMvc.perform(MockMvcRequestBuilders.patch("/idm/users/" + USER_NO_RACFID_ID)
           .contentType(CONTENT_TYPE)
-          .content(asJsonString(updateUserDto)));
-      fail("NestedServletException should be thrown");
-    } catch (NestedServletException e) {
-      assertTrue(e.getCause() instanceof AccessDeniedException);
-    }
+          .content(asJsonString(updateUserDto)))
+          .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+          .andReturn();
   }
 
   private void testGetValidYoloUser(String userId, String fixtureFilePath) throws Exception {
-    authenticate("Yolo", "CARES admin");
 
     MvcResult result = mockMvc
         .perform(MockMvcRequestBuilders.get("/idm/users/" + userId))
@@ -307,21 +301,6 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     AdminEnableUserResult result = new AdminEnableUserResult();
     when(cognito.adminEnableUser(request)).thenReturn(result);
     return request;
-  }
-
-  private void authenticate(String county, String... roles) {
-    UniversalUserToken userToken = new UniversalUserToken();
-    userToken.setParameter("county_name", county);
-    userToken.setRoles(new HashSet<>(Arrays.asList(roles)));
-    userToken.setUserId("userId");
-
-    TestingAuthenticationToken testingAuthenticationToken = new TestingAuthenticationToken(
-        userToken, null);
-    testingAuthenticationToken.setAuthenticated(true);
-
-    SecurityContext ctx = SecurityContextHolder.createEmptyContext();
-    SecurityContextHolder.setContext(ctx);
-    ctx.setAuthentication(testingAuthenticationToken);
   }
 
   private static String asJsonString(final Object obj) {
