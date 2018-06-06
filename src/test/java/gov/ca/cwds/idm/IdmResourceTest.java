@@ -108,6 +108,15 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   }
 
   @Test
+  @WithMockCustomUser(roles = {"OtherRole"})
+  public void testGetPermissionsWithOtherRole() throws Exception {
+
+    mockMvc.perform(MockMvcRequestBuilders.get("/idm/permissions"))
+        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+        .andReturn();
+  }
+
+  @Test
   @WithMockCustomUser
   public void testGetUserNoRacfId() throws Exception {
     testGetValidYoloUser(USER_NO_RACFID_ID,
@@ -132,8 +141,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @WithMockCustomUser
   public void testGetAbsentUser() throws Exception {
 
-    mockMvc
-        .perform(MockMvcRequestBuilders.get("/idm/users/" + ABSENT_USER_ID))
+    mockMvc.perform(MockMvcRequestBuilders.get("/idm/users/" + ABSENT_USER_ID))
         .andExpect(MockMvcResultMatchers.status().isNotFound())
         .andReturn();
   }
@@ -141,26 +149,25 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @Test
   @WithMockCustomUser
   public void testGetUserError() throws Exception {
-      mockMvc.perform(MockMvcRequestBuilders.get("/idm/users/" + ERROR_USER_ID))
-          .andExpect(MockMvcResultMatchers.status().isUnauthorized())
-          .andReturn();
+    mockMvc.perform(MockMvcRequestBuilders.get("/idm/users/" + ERROR_USER_ID))
+        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+        .andReturn();
   }
 
   @Test
   @WithMockCustomUser(county = "Madera")
   public void testGetUserByOtherCountyAdmin() throws Exception {
 
-      mockMvc.perform(MockMvcRequestBuilders.get("/idm/users/" + USER_NO_RACFID_ID))
-          .andExpect(MockMvcResultMatchers.status().isUnauthorized())
-          .andReturn();
+    mockMvc.perform(MockMvcRequestBuilders.get("/idm/users/" + USER_NO_RACFID_ID))
+        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+        .andReturn();
   }
 
   @Test
   @WithMockCustomUser(roles = {"OtherRole"})
-  public void testGetUserOtherRole() throws Exception {
+  public void testGetUserWithOtherRole() throws Exception {
 
-    mockMvc
-        .perform(MockMvcRequestBuilders.get("/idm/users/" + USER_NO_RACFID_ID))
+    mockMvc.perform(MockMvcRequestBuilders.get("/idm/users/" + USER_NO_RACFID_ID))
         .andExpect(MockMvcResultMatchers.status().isUnauthorized())
         .andReturn();
   }
@@ -189,6 +196,15 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         .andReturn();
 
     assertNonStrict(result, "fixtures/idm/get-users/search-valid.json");
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {"OtherRole"})
+  public void testSearchUsersWithOtherRole() throws Exception {
+
+    mockMvc.perform(MockMvcRequestBuilders.get("/idm/users?lastName=Ma"))
+        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+        .andReturn();
   }
 
   @Test
@@ -259,11 +275,26 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     updateUserDto.setEnabled(Boolean.FALSE);
     updateUserDto.setPermissions(new HashSet<>(Arrays.asList("RFA-rollout", "Hotline-rollout")));
 
-      mockMvc.perform(MockMvcRequestBuilders.patch("/idm/users/" + USER_NO_RACFID_ID)
-          .contentType(CONTENT_TYPE)
-          .content(asJsonString(updateUserDto)))
-          .andExpect(MockMvcResultMatchers.status().isUnauthorized())
-          .andReturn();
+    mockMvc.perform(MockMvcRequestBuilders.patch("/idm/users/" + USER_NO_RACFID_ID)
+        .contentType(CONTENT_TYPE)
+        .content(asJsonString(updateUserDto)))
+        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+        .andReturn();
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {"OtherRole"})
+  public void testUpdateUserWithOtherRole() throws Exception {
+
+    UpdateUserDto updateUserDto = new UpdateUserDto();
+    updateUserDto.setEnabled(Boolean.FALSE);
+    updateUserDto.setPermissions(new HashSet<>(Arrays.asList("RFA-rollout", "Hotline-rollout")));
+
+    mockMvc.perform(MockMvcRequestBuilders.patch("/idm/users/" + USER_NO_RACFID_ID)
+        .contentType(CONTENT_TYPE)
+        .content(asJsonString(updateUserDto)))
+        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+        .andReturn();
   }
 
   private void testGetValidYoloUser(String userId, String fixtureFilePath) throws Exception {
