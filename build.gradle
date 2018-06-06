@@ -206,15 +206,17 @@ processResources {
     ])
 }
 
-publishing.publications {
-    mavenJava(MavenPublication) {
-        from components.java
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
     }
-}
-publishing.repositories {
-    mavenLocal()
-    maven {
-        url artifactoryRepo
+    repositories {
+        mavenLocal()
+        maven {
+            url artifactoryRepo
+        }
     }
 }
 
