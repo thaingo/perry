@@ -108,6 +108,10 @@ repositories {
     }
 }
 
+springBoot {
+    buildInfo()
+}
+
 dependencies {
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: springVersion
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version:springVersion
@@ -199,12 +203,6 @@ task checkDockerService {
     }
 }
 
-processResources {
-    filter(ReplaceTokens, tokens: [
-            'build.version': projectVersion,
-            'build.number' : (System.getenv("BUILD_NUMBER") ?: "IDE")
-    ])
-}
 
 publishing {
     publications {
