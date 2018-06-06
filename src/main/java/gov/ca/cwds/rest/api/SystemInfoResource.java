@@ -54,8 +54,8 @@ public class SystemInfoResource {
 
   @JsonInclude(JsonInclude.Include.NON_EMPTY)
   private static class InfoClass {
-    private Health health;
     private Map<String, Object> systemInfo;
+    private Health health;
 
     public Health getHealth() {
       return health;
