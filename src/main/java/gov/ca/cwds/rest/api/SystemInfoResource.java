@@ -46,7 +46,7 @@ public class SystemInfoResource {
       info.setHealth(healthEndpoint.invoke());
       return mapper.writeValueAsString(info);
     } catch (IOException e) {
-      LOGGER.error("ERROR in system-info", e.getMessage());
+      LOGGER.error("ERROR in system-info: {}", e.getMessage());
     }
     return  null;
   }
