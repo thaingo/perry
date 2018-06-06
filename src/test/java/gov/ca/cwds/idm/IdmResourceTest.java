@@ -51,6 +51,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -151,6 +152,18 @@ public class IdmResourceTest extends BaseLiquibaseTest {
       fail("NestedServletException should be thrown");
     } catch (NestedServletException e) {
       assertTrue(e.getCause() instanceof PerryException);
+    }
+  }
+
+  @Test
+  public void testGetUserByOtherCountyAdmin() throws Exception {
+    authenticate("Madera", "CARES admin");
+
+    try {
+      mockMvc.perform(MockMvcRequestBuilders.get("/idm/users/" + USER_NO_RACFID_ID));
+      fail("NestedServletException should be thrown");
+    } catch (NestedServletException e) {
+      assertTrue(e.getCause() instanceof AccessDeniedException);
     }
   }
 
@@ -283,6 +296,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     UniversalUserToken userToken = new UniversalUserToken();
     userToken.setParameter("county_name", county);
     userToken.setRoles(new HashSet<>(Arrays.asList(roles)));
+    userToken.setUserId("userId");
 
     TestingAuthenticationToken testingAuthenticationToken = new TestingAuthenticationToken(
         userToken, null);
