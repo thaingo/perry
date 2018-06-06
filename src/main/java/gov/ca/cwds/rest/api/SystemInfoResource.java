@@ -24,20 +24,18 @@ public class SystemInfoResource {
 
   @Autowired private HealthEndpoint healthEndpoint;
 
-  @Autowired
-  private InfoEndpoint infoEndpoint;
+  @Autowired private InfoEndpoint infoEndpoint;
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SystemInfoResource.class);
 
-
   @GET
-  @RequestMapping(value = "/system-information", produces = "application/json", method = RequestMethod.GET)
-  @ApiOperation(value = "Get system info")
-  @ApiResponses(
-    value = {
-      @ApiResponse(code = 200, message = "application info and healthcheck")
-    }
+  @RequestMapping(
+    value = "/system-information",
+    produces = "application/json",
+    method = RequestMethod.GET
   )
+  @ApiOperation(value = "Get system info")
+  @ApiResponses(value = {@ApiResponse(code = 200, message = "application info and healthcheck")})
   public String getInfo() {
     ObjectMapper mapper = new ObjectMapper();
     try {
@@ -48,9 +46,8 @@ public class SystemInfoResource {
     } catch (IOException e) {
       LOGGER.error("ERROR in system-info: {}", e.getMessage());
     }
-    return  null;
+    return null;
   }
-
 
   @JsonInclude(JsonInclude.Include.NON_EMPTY)
   private static class InfoClass {

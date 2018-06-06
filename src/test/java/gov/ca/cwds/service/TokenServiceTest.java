@@ -15,35 +15,28 @@ import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.transaction.TransactionSystemException;
 
 @RunWith(SpringRunner.class)
-@DataJpaTest(excludeAutoConfiguration = {FlywayAutoConfiguration.class,
-    LiquibaseAutoConfiguration.class})
+@DataJpaTest(
+  excludeAutoConfiguration = {FlywayAutoConfiguration.class, LiquibaseAutoConfiguration.class}
+)
 @DirtiesContext
 @ActiveProfiles("dev")
 public class TokenServiceTest {
 
-  @Autowired
-  private TokenService tokenService;
-  @Autowired
-  private PerryProperties properties;
-  @Autowired
-  TokenRepository tokenRepository;
+  @Autowired private TokenService tokenService;
+  @Autowired private PerryProperties properties;
+  @Autowired TokenRepository tokenRepository;
 
-  @MockBean
-  private HealthEndpoint healthEndpoint;
+  @MockBean private HealthEndpoint healthEndpoint;
 
-  @MockBean
-  private InfoEndpoint infoEndpoint;
+  @MockBean private InfoEndpoint infoEndpoint;
 
   private static final String ACCESS_TOKEN = "accessToken";
   private static final String USER_ID = "userId";

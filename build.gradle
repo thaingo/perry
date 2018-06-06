@@ -1,6 +1,4 @@
-import org.apache.tools.ant.filters.ReplaceTokens
 import org.apache.tools.ant.taskdefs.condition.Os
-
 import java.text.SimpleDateFormat
 
 buildscript {
@@ -216,7 +214,6 @@ task checkDockerService {
     }
 }
 
-
 publishing {
     publications {
         mavenJava(MavenPublication) {
@@ -230,7 +227,6 @@ publishing {
         }
     }
 }
-
 
 task publishDocker(dependsOn: ':docker-perry:dockerPerryPublish') {
     doLast {
