@@ -1,23 +1,33 @@
 package gov.ca.cwds.idm;
 
+import static gov.ca.cwds.idm.service.CognitoUtils.PERMISSIONS_ATTR_NAME;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertStrict;
 import static gov.ca.cwds.idm.util.UsersSearchParametersUtil.DEFAULT_PAGESIZE;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
+import com.amazonaws.services.cognitoidp.model.AdminDisableUserRequest;
+import com.amazonaws.services.cognitoidp.model.AdminDisableUserResult;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserResult;
+import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesRequest;
+import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesResult;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.InternalErrorException;
 import com.amazonaws.services.cognitoidp.model.ListUsersRequest;
 import com.amazonaws.services.cognitoidp.model.ListUsersResult;
 import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
 import com.amazonaws.services.cognitoidp.model.UserType;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.ca.cwds.UniversalUserToken;
+import gov.ca.cwds.idm.dto.UpdateUserDto;
 import gov.ca.cwds.idm.service.CognitoServiceFacade;
 import gov.ca.cwds.rest.api.domain.PerryException;
 import java.nio.charset.Charset;
@@ -68,7 +78,12 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @Autowired
   private WebApplicationContext webApplicationContext;
 
+  @Autowired
+  private CognitoServiceFacade cognitoServiceFacade;
+
   private MockMvc mockMvc;
+
+  private AWSCognitoIdentityProvider cognito;
 
   @BeforeClass
   public static void beforeClass() throws Exception {
@@ -80,6 +95,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     this.mockMvc = MockMvcBuilders
         .webAppContextSetup(webApplicationContext)
         .build();
+    cognito = cognitoServiceFacade.getIdentityProvider();
   }
 
   @Test
@@ -160,6 +176,28 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     assertNonStrict(result, "fixtures/idm/get-users/search-valid.json");
   }
 
+  @Test
+  public void testUpdateUser() throws Exception {
+    authenticate("Yolo", "CARES admin");
+
+    UpdateUserDto updateUserDto = new UpdateUserDto();
+    updateUserDto.setEnabled(Boolean.FALSE);
+    updateUserDto.setPermissions(new HashSet<>(Arrays.asList("RFA-rollout", "Hotline-rollout")));
+
+    mockMvc
+        .perform(MockMvcRequestBuilders.patch("/idm/users/" + USER_NO_RACFID_ID)
+            .contentType(CONTENT_TYPE)
+            .content(asJsonString(updateUserDto)))
+        .andExpect(MockMvcResultMatchers.status().isNoContent())
+        .andReturn();
+
+    verify(cognito, times(1))
+        .adminUpdateUserAttributes(any(AdminUpdateUserAttributesRequest.class));
+
+    verify(cognito, times(1))
+        .adminDisableUser(any(AdminDisableUserRequest.class));
+  }
+
   private void testGetValidYoloUser(String userId, String fixtureFilePath) throws Exception {
     authenticate("Yolo", "CARES admin");
 
@@ -184,6 +222,14 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     SecurityContext ctx = SecurityContextHolder.createEmptyContext();
     SecurityContextHolder.setContext(ctx);
     ctx.setAuthentication(testingAuthenticationToken);
+  }
+
+  private static String asJsonString(final Object obj) {
+    try {
+      return new ObjectMapper().writeValueAsString(obj);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Component
@@ -248,6 +294,11 @@ public class IdmResourceTest extends BaseLiquibaseTest {
       setSearchYoloUsersRequestAndResult("", user0, user1, user2);
 
       setSearchYoloUsersRequestAndResult("Ma", user0);
+
+      setUpdateUserAttributesRequestAndResult(USER_NO_RACFID_ID,
+          attr(PERMISSIONS_ATTR_NAME, "RFA-rollout:Hotline-rollout"));
+
+      setDisableUserRequestAndResult(USER_NO_RACFID_ID);
     }
 
     private void setSearchYoloUsersRequestAndResult(String lastNameSubstr, TestUser... testUsers) {
@@ -257,9 +308,9 @@ public class IdmResourceTest extends BaseLiquibaseTest {
               .withLimit(DEFAULT_PAGESIZE)
               .withFilter("preferred_username = \"Yolo\"");
 
-              if(StringUtils.isNotEmpty(lastNameSubstr)) {
-                request.withFilter("family_name ^= \"" + lastNameSubstr + "\"");
-              }
+      if (StringUtils.isNotEmpty(lastNameSubstr)) {
+        request.withFilter("family_name ^= \"" + lastNameSubstr + "\"");
+      }
 
       List<UserType> userTypes = Arrays.stream(testUsers)
           .map(testUser -> userType(testUser)).collect(Collectors.toList());
@@ -267,6 +318,21 @@ public class IdmResourceTest extends BaseLiquibaseTest {
       ListUsersResult result = new ListUsersResult().withUsers(userTypes);
 
       when(cognito.listUsers(request)).thenReturn(result);
+    }
+
+    private void setUpdateUserAttributesRequestAndResult(String id,
+        AttributeType... userAttributes) {
+      AdminUpdateUserAttributesRequest request = new AdminUpdateUserAttributesRequest()
+          .withUsername(id).withUserPoolId(USERPOOL).withUserAttributes(userAttributes);
+      AdminUpdateUserAttributesResult result = new AdminUpdateUserAttributesResult();
+      when(cognito.adminUpdateUserAttributes(request)).thenReturn(result);
+    }
+
+    private void setDisableUserRequestAndResult(String id) {
+      AdminDisableUserRequest request = new AdminDisableUserRequest()
+          .withUsername(id).withUserPoolId(USERPOOL);
+      AdminDisableUserResult result = new AdminDisableUserResult();
+      when(cognito.adminDisableUser(request)).thenReturn(result);
     }
 
     private TestUser testUser(String id, Boolean enabled, String status, Date userCreateDate,
@@ -282,25 +348,25 @@ public class IdmResourceTest extends BaseLiquibaseTest {
       return testUser;
     }
 
-    private static Collection<AttributeType> attrs(TestUser testUser){
+    private static Collection<AttributeType> attrs(TestUser testUser) {
       Collection<AttributeType> attrs = new ArrayList<>();
 
-      if(testUser.getEmail() != null) {
+      if (testUser.getEmail() != null) {
         attrs.add(attr("email", testUser.getEmail()));
       }
-      if(testUser.getFirstName() != null) {
+      if (testUser.getFirstName() != null) {
         attrs.add(attr("given_name", testUser.getFirstName()));
       }
-      if(testUser.getLastName() != null) {
+      if (testUser.getLastName() != null) {
         attrs.add(attr("family_name", testUser.getLastName()));
       }
-      if(testUser.getCounty() != null) {
+      if (testUser.getCounty() != null) {
         attrs.add(attr("custom:County", testUser.getCounty()));
       }
-      if(testUser.getPermissions() != null) {
+      if (testUser.getPermissions() != null) {
         attrs.add(attr("custom:permission", testUser.getPermissions()));
       }
-      if(testUser.getRacfId() != null) {
+      if (testUser.getRacfId() != null) {
         attrs.add(attr("custom:RACFID", testUser.getRacfId()));
       }
       return attrs;
@@ -308,11 +374,11 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
     private static UserType userType(TestUser testUser) {
       UserType userType = new UserType()
-        .withUsername(testUser.getId())
-        .withEnabled(testUser.getEnabled())
-        .withUserCreateDate(testUser.getUserCreateDate())
-        .withUserLastModifiedDate(testUser.getLastModifiedDate())
-        .withUserStatus(testUser.getStatus());
+          .withUsername(testUser.getId())
+          .withEnabled(testUser.getEnabled())
+          .withUserCreateDate(testUser.getUserCreateDate())
+          .withUserLastModifiedDate(testUser.getLastModifiedDate())
+          .withUserStatus(testUser.getStatus());
 
       userType.withAttributes(attrs(testUser));
       return userType;
@@ -367,6 +433,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   }
 
   static class TestUser {
+
     private String id;
     private Boolean enabled;
     private String status;

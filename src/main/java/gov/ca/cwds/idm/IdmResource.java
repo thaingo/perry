@@ -85,6 +85,7 @@ public class IdmResource {
   )
   @ApiOperation(value = "Update User")
   public ResponseEntity updateUser(
+//  public ResponseEntity<Void> updateUser(
       @ApiParam(required = true, value = "The unique user ID", example = "userId1")
           @PathVariable
           @NotNull
@@ -96,6 +97,7 @@ public class IdmResource {
 
     try {
       idmService.updateUser(id, updateUserDto);
+//      return ResponseEntity.ok().build();
       return ResponseEntity.noContent().build();
     } catch (UserNotFoundPerryException e) {
       return ResponseEntity.notFound().build();
