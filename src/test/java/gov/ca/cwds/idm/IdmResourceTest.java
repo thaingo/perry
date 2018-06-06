@@ -240,10 +240,9 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
     AdminEnableUserRequest enableUserRequest = setEnableUserRequestAndResult(USER_NO_RACFID_ID);
 
-    mockMvc
-        .perform(MockMvcRequestBuilders.patch("/idm/users/" + USER_NO_RACFID_ID)
-            .contentType(CONTENT_TYPE)
-            .content(asJsonString(updateUserDto)))
+    mockMvc.perform(MockMvcRequestBuilders.patch("/idm/users/" + USER_NO_RACFID_ID)
+        .contentType(CONTENT_TYPE)
+        .content(asJsonString(updateUserDto)))
         .andExpect(MockMvcResultMatchers.status().isNoContent())
         .andReturn();
 
@@ -252,6 +251,24 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
     verify(cognito, times(0))
         .adminEnableUser(enableUserRequest);
+  }
+
+  @Test
+  public void testUpdateUserByOtherCountyAdmin() throws Exception {
+    authenticate("Madera", "CARES admin");
+
+    UpdateUserDto updateUserDto = new UpdateUserDto();
+    updateUserDto.setEnabled(Boolean.FALSE);
+    updateUserDto.setPermissions(new HashSet<>(Arrays.asList("RFA-rollout", "Hotline-rollout")));
+
+    try {
+      mockMvc.perform(MockMvcRequestBuilders.patch("/idm/users/" + USER_NO_RACFID_ID)
+          .contentType(CONTENT_TYPE)
+          .content(asJsonString(updateUserDto)));
+      fail("NestedServletException should be thrown");
+    } catch (NestedServletException e) {
+      assertTrue(e.getCause() instanceof AccessDeniedException);
+    }
   }
 
   private void testGetValidYoloUser(String userId, String fixtureFilePath) throws Exception {
