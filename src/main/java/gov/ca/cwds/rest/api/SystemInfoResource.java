@@ -46,14 +46,14 @@ public class SystemInfoResource {
       info.setHealth(healthEndpoint.invoke());
       return mapper.writeValueAsString(info);
     } catch (IOException e) {
-      LOGGER.error("ERROR in system-info: " +e.getMessage());
+      LOGGER.error("ERROR in system-info", e.getMessage());
     }
     return  null;
   }
 
 
   @JsonInclude(JsonInclude.Include.NON_EMPTY)
-  private class InfoClass {
+  private static class InfoClass {
     private Health health;
     private Map<String, Object> systemInfo;
 

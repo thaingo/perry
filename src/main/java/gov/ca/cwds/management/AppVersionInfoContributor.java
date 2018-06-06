@@ -17,6 +17,7 @@ public class AppVersionInfoContributor implements InfoContributor {
   @Override
   public void contribute(Info.Builder builder) {
 
-    builder.withDetail("buildNumber", buildNumber);
+    builder.withDetail("buildNumber", buildNumber)
+            .withDetail("buildVersion", buildVersion);
   }
 }
