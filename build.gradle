@@ -1,6 +1,8 @@
 import org.apache.tools.ant.filters.ReplaceTokens
 import org.apache.tools.ant.taskdefs.condition.Os
 
+import java.text.SimpleDateFormat
+
 buildscript {
     repositories {
         mavenLocal()
@@ -109,7 +111,18 @@ repositories {
 }
 
 springBoot {
-    buildInfo()
+    buildInfo {
+        additionalProperties = [
+                version: projectVersion,
+                time: buildTime()
+        ]
+    }
+}
+
+def buildTime() {
+    final dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ")
+    dateFormat.timeZone = TimeZone.getTimeZone('PDT')
+    dateFormat.format(new Date())
 }
 
 dependencies {
