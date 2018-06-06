@@ -75,7 +75,7 @@ endpoints:
   health:
     enabled: true
   info:
-    enabled: false
+    enabled: true
   env:
     enabled: false
   configprops:

@@ -14,6 +14,7 @@ import com.amazonaws.services.cognitoidp.model.AdminGetUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserResult;
 import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesRequest;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
+import com.amazonaws.services.cognitoidp.model.DescribeUserPoolRequest;
 import com.amazonaws.services.cognitoidp.model.ListUsersRequest;
 import com.amazonaws.services.cognitoidp.model.ListUsersResult;
 import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
@@ -36,8 +37,7 @@ import org.springframework.stereotype.Service;
 @Profile("idm")
 public class CognitoServiceFacade {
 
-  @Autowired
-  private CognitoProperties properties;
+  @Autowired private CognitoProperties properties;
 
   private AWSCognitoIdentityProvider identityProvider;
 
@@ -93,6 +93,11 @@ public class CognitoServiceFacade {
     }
   }
 
+  public void healthCheck() {
+    identityProvider.describeUserPool(
+        new DescribeUserPoolRequest().withUserPoolId(properties.getUserpool()));
+  }
+
   private UserType getCognitoUserById(String id) {
     AdminGetUserRequest request =
         new AdminGetUserRequest().withUsername(id).withUserPoolId(properties.getUserpool());
@@ -106,8 +111,8 @@ public class CognitoServiceFacade {
         .withUserStatus(agur.getUserStatus());
   }
 
-  private void updateUserAttributes(String id, UserType existedCognitoUser,
-      UpdateUserDto updateUserDto) {
+  private void updateUserAttributes(
+      String id, UserType existedCognitoUser, UpdateUserDto updateUserDto) {
 
     List<AttributeType> updateAttributes = getUpdateAttributes(existedCognitoUser, updateUserDto);
 
@@ -122,8 +127,8 @@ public class CognitoServiceFacade {
     }
   }
 
-  private List<AttributeType> getUpdateAttributes(UserType existedCognitoUser,
-      UpdateUserDto updateUserDto) {
+  private List<AttributeType> getUpdateAttributes(
+      UserType existedCognitoUser, UpdateUserDto updateUserDto) {
     List<AttributeType> updateAttributes = new ArrayList<>();
 
     Set<String> existedUserPermissions = CognitoUtils.getPermissions(existedCognitoUser);
@@ -177,8 +182,7 @@ public class CognitoServiceFacade {
     return identityProvider;
   }
 
-  public void setIdentityProvider(
-      AWSCognitoIdentityProvider identityProvider) {
+  public void setIdentityProvider(AWSCognitoIdentityProvider identityProvider) {
     this.identityProvider = identityProvider;
   }
 }

@@ -1,3 +1,4 @@
+import org.apache.tools.ant.filters.ReplaceTokens
 import org.apache.tools.ant.taskdefs.condition.Os
 
 buildscript {
@@ -198,19 +199,25 @@ task checkDockerService {
     }
 }
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-        }
-    }
-    repositories {
-        mavenLocal()
-        maven {
-            url artifactoryRepo
-        }
+processResources {
+    filter(ReplaceTokens, tokens: [
+            'build.version': projectVersion,
+            'build.number' : (System.getenv("BUILD_NUMBER") ?: "IDE")
+    ])
+}
+
+publishing.publications {
+    mavenJava(MavenPublication) {
+        from components.java
     }
 }
+publishing.repositories {
+    mavenLocal()
+    maven {
+        url artifactoryRepo
+    }
+}
+
 
 task publishDocker(dependsOn: ':docker-perry:dockerPerryPublish') {
     doLast {
