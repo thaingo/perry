@@ -361,11 +361,6 @@ public class IdmResourceTest extends BaseLiquibaseTest {
       setSearchYoloUsersRequestAndResult("", user0, user1, user2);
 
       setSearchYoloUsersRequestAndResult("Ma", user0);
-
-//      setUpdateUserAttributesRequestAndResult(USER_NO_RACFID_ID,
-//          attr(PERMISSIONS_ATTR_NAME, "RFA-rollout:Hotline-rollout"));
-//
-//      setDisableUserRequestAndResult(USER_NO_RACFID_ID);
     }
 
     private void setSearchYoloUsersRequestAndResult(String lastNameSubstr, TestUser... testUsers) {
