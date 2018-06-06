@@ -6,7 +6,7 @@ import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertStrict;
 import static gov.ca.cwds.idm.util.UsersSearchParametersUtil.DEFAULT_PAGESIZE;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -15,6 +15,8 @@ import static org.mockito.Mockito.when;
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
 import com.amazonaws.services.cognitoidp.model.AdminDisableUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminDisableUserResult;
+import com.amazonaws.services.cognitoidp.model.AdminEnableUserRequest;
+import com.amazonaws.services.cognitoidp.model.AdminEnableUserResult;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserResult;
 import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesRequest;
@@ -44,6 +46,7 @@ import liquibase.util.StringUtils;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.InOrder;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -70,6 +73,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   private final static String USER_WITH_RACFID_AND_DB_DATA_ID = "d740ec1d-80ae-4d84-a8c4-9bed7a942f5b";
   private final static String ABSENT_USER_ID = "absentUserId";
   private final static String ERROR_USER_ID = "errorUserId";
+  private final static String USERPOOL = "userpool";
 
   private static final MediaType CONTENT_TYPE = new MediaType(MediaType.APPLICATION_JSON.getType(),
       MediaType.APPLICATION_JSON.getSubtype(),
@@ -184,6 +188,13 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     updateUserDto.setEnabled(Boolean.FALSE);
     updateUserDto.setPermissions(new HashSet<>(Arrays.asList("RFA-rollout", "Hotline-rollout")));
 
+    AdminUpdateUserAttributesRequest updateAttributesRequest =
+        setUpdateUserAttributesRequestAndResult(USER_NO_RACFID_ID,
+            attr(PERMISSIONS_ATTR_NAME, "RFA-rollout:Hotline-rollout"));
+
+    AdminDisableUserRequest disableUserRequest =
+        setDisableUserRequestAndResult(USER_NO_RACFID_ID);
+
     mockMvc
         .perform(MockMvcRequestBuilders.patch("/idm/users/" + USER_NO_RACFID_ID)
             .contentType(CONTENT_TYPE)
@@ -192,10 +203,42 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         .andReturn();
 
     verify(cognito, times(1))
-        .adminUpdateUserAttributes(any(AdminUpdateUserAttributesRequest.class));
+        .adminUpdateUserAttributes(updateAttributesRequest);
 
     verify(cognito, times(1))
-        .adminDisableUser(any(AdminDisableUserRequest.class));
+        .adminDisableUser(disableUserRequest);
+
+    InOrder inOrder = inOrder(cognito);
+    inOrder.verify(cognito).adminUpdateUserAttributes(updateAttributesRequest);
+    inOrder.verify(cognito).adminDisableUser(disableUserRequest);
+  }
+
+  @Test
+  public void testUpdateUserNoChanges() throws Exception {
+    authenticate("Yolo", "CARES admin");
+
+    UpdateUserDto updateUserDto = new UpdateUserDto();
+    updateUserDto.setEnabled(Boolean.TRUE);
+    updateUserDto.setPermissions(new HashSet<>(Arrays.asList("RFA-rollout", "Snapshot-rollout")));
+
+    AdminUpdateUserAttributesRequest updateAttributesRequest =
+        setUpdateUserAttributesRequestAndResult(USER_NO_RACFID_ID,
+            attr(PERMISSIONS_ATTR_NAME, "RFA-rollout:Snapshot-rollout"));
+
+    AdminEnableUserRequest enableUserRequest = setEnableUserRequestAndResult(USER_NO_RACFID_ID);
+
+    mockMvc
+        .perform(MockMvcRequestBuilders.patch("/idm/users/" + USER_NO_RACFID_ID)
+            .contentType(CONTENT_TYPE)
+            .content(asJsonString(updateUserDto)))
+        .andExpect(MockMvcResultMatchers.status().isNoContent())
+        .andReturn();
+
+    verify(cognito, times(0))
+        .adminUpdateUserAttributes(updateAttributesRequest);
+
+    verify(cognito, times(0))
+        .adminEnableUser(enableUserRequest);
   }
 
   private void testGetValidYoloUser(String userId, String fixtureFilePath) throws Exception {
@@ -208,6 +251,32 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         .andReturn();
 
     assertNonStrict(result, fixtureFilePath);
+  }
+
+  private AdminUpdateUserAttributesRequest setUpdateUserAttributesRequestAndResult(
+      String id,
+      AttributeType... userAttributes) {
+    AdminUpdateUserAttributesRequest request = new AdminUpdateUserAttributesRequest()
+        .withUsername(id).withUserPoolId(USERPOOL).withUserAttributes(userAttributes);
+    AdminUpdateUserAttributesResult result = new AdminUpdateUserAttributesResult();
+    when(cognito.adminUpdateUserAttributes(request)).thenReturn(result);
+    return request;
+  }
+
+  private AdminDisableUserRequest setDisableUserRequestAndResult(String id) {
+    AdminDisableUserRequest request = new AdminDisableUserRequest()
+        .withUsername(id).withUserPoolId(USERPOOL);
+    AdminDisableUserResult result = new AdminDisableUserResult();
+    when(cognito.adminDisableUser(request)).thenReturn(result);
+    return request;
+  }
+
+  private AdminEnableUserRequest setEnableUserRequestAndResult(String id) {
+    AdminEnableUserRequest request = new AdminEnableUserRequest()
+        .withUsername(id).withUserPoolId(USERPOOL);
+    AdminEnableUserResult result = new AdminEnableUserResult();
+    when(cognito.adminEnableUser(request)).thenReturn(result);
+    return request;
   }
 
   private void authenticate(String county, String... roles) {
@@ -252,9 +321,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     }
   }
 
-  static class TestCognitoServiceFacade extends CognitoServiceFacade {
-
-    private final static String USERPOOL = "userpool";
+  public static class TestCognitoServiceFacade extends CognitoServiceFacade {
 
     private AWSCognitoIdentityProvider cognito;
 
@@ -295,10 +362,10 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
       setSearchYoloUsersRequestAndResult("Ma", user0);
 
-      setUpdateUserAttributesRequestAndResult(USER_NO_RACFID_ID,
-          attr(PERMISSIONS_ATTR_NAME, "RFA-rollout:Hotline-rollout"));
-
-      setDisableUserRequestAndResult(USER_NO_RACFID_ID);
+//      setUpdateUserAttributesRequestAndResult(USER_NO_RACFID_ID,
+//          attr(PERMISSIONS_ATTR_NAME, "RFA-rollout:Hotline-rollout"));
+//
+//      setDisableUserRequestAndResult(USER_NO_RACFID_ID);
     }
 
     private void setSearchYoloUsersRequestAndResult(String lastNameSubstr, TestUser... testUsers) {
@@ -318,21 +385,6 @@ public class IdmResourceTest extends BaseLiquibaseTest {
       ListUsersResult result = new ListUsersResult().withUsers(userTypes);
 
       when(cognito.listUsers(request)).thenReturn(result);
-    }
-
-    private void setUpdateUserAttributesRequestAndResult(String id,
-        AttributeType... userAttributes) {
-      AdminUpdateUserAttributesRequest request = new AdminUpdateUserAttributesRequest()
-          .withUsername(id).withUserPoolId(USERPOOL).withUserAttributes(userAttributes);
-      AdminUpdateUserAttributesResult result = new AdminUpdateUserAttributesResult();
-      when(cognito.adminUpdateUserAttributes(request)).thenReturn(result);
-    }
-
-    private void setDisableUserRequestAndResult(String id) {
-      AdminDisableUserRequest request = new AdminDisableUserRequest()
-          .withUsername(id).withUserPoolId(USERPOOL);
-      AdminDisableUserResult result = new AdminDisableUserResult();
-      when(cognito.adminDisableUser(request)).thenReturn(result);
     }
 
     private TestUser testUser(String id, Boolean enabled, String status, Date userCreateDate,
