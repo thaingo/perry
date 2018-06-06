@@ -68,7 +68,7 @@ node('dora-slave') {
             def gradlePropsText = """
             perry.health.check.url=http://10.110.12.162:9082/manage/health
             perry.url=${PERRY_URL}
-            perry.threads.count=2
+            perry.threads.count=1
             selenium.grid.url=http://grid.dev.cwds.io:4444/wd/hub
             """
             writeFile file: "gradle.properties", text: gradlePropsText
