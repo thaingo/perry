@@ -45,9 +45,9 @@ node('dora-slave') {
         stage('Build Docker') {
             withDockerRegistry([credentialsId: '6ba8d05c-ca13-4818-8329-15d41a089ec0']) {
                 if (params.RELEASE_PROJECT) {
-                    buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'buildDocker -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
+                    buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'dockerPushLatestVersion -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
                 } else {
-                    buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'buildDocker -DRelease=false -DBuildNumber=$BUILD_NUMBER'
+                    buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'dockerPushLatestVersion -DRelease=false -DBuildNumber=$BUILD_NUMBER'
                 }
             }
         }
@@ -56,6 +56,7 @@ node('dora-slave') {
         }
         stage('Deploy Application') {
             sh 'cd ansible ; ansible-playbook -e NEW_RELIC_AGENT=$USE_NEWRELIC -e VERSION_NUMBER=$APP_VERSION -i $inventory deploy-perry.yml --vault-password-file ~/.ssh/vault.txt -vv'
+            sleep(20)
         }
 //        stage('Smoke Tests') {
 //            git branch: 'master', url: 'https://github.com/ca-cwds/perry.git'
@@ -68,7 +69,7 @@ node('dora-slave') {
             def gradlePropsText = """
             perry.health.check.url=http://10.110.12.162:9082/manage/health
             perry.url=${PERRY_URL}
-            perry.threads.count=5
+            perry.threads.count=1
             selenium.grid.url=http://grid.dev.cwds.io:4444/wd/hub
             """
             writeFile file: "gradle.properties", text: gradlePropsText
