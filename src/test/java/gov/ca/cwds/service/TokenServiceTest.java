@@ -9,14 +9,20 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.endpoint.HealthEndpoint;
+import org.springframework.boot.actuate.endpoint.InfoEndpoint;
 import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import org.springframework.transaction.TransactionSystemException;
 
 @RunWith(SpringRunner.class)
@@ -32,6 +38,13 @@ public class TokenServiceTest {
   private PerryProperties properties;
   @Autowired
   TokenRepository tokenRepository;
+
+  @MockBean
+  private HealthEndpoint healthEndpoint;
+
+  @MockBean
+  private InfoEndpoint infoEndpoint;
+
   private static final String ACCESS_TOKEN = "accessToken";
   private static final String USER_ID = "userId";
   private static final String PERRY_TOKEN = "perryToken";

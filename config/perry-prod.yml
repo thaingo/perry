@@ -107,7 +107,7 @@ management:
     health:
       enabled: true
     info:
-      enabled: true
+      enabled: false
     env:
       enabled: false
     configprops:
