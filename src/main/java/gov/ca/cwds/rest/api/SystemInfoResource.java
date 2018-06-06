@@ -39,7 +39,7 @@ public class SystemInfoResource {
   public String getInfo() {
     ObjectMapper mapper = new ObjectMapper();
     try {
-      InfoClass info = new InfoClass();
+      SystemInformation info = new SystemInformation();
       info.setSystemInfo(infoEndpoint.invoke());
       info.setHealth(healthEndpoint.invoke());
       return mapper.writeValueAsString(info);
@@ -50,7 +50,7 @@ public class SystemInfoResource {
   }
 
   @JsonInclude(JsonInclude.Include.NON_EMPTY)
-  private static class InfoClass {
+  private static class SystemInformation {
     private Map<String, Object> systemInfo;
     private Health health;
 
