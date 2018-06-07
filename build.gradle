@@ -112,7 +112,7 @@ springBoot {
     buildInfo {
         additionalProperties = [
                 version: projectVersion,
-                build: buildNumber,
+                buildNumber: ""+buildNumber,
                 time: buildTime()
         ]
     }
