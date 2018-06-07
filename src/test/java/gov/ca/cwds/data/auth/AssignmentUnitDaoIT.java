@@ -8,10 +8,13 @@ import java.util.Date;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.actuate.endpoint.HealthEndpoint;
+import org.springframework.boot.actuate.endpoint.InfoEndpoint;
 import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -30,6 +33,12 @@ public class AssignmentUnitDaoIT {
 
   @Autowired
   private AssignmentUnitDao assignmentUnitDao;
+
+  @MockBean
+  private HealthEndpoint healthEndpoint;
+
+  @MockBean
+  private InfoEndpoint infoEndpoint;
 
   @Test
   public void testFind() {

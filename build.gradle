@@ -1,4 +1,5 @@
 import org.apache.tools.ant.taskdefs.condition.Os
+import java.text.SimpleDateFormat
 
 buildscript {
     repositories {
@@ -105,6 +106,22 @@ repositories {
     maven {
         url "http://pr.dev.cwds.io/artifactory/repo"
     }
+}
+
+springBoot {
+    buildInfo {
+        additionalProperties = [
+                version: projectVersion,
+                buildNumber: ""+buildNumber,
+                time: buildTime()
+        ]
+    }
+}
+
+def buildTime() {
+    final dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssZ")
+    dateFormat.timeZone = TimeZone.getTimeZone('PDT')
+    dateFormat.format(new Date())
 }
 
 dependencies {

@@ -70,16 +70,16 @@ management:
     enabled: false
   ssl:
     enabled: false
-endpoints:
-  enabled: false
-  health:
-    enabled: true
-  info:
+  endpoints:
     enabled: false
-  env:
-    enabled: false
-  configprops:
-    enabled: false
+    health:
+      enabled: true
+    info:
+      enabled: false
+    env:
+      enabled: false
+    configprops:
+      enabled: false
 server:
   context-path: ${CONTEXT_PATH:/perry}
   use-forward-headers: ${USE_FORWARD_HEADERS:true}
