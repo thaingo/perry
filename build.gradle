@@ -126,7 +126,6 @@ dependencies {
     compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.4.11'
     compile group: 'org.liquibase', name: 'liquibase-core', version: '3.5.3'
     compile group: 'gov.ca.cwds.cals', name: 'perry-data-model', version: cwdsModelVersion, changing: true
-    compile group: 'gov.ca.cwds.cals', name: 'cws-cms-data-model', version: cwdsModelVersion, changing: true
 
     compile group: 'com.amazonaws', name: 'aws-java-sdk', version: '1.11.325'
 
@@ -159,6 +158,8 @@ dependencies {
     testCompile group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '2.1.6'
     testCompile 'org.ow2.asm:asm-all:5.1'
     testCompile group: 'io.dropwizard', name: 'dropwizard-testing', version: '1.0.5'
+
+    testCompile group: 'gov.ca.cwds.cals', name: 'cws-cms-data-model', version: cwdsModelVersion, changing: true
 }
 
 test {
