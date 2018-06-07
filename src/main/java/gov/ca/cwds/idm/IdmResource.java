@@ -30,20 +30,22 @@ import java.util.Optional;
 @RequestMapping(value = "/idm")
 public class IdmResource {
 
-  @Autowired private IdmService idmService;
+  @Autowired
+  private IdmService idmService;
 
-  @Autowired private DictionaryProvider dictionaryProvider;
+  @Autowired
+  private DictionaryProvider dictionaryProvider;
 
   @RequestMapping(method = RequestMethod.GET, value = "/users", produces = "application/json")
   @ApiOperation(
-    value = "Users to manage by current logged-in admin",
-    response = User.class,
-    responseContainer = "List"
+      value = "Users to manage by current logged-in admin",
+      response = User.class,
+      responseContainer = "List"
   )
   @ApiResponses(value = {@ApiResponse(code = 401, message = "Not Authorized")})
   public List<User> getUsers(
       @ApiParam(name = "lastName", value = "lastName to search for")
-          @RequestParam(name = "lastName", required = false)
+      @RequestParam(name = "lastName", required = false)
           String lastName) {
     return idmService.getUsers(lastName);
   }
@@ -51,15 +53,15 @@ public class IdmResource {
   @RequestMapping(method = RequestMethod.GET, value = "/users/{id}", produces = "application/json")
   @ApiOperation(value = "Find User by ID", response = User.class)
   @ApiResponses(
-    value = {
-      @ApiResponse(code = 401, message = "Not Authorized"),
-      @ApiResponse(code = 404, message = "Not found")
-    }
+      value = {
+          @ApiResponse(code = 401, message = "Not Authorized"),
+          @ApiResponse(code = 404, message = "Not found")
+      }
   )
   public ResponseEntity<User> getUser(
       @ApiParam(required = true, value = "The unique user ID", example = "userId1")
-          @PathVariable
-          @NotNull
+      @PathVariable
+      @NotNull
           String id) {
 
     try {
@@ -71,33 +73,30 @@ public class IdmResource {
   }
 
   @RequestMapping(
-    method = RequestMethod.PATCH,
-    value = "/users/{id}",
-    consumes = "application/json"
+      method = RequestMethod.PATCH,
+      value = "/users/{id}",
+      consumes = "application/json"
   )
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @ApiResponses(
-    value = {
-      @ApiResponse(code = 204, message = "No Content"),
-      @ApiResponse(code = 401, message = "Not Authorized"),
-      @ApiResponse(code = 404, message = "Not found")
-    }
+      value = {
+          @ApiResponse(code = 204, message = "No Content"),
+          @ApiResponse(code = 401, message = "Not Authorized"),
+          @ApiResponse(code = 404, message = "Not found")
+      }
   )
   @ApiOperation(value = "Update User")
   public ResponseEntity updateUser(
-//  public ResponseEntity<Void> updateUser(
       @ApiParam(required = true, value = "The unique user ID", example = "userId1")
-          @PathVariable
-          @NotNull
+      @PathVariable
+      @NotNull
           String id,
       @ApiParam(required = true, name = "userUpdateData", value = "The User update data")
-          @NotNull
-          @RequestBody
+      @NotNull
+      @RequestBody
           UpdateUserDto updateUserDto) {
-
     try {
       idmService.updateUser(id, updateUserDto);
-//      return ResponseEntity.ok().build();
       return ResponseEntity.noContent().build();
     } catch (UserNotFoundPerryException e) {
       return ResponseEntity.notFound().build();
@@ -106,15 +105,15 @@ public class IdmResource {
 
   @RequestMapping(method = RequestMethod.GET, value = "/permissions", produces = "application/json")
   @ApiResponses(
-    value = {
-      @ApiResponse(code = 401, message = "Not Authorized"),
-      @ApiResponse(code = 404, message = "Not found")
-    }
+      value = {
+          @ApiResponse(code = 401, message = "Not Authorized"),
+          @ApiResponse(code = 404, message = "Not found")
+      }
   )
   @ApiOperation(
-    value = "Get List of possible permissions",
-    response = String.class,
-    responseContainer = "List"
+      value = "Get List of possible permissions",
+      response = String.class,
+      responseContainer = "List"
   )
   public ResponseEntity<List<String>> getPermissions() {
     return Optional.ofNullable(dictionaryProvider.getPermissions())
