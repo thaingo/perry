@@ -12,7 +12,7 @@ import org.apache.commons.collections.CollectionUtils;
 
 public class CognitoUtils {
 
-  static final String PERMISSIONS_ATTR_NAME = "custom:Permission";
+  public static final String PERMISSIONS_ATTR_NAME = "custom:Permission";
   static final String COUNTY_ATTR_NAME = "custom:County";
   static final String PERMISSIONS_DELIMITER = ":";
 

@@ -163,6 +163,7 @@ dependencies {
             exclude(module: 'commons-logging')
     }
     testCompile 'org.springframework:spring-test:4.3.0.RELEASE'
+    testCompile 'org.springframework.security:spring-security-test:4.2.6.RELEASE'
     testCompile 'org.mockito:mockito-core:2.18.3'
     testCompile group: 'org.hamcrest', name: 'hamcrest-junit', version: '2.0.0.0'
     testCompile('org.glassfish.jersey.test-framework.providers:jersey-test-framework-provider-grizzly2:2.23.2') {
@@ -174,6 +175,8 @@ dependencies {
     testCompile group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '2.1.6'
     testCompile 'org.ow2.asm:asm-all:5.1'
     testCompile group: 'io.dropwizard', name: 'dropwizard-testing', version: '1.0.5'
+
+    testCompile group: 'gov.ca.cwds.cals', name: 'cws-cms-data-model', version: cwdsModelVersion, changing: true
 }
 
 test {
