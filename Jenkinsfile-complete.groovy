@@ -188,7 +188,6 @@ def updateFiles(newTag) {
     debug("updateFiles( newTag: ${newTag} )")
 	def source = readFile file: 'build.gradle'
 	source = source.replace('projectVersion = (isRelease ? projectReleaseVersion : projectSnapshotVersion )', 'projectVersion = \''+newTag+'\'')
-	source.replace('dockerTag = projectVersion','dockerTag = \''+newTag+'\'')
 	writeFile file:'build.gradle', text: "$source"
 }
 // Tags the repo
