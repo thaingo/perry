@@ -187,6 +187,7 @@ def updateFiles(newTag) {
     debug("updateFiles( newTag: ${newTag} )")
 	def source = readFile file: 'build.gradle'
 	source = source.replace('projectVersion = (isRelease ? projectReleaseVersion : projectSnapshotVersion )', 'projectVersion = \''+newTag+'\'')
+	source.replace('dockerTag = projectVersion','dockerTag = \''+newTag+'\'')
 	writeFile file:'build.gradle', text: "$source"
 }
 // Tags the repo
@@ -236,6 +237,40 @@ node('dora-slave') {
             rtGradle.tool = "Gradle_35"
             rtGradle.resolver repo: 'repo', server: serverArti
             rtGradle.useWrapper = true
+        }
+        stage("Increment Tag") {
+            try {
+                def prEvent = getPullRequestEvent()
+                debug("Increment Tag: prEvent: ${prEvent}")
+
+                def labels = getLabels(prEvent)
+                debug("Increment Tag: labels: ${labels}")
+
+                VersionIncrement increment = getVersionIncrement(labels)
+                debug("Increment Tag: increment: ${increment}")
+                if(increment != null ) {
+                    def tags = getTags()
+                    debug("Increment Tag: tags: ${tags}")
+
+                    newTag = getNewTag(tags, increment)
+                    debug("Increment Tag: newTag: ${newTag}")
+
+                    updateFiles(newTag)
+
+                    tagRepo(newTag)
+
+                } else {
+                    def tags = getTags()
+                    debug("Increment Tag: tags: ${tags}")
+
+                    newTag = tags
+                    debug("Increment Tag: No label going with old version: ${newTag}")
+
+                }
+            }
+            catch(Exception ex) {
+                error "[ERROR] ${ex}"
+            }
         }
         stage('Build') {
             if (params.RELEASE_PROJECT) {
