@@ -1,3 +1,4 @@
+
 /**
 +It's hard to test this script without constantly open/closing PRs.
 +Set to true to test with triggering only a build and using mock values.
