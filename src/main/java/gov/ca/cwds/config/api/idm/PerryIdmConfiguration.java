@@ -14,6 +14,7 @@ public class PerryIdmConfiguration extends BaseApiConfiguration {
   @Override
   protected void configure(HttpSecurity http) throws Exception {
     http.antMatcher("/idm/**").authorizeRequests().anyRequest().hasAuthority("CWS-admin");
+    http.antMatcher("/admin/**").authorizeRequests().anyRequest().hasAuthority("CAP-admin");
     super.configure(http);
   }
 }
