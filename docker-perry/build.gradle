@@ -15,7 +15,7 @@ task dockerCopyScripts(type: Copy) {
     from projectDir
     into dockerContextDir
     include 'entrypoint.sh'
-    filter(FixCrLfFilter.class, eol:FixCrLfFilter.CrLf.newInstance("lf"))
+    filter(FixCrLfFilter.class, eol: FixCrLfFilter.CrLf.newInstance("lf"))
 }
 
 task dockerCopyConfig(type: Copy) {
@@ -37,7 +37,7 @@ task dockerfile(type: Copy) {
     into dockerContextDir
     rename { file -> 'Dockerfile-perry' }
     expand(
-        perry_dist_file_name: perryDistFileName
+            perry_dist_file_name: perryDistFileName
     )
 }
 
@@ -56,7 +56,7 @@ task dockerTagImage(type: Exec, dependsOn: project.parent.checkDockerService) {
 }
 
 task readArguments() {
-    doLast{
+    doLast {
         println "ReleaseDocker: " + isRelease
         println "Build: " + buildNumber
         println "Docker Tag: " + dockerTag
@@ -86,20 +86,18 @@ task dockerPerryPublish(dependsOn: [dockerCreateImage, dockerPushTaggedVersion, 
     dockerPushLatestVersion.mustRunAfter(dockerCreateImage)
 }
 
+task createGitTag(type: Exec) {
+    commandLine "git", "tag", "$dockerTag"
+}
 
+task pushGitTag(type: Exec, dependsOn: createGitTag) {
+    doFirst {
+        environment "GIT_SSH_COMMAND", 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
+    }
 
-task createGitTag(type:Exec) {
-      commandLine "git", "tag", "$dockerTag"
-  }
-  
-  task pushGitTag(type:Exec, dependsOn: createGitTag) {
-      doFirst{
-          environment "GIT_SSH_COMMAND", 'ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
-      }
-      
-      commandLine "git", "push", "origin", "$dockerTag"
-      
-      doLast {
-          println "Pushed tagged to Git origin"
-      }
-  }
+    commandLine "git", "push", "origin", "$dockerTag"
+
+    doLast {
+        println "Pushed tagged to Git origin"
+    }
+}
