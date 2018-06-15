@@ -64,7 +64,6 @@ project.ext {
     serenityVersion = '1.9.13'
 
 }
-
 group = projectGroup
 
 description = """perry"""
@@ -244,6 +243,12 @@ task buildDocker(dependsOn: ':docker-perry:dockerCreateImage') {
     }
 }
 
+task publishGit(dependsOn: ':docker-perry:pushGitTag') {
+    doLast {
+        println 'Docker published'
+    }
+}
+
 task integrationTestDev(dependsOn: ':integration-tests:testDevMode') {
     doLast {
         println 'Integration Test Passed'
@@ -253,8 +258,6 @@ task integrationTestDev(dependsOn: ':integration-tests:testDevMode') {
 javadoc {
     options.addStringOption("charset", "UTF-8")
 }
-
-
 
 task integrationTest(type: Test, dependsOn: testClasses) {
     include '**/*IT*'
