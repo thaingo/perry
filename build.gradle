@@ -64,7 +64,6 @@ project.ext {
     serenityVersion = '1.9.13'
 
 }
-
 group = projectGroup
 
 description = """perry"""
