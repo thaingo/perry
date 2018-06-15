@@ -52,8 +52,13 @@ node('dora-slave') {
             }
         }
         stage('Tag Git') {
+            if (params.RELEASE_PROJECT) {
+                echo "!!!! BUILD RELEASE VERSION"
           // tagRepo('test-tags')
   	   def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'pushGitTag -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
+      }else {
+                echo "!!!! BUILD SNAPSHOT VERSION"
+       def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'pushGitTag -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
       }
         stage('Clean Workspace') {
             archiveArtifacts artifacts: '**/perry*.jar,readme.txt', fingerprint: true
