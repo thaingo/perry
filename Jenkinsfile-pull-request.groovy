@@ -23,10 +23,10 @@ node('dora-slave') {
         stage('Build') {
             if (params.RELEASE_PROJECT) {
                 echo "!!!! BUILD RELEASE VERSION"
-                def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'clean jar -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
+                buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'clean jar -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
             } else {
                 echo "!!!! BUILD SNAPSHOT VERSION"
-                def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'clean jar'
+                buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'clean jar'
             }
         }
         stage('Unit Tests') {
