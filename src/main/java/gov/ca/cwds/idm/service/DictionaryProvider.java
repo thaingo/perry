@@ -26,7 +26,8 @@ public class DictionaryProvider {
     this.permissionRepository = permissionRepository;
   }
 
-  public void rewritePermissions(List<String> permissions) {
+  @Transactional(value = "tokenTransactionManager")
+  public void overwritePermissions(List<String> permissions) {
     permissionRepository.deleteAll();
     permissionRepository.save(permissions.stream().map(Permission::new).collect(Collectors.toList()));
   }

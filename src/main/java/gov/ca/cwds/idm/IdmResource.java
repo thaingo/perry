@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -119,5 +120,24 @@ public class IdmResource {
     return Optional.ofNullable(dictionaryProvider.getPermissions())
         .map(permissions -> ResponseEntity.ok().body(permissions))
         .orElseGet(() -> ResponseEntity.notFound().build());
+  }
+
+  @RequestMapping(method = RequestMethod.PUT, value = "/permissions", consumes = "application/json")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @ApiResponses(
+          value = {
+                  @ApiResponse(code = 204, message = "No Content"),
+                  @ApiResponse(code = 401, message = "Not Authorized")
+          }
+  )
+  @ApiOperation(value = "Overwrite the List of possible permissions")
+  @PreAuthorize("hasAuthority('CARES-admin')")
+  public ResponseEntity overwritePermissions(
+          @ApiParam(required = true, name = "List of Permissions", value = "List new Permissions here")
+          @NotNull
+          @RequestBody
+                  List<String> permissions) {
+    dictionaryProvider.overwritePermissions(permissions);
+    return ResponseEntity.noContent().build();
   }
 }
