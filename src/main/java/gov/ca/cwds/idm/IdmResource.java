@@ -5,6 +5,7 @@ import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.DictionaryProvider;
 import gov.ca.cwds.idm.service.IdmService;
 import gov.ca.cwds.rest.api.domain.UserNotFoundPerryException;
+import gov.ca.cwds.rest.api.domain.UserValidationException;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -139,5 +140,21 @@ public class IdmResource {
                   List<String> permissions) {
     dictionaryProvider.overwritePermissions(permissions);
     return ResponseEntity.noContent().build();
+  }
+
+  //TODO swagger
+  @RequestMapping(
+    method = RequestMethod.GET,
+    value = "users/validate",
+    produces = "application/json"
+  )
+  public ResponseEntity<User> validateUser(
+      @RequestParam(name = "racfid") String racfId, @RequestParam(name = "email") String email) {
+    try {
+      User user = idmService.checkUser(racfId, email);
+      return ResponseEntity.ok().body(user);
+    } catch (UserValidationException e) {
+      return ResponseEntity.badRequest().build();
+    }
   }
 }
