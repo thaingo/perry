@@ -62,13 +62,14 @@ public class CwsUserInfoService {
     UserId user = userId.get();
     String userIdentifier = user.getId();
     String staffPersonIdentifier = user.getStaffPersonId();
-    boolean socialWorker =
-        !staffAuthorityPrivilegeDao.findSocialWorkerPrivileges(userIdentifier).isEmpty();
+    return getCwsUserInfo(user, userIdentifier, staffPersonIdentifier);
+  }
 
+  //just because of codeclimate 25 lines of code allowed rule
+  private CwsUserInfo getCwsUserInfo(UserId user, String userIdentifier, String staffPersonIdentifier) {
+    boolean socialWorker = !staffAuthorityPrivilegeDao.findSocialWorkerPrivileges(userIdentifier).isEmpty();
     Set<StaffAuthorityPrivilege> userAuthPrivs = getStaffAuthorityPriveleges(userIdentifier);
-
     Set<StaffUnitAuthority> setStaffUnitAuths = getStaffUnitAuthorities(staffPersonIdentifier);
-
     StaffPerson staffPerson = staffPersonDao.findOne(staffPersonIdentifier);
     if (staffPerson == null) {
       LOGGER.warn("No staff person found for {}", staffPersonIdentifier);
@@ -92,42 +93,27 @@ public class CwsUserInfoService {
   }
 
   public List<CwsUserInfo> findUsers(Collection<String> racfIds) {
-    List<String> filtered =
-        racfIds
-            .stream()
-            .filter(Objects::nonNull)
-            .filter(e -> e.length() <= RACFID_MAX_LENGTH)
-            .collect(Collectors.toList());
+    List<String> filtered = racfIds.stream().filter(Objects::nonNull)
+            .filter(e -> e.length() <= RACFID_MAX_LENGTH).collect(Collectors.toList());
     if (CollectionUtils.isEmpty(filtered)) {
       return Collections.emptyList();
     }
     List<UserId> userIdList = userIdDao.findActiveByLogonIdIn(filtered);
-    List<String> staffPersonIds =
-        userIdList
-            .stream()
-            .map(UserId::getStaffPersonId)
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+    List<String> staffPersonIds = userIdList.stream().map(UserId::getStaffPersonId)
+            .filter(Objects::nonNull).collect(Collectors.toList());
 
     Map<String, StaffPerson> idToStaffperson =
         StreamSupport.stream(staffPersonDao.findByIdIn(staffPersonIds).spliterator(), false)
             .collect(Collectors.toMap(StaffPerson::getId, e -> e));
 
-    List<String> offices =
-        idToStaffperson
-            .values()
-            .stream()
-            .map(StaffPerson::getCwsOffice)
-            .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+    List<String> offices = idToStaffperson.values().stream().map(StaffPerson::getCwsOffice)
+            .filter(Objects::nonNull).collect(Collectors.toList());
 
     Map<String, CwsOffice> idToOffice =
         StreamSupport.stream(cwsOfficeDao.findByOfficeIdIn(offices).spliterator(), false)
             .collect(Collectors.toMap(CwsOffice::getOfficeId, e -> e));
 
-    return userIdList
-        .stream()
-        .map(e -> composeCwsUserInfo(e, idToStaffperson, idToOffice))
+    return userIdList.stream().map(e -> composeCwsUserInfo(e, idToStaffperson, idToOffice))
         .collect(Collectors.toList());
   }
 

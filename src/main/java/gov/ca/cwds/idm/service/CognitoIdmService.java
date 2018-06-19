@@ -48,32 +48,23 @@ public class CognitoIdmService implements IdmService {
 
   @Override
   public List<User> getUsers(String lastName) {
-    Collection<UserType> cognitoUsers =
-        cognitoService.search(UsersSearchParametersUtil.composeSearchParameter(lastName));
+    Collection<UserType> cognitoUsers = cognitoService.search(UsersSearchParametersUtil.composeSearchParameter(lastName));
 
     Map<String, String> userNameToRacfId = new HashMap<>(cognitoUsers.size());
     for (UserType user : cognitoUsers) {
       userNameToRacfId.put(user.getUsername(), getRACFId(user));
     }
 
-    Map<String, CwsUserInfo> idToCmsUser =
-        cwsUserInfoService
-            .findUsers(userNameToRacfId.values())
-            .stream()
-            .collect(
-                Collectors.toMap(
-                    CwsUserInfo::getRacfId,
-                    e -> e,
-                    (user1, user2) -> {
-                      LOGGER.warn(
-                          "UserAuthorization - duplicate UserId for RACFid: {}", user1.getRacfId());
-                      return user1;
-                    }));
+    Map<String, CwsUserInfo> idToCmsUser = cwsUserInfoService.findUsers(userNameToRacfId.values())
+            .stream().collect(
+                    Collectors.toMap(CwsUserInfo::getRacfId, e -> e,
+                      (user1, user2) -> {
+                        LOGGER.warn("UserAuthorization - duplicate UserId for RACFid: {}", user1.getRacfId());
+                        return user1;
+                      }));
 
     IdmMappingScript mapping = configuration.getIdentityManager().getIdmMapping();
-    return cognitoUsers
-        .stream()
-        .map(
+    return cognitoUsers.stream().map(
             e -> {
               try {
                 return mapping.map(e, idToCmsUser.get(userNameToRacfId.get(e.getUsername())));
@@ -81,8 +72,7 @@ public class CognitoIdmService implements IdmService {
                 LOGGER.error("Error running the IdmMappingScript");
                 throw new PerryException(ex.getMessage(), ex);
               }
-            })
-        .collect(Collectors.toList());
+            }).collect(Collectors.toList());
   }
 
   @Override
@@ -101,38 +91,34 @@ public class CognitoIdmService implements IdmService {
     CwsUserInfo cwsUser = getCwsUserByRacfId(racfId);
     if (cwsUser == null) {
       String message = MessageFormat.format("No user with RACFID: {0} found in CWSCMS", racfId);
-      LOGGER.info(message);
-      return UserVerificationResult.Builder.anUserVerificationResult()
-          .withMessage(message)
-          .withVerificationPassed(false)
-          .build();
+      return composeNegativeResultWithMessage(message);
     }
     Collection<UserType> cognitoUsers =
         cognitoService.search(
             UsersSearchParameter.SearchParameterBuilder.aSearchParameters()
-                .withEmail(email)
-                .build());
+                .withEmail(email).build());
 
     if (!CollectionUtils.isEmpty(cognitoUsers)) {
       String message =
           MessageFormat.format("User with email: {0} is already present in Cognito", email);
-      LOGGER.info(message);
-      return UserVerificationResult.Builder.anUserVerificationResult()
-          .withMessage(message)
-          .withVerificationPassed(false)
-          .build();
+      return composeNegativeResultWithMessage(message);
     }
     User user = composeUser(cwsUser, email);
-    if (!Objects.equals(
-        CurrentAuthenticatedUserUtil.getCurrentUserCountyName(), user.getCountyName())) {
+    if (!Objects.equals(CurrentAuthenticatedUserUtil.getCurrentUserCountyName(), user.getCountyName())) {
       return UserVerificationResult.Builder.anUserVerificationResult()
           .withMessage("You are not authorized to add user from County other than yours")
-          .withVerificationPassed(false)
-          .build();
+          .withVerificationPassed(false).build();
     }
     return UserVerificationResult.Builder.anUserVerificationResult()
         .withUser(user)
-        .withVerificationPassed(true)
+        .withVerificationPassed(true).build();
+  }
+
+  private UserVerificationResult composeNegativeResultWithMessage(String message) {
+    LOGGER.info(message);
+    return UserVerificationResult.Builder.anUserVerificationResult()
+        .withMessage(message)
+        .withVerificationPassed(false)
         .build();
   }
 
