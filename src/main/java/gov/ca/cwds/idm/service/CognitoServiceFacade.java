@@ -32,17 +32,21 @@ import com.amazonaws.services.cognitoidp.model.ListUsersRequest;
 import com.amazonaws.services.cognitoidp.model.ListUsersResult;
 import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
 import com.amazonaws.services.cognitoidp.model.UserType;
+import com.amazonaws.services.cognitoidp.model.UsernameExistsException;
 import gov.ca.cwds.idm.CognitoProperties;
 import gov.ca.cwds.idm.dto.UpdateUserDto;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UsersSearchParameter;
 import gov.ca.cwds.rest.api.domain.PerryException;
+import gov.ca.cwds.rest.api.domain.UserAlreadyExistsException;
 import gov.ca.cwds.rest.api.domain.UserNotFoundPerryException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -50,6 +54,7 @@ import org.springframework.stereotype.Service;
 @Service(value = "cognitoServiceFacade")
 @Profile("idm")
 public class CognitoServiceFacade {
+  private static final Logger LOGGER = LoggerFactory.getLogger(CognitoServiceFacade.class);
 
   private static final String EMAIL_DELIVERY = "EMAIL";
   private static final String DEFAULT_ROLES = "CWS-worker";
@@ -122,7 +127,14 @@ public class CognitoServiceFacade {
             .withDesiredDeliveryMediums(EMAIL_DELIVERY)
             .withUserAttributes(attrs);
 
-    AdminCreateUserResult result = identityProvider.adminCreateUser(request);
+    AdminCreateUserResult result;
+    try {
+      result = identityProvider.adminCreateUser(request);
+    } catch (UsernameExistsException e) {
+      String msg = "Unable to create new Cognito user. A User with email " + email + " already exists.";
+      LOGGER.error(msg);
+      throw new UserAlreadyExistsException(msg, e);
+    }
     UserType cognitoUser = result.getUser();
     return cognitoUser.getUsername();
   }

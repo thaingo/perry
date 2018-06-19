@@ -4,7 +4,7 @@ import gov.ca.cwds.idm.dto.UpdateUserDto;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.DictionaryProvider;
 import gov.ca.cwds.idm.service.IdmService;
-import gov.ca.cwds.rest.api.domain.UserExistsException;
+import gov.ca.cwds.rest.api.domain.UserAlreadyExistsException;
 import gov.ca.cwds.rest.api.domain.UserNotFoundPerryException;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -105,11 +105,16 @@ public class IdmResource {
   @ResponseStatus(HttpStatus.CREATED)
   @ApiResponses(
       value = {
-        @ApiResponse(code = 201, message = "Created"),
+        @ApiResponse(code = 201, message = "New User is created successfully"),
         @ApiResponse(code = 401, message = "Not Authorized"),
-        @ApiResponse(code = 409, message = "Conflict")
+        @ApiResponse(code = 409, message = "Conflict. User with the same email already exists")
       })
-  @ApiOperation(value = "Create new Cognito User")
+  @ApiOperation(
+      value = "Create new Cognito User",
+      notes =
+          "Only the following properties of the input User JSON will be used at new User creation: "
+              + "email, first_name, last_name, county_name, RACFID, permissions, office, phone_number. "
+              + "Other properties will be ignored, their values will be set by the system automatically.")
   public ResponseEntity createUser(
       @ApiParam(required = true, name = "createUserDto", value = "The User create data")
           @NotNull
@@ -117,15 +122,14 @@ public class IdmResource {
           User user) {
     try {
       String newUserId = idmService.createUser(user);
-
       URI uri =
           ServletUriComponentsBuilder.fromCurrentRequest()
               .path("/{id}")
               .buildAndExpand(newUserId)
               .toUri();
-
       return ResponseEntity.created(uri).build();
-    } catch (UserExistsException e) {
+
+    } catch (UserAlreadyExistsException e) {
       return new ResponseEntity(HttpStatus.CONFLICT);
     }
   }
