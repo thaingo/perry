@@ -1,8 +1,9 @@
 package gov.ca.cwds.idm.service;
 
+import static gov.ca.cwds.idm.service.CognitoUtils.RACFID_ATTR_NAME;
+
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.PerryProperties;
-import gov.ca.cwds.idm.dto.CreateUserDto;
 import gov.ca.cwds.idm.dto.UpdateUserDto;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.util.UsersSearchParametersUtil;
@@ -32,7 +33,6 @@ import org.springframework.stereotype.Service;
 public class CognitoIdmService implements IdmService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CognitoIdmService.class);
-  static final String RACFID_ATTRIBUTE = "CUSTOM:RACFID";
 
   @Autowired CognitoServiceFacade cognitoService;
 
@@ -87,8 +87,8 @@ public class CognitoIdmService implements IdmService {
   }
 
   @Override
-  public String createUser(CreateUserDto createUserDto) {
-    return cognitoService.createUser(createUserDto);
+  public String createUser(User user) {
+    return cognitoService.createUser(user);
   }
 
   private User enrichCognitoUser(UserType cognitoUser) {
@@ -113,6 +113,6 @@ public class CognitoIdmService implements IdmService {
   }
 
   static String getRACFId(UserType user) {
-    return CognitoUtils.getAttributeValue(user, RACFID_ATTRIBUTE);
+    return CognitoUtils.getAttributeValue(user, RACFID_ATTR_NAME);
   }
 }

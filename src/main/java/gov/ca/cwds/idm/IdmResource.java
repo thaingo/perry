@@ -1,6 +1,5 @@
 package gov.ca.cwds.idm;
 
-import gov.ca.cwds.idm.dto.CreateUserDto;
 import gov.ca.cwds.idm.dto.UpdateUserDto;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.DictionaryProvider;
@@ -115,9 +114,9 @@ public class IdmResource {
       @ApiParam(required = true, name = "createUserDto", value = "The User create data")
           @NotNull
           @RequestBody
-          CreateUserDto createUserDto) {
+          User user) {
     try {
-      String newUserId = idmService.createUser(createUserDto);
+      String newUserId = idmService.createUser(user);
 
       URI uri =
           ServletUriComponentsBuilder.fromCurrentRequest()

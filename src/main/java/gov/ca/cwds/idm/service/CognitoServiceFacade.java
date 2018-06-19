@@ -1,11 +1,26 @@
 package gov.ca.cwds.idm.service;
 
+import static gov.ca.cwds.idm.service.CognitoUtils.COUNTY_ATTR_NAME;
+import static gov.ca.cwds.idm.service.CognitoUtils.EMAIL_ATTR_NAME;
+import static gov.ca.cwds.idm.service.CognitoUtils.FIRST_NAME_ATTR_NAME;
+import static gov.ca.cwds.idm.service.CognitoUtils.LAST_NAME_ATTR_NAME;
+import static gov.ca.cwds.idm.service.CognitoUtils.OFFICE_ATTR_NAME;
+import static gov.ca.cwds.idm.service.CognitoUtils.PHONE_NUMBER_ATTR_NAME;
+import static gov.ca.cwds.idm.service.CognitoUtils.RACFID_ATTR_NAME;
+import static gov.ca.cwds.idm.service.CognitoUtils.ROLE_ATTR_NAME;
+import static gov.ca.cwds.idm.service.CognitoUtils.SECOND_COUNTY_ATTR_NAME;
+import static gov.ca.cwds.idm.service.CognitoUtils.SECOND_RACFID_ATTR_NAME;
+import static gov.ca.cwds.idm.service.CognitoUtils.attribute;
+import static gov.ca.cwds.idm.service.CognitoUtils.createPermissionsAttribute;
+
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProviderClientBuilder;
+import com.amazonaws.services.cognitoidp.model.AdminCreateUserRequest;
+import com.amazonaws.services.cognitoidp.model.AdminCreateUserResult;
 import com.amazonaws.services.cognitoidp.model.AdminDisableUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminEnableUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserRequest;
@@ -18,26 +33,26 @@ import com.amazonaws.services.cognitoidp.model.ListUsersResult;
 import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.CognitoProperties;
-import gov.ca.cwds.idm.dto.CreateUserDto;
 import gov.ca.cwds.idm.dto.UpdateUserDto;
+import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UsersSearchParameter;
 import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.rest.api.domain.UserNotFoundPerryException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Service;
-
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-
-import static gov.ca.cwds.idm.service.CognitoUtils.createPermissionsAttribute;
+import javax.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Service;
 
 @Service(value = "cognitoServiceFacade")
 @Profile("idm")
 public class CognitoServiceFacade {
+
+  private static final String EMAIL_DELIVERY = "EMAIL";
+  private static final String DEFAULT_ROLES = "CWS-worker";
 
   @Autowired private CognitoProperties properties;
 
@@ -77,8 +92,39 @@ public class CognitoServiceFacade {
     }
   }
 
-  public String createUser(CreateUserDto createUserDto) {
-    return  null;
+  public String createUser(User user) {
+
+    final String email = user.getEmail();
+    final String countyName = user.getCountyName();
+    final String racfId = user.getRacfid();
+
+    List<AttributeType> attrs = new ArrayList<>();
+
+    attrs.add(attribute(EMAIL_ATTR_NAME, email));
+    attrs.add(attribute(FIRST_NAME_ATTR_NAME, user.getFirstName()));
+    attrs.add(attribute(LAST_NAME_ATTR_NAME, user.getLastName()));
+    attrs.add(attribute(OFFICE_ATTR_NAME, user.getOffice()));
+    attrs.add(attribute(PHONE_NUMBER_ATTR_NAME, user.getPhoneNumber()));
+    attrs.add(attribute(ROLE_ATTR_NAME, DEFAULT_ROLES));
+
+    attrs.add(attribute(COUNTY_ATTR_NAME, countyName));
+    attrs.add(attribute(SECOND_COUNTY_ATTR_NAME, countyName));
+
+    attrs.add(attribute(RACFID_ATTR_NAME, racfId));
+    attrs.add(attribute(SECOND_RACFID_ATTR_NAME, racfId));
+
+    attrs.add(createPermissionsAttribute(user.getPermissions()));
+
+    AdminCreateUserRequest request =
+        new AdminCreateUserRequest()
+            .withUsername(email)
+            .withUserPoolId(properties.getUserpool())
+            .withDesiredDeliveryMediums(EMAIL_DELIVERY)
+            .withUserAttributes(attrs);
+
+    AdminCreateUserResult result = identityProvider.adminCreateUser(request);
+    UserType cognitoUser = result.getUser();
+    return cognitoUser.getUsername();
   }
 
   public String getCountyName(String userId) {

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.LinkedHashSet;
@@ -16,7 +17,11 @@ import static gov.ca.cwds.rest.api.domain.DomainObject.TIME_FORMAT;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class User {
+@SuppressWarnings("squid:S3437")
+public class User implements Serializable {
+
+  private static final long serialVersionUID = 7649483256698405223L;
+
   private String id;
   private String firstName;
   private String lastName;
