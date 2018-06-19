@@ -25,6 +25,13 @@ public class Permission {
     this.name = name;
   }
 
+  public Permission() {
+  }
+
+  public Permission(String name) {
+    this.name = name;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
