@@ -6,14 +6,15 @@ import gov.ca.cwds.data.persistence.auth.CwsOffice;
 import gov.ca.cwds.data.persistence.auth.StaffPerson;
 import gov.ca.cwds.idm.dto.UpdateUserDto;
 import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.idm.dto.UserVerificationResult;
 import gov.ca.cwds.idm.dto.UsersSearchParameter;
 import gov.ca.cwds.idm.util.UsersSearchParametersUtil;
 import gov.ca.cwds.rest.api.domain.PerryException;
-import gov.ca.cwds.rest.api.domain.UserValidationException;
 import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType;
 import gov.ca.cwds.service.CwsUserInfoService;
 import gov.ca.cwds.service.dto.CwsUserInfo;
 import gov.ca.cwds.service.scripts.IdmMappingScript;
+import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +29,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -95,12 +97,15 @@ public class CognitoIdmService implements IdmService {
   }
 
   @Override
-  public User checkUser(String racfId, String email) {
+  public UserVerificationResult verifyUser(String racfId, String email) {
     CwsUserInfo cwsUser = getCwsUserByRacfId(racfId);
     if (cwsUser == null) {
-      String message = MessageFormat.format("No user with RACFID {0} found in CWSCMS", racfId);
+      String message = MessageFormat.format("No user with RACFID: {0} found in CWSCMS", racfId);
       LOGGER.info(message);
-      throw new UserValidationException(message);
+      return UserVerificationResult.Builder.anUserVerificationResult()
+          .withMessage(message)
+          .withVerificationPassed(false)
+          .build();
     }
     Collection<UserType> cognitoUsers =
         cognitoService.search(
@@ -110,11 +115,25 @@ public class CognitoIdmService implements IdmService {
 
     if (!CollectionUtils.isEmpty(cognitoUsers)) {
       String message =
-          MessageFormat.format("User with email {0} is already present in Cognito", email);
+          MessageFormat.format("User with email: {0} is already present in Cognito", email);
       LOGGER.info(message);
-      throw new UserValidationException(message);
+      return UserVerificationResult.Builder.anUserVerificationResult()
+          .withMessage(message)
+          .withVerificationPassed(false)
+          .build();
     }
-    return composeUser(cwsUser, email);
+    User user = composeUser(cwsUser, email);
+    if (!Objects.equals(
+        CurrentAuthenticatedUserUtil.getCurrentUserCountyName(), user.getCountyName())) {
+      return UserVerificationResult.Builder.anUserVerificationResult()
+          .withMessage("You are not authorized to add user from County other than yours")
+          .withVerificationPassed(false)
+          .build();
+    }
+    return UserVerificationResult.Builder.anUserVerificationResult()
+        .withUser(user)
+        .withVerificationPassed(true)
+        .build();
   }
 
   private User composeUser(CwsUserInfo cwsUser, String email) {

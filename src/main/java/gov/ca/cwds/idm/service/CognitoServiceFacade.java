@@ -169,7 +169,7 @@ public class CognitoServiceFacade {
       request = request.withFilter("family_name ^= \"" + parameter.getLastName() + "\"");
     }
     if (parameter.getEmail() != null) {
-      request = request.withFilter("email = \"" + parameter.getLastName() + "\"");
+      request = request.withFilter("email = \"" + parameter.getEmail() + "\"");
     }
     return request;
   }
