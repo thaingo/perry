@@ -2,6 +2,7 @@ package gov.ca.cwds.idm.service;
 
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.PerryProperties;
+import gov.ca.cwds.idm.dto.CreateUserDto;
 import gov.ca.cwds.idm.dto.UpdateUserDto;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.util.UsersSearchParametersUtil;
@@ -83,6 +84,11 @@ public class CognitoIdmService implements IdmService {
   @PreAuthorize("@cognitoServiceFacade.getCountyName(#id) == principal.getParameter('county_name')")
   public void updateUser(String id, UpdateUserDto updateUserDto) {
     cognitoService.updateUser(id, updateUserDto);
+  }
+
+  @Override
+  public String createUser(CreateUserDto createUserDto) {
+    return cognitoService.createUser(createUserDto);
   }
 
   private User enrichCognitoUser(UserType cognitoUser) {

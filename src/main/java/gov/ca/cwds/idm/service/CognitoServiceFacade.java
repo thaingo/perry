@@ -18,6 +18,7 @@ import com.amazonaws.services.cognitoidp.model.ListUsersResult;
 import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.CognitoProperties;
+import gov.ca.cwds.idm.dto.CreateUserDto;
 import gov.ca.cwds.idm.dto.UpdateUserDto;
 import gov.ca.cwds.idm.dto.UsersSearchParameter;
 import gov.ca.cwds.rest.api.domain.PerryException;
@@ -74,6 +75,10 @@ public class CognitoServiceFacade {
     } catch (Exception e) {
       throw new PerryException("Exception while updating user in AWS Cognito", e);
     }
+  }
+
+  public String createUser(CreateUserDto createUserDto) {
+    return  null;
   }
 
   public String getCountyName(String userId) {
