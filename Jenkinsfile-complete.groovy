@@ -52,13 +52,15 @@ node('dora-slave') {
             }
         }
         stage('Tag Git') {
-            if (params.RELEASE_PROJECT) {
-                echo "!!!! BUILD RELEASE VERSION"
-                // tagRepo('test-tags')
-                buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'pushGitTag -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
-            } else {
-                echo "!!!! BUILD SNAPSHOT VERSION"
-                buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'pushGitTag -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
+            sshagent (credentials: ['433ac100-b3c2-4519-b4d6-207c029a103b']) {
+                if (params.RELEASE_PROJECT) {
+                    echo "!!!! BUILD RELEASE VERSION"
+                    // tagRepo('test-tags')
+                    buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'pushGitTag -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
+                } else {
+                    echo "!!!! BUILD SNAPSHOT VERSION"
+                    buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'pushGitTag -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
+                }
             }
         }
         stage('Clean Workspace') {
