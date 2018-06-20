@@ -107,6 +107,7 @@ public class IdmResource {
   @ApiResponses(
       value = {
         @ApiResponse(code = 201, message = "New User is created successfully"),
+        @ApiResponse(code = 400, message = "Bad Request. Provided JSON has invalid data"),
         @ApiResponse(code = 401, message = "Not Authorized"),
         @ApiResponse(code = 409, message = "Conflict. User with the same email already exists")
       })
