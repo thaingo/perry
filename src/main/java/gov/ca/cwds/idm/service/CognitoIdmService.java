@@ -87,6 +87,7 @@ public class CognitoIdmService implements IdmService {
   }
 
   @Override
+  @PreAuthorize("#user.countyName == principal.getParameter('county_name')")
   public String createUser(User user) {
     return cognitoService.createUser(user);
   }
