@@ -83,7 +83,7 @@ task dockerPerryPublish(dependsOn: [dockerCreateImage, dockerPushTaggedVersion, 
         println "\nPerry $projectVersion is published"
     }
     dockerPushTaggedVersion.mustRunAfter(dockerCreateImage)
-    dockerPushLatestVersion.mustRunAfter(dockerCreateImage)
+    //dockerPushLatestVersion.mustRunAfter(dockerCreateImage)
 }
 
 task createGitTag(type: Exec) {
