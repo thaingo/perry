@@ -39,7 +39,7 @@ public class CwsUserInfoService {
 
   private static final int RACFID_MAX_LENGTH = 8;
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(UserAuthorizationService.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(CwsUserInfoService.class);
 
   @Autowired private UserIdDao userIdDao;
   @Autowired private StaffAuthorityPrivilegeDao staffAuthorityPrivilegeDao;
