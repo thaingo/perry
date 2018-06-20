@@ -117,6 +117,18 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   }
 
   @Test
+  @WithMockCustomUser(roles = {"CARES-admin"})
+  public void testGetPermissionsWithCaresAdminRole() throws Exception {
+
+    MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/idm/permissions"))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers.content().contentType(CONTENT_TYPE))
+            .andReturn();
+
+    assertStrict(result, "fixtures/idm/permissions/valid.json");
+  }
+
+  @Test
   @WithMockCustomUser
   public void testGetUserNoRacfId() throws Exception {
     testGetValidYoloUser(USER_NO_RACFID_ID,
