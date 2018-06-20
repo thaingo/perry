@@ -4,6 +4,7 @@ public class UsersSearchParameter {
   private String userCounty;
   private String lastName;
   private Integer pageSize;
+  private String email;
 
   public String getUserCounty() {
     return userCounty;
@@ -29,10 +30,19 @@ public class UsersSearchParameter {
     this.pageSize = pageSize;
   }
 
+  public String getEmail() {
+    return email;
+  }
+
+  public void setEmail(String email) {
+    this.email = email;
+  }
+
   public static final class SearchParameterBuilder {
     private String userCounty;
     private String lastName;
     private Integer pageSize;
+    private String email;
 
     private SearchParameterBuilder() {}
 
@@ -55,12 +65,18 @@ public class UsersSearchParameter {
       return this;
     }
 
+    public SearchParameterBuilder withEmail(String email) {
+      this.email = email;
+      return this;
+    }
+
     public UsersSearchParameter build() {
-      UsersSearchParameter searchParameters = new UsersSearchParameter();
-      searchParameters.setUserCounty(userCounty);
-      searchParameters.setLastName(lastName);
-      searchParameters.setPageSize(pageSize);
-      return searchParameters;
+      UsersSearchParameter usersSearchParameter = new UsersSearchParameter();
+      usersSearchParameter.setUserCounty(userCounty);
+      usersSearchParameter.setLastName(lastName);
+      usersSearchParameter.setPageSize(pageSize);
+      usersSearchParameter.setEmail(email);
+      return usersSearchParameter;
     }
   }
 }

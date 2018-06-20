@@ -18,7 +18,7 @@ import com.amazonaws.services.cognitoidp.model.ListUsersResult;
 import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.CognitoProperties;
-import gov.ca.cwds.idm.dto.UpdateUserDto;
+import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.UsersSearchParameter;
 import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.rest.api.domain.UserNotFoundPerryException;
@@ -64,7 +64,7 @@ public class CognitoServiceFacade {
     }
   }
 
-  public void updateUser(String id, UpdateUserDto updateUserDto) {
+  public void updateUser(String id, UserUpdate updateUserDto) {
     try {
       UserType existedCognitoUser = getCognitoUserById(id);
       updateUserAttributes(id, existedCognitoUser, updateUserDto);
@@ -113,7 +113,7 @@ public class CognitoServiceFacade {
   }
 
   private void updateUserAttributes(
-      String id, UserType existedCognitoUser, UpdateUserDto updateUserDto) {
+      String id, UserType existedCognitoUser, UserUpdate updateUserDto) {
 
     List<AttributeType> updateAttributes = getUpdateAttributes(existedCognitoUser, updateUserDto);
 
@@ -129,7 +129,7 @@ public class CognitoServiceFacade {
   }
 
   private List<AttributeType> getUpdateAttributes(
-      UserType existedCognitoUser, UpdateUserDto updateUserDto) {
+      UserType existedCognitoUser, UserUpdate updateUserDto) {
     List<AttributeType> updateAttributes = new ArrayList<>();
 
     Set<String> existedUserPermissions = CognitoUtils.getPermissions(existedCognitoUser);
@@ -167,6 +167,9 @@ public class CognitoServiceFacade {
     }
     if (parameter.getLastName() != null) {
       request = request.withFilter("family_name ^= \"" + parameter.getLastName() + "\"");
+    }
+    if (parameter.getEmail() != null) {
+      request = request.withFilter("email = \"" + parameter.getEmail() + "\"");
     }
     return request;
   }

@@ -9,7 +9,7 @@ import java.util.Set;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class UpdateUserDto implements Serializable {
+public class UserUpdate implements Serializable {
 
   private static final long serialVersionUID = 123311439530649580L;
 

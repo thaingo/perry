@@ -27,7 +27,7 @@ import com.amazonaws.services.cognitoidp.model.ListUsersResult;
 import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import gov.ca.cwds.idm.dto.UpdateUserDto;
+import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.service.CognitoServiceFacade;
 import java.nio.charset.Charset;
 import java.time.LocalDate;
@@ -114,6 +114,18 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     mockMvc.perform(MockMvcRequestBuilders.get("/idm/permissions"))
         .andExpect(MockMvcResultMatchers.status().isUnauthorized())
         .andReturn();
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {"CARES-admin"})
+  public void testGetPermissionsWithCaresAdminRole() throws Exception {
+
+    MvcResult result = mockMvc.perform(MockMvcRequestBuilders.get("/idm/permissions"))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers.content().contentType(CONTENT_TYPE))
+            .andReturn();
+
+    assertStrict(result, "fixtures/idm/permissions/valid.json");
   }
 
   @Test
@@ -211,9 +223,9 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @WithMockCustomUser
   public void testUpdateUser() throws Exception {
 
-    UpdateUserDto updateUserDto = new UpdateUserDto();
-    updateUserDto.setEnabled(Boolean.FALSE);
-    updateUserDto.setPermissions(new HashSet<>(Arrays.asList("RFA-rollout", "Hotline-rollout")));
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setEnabled(Boolean.FALSE);
+    userUpdate.setPermissions(new HashSet<>(Arrays.asList("RFA-rollout", "Hotline-rollout")));
 
     AdminUpdateUserAttributesRequest updateAttributesRequest =
         setUpdateUserAttributesRequestAndResult(USER_NO_RACFID_ID,
@@ -225,7 +237,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     mockMvc
         .perform(MockMvcRequestBuilders.patch("/idm/users/" + USER_NO_RACFID_ID)
             .contentType(CONTENT_TYPE)
-            .content(asJsonString(updateUserDto)))
+            .content(asJsonString(userUpdate)))
         .andExpect(MockMvcResultMatchers.status().isNoContent())
         .andReturn();
 
@@ -244,9 +256,9 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @WithMockCustomUser
   public void testUpdateUserNoChanges() throws Exception {
 
-    UpdateUserDto updateUserDto = new UpdateUserDto();
-    updateUserDto.setEnabled(Boolean.TRUE);
-    updateUserDto.setPermissions(new HashSet<>(Arrays.asList("RFA-rollout", "Snapshot-rollout")));
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setEnabled(Boolean.TRUE);
+    userUpdate.setPermissions(new HashSet<>(Arrays.asList("RFA-rollout", "Snapshot-rollout")));
 
     AdminUpdateUserAttributesRequest updateAttributesRequest =
         setUpdateUserAttributesRequestAndResult(USER_NO_RACFID_ID,
@@ -256,7 +268,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
     mockMvc.perform(MockMvcRequestBuilders.patch("/idm/users/" + USER_NO_RACFID_ID)
         .contentType(CONTENT_TYPE)
-        .content(asJsonString(updateUserDto)))
+        .content(asJsonString(userUpdate)))
         .andExpect(MockMvcResultMatchers.status().isNoContent())
         .andReturn();
 
@@ -271,13 +283,13 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @WithMockCustomUser(county = "Madera")
   public void testUpdateUserByOtherCountyAdmin() throws Exception {
 
-    UpdateUserDto updateUserDto = new UpdateUserDto();
-    updateUserDto.setEnabled(Boolean.FALSE);
-    updateUserDto.setPermissions(new HashSet<>(Arrays.asList("RFA-rollout", "Hotline-rollout")));
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setEnabled(Boolean.FALSE);
+    userUpdate.setPermissions(new HashSet<>(Arrays.asList("RFA-rollout", "Hotline-rollout")));
 
     mockMvc.perform(MockMvcRequestBuilders.patch("/idm/users/" + USER_NO_RACFID_ID)
         .contentType(CONTENT_TYPE)
-        .content(asJsonString(updateUserDto)))
+        .content(asJsonString(userUpdate)))
         .andExpect(MockMvcResultMatchers.status().isUnauthorized())
         .andReturn();
   }
@@ -286,16 +298,75 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @WithMockCustomUser(roles = {"OtherRole"})
   public void testUpdateUserWithOtherRole() throws Exception {
 
-    UpdateUserDto updateUserDto = new UpdateUserDto();
-    updateUserDto.setEnabled(Boolean.FALSE);
-    updateUserDto.setPermissions(new HashSet<>(Arrays.asList("RFA-rollout", "Hotline-rollout")));
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setEnabled(Boolean.FALSE);
+    userUpdate.setPermissions(new HashSet<>(Arrays.asList("RFA-rollout", "Hotline-rollout")));
 
     mockMvc.perform(MockMvcRequestBuilders.patch("/idm/users/" + USER_NO_RACFID_ID)
         .contentType(CONTENT_TYPE)
-        .content(asJsonString(updateUserDto)))
+        .content(asJsonString(userUpdate)))
         .andExpect(MockMvcResultMatchers.status().isUnauthorized())
         .andReturn();
   }
+
+  @Test
+  @WithMockCustomUser
+  public void testVerifyUsers() throws Exception {
+    MvcResult result = mockMvc
+            .perform(MockMvcRequestBuilders.get("/idm/users/verify?email=test@test.com&racfid=SMITHBO"))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers.content().contentType(CONTENT_TYPE))
+            .andReturn();
+
+    assertNonStrict(result, "fixtures/idm/verify-user/verify-valid.json");
+  }
+
+  @Test
+  @WithMockCustomUser
+  public void testVerifyUsersNoRacfId() throws Exception {
+    MvcResult result = mockMvc
+            .perform(MockMvcRequestBuilders.get("/idm/users/verify?email=test@test.com&racfid=SMITHB1"))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers.content().contentType(CONTENT_TYPE))
+            .andReturn();
+
+    assertNonStrict(result, "fixtures/idm/verify-user/verify-no-racfid.json");
+  }
+
+  @Test
+  @WithMockCustomUser
+  public void testVerifyUsersCognitoUserIsPresent() throws Exception {
+    MvcResult result = mockMvc
+            .perform(MockMvcRequestBuilders.get("/idm/users/verify?email=julio@gmail.com&racfid=SMITHBO"))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers.content().contentType(CONTENT_TYPE))
+            .andReturn();
+
+    assertNonStrict(result, "fixtures/idm/verify-user/verify-user-present.json");
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {"OtherRole"})
+  public void testVerifyUserWithOtherRole() throws Exception {
+
+    MvcResult result = mockMvc
+            .perform(MockMvcRequestBuilders.get("/idm/users/verify?email=test@test.com&racfid=CWDS"))
+            .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+            .andReturn();
+  }
+
+  @Test
+  @WithMockCustomUser(county = "Madera")
+  public void testVerifyUsersOtherCounty() throws Exception {
+    MvcResult result = mockMvc
+            .perform(MockMvcRequestBuilders.get("/idm/users/verify?email=test@test.com&racfid=SMITHBO"))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers.content().contentType(CONTENT_TYPE))
+            .andReturn();
+
+    assertNonStrict(result, "fixtures/idm/verify-user/verify-other-county.json");
+  }
+
 
   private void testGetValidYoloUser(String userId, String fixtureFilePath) throws Exception {
 
@@ -402,6 +473,8 @@ public class IdmResourceTest extends BaseLiquibaseTest {
       setSearchYoloUsersRequestAndResult("", user0, user1, user2);
 
       setSearchYoloUsersRequestAndResult("Ma", user0);
+
+      setSearchUsersByEmailRequestAndResult("julio@gmail.com", "test@test.com", user1);
     }
 
     private void setSearchYoloUsersRequestAndResult(String lastNameSubstr, TestUser... testUsers) {
@@ -470,6 +543,28 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
       userType.withAttributes(attrs(testUser));
       return userType;
+    }
+
+    private void setSearchUsersByEmailRequestAndResult(String email_correct, String email_wrong, TestUser... testUsers) {
+      ListUsersRequest request_correct =
+              new ListUsersRequest()
+                      .withUserPoolId(USERPOOL)
+                      .withFilter("email = \"" + email_correct + "\"");
+
+      ListUsersRequest request_wrong =
+              new ListUsersRequest()
+                      .withUserPoolId(USERPOOL)
+                      .withFilter("email = \"" + email_wrong + "\"");
+
+
+      List<UserType> userTypes = Arrays.stream(testUsers)
+              .map(TestCognitoServiceFacade::userType).collect(Collectors.toList());
+
+      ListUsersResult result = new ListUsersResult().withUsers(userTypes);
+      ListUsersResult result_empty = new ListUsersResult();
+
+      when(cognito.listUsers(request_correct)).thenReturn(result);
+      when(cognito.listUsers(request_wrong)).thenReturn(result_empty);
     }
 
     private void setUpGetUserRequestAndResult(TestUser testUser) {
