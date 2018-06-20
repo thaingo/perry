@@ -27,6 +27,7 @@ import com.amazonaws.services.cognitoidp.model.AdminGetUserResult;
 import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesRequest;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.DescribeUserPoolRequest;
+import com.amazonaws.services.cognitoidp.model.InvalidParameterException;
 import com.amazonaws.services.cognitoidp.model.ListUsersRequest;
 import com.amazonaws.services.cognitoidp.model.ListUsersResult;
 import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
@@ -39,6 +40,7 @@ import gov.ca.cwds.idm.dto.UsersSearchParameter;
 import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.rest.api.domain.UserAlreadyExistsException;
 import gov.ca.cwds.rest.api.domain.UserNotFoundPerryException;
+import gov.ca.cwds.rest.api.domain.UserValidationException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -111,11 +113,16 @@ public class CognitoServiceFacade {
 
     try {
       result = identityProvider.adminCreateUser(request);
+
     } catch (UsernameExistsException e) {
       String msg =
           "Unable to create new Cognito user. A User with email " + email + " already exists.";
       LOGGER.error(msg);
       throw new UserAlreadyExistsException(msg, e);
+
+    } catch(InvalidParameterException e) {
+      LOGGER.error("Cognito validation failed", e);
+      throw new UserValidationException(e.getMessage(), e);
     }
 
     return result.getUser().getUsername();

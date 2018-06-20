@@ -6,6 +6,7 @@ import gov.ca.cwds.idm.service.DictionaryProvider;
 import gov.ca.cwds.idm.service.IdmService;
 import gov.ca.cwds.rest.api.domain.UserAlreadyExistsException;
 import gov.ca.cwds.rest.api.domain.UserNotFoundPerryException;
+import gov.ca.cwds.rest.api.domain.UserValidationException;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -137,7 +138,9 @@ public class IdmResource {
       return ResponseEntity.created(uri).build();
 
     } catch (UserAlreadyExistsException e) {
-      return new ResponseEntity(HttpStatus.CONFLICT);
+      return createCustomResponseEntity(HttpStatus.CONFLICT, e.getMessage());
+    } catch (UserValidationException e) {
+      return createCustomResponseEntity(HttpStatus.BAD_REQUEST, e.getMessage());
     }
   }
 
@@ -173,5 +176,11 @@ public class IdmResource {
           List<String> permissions) {
     dictionaryProvider.overwritePermissions(permissions);
     return ResponseEntity.noContent().build();
+  }
+
+  private static ResponseEntity<CustomIdmApiError> createCustomResponseEntity(
+      HttpStatus httpStatus, String msg) {
+    return new ResponseEntity<>(
+        new CustomIdmApiError(httpStatus, msg), httpStatus);
   }
 }

@@ -2,7 +2,7 @@ package gov.ca.cwds.rest.api.domain;
 
 public class UserAlreadyExistsException extends RuntimeException {
 
-  private static final long serialVersionUID = 71714582833800531L;
+  private static final long serialVersionUID = 234671130524693850L;
 
   public UserAlreadyExistsException(String message) {
     super(message);
