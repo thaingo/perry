@@ -8,9 +8,8 @@ import static gov.ca.cwds.idm.service.CognitoUtils.OFFICE_ATTR_NAME;
 import static gov.ca.cwds.idm.service.CognitoUtils.PHONE_NUMBER_ATTR_NAME;
 import static gov.ca.cwds.idm.service.CognitoUtils.RACFID_ATTR_NAME;
 import static gov.ca.cwds.idm.service.CognitoUtils.ROLE_ATTR_NAME;
-import static gov.ca.cwds.idm.service.CognitoUtils.SECOND_COUNTY_ATTR_NAME;
-import static gov.ca.cwds.idm.service.CognitoUtils.SECOND_RACFID_ATTR_NAME;
-import static gov.ca.cwds.idm.service.CognitoUtils.attribute;
+import static gov.ca.cwds.idm.service.CognitoUtils.COUNTY_ATTR_NAME_2;
+import static gov.ca.cwds.idm.service.CognitoUtils.RACFID_ATTR_NAME_2;
 import static gov.ca.cwds.idm.service.CognitoUtils.createPermissionsAttribute;
 
 import com.amazonaws.auth.AWSCredentialsProvider;
@@ -100,43 +99,26 @@ public class CognitoServiceFacade {
   public String createUser(User user) {
 
     final String email = user.getEmail();
-    final String countyName = user.getCountyName();
-    final String racfId = user.getRacfid();
-
-    List<AttributeType> attrs = new ArrayList<>();
-
-    attrs.add(attribute(EMAIL_ATTR_NAME, email));
-    attrs.add(attribute(FIRST_NAME_ATTR_NAME, user.getFirstName()));
-    attrs.add(attribute(LAST_NAME_ATTR_NAME, user.getLastName()));
-    attrs.add(attribute(OFFICE_ATTR_NAME, user.getOffice()));
-    attrs.add(attribute(PHONE_NUMBER_ATTR_NAME, user.getPhoneNumber()));
-    attrs.add(attribute(ROLE_ATTR_NAME, DEFAULT_ROLES));
-
-    attrs.add(attribute(COUNTY_ATTR_NAME, countyName));
-    attrs.add(attribute(SECOND_COUNTY_ATTR_NAME, countyName));
-
-    attrs.add(attribute(RACFID_ATTR_NAME, racfId));
-    attrs.add(attribute(SECOND_RACFID_ATTR_NAME, racfId));
-
-    attrs.add(createPermissionsAttribute(user.getPermissions()));
 
     AdminCreateUserRequest request =
         new AdminCreateUserRequest()
             .withUsername(email)
             .withUserPoolId(properties.getUserpool())
             .withDesiredDeliveryMediums(EMAIL_DELIVERY)
-            .withUserAttributes(attrs);
+            .withUserAttributes(buildCreateUserAttributes(user));
 
     AdminCreateUserResult result;
+
     try {
       result = identityProvider.adminCreateUser(request);
     } catch (UsernameExistsException e) {
-      String msg = "Unable to create new Cognito user. A User with email " + email + " already exists.";
+      String msg =
+          "Unable to create new Cognito user. A User with email " + email + " already exists.";
       LOGGER.error(msg);
       throw new UserAlreadyExistsException(msg, e);
     }
-    UserType cognitoUser = result.getUser();
-    return cognitoUser.getUsername();
+
+    return result.getUser().getUsername();
   }
 
   public String getCountyName(String userId) {
@@ -160,6 +142,22 @@ public class CognitoServiceFacade {
   public void healthCheck() {
     identityProvider.describeUserPool(
         new DescribeUserPoolRequest().withUserPoolId(properties.getUserpool()));
+  }
+
+  private List<AttributeType> buildCreateUserAttributes(User user) {
+    AttributesBuilder attributesBuilder = new AttributesBuilder()
+        .addAttribute(EMAIL_ATTR_NAME, user.getEmail())
+        .addAttribute(FIRST_NAME_ATTR_NAME, user.getFirstName())
+        .addAttribute(LAST_NAME_ATTR_NAME, user.getLastName())
+        .addAttribute(OFFICE_ATTR_NAME, user.getOffice())
+        .addAttribute(PHONE_NUMBER_ATTR_NAME, user.getPhoneNumber())
+        .addAttribute(ROLE_ATTR_NAME, DEFAULT_ROLES)
+        .addAttribute(COUNTY_ATTR_NAME, user.getCountyName())
+        .addAttribute(COUNTY_ATTR_NAME_2, user.getCountyName())
+        .addAttribute(RACFID_ATTR_NAME, user.getRacfid())
+        .addAttribute(RACFID_ATTR_NAME_2, user.getRacfid())
+        .addAttribute(createPermissionsAttribute(user.getPermissions()));
+    return attributesBuilder.build();
   }
 
   private UserType getCognitoUserById(String id) {

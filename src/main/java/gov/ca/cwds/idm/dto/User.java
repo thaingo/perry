@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import static gov.ca.cwds.rest.api.domain.DomainObject.DATE_FORMAT;
 import static gov.ca.cwds.rest.api.domain.DomainObject.TIME_FORMAT;
@@ -23,8 +24,17 @@ public class User implements Serializable {
   private static final long serialVersionUID = 7649483256698405223L;
 
   private String id;
+
+  @NotEmpty
+  private String email;
+
+  @NotEmpty
   private String firstName;
+
+  @NotEmpty
   private String lastName;
+
+  @NotEmpty
   private String countyName;
 
   @JsonProperty("RACFID")
@@ -39,7 +49,6 @@ public class User implements Serializable {
   private String office;
   private String phoneNumber;
   private String phoneExtensionNumber;
-  private String email;
 
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_FORMAT)
   private Date userCreateDate;

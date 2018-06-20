@@ -11,6 +11,7 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import java.net.URI;
+import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
@@ -110,14 +111,16 @@ public class IdmResource {
         @ApiResponse(code = 409, message = "Conflict. User with the same email already exists")
       })
   @ApiOperation(
-      value = "Create new Cognito User",
+      value = "Create new User",
       notes =
-          "Only the following properties of the input User JSON will be used at new User creation: "
-              + "email, first_name, last_name, county_name, RACFID, permissions, office, phone_number. "
-              + "Other properties will be ignored, their values will be set by the system automatically.")
+          "Only the following properties of the input User JSON will be used at new User creation:\n "
+              + "email, first_name, last_name, county_name, RACFID, permissions, office, phone_number.\n\n "
+              + "Other properties values will be set by the system automatically.\n\n"
+              + "Required properties are: email, first_name, last_name, county_name.")
   public ResponseEntity createUser(
-      @ApiParam(required = true, name = "createUserDto", value = "The User create data")
+      @ApiParam(required = true, name = "User", value = "The User create data")
           @NotNull
+          @Valid
           @RequestBody
           User user) {
     try {
