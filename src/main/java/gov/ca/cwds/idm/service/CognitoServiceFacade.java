@@ -35,7 +35,6 @@ import com.amazonaws.services.cognitoidp.model.UserType;
 import com.amazonaws.services.cognitoidp.model.UsernameExistsException;
 import gov.ca.cwds.idm.CognitoProperties;
 import gov.ca.cwds.idm.dto.UserUpdate;
-import gov.ca.cwds.idm.dto.UpdateUserDto;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UsersSearchParameter;
 import gov.ca.cwds.rest.api.domain.PerryException;

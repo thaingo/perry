@@ -22,6 +22,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.access.method.P;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import javax.script.ScriptException;
@@ -83,12 +85,12 @@ public class CognitoIdmService implements IdmService {
   }
 
   @Override
+  @PreAuthorize("@cognitoServiceFacade.getCountyName(#id) == principal.getParameter('county_name')")
   public void updateUser(String id, UserUpdate updateUserDto) {
     cognitoService.updateUser(id, updateUserDto);
   }
 
   @Override
-  @PreAuthorize("#user.countyName == principal.getParameter('county_name')")
   public String createUser(User user) {
     return cognitoService.createUser(user);
   }

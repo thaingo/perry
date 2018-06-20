@@ -17,11 +17,10 @@ public interface IdmService {
   @PostAuthorize("returnObject.countyName == principal.getParameter('county_name')")
   User findUser(String id);
 
-  @PreAuthorize("@cognitoServiceFacade.getCountyName(#id) == principal.getParameter('county_name')")
-  void updateUser(@P("id") String id, UserUpdate updateUserDto);
+  void updateUser(String id, UserUpdate updateUserDto);
 
   UserVerificationResult verifyUser(String racfId, String email);
-  void updateUser(String id, UpdateUserDto updateUserDto);
 
+  @PreAuthorize("#user.countyName == principal.getParameter('county_name')")
   String createUser(User user);
 }
