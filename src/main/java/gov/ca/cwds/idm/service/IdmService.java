@@ -1,6 +1,6 @@
 package gov.ca.cwds.idm.service;
 
-import gov.ca.cwds.idm.dto.UpdateUserDto;
+import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserVerificationResult;
 import org.springframework.security.access.method.P;
@@ -18,7 +18,7 @@ public interface IdmService {
   User findUser(String id);
 
   @PreAuthorize("@cognitoServiceFacade.getCountyName(#id) == principal.getParameter('county_name')")
-  void updateUser(@P("id") String id, UpdateUserDto updateUserDto);
+  void updateUser(@P("id") String id, UserUpdate updateUserDto);
 
   UserVerificationResult verifyUser(String racfId, String email);
 }

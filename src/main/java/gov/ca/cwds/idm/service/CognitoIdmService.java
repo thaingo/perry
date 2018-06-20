@@ -4,7 +4,7 @@ import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.PerryProperties;
 import gov.ca.cwds.data.persistence.auth.CwsOffice;
 import gov.ca.cwds.data.persistence.auth.StaffPerson;
-import gov.ca.cwds.idm.dto.UpdateUserDto;
+import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserVerificationResult;
 import gov.ca.cwds.idm.dto.UsersSearchParameter;
@@ -82,7 +82,7 @@ public class CognitoIdmService implements IdmService {
   }
 
   @Override
-  public void updateUser(String id, UpdateUserDto updateUserDto) {
+  public void updateUser(String id, UserUpdate updateUserDto) {
     cognitoService.updateUser(id, updateUserDto);
   }
 

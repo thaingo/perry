@@ -27,7 +27,7 @@ import com.amazonaws.services.cognitoidp.model.ListUsersResult;
 import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import gov.ca.cwds.idm.dto.UpdateUserDto;
+import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.service.CognitoServiceFacade;
 import java.nio.charset.Charset;
 import java.time.LocalDate;
@@ -223,9 +223,9 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @WithMockCustomUser
   public void testUpdateUser() throws Exception {
 
-    UpdateUserDto updateUserDto = new UpdateUserDto();
-    updateUserDto.setEnabled(Boolean.FALSE);
-    updateUserDto.setPermissions(new HashSet<>(Arrays.asList("RFA-rollout", "Hotline-rollout")));
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setEnabled(Boolean.FALSE);
+    userUpdate.setPermissions(new HashSet<>(Arrays.asList("RFA-rollout", "Hotline-rollout")));
 
     AdminUpdateUserAttributesRequest updateAttributesRequest =
         setUpdateUserAttributesRequestAndResult(USER_NO_RACFID_ID,
@@ -237,7 +237,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     mockMvc
         .perform(MockMvcRequestBuilders.patch("/idm/users/" + USER_NO_RACFID_ID)
             .contentType(CONTENT_TYPE)
-            .content(asJsonString(updateUserDto)))
+            .content(asJsonString(userUpdate)))
         .andExpect(MockMvcResultMatchers.status().isNoContent())
         .andReturn();
 
@@ -256,9 +256,9 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @WithMockCustomUser
   public void testUpdateUserNoChanges() throws Exception {
 
-    UpdateUserDto updateUserDto = new UpdateUserDto();
-    updateUserDto.setEnabled(Boolean.TRUE);
-    updateUserDto.setPermissions(new HashSet<>(Arrays.asList("RFA-rollout", "Snapshot-rollout")));
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setEnabled(Boolean.TRUE);
+    userUpdate.setPermissions(new HashSet<>(Arrays.asList("RFA-rollout", "Snapshot-rollout")));
 
     AdminUpdateUserAttributesRequest updateAttributesRequest =
         setUpdateUserAttributesRequestAndResult(USER_NO_RACFID_ID,
@@ -268,7 +268,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
     mockMvc.perform(MockMvcRequestBuilders.patch("/idm/users/" + USER_NO_RACFID_ID)
         .contentType(CONTENT_TYPE)
-        .content(asJsonString(updateUserDto)))
+        .content(asJsonString(userUpdate)))
         .andExpect(MockMvcResultMatchers.status().isNoContent())
         .andReturn();
 
@@ -283,13 +283,13 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @WithMockCustomUser(county = "Madera")
   public void testUpdateUserByOtherCountyAdmin() throws Exception {
 
-    UpdateUserDto updateUserDto = new UpdateUserDto();
-    updateUserDto.setEnabled(Boolean.FALSE);
-    updateUserDto.setPermissions(new HashSet<>(Arrays.asList("RFA-rollout", "Hotline-rollout")));
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setEnabled(Boolean.FALSE);
+    userUpdate.setPermissions(new HashSet<>(Arrays.asList("RFA-rollout", "Hotline-rollout")));
 
     mockMvc.perform(MockMvcRequestBuilders.patch("/idm/users/" + USER_NO_RACFID_ID)
         .contentType(CONTENT_TYPE)
-        .content(asJsonString(updateUserDto)))
+        .content(asJsonString(userUpdate)))
         .andExpect(MockMvcResultMatchers.status().isUnauthorized())
         .andReturn();
   }
@@ -298,13 +298,13 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @WithMockCustomUser(roles = {"OtherRole"})
   public void testUpdateUserWithOtherRole() throws Exception {
 
-    UpdateUserDto updateUserDto = new UpdateUserDto();
-    updateUserDto.setEnabled(Boolean.FALSE);
-    updateUserDto.setPermissions(new HashSet<>(Arrays.asList("RFA-rollout", "Hotline-rollout")));
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setEnabled(Boolean.FALSE);
+    userUpdate.setPermissions(new HashSet<>(Arrays.asList("RFA-rollout", "Hotline-rollout")));
 
     mockMvc.perform(MockMvcRequestBuilders.patch("/idm/users/" + USER_NO_RACFID_ID)
         .contentType(CONTENT_TYPE)
-        .content(asJsonString(updateUserDto)))
+        .content(asJsonString(userUpdate)))
         .andExpect(MockMvcResultMatchers.status().isUnauthorized())
         .andReturn();
   }

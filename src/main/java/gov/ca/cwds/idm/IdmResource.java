@@ -1,6 +1,6 @@
 package gov.ca.cwds.idm;
 
-import gov.ca.cwds.idm.dto.UpdateUserDto;
+import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserVerificationResult;
 import gov.ca.cwds.idm.service.DictionaryProvider;
@@ -94,7 +94,7 @@ public class IdmResource {
       @ApiParam(required = true, name = "userUpdateData", value = "The User update data")
           @NotNull
           @RequestBody
-          UpdateUserDto updateUserDto) {
+              UserUpdate updateUserDto) {
     try {
       idmService.updateUser(id, updateUserDto);
       return ResponseEntity.noContent().build();
