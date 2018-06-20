@@ -1,9 +1,8 @@
 package gov.ca.cwds.service.scripts;
 
-import com.amazonaws.services.cognitoidp.model.AdminGetUserResult;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.rest.api.domain.auth.UserAuthorization;
+import gov.ca.cwds.service.dto.CwsUserInfo;
 
 import javax.script.ScriptException;
 import java.io.IOException;
@@ -13,9 +12,9 @@ public class IdmMappingScript extends Script {
     super(path, "result", "cognitoUser", "cwsUser");
   }
 
-  public User map(UserType cognitoUser, UserAuthorization userInfo) throws ScriptException {
+  public User map(UserType cognitoUser, CwsUserInfo cwsUser) throws ScriptException {
     User user = new User();
-    eval(user, cognitoUser, userInfo);
+    eval(user, cognitoUser, cwsUser);
     return user;
   }
 }

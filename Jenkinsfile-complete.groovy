@@ -45,20 +45,22 @@ node('dora-slave') {
         stage('Build Docker') {
             withDockerRegistry([credentialsId: '6ba8d05c-ca13-4818-8329-15d41a089ec0']) {
                 if (params.RELEASE_PROJECT) {
-                    buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'dockerPushLatestVersion -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
+                    buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'dockerPerryPublish -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
                 } else {
-                    buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'dockerPushLatestVersion -DRelease=false -DBuildNumber=$BUILD_NUMBER'
+                    buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'dockerPerryPublish -DRelease=false -DBuildNumber=$BUILD_NUMBER'
                 }
             }
         }
         stage('Tag Git') {
-            if (params.RELEASE_PROJECT) {
-                echo "!!!! BUILD RELEASE VERSION"
-                // tagRepo('test-tags')
-                buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'pushGitTag -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
-            } else {
-                echo "!!!! BUILD SNAPSHOT VERSION"
-                buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'pushGitTag -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
+            sshagent (credentials: ['433ac100-b3c2-4519-b4d6-207c029a103b']) {
+                if (params.RELEASE_PROJECT) {
+                    echo "!!!! BUILD RELEASE VERSION"
+                    // tagRepo('test-tags')
+                    buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'pushGitTag -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
+                } else {
+                    echo "!!!! BUILD SNAPSHOT VERSION"
+                    buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'pushGitTag -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
+                }
             }
         }
         stage('Clean Workspace') {
