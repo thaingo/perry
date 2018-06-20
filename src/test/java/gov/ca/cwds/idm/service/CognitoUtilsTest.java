@@ -2,6 +2,7 @@ package gov.ca.cwds.idm.service;
 
 import static gov.ca.cwds.idm.service.CognitoUtils.COUNTY_ATTR_NAME;
 import static gov.ca.cwds.idm.service.CognitoUtils.PERMISSIONS_ATTR_NAME;
+import static gov.ca.cwds.idm.service.CognitoUtils.attribute;
 import static gov.ca.cwds.idm.service.CognitoUtils.createPermissionsAttribute;
 import static gov.ca.cwds.idm.service.CognitoUtils.getAttribute;
 import static gov.ca.cwds.idm.service.CognitoUtils.getCountyName;
@@ -12,6 +13,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
@@ -185,4 +187,11 @@ public class CognitoUtilsTest {
     assertThat(getCountyName(cognitoUser), is(nullValue()));
   }
 
+  @Test
+  public void testAttribute() {
+    AttributeType attr = attribute("attrName", "attrValue");
+    assertThat(attr, is(notNullValue()));
+    assertThat(attr.getName(), is("attrName"));
+    assertThat(attr.getValue(), is("attrValue"));
+  }
 }

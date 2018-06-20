@@ -15,17 +15,26 @@ public class AttributesBuilder {
     return attrs;
   }
 
-  public AttributesBuilder addAttribute(String attrName, String attrValue) {
-    if (StringUtils.isNotEmpty(attrValue)) {
-      attrs.add(attribute(attrName, attrValue));
+  public AttributesBuilder addAttribute(AttributeType attr) {
+
+    if (attr == null) {
+      throw new IllegalArgumentException("Attribute may not be null");
+    }
+
+    if (StringUtils.isBlank(attr.getName())) {
+      throw new IllegalArgumentException("Attribute name may not be empty");
+    }
+
+    String attrValue = attr.getValue();
+    if (attrValue != null) {
+      attr.setValue(attrValue.trim());
+      attrs.add(attr);
     }
     return this;
   }
 
-  public AttributesBuilder addAttribute(AttributeType attr) {
-    if (StringUtils.isNotEmpty(attr.getValue())) {
-      attrs.add(attr);
-    }
-    return this;
+  public AttributesBuilder addAttribute(String attrName, String attrValue) {
+    AttributeType attr = attribute(attrName, attrValue);
+    return addAttribute(attr);
   }
 }

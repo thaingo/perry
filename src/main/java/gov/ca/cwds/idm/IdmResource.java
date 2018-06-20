@@ -114,8 +114,8 @@ public class IdmResource {
       value = "Create new User",
       notes =
           "Only the following properties of the input User JSON will be used at new User creation:\n "
-              + "email, first_name, last_name, county_name, RACFID, permissions, office, phone_number.\n\n "
-              + "Other properties values will be set by the system automatically.\n\n"
+              + "email, first_name, last_name, county_name, RACFID, permissions, office, phone_number.\n "
+              + "Other properties values will be set by the system automatically.\n"
               + "Required properties are: email, first_name, last_name, county_name.")
   public ResponseEntity createUser(
       @ApiParam(required = true, name = "User", value = "The User create data")

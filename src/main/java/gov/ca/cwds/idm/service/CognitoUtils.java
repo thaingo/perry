@@ -87,12 +87,4 @@ public class CognitoUtils {
     permissionsAttr.setValue(value);
     return permissionsAttr;
   }
-
-  public static List<AttributeType> addAttribute(
-      List<AttributeType> attrs, String attrName, String attrValue) {
-    if (StringUtils.isNotEmpty(attrValue)) {
-      attrs.add(attribute(attrName, attrValue));
-    }
-    return attrs;
-  }
 }
