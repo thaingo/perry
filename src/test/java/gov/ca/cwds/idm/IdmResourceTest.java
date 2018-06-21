@@ -37,6 +37,7 @@ import com.amazonaws.services.cognitoidp.model.ListUsersRequest;
 import com.amazonaws.services.cognitoidp.model.ListUsersResult;
 import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
 import com.amazonaws.services.cognitoidp.model.UserType;
+import com.amazonaws.services.cognitoidp.model.UsernameExistsException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
@@ -77,7 +78,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   private static final String USER_WITH_RACFID_ID = "24051d54-9321-4dd2-a92f-6425d6c455be";
   private static final String USER_WITH_RACFID_AND_DB_DATA_ID =
       "d740ec1d-80ae-4d84-a8c4-9bed7a942f5b";
-  private static final String NEW_USER_ID = "17067e4e-270f-4623-b86c-b4d4fa527a34";
+  private static final String NEW_USER_SUCCESS_ID = "17067e4e-270f-4623-b86c-b4d4fa527a34";
   private static final String ABSENT_USER_ID = "absentUserId";
   private static final String ERROR_USER_ID = "errorUserId";
   private static final String USERPOOL = "userpool";
@@ -246,25 +247,9 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @Test
   @WithMockCustomUser
   public void testCreateUserSuccess() throws Exception {
-
-    User user = new User();
-    user.setEmail("gonzales@gmail.com");
-    user.setFirstName("Garcia");
-    user.setLastName("Gonzales");
-    user.setCountyName("Yolo");
-
-    AdminCreateUserRequest request =
-        setCreateUserRequestAndResult(
-            "gonzales@gmail.com",
-            NEW_USER_ID,
-            attr(EMAIL_ATTR_NAME, "gonzales@gmail.com"),
-            attr(FIRST_NAME_ATTR_NAME, "Garcia"),
-            attr(LAST_NAME_ATTR_NAME, "Gonzales"),
-            attr(ROLE_ATTR_NAME, DEFAULT_ROLES),
-            attr(COUNTY_ATTR_NAME, "Yolo"),
-            attr(COUNTY_ATTR_NAME_2, "Yolo"),
-            attr(PERMISSIONS_ATTR_NAME, "")
-        );
+    User user = createUser();
+    AdminCreateUserRequest request = createUserRequest(user);
+    setCreateUserResult(request, NEW_USER_SUCCESS_ID);
 
     mockMvc
         .perform(
@@ -272,8 +257,26 @@ public class IdmResourceTest extends BaseLiquibaseTest {
                 .contentType(CONTENT_TYPE)
                 .content(asJsonString(user)))
         .andExpect(MockMvcResultMatchers.status().isCreated())
-        .andExpect(
-            header().string("location", "http://localhost/idm/users/" + NEW_USER_ID))
+        .andExpect(header().string("location", "http://localhost/idm/users/" + NEW_USER_SUCCESS_ID))
+        .andReturn();
+
+    verify(cognito, times(1)).adminCreateUser(request);
+  }
+
+  @Test
+  @WithMockCustomUser
+  public void testCreateUserAlreadyExists() throws Exception {
+    User user = createUser("some.existing@email");
+    AdminCreateUserRequest request = createUserRequest(user);
+    when(cognito.adminCreateUser(request))
+        .thenThrow(new UsernameExistsException("user already exists"));
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.post("/idm/users")
+                .contentType(CONTENT_TYPE)
+                .content(asJsonString(user)))
+        .andExpect(MockMvcResultMatchers.status().isConflict())
         .andReturn();
 
     verify(cognito, times(1)).adminCreateUser(request);
@@ -480,20 +483,54 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     return request;
   }
 
-  private AdminCreateUserRequest setCreateUserRequestAndResult(
-      String email, String newId, AttributeType... userAttributes) {
+  private static User createUser() {
+    return createUser("gonzales@gmail.com");
+  }
+
+  private static User createUser(String email) {
+    String firstName = "Garcia";
+    String lastName = "Gonzales";
+    String countyName = WithMockCustomUser.COUNTY;
+
+    User user = new User();
+    user.setEmail(email);
+    user.setFirstName(firstName);
+    user.setLastName(lastName);
+    user.setCountyName(countyName);
+    return user;
+  }
+
+  private static AdminCreateUserRequest createUserRequest(User user) {
+
+    AttributeType[] userAttributes =
+        new AttributeType[] {
+          attr(EMAIL_ATTR_NAME, user.getEmail()),
+          attr(FIRST_NAME_ATTR_NAME, user.getFirstName()),
+          attr(LAST_NAME_ATTR_NAME, user.getLastName()),
+          attr(ROLE_ATTR_NAME, DEFAULT_ROLES),
+          attr(COUNTY_ATTR_NAME, user.getCountyName()),
+          attr(COUNTY_ATTR_NAME_2, user.getCountyName()),
+          attr(PERMISSIONS_ATTR_NAME, "")
+        };
+
     AdminCreateUserRequest request =
         new AdminCreateUserRequest()
-            .withUsername(email)
+            .withUsername(user.getEmail())
             .withUserPoolId(USERPOOL)
             .withDesiredDeliveryMediums(EMAIL_DELIVERY)
             .withUserAttributes(userAttributes);
+
+    return request;
+  }
+
+  private AdminCreateUserRequest setCreateUserResult(AdminCreateUserRequest request,
+      String newId) {
 
     UserType newUser = new UserType();
     newUser.setUsername(newId);
     newUser.setEnabled(true);
     newUser.setUserStatus("FORCE_CHANGE_PASSWORD");
-    newUser.withAttributes(userAttributes);
+    newUser.withAttributes(request.getUserAttributes());
 
     AdminCreateUserResult result = new AdminCreateUserResult().withUser(newUser);
     when(cognito.adminCreateUser(request)).thenReturn(result);
@@ -556,7 +593,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
               "donzano@gmail.com",
               "Don",
               "Manzano",
-              "Yolo",
+              WithMockCustomUser.COUNTY,
               "RFA-rollout:Snapshot-rollout:",
               null);
 
@@ -570,7 +607,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
               "julio@gmail.com",
               "Julio",
               "Iglecias",
-              "Yolo",
+              WithMockCustomUser.COUNTY,
               "Hotline-rollout",
               "YOLOD");
 
@@ -584,7 +621,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
               "garcia@gmail.com",
               "Garcia",
               "Gonzales",
-              "Yolo",
+              WithMockCustomUser.COUNTY,
               "test",
               "SMITHBO");
 
