@@ -305,6 +305,38 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
   @Test
   @WithMockCustomUser
+  public void testCreateUserWithEmptyEmail() throws Exception {
+    User user = user();
+    user.setEmail("");
+    testCreateUserValidationError(user);
+  }
+
+  @Test
+  @WithMockCustomUser
+  public void testCreateUserWithNullFirstName() throws Exception {
+    User user = user();
+    user.setFirstName(null);
+    testCreateUserValidationError(user);
+  }
+
+  @Test
+  @WithMockCustomUser
+  public void testCreateUserWithBlankLastName() throws Exception {
+    User user = user();
+    user.setLastName("   ");
+    testCreateUserValidationError(user);
+  }
+
+  @Test
+  @WithMockCustomUser
+  public void testCreateUserWithEmptyCountyName() throws Exception {
+    User user = user();
+    user.setCountyName("");
+    testCreateUserValidationError(user);
+  }
+
+  @Test
+  @WithMockCustomUser
   public void testUpdateUser() throws Exception {
 
     UserUpdate userUpdate = new UserUpdate();
@@ -474,6 +506,21 @@ public class IdmResourceTest extends BaseLiquibaseTest {
             .andReturn();
 
     assertNonStrict(result, fixtureFilePath);
+  }
+
+  private void testCreateUserValidationError(User user) throws Exception {
+
+    AdminCreateUserRequest request = createUserRequest(user);
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.post("/idm/users")
+                .contentType(CONTENT_TYPE)
+                .content(asJsonString(user)))
+        .andExpect(MockMvcResultMatchers.status().isBadRequest())
+        .andReturn();
+
+    verify(cognito, times(0)).adminCreateUser(request);
   }
 
   private AdminUpdateUserAttributesRequest setUpdateUserAttributesRequestAndResult(
