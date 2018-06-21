@@ -247,7 +247,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @Test
   @WithMockCustomUser
   public void testCreateUserSuccess() throws Exception {
-    User user = createUser();
+    User user = user();
     AdminCreateUserRequest request = createUserRequest(user);
     setCreateUserResult(request, NEW_USER_SUCCESS_ID);
 
@@ -266,7 +266,9 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @Test
   @WithMockCustomUser
   public void testCreateUserAlreadyExists() throws Exception {
-    User user = createUser("some.existing@email");
+    User user = user();
+    user.setEmail("some.existing@email");
+
     AdminCreateUserRequest request = createUserRequest(user);
     when(cognito.adminCreateUser(request))
         .thenThrow(new UsernameExistsException("user already exists"));
@@ -280,6 +282,25 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         .andReturn();
 
     verify(cognito, times(1)).adminCreateUser(request);
+  }
+
+  @Test
+  @WithMockCustomUser
+  public void testCreateUserInOtherCounty() throws Exception {
+    User user = user();
+    user.setCountyName("OtherCounty");
+
+    AdminCreateUserRequest request = createUserRequest(user);
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.post("/idm/users")
+                .contentType(CONTENT_TYPE)
+                .content(asJsonString(user)))
+        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+        .andReturn();
+
+    verify(cognito, times(0)).adminCreateUser(request);
   }
 
   @Test
@@ -483,20 +504,12 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     return request;
   }
 
-  private static User createUser() {
-    return createUser("gonzales@gmail.com");
-  }
-
-  private static User createUser(String email) {
-    String firstName = "Garcia";
-    String lastName = "Gonzales";
-    String countyName = WithMockCustomUser.COUNTY;
-
+  private static User user() {
     User user = new User();
-    user.setEmail(email);
-    user.setFirstName(firstName);
-    user.setLastName(lastName);
-    user.setCountyName(countyName);
+    user.setEmail("gonzales@gmail.com");
+    user.setFirstName("Garcia");
+    user.setLastName("Gonzales");
+    user.setCountyName(WithMockCustomUser.COUNTY);
     return user;
   }
 
@@ -513,18 +526,14 @@ public class IdmResourceTest extends BaseLiquibaseTest {
           attr(PERMISSIONS_ATTR_NAME, "")
         };
 
-    AdminCreateUserRequest request =
-        new AdminCreateUserRequest()
+    return new AdminCreateUserRequest()
             .withUsername(user.getEmail())
             .withUserPoolId(USERPOOL)
             .withDesiredDeliveryMediums(EMAIL_DELIVERY)
             .withUserAttributes(userAttributes);
-
-    return request;
   }
 
-  private AdminCreateUserRequest setCreateUserResult(AdminCreateUserRequest request,
-      String newId) {
+  private AdminCreateUserRequest setCreateUserResult(AdminCreateUserRequest request, String newId) {
 
     UserType newUser = new UserType();
     newUser.setUsername(newId);
@@ -809,7 +818,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     private String permissions;
     private String racfId;
 
-    public TestUser(
+    TestUser(
         String id,
         Boolean enabled,
         String status,
