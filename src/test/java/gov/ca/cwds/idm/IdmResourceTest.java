@@ -1,5 +1,6 @@
 package gov.ca.cwds.idm;
 
+import static com.google.common.base.Strings.nullToEmpty;
 import static gov.ca.cwds.idm.service.cognito.CognitoServiceFacade.DEFAULT_ROLES;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.COUNTY_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.COUNTY_ATTR_NAME_2;
@@ -7,8 +8,13 @@ import static gov.ca.cwds.idm.service.cognito.CognitoUtils.EMAIL_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.EMAIL_DELIVERY;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.FIRST_NAME_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.LAST_NAME_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.OFFICE_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.PERMISSIONS_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.PHONE_NUMBER_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_2;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.ROLE_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.getPermissionsAttributeValue;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertStrict;
 import static gov.ca.cwds.idm.util.UsersSearchParametersUtil.DEFAULT_PAGESIZE;
@@ -33,6 +39,7 @@ import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesRequest;
 import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesResult;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.InternalErrorException;
+import com.amazonaws.services.cognitoidp.model.InvalidParameterException;
 import com.amazonaws.services.cognitoidp.model.ListUsersRequest;
 import com.amazonaws.services.cognitoidp.model.ListUsersResult;
 import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
@@ -56,6 +63,7 @@ import javax.annotation.PostConstruct;
 import liquibase.util.StringUtils;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.InOrder;
 import org.springframework.beans.BeansException;
@@ -337,6 +345,26 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
   @Test
   @WithMockCustomUser
+  public void testCreateUserCognitoValidationError() throws Exception {
+    User user = user();
+    user.setOffice("too long string");
+    AdminCreateUserRequest request = createUserRequest(user);
+    when(cognito.adminCreateUser(request))
+        .thenThrow(new InvalidParameterException("invalid parameter"));
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.post("/idm/users")
+                .contentType(CONTENT_TYPE)
+                .content(asJsonString(user)))
+        .andExpect(MockMvcResultMatchers.status().isBadRequest())
+        .andReturn();
+
+    verify(cognito, times(1)).adminCreateUser(request);
+  }
+
+  @Test
+  @WithMockCustomUser
   public void testUpdateUser() throws Exception {
 
     UserUpdate userUpdate = new UserUpdate();
@@ -564,13 +592,17 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
     AttributeType[] userAttributes =
         new AttributeType[] {
-          attr(EMAIL_ATTR_NAME, user.getEmail()),
-          attr(FIRST_NAME_ATTR_NAME, user.getFirstName()),
-          attr(LAST_NAME_ATTR_NAME, user.getLastName()),
+          attr(EMAIL_ATTR_NAME, nullToEmpty(user.getEmail())),
+          attr(FIRST_NAME_ATTR_NAME, nullToEmpty(user.getFirstName())),
+          attr(LAST_NAME_ATTR_NAME, nullToEmpty(user.getLastName())),
+          attr(COUNTY_ATTR_NAME, nullToEmpty(user.getCountyName())),
+          attr(COUNTY_ATTR_NAME_2, nullToEmpty(user.getCountyName())),
+          attr(OFFICE_ATTR_NAME, nullToEmpty(user.getOffice())),
+          attr(PHONE_NUMBER_ATTR_NAME, nullToEmpty(user.getPhoneNumber())),
           attr(ROLE_ATTR_NAME, DEFAULT_ROLES),
-          attr(COUNTY_ATTR_NAME, user.getCountyName()),
-          attr(COUNTY_ATTR_NAME_2, user.getCountyName()),
-          attr(PERMISSIONS_ATTR_NAME, "")
+          attr(RACFID_ATTR_NAME, nullToEmpty(user.getRacfid())),
+          attr(RACFID_ATTR_NAME_2, nullToEmpty(user.getRacfid())),
+          attr(PERMISSIONS_ATTR_NAME, getPermissionsAttributeValue(user.getPermissions()))
         };
 
     return new AdminCreateUserRequest()

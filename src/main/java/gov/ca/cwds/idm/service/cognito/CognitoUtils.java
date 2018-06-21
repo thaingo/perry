@@ -71,7 +71,7 @@ public class CognitoUtils {
     return new HashSet<>(Arrays.asList(permissionsStr.split(PERMISSIONS_DELIMITER)));
   }
 
-  static String getPermissionsAttributeValue(Set<String> permissions) {
+  public static String getPermissionsAttributeValue(Set<String> permissions) {
     if (CollectionUtils.isNotEmpty(permissions)) {
       return String.join(PERMISSIONS_DELIMITER, permissions);
     } else {

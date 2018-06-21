@@ -1,5 +1,6 @@
 package gov.ca.cwds.idm.service.cognito;
 
+import static com.google.common.base.Strings.nullToEmpty;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.attribute;
 
 import com.amazonaws.services.cognitoidp.model.AttributeType;
@@ -25,11 +26,10 @@ public class AttributesBuilder {
       throw new IllegalArgumentException("Attribute name may not be empty");
     }
 
-    String attrValue = attr.getValue();
-    if (attrValue != null) {
-      attr.setValue(attrValue.trim());
-      attrs.add(attr);
-    }
+    String attrValue = nullToEmpty(attr.getValue()).trim();
+    attr.setValue(attrValue);
+    attrs.add(attr);
+
     return this;
   }
 

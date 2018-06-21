@@ -29,7 +29,7 @@ public class AttributesBuilderTest {
         .addAttribute("thirdName", "   ")
         .addAttribute("forthName", null);
     List<AttributeType> attrs = builder.build();
-    assertThat(attrs, hasSize(3));
+    assertThat(attrs, hasSize(4));
 
     assertThat(attrs.get(0).getName(), is("firstName"));
     assertThat(attrs.get(0).getValue(), is("firstValue"));
@@ -39,6 +39,9 @@ public class AttributesBuilderTest {
 
     assertThat(attrs.get(2).getName(), is("thirdName"));
     assertThat(attrs.get(2).getValue(), is(""));
+
+    assertThat(attrs.get(3).getName(), is("forthName"));
+    assertThat(attrs.get(3).getValue(), is(""));
   }
 
   @Test
@@ -49,7 +52,7 @@ public class AttributesBuilderTest {
         .addAttribute(attribute("thirdName", "   "))
         .addAttribute(attribute("forthName", null));
     List<AttributeType> attrs = builder.build();
-    assertThat(attrs, hasSize(3));
+    assertThat(attrs, hasSize(4));
 
     assertThat(attrs.get(0).getName(), is("firstName"));
     assertThat(attrs.get(0).getValue(), is("firstValue"));
@@ -59,6 +62,9 @@ public class AttributesBuilderTest {
 
     assertThat(attrs.get(2).getName(), is("thirdName"));
     assertThat(attrs.get(2).getValue(), is(""));
+
+    assertThat(attrs.get(3).getName(), is("forthName"));
+    assertThat(attrs.get(3).getValue(), is(""));
   }
 
   @Test(expected = IllegalArgumentException.class)

@@ -155,11 +155,11 @@ public class CognitoServiceFacade {
         .addAttribute(EMAIL_ATTR_NAME, user.getEmail())
         .addAttribute(FIRST_NAME_ATTR_NAME, user.getFirstName())
         .addAttribute(LAST_NAME_ATTR_NAME, user.getLastName())
+        .addAttribute(COUNTY_ATTR_NAME, user.getCountyName())
+        .addAttribute(COUNTY_ATTR_NAME_2, user.getCountyName())
         .addAttribute(OFFICE_ATTR_NAME, user.getOffice())
         .addAttribute(PHONE_NUMBER_ATTR_NAME, user.getPhoneNumber())
         .addAttribute(ROLE_ATTR_NAME, DEFAULT_ROLES)
-        .addAttribute(COUNTY_ATTR_NAME, user.getCountyName())
-        .addAttribute(COUNTY_ATTR_NAME_2, user.getCountyName())
         .addAttribute(RACFID_ATTR_NAME, user.getRacfid())
         .addAttribute(RACFID_ATTR_NAME_2, user.getRacfid())
         .addAttribute(createPermissionsAttribute(user.getPermissions()));
