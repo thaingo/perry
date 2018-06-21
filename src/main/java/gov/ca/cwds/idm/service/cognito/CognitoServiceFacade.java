@@ -202,7 +202,7 @@ public class CognitoServiceFacade {
     Set<String> existedUserPermissions = CognitoUtils.getPermissions(existedCognitoUser);
     Set<String> newUserPermissions = updateUserDto.getPermissions();
 
-    if (!existedUserPermissions.equals(newUserPermissions)) {
+    if (newUserPermissions != null && !newUserPermissions.equals(existedUserPermissions)) {
       AttributeType permissionsAttr = createPermissionsAttribute(newUserPermissions);
       updateAttributes.add(permissionsAttr);
     }

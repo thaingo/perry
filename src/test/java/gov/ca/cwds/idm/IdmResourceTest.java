@@ -422,6 +422,26 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   }
 
   @Test
+  @WithMockCustomUser
+  public void testUpdateUserNoPermissions() throws Exception {
+
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setEnabled(Boolean.TRUE);
+
+    AdminEnableUserRequest enableUserRequest = setEnableUserRequestAndResult(USER_NO_RACFID_ID);
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.patch("/idm/users/" + USER_NO_RACFID_ID)
+                .contentType(CONTENT_TYPE)
+                .content(asJsonString(userUpdate)))
+        .andExpect(MockMvcResultMatchers.status().isNoContent())
+        .andReturn();
+
+    verify(cognito, times(0)).adminEnableUser(enableUserRequest);
+  }
+
+  @Test
   @WithMockCustomUser(county = "Madera")
   public void testUpdateUserByOtherCountyAdmin() throws Exception {
 
