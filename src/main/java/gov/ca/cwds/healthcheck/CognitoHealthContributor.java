@@ -1,7 +1,7 @@
 package gov.ca.cwds.healthcheck;
 
 import com.amazonaws.services.cognitoidp.model.AWSCognitoIdentityProviderException;
-import gov.ca.cwds.idm.service.CognitoServiceFacade;
+import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;

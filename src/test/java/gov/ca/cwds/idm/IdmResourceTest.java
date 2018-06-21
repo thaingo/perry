@@ -1,6 +1,6 @@
 package gov.ca.cwds.idm;
 
-import static gov.ca.cwds.idm.service.CognitoUtils.PERMISSIONS_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.PERMISSIONS_ATTR_NAME;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertStrict;
 import static gov.ca.cwds.idm.util.UsersSearchParametersUtil.DEFAULT_PAGESIZE;
@@ -28,7 +28,8 @@ import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.ca.cwds.idm.dto.UserUpdate;
-import gov.ca.cwds.idm.service.CognitoServiceFacade;
+import gov.ca.cwds.idm.service.cognito.CognitoProperties;
+import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import java.nio.charset.Charset;
 import java.time.LocalDate;
 import java.util.ArrayList;

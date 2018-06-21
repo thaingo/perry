@@ -1,4 +1,4 @@
-package gov.ca.cwds.idm.service;
+package gov.ca.cwds.idm.service.cognito;
 
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.UserType;
@@ -23,7 +23,7 @@ public class CognitoUtils {
   static final String COUNTY_ATTR_NAME = "custom:County";
   static final String COUNTY_ATTR_NAME_2 = "preferred_username";
 
-  static final String RACFID_ATTR_NAME = "custom:RACFID";
+  public static final String RACFID_ATTR_NAME = "custom:RACFID";
   static final String RACFID_ATTR_NAME_2 = "custom:RACFId";
 
   private static final String PERMISSIONS_DELIMITER = ":";

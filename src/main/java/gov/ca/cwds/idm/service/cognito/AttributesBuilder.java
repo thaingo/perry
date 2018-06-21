@@ -1,6 +1,6 @@
-package gov.ca.cwds.idm.service;
+package gov.ca.cwds.idm.service.cognito;
 
-import static gov.ca.cwds.idm.service.CognitoUtils.attribute;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.attribute;
 
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import java.util.ArrayList;

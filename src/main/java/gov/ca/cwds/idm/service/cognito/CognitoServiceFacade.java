@@ -1,16 +1,16 @@
-package gov.ca.cwds.idm.service;
+package gov.ca.cwds.idm.service.cognito;
 
-import static gov.ca.cwds.idm.service.CognitoUtils.COUNTY_ATTR_NAME;
-import static gov.ca.cwds.idm.service.CognitoUtils.EMAIL_ATTR_NAME;
-import static gov.ca.cwds.idm.service.CognitoUtils.FIRST_NAME_ATTR_NAME;
-import static gov.ca.cwds.idm.service.CognitoUtils.LAST_NAME_ATTR_NAME;
-import static gov.ca.cwds.idm.service.CognitoUtils.OFFICE_ATTR_NAME;
-import static gov.ca.cwds.idm.service.CognitoUtils.PHONE_NUMBER_ATTR_NAME;
-import static gov.ca.cwds.idm.service.CognitoUtils.RACFID_ATTR_NAME;
-import static gov.ca.cwds.idm.service.CognitoUtils.ROLE_ATTR_NAME;
-import static gov.ca.cwds.idm.service.CognitoUtils.COUNTY_ATTR_NAME_2;
-import static gov.ca.cwds.idm.service.CognitoUtils.RACFID_ATTR_NAME_2;
-import static gov.ca.cwds.idm.service.CognitoUtils.createPermissionsAttribute;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.COUNTY_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.EMAIL_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.FIRST_NAME_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.LAST_NAME_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.OFFICE_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.PHONE_NUMBER_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.ROLE_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.COUNTY_ATTR_NAME_2;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_2;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.createPermissionsAttribute;
 
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
@@ -33,7 +33,6 @@ import com.amazonaws.services.cognitoidp.model.ListUsersResult;
 import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import com.amazonaws.services.cognitoidp.model.UsernameExistsException;
-import gov.ca.cwds.idm.CognitoProperties;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UsersSearchParameter;

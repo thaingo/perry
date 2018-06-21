@@ -1,12 +1,13 @@
-package gov.ca.cwds.idm.service;
+package gov.ca.cwds.idm.service.cognito;
 
-import static gov.ca.cwds.idm.service.CognitoUtils.attribute;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.attribute;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
 import com.amazonaws.services.cognitoidp.model.AttributeType;
+import gov.ca.cwds.idm.service.cognito.AttributesBuilder;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;

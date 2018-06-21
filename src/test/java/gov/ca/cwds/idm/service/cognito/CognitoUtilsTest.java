@@ -1,13 +1,13 @@
-package gov.ca.cwds.idm.service;
+package gov.ca.cwds.idm.service.cognito;
 
-import static gov.ca.cwds.idm.service.CognitoUtils.COUNTY_ATTR_NAME;
-import static gov.ca.cwds.idm.service.CognitoUtils.PERMISSIONS_ATTR_NAME;
-import static gov.ca.cwds.idm.service.CognitoUtils.attribute;
-import static gov.ca.cwds.idm.service.CognitoUtils.createPermissionsAttribute;
-import static gov.ca.cwds.idm.service.CognitoUtils.getAttribute;
-import static gov.ca.cwds.idm.service.CognitoUtils.getCountyName;
-import static gov.ca.cwds.idm.service.CognitoUtils.getPermissions;
-import static gov.ca.cwds.idm.service.CognitoUtils.getPermissionsAttributeValue;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.COUNTY_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.PERMISSIONS_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.attribute;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.createPermissionsAttribute;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.getAttribute;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.getCountyName;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.getPermissions;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.getPermissionsAttributeValue;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
