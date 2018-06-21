@@ -30,4 +30,16 @@ public class CustomIdmApiError {
     this.status = status;
     this.message = message;
   }
+
+  public LocalDateTime getTimestamp() {
+    return timestamp;
+  }
+
+  public HttpStatus getStatus() {
+    return status;
+  }
+
+  public String getMessage() {
+    return message;
+  }
 }
