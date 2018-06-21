@@ -13,18 +13,20 @@ import org.apache.commons.lang3.StringUtils;
 public class CognitoUtils {
 
   public static final String PERMISSIONS_ATTR_NAME = "custom:Permission";
-  static final String EMAIL_ATTR_NAME = "email";
-  static final String FIRST_NAME_ATTR_NAME = "given_name";
-  static final String LAST_NAME_ATTR_NAME = "family_name";
-  static final String PHONE_NUMBER_ATTR_NAME = "phone_number";
-  static final String OFFICE_ATTR_NAME = "custom:Office";
-  static final String ROLE_ATTR_NAME = "custom:Role";
+  public static final String EMAIL_ATTR_NAME = "email";
+  public static final String FIRST_NAME_ATTR_NAME = "given_name";
+  public static final String LAST_NAME_ATTR_NAME = "family_name";
+  public static final String PHONE_NUMBER_ATTR_NAME = "phone_number";
+  public static final String OFFICE_ATTR_NAME = "custom:Office";
+  public static final String ROLE_ATTR_NAME = "custom:Role";
 
-  static final String COUNTY_ATTR_NAME = "custom:County";
-  static final String COUNTY_ATTR_NAME_2 = "preferred_username";
+  public static final String COUNTY_ATTR_NAME = "custom:County";
+  public static final String COUNTY_ATTR_NAME_2 = "preferred_username";
 
   public static final String RACFID_ATTR_NAME = "custom:RACFID";
-  static final String RACFID_ATTR_NAME_2 = "custom:RACFId";
+  public static final String RACFID_ATTR_NAME_2 = "custom:RACFId";
+
+  public static final String EMAIL_DELIVERY = "EMAIL";
 
   private static final String PERMISSIONS_DELIMITER = ":";
 

@@ -2,6 +2,7 @@ package gov.ca.cwds.idm.service.cognito;
 
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.COUNTY_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.EMAIL_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.EMAIL_DELIVERY;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.FIRST_NAME_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.LAST_NAME_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.OFFICE_ATTR_NAME;
@@ -56,8 +57,7 @@ import org.springframework.stereotype.Service;
 public class CognitoServiceFacade {
   private static final Logger LOGGER = LoggerFactory.getLogger(CognitoServiceFacade.class);
 
-  private static final String EMAIL_DELIVERY = "EMAIL";
-  private static final String DEFAULT_ROLES = "CWS-worker";
+  public static final String DEFAULT_ROLES = "CWS-worker";
 
   @Autowired private CognitoProperties properties;
 
