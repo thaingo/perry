@@ -1,6 +1,6 @@
 package gov.ca.cwds.idm.service;
 
-import static gov.ca.cwds.idm.service.CognitoIdmService.getRACFId;
+import static gov.ca.cwds.idm.service.IdmServiceImpl.getRACFId;
 import static gov.ca.cwds.idm.service.CognitoUtils.RACFID_ATTR_NAME;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -10,7 +10,7 @@ import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import org.junit.Test;
 
-public class CognitoIdmServiceTest {
+public class IdmServiceImplTest {
 
   @Test
   public void testGetRACFId() {

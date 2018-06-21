@@ -37,9 +37,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Profile("idm")
-public class CognitoIdmService implements IdmService {
+public class IdmServiceImpl implements IdmService {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(CognitoIdmService.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(IdmServiceImpl.class);
 
   @Autowired CognitoServiceFacade cognitoService;
 
