@@ -201,9 +201,9 @@ public class IdmResource {
     return ResponseEntity.ok().body(idmService.verifyUser(racfId, email));
   }
 
-  private static ResponseEntity<CustomIdmApiError> createCustomResponseEntity(
+  private static ResponseEntity<IdmApiCustomError> createCustomResponseEntity(
       HttpStatus httpStatus, String msg) {
     return new ResponseEntity<>(
-        new CustomIdmApiError(httpStatus, msg), httpStatus);
+        new IdmApiCustomError(httpStatus, msg), httpStatus);
   }
 }

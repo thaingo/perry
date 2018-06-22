@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDateTime;
 import org.springframework.http.HttpStatus;
 
-public class CustomIdmApiError {
+public class IdmApiCustomError {
 
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")
   private LocalDateTime timestamp;
@@ -16,16 +16,16 @@ public class CustomIdmApiError {
   @JsonProperty
   private String message;
 
-  private CustomIdmApiError() {
+  private IdmApiCustomError() {
     timestamp = LocalDateTime.now();
   }
 
-  CustomIdmApiError(HttpStatus status) {
+  IdmApiCustomError(HttpStatus status) {
     this();
     this.status = status;
   }
 
-  CustomIdmApiError(HttpStatus status, String message) {
+  IdmApiCustomError(HttpStatus status, String message) {
     this();
     this.status = status;
     this.message = message;
