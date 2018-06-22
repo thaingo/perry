@@ -3,7 +3,6 @@ package gov.ca.cwds.idm.service.cognito;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.COUNTY_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.COUNTY_ATTR_NAME_2;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.EMAIL_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.EMAIL_DELIVERY;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.FIRST_NAME_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.LAST_NAME_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.OFFICE_ATTR_NAME;
@@ -102,7 +101,6 @@ public class CognitoServiceFacade {
         new AdminCreateUserRequest()
             .withUsername(email)
             .withUserPoolId(properties.getUserpool())
-            .withDesiredDeliveryMediums(EMAIL_DELIVERY)
             .withUserAttributes(buildCreateUserAttributes(user));
 
     AdminCreateUserResult result;

@@ -4,7 +4,6 @@ import static com.google.common.base.Strings.nullToEmpty;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.COUNTY_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.COUNTY_ATTR_NAME_2;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.EMAIL_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.EMAIL_DELIVERY;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.FIRST_NAME_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.LAST_NAME_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.OFFICE_ATTR_NAME;
@@ -624,7 +623,6 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     return new AdminCreateUserRequest()
             .withUsername(user.getEmail())
             .withUserPoolId(USERPOOL)
-            .withDesiredDeliveryMediums(EMAIL_DELIVERY)
             .withUserAttributes(userAttributes);
   }
 

@@ -25,8 +25,6 @@ public class CognitoUtils {
   public static final String RACFID_ATTR_NAME = "custom:RACFID";
   public static final String RACFID_ATTR_NAME_2 = "custom:RACFId";
 
-  public static final String EMAIL_DELIVERY = "EMAIL";
-
   private static final String PERMISSIONS_DELIMITER = ":";
 
   private CognitoUtils() {}
