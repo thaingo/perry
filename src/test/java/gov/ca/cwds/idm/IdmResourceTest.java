@@ -1,7 +1,6 @@
 package gov.ca.cwds.idm;
 
 import static com.google.common.base.Strings.nullToEmpty;
-import static gov.ca.cwds.idm.service.cognito.CognitoServiceFacade.DEFAULT_ROLES;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.COUNTY_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.COUNTY_ATTR_NAME_2;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.EMAIL_ATTR_NAME;
@@ -13,7 +12,6 @@ import static gov.ca.cwds.idm.service.cognito.CognitoUtils.PERMISSIONS_ATTR_NAME
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.PHONE_NUMBER_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_2;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.ROLE_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.getPermissionsAttributeValue;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertStrict;
@@ -63,7 +61,6 @@ import javax.annotation.PostConstruct;
 import liquibase.util.StringUtils;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.InOrder;
 import org.springframework.beans.BeansException;
@@ -619,7 +616,6 @@ public class IdmResourceTest extends BaseLiquibaseTest {
           attr(COUNTY_ATTR_NAME_2, nullToEmpty(user.getCountyName())),
           attr(OFFICE_ATTR_NAME, nullToEmpty(user.getOffice())),
           attr(PHONE_NUMBER_ATTR_NAME, nullToEmpty(user.getPhoneNumber())),
-          attr(ROLE_ATTR_NAME, DEFAULT_ROLES),
           attr(RACFID_ATTR_NAME, nullToEmpty(user.getRacfid())),
           attr(RACFID_ATTR_NAME_2, nullToEmpty(user.getRacfid())),
           attr(PERMISSIONS_ATTR_NAME, getPermissionsAttributeValue(user.getPermissions()))
