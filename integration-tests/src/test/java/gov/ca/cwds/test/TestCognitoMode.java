@@ -18,12 +18,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 @RunWith(SerenityParameterizedRunner.class)
 @Concurrent
 public class TestCognitoMode {
+
+  public static final String USERNAME_XPATH = "/html/body/div[1]/div/div[1]/div/div[2]/div[3]/div/div/form/div[1]/input[1]";
 
   private WebDriver driver;
   private final TestDataBean testDataBean;
