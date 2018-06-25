@@ -26,7 +26,8 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 @Concurrent
 public class TestCognitoMode {
 
-  public static final String USERNAME_XPATH = "/html/body/div[1]/div/div[1]/div/div[2]/div[3]/div/div/form/div[1]/input[1]";
+  public static final String USERNAME_XPATH = "(//input[@id='username'])[2]";
+  public static final String PASSWORD_XPATH = "(//input[@id='password'])[2]";
 
   private WebDriver driver;
   private final TestDataBean testDataBean;
