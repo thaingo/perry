@@ -81,7 +81,7 @@ node('dora-slave') {
             selenium.grid.url=http://grid.dev.cwds.io:4444/wd/hub
             """
             writeFile file: "gradle.properties", text: gradlePropsText
-            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'integrationTestDev --stacktrace'
+            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'integrationTestProd --stacktrace'
         }
         stage('Deploy Dev Mode') {
             // TODO: Need to change Perry mode here to DEV
@@ -92,9 +92,6 @@ node('dora-slave') {
             def gradlePropsText = """
             perry.health.check.url=http://10.110.12.162:9082/manage/health
             perry.url=${PERRY_URL}
-            perry.username=user
-            perry.password=password
-            perry.json={}
             perry.threads.count=1
             selenium.grid.url=http://grid.dev.cwds.io:4444/wd/hub
             """
