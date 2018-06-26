@@ -36,7 +36,6 @@ public class User implements Serializable {
   @NotBlank
   private String countyName;
 
-  @JsonProperty("RACFID")
   private String racfid;
 
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_FORMAT)

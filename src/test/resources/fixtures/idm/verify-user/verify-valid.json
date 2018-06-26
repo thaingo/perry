@@ -1,7 +1,7 @@
   {
     "verification_passed": true,
     "user": {
-      "RACFID": "SMITHBO",
+      "racfid": "SMITHBO",
       "county_name": "Yolo",
       "email": "test@test.com",
       "first_name": "Win",
