@@ -22,10 +22,10 @@ node('dora-slave') {
             rtGradle.resolver repo: 'repo', server: serverArti
             rtGradle.useWrapper = true
         }
-        stage('Deploy Cognito Mode') {
-            sh 'cd ansible ; ansible-playbook -e NEW_RELIC_AGENT=$USE_NEWRELIC -e VERSION_NUMBER=$APP_VERSION -i $inventory deploy-perry.yml --vault-password-file ~/.ssh/vault.txt -vv'
-            sleep(20)
-        }
+//        stage('Deploy Cognito Mode') {
+//            sh 'cd ansible ; ansible-playbook -e NEW_RELIC_AGENT=$USE_NEWRELIC -e VERSION_NUMBER=$APP_VERSION -i $inventory deploy-perry.yml --vault-password-file ~/.ssh/vault.txt -vv'
+//            sleep(20)
+//        }
         stage('Cognito Integration Tests') {
             def gradlePropsText = """
             perry.health.check.url=http://10.110.12.162:9082/manage/health
