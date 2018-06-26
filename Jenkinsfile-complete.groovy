@@ -66,21 +66,6 @@ node('dora-slave') {
         stage('Clean Workspace') {
             archiveArtifacts artifacts: '**/perry*.jar,readme.txt', fingerprint: true
         }
-        stage('Deploy Application') {
-            sh 'cd ansible ; ansible-playbook -e NEW_RELIC_AGENT=$USE_NEWRELIC -e VERSION_NUMBER=$APP_VERSION -i $inventory deploy-perry.yml --vault-password-file ~/.ssh/vault.txt -vv'
-            sleep(20)
-        }
-        stage('Integration Tests') {
-
-            def gradlePropsText = """
-            perry.health.check.url=http://10.110.12.162:9082/manage/health
-            perry.url=${PERRY_URL}
-            perry.threads.count=1
-            selenium.grid.url=http://grid.dev.cwds.io:4444/wd/hub
-            """
-            writeFile file: "gradle.properties", text: gradlePropsText
-            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'integrationTestDev --stacktrace'
-        }
         stage('Push artifacts') {
             // Artifactory
             rtGradle.deployer.deployArtifacts = true
@@ -100,6 +85,21 @@ node('dora-slave') {
                     buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'publishDocker -DRelease=false -DBuildNumber=$BUILD_NUMBER'
                 }
             }
+        }
+        stage('Deploy Application') {
+            sh 'cd ansible ; ansible-playbook -e NEW_RELIC_AGENT=$USE_NEWRELIC -e VERSION_NUMBER=$APP_VERSION -i $inventory deploy-perry.yml --vault-password-file ~/.ssh/vault.txt -vv'
+            sleep(20)
+        }
+        stage('Integration Tests') {
+
+            def gradlePropsText = """
+            perry.health.check.url=http://10.110.12.162:9082/manage/health
+            perry.url=${PERRY_URL}
+            perry.threads.count=1
+            selenium.grid.url=http://grid.dev.cwds.io:4444/wd/hub
+            """
+            writeFile file: "gradle.properties", text: gradlePropsText
+            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'integrationTestDev --stacktrace'
         }
     } catch (Exception e) {
         emailext attachLog: true, body: "Failed: ${e}", recipientProviders: [[$class: 'DevelopersRecipientProvider']],
