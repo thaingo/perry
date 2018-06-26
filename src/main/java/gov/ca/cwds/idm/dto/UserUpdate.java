@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import java.io.Serializable;
-import java.util.LinkedHashSet;
 import java.util.Set;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -14,7 +13,7 @@ public class UserUpdate implements Serializable {
   private static final long serialVersionUID = 123311439530649580L;
 
   private Boolean enabled;
-  private Set<String> permissions = new LinkedHashSet<>();
+  private Set<String> permissions;
 
   public Boolean getEnabled() {
     return enabled;

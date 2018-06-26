@@ -24,7 +24,7 @@
     "user_last_modified_date": "2018-05-29",
     "enabled": true,
     "status": "CONFIRMED",
-    "RACFID": "YOLOD",
+    "racfid": "YOLOD",
     "permissions": [
       "Hotline-rollout"
     ]
@@ -43,7 +43,7 @@
     "user_last_modified_date": "2018-05-31",
     "enabled": true,
     "status": "CONFIRMED",
-    "RACFID": "SMITHBO",
+    "racfid": "SMITHBO",
     "permissions": [
       "test"
     ]

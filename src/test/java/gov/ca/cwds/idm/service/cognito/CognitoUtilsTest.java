@@ -1,17 +1,19 @@
-package gov.ca.cwds.idm.service;
+package gov.ca.cwds.idm.service.cognito;
 
-import static gov.ca.cwds.idm.service.CognitoUtils.COUNTY_ATTR_NAME;
-import static gov.ca.cwds.idm.service.CognitoUtils.PERMISSIONS_ATTR_NAME;
-import static gov.ca.cwds.idm.service.CognitoUtils.createPermissionsAttribute;
-import static gov.ca.cwds.idm.service.CognitoUtils.getAttribute;
-import static gov.ca.cwds.idm.service.CognitoUtils.getCountyName;
-import static gov.ca.cwds.idm.service.CognitoUtils.getPermissions;
-import static gov.ca.cwds.idm.service.CognitoUtils.getPermissionsAttributeValue;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.COUNTY_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.PERMISSIONS_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.attribute;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.createPermissionsAttribute;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.getAttribute;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.getCountyName;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.getPermissions;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.getPermissionsAttributeValue;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
@@ -185,4 +187,11 @@ public class CognitoUtilsTest {
     assertThat(getCountyName(cognitoUser), is(nullValue()));
   }
 
+  @Test
+  public void testAttribute() {
+    AttributeType attr = attribute("attrName", "attrValue");
+    assertThat(attr, is(notNullValue()));
+    assertThat(attr.getName(), is("attrName"));
+    assertThat(attr.getValue(), is("attrValue"));
+  }
 }

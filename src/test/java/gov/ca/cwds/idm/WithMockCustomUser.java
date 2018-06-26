@@ -7,6 +7,7 @@ import org.springframework.security.test.context.support.WithSecurityContext;
 @Retention(RetentionPolicy.RUNTIME)
 @WithSecurityContext(factory = WithMockCustomUserSecurityContextFactory.class)
 public @interface WithMockCustomUser {
-  String county() default "Yolo";
+  String COUNTY = "Yolo";
+  String county() default COUNTY;
   String[] roles() default "CWS-admin";
 }

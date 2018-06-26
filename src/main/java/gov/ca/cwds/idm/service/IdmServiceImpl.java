@@ -1,13 +1,17 @@
 package gov.ca.cwds.idm.service;
 
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME;
+
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.PerryProperties;
 import gov.ca.cwds.data.persistence.auth.CwsOffice;
 import gov.ca.cwds.data.persistence.auth.StaffPerson;
-import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.UserVerificationResult;
 import gov.ca.cwds.idm.dto.UsersSearchParameter;
+import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
+import gov.ca.cwds.idm.service.cognito.CognitoUtils;
 import gov.ca.cwds.idm.util.UsersSearchParametersUtil;
 import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType;
@@ -15,14 +19,6 @@ import gov.ca.cwds.service.CwsUserInfoService;
 import gov.ca.cwds.service.dto.CwsUserInfo;
 import gov.ca.cwds.service.scripts.IdmMappingScript;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
-import org.apache.commons.collections.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Service;
-
-import javax.script.ScriptException;
 import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Collections;
@@ -32,15 +28,23 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import javax.script.ScriptException;
+import org.apache.commons.collections.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
 
 @Service
 @Profile("idm")
-public class CognitoIdmService implements IdmService {
+public class IdmServiceImpl implements IdmService {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(CognitoIdmService.class);
-  static final String RACFID_ATTRIBUTE = "CUSTOM:RACFID";
+  private static final Logger LOGGER = LoggerFactory.getLogger(IdmServiceImpl.class);
 
-  @Autowired CognitoServiceFacade cognitoService;
+  @Autowired
+  CognitoServiceFacade cognitoService;
 
   @Autowired CwsUserInfoService cwsUserInfoService;
 
@@ -82,8 +86,14 @@ public class CognitoIdmService implements IdmService {
   }
 
   @Override
+  @PreAuthorize("@cognitoServiceFacade.getCountyName(#id) == principal.getParameter('county_name')")
   public void updateUser(String id, UserUpdate updateUserDto) {
     cognitoService.updateUser(id, updateUserDto);
+  }
+
+  @Override
+  public String createUser(User user) {
+    return cognitoService.createUser(user);
   }
 
   @Override
@@ -176,6 +186,6 @@ public class CognitoIdmService implements IdmService {
   }
 
   static String getRACFId(UserType user) {
-    return CognitoUtils.getAttributeValue(user, RACFID_ATTRIBUTE);
+    return CognitoUtils.getAttributeValue(user, RACFID_ATTR_NAME);
   }
 }
