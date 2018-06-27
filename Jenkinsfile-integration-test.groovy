@@ -5,7 +5,8 @@ node('dora-slave') {
                 parameters([
                         string(defaultValue: 'SNAPSHOT', description: 'Release version (if not SNAPSHOT will be released to lib-release repository)', name: 'VERSION'),
                         string(defaultValue: 'latest', description: '', name: 'APP_VERSION'),
-                        string(defaultValue: 'master', description: '', name: 'branch'),
+                        string(defaultValue: 'master', description: 'perry branch', name: 'branch'),
+                        string(defaultValue: 'master', description: 'ansible branch', name: 'ansible_branch'),
                         string(defaultValue: '', description: 'Used for mergerequest default is empty', name: 'refspec'),
                         booleanParam(defaultValue: true, description: 'Default release version template is: <majorVersion>_<buildNumber>-RC', name: 'RELEASE_PROJECT'),
                         string(defaultValue: "", description: 'Fill this field if need to specify custom version ', name: 'OVERRIDE_VERSION'),
@@ -17,7 +18,7 @@ node('dora-slave') {
         stage('Preparation') {
             cleanWs()
             checkout([$class: 'GitSCM', branches: [[name: '$branch']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '433ac100-b3c2-4519-b4d6-207c029a103b', refspec: '$refspec', url: 'git@github.com:ca-cwds/perry.git']]])
-            checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: '*/AARA-425']], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'ansible']], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '433ac100-b3c2-4519-b4d6-207c029a103b', url: 'git@github.com:LeonidMarushevskyi/de-ansible.git']]]
+            checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: '$ansible_branch']], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'ansible']], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '433ac100-b3c2-4519-b4d6-207c029a103b', url: 'git@github.com:LeonidMarushevskyi/de-ansible.git']]]
             rtGradle.tool = "Gradle_35"
             rtGradle.resolver repo: 'repo', server: serverArti
             rtGradle.useWrapper = true
