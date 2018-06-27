@@ -34,7 +34,7 @@ node('dora-slave') {
             perry.password=CWS4kids!
             perry.json={}
             perry.threads.count=1
-            selenium.grid.url=http://grid.dev.cwds.io:4444/wd/hub
+            selenium.grid.url=
             """
             writeFile file: "gradle.properties", text: gradlePropsText
             buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'integrationTestProd --stacktrace'
