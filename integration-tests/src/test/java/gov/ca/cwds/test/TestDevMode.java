@@ -79,8 +79,11 @@ public class TestDevMode {
     loginSteps.click("submitBtn");
     String accessCode = loginSteps.waitForAccessCodeParameter();
     String perryToken = loginSteps.mapAccessCode(testDataBean.getUrl() + "/authn/token?accessCode=" + accessCode);
-    String jsonToken = loginSteps.validateToken(testDataBean.getUrl() + "/authn/validate?token=" + perryToken);
-    loginSteps.validateTokenContent(json, jsonToken);
+    for (int i = 0; i < Integer.parseInt(testDataBean.getValidateRepeatCount()); i++) {
+      String jsonToken =
+          loginSteps.validateToken(testDataBean.getUrl() + "/authn/validate?token=" + perryToken);
+      loginSteps.validateTokenContent(json, jsonToken);
+    }
   }
 }
 

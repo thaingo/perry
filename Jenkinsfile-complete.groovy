@@ -68,6 +68,7 @@ node('dora-slave') {
             perry.json={}
             perry.threads.count=1
             selenium.grid.url=
+            validate.repeat.count=2
             """
             writeFile file: "gradle.properties", text: gradlePropsText
             buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'integrationTestProd --stacktrace'
@@ -88,6 +89,7 @@ node('dora-slave') {
             perry.json=
             perry.threads.count=1
             selenium.grid.url=http://grid.dev.cwds.io:4444/wd/hub
+            validate.repeat.count=2
             """
             writeFile file: "gradle.properties", text: gradlePropsText
             buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'integrationTestDev --stacktrace'

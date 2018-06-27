@@ -45,6 +45,7 @@ task testDevMode(type: Test, dependsOn: testClasses) {
     systemProperty 'perry.json', project.property('perry.json')
     systemProperty 'perry.threads.count', project.property('perry.threads.count')
     systemProperty 'selenium.grid.url', project.property('selenium.grid.url')
+    systemProperty 'validate.repeat.count', project.property('validate.repeat.count')
     systemProperties System.properties
     include '**/TestDevMode*'
 }
@@ -57,6 +58,7 @@ task testCognitoMode(type: Test, dependsOn: testClasses) {
     systemProperty 'perry.json', project.property('perry.json')
     systemProperty 'perry.threads.count', project.property('perry.threads.count')
     systemProperty 'selenium.grid.url', project.property('selenium.grid.url')
+    systemProperty 'validate.repeat.count', project.property('validate.repeat.count')
     systemProperties System.properties
     include '**/TestCognitoMode*'
 }

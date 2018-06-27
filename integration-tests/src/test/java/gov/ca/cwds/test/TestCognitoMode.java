@@ -83,7 +83,9 @@ public class TestCognitoMode {
     loginSteps.clickXpath(SUBMIT_XPATH);
     String accessCode = loginSteps.waitForAccessCodeParameter();
     String perryToken = loginSteps.mapAccessCode(testDataBean.getUrl() + "/authn/token?accessCode=" + accessCode);
-    String jsonToken = loginSteps.validateToken(testDataBean.getUrl() + "/authn/validate?token=" + perryToken);
-    loginSteps.validateTokenContent(testDataBean.getJson(), jsonToken);
+    for (int i = 0; i<Integer.parseInt(testDataBean.getValidateRepeatCount()); i++) {
+      String jsonToken = loginSteps.validateToken(testDataBean.getUrl() + "/authn/validate?token=" + perryToken);
+      loginSteps.validateTokenContent(testDataBean.getJson(), jsonToken);
+    }
   }
 }
