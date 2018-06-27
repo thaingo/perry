@@ -42,11 +42,6 @@
             <stringProp name="Argument.value">${__P(JM_REQUESTS_PER_USER,1)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
-          <elementProp name="redirectUri" elementType="Argument">
-            <stringProp name="Argument.name">redirectUri</stringProp>
-            <stringProp name="Argument.value">${__P(JM_REDIRECT_URI,http://localhost:18080/perry/login)}</stringProp>
-            <stringProp name="Argument.metadata">=</stringProp>
-          </elementProp>
           <elementProp name="rampUpPeriodSec" elementType="Argument">
             <stringProp name="Argument.name">rampUpPeriodSec</stringProp>
             <stringProp name="Argument.value">${__P(JM_RAMP_UP_PERIOD_SEC,1)}</stringProp>
@@ -236,7 +231,7 @@
               <stringProp name="HTTPSampler.port"></stringProp>
               <stringProp name="HTTPSampler.protocol">https</stringProp>
               <stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp>
-              <stringProp name="HTTPSampler.path">/login?client_id=4k6ta23klo8t62nkdif1lp1cvv&amp;redirect_uri=${redirectUri}&amp;response_type=code</stringProp>
+              <stringProp name="HTTPSampler.path">/login?client_id=4k6ta23klo8t62nkdif1lp1cvv&amp;redirect_uri=${perryProtocol}://${perryHost}:${perryPort}/perry/login&amp;response_type=code</stringProp>
               <stringProp name="HTTPSampler.method">POST</stringProp>
               <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
               <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
