@@ -18,7 +18,7 @@ node('dora-slave') {
         stage('Preparation') {
             cleanWs()
             checkout([$class: 'GitSCM', branches: [[name: '$branch']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '433ac100-b3c2-4519-b4d6-207c029a103b', refspec: '$refspec', url: 'git@github.com:ca-cwds/perry.git']]])
-            checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: '$ansible_branch']], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'ansible']], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '433ac100-b3c2-4519-b4d6-207c029a103b', url: 'git@github.com:LeonidMarushevskyi/de-ansible.git']]]
+            checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: '$ansible_branch']], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'ansible']], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '433ac100-b3c2-4519-b4d6-207c029a103b', url: 'git@github.com:ca-cwds/de-ansible.git']]]
             rtGradle.tool = "Gradle_35"
             rtGradle.resolver repo: 'repo', server: serverArti
             rtGradle.useWrapper = true
