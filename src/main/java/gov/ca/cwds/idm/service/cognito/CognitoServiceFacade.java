@@ -1,17 +1,5 @@
 package gov.ca.cwds.idm.service.cognito;
 
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.COUNTY_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.COUNTY_ATTR_NAME_2;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.EMAIL_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.EMAIL_DELIVERY;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.FIRST_NAME_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.LAST_NAME_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.OFFICE_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.PHONE_NUMBER_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_2;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.createPermissionsAttribute;
-
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
@@ -40,16 +28,29 @@ import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.rest.api.domain.UserAlreadyExistsException;
 import gov.ca.cwds.rest.api.domain.UserNotFoundPerryException;
 import gov.ca.cwds.rest.api.domain.UserValidationException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.COUNTY_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.COUNTY_ATTR_NAME_2;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.EMAIL_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.EMAIL_DELIVERY;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.FIRST_NAME_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.LAST_NAME_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.OFFICE_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.PHONE_NUMBER_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_2;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.createPermissionsAttribute;
 
 @Service(value = "cognitoServiceFacade")
 @Profile("idm")
@@ -116,7 +117,7 @@ public class CognitoServiceFacade {
       LOGGER.error(msg);
       throw new UserAlreadyExistsException(msg, e);
 
-    } catch(InvalidParameterException e) {
+    } catch (InvalidParameterException e) {
       LOGGER.error("Cognito validation failed", e);
       throw new UserValidationException(e.getMessage(), e);
     }
@@ -148,17 +149,18 @@ public class CognitoServiceFacade {
   }
 
   private List<AttributeType> buildCreateUserAttributes(User user) {
-    AttributesBuilder attributesBuilder = new AttributesBuilder()
-        .addAttribute(EMAIL_ATTR_NAME, user.getEmail())
-        .addAttribute(FIRST_NAME_ATTR_NAME, user.getFirstName())
-        .addAttribute(LAST_NAME_ATTR_NAME, user.getLastName())
-        .addAttribute(COUNTY_ATTR_NAME, user.getCountyName())
-        .addAttribute(COUNTY_ATTR_NAME_2, user.getCountyName())
-        .addAttribute(OFFICE_ATTR_NAME, user.getOffice())
-        .addAttribute(PHONE_NUMBER_ATTR_NAME, user.getPhoneNumber())
-        .addAttribute(RACFID_ATTR_NAME, user.getRacfid())
-        .addAttribute(RACFID_ATTR_NAME_2, user.getRacfid())
-        .addAttribute(createPermissionsAttribute(user.getPermissions()));
+    AttributesBuilder attributesBuilder =
+        new AttributesBuilder()
+            .addAttribute(EMAIL_ATTR_NAME, user.getEmail())
+            .addAttribute(FIRST_NAME_ATTR_NAME, user.getFirstName())
+            .addAttribute(LAST_NAME_ATTR_NAME, user.getLastName())
+            .addAttribute(COUNTY_ATTR_NAME, user.getCountyName())
+            .addAttribute(COUNTY_ATTR_NAME_2, user.getCountyName())
+            .addAttribute(OFFICE_ATTR_NAME, user.getOffice())
+            .addAttribute(PHONE_NUMBER_ATTR_NAME, user.getPhoneNumber())
+            .addAttribute(RACFID_ATTR_NAME, user.getRacfid())
+            .addAttribute(RACFID_ATTR_NAME_2, user.getRacfid())
+            .addAttribute(createPermissionsAttribute(user.getPermissions()));
     return attributesBuilder.build();
   }
 
