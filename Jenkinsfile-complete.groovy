@@ -5,7 +5,8 @@ node('dora-slave') {
                 parameters([
                         string(defaultValue: 'SNAPSHOT', description: 'Release version (if not SNAPSHOT will be released to lib-release repository)', name: 'VERSION'),
                         string(defaultValue: 'latest', description: '', name: 'APP_VERSION'),
-                        string(defaultValue: 'master', description: '', name: 'branch'),
+                        string(defaultValue: 'master', description: 'perry branch', name: 'branch'),
+                        string(defaultValue: 'master', description: 'ansible branch', name: 'ansible_branch'),
                         string(defaultValue: '', description: 'Used for mergerequest default is empty', name: 'refspec'),
                         booleanParam(defaultValue: true, description: 'Default release version template is: <majorVersion>_<buildNumber>-RC', name: 'RELEASE_PROJECT'),
                         string(defaultValue: "", description: 'Fill this field if need to specify custom version ', name: 'OVERRIDE_VERSION'),
@@ -17,7 +18,7 @@ node('dora-slave') {
         stage('Preparation') {
             cleanWs()
             checkout([$class: 'GitSCM', branches: [[name: '$branch']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '433ac100-b3c2-4519-b4d6-207c029a103b', refspec: '$refspec', url: 'git@github.com:ca-cwds/perry.git']]])
-            checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: '*/AARA-425']], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'ansible']], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '433ac100-b3c2-4519-b4d6-207c029a103b', url: 'git@github.com:LeonidMarushevskyi/de-ansible.git']]]
+            checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: '$ansible_branch']], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'ansible']], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '433ac100-b3c2-4519-b4d6-207c029a103b', url: 'git@github.com:ca-cwds/de-ansible.git']]]
             rtGradle.tool = "Gradle_35"
             rtGradle.resolver repo: 'repo', server: serverArti
             rtGradle.useWrapper = true
@@ -73,6 +74,8 @@ node('dora-slave') {
         }
         stage('Deploy Dev Mode') {
             // TODO: Need to change Perry mode here to DEV
+            sh 'sed -i \'s/devmode: "false"/devmode: "true"/\'  ansible/inventories/tpt2dev/group_vars/perry.yml'
+            sh 'sed -i \'s/cognito_mode: "true"/cognito_mode: "false"/\'  ansible/inventories/tpt2dev/group_vars/perry.yml'
             sh 'cd ansible ; ansible-playbook -e NEW_RELIC_AGENT=$USE_NEWRELIC -e VERSION_NUMBER=$APP_VERSION -i $inventory deploy-perry.yml --vault-password-file ~/.ssh/vault.txt -vv'
             sleep(20)
         }
@@ -80,6 +83,9 @@ node('dora-slave') {
             def gradlePropsText = """
             perry.health.check.url=http://10.110.12.162:9082/manage/health
             perry.url=${PERRY_URL}
+            perry.username=
+            perry.password=
+            perry.json=
             perry.threads.count=1
             selenium.grid.url=http://grid.dev.cwds.io:4444/wd/hub
             """
