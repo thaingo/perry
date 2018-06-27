@@ -23,7 +23,7 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.urlContains;
 public class LoginSteps {
 
 
-  private WebDriver driver;
+  public WebDriver driver;
 
   public void setDriver(WebDriver driver) {
     this.driver = driver;
@@ -37,6 +37,11 @@ public class LoginSteps {
   @Step
   public void isElementPresent(String id) {
     new WebDriverWait(driver, 5).until(presenceOfElementLocated(By.id(id)));
+  }
+
+  @Step
+  public void isElementPresentXpath(String xpath) {
+    new WebDriverWait(driver, 5).until(presenceOfElementLocated(By.xpath(xpath)));
   }
 
   @Step
@@ -69,6 +74,11 @@ public class LoginSteps {
   @Step
   public void click(String id) {
     find(id).click();
+  }
+
+  @Step
+  public void clickXpath(String xpath) {
+    findXpath(xpath).submit();
   }
 
   @Step
