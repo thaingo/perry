@@ -31,17 +31,17 @@ node('dora-slave') {
                 buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'clean jar'
             }
         }
-//        stage('Unit Tests') {
-//            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'test jacocoTestReport', switches: '--info'
-//        }
-//        stage('SonarQube analysis') {
-//            withSonarQubeEnv('Core-SonarQube') {
-//                buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'sonarqube'
-//            }
-//        }
-//        stage('License Report') {
-//            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'downloadLicenses'
-//        }
+        stage('Unit Tests') {
+            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'test jacocoTestReport', switches: '--info'
+        }
+        stage('SonarQube analysis') {
+            withSonarQubeEnv('Core-SonarQube') {
+                buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'sonarqube'
+            }
+        }
+        stage('License Report') {
+            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'downloadLicenses'
+        }
         stage('Build Docker') {
             withDockerRegistry([credentialsId: '6ba8d05c-ca13-4818-8329-15d41a089ec0']) {
                 if (params.RELEASE_PROJECT) {
