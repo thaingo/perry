@@ -1,28 +1,5 @@
 package gov.ca.cwds.idm;
 
-import static com.google.common.base.Strings.nullToEmpty;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.COUNTY_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.COUNTY_ATTR_NAME_2;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.EMAIL_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.FIRST_NAME_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.LAST_NAME_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.OFFICE_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.PERMISSIONS_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.PHONE_NUMBER_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_2;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.getPermissionsAttributeValue;
-import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
-import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertStrict;
-import static gov.ca.cwds.idm.util.UsersSearchParametersUtil.DEFAULT_PAGESIZE;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
 import com.amazonaws.services.cognitoidp.model.AdminCreateUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminCreateUserResult;
@@ -47,16 +24,6 @@ import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.service.cognito.CognitoProperties;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
-import java.nio.charset.Charset;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.stream.Collectors;
-import javax.annotation.PostConstruct;
 import liquibase.util.StringUtils;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -74,6 +41,41 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+
+import javax.annotation.PostConstruct;
+import java.nio.charset.Charset;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.google.common.base.Strings.nullToEmpty;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.COUNTY_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.COUNTY_ATTR_NAME_2;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.EMAIL_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.EMAIL_DELIVERY;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.FIRST_NAME_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.LAST_NAME_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.OFFICE_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.PERMISSIONS_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.PHONE_NUMBER_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_2;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.getPermissionsAttributeValue;
+import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
+import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertStrict;
+import static gov.ca.cwds.idm.util.UsersSearchParametersUtil.DEFAULT_PAGESIZE;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 
 @ActiveProfiles({"dev", "idm"})
 public class IdmResourceTest extends BaseLiquibaseTest {
@@ -621,9 +623,10 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         };
 
     return new AdminCreateUserRequest()
-            .withUsername(user.getEmail())
-            .withUserPoolId(USERPOOL)
-            .withUserAttributes(userAttributes);
+        .withUsername(user.getEmail())
+        .withUserPoolId(USERPOOL)
+        .withDesiredDeliveryMediums(EMAIL_DELIVERY)
+        .withUserAttributes(userAttributes);
   }
 
   private AdminCreateUserRequest setCreateUserResult(AdminCreateUserRequest request, String newId) {
