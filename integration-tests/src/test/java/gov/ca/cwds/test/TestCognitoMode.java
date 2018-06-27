@@ -18,12 +18,18 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 @RunWith(SerenityParameterizedRunner.class)
 @Concurrent
 public class TestCognitoMode {
+
+  public static final String USERNAME_XPATH = "(//input[@id='username'])[2]";
+  public static final String PASSWORD_XPATH = "(//input[@id='password'])[2]";
+  public static final String SUBMIT_XPATH = "(//form[@name='cognitoSignInForm'])[2]";
 
   private WebDriver driver;
   private final TestDataBean testDataBean;
@@ -54,7 +60,7 @@ public class TestCognitoMode {
   @Before
   public void init() throws MalformedURLException {
     if (StringUtils.isEmpty(testDataBean.getGridUrl())) {
-      driver = new ChromeDriver();
+      driver = new HtmlUnitDriver();
     } else {
       driver = new RemoteWebDriver(new URL(testDataBean.getGridUrl()), DesiredCapabilities.chrome());
     }
@@ -71,13 +77,15 @@ public class TestCognitoMode {
   @Test
   public void testCognitoMode() throws Exception {
     loginSteps.goToPerryLoginUrl(testDataBean.getUrl() + "/authn/login?callback=" + testDataBean.getUrl() + "/demo-sp.html");
-    loginSteps.isElementPresent("username");
-    loginSteps.type("username", testDataBean.getUsername());
-    loginSteps.type("password", testDataBean.getPassword());
-    loginSteps.click("signInSubmitButton");
+    loginSteps.isElementPresentXpath(USERNAME_XPATH);
+    loginSteps.typeXpath(USERNAME_XPATH, testDataBean.getUsername());
+    loginSteps.typeXpath(PASSWORD_XPATH, testDataBean.getPassword());
+    loginSteps.clickXpath(SUBMIT_XPATH);
     String accessCode = loginSteps.waitForAccessCodeParameter();
     String perryToken = loginSteps.mapAccessCode(testDataBean.getUrl() + "/authn/token?accessCode=" + accessCode);
-    String jsonToken = loginSteps.validateToken(testDataBean.getUrl() + "/authn/validate?token=" + perryToken);
-    loginSteps.validateTokenContent(testDataBean.getJson(), jsonToken);
+    for (int i = 0; i<Integer.parseInt(testDataBean.getValidateRepeatCount()); i++) {
+      String jsonToken = loginSteps.validateToken(testDataBean.getUrl() + "/authn/validate?token=" + perryToken);
+      loginSteps.validateTokenContent(testDataBean.getJson(), jsonToken);
+    }
   }
 }

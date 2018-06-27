@@ -255,6 +255,12 @@ task integrationTestDev(dependsOn: ':integration-tests:testDevMode') {
     }
 }
 
+task integrationTestProd(dependsOn: ':integration-tests:testCognitoMode') {
+    doLast {
+        println 'Integration Test Passed'
+    }
+}
+
 javadoc {
     options.addStringOption("charset", "UTF-8")
 }
