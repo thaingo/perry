@@ -41,6 +41,8 @@ node('dora-slave') {
         }
         stage('Deploy Dev Mode') {
             // TODO: Need to change Perry mode here to DEV
+            sh 'sed -i \'s/devmode: "false"/devmode: "true"/\'  inventories/tpt2dev/group_vars/perry.yml'
+            sh 'sed -i \'s/cognito_mode: "true"/cognito_mode: "false"/\'  inventories/tpt2dev/group_vars/perry.yml'
             sh 'cd ansible ; ansible-playbook -e NEW_RELIC_AGENT=$USE_NEWRELIC -e VERSION_NUMBER=$APP_VERSION -i $inventory deploy-perry.yml --vault-password-file ~/.ssh/vault.txt -vv'
             sleep(20)
         }
