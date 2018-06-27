@@ -12,11 +12,6 @@
             <stringProp name="Argument.value">${__P(JM_TARGET,api)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
-          <elementProp name="perryMode" elementType="Argument">
-            <stringProp name="Argument.name">perryMode</stringProp>
-            <stringProp name="Argument.value">${__P(JM_PERRY_MODE,PROD)}</stringProp>
-            <stringProp name="Argument.metadata">=</stringProp>
-          </elementProp>
           <elementProp name="perryProtocol" elementType="Argument">
             <stringProp name="Argument.name">perryProtocol</stringProp>
             <stringProp name="Argument.value">${__P(JM_PERRY_PROTOCOL,http)}</stringProp>
@@ -49,12 +44,17 @@
           </elementProp>
           <elementProp name="requestsPerUser" elementType="Argument">
             <stringProp name="Argument.name">requestsPerUser</stringProp>
-            <stringProp name="Argument.value">${__P(JM_UPDATE_REQUESTS_PER_USER,1)}</stringProp>
+            <stringProp name="Argument.value">${__P(JM_REQUESTS_PER_USER,1)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="redirectUri" elementType="Argument">
             <stringProp name="Argument.name">redirectUri</stringProp>
             <stringProp name="Argument.value">${__P(JM_REDIRECT_URI,http://localhost:18080/perry/login)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="rampUpPeriodSec" elementType="Argument">
+            <stringProp name="Argument.name">rampUpPeriodSec</stringProp>
+            <stringProp name="Argument.value">${__P(JM_RAMP_UP_PERIOD_SEC,1)</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
         </collectionProp>
@@ -70,7 +70,7 @@
           <stringProp name="LoopController.loops">1</stringProp>
         </elementProp>
         <stringProp name="ThreadGroup.num_threads">${usersCount}</stringProp>
-        <stringProp name="ThreadGroup.ramp_time">1</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">${rampUpPeriodSec}</stringProp>
         <longProp name="ThreadGroup.start_time">1525377506000</longProp>
         <longProp name="ThreadGroup.end_time">1525377506000</longProp>
         <boolProp name="ThreadGroup.scheduler">false</boolProp>
@@ -430,58 +430,6 @@ System.out.println(&quot;vars.tokenQueryParam&quot; + vars.get(&quot;tokenQueryP
                   <hashTree/>
                 </hashTree>
               </hashTree>
-              <IfController guiclass="IfControllerPanel" testclass="IfController" testname="If &apos;perryMode&apos; == &apos;DEV&apos;" enabled="false">
-                <stringProp name="IfController.condition">&apos;${perryMode}&apos;==&apos;DEV&apos;</stringProp>
-                <boolProp name="IfController.evaluateAll">false</boolProp>
-              </IfController>
-              <hashTree>
-                <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Perry: /perry/login" enabled="false">
-                  <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" enabled="true">
-                    <collectionProp name="Arguments.arguments">
-                      <elementProp name="username" elementType="HTTPArgument">
-                        <boolProp name="HTTPArgument.always_encode">false</boolProp>
-                        <stringProp name="Argument.name">username</stringProp>
-                        <stringProp name="Argument.value">${username}</stringProp>
-                        <stringProp name="Argument.metadata">=</stringProp>
-                        <boolProp name="HTTPArgument.use_equals">true</boolProp>
-                      </elementProp>
-                    </collectionProp>
-                  </elementProp>
-                  <stringProp name="HTTPSampler.domain">${perryHost}</stringProp>
-                  <stringProp name="HTTPSampler.port">${perryPort}</stringProp>
-                  <stringProp name="HTTPSampler.protocol">${perryProtocol}</stringProp>
-                  <stringProp name="HTTPSampler.contentEncoding"></stringProp>
-                  <stringProp name="HTTPSampler.path">/perry/login</stringProp>
-                  <stringProp name="HTTPSampler.method">POST</stringProp>
-                  <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
-                  <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
-                  <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
-                  <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
-                  <boolProp name="HTTPSampler.BROWSER_COMPATIBLE_MULTIPART">true</boolProp>
-                  <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
-                  <stringProp name="HTTPSampler.connect_timeout"></stringProp>
-                  <stringProp name="HTTPSampler.response_timeout"></stringProp>
-                  <stringProp name="TestPlan.comments">Detected the start of a redirect chain</stringProp>
-                </HTTPSamplerProxy>
-                <hashTree>
-                  <JSONPathAssertion guiclass="JSONPathAssertionGui" testclass="JSONPathAssertion" testname="JSON Assertion" enabled="false">
-                    <stringProp name="JSON_PATH">$.application</stringProp>
-                    <stringProp name="EXPECTED_VALUE">CWDS CANS API</stringProp>
-                    <boolProp name="JSONVALIDATION">false</boolProp>
-                    <boolProp name="EXPECT_NULL">false</boolProp>
-                    <boolProp name="INVERT">false</boolProp>
-                    <boolProp name="ISREGEX">true</boolProp>
-                  </JSONPathAssertion>
-                  <hashTree/>
-                  <BeanShellPostProcessor guiclass="TestBeanGUI" testclass="BeanShellPostProcessor" testname="BeanShell PostProcessor" enabled="false">
-                    <boolProp name="resetInterpreter">false</boolProp>
-                    <stringProp name="parameters"></stringProp>
-                    <stringProp name="filename"></stringProp>
-                    <stringProp name="script">vars.put(&quot;tokenQueryParam&quot;, &quot;&quot;);</stringProp>
-                  </BeanShellPostProcessor>
-                  <hashTree/>
-                </hashTree>
-              </hashTree>
             </hashTree>
           </hashTree>
           <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="Get Users in loop" enabled="true">
@@ -519,6 +467,36 @@ System.out.println(&quot;vars.tokenQueryParam&quot; + vars.get(&quot;tokenQueryP
               </ResponseAssertion>
               <hashTree/>
             </hashTree>
+          </hashTree>
+          <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Logout Perry" enabled="true">
+            <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+              <collectionProp name="Arguments.arguments"/>
+            </elementProp>
+            <stringProp name="HTTPSampler.domain">${perryHost}</stringProp>
+            <stringProp name="HTTPSampler.port">${perryPort}</stringProp>
+            <stringProp name="HTTPSampler.protocol"></stringProp>
+            <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+            <stringProp name="HTTPSampler.path">/perry/authn/logout</stringProp>
+            <stringProp name="HTTPSampler.method">POST</stringProp>
+            <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+            <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+            <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+            <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+            <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+            <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+            <stringProp name="HTTPSampler.response_timeout"></stringProp>
+          </HTTPSamplerProxy>
+          <hashTree>
+            <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Assert response 200 Ok" enabled="true">
+              <collectionProp name="Asserion.test_strings">
+                <stringProp name="49586">200</stringProp>
+              </collectionProp>
+              <stringProp name="Assertion.custom_message"></stringProp>
+              <stringProp name="Assertion.test_field">Assertion.response_code</stringProp>
+              <boolProp name="Assertion.assume_success">false</boolProp>
+              <intProp name="Assertion.test_type">8</intProp>
+            </ResponseAssertion>
+            <hashTree/>
           </hashTree>
         </hashTree>
       </hashTree>
