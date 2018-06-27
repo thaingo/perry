@@ -19,6 +19,8 @@ public class CognitoUtils {
   public static final String PHONE_NUMBER_ATTR_NAME = "phone_number";
   public static final String OFFICE_ATTR_NAME = "custom:Office";
 
+  public static final String EMAIL_DELIVERY = "EMAIL";
+
   public static final String COUNTY_ATTR_NAME = "custom:County";
   public static final String COUNTY_ATTR_NAME_2 = "preferred_username";
 
