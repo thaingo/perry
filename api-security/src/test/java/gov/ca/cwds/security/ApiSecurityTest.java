@@ -21,12 +21,12 @@ public class ApiSecurityTest extends AbstractApiSecurityTest {
   TestService testService;
 
   @Test(expected = UnauthorizedException.class)
-  public void testUnauthorized() throws Exception {
+  public void testUnauthorized() {
     testService.testArg("2");
   }
 
   @Test
-  public void testAuthorized() throws Exception {
+  public void testAuthorized() {
     testService.testArg("1");
   }
 
@@ -41,7 +41,7 @@ public class ApiSecurityTest extends AbstractApiSecurityTest {
   }
 
   @Test
-  public void testArgAuthorizedCompositeObject() throws Exception {
+  public void testArgAuthorizedCompositeObject() {
     CaseDTO caseDTO = new CaseDTO();
     Case caseObject = new Case(1L, "name");
     caseDTO.setCaseObject(caseObject);
@@ -49,7 +49,7 @@ public class ApiSecurityTest extends AbstractApiSecurityTest {
   }
 
   @Test(expected = UnauthorizedException.class)
-  public void testArgUnauthorizedCompositeObject() throws Exception {
+  public void testArgUnauthorizedCompositeObject() {
     CaseDTO caseDTO = new CaseDTO();
     Case caseObject = new Case(2L, "name");
     caseDTO.setCaseObject(caseObject);
@@ -57,7 +57,7 @@ public class ApiSecurityTest extends AbstractApiSecurityTest {
   }
 
   @Test
-  public void testArgAuthorizedCompositeObjectList() throws Exception {
+  public void testArgAuthorizedCompositeObjectList() {
     CaseDTO caseDTO = new CaseDTO();
     Case caseObject = new Case(1L, "name");
     caseDTO.getCases().add(caseObject);
@@ -66,7 +66,7 @@ public class ApiSecurityTest extends AbstractApiSecurityTest {
   }
 
   @Test(expected = UnauthorizedException.class)
-  public void testArgUnauthorizedCompositeObjectList() throws Exception {
+  public void testArgUnauthorizedCompositeObjectList() {
     CaseDTO caseDTO = new CaseDTO();
     Case caseObject = new Case(1L, "name");
     caseDTO.getCases().add(caseObject);
@@ -75,13 +75,13 @@ public class ApiSecurityTest extends AbstractApiSecurityTest {
   }
 
   @Test
-  public void testRetAuthorizedCompositeObject() throws Exception {
+  public void testRetAuthorizedCompositeObject() {
     CaseDTO caseDTO = testService.testReturnInstance();
     assert  caseDTO != null;
   }
 
   @Test(expected = UnauthorizedException.class)
-  public void testRetUnauthorizedCompositeObject() throws Exception {
+  public void testRetUnauthorizedCompositeObject() {
     testService.testReturnProtectedInstance();
   }
 
@@ -156,71 +156,5 @@ public class ApiSecurityTest extends AbstractApiSecurityTest {
   @Test(expected = UnauthorizedException.class)
   public void testDirectCheckUnauthorized() {
     SecurityUtils.getSubject().checkPermission("case:read:2");
-  }
-
-  /*
-   * tests that uses FilterOnlyAuthorizer
-   */
-
-  @Test
-  public void testBatchReturnFiltered() {
-    List<Case> result = testService.testBatchReturnFiltered();
-    assert result.size() == 1;
-    assert result.iterator().next().getName().equals("valid");
-  }
-
-  @Test
-  public void testBatchReturnFilteredByNestedId() {
-    Set<CaseDTO> result = testService.testBatchReturnFilteredByNestedId();
-    assert result.size() == 1;
-    assert result.iterator().next().getCaseObject().getName().equals("valid");
-  }
-
-  @Test
-  public void testBatchReturnFilteredByNestedObject() {
-    List<CaseDTO> result = testService.testBatchReturnFilteredByNestedObject();
-    assert result.size() == 1;
-    assert result.iterator().next().getCaseObject().getName().equals("valid");
-  }
-
-  @Test
-  public void testBatchFilterArgument() {
-    List<Case> list = new ArrayList<>();
-    list.add(new Case(1L, "invalid"));
-    list.add(new Case(2L, "valid"));
-
-    List<Case> filteredList = testService.testBatchFilterArgument(list);
-    assert filteredList.size() == 1;
-    assert filteredList.iterator().next().getName().equals("valid");
-  }
-
-  @Test
-  public void testBatchFilterArgumentByNestedId() {
-    List<CaseDTO> list = new ArrayList<>();
-    CaseDTO caseDTO = new CaseDTO();
-    caseDTO.setCaseObject(new Case(1L, "invalid"));
-    list.add(caseDTO);
-    caseDTO = new CaseDTO();
-    caseDTO.setCaseObject(new Case(2L, "valid"));
-    list.add(caseDTO);
-
-    List<CaseDTO> filteredList = testService.testBatchFilterArgumentByNestedId(list);
-    assert filteredList.size() == 1;
-    assert filteredList.iterator().next().getCaseObject().getName().equals("valid");
-  }
-
-  @Test
-  public void testBatchFilterArgumentByNestedObject() {
-    Set<CaseDTO> set = new HashSet<>();
-    CaseDTO caseDTO = new CaseDTO();
-    caseDTO.setCaseObject(new Case(1L, "invalid"));
-    set.add(caseDTO);
-    caseDTO = new CaseDTO();
-    caseDTO.setCaseObject(new Case(2L, "valid"));
-    set.add(caseDTO);
-
-    Set<CaseDTO> filteredList = testService.testBatchFilterArgumentByNestedObject(set);
-    assert filteredList.size() == 1;
-    assert filteredList.iterator().next().getCaseObject().getName().equals("valid");
   }
 }

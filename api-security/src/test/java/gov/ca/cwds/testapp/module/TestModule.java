@@ -4,8 +4,13 @@ import com.google.inject.AbstractModule;
 import com.google.inject.matcher.Matchers;
 import gov.ca.cwds.security.authorizer.CaseAuthorizer;
 import gov.ca.cwds.security.authorizer.FilterOnlyAuthorizer;
+import gov.ca.cwds.security.authorizer.FullyImplementedAuthorizer;
 import gov.ca.cwds.security.authorizer.TestStaticAuthorizer;
 import gov.ca.cwds.security.module.SecurityModule;
+import gov.ca.cwds.testapp.service.FilterOnlyAuthorizerTestService;
+import gov.ca.cwds.testapp.service.FilterOnlyAuthorizerTestServiceImpl;
+import gov.ca.cwds.testapp.service.FullyImplementedAuthorizerTestService;
+import gov.ca.cwds.testapp.service.FullyImplementedAuthorizerTestServiceImpl;
 import gov.ca.cwds.testapp.service.TestService;
 import gov.ca.cwds.testapp.service.TestServiceImpl;
 import org.aopalliance.intercept.MethodInterceptor;
@@ -22,9 +27,12 @@ public class TestModule extends AbstractModule {
   @Override
   protected void configure() {
     bind(TestService.class).to(TestServiceImpl.class);
+    bind(FilterOnlyAuthorizerTestService.class).to(FilterOnlyAuthorizerTestServiceImpl.class);
+    bind(FullyImplementedAuthorizerTestService.class).to(FullyImplementedAuthorizerTestServiceImpl.class);
     install(new SecurityModule(null)
         .addAuthorizer("case:read", CaseAuthorizer.class)
         .addAuthorizer("case:filter", FilterOnlyAuthorizer.class)
+        .addAuthorizer("case:full", FullyImplementedAuthorizer.class)
         .addStaticAuthorizer(TestStaticAuthorizer.class)
     );
 
