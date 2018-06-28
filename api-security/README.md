@@ -281,28 +281,12 @@ class CaseAuthorizer extends BaseAuthorizer<Case, Long> {
   
   @Override
   protected Collection<Long> filterIds(Collection<Long> ids) {
-    // perform initialization that may be needed for authorization of every id in the collection
-    Collection<Long> filteredIds = ids instanceof Set ? new HashSet() : new ArrayList();
-    for (Long id : ids) {
-      // evaluate authorization
-      if (isAuthorized) {
-        filteredIds.add(id);
-      }
-    }
-    return filteredIds;
+    // filtering logic
   }
 
   @Override
   protected Collection<Case> filterInstances(Collection<Case> instances) {
-    // perform initialization that may be needed for authorization of every id in the collection
-    Collection<Long> filteredCases = instances instanceof Set ? new HashSet() : new ArrayList();
-    for (Case caseObject : instances) {
-      // evaluate authorization
-      if (isAuthorized) {
-        filteredCases.add(caseObject);
-      }
-    }
-    return filteredCases;
+    // filtering logic
   }
 }
 ```
