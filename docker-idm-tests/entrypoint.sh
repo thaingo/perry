@@ -2,12 +2,12 @@
 
 JAVA_OPT="-Xms128m -Xmx512m"
 
-  if ([ -z "$TARGET" ]); then
-    TARGET = "api"
-    echo "Default value is set: TARGET = $TARGET"
+  if ([ -z "$JM_TARGET" ]); then
+    JM_TARGET = "api"
+    echo "Default value is set: JM_TARGET = $JM_TARGET"
   fi
-  if [ "$TARGET" != "api" ] && [ "$TARGET" != "rails" ]; then
-    echo "Unknown TARGET: '$TARGET'"
+  if [ "$JM_TARGET" != "api" ] && [ "$JM_TARGET" != "rails" ]; then
+    echo "Unknown JM_TARGET: '$JM_TARGET'"
     echo "Possible values: api, rails"
     exit 1
   fi
@@ -43,7 +43,7 @@ JAVA_OPT="-Xms128m -Xmx512m"
   fi
 
   echo "Starting performance tests: "
-  echo "TARGET = '$TARGET'"
+  echo "JM_TARGET = '$JM_TARGET'"
   echo "JM_PERRY_PROTOCOL = '$JM_PERRY_PROTOCOL'"
   echo "JM_PERRY_HOST = '$JM_PERRY_HOST'"
   echo "JM_PERRY_PORT = '$JM_PERRY_PORT'"
@@ -52,8 +52,8 @@ JAVA_OPT="-Xms128m -Xmx512m"
   echo "JM_REQUESTS_PER_USER = '$JM_REQUESTS_PER_USER'"
   echo "JM_RAMP_UP_PERIOD_SEC = '$JM_RAMP_UP_PERIOD_SEC'"
 
-  $JMETER_HOME/bin/jmeter -n -t $JMETER_TESTS/$TARGET/getUsers.jmx -l $JMETER_TESTS/$TARGET/results/resultfile -e -o $JMETER_TESTS/$TARGET/results/web-report \
-    -JTARGET=$TARGET \
+  $JMETER_HOME/bin/jmeter -n -t $JMETER_TESTS/$JM_TARGET/getUsers.jmx -l $JMETER_TESTS/$JM_TARGET/results/getUsers.jtl -e -o $JMETER_TESTS/$JM_TARGET/results/web-report \
+    -JJM_TARGET=$JM_TARGET \
     -JJM_PERRY_PROTOCOL=$JM_PERRY_PROTOCOL \
     -JJM_PERRY_HOST=$JM_PERRY_HOST \
     -JJM_PERRY_PORT=$JM_PERRY_PORT \
