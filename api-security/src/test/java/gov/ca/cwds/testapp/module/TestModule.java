@@ -3,6 +3,7 @@ package gov.ca.cwds.testapp.module;
 import com.google.inject.AbstractModule;
 import com.google.inject.matcher.Matchers;
 import gov.ca.cwds.security.authorizer.CaseAuthorizer;
+import gov.ca.cwds.security.authorizer.FilterOnlyAuthorizer;
 import gov.ca.cwds.security.authorizer.TestStaticAuthorizer;
 import gov.ca.cwds.security.module.SecurityModule;
 import gov.ca.cwds.testapp.service.TestService;
@@ -23,6 +24,7 @@ public class TestModule extends AbstractModule {
     bind(TestService.class).to(TestServiceImpl.class);
     install(new SecurityModule(null)
         .addAuthorizer("case:read", CaseAuthorizer.class)
+        .addAuthorizer("case:filter", FilterOnlyAuthorizer.class)
         .addStaticAuthorizer(TestStaticAuthorizer.class)
     );
 
