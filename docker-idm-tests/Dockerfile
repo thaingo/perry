@@ -9,9 +9,9 @@ RUN cd /opt/ \
 ENV JMETER_HOME /opt/apache-jmeter-4.0/
 RUN mkdir /opt/idm-api-perf-test
 ENV JMETER_TESTS /opt/idm-api-perf-test
-RUN mkdir $JMETER_TESTS/jmeter
-ADD jmeter $JMETER_TESTS/jmeter
-RUN mkdir $JMETER_TESTS/results && mkdir $JMETER_TESTS/results/api && mkdir $JMETER_TESTS/results/rails
+ADD jmeter $JMETER_TESTS
+RUN mkdir $JMETER_TESTS/api/results
+RUN mkdir $JMETER_TESTS/rails/results
 ADD entrypoint.sh /opt/
 RUN chmod +x /opt/entrypoint.sh
 WORKDIR /opt
