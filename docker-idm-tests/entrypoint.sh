@@ -3,7 +3,7 @@
 JAVA_OPT="-Xms128m -Xmx512m"
 
   if ([ -z "$JM_TARGET" ]); then
-    JM_TARGET = "api"
+    JM_TARGET="api"
     echo "Default value is set: JM_TARGET = $JM_TARGET"
   fi
   if [ "$JM_TARGET" != "api" ] && [ "$JM_TARGET" != "rails" ]; then
@@ -30,15 +30,15 @@ JAVA_OPT="-Xms128m -Xmx512m"
   fi
 
   if ([ -z "$JM_USERS_COUNT" ]); then
-    JM_USERS_COUNT = "1"
+    JM_USERS_COUNT="1"
     echo "Default value is set: JM_USERS_COUNT = $JM_USERS_COUNT"
   fi
   if ([ -z "$JM_REQUESTS_PER_USER" ]); then
-    JM_REQUESTS_PER_USER = "1"
+    JM_REQUESTS_PER_USER="1"
     echo "Default value is set: JM_REQUESTS_PER_USER = $JM_REQUESTS_PER_USER"
   fi
   if ([ -z "$JM_RAMP_UP_PERIOD_SEC" ]); then
-    JM_RAMP_UP_PERIOD_SEC = "1"
+    JM_RAMP_UP_PERIOD_SEC="1"
     echo "Default value is set: JM_RAMP_UP_PERIOD_SEC = $JM_RAMP_UP_PERIOD_SEC"
   fi
 
@@ -52,7 +52,13 @@ JAVA_OPT="-Xms128m -Xmx512m"
   echo "JM_REQUESTS_PER_USER = '$JM_REQUESTS_PER_USER'"
   echo "JM_RAMP_UP_PERIOD_SEC = '$JM_RAMP_UP_PERIOD_SEC'"
 
-  $JMETER_HOME/bin/jmeter -n -t $JMETER_TESTS/$JM_TARGET/getUsers.jmx -l $JMETER_TESTS/$JM_TARGET/results/getUsers.jtl -e -o $JMETER_TESTS/$JM_TARGET/results/web-report \
+  JMX_DIR="$JMETER_TESTS/$JM_TARGET"
+  RESULTS_DIR="$JMX_DIR/results"
+  TEST_NAME="getUsers"
+
+  $JMETER_HOME/bin/jmeter -n -t $JMX_DIR/$TEST_NAME.jmx  \
+    -l $RESULTS_DIR/$TEST_NAME.jtl  \
+    -e -o $RESULTS_DIR/$TEST_NAME-report \
     -JJM_TARGET=$JM_TARGET \
     -JJM_PERRY_PROTOCOL=$JM_PERRY_PROTOCOL \
     -JJM_PERRY_HOST=$JM_PERRY_HOST \
