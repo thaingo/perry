@@ -1,6 +1,6 @@
 package gov.ca.cwds;
 
-import gov.ca.cwds.idm.CognitoProperties;
+import gov.ca.cwds.idm.service.cognito.CognitoProperties;
 import gov.ca.cwds.security.jwt.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;

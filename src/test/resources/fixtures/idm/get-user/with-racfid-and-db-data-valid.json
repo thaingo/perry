@@ -12,7 +12,7 @@
   "user_last_modified_date": "2018-05-31",
   "enabled": true,
   "status": "CONFIRMED",
-  "RACFID": "SMITHBO",
+  "racfid": "SMITHBO",
   "permissions": [
     "test"
   ]

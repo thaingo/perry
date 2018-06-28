@@ -1,0 +1,15 @@
+  {
+    "verification_passed": true,
+    "user": {
+      "racfid": "SMITHBO",
+      "county_name": "Yolo",
+      "email": "test@test.com",
+      "first_name": "Win",
+      "last_name": "Staff",
+      "office": "Tolo Office",
+      "permissions": [],
+      "phone_number": "4646464646",
+      "phone_extension_number": "11",
+      "start_date": "1980-08-08"
+    }
+  }

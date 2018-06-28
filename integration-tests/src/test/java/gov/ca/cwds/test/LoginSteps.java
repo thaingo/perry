@@ -22,7 +22,8 @@ import static org.openqa.selenium.support.ui.ExpectedConditions.urlContains;
 
 public class LoginSteps {
 
-  private WebDriver driver;
+
+  public WebDriver driver;
 
   public void setDriver(WebDriver driver) {
     this.driver = driver;
@@ -39,8 +40,27 @@ public class LoginSteps {
   }
 
   @Step
+  public void isElementPresentXpath(String xpath) {
+    new WebDriverWait(driver, 5).until(presenceOfElementLocated(By.xpath(xpath)));
+  }
+
+  @Step
   public void type(String id, String username) {
     find(id).sendKeys(username);
+  }
+
+  @Step
+  public void typeXpath(String xpath, String text) {
+    findXpath(xpath).sendKeys(text);
+  }
+
+  private WebElement findXpath(String xpath) {
+    try {
+      return driver.findElement(
+          By.xpath(xpath));
+    } catch (NoSuchElementException e) {
+      return driver.findElement(By.xpath(xpath));
+    }
   }
 
   private WebElement find(String selector) {
@@ -54,6 +74,11 @@ public class LoginSteps {
   @Step
   public void click(String id) {
     find(id).click();
+  }
+
+  @Step
+  public void clickXpath(String xpath) {
+    findXpath(xpath).submit();
   }
 
   @Step

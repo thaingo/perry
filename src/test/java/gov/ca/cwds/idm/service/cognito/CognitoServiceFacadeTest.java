@@ -1,6 +1,6 @@
-package gov.ca.cwds.idm.service;
+package gov.ca.cwds.idm.service.cognito;
 
-import static gov.ca.cwds.idm.service.CognitoUtils.PERMISSIONS_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.PERMISSIONS_ATTR_NAME;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
@@ -21,8 +21,9 @@ import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.UpdateUserAttributesRequest;
 import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
 import com.amazonaws.services.cognitoidp.model.UserType;
-import gov.ca.cwds.idm.CognitoProperties;
-import gov.ca.cwds.idm.dto.UpdateUserDto;
+import gov.ca.cwds.idm.service.cognito.CognitoProperties;
+import gov.ca.cwds.idm.dto.UserUpdate;
+import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.rest.api.domain.UserNotFoundPerryException;
 import java.util.ArrayList;
@@ -128,14 +129,14 @@ public class CognitoServiceFacadeTest {
     when(identityProvider.adminGetUser(any(AdminGetUserRequest.class)))
         .thenReturn(mockResult);
 
-    UpdateUserDto updateUserDto = new UpdateUserDto();
-    updateUserDto.setEnabled(Boolean.TRUE);
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setEnabled(Boolean.TRUE);
     Set<String> permissions = new HashSet<>();
     permissions.add("Snapshot-rollout");
     permissions.add("Hotline-rollout");
-    updateUserDto.setPermissions(permissions);
+    userUpdate.setPermissions(permissions);
 
-    fasade.updateUser("id", updateUserDto);
+    fasade.updateUser("id", userUpdate);
 
     AdminGetUserRequest expectedRequest = new AdminGetUserRequest().withUsername("id")
         .withUserPoolId("userpool");
@@ -161,13 +162,13 @@ public class CognitoServiceFacadeTest {
     when(identityProvider.adminGetUser(any(AdminGetUserRequest.class)))
         .thenReturn(mockResult);
 
-    UpdateUserDto updateUserDto = new UpdateUserDto();
-    updateUserDto.setEnabled(Boolean.FALSE);
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setEnabled(Boolean.FALSE);
     Set<String> permissions = new HashSet<>();
     permissions.add("Hotline-rollout");
-    updateUserDto.setPermissions(permissions);
+    userUpdate.setPermissions(permissions);
 
-    fasade.updateUser("id", updateUserDto);
+    fasade.updateUser("id", userUpdate);
 
     AdminGetUserRequest expectedAdminGetUserRequest =
         new AdminGetUserRequest().withUsername("id").withUserPoolId("userpool");
@@ -202,13 +203,13 @@ public class CognitoServiceFacadeTest {
   public void testUpdateUserNotFoundException() {
     when(identityProvider.adminGetUser(any(AdminGetUserRequest.class)))
         .thenThrow(new UserNotFoundException("user not found"));
-    fasade.updateUser("id", new UpdateUserDto());
+    fasade.updateUser("id", new UserUpdate());
   }
 
   @Test(expected = PerryException.class)
   public void testUpdateUserException() {
     when(identityProvider.adminGetUser(any(AdminGetUserRequest.class)))
         .thenThrow(new RuntimeException());
-    fasade.updateUser("id", new UpdateUserDto());
+    fasade.updateUser("id", new UserUpdate());
   }
 }
