@@ -23,7 +23,7 @@ import org.junit.BeforeClass;
 /**
  * Created by dmitry.rudenko on 10/6/2017.
  */
-public class AbstractApiSecurityTest {
+public abstract class AbstractApiSecurityTest {
   private static ThreadState subjectThreadState;
 
   @BeforeClass

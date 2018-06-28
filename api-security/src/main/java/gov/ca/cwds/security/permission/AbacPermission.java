@@ -4,6 +4,7 @@ import com.google.inject.Key;
 import com.google.inject.name.Names;
 import gov.ca.cwds.security.authorizer.Authorizer;
 import gov.ca.cwds.security.module.SecurityModule;
+import java.util.Collection;
 import org.apache.shiro.authz.Permission;
 
 import java.util.Optional;
@@ -56,8 +57,27 @@ public class AbacPermission implements Permission {
   }
 
   private boolean check() {
-    return securedObject == null
-        || (authorizer != null && authorizer.check(securedObject));
+    if (securedObject == null) {
+      return true;
+    } else if (authorizer == null) {
+      return false;
+    } else if (securedObject instanceof Collection) {
+      filterCollection();
+      return true;
+    } else {
+      return authorizer.check(securedObject);
+    }
+  }
+
+
+  @SuppressWarnings("unchecked")
+  private void filterCollection() {
+    Collection securedCollection = (Collection) securedObject;
+    Collection filteredCollection = authorizer.filter(securedCollection);
+    if (securedCollection.size() != filteredCollection.size()) {
+      securedCollection.clear();
+      securedCollection.addAll(filteredCollection);
+    }
   }
 
   private Optional<Authorizer> findPermissionHandler(String name) {

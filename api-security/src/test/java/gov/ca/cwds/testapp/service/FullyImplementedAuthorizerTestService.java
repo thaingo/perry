@@ -2,27 +2,29 @@ package gov.ca.cwds.testapp.service;
 
 import gov.ca.cwds.testapp.domain.Case;
 import gov.ca.cwds.testapp.domain.CaseDTO;
-
 import java.util.List;
 import java.util.Set;
 
 /**
- * Created by dmitry.rudenko on 10/6/2017.
+ * CWDS Intake Team
  */
-public interface TestService {
-  void testArg(String id);
+public interface FullyImplementedAuthorizerTestService {
 
-  void testCompositeObject(CaseDTO caseDTO);
+  void testAuthorizeById(Long id);
 
-  void testCompositeObjectList(CaseDTO caseDTO);
+  void testAuthorizeByNestedId(CaseDTO caseDTO);
 
-  CaseDTO testReturnInstance();
+  void testAuthorizeByObject(Case caseObject);
 
-  CaseDTO testReturnProtectedInstance() ;
+  void testAuthorizeByNestedObject(CaseDTO caseDTO);
 
-  Case getById(Long id);
+  Long testAuthorizeReturnById();
 
-  void updateCase(Long id, String name);
+  CaseDTO testAuthorizeReturnByNestedId();
+
+  Case testAuthorizeReturnByObject();
+
+  CaseDTO testAuthorizeReturnByNestedObject();
 
   List<Case> testReturnFiltered();
 
