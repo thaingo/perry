@@ -122,7 +122,7 @@ class ClientService {
   @Authorize({"client:read:clientDTO.client"}) 
   // or @Authorize({"client:read:clientDTO.client.id"}) 
   public Collection<ClientDTO> getAll() {
-    //client update logic here
+    // ...
   }
 }
 
