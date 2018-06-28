@@ -3,6 +3,7 @@ package gov.ca.cwds.security.authorizer;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.apache.shiro.authz.AuthorizationException;
@@ -54,16 +55,18 @@ public abstract class BaseAuthorizer<Type, ID> implements Authorizer {
 
   // WARNING: possibly slow default implementation
   protected Collection<ID> filterIds(Collection<ID> ids) {
-    Stream<ID> filteredStream = ids.stream().filter(Objects::nonNull).filter(this::checkId);
-    return ids instanceof Set ? filteredStream.collect(Collectors.toSet())
-        : filteredStream.collect(Collectors.toList());
+    return filterObjects(ids, this::checkId);
   }
 
   // WARNING: possibly slow default implementation
   protected Collection<Type> filterInstances(Collection<Type> instances) {
-    Stream<Type> filteredStream = instances.stream().filter(Objects::nonNull)
-        .filter(this::checkInstance);
-    return instances instanceof Set ? filteredStream.collect(Collectors.toSet())
+    return filterObjects(instances, this::checkInstance);
+  }
+
+  private <E> Collection<E> filterObjects(Collection<E> objects, Predicate<E> predicate) {
+    Stream<E> filteredStream = objects.stream().filter(Objects::nonNull)
+        .filter(predicate);
+    return objects instanceof Set ? filteredStream.collect(Collectors.toSet())
         : filteredStream.collect(Collectors.toList());
   }
 

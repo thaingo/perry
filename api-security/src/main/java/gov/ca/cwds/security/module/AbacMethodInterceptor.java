@@ -80,21 +80,21 @@ public class AbacMethodInterceptor implements MethodInterceptor {
     scriptContext.setAttribute(identifier, arg, ScriptContext.ENGINE_SCOPE);
 
     if (arg instanceof Collection) {
-      applyPermissionToCollection(abacPermission, (Collection) arg, scriptContext, identifier,
-          selector);
+      applyPermissionToCollection(abacPermission, (Collection) arg, scriptContext, identifier);
     } else {
-      applyPermissionToScalar(abacPermission, scriptContext, selector);
+      applyPermissionToScalar(abacPermission, scriptContext);
     }
   }
 
   private void applyPermissionToCollection(AbacPermission abacPermission, Collection<Object> arg,
-      ScriptContext scriptContext, String identifier, String selector)
+      ScriptContext scriptContext, String identifier)
       throws ScriptException {
+    String selector = abacPermission.getSecuredObject().toString();
     selector = "it" + selector.substring(identifier.length());
 
-    @SuppressWarnings("unchecked")
     // key: securedObject like caseDTO.case.id, value: argument element like caseDTO
-        Map<Object, Object> securedObjectsMap = (Map<Object, Object>) scriptEngine
+    @SuppressWarnings("unchecked")
+    Map<Object, Object> securedObjectsMap = (Map<Object, Object>) scriptEngine
         .eval(identifier + ".collectEntries{[" + selector + ", it]}", scriptContext);
 
     Collection<Object> securedObjects = new HashSet<>(securedObjectsMap.keySet());
@@ -109,9 +109,9 @@ public class AbacMethodInterceptor implements MethodInterceptor {
     }
   }
 
-  private void applyPermissionToScalar(AbacPermission abacPermission, ScriptContext scriptContext,
-      String selector)
+  private void applyPermissionToScalar(AbacPermission abacPermission, ScriptContext scriptContext)
       throws ScriptException {
+    String selector = abacPermission.getSecuredObject().toString();
     @SuppressWarnings("unchecked")
     Collection<Object> securedObjects = (Collection<Object>) scriptEngine
         .eval("[" + selector + "].flatten()", scriptContext);
