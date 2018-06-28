@@ -22,11 +22,6 @@
             <stringProp name="Argument.value">${__P(JM_PERRY_PORT,18080)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
-          <elementProp name="idmApiPathRoot" elementType="Argument">
-            <stringProp name="Argument.name">idmApiPathRoot</stringProp>
-            <stringProp name="Argument.value">${__P(JM_IDM_API_PATH_ROOT,perry/idm/)}</stringProp>
-            <stringProp name="Argument.metadata">=</stringProp>
-          </elementProp>
           <elementProp name="usersCsvPath" elementType="Argument">
             <stringProp name="Argument.name">usersCsvPath</stringProp>
             <stringProp name="Argument.value">${__P(JM_USERS_CSV_PATH,c:\temp\users.csv)}</stringProp>
@@ -99,6 +94,11 @@
               <elementProp name="callbackURL" elementType="Argument">
                 <stringProp name="Argument.name">callbackURL</stringProp>
                 <stringProp name="Argument.value">${perryProtocol}://${perryHost}:${perryPort}/perry/demo-sp.html</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
+              <elementProp name="idmApiPathRoot" elementType="Argument">
+                <stringProp name="Argument.name">idmApiPathRoot</stringProp>
+                <stringProp name="Argument.value">perry/idm/</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
             </collectionProp>
