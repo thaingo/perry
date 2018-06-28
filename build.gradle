@@ -9,6 +9,7 @@ buildscript {
     }
     dependencies {
         classpath group: 'javax.interceptor', name: 'javax.interceptor-api', version: '1.2'
+        classpath 'se.transmode.gradle:gradle-docker:1.2'
     }
 }
 
@@ -25,6 +26,7 @@ apply plugin: 'application'
 apply plugin: 'maven-publish'
 apply plugin: 'maven'
 apply plugin: 'jacoco'
+apply plugin: 'docker'
 
 project.ext {
     projectGroup = 'gov.ca.cwds.api'
@@ -37,8 +39,10 @@ project.ext {
     cwdsModelVersion = '0.7.3_600-RC'
 
     // assume that Windows users use the Docker Toolbox
-    buildEnv = System.env.BUILD_ENV ?: (Os.isFamily(Os.FAMILY_WINDOWS) ? 'WIN_DEV' : 'JENKINS')
-    devDockerHost = System.env.DEV_DOCKER_HOST ?: '192.168.99.100'
+//    buildEnv = System.env.BUILD_ENV ?: (Os.isFamily(Os.FAMILY_WINDOWS) ? 'WIN_DEV' : 'JENKINS')
+    buildEnv = 'JENKINS'
+//    devDockerHost = System.env.DEV_DOCKER_HOST ?: '192.168.99.100'
+    devDockerHost = 'localhost'
     devDockerPort = 2376
 
     isRelease = System.getProperty("Release") == "true"
@@ -48,6 +52,7 @@ project.ext {
     projectSnapshotVersion = projectMajorVersion + "-SNAPSHOT"
     projectReleaseVersion = (customVersion == null || customVersion == "" || customVersion.startsWith('$') ? projectMajorVersion + '_' + buildNumber + '-RC' : customVersion )
     projectVersion = (isRelease ? projectReleaseVersion : projectSnapshotVersion )
+    dockerTag = projectVersion
 
     // Publishing configuration
     snapshotMavenRepo = "http://pr.dev.cwds.io/artifactory/repo"

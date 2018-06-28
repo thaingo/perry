@@ -1,0 +1,138 @@
+import org.apache.tools.ant.filters.FixCrLfFilter
+
+def dockerImageName = "cwds/perry-idm-api-test"
+def dockerContextDir = "build/docker-context"
+
+project.ext.dockerEnvVars = project.buildEnv != 'WIN_DEV' ? [:] : [
+        DOCKER_CERT_PATH: System.getProperty("user.home") + '/.docker/machine/machines/default',
+        DOCKER_HOST: "tcp://$project.devDockerHost:$project.devDockerPort",
+        DOCKER_MACHINE_NAME: 'default',
+        DOCKER_TLS_VERIFY: '1',
+        COMPOSE_CONVERT_WINDOWS_PATHS: 'true'
+]
+
+static isPortOpen(host, port) {
+    try {
+        Socket socket = new Socket(host, port)
+        socket.close()
+        return true
+    } catch (IOException e) {
+        return false
+    }
+}
+
+task checkDockerService {
+    enabled = project.buildEnv == 'WIN_DEV'
+    doFirst {
+        if (!isPortOpen(project.devDockerHost, project.devDockerPort)) {
+            throw new GradleException('Docker service is not available. Windows users should run Docker Quickstart Terminal of Docker Toolbox')
+        }
+    }
+}
+
+task dockerTestsCleanUpLatest(type: Exec, dependsOn: checkDockerService) {
+    ignoreExitValue true
+    environment << project.dockerEnvVars
+    doFirst {
+        commandLine 'docker', 'rmi', '--force', "$dockerImageName:latest"
+    }
+}
+
+task dockerTestsCleanUpTagged(type: Exec, dependsOn: checkDockerService) {
+    ignoreExitValue true
+    environment << project.dockerEnvVars
+    doFirst {
+        commandLine 'docker', 'rmi', '--force', "$dockerImageName:$dockerTag"
+    }
+}
+
+task dockerTestsCleanUp(dependsOn: [dockerTestsCleanUpLatest, dockerTestsCleanUpTagged]) {}
+
+//task testsJar(type: ShadowJar, dependsOn: [project.parent.compileJava, project.parent.compileTestJava]) {
+//    doFirst {
+//        println "${project.parent.projectDir}/build/classes/java/main"
+//    }
+//
+//    zip64 true
+//    baseName 'cans-api'
+//    version ''
+//    classifier 'test'
+//
+//    from "${project.parent.projectDir}/build/classes/java/main"
+//    from "${project.parent.projectDir}/build/classes/java/test"
+//    // the following will expand all dependencies from jar files
+//    from project.parent.configurations.compile
+//    from project.parent.configurations.testCompile
+//
+//    destinationDir file(dockerContextDir)
+//
+//    // exclusions to avoid Exception in thread "main" java.lang.SecurityException: Invalid signature file digest for Manifest main attributes
+//    exclude 'META-INF/*.RSA', 'META-INF/*.SF', 'META-INF/*.DSA'
+//
+//    mergeServiceFiles()
+//}
+
+//task dockerTestsCopyResources(type: Copy) {
+//    from '../src/main/resources'
+//    from '../src/test/resources'
+//    into "$dockerContextDir/resources"
+//}
+
+//task dockerTestsCopyConfig(type: Copy) {
+//    from '../config'
+//    into "$dockerContextDir/config"
+//}
+
+task dockerTestsCopyJMeterFiles(type: Copy) {
+    from '../jmeter/idm'
+    into "$dockerContextDir/jmeter"
+}
+
+task dockerTestsCopyScripts(type: Copy) {
+    from projectDir
+    into dockerContextDir
+    include 'entrypoint.sh'
+    include 'Dockerfile'
+    filter(FixCrLfFilter.class, eol: FixCrLfFilter.CrLf.newInstance("lf"))
+}
+
+task dockerTestsCreateImage(type: Exec, dependsOn: [checkDockerService, dockerTestsCleanUp, dockerTestsCopyJMeterFiles, dockerTestsCopyScripts]) {
+    environment << project.dockerEnvVars
+    doFirst {
+        commandLine 'docker', 'build', '-t', dockerImageName, '-f', "$dockerContextDir/Dockerfile", dockerContextDir
+    }
+    dockerTestsCleanUp.mustRunAfter(checkDockerService)
+}
+
+task dockerTestsTagImage(type: Exec, dependsOn: checkDockerService) {
+    environment << project.dockerEnvVars
+    doFirst {
+        commandLine 'docker', 'tag', dockerImageName, "$dockerImageName:$dockerTag"
+    }
+}
+
+task dockerTestsPushTaggedVersion(type: Exec, dependsOn: [checkDockerService, dockerTestsTagImage]) {
+    environment << project.dockerEnvVars
+    doFirst {
+        commandLine 'docker', 'push', "$dockerImageName:$dockerTag"
+    }
+    dockerTestsTagImage.mustRunAfter(checkDockerService)
+}
+
+task dockerTestsPushLatestVersion(type: Exec, dependsOn: checkDockerService) {
+    environment << project.dockerEnvVars
+    doFirst {
+        commandLine 'docker', 'push', "$dockerImageName:latest"
+    }
+}
+
+task dockerTestsPublish(dependsOn: [dockerTestsCreateImage, dockerTestsPushTaggedVersion, dockerTestsPushLatestVersion]) {
+    doLast {
+        println "$dockerImageName:$projectVersion docker image is published"
+    }
+    dockerTestsPushTaggedVersion.mustRunAfter(dockerTestsCreateImage)
+    dockerTestsPushLatestVersion.mustRunAfter(dockerTestsCreateImage)
+}
+group 'gov.ca.cwds.api'
+version '3.0.3-SNAPSHOT'
+
