@@ -53,12 +53,10 @@ public abstract class BaseAuthorizer<Type, ID> implements Authorizer {
         "Authorizer for type: " + o.getClass() + " is not implemented");
   }
 
-  // WARNING: possibly slow default implementation
   protected Collection<ID> filterIds(Collection<ID> ids) {
     return filterObjects(ids, this::checkId);
   }
 
-  // WARNING: possibly slow default implementation
   protected Collection<Type> filterInstances(Collection<Type> instances) {
     return filterObjects(instances, this::checkInstance);
   }

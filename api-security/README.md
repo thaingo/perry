@@ -58,11 +58,17 @@ class ClientService {
 }
 ```
 If current user are not allowed to read returned client object - then authorization exception will be thrown.
-Also Authorization library are able to filter resulting collections:
+
+Also Authorization library is able to filter collections in method arguments and resulting collections:
 
 ```java
 //Service which needs to be secured
 class ClientService {
+
+  public void processCases(
+      @Authorize("case:read:caseList") List<Case> caseList) {
+    // caseList will contain only Cases that current user is authorized to read
+  }
   
   @Authorize("client:read:result")
   //or @Authorize("client:write:client")
@@ -72,9 +78,9 @@ class ClientService {
 }
 ```
 
-Resulting collection will contain only client objects which current user authorized to "read".
+Collection in argument and resulting collection will contain only client objects which current user authorized to "read".
 Next example will demonstrate how to use security annotation when secured entity inside of DTO object. In general we can
-simply select inner objects using "." operator.
+simply select inner objects using "." operator:
 
 
 ```java
@@ -97,17 +103,24 @@ class ClientService {
   public void update(@Authorize({"client:write:clientDTO.client", "client:write:clientDTO.clients"}) ClientDTO clientDTO) {
     //client update logic here
   }
+  
+  public void processCaseDTOs(
+      @Authorize("case:read:caseDTO.caseObject.id") List<CaseDTO> caseDTOList) {
+    // caseDTOList will contain only DTO with Cases that current user is authorized to read
+  }
 }
 
 ```
 
-In above example @Authorize annotation has 2 values, first will check is user allowed to "write" "client" object which is 
+In above example @Authorize annotation of the method update has 2 values, first will check if is user allowed to "write" "client" object which is 
 inside clientDTO, and next value will check is user allowed to write ALL "client" objects in "clients" collection.
-Same will work for return values:
+
+Also dot operation is supported for return values:
 ```java
 //Service which needs to be secured
 class ClientService {
-  @Authorize({"client:read:clientDTO.client", "client:read:clientDTO.clients"}) 
+  @Authorize({"client:read:clientDTO.client"}) 
+  // or @Authorize({"client:read:clientDTO.client.id"}) 
   public Collection<ClientDTO> getAll() {
     //client update logic here
   }
@@ -133,9 +146,6 @@ class SomeDTO {
   private Collection<ClientDTO> clientDTOs;
   //...
 }
-
-
-
 
 //Service which needs to be secured
 class ClientService {
@@ -243,7 +253,6 @@ class ClientService {
     //client update logic here
   }
 }
-
 ```
 
 In this case you have to implement both stringToId and checkId methods:
@@ -259,6 +268,41 @@ class ClientWriteAuthorizer extends BaseAuthorizer<Client, Long> {
   
   public Long stringToId(String id) {
     return Long.valueOf(id);
+  }
+}
+```
+
+There could be cases when filtering collections in arguments or return values is slow,
+for example, when authorizer executes DB queries per each checkId or checkInstance method.
+
+In such case it is better to implement filterIds or filterInstances method or both:
+```java
+class CaseAuthorizer extends BaseAuthorizer<Case, Long> {
+  
+  @Override
+  protected Collection<Long> filterIds(Collection<Long> ids) {
+    // pre-load data that will be needed for authorization of every id in the collection
+    Collection<Long> filteredIds = ids instanceof Set ? new HashSet() : new ArrayList();
+    for (Long id : ids) {
+      // evaluate authorization for an id using pre-loaded data
+      if (isAuthorized) {
+        filteredIds.add(id);
+      }
+    }
+    return filteredIds;
+  }
+
+  @Override
+  protected Collection<Case> filterInstances(Collection<Case> instances) {
+    // pre-load data that will be needed for authorization of every case in the collection
+    Collection<Long> filteredCases = instances instanceof Set ? new HashSet() : new ArrayList();
+    for (Case caseObject : instances) {
+      // evaluate authorization for a caseObject using pre-loaded data
+      if (isAuthorized) {
+        filteredCases.add(caseObject);
+      }
+    }
+    return filteredCases;
   }
 }
 ```
