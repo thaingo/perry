@@ -298,10 +298,8 @@
 vars.put(&quot;tokenQueryParam&quot;, &quot;?token=&quot; + token);
 
 System.out.println(&quot;-------&quot;);
-System.out.println(&quot;vars.target&quot; + vars.get(&quot;target&quot;));
-System.out.println(&quot;props.token&quot; + props.get(&quot;token&quot;));
-System.out.println(&quot;vars.token&quot; + vars.get(&quot;token&quot;));
-System.out.println(&quot;vars.tokenQueryParam&quot; + vars.get(&quot;tokenQueryParam&quot;));</stringProp>
+System.out.println(&quot;vars.token=&quot; + vars.get(&quot;token&quot;));
+System.out.println(&quot;vars.tokenQueryParam=&quot; + vars.get(&quot;tokenQueryParam&quot;));</stringProp>
               </BeanShellPostProcessor>
               <hashTree/>
             </hashTree>
