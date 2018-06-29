@@ -11,5 +11,9 @@
   "racfid": "YOLOD",
   "permissions": [
     "Hotline-rollout"
+  ],
+  "roles": [
+    "CWS-worker",
+    "CWS-admin"
   ]
 }

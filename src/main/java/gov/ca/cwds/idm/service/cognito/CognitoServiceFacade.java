@@ -51,6 +51,7 @@ import static gov.ca.cwds.idm.service.cognito.CognitoUtils.PHONE_NUMBER_ATTR_NAM
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_2;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.createPermissionsAttribute;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.createRolesAttribute;
 
 @Service(value = "cognitoServiceFacade")
 @Profile("idm")
@@ -160,7 +161,8 @@ public class CognitoServiceFacade {
             .addAttribute(PHONE_NUMBER_ATTR_NAME, user.getPhoneNumber())
             .addAttribute(RACFID_ATTR_NAME, user.getRacfid())
             .addAttribute(RACFID_ATTR_NAME_2, user.getRacfid())
-            .addAttribute(createPermissionsAttribute(user.getPermissions()));
+            .addAttribute(createPermissionsAttribute(user.getPermissions()))
+            .addAttribute(createRolesAttribute(user.getRoles()));
     return attributesBuilder.build();
   }
 

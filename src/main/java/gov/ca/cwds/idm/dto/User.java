@@ -1,19 +1,19 @@
 package gov.ca.cwds.idm.dto;
 
-import static gov.ca.cwds.rest.api.domain.DomainObject.DATE_FORMAT;
-import static gov.ca.cwds.rest.api.domain.DomainObject.TIME_FORMAT;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import org.hibernate.validator.constraints.NotBlank;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import org.hibernate.validator.constraints.NotBlank;
+
+import static gov.ca.cwds.rest.api.domain.DomainObject.DATE_FORMAT;
+import static gov.ca.cwds.rest.api.domain.DomainObject.TIME_FORMAT;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
@@ -24,17 +24,13 @@ public class User implements Serializable {
 
   private String id;
 
-  @NotBlank
-  private String email;
+  @NotBlank private String email;
 
-  @NotBlank
-  private String firstName;
+  @NotBlank private String firstName;
 
-  @NotBlank
-  private String lastName;
+  @NotBlank private String lastName;
 
-  @NotBlank
-  private String countyName;
+  @NotBlank private String countyName;
 
   private String racfid;
 
@@ -64,6 +60,8 @@ public class User implements Serializable {
   private String status;
 
   private Set<String> permissions = new LinkedHashSet<>();
+
+  private Set<String> roles = new LinkedHashSet<>();
 
   public String getId() {
     return id;
@@ -191,6 +189,14 @@ public class User implements Serializable {
 
   public void setPermissions(Set<String> permissions) {
     this.permissions = permissions;
+  }
+
+  public Set<String> getRoles() {
+    return roles;
+  }
+
+  public void setRoles(Set<String> roles) {
+    this.roles = roles;
   }
 
   public String getPhoneExtensionNumber() {
