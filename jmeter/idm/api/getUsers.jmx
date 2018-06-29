@@ -315,7 +315,7 @@ System.out.println(&quot;vars.tokenQueryParam=&quot; + vars.get(&quot;tokenQuery
               </elementProp>
               <stringProp name="HTTPSampler.domain">${perryHost}</stringProp>
               <stringProp name="HTTPSampler.port">${perryPort}</stringProp>
-              <stringProp name="HTTPSampler.protocol"></stringProp>
+              <stringProp name="HTTPSampler.protocol">${perryProtocol}</stringProp>
               <stringProp name="HTTPSampler.contentEncoding"></stringProp>
               <stringProp name="HTTPSampler.path">${idmApiPathRoot}users${tokenQueryParam}</stringProp>
               <stringProp name="HTTPSampler.method">GET</stringProp>
@@ -346,7 +346,7 @@ System.out.println(&quot;vars.tokenQueryParam=&quot; + vars.get(&quot;tokenQuery
             </elementProp>
             <stringProp name="HTTPSampler.domain">${perryHost}</stringProp>
             <stringProp name="HTTPSampler.port">${perryPort}</stringProp>
-            <stringProp name="HTTPSampler.protocol"></stringProp>
+            <stringProp name="HTTPSampler.protocol">${perryProtocol}</stringProp>
             <stringProp name="HTTPSampler.contentEncoding"></stringProp>
             <stringProp name="HTTPSampler.path">/perry/authn/logout</stringProp>
             <stringProp name="HTTPSampler.method">POST</stringProp>
@@ -373,7 +373,7 @@ System.out.println(&quot;vars.tokenQueryParam=&quot; + vars.get(&quot;tokenQuery
         </hashTree>
       </hashTree>
       <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
-        <boolProp name="ResultCollector.error_logging">true</boolProp>
+        <boolProp name="ResultCollector.error_logging">false</boolProp>
         <objProp>
           <name>saveConfig</name>
           <value class="SampleSaveConfiguration">
