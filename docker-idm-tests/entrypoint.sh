@@ -24,11 +24,11 @@ JAVA_OPT="-Xms128m -Xmx512m"
     echo "JM_PERRY_PORT variable is required"
     exit 1
   fi
-  if ([ -z "$JM_USERS_CSV_PATH" ]); then
-    echo "$JM_USERS_CSV_PATH variable is required"
-    exit 1
-  fi
 
+  if ([ -z "$JM_USERS_CSV_FILENAME" ]); then
+    JM_USERS_CSV_FILENAME="users.csv"
+    echo "Default users file name: JM_USERS_CSV_FILENAME = $JM_USERS_CSV_FILENAME"
+  fi
   if ([ -z "$JM_USERS_COUNT" ]); then
     JM_USERS_COUNT="1"
     echo "Default value is set: JM_USERS_COUNT = $JM_USERS_COUNT"
@@ -66,12 +66,14 @@ JAVA_OPT="-Xms128m -Xmx512m"
       -l $TEST_RESULTS_DIR/$TEST_NAME.jtl  \
       -j $TEST_RESULTS_DIR/$TEST_NAME.log  \
       -e -o $TEST_RESULTS_DIR/$TEST_NAME-report \
+      -JTEST_NAME=$TEST_NAME \
       -JJM_PERRY_PROTOCOL=$JM_PERRY_PROTOCOL \
       -JJM_PERRY_HOST=$JM_PERRY_HOST \
       -JJM_PERRY_PORT=$JM_PERRY_PORT \
-      -JJM_USERS_CSV_PATH=$JM_USERS_CSV_PATH \
       -JJM_USERS_COUNT=$JM_USERS_COUNT \
       -JJM_REQUESTS_PER_USER=$JM_REQUESTS_PER_USER \
-      -JJM_RAMP_UP_PERIOD_SEC=$JM_RAMP_UP_PERIOD_SEC
+      -JJM_RAMP_UP_PERIOD_SEC=$JM_RAMP_UP_PERIOD_SEC \
+      -JJM_DATA_DIR_PATH=$JM_DATA_DIR_PATH \
+      -JJM_USERS_CSV_FILENAME=$JM_USERS_CSV_FILENAME
   done
 

@@ -7,6 +7,11 @@
       <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
       <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
         <collectionProp name="Arguments.arguments">
+          <elementProp name="testName" elementType="Argument">
+            <stringProp name="Argument.name">testName</stringProp>
+            <stringProp name="Argument.value">${__P(TEST_NAME,getUsers)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
           <elementProp name="perryProtocol" elementType="Argument">
             <stringProp name="Argument.name">perryProtocol</stringProp>
             <stringProp name="Argument.value">${__P(JM_PERRY_PROTOCOL,http)}</stringProp>
@@ -22,11 +27,6 @@
             <stringProp name="Argument.value">${__P(JM_PERRY_PORT,18080)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
-          <elementProp name="usersCsvPath" elementType="Argument">
-            <stringProp name="Argument.name">usersCsvPath</stringProp>
-            <stringProp name="Argument.value">${__P(JM_USERS_CSV_PATH,/data/users.csv)}</stringProp>
-            <stringProp name="Argument.metadata">=</stringProp>
-          </elementProp>
           <elementProp name="usersCount" elementType="Argument">
             <stringProp name="Argument.name">usersCount</stringProp>
             <stringProp name="Argument.value">${__P(JM_USERS_COUNT,1)}</stringProp>
@@ -40,6 +40,11 @@
           <elementProp name="rampUpPeriodSec" elementType="Argument">
             <stringProp name="Argument.name">rampUpPeriodSec</stringProp>
             <stringProp name="Argument.value">${__P(JM_RAMP_UP_PERIOD_SEC,1)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="usersCsvFilename" elementType="Argument">
+            <stringProp name="Argument.name">usersCsvFilename</stringProp>
+            <stringProp name="Argument.value">${__P(JM_USERS_CSV_FILENAME,users.csv)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
         </collectionProp>
@@ -77,18 +82,6 @@
             <collectionProp name="HeaderManager.headers"/>
           </HeaderManager>
           <hashTree/>
-          <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="Users CSV Data Set" enabled="true">
-            <stringProp name="delimiter">|</stringProp>
-            <stringProp name="fileEncoding">UTF-8</stringProp>
-            <stringProp name="filename">${usersCsvPath}</stringProp>
-            <boolProp name="ignoreFirstLine">false</boolProp>
-            <boolProp name="quotedData">false</boolProp>
-            <boolProp name="recycle">true</boolProp>
-            <stringProp name="shareMode">shareMode.group</stringProp>
-            <boolProp name="stopThread">false</boolProp>
-            <stringProp name="variableNames">username,password</stringProp>
-          </CSVDataSet>
-          <hashTree/>
           <Arguments guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
             <collectionProp name="Arguments.arguments">
               <elementProp name="callbackURL" elementType="Argument">
@@ -103,6 +96,18 @@
               </elementProp>
             </collectionProp>
           </Arguments>
+          <hashTree/>
+          <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="Users CSV Data Set" enabled="true">
+            <stringProp name="delimiter">|</stringProp>
+            <stringProp name="fileEncoding">UTF-8</stringProp>
+            <stringProp name="filename">/data/${usersCsvFilename}</stringProp>
+            <boolProp name="ignoreFirstLine">false</boolProp>
+            <boolProp name="quotedData">false</boolProp>
+            <boolProp name="recycle">true</boolProp>
+            <stringProp name="shareMode">shareMode.group</stringProp>
+            <boolProp name="stopThread">false</boolProp>
+            <stringProp name="variableNames">username,password</stringProp>
+          </CSVDataSet>
           <hashTree/>
           <TransactionController guiclass="TransactionControllerGui" testclass="TransactionController" testname="Login" enabled="true">
             <boolProp name="TransactionController.includeTimers">false</boolProp>
@@ -409,7 +414,7 @@ System.out.println(&quot;vars.tokenQueryParam=&quot; + vars.get(&quot;tokenQuery
             <connectTime>true</connectTime>
           </value>
         </objProp>
-        <stringProp name="filename">/opt/idm-api-perf-test/api/results/getUsers/getUsers-resultTree.xml</stringProp>
+        <stringProp name="filename">/opt/idm-api-perf-test/api/results/${testName}/${testName}-resultTree.xml</stringProp>
       </ResultCollector>
       <hashTree/>
       <ResultCollector guiclass="StatVisualizer" testclass="ResultCollector" testname="Aggregate Report" enabled="true">
