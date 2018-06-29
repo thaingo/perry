@@ -24,7 +24,7 @@
           </elementProp>
           <elementProp name="usersCsvPath" elementType="Argument">
             <stringProp name="Argument.name">usersCsvPath</stringProp>
-            <stringProp name="Argument.value">${__P(JM_USERS_CSV_PATH,c:/work/docker/users.csv)}</stringProp>
+            <stringProp name="Argument.value">${__P(JM_USERS_CSV_PATH,/data/users.csv)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="usersCount" elementType="Argument">
@@ -124,7 +124,7 @@
               </elementProp>
               <stringProp name="HTTPSampler.domain">${perryHost}</stringProp>
               <stringProp name="HTTPSampler.port">${perryPort}</stringProp>
-              <stringProp name="HTTPSampler.protocol"></stringProp>
+              <stringProp name="HTTPSampler.protocol">${perryProtocol}</stringProp>
               <stringProp name="HTTPSampler.contentEncoding"></stringProp>
               <stringProp name="HTTPSampler.path">/perry/authn/login</stringProp>
               <stringProp name="HTTPSampler.method">GET</stringProp>
@@ -268,7 +268,7 @@
               </elementProp>
               <stringProp name="HTTPSampler.domain">${perryHost}</stringProp>
               <stringProp name="HTTPSampler.port">${perryPort}</stringProp>
-              <stringProp name="HTTPSampler.protocol"></stringProp>
+              <stringProp name="HTTPSampler.protocol">${perryProtocol}</stringProp>
               <stringProp name="HTTPSampler.contentEncoding"></stringProp>
               <stringProp name="HTTPSampler.path">/perry/authn/token</stringProp>
               <stringProp name="HTTPSampler.method">GET</stringProp>
@@ -373,7 +373,7 @@ System.out.println(&quot;vars.tokenQueryParam=&quot; + vars.get(&quot;tokenQuery
         </hashTree>
       </hashTree>
       <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
-        <boolProp name="ResultCollector.error_logging">false</boolProp>
+        <boolProp name="ResultCollector.error_logging">true</boolProp>
         <objProp>
           <name>saveConfig</name>
           <value class="SampleSaveConfiguration">
@@ -386,26 +386,30 @@ System.out.println(&quot;vars.tokenQueryParam=&quot; + vars.get(&quot;tokenQuery
             <message>true</message>
             <threadName>true</threadName>
             <dataType>true</dataType>
-            <encoding>false</encoding>
+            <encoding>true</encoding>
             <assertions>true</assertions>
             <subresults>true</subresults>
-            <responseData>false</responseData>
-            <samplerData>false</samplerData>
-            <xml>false</xml>
+            <responseData>true</responseData>
+            <samplerData>true</samplerData>
+            <xml>true</xml>
             <fieldNames>true</fieldNames>
-            <responseHeaders>false</responseHeaders>
-            <requestHeaders>false</requestHeaders>
+            <responseHeaders>true</responseHeaders>
+            <requestHeaders>true</requestHeaders>
             <responseDataOnError>false</responseDataOnError>
             <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
             <assertionsResultsToSave>0</assertionsResultsToSave>
             <bytes>true</bytes>
             <sentBytes>true</sentBytes>
+            <url>true</url>
+            <fileName>true</fileName>
+            <hostname>true</hostname>
             <threadCounts>true</threadCounts>
+            <sampleCount>true</sampleCount>
             <idleTime>true</idleTime>
             <connectTime>true</connectTime>
           </value>
         </objProp>
-        <stringProp name="filename"></stringProp>
+        <stringProp name="filename">/opt/idm-api-perf-test/api/results/getUsers/getUsers-resultTree.xml</stringProp>
       </ResultCollector>
       <hashTree/>
       <ResultCollector guiclass="StatVisualizer" testclass="ResultCollector" testname="Aggregate Report" enabled="true">
