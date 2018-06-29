@@ -24,7 +24,7 @@
           </elementProp>
           <elementProp name="usersCsvPath" elementType="Argument">
             <stringProp name="Argument.name">usersCsvPath</stringProp>
-            <stringProp name="Argument.value">${__P(JM_USERS_CSV_PATH,c:\temp\users.csv)}</stringProp>
+            <stringProp name="Argument.value">${__P(JM_USERS_CSV_PATH,c:/work/docker/users.csv)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="usersCount" elementType="Argument">
@@ -297,7 +297,7 @@
                 <stringProp name="script">String token = vars.get(&quot;token&quot;);
 vars.put(&quot;tokenQueryParam&quot;, &quot;?token=&quot; + token);
 
-System.out.println(&quot;-------&quot;));
+System.out.println(&quot;-------&quot;);
 System.out.println(&quot;vars.target&quot; + vars.get(&quot;target&quot;));
 System.out.println(&quot;props.token&quot; + props.get(&quot;token&quot;));
 System.out.println(&quot;vars.token&quot; + vars.get(&quot;token&quot;));
