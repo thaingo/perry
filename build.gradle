@@ -39,9 +39,7 @@ project.ext {
     cwdsModelVersion = '0.7.3_600-RC'
 
     // assume that Windows users use the Docker Toolbox
-//    buildEnv = System.env.BUILD_ENV ?: (Os.isFamily(Os.FAMILY_WINDOWS) ? 'WIN_DEV' : 'JENKINS')
     buildEnv = 'JENKINS'
-//    devDockerHost = System.env.DEV_DOCKER_HOST ?: '192.168.99.100'
     devDockerHost = 'localhost'
     devDockerPort = 2376
 
