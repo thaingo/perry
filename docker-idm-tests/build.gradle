@@ -1,6 +1,6 @@
 import org.apache.tools.ant.filters.FixCrLfFilter
 
-def dockerImageName = "cwds/perry-idm-api-test"
+def dockerImageName = "cwds/perry-idm-test"
 def dockerContextDir = "build/docker-context"
 
 project.ext.dockerEnvVars = project.buildEnv != 'WIN_DEV' ? [:] : [

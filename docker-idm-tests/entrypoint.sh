@@ -25,6 +25,14 @@ JAVA_OPT="-Xms128m -Xmx512m"
     exit 1
   fi
 
+  if ([ -z "$JM_DATA_DIR" ]); then
+    JM_DATA_DIR="/opt/idm-perf-tests/data"
+    echo "Default users file name: JM_DATA_DIR = $JM_DATA_DIR"
+  fi
+  if ([ -z "$JM_RESULTS_DIR" ]); then
+    JM_RESULTS_DIR="/opt/idm-perf-tests/results"
+    echo "Default users file name: JM_RESULTS_DIR = $JM_RESULTS_DIR"
+  fi
   if ([ -z "$JM_USERS_CSV_FILENAME" ]); then
     JM_USERS_CSV_FILENAME="users.csv"
     echo "Default users file name: JM_USERS_CSV_FILENAME = $JM_USERS_CSV_FILENAME"
@@ -47,20 +55,19 @@ JAVA_OPT="-Xms128m -Xmx512m"
   echo "JM_PERRY_PROTOCOL = '$JM_PERRY_PROTOCOL'"
   echo "JM_PERRY_HOST = '$JM_PERRY_HOST'"
   echo "JM_PERRY_PORT = '$JM_PERRY_PORT'"
-  echo "JM_USERS_CSV_PATH = '$JM_USERS_CSV_PATH'"
+  echo "JM_USERS_CSV_FILENAME = '$JM_USERS_CSV_FILENAME'"
   echo "JM_USERS_COUNT = '$JM_USERS_COUNT'"
   echo "JM_REQUESTS_PER_USER = '$JM_REQUESTS_PER_USER'"
   echo "JM_RAMP_UP_PERIOD_SEC = '$JM_RAMP_UP_PERIOD_SEC'"
 
   JMX_DIR="$JMETER_TESTS/$JM_TARGET"
-  RESULTS_DIR="$JMX_DIR/results"
 
   for TEST_FILEPATH in "$JMX_DIR"/*.jmx; do
 
     TEST_NAME=$(basename "$TEST_FILEPATH" .jmx)
 
-    TEST_RESULTS_DIR="$RESULTS_DIR/$TEST_NAME"
-    mkdir "$TEST_RESULTS_DIR"
+    TEST_RESULTS_DIR="$JMETER_TESTS/results/$JM_TARGET/$TEST_NAME"
+    mkdir -pv "$TEST_RESULTS_DIR"
 
     $JMETER_HOME/bin/jmeter -n -t $JMX_DIR/$TEST_NAME.jmx  \
       -l $TEST_RESULTS_DIR/$TEST_NAME.jtl  \
@@ -73,7 +80,8 @@ JAVA_OPT="-Xms128m -Xmx512m"
       -JJM_USERS_COUNT=$JM_USERS_COUNT \
       -JJM_REQUESTS_PER_USER=$JM_REQUESTS_PER_USER \
       -JJM_RAMP_UP_PERIOD_SEC=$JM_RAMP_UP_PERIOD_SEC \
-      -JJM_DATA_DIR_PATH=$JM_DATA_DIR_PATH \
-      -JJM_USERS_CSV_FILENAME=$JM_USERS_CSV_FILENAME
+      -JJM_DATA_DIR=$JM_DATA_DIR \
+      -JJM_USERS_CSV_FILENAME=$JM_USERS_CSV_FILENAME \
+      -JJM_RESULTS_DIR=$JM_RESULTS_DIR
   done
 

@@ -7,11 +7,6 @@
       <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
       <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
         <collectionProp name="Arguments.arguments">
-          <elementProp name="testName" elementType="Argument">
-            <stringProp name="Argument.name">testName</stringProp>
-            <stringProp name="Argument.value">${__P(TEST_NAME,getUsers)}</stringProp>
-            <stringProp name="Argument.metadata">=</stringProp>
-          </elementProp>
           <elementProp name="perryProtocol" elementType="Argument">
             <stringProp name="Argument.name">perryProtocol</stringProp>
             <stringProp name="Argument.value">${__P(JM_PERRY_PROTOCOL,http)}</stringProp>
@@ -42,9 +37,24 @@
             <stringProp name="Argument.value">${__P(JM_RAMP_UP_PERIOD_SEC,1)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
+          <elementProp name="dataDir" elementType="Argument">
+            <stringProp name="Argument.name">dataDir</stringProp>
+            <stringProp name="Argument.value">${__P(JM_DATA_DIR,c:/work/docker/data)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
           <elementProp name="usersCsvFilename" elementType="Argument">
             <stringProp name="Argument.name">usersCsvFilename</stringProp>
             <stringProp name="Argument.value">${__P(JM_USERS_CSV_FILENAME,users.csv)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="resultsDir" elementType="Argument">
+            <stringProp name="Argument.name">resultsDir</stringProp>
+            <stringProp name="Argument.value">${__P(JM_RESULTS_DIR,c:/work/docker/results)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="target" elementType="Argument">
+            <stringProp name="Argument.name">target</stringProp>
+            <stringProp name="Argument.value">${__P(JM_TARGET,api)}</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
         </collectionProp>
@@ -94,13 +104,18 @@
                 <stringProp name="Argument.value">perry/idm/</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
               </elementProp>
+              <elementProp name="testName" elementType="Argument">
+                <stringProp name="Argument.name">testName</stringProp>
+                <stringProp name="Argument.value">${__groovy(&quot;${__TestPlanName}&quot;.minus(&quot;.jmx&quot;))}</stringProp>
+                <stringProp name="Argument.metadata">=</stringProp>
+              </elementProp>
             </collectionProp>
           </Arguments>
           <hashTree/>
           <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="Users CSV Data Set" enabled="true">
             <stringProp name="delimiter">|</stringProp>
             <stringProp name="fileEncoding">UTF-8</stringProp>
-            <stringProp name="filename">/data/${usersCsvFilename}</stringProp>
+            <stringProp name="filename">${dataDir}/${usersCsvFilename}</stringProp>
             <boolProp name="ignoreFirstLine">false</boolProp>
             <boolProp name="quotedData">false</boolProp>
             <boolProp name="recycle">true</boolProp>
@@ -414,7 +429,7 @@ System.out.println(&quot;vars.tokenQueryParam=&quot; + vars.get(&quot;tokenQuery
             <connectTime>true</connectTime>
           </value>
         </objProp>
-        <stringProp name="filename">/opt/idm-api-perf-test/api/results/${testName}/${testName}-resultTree.xml</stringProp>
+        <stringProp name="filename">${resultsDir}/${target}/${testName}/${testName}-resultTree.xml</stringProp>
       </ResultCollector>
       <hashTree/>
       <ResultCollector guiclass="StatVisualizer" testclass="ResultCollector" testname="Aggregate Report" enabled="true">

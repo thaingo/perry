@@ -1,63 +1,43 @@
-# CWDS CANS API TESTS
+# CWDS PERRY IDM PERFORMANCE TESTS
 
-This image can be used to run a set of tests against CANS API or CANS Rails layer 
+This image can be used to run a set of performance tests against PERRY IDM API or PERRY IDM Rails layer 
 
 # Configuration
 ## Application Configuration Parameters
-### Smoke and Functional tests
-| Parameter | Description  | Required  | Possible values | Default value | Example |
-| :------------ | :------------ | :------------ | :------------ | :------------ | :------------ |
-| **TEST_TYPE** | The type of test to be started in the container | - | smoke; functional; performance | smoke | functional |
-| **CANS_API_URL**  | URL of the cans-api instance to test | + |   |   | http://cans.dev.cwds.io:8089/ |
 
 ### Performance tests
 | Parameter | Description  | Required  | Possible values | Default value | Example |
 | :------------ | :------------ | :------------ | :------------ | :------------ | :------------ |
-| **TEST_TYPE** | The type of test to be started in the container | + | smoke; functional; performance | smoke | performance |
-| **JM_TARGET**  | The target application to be tested (Api java app or Rails app) | - | api; rails | api | rails |
-| **JM_PERRY_MODE** | The mode the Perry runs on the environment the tests will be run against | - | DEV; PROD | PROD | PROD |
-| **JM_USERS_CSV_PATH** | File path to the csv file containing users | - | any file path | /opt/cans-api-perf-test/assets/users.csv | /path/to/file.csv |
-| **JM_USERS_COUNT** | How many simultaneous users will be imitated by tests | - | Any number like 10 or 2000. A bigger amount of users may lead to issues with running a test | 1 | 100 |
-| **JM_UPDATE_REQUESTS_PER_USER** | How many request will make each user | - | Any number like 10 or 2000 | 1 | 100 |
 | **JM_PERRY_PROTOCOL** | The protocol for the Perry connection | + | http; https |  | https |
 | **JM_PERRY_HOST** | The host for the Perry connection | + | any host |  | web.dev.cwds.io |
 | **JM_PERRY_PORT** | The port for the Perry connection | + | Any port like 80 (for http) or 443 (for https) |  | 443 |
-| **JM_CANS_API_PROTOCOL** | The protocol for application to be tested | + | http; https |  | https |
-| **JM_CANS_API_HOST** | The host for application to be tested | + | any host |  | cansapi.dev.cwds.io |
-| **JM_CANS_API_PORT** | The port for application to be tested | + | Any port like 80 (for http) or 443 (for https) |  | 443 |
+| **JM_TARGET**  | The target application to be tested (Api java app or Rails app) | - | api; rails | api | rails |
+| **JM_DATA_DIR** | Path to the directory containing input data (for example users csv file). | - | any directory | /opt/idm-tests/perf/data | c:/work/test_data |
+| **JM_USERS_CSV_FILENAME** | Name of the csv file containing users names and passwords(in {name}\|{password} format). Should be put in JM_DATA_DIR directory| - | any file name | users.csv | test_users.csv |
+| **JM_RESULTS_DIR** | Path to the directory containing test results| - | any directory | /opt/idm-tests/perf/results | c:/work/test_results |
+| **JM_USERS_COUNT** | How many simultaneous users will be imitated by tests | - | Any positive integer. If every thread has to be executed with different user then this number should be less then the number of different users in users csv file| 1 | 100 |
+| **JM_REQUESTS_PER_USER** | How many requests will make each user | - | Any positive integer. | 1 | 100 |
+| **JM_RAMP_UP_PERIOD_SEC** | Time (in seconds) in which all threads are started| - | Any positive integer. | 1 | 2 |
+
+JM_DATA_DIR and JM_RESULTS_DIR should not be set when tests are started from Docker container. 
+Instead some host directories have to be mapped to the  Docker volumes with names equal to 
+default JM_DATA_DIR and JM_RESULTS_DIR values (/opt/idm-tests/perf/data and /opt/idm-tests/perf/results)
 
 
 # Example commands to run:
-### Run smoke test example
-```
-docker run -e "CANS_API_URL=http://cans.dev.cwds.io:8089/" -e "TEST_TYPE=smoke" -it cwds/cans-api-test
-```
-
-### Run functional test example
-```
-docker run -e "CANS_API_URL=http://cans.dev.cwds.io:8080/" \
-	-e "TEST_TYPE=functional" \
-	-e "DB_NS_JDBC_URL=jdbc:postgresql://postgres.dev.cwds.io:5432/postgres_data" \
-	-e "DB_NS_SCHEMA=CANS" \
-	-e "DB_NS_USER=postgres_data" \
-	-e "DB_MS_PASSWORD=postgres_data" \
-	-it cwds/cans-api-test
-```
-
-### Run performance test example
+### From Docker container
 ```
 docker run -e "JM_TARGET=api" \
-  -e "JM_PERRY_MODE=DEV" \
-  -e "TEST_TYPE=performance" \
-  -e "JM_USERS_COUNT=50" \
-  -e "JM_UPDATE_REQUESTS_PER_USER=100" \
   -e "JM_PERRY_PROTOCOL=https" \
   -e "JM_PERRY_HOST=web.dev.cwds.io" \
   -e "JM_PERRY_PORT=443" \
-  -e "JM_CANS_API_PROTOCOL=https" \
-  -e "JM_CANS_API_HOST=cans.dev.cwds.io" \
-  -e "JM_CANS_API_PORT=443" \
-  -it --rm cwds/cans-api-test
+  -e "JM_USERS_COUNT=50" \
+  -e "JM_REQUESTS_PER_USER=100" \
+  -e "JM_RAMP_UP_PERIOD_SEC=2" \
+  -e "JM_USERS_CSV_FILENAME=users.csv" \
+  -v c:/work/idm-tests/data:/opt/idm-tests/perf/data  \
+  -v c:/work/idm-tests/results:/opt/idm-tests/perf/results \
+  --rm cwds/perry-idm-test
 ```
 
 # Result
