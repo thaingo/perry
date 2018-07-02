@@ -48,43 +48,8 @@ task dockerTestsCleanUpTagged(type: Exec, dependsOn: checkDockerService) {
 
 task dockerTestsCleanUp(dependsOn: [dockerTestsCleanUpLatest, dockerTestsCleanUpTagged]) {}
 
-//task testsJar(type: ShadowJar, dependsOn: [project.parent.compileJava, project.parent.compileTestJava]) {
-//    doFirst {
-//        println "${project.parent.projectDir}/build/classes/java/main"
-//    }
-//
-//    zip64 true
-//    baseName 'cans-api'
-//    version ''
-//    classifier 'test'
-//
-//    from "${project.parent.projectDir}/build/classes/java/main"
-//    from "${project.parent.projectDir}/build/classes/java/test"
-//    // the following will expand all dependencies from jar files
-//    from project.parent.configurations.compile
-//    from project.parent.configurations.testCompile
-//
-//    destinationDir file(dockerContextDir)
-//
-//    // exclusions to avoid Exception in thread "main" java.lang.SecurityException: Invalid signature file digest for Manifest main attributes
-//    exclude 'META-INF/*.RSA', 'META-INF/*.SF', 'META-INF/*.DSA'
-//
-//    mergeServiceFiles()
-//}
-
-//task dockerTestsCopyResources(type: Copy) {
-//    from '../src/main/resources'
-//    from '../src/test/resources'
-//    into "$dockerContextDir/resources"
-//}
-
-//task dockerTestsCopyConfig(type: Copy) {
-//    from '../config'
-//    into "$dockerContextDir/config"
-//}
-
 task dockerTestsCopyJMeterFiles(type: Copy) {
-    from '../jmeter/idm'
+    from '../jmeter/cap'
     into "$dockerContextDir/jmeter"
 }
 
