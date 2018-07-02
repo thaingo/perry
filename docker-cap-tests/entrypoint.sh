@@ -25,17 +25,9 @@ JAVA_OPT="-Xms128m -Xmx512m"
     exit 1
   fi
 
-  if ([ -z "$JM_DATA_DIR" ]); then
-    JM_DATA_DIR="/opt/cap-perf-tests/data"
-    echo "Default users file name: JM_DATA_DIR = $JM_DATA_DIR"
-  fi
-  if ([ -z "$JM_RESULTS_DIR" ]); then
-    JM_RESULTS_DIR="/opt/cap-perf-tests/results"
-    echo "Default users file name: JM_RESULTS_DIR = $JM_RESULTS_DIR"
-  fi
   if ([ -z "$JM_USERS_CSV_FILENAME" ]); then
     JM_USERS_CSV_FILENAME="users.csv"
-    echo "Default users file name: JM_USERS_CSV_FILENAME = $JM_USERS_CSV_FILENAME"
+    echo "Default users file name is set: JM_USERS_CSV_FILENAME = $JM_USERS_CSV_FILENAME"
   fi
   if ([ -z "$JM_USERS_COUNT" ]); then
     JM_USERS_COUNT="1"
@@ -50,12 +42,20 @@ JAVA_OPT="-Xms128m -Xmx512m"
     echo "Default value is set: JM_RAMP_UP_PERIOD_SEC = $JM_RAMP_UP_PERIOD_SEC"
   fi
 
+  JM_DATA_DIR="/opt/cap-perf-tests/data"
+  echo "Input data volume name: $JM_DATA_DIR"
+
+  JM_RESULTS_DIR="/opt/cap-perf-tests/results"
+  echo "Results volume name: $JM_RESULTS_DIR"
+
   echo "Starting performance tests: "
   echo "JM_TARGET = '$JM_TARGET'"
   echo "JM_PERRY_PROTOCOL = '$JM_PERRY_PROTOCOL'"
   echo "JM_PERRY_HOST = '$JM_PERRY_HOST'"
   echo "JM_PERRY_PORT = '$JM_PERRY_PORT'"
+  echo "JM_DATA_DIR = '$JM_DATA_DIR'"
   echo "JM_USERS_CSV_FILENAME = '$JM_USERS_CSV_FILENAME'"
+  echo "JM_RESULTS_DIR = '$JM_RESULTS_DIR'"
   echo "JM_USERS_COUNT = '$JM_USERS_COUNT'"
   echo "JM_REQUESTS_PER_USER = '$JM_REQUESTS_PER_USER'"
   echo "JM_RAMP_UP_PERIOD_SEC = '$JM_RAMP_UP_PERIOD_SEC'"
