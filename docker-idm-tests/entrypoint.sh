@@ -26,11 +26,11 @@ JAVA_OPT="-Xms128m -Xmx512m"
   fi
 
   if ([ -z "$JM_DATA_DIR" ]); then
-    JM_DATA_DIR="/opt/idm-perf-tests/data"
+    JM_DATA_DIR="/opt/cap-perf-tests/data"
     echo "Default users file name: JM_DATA_DIR = $JM_DATA_DIR"
   fi
   if ([ -z "$JM_RESULTS_DIR" ]); then
-    JM_RESULTS_DIR="/opt/idm-perf-tests/results"
+    JM_RESULTS_DIR="/opt/cap-perf-tests/results"
     echo "Default users file name: JM_RESULTS_DIR = $JM_RESULTS_DIR"
   fi
   if ([ -z "$JM_USERS_CSV_FILENAME" ]); then

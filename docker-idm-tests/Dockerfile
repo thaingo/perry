@@ -7,13 +7,13 @@ RUN cd /opt/ \
     && tar -xvzf apache-jmeter-4.0.tgz \
     && rm apache-jmeter-4.0.tgz
 ENV JMETER_HOME /opt/apache-jmeter-4.0/
-RUN mkdir /opt/idm-perf-tests
-ADD jmeter /opt/idm-perf-tests
-ENV JMETER_TESTS /opt/idm-perf-tests
+RUN mkdir /opt/cap-perf-tests
+ADD jmeter /opt/cap-perf-tests
+ENV JMETER_TESTS /opt/cap-perf-tests
 RUN mkdir $JMETER_TESTS/results
 ENV JM_RESULTS_DIR $JMETER_TESTS/results
 RUN mkdir $JMETER_TESTS/data
 ADD entrypoint.sh $JMETER_TESTS
 RUN chmod +x $JMETER_TESTS/entrypoint.sh
 WORKDIR $JMETER_TESTS
-CMD ["/opt/idm-perf-tests/entrypoint.sh"]
+CMD ["/opt/cap-perf-tests/entrypoint.sh"]
