@@ -2,13 +2,14 @@ package gov.ca.cwds.idm.service.cognito;
 
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.UserType;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 
 public class CognitoUtils {
 
@@ -18,6 +19,8 @@ public class CognitoUtils {
   public static final String LAST_NAME_ATTR_NAME = "family_name";
   public static final String PHONE_NUMBER_ATTR_NAME = "phone_number";
   public static final String OFFICE_ATTR_NAME = "custom:Office";
+
+  public static final String EMAIL_DELIVERY = "EMAIL";
 
   public static final String COUNTY_ATTR_NAME = "custom:County";
   public static final String COUNTY_ATTR_NAME_2 = "preferred_username";

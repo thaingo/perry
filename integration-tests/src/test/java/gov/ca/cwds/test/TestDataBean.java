@@ -6,6 +6,7 @@ public class TestDataBean {
   private String url;
   private String json;
   private String gridUrl;
+  private String validateRepeatCount;
 
   public TestDataBean() {
     username = System.getProperty("perry.username");
@@ -13,6 +14,7 @@ public class TestDataBean {
     url = System.getProperty("perry.url");
     json = System.getProperty("perry.json");
     gridUrl = System.getProperty("selenium.grid.url");
+    validateRepeatCount = System.getProperty("validate.repeat.count");
   }
 
   public String getUsername() {
@@ -33,5 +35,9 @@ public class TestDataBean {
 
   public String getGridUrl() {
     return gridUrl;
+  }
+
+  public String getValidateRepeatCount() {
+    return validateRepeatCount;
   }
 }

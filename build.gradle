@@ -33,7 +33,7 @@ project.ext {
     configPath = "$rootProject.projectDir/config/"
     springVersion = "1.5.13.RELEASE"
     springfoxSwaggerVersion = "2.9.0"
-    projectMajorVersion = '3.0.3'
+    projectMajorVersion = '3.0.4'
     mainclass = 'gov.ca.cwds.PerryApplication'
     targetDockerHubOrganization = System.env.DOCKERHUB_ORG ?: 'cwds'
     cwdsModelVersion = '0.7.3_600-RC'
@@ -255,6 +255,12 @@ task publishGit(dependsOn: ':docker-perry:pushGitTag') {
 }
 
 task integrationTestDev(dependsOn: ':integration-tests:testDevMode') {
+    doLast {
+        println 'Integration Test Passed'
+    }
+}
+
+task integrationTestProd(dependsOn: ':integration-tests:testCognitoMode') {
     doLast {
         println 'Integration Test Passed'
     }

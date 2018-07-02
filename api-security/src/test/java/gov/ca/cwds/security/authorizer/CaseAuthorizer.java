@@ -7,14 +7,18 @@ import gov.ca.cwds.testapp.domain.Case;
  */
 
 public class CaseAuthorizer extends BaseAuthorizer<Case, Long> {
+
+  @Override
   public boolean checkId(Long id) {
     return id == 1L;
   }
 
+  @Override
   public boolean checkInstance(Case instance) {
     return this.checkId(instance.getId());
   }
 
+  @Override
   public Long stringToId(String id) {
     return Long.valueOf(id);
   }
