@@ -65,7 +65,8 @@ import static gov.ca.cwds.idm.service.cognito.CognitoUtils.PERMISSIONS_ATTR_NAME
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.PHONE_NUMBER_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_2;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.getPermissionsAttributeValue;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.ROLES_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.getCustomDelimeteredListAttributeValue;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertStrict;
 import static gov.ca.cwds.idm.util.UsersSearchParametersUtil.DEFAULT_PAGESIZE;
@@ -619,7 +620,8 @@ public class IdmResourceTest extends BaseLiquibaseTest {
           attr(PHONE_NUMBER_ATTR_NAME, nullToEmpty(user.getPhoneNumber())),
           attr(RACFID_ATTR_NAME, nullToEmpty(user.getRacfid())),
           attr(RACFID_ATTR_NAME_2, nullToEmpty(user.getRacfid())),
-          attr(PERMISSIONS_ATTR_NAME, getPermissionsAttributeValue(user.getPermissions()))
+          attr(PERMISSIONS_ATTR_NAME, getCustomDelimeteredListAttributeValue(user.getPermissions())),
+          attr(ROLES_ATTR_NAME, getCustomDelimeteredListAttributeValue(user.getRoles()))
         };
 
     return new AdminCreateUserRequest()
@@ -700,6 +702,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
               "Manzano",
               WithMockCustomUser.COUNTY,
               "RFA-rollout:Snapshot-rollout:",
+              "CWS-worker:CWS-admin",
               null);
 
       TestUser user1 =
@@ -714,6 +717,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
               "Iglecias",
               WithMockCustomUser.COUNTY,
               "Hotline-rollout",
+              "CWS-worker:CWS-admin",
               "YOLOD");
 
       TestUser user2 =
@@ -728,6 +732,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
               "Gonzales",
               WithMockCustomUser.COUNTY,
               "test",
+              null,
               "SMITHBO");
 
       setUpGetAbsentUserRequestAndResult();
@@ -753,7 +758,9 @@ public class IdmResourceTest extends BaseLiquibaseTest {
       }
 
       List<UserType> userTypes =
-          Arrays.stream(testUsers).map(testUser -> userType(testUser)).collect(Collectors.toList());
+          Arrays.stream(testUsers)
+              .map(TestCognitoServiceFacade::userType)
+              .collect(Collectors.toList());
 
       ListUsersResult result = new ListUsersResult().withUsers(userTypes);
 
@@ -771,6 +778,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         String lastName,
         String county,
         String permissions,
+        String roles,
         String racfId) {
 
       TestUser testUser =
@@ -785,6 +793,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
               lastName,
               county,
               permissions,
+              roles,
               racfId);
 
       setUpGetUserRequestAndResult(testUser);
@@ -809,6 +818,9 @@ public class IdmResourceTest extends BaseLiquibaseTest {
       }
       if (testUser.getPermissions() != null) {
         attrs.add(attr("custom:permission", testUser.getPermissions()));
+      }
+      if (testUser.getRoles() != null) {
+        attrs.add(attr("custom:role", testUser.getRoles()));
       }
       if (testUser.getRacfId() != null) {
         attrs.add(attr("custom:RACFID", testUser.getRacfId()));
@@ -912,6 +924,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     private String lastName;
     private String county;
     private String permissions;
+    private String roles;
     private String racfId;
 
     TestUser(
@@ -925,6 +938,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         String lastName,
         String county,
         String permissions,
+        String roles,
         String racfId) {
       this.id = id;
       this.enabled = enabled;
@@ -936,6 +950,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
       this.lastName = lastName;
       this.county = county;
       this.permissions = permissions;
+      this.roles = roles;
       this.racfId = racfId;
     }
 
@@ -977,6 +992,10 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
     public String getPermissions() {
       return permissions;
+    }
+
+    public String getRoles() {
+      return roles;
     }
 
     public String getRacfId() {

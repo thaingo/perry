@@ -14,6 +14,7 @@ import java.util.Set;
 public class CognitoUtils {
 
   public static final String PERMISSIONS_ATTR_NAME = "custom:Permission";
+  public static final String ROLES_ATTR_NAME = "custom:Role";
   public static final String EMAIL_ATTR_NAME = "email";
   public static final String FIRST_NAME_ATTR_NAME = "given_name";
   public static final String LAST_NAME_ATTR_NAME = "family_name";
@@ -28,7 +29,7 @@ public class CognitoUtils {
   public static final String RACFID_ATTR_NAME = "custom:RACFID";
   public static final String RACFID_ATTR_NAME_2 = "custom:RACFId";
 
-  private static final String PERMISSIONS_DELIMITER = ":";
+  private static final String COGNITO_LIST_DELIMITER = ":";
 
   private CognitoUtils() {}
 
@@ -68,19 +69,23 @@ public class CognitoUtils {
       return new HashSet<>();
     }
 
-    return new HashSet<>(Arrays.asList(permissionsStr.split(PERMISSIONS_DELIMITER)));
+    return new HashSet<>(Arrays.asList(permissionsStr.split(COGNITO_LIST_DELIMITER)));
   }
 
-  public static String getPermissionsAttributeValue(Set<String> permissions) {
-    if (CollectionUtils.isNotEmpty(permissions)) {
-      return String.join(PERMISSIONS_DELIMITER, permissions);
+  public static String getCustomDelimeteredListAttributeValue(Set<String> setOfValues) {
+    if (CollectionUtils.isNotEmpty(setOfValues)) {
+      return String.join(COGNITO_LIST_DELIMITER, setOfValues);
     } else {
       return "";
     }
   }
 
   static AttributeType createPermissionsAttribute(Set<String> permissions) {
-    return attribute(PERMISSIONS_ATTR_NAME, getPermissionsAttributeValue(permissions));
+    return attribute(PERMISSIONS_ATTR_NAME, getCustomDelimeteredListAttributeValue(permissions));
+  }
+
+  static AttributeType createRolesAttribute(Set<String> roles) {
+    return attribute(ROLES_ATTR_NAME, getCustomDelimeteredListAttributeValue(roles));
   }
 
   static AttributeType attribute(String name, String value) {
