@@ -12,6 +12,7 @@ result.lastName = attribute("family_name")
 result.racfid = attribute("CUSTOM:RACFID")
 result.email = attribute("email")
 result.permissions = attribute("custom:permission")?.split('\\s*:\\s*') as HashSet
+result.roles = attribute("custom:role")?.split('\\s*:\\s*') as HashSet
 
 result.startDate = cwsUser?.staffPerson?.startDate
 result.endDate = cwsUser?.staffPerson?.endDate

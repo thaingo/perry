@@ -12,6 +12,10 @@
     "permissions": [
       "Snapshot-rollout",
       "RFA-rollout"
+    ],
+    "roles": [
+      "CWS-worker",
+      "CWS-admin"
     ]
   },
   {
@@ -27,6 +31,10 @@
     "racfid": "YOLOD",
     "permissions": [
       "Hotline-rollout"
+    ],
+    "roles": [
+      "CWS-worker",
+      "CWS-admin"
     ]
   },
   {

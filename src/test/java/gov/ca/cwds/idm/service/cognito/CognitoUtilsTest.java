@@ -1,13 +1,21 @@
 package gov.ca.cwds.idm.service.cognito;
 
+import com.amazonaws.services.cognitoidp.model.AttributeType;
+import com.amazonaws.services.cognitoidp.model.UserType;
+import org.junit.Test;
+
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.COUNTY_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.PERMISSIONS_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.attribute;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.createPermissionsAttribute;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.getAttribute;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.getCountyName;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.getCustomDelimeteredListAttributeValue;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.getPermissions;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.getPermissionsAttributeValue;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -16,13 +24,6 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-
-import com.amazonaws.services.cognitoidp.model.AttributeType;
-import com.amazonaws.services.cognitoidp.model.UserType;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import org.junit.Test;
 
 public class CognitoUtilsTest {
 
@@ -142,13 +143,13 @@ public class CognitoUtilsTest {
 
   @Test
   public void testGetPermissionsAttributeValueNull() {
-    assertThat(getPermissionsAttributeValue(null), is(""));
+    assertThat(getCustomDelimeteredListAttributeValue(null), is(""));
   }
 
   @Test
   public void testGetPermissionsAttributeValueEmpty() {
     Set<String> permissions = new HashSet<>();
-    assertThat(getPermissionsAttributeValue(permissions), is(""));
+    assertThat(getCustomDelimeteredListAttributeValue(permissions), is(""));
   }
 
   @Test
@@ -156,7 +157,7 @@ public class CognitoUtilsTest {
     Set<String> permissions = new HashSet<>();
     permissions.add("one");
     permissions.add("two");
-    assertThat(getPermissionsAttributeValue(permissions), is("one:two"));
+    assertThat(getCustomDelimeteredListAttributeValue(permissions), is("one:two"));
   }
 
   @Test
