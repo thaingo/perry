@@ -38,6 +38,7 @@ public class SpApiAuthenticationProvider implements AuthenticationProvider {
           universalUserToken,
           SerializationUtils.deserialize(perryTokenEntity.getSecurityContext()),
           roles);
+      //TODO : remove
       authenticationToken.setDetails(perryTokenEntity);
       return authenticationToken;
     } catch (Exception e) {
