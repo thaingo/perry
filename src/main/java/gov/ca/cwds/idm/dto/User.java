@@ -20,7 +20,7 @@ import static gov.ca.cwds.rest.api.domain.DomainObject.TIME_FORMAT;
 @SuppressWarnings("squid:S3437")
 public class User implements Serializable {
 
-  private static final long serialVersionUID = 7649483256698405223L;
+  private static final long serialVersionUID = -5958790384369574754L;
 
   private String id;
 
