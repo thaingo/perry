@@ -68,6 +68,8 @@ perry:
     homePageUrl: ${HOME_PAGE_URL:/}
     showErrors: ${SHOW_ERRORS:true}
     tokenRecordTimeout: ${TOKEN_RECORD_TIMEOUT:7} # days
+    idpMaxAttempts: ${IDP_MAX_ATTEMPTS:1} #amount of retries
+    idpRetryTimeout: ${IDP_RETRY_TIMEOUT:0}  #milliseconds
     tokenStore:
         datasource:
             driver-class-name: org.postgresql.Driver
