@@ -94,8 +94,4 @@ public class PerryTokenEntity implements Serializable {
   public void setLastIdpValidateTime(Date lastIdpValidateTime) {
     this.lastIdpValidateTime = lastIdpValidateTime;
   }
-
-  public static <T> T getSecurityContext(PerryTokenEntity perryTokenEntity) {
-    return SerializationUtils.deserialize(perryTokenEntity.getSecurityContext());
-  }
 }

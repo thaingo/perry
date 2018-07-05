@@ -1,13 +1,16 @@
 package gov.ca.cwds.service.sso;
 
+import static gov.ca.cwds.util.Utils.deserialize;
+import static gov.ca.cwds.util.Utils.fromDate;
+
 import gov.ca.cwds.PerryProperties;
 import gov.ca.cwds.data.reissue.model.PerryTokenEntity;
 import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.service.TokenService;
 import gov.ca.cwds.service.sso.custom.OAuth2RequestHttpEntityFactory;
+import gov.ca.cwds.util.Utils;
 import java.io.IOException;
 import java.io.Serializable;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Map;
@@ -53,10 +56,6 @@ public class OAuth2Service implements SsoService {
   private TokenService tokenService;
   private ObjectMapper objectMapper;
 
-  private static LocalDateTime fromDate(Date date) {
-    return new Timestamp(date.getTime()).toLocalDateTime();
-  }
-
   @PostConstruct
   public void init() {
     ClientCredentialsResourceDetails resource = new ClientCredentialsResourceDetails();
@@ -90,7 +89,8 @@ public class OAuth2Service implements SsoService {
   @Override
   @Retryable(interceptor = "retryInterceptor", value = HttpClientErrorException.class)
   public void validate(PerryTokenEntity perryTokenEntity) {
-    OAuth2ClientContext oAuth2ClientContext = PerryTokenEntity.getSecurityContext(perryTokenEntity);
+    OAuth2ClientContext oAuth2ClientContext =
+        deserialize(perryTokenEntity.getSecurityContext());
     Optional<PerryTokenEntity> refreshedToken;
     if (properties.getIdpValidateInterval() == 0) {
       refreshedToken = validateIdp(perryTokenEntity, oAuth2ClientContext);
@@ -160,10 +160,9 @@ public class OAuth2Service implements SsoService {
   }
 
   private Serializable getWebSecurityContext() {
-    //TODO possible serialization issues
     if (clientContext != null) {
       DefaultOAuth2ClientContext context = new DefaultOAuth2ClientContext(
-          clientContext.getAccessTokenRequest());
+          Utils.unwrap(clientContext.getAccessTokenRequest()));
       context.setAccessToken(clientContext.getAccessToken());
       return context;
     }
