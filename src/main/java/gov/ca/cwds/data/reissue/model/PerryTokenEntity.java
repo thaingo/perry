@@ -27,9 +27,9 @@ public class PerryTokenEntity implements Serializable {
   private Date createdDate = new Date();
   @Column(name = "security_context", length = 20000, nullable = false)
   private byte[] securityContext;
-  @Column(name = "last_idp_validate_time", nullable = false)
+  @Column(name = "last_idp_validate_time")
   @Temporal(TemporalType.TIMESTAMP)
-  private Date lastIdpValidateTime = new Date();
+  private Date lastIdpValidateTime;
 
   public String getUser() {
     return user;
