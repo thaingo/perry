@@ -3,6 +3,7 @@ package gov.ca.cwds.data.reissue.model;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
+import org.apache.commons.lang3.SerializationUtils;
 
 /**
  * Created by TPT2 on 10/24/2017.
@@ -26,6 +27,9 @@ public class PerryTokenEntity implements Serializable {
   private Date createdDate = new Date();
   @Column(name = "security_context", length = 20000, nullable = false)
   private byte[] securityContext;
+  @Column(name = "last_idp_validate_time", nullable = false)
+  @Temporal(TemporalType.TIMESTAMP)
+  private Date lastIdpValidateTime = new Date();
 
   public String getUser() {
     return user;
@@ -81,5 +85,17 @@ public class PerryTokenEntity implements Serializable {
 
   public void setSecurityContext(byte[] securityContext) {
     this.securityContext = securityContext;
+  }
+
+  public Date getLastIdpValidateTime() {
+    return lastIdpValidateTime;
+  }
+
+  public void setLastIdpValidateTime(Date lastIdpValidateTime) {
+    this.lastIdpValidateTime = lastIdpValidateTime;
+  }
+
+  public static <T> T getSecurityContext(PerryTokenEntity perryTokenEntity) {
+    return SerializationUtils.deserialize(perryTokenEntity.getSecurityContext());
   }
 }

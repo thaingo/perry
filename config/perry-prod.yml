@@ -70,6 +70,7 @@ perry:
     tokenRecordTimeout: ${TOKEN_RECORD_TIMEOUT:7} # days
     idpMaxAttempts: ${IDP_MAX_ATTEMPTS:2} #amount of retries
     idpRetryTimeout: ${IDP_RETRY_TIMEOUT:0}  #milliseconds
+    idpValidateInterval: ${IDP_VALIDATE_INTERVAL:2} #seconds
     tokenStore:
         datasource:
             driver-class-name: org.postgresql.Driver

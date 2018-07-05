@@ -1,10 +1,17 @@
 package gov.ca.cwds.service.sso;
 
+import gov.ca.cwds.PerryProperties;
+import gov.ca.cwds.data.reissue.model.PerryTokenEntity;
 import gov.ca.cwds.rest.api.domain.PerryException;
+import gov.ca.cwds.service.TokenService;
 import gov.ca.cwds.service.sso.custom.OAuth2RequestHttpEntityFactory;
 import java.io.IOException;
 import java.io.Serializable;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Map;
+import java.util.Optional;
 import javax.annotation.PostConstruct;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
@@ -22,6 +29,7 @@ import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResour
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.stereotype.Service;
+import org.springframework.util.SerializationUtils;
 import org.springframework.web.client.HttpClientErrorException;
 
 @Service
@@ -32,6 +40,8 @@ public class OAuth2Service implements SsoService {
 
   private OAuth2ProtectedResourceDetails resourceDetails;
   private OAuth2RestTemplate clientTemplate;
+  @Autowired
+  private PerryProperties properties;
   private ResourceServerProperties resourceServerProperties;
   @Autowired(required = false)
   private OAuth2ClientContext clientContext;
@@ -39,7 +49,13 @@ public class OAuth2Service implements SsoService {
   private String revokeTokenUri;
   @Autowired
   private OAuth2RequestHttpEntityFactory httpEntityFactory;
+  @Autowired
+  private TokenService tokenService;
   private ObjectMapper objectMapper;
+
+  private static LocalDateTime fromDate(Date date) {
+    return new Timestamp(date.getTime()).toLocalDateTime();
+  }
 
   @PostConstruct
   public void init() {
@@ -73,12 +89,46 @@ public class OAuth2Service implements SsoService {
 
   @Override
   @Retryable(interceptor = "retryInterceptor", value = HttpClientErrorException.class)
-  public String validate(Serializable ssoContext) {
-      OAuth2ClientContext oAuth2ClientContext = (OAuth2ClientContext) ssoContext;
-      OAuth2RestTemplate restTemplate = userRestTemplate(oAuth2ClientContext);
-      doPost(restTemplate, resourceServerProperties.getTokenInfoUri(),
-          restTemplate.getAccessToken().getValue());
-      return restTemplate.getOAuth2ClientContext().getAccessToken().getValue();
+  public void validate(PerryTokenEntity perryTokenEntity) {
+    OAuth2ClientContext oAuth2ClientContext = PerryTokenEntity.getSecurityContext(perryTokenEntity);
+    Optional<PerryTokenEntity> refreshedToken;
+    if (properties.getIdpValidateInterval() == 0) {
+      refreshedToken = validateIdp(perryTokenEntity, oAuth2ClientContext);
+      refreshedToken.ifPresent(tokenService::update);
+    } else if (!validateLocal(perryTokenEntity, oAuth2ClientContext)) {
+      refreshedToken = validateIdp(perryTokenEntity, oAuth2ClientContext);
+      PerryTokenEntity updated = refreshedToken.orElse(perryTokenEntity);
+      updated.setLastIdpValidateTime(new Date());
+      tokenService.update(updated);
+    }
+  }
+
+  private boolean validateLocal(PerryTokenEntity perryTokenEntity,
+      OAuth2ClientContext clientContext) {
+    if (perryTokenEntity.getLastIdpValidateTime() == null) {
+      return false;
+    }
+    LocalDateTime lastIdpValidateTime = fromDate(perryTokenEntity.getLastIdpValidateTime());
+    return lastIdpValidateTime
+        .plusSeconds(properties.getIdpValidateInterval())
+        .isAfter(LocalDateTime.now())
+        && !clientContext.getAccessToken().isExpired();
+  }
+
+  private Optional<PerryTokenEntity> validateIdp(PerryTokenEntity perryTokenEntity,
+      OAuth2ClientContext oAuth2ClientContext) {
+    OAuth2RestTemplate restTemplate = userRestTemplate(oAuth2ClientContext);
+    doPost(restTemplate, resourceServerProperties.getTokenInfoUri(),
+        restTemplate.getAccessToken().getValue());
+    String accessToken = restTemplate.getOAuth2ClientContext().getAccessToken().getValue();
+    if (!accessToken.equals(perryTokenEntity.getSsoToken())) {
+      perryTokenEntity.setSsoToken(accessToken);
+      perryTokenEntity
+          .setSecurityContext(SerializationUtils.serialize(restTemplate.getOAuth2ClientContext()));
+      return Optional.of(perryTokenEntity);
+    } else {
+      return Optional.empty();
+    }
   }
 
   @Override

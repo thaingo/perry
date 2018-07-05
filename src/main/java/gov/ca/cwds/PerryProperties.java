@@ -42,6 +42,7 @@ public class PerryProperties {
 
   private int idpRetryTimeout;
   private int idpMaxAttempts;
+  private int idpValidateInterval;
 
   public static class IdentityProviderConfiguration {
 
@@ -177,5 +178,13 @@ public class PerryProperties {
 
   public void setIdpMaxAttempts(int idpMaxAttempts) {
     this.idpMaxAttempts = idpMaxAttempts;
+  }
+
+  public int getIdpValidateInterval() {
+    return idpValidateInterval;
+  }
+
+  public void setIdpValidateInterval(int idpValidateInterval) {
+    this.idpValidateInterval = idpValidateInterval;
   }
 }

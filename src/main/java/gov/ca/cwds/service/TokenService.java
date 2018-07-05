@@ -64,8 +64,8 @@ public class TokenService {
     return perryTokenEntity.getToken();
   }
 
-  public void updateSsoToken(String token, String ssoToken, Serializable context) {
-    tokenRepository.updateSsoToken(token, ssoToken, SerializationUtils.serialize(context));
+  public void update(PerryTokenEntity perryTokenEntity) {
+    tokenRepository.save(perryTokenEntity);
   }
 
   public String deleteToken(String token) {

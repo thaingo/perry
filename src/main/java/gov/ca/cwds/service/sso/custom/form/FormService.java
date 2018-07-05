@@ -1,5 +1,6 @@
 package gov.ca.cwds.service.sso.custom.form;
 
+import gov.ca.cwds.data.reissue.model.PerryTokenEntity;
 import java.io.Serializable;
 import java.util.Map;
 import gov.ca.cwds.UniversalUserToken;
@@ -19,8 +20,8 @@ public class FormService implements SsoService {
   }
 
   @Override
-  public String validate(Serializable ssoToken) {
-    return ssoToken.toString();
+  public void validate(PerryTokenEntity perryTokenEntity) {
+
   }
 
   @Override
