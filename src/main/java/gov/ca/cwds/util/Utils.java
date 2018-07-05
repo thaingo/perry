@@ -24,9 +24,9 @@ public class Utils {
         Advised advised = (Advised) bean;
         return (T) advised.getTargetSource().getTarget();
       }
-      return (T) bean;
+      return bean;
     } catch (Exception e) {
-      return (T) bean;
+      return bean;
     }
   }
 }
