@@ -21,8 +21,4 @@ public interface TokenRepository extends JpaRepository<PerryTokenEntity, String>
   @Modifying
   long deleteByCreatedDateBefore(Timestamp date);
 
-  @Modifying
-  @Query("UPDATE PerryTokenEntity pte SET pte.ssoToken = ?2, pte.securityContext = ?3 WHERE pte.token = ?1")
-  int updateSsoToken(String token, String ssoToken, byte[] securityContext);
-
 }

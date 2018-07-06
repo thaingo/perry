@@ -1,11 +1,21 @@
 package gov.ca.cwds.service.sso;
 
+import static gov.ca.cwds.util.Utils.deserialize;
+import static gov.ca.cwds.util.Utils.fromDate;
+
+import gov.ca.cwds.PerryProperties;
+import gov.ca.cwds.data.reissue.model.PerryTokenEntity;
+import gov.ca.cwds.rest.api.domain.PerryException;
+import gov.ca.cwds.service.TokenService;
+import gov.ca.cwds.service.sso.custom.OAuth2RequestHttpEntityFactory;
+import gov.ca.cwds.util.Utils;
 import java.io.IOException;
 import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Map;
+import java.util.Optional;
 import javax.annotation.PostConstruct;
-import gov.ca.cwds.rest.api.domain.PerryException;
-import gov.ca.cwds.service.sso.custom.OAuth2RequestHttpEntityFactory;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.ResourceServerProperties;
 import org.springframework.context.annotation.Profile;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.DefaultOAuth2ClientContext;
 import org.springframework.security.oauth2.client.OAuth2ClientContext;
@@ -21,14 +32,19 @@ import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResour
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.stereotype.Service;
+import org.springframework.util.SerializationUtils;
+import org.springframework.web.client.HttpClientErrorException;
 
 @Service
 @Profile("prod")
 public class OAuth2Service implements SsoService {
+
   private static final Logger LOGGER = LoggerFactory.getLogger(OAuth2Service.class);
 
   private OAuth2ProtectedResourceDetails resourceDetails;
   private OAuth2RestTemplate clientTemplate;
+  @Autowired
+  private PerryProperties properties;
   private ResourceServerProperties resourceServerProperties;
   @Autowired(required = false)
   private OAuth2ClientContext clientContext;
@@ -36,8 +52,9 @@ public class OAuth2Service implements SsoService {
   private String revokeTokenUri;
   @Autowired
   private OAuth2RequestHttpEntityFactory httpEntityFactory;
+  @Autowired
+  private TokenService tokenService;
   private ObjectMapper objectMapper;
-
 
   @PostConstruct
   public void init() {
@@ -70,17 +87,48 @@ public class OAuth2Service implements SsoService {
   }
 
   @Override
-  public String validate(Serializable ssoContext) {
-    OAuth2ClientContext oAuth2ClientContext = (OAuth2ClientContext)ssoContext;
+  @Retryable(interceptor = "retryInterceptor", value = HttpClientErrorException.class)
+  public void validate(PerryTokenEntity perryTokenEntity) {
+    OAuth2ClientContext oAuth2ClientContext =
+        deserialize(perryTokenEntity.getSecurityContext());
+    Optional<PerryTokenEntity> refreshedToken;
+    if (properties.getIdpValidateInterval() == 0) {
+      refreshedToken = validateIdp(perryTokenEntity, oAuth2ClientContext);
+      refreshedToken.ifPresent(tokenService::update);
+    } else if (!validateLocal(perryTokenEntity, oAuth2ClientContext)) {
+      refreshedToken = validateIdp(perryTokenEntity, oAuth2ClientContext);
+      PerryTokenEntity updated = refreshedToken.orElse(perryTokenEntity);
+      updated.setLastIdpValidateTime(new Date());
+      tokenService.update(updated);
+    }
+  }
+
+  private boolean validateLocal(PerryTokenEntity perryTokenEntity,
+      OAuth2ClientContext clientContext) {
+    if (perryTokenEntity.getLastIdpValidateTime() == null) {
+      return false;
+    }
+    LocalDateTime lastIdpValidateTime = fromDate(perryTokenEntity.getLastIdpValidateTime());
+    return lastIdpValidateTime
+        .plusSeconds(properties.getIdpValidateInterval())
+        .isAfter(LocalDateTime.now())
+        && !clientContext.getAccessToken().isExpired();
+  }
+
+  private Optional<PerryTokenEntity> validateIdp(PerryTokenEntity perryTokenEntity,
+      OAuth2ClientContext oAuth2ClientContext) {
     OAuth2RestTemplate restTemplate = userRestTemplate(oAuth2ClientContext);
-    try {
-      doPost(restTemplate, resourceServerProperties.getTokenInfoUri(), restTemplate.getAccessToken().getValue());
+    doPost(restTemplate, resourceServerProperties.getTokenInfoUri(),
+        restTemplate.getAccessToken().getValue());
+    String accessToken = restTemplate.getOAuth2ClientContext().getAccessToken().getValue();
+    if (!accessToken.equals(perryTokenEntity.getSsoToken())) {
+      perryTokenEntity.setSsoToken(accessToken);
+      perryTokenEntity
+          .setSecurityContext(SerializationUtils.serialize(restTemplate.getOAuth2ClientContext()));
+      return Optional.of(perryTokenEntity);
+    } else {
+      return Optional.empty();
     }
-    catch (Exception e) {
-      //retry
-      doPost(restTemplate, resourceServerProperties.getTokenInfoUri(), restTemplate.getAccessToken().getValue());
-    }
-    return restTemplate.getOAuth2ClientContext().getAccessToken().getValue();
   }
 
   @Override
@@ -113,7 +161,8 @@ public class OAuth2Service implements SsoService {
 
   private Serializable getWebSecurityContext() {
     if (clientContext != null) {
-      DefaultOAuth2ClientContext context = new DefaultOAuth2ClientContext(clientContext.getAccessTokenRequest());
+      DefaultOAuth2ClientContext context = new DefaultOAuth2ClientContext(
+          Utils.unwrap(clientContext.getAccessTokenRequest()));
       context.setAccessToken(clientContext.getAccessToken());
       return context;
     }
@@ -135,7 +184,8 @@ public class OAuth2Service implements SsoService {
         String.class);
   }
 
-  private <T> T doPost(OAuth2RestTemplate restTemplate, String url, String accessToken, Class<T> clazz) {
+  private <T> T doPost(OAuth2RestTemplate restTemplate, String url, String accessToken,
+      Class<T> clazz) {
     String response = doPost(restTemplate, url, accessToken);
     try {
       return objectMapper.readValue(response, clazz);

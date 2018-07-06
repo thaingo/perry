@@ -40,6 +40,10 @@ public class PerryProperties {
 
   private int tokenRecordTimeout;
 
+  private int idpRetryTimeout;
+  private int idpMaxAttempts;
+  private int idpValidateInterval;
+
   public static class IdentityProviderConfiguration {
 
     private IdpMappingScript idpMapping;
@@ -160,4 +164,27 @@ public class PerryProperties {
     this.tokenRecordTimeout = tokenRecordTimeout;
   }
 
+  public int getIdpRetryTimeout() {
+    return idpRetryTimeout;
+  }
+
+  public void setIdpRetryTimeout(int idpRetryTimeout) {
+    this.idpRetryTimeout = idpRetryTimeout;
+  }
+
+  public int getIdpMaxAttempts() {
+    return idpMaxAttempts;
+  }
+
+  public void setIdpMaxAttempts(int idpMaxAttempts) {
+    this.idpMaxAttempts = idpMaxAttempts;
+  }
+
+  public int getIdpValidateInterval() {
+    return idpValidateInterval;
+  }
+
+  public void setIdpValidateInterval(int idpValidateInterval) {
+    this.idpValidateInterval = idpValidateInterval;
+  }
 }

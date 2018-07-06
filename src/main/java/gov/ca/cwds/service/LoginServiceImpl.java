@@ -37,11 +37,7 @@ public class LoginServiceImpl implements LoginService {
   @Override
   public UniversalUserToken validate(String perryToken) {
     PerryTokenEntity perryTokenEntity = tokenService.getPerryToken(perryToken);
-    Serializable securityContext = SerializationUtils.deserialize(perryTokenEntity.getSecurityContext());
-    String currentSsoToken = ssoService.validate(securityContext);
-    if (!currentSsoToken.equals(perryTokenEntity.getSsoToken())) {
-      tokenService.updateSsoToken(perryToken, currentSsoToken, securityContext);
-    }
+    ssoService.validate(perryTokenEntity);
     return UniversalUserToken.fromJson(perryTokenEntity.getJsonToken());
   }
 
