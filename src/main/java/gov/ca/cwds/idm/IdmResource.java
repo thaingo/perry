@@ -1,8 +1,9 @@
 package gov.ca.cwds.idm;
 
-import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.UserVerificationResult;
+import gov.ca.cwds.idm.persistence.model.Permission;
 import gov.ca.cwds.idm.service.DictionaryProvider;
 import gov.ca.cwds.idm.service.IdmService;
 import gov.ca.cwds.rest.api.domain.UserAlreadyExistsException;
@@ -13,7 +14,9 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import java.net.URI;
+import java.util.List;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
@@ -26,10 +29,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.validation.constraints.NotNull;
-import java.util.List;
-import java.util.Optional;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
@@ -158,13 +157,11 @@ public class IdmResource {
   )
   @ApiOperation(
     value = "Get List of possible permissions",
-    response = String.class,
+    response = Permission.class,
     responseContainer = "List"
   )
-  public ResponseEntity<List<String>> getPermissions() {
-    return Optional.ofNullable(dictionaryProvider.getPermissions())
-        .map(permissions -> ResponseEntity.ok().body(permissions))
-        .orElseGet(() -> ResponseEntity.notFound().build());
+  public List<Permission> getPermissions() {
+    return  dictionaryProvider.getPermissions();
   }
 
   @RequestMapping(method = RequestMethod.PUT, value = "/permissions", consumes = "application/json")
@@ -181,7 +178,7 @@ public class IdmResource {
       @ApiParam(required = true, name = "List of Permissions", value = "List new Permissions here")
           @NotNull
           @RequestBody
-          List<String> permissions) {
+          List<Permission> permissions) {
     dictionaryProvider.overwritePermissions(permissions);
     return ResponseEntity.noContent().build();
   }

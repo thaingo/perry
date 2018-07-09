@@ -1,1 +1,18 @@
-["Facility-search-rollout","Hotline-rollout","RFA-rollout","Snapshot-rollout"]
+[
+  {
+    "name": "Facility-search-rollout",
+    "description": "Facility-search"
+  },
+  {
+    "name": "Hotline-rollout",
+    "description": "Hotline"
+  },
+  {
+    "name": "RFA-rollout",
+    "description": "RFA"
+  },
+  {
+    "name": "Snapshot-rollout",
+    "description": "Snapshot"
+  }
+]
