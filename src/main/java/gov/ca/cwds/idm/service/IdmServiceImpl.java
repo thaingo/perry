@@ -16,10 +16,10 @@ import gov.ca.cwds.idm.util.UsersSearchParametersUtil;
 import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType;
 import gov.ca.cwds.service.CwsUserInfoService;
+import gov.ca.cwds.service.messages.MessagesService;
 import gov.ca.cwds.service.dto.CwsUserInfo;
 import gov.ca.cwds.service.scripts.IdmMappingScript;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
-import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -44,6 +44,9 @@ public class IdmServiceImpl implements IdmService {
   private static final Logger LOGGER = LoggerFactory.getLogger(IdmServiceImpl.class);
 
   @Autowired
+  MessagesService messages;
+
+  @Autowired
   CognitoServiceFacade cognitoService;
 
   @Autowired CwsUserInfoService cwsUserInfoService;
@@ -63,7 +66,8 @@ public class IdmServiceImpl implements IdmService {
             .stream().collect(
                     Collectors.toMap(CwsUserInfo::getRacfId, e -> e,
                       (user1, user2) -> {
-                        LOGGER.warn("UserAuthorization - duplicate UserId for RACFid: {}", user1.getRacfId());
+//                        LOGGER.warn("UserAuthorization - duplicate UserId for RACFid: {}", user1.getRacfId());
+                        LOGGER.warn(messages.get("DUPLICATE_USERID_FOR_RACFID", user1.getRacfId()));
                         return user1;
                       }));
 
@@ -73,7 +77,8 @@ public class IdmServiceImpl implements IdmService {
               try {
                 return mapping.map(e, idToCmsUser.get(userNameToRacfId.get(e.getUsername())));
               } catch (ScriptException ex) {
-                LOGGER.error("Error running the IdmMappingScript");
+//                LOGGER.error("Error running the IdmMappingScript");
+                LOGGER.error(messages.get("IDM_MAPPING_SCRIPT_ERROR"));
                 throw new PerryException(ex.getMessage(), ex);
               }
             }).collect(Collectors.toList());
@@ -100,7 +105,8 @@ public class IdmServiceImpl implements IdmService {
   public UserVerificationResult verifyUser(String racfId, String email) {
     CwsUserInfo cwsUser = getCwsUserByRacfId(racfId);
     if (cwsUser == null) {
-      String message = MessageFormat.format("No user with RACFID: {0} found in CWSCMS", racfId);
+//      String message = MessageFormat.format("No user with RACFID: {0} found in CWSCMS", racfId);
+      String message = messages.get("NO_USER_WITH_RACFID", racfId);
       return composeNegativeResultWithMessage(message);
     }
     Collection<UserType> cognitoUsers =
@@ -110,13 +116,15 @@ public class IdmServiceImpl implements IdmService {
 
     if (!CollectionUtils.isEmpty(cognitoUsers)) {
       String message =
-          MessageFormat.format("User with email: {0} is already present in Cognito", email);
+//          MessageFormat.format("User with email: {0} is already present in Cognito", email);
+          messages.get("USER_WITH_EMAIL_ALREADY_EXISTS", email);
       return composeNegativeResultWithMessage(message);
     }
     User user = composeUser(cwsUser, email);
     if (!Objects.equals(CurrentAuthenticatedUserUtil.getCurrentUserCountyName(), user.getCountyName())) {
       return UserVerificationResult.Builder.anUserVerificationResult()
-          .withMessage("You are not authorized to add user from County other than yours")
+//          .withMessage("You are not authorized to add user from County other than yours")
+          .withMessage(messages.get("NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY"))
           .withVerificationPassed(false).build();
     }
     return UserVerificationResult.Builder.anUserVerificationResult()
@@ -169,7 +177,8 @@ public class IdmServiceImpl implements IdmService {
     try {
       return configuration.getIdentityManager().getIdmMapping().map(cognitoUser, cwsUser);
     } catch (ScriptException e) {
-      LOGGER.error("Error running the IdmMappingScript");
+//      LOGGER.error("Error running the IdmMappingScript");
+      LOGGER.error(messages.get("IDM_MAPPING_SCRIPT_ERROR"));
       throw new PerryException(e.getMessage(), e);
     }
   }
