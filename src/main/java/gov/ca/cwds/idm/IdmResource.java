@@ -45,7 +45,9 @@ public class IdmResource {
   @RequestMapping(method = RequestMethod.GET, value = "/users", produces = "application/json")
   @ApiOperation(
     value = "Users page",
-    response = UsersPage.class
+    response = UsersPage.class,
+    notes = "Once there is more items than a default pagesize(60) in the datasource  you will get a paginationToken " +
+            "in a responce. Use it as a parameter to get a next page."
   )
   @ApiResponses(value = {@ApiResponse(code = 401, message = "Not Authorized")})
   public UsersPage getUsers(
