@@ -22,10 +22,6 @@ public class MessagesService {
     accessor = new MessageSourceAccessor(messageSource, DEFAULT_LOCALE);
   }
 
-  public String get(String code) {
-    return accessor.getMessage(code);
-  }
-
   public String get(String code, Object... args) {
     return accessor.getMessage(code, args);
   }

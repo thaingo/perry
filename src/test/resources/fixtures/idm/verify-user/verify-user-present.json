@@ -1,4 +1,5 @@
   {
     "verification_passed": false,
-    "verification_message": "User with email: julio@gmail.com is already present in Cognito"
+    "verification_message": "User with email: julio@gmail.com is already present in Cognito",
+    "error_code": "USER_WITH_EMAIL_ALREADY_EXISTS"
   }
