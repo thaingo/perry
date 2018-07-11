@@ -230,9 +230,6 @@ public class CognitoServiceFacade {
     if (parameter.getPageSize() != null) {
       request = request.withLimit(parameter.getPageSize());
     }
-    if (parameter.getUserCounty() != null) {
-      request = request.withFilter("preferred_username = \"" + parameter.getUserCounty() + "\"");
-    }
     if (parameter.getPaginationToken() != null) {
       request = request.withPaginationToken(parameter.getPaginationToken());
     }
