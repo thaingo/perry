@@ -11,9 +11,11 @@ import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.PerryProperties;
 import gov.ca.cwds.data.persistence.auth.CwsOffice;
 import gov.ca.cwds.data.persistence.auth.StaffPerson;
+import gov.ca.cwds.idm.dto.CognitoUserPage;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.UserVerificationResult;
+import gov.ca.cwds.idm.dto.UsersPage;
 import gov.ca.cwds.idm.dto.UsersSearchParameter;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.CognitoUtils;
@@ -26,6 +28,16 @@ import gov.ca.cwds.service.messages.MessagesService;
 import gov.ca.cwds.service.dto.CwsUserInfo;
 import gov.ca.cwds.service.scripts.IdmMappingScript;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
+import org.apache.commons.collections.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+
+import javax.script.ScriptException;
+import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -34,14 +46,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import javax.script.ScriptException;
-import org.apache.commons.collections.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
+
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME;
 
 @Service
 @Profile("idm")
@@ -56,35 +62,6 @@ public class IdmServiceImpl implements IdmService {
   @Autowired private PerryProperties configuration;
 
   @Autowired private MessagesService messages;
-
-  @Override
-  public List<User> getUsers(String lastName) {
-    Collection<UserType> cognitoUsers = cognitoService.search(UsersSearchParametersUtil.composeSearchParameter(lastName));
-
-    Map<String, String> userNameToRacfId = new HashMap<>(cognitoUsers.size());
-    for (UserType user : cognitoUsers) {
-      userNameToRacfId.put(user.getUsername(), getRACFId(user));
-    }
-
-    Map<String, CwsUserInfo> idToCmsUser = cwsUserInfoService.findUsers(userNameToRacfId.values())
-            .stream().collect(
-                    Collectors.toMap(CwsUserInfo::getRacfId, e -> e,
-                      (user1, user2) -> {
-                        LOGGER.warn(messages.get(DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS, user1.getRacfId()));
-                        return user1;
-                      }));
-
-    IdmMappingScript mapping = configuration.getIdentityManager().getIdmMapping();
-    return cognitoUsers.stream().map(
-            e -> {
-              try {
-                return mapping.map(e, idToCmsUser.get(userNameToRacfId.get(e.getUsername())));
-              } catch (ScriptException ex) {
-                LOGGER.error(messages.get(IDM_MAPPING_SCRIPT_ERROR));
-                throw new PerryException(ex.getMessage(), ex);
-              }
-            }).collect(Collectors.toList());
-  }
 
   @Override
   public User findUser(String id) {
@@ -112,7 +89,7 @@ public class IdmServiceImpl implements IdmService {
     Collection<UserType> cognitoUsers =
         cognitoService.search(
             UsersSearchParameter.SearchParameterBuilder.aSearchParameters()
-                .withEmail(email).build());
+                .withEmail(email).build()).getUsers();
 
     if (!CollectionUtils.isEmpty(cognitoUsers)) {
       return composeNegativeResultWithMessage(USER_WITH_EMAIL_EXISTS_IN_IDM, email);
@@ -124,6 +101,32 @@ public class IdmServiceImpl implements IdmService {
     return UserVerificationResult.Builder.anUserVerificationResult()
         .withUser(user)
         .withVerificationPassed().build();
+  }
+
+  @Override
+  public UsersPage getUserPage(String paginationToken) {
+    CognitoUserPage userPage = cognitoService.search(UsersSearchParametersUtil.composeToGetAllByPages(paginationToken));
+    Collection<UserType> cognitoUsers = userPage.getUsers();
+    Map<String, String> userNameToRacfId = new HashMap<>(cognitoUsers.size());
+    for (UserType user : cognitoUsers) {
+      userNameToRacfId.put(user.getUsername(), getRACFId(user));
+    }
+    Map<String, CwsUserInfo> idToCmsUser = cwsUserInfoService.findUsers(userNameToRacfId.values())
+            .stream().collect(
+                    Collectors.toMap(CwsUserInfo::getRacfId, e -> e, (user1, user2) -> {
+                      LOGGER.warn("UserAuthorization - duplicate UserId for RACFid: {}", user1.getRacfId());
+                      return user1;
+                    }));
+    IdmMappingScript mapping = configuration.getIdentityManager().getIdmMapping();
+    List<User> users = cognitoUsers
+            .stream()
+            .map( e -> { try {
+              return mapping.map(e, idToCmsUser.get(userNameToRacfId.get(e.getUsername())));
+            } catch (ScriptException ex) {
+              LOGGER.error("Error running the IdmMappingScript");
+              throw new PerryException(ex.getMessage(), ex);
+            }}).collect(Collectors.toList());
+    return new UsersPage(users, userPage.getPaginationToken());
   }
 
   private UserVerificationResult composeNegativeResultWithMessage(MessageCode errorCode, Object... params) {
