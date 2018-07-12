@@ -1,6 +1,6 @@
 package gov.ca.cwds.service.messages;
 
-public enum MessageCodes {
+public enum MessageCode {
   IDM_MAPPING_SCRIPT_ERROR("IDM_MAPPING_SCRIPT_ERROR"),
   DUPLICATE_USERID_FOR_RACFID("DUPLICATE_USERID_FOR_RACFID"),
   NO_USER_WITH_RACFID("NO_USER_WITH_RACFID"),
@@ -9,7 +9,7 @@ public enum MessageCodes {
 
   private String value;
 
-  MessageCodes(String value){
+  MessageCode(String value){
     this.value = value;
   }
 

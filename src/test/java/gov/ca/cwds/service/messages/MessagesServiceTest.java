@@ -1,7 +1,7 @@
 package gov.ca.cwds.service.messages;
 
-import static gov.ca.cwds.service.messages.MessageCodes.IDM_MAPPING_SCRIPT_ERROR;
-import static gov.ca.cwds.service.messages.MessageCodes.NO_USER_WITH_RACFID;
+import static gov.ca.cwds.service.messages.MessageCode.IDM_MAPPING_SCRIPT_ERROR;
+import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 

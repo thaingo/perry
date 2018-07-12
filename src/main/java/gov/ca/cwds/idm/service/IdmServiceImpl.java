@@ -1,11 +1,11 @@
 package gov.ca.cwds.idm.service;
 
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME;
-import static gov.ca.cwds.service.messages.MessageCodes.DUPLICATE_USERID_FOR_RACFID;
-import static gov.ca.cwds.service.messages.MessageCodes.IDM_MAPPING_SCRIPT_ERROR;
-import static gov.ca.cwds.service.messages.MessageCodes.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY;
-import static gov.ca.cwds.service.messages.MessageCodes.NO_USER_WITH_RACFID;
-import static gov.ca.cwds.service.messages.MessageCodes.USER_WITH_EMAIL_ALREADY_EXISTS;
+import static gov.ca.cwds.service.messages.MessageCode.DUPLICATE_USERID_FOR_RACFID;
+import static gov.ca.cwds.service.messages.MessageCode.IDM_MAPPING_SCRIPT_ERROR;
+import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY;
+import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID;
+import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_ALREADY_EXISTS;
 
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.PerryProperties;
@@ -21,7 +21,7 @@ import gov.ca.cwds.idm.util.UsersSearchParametersUtil;
 import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType;
 import gov.ca.cwds.service.CwsUserInfoService;
-import gov.ca.cwds.service.messages.MessageCodes;
+import gov.ca.cwds.service.messages.MessageCode;
 import gov.ca.cwds.service.messages.MessagesService;
 import gov.ca.cwds.service.dto.CwsUserInfo;
 import gov.ca.cwds.service.scripts.IdmMappingScript;
@@ -49,13 +49,11 @@ public class IdmServiceImpl implements IdmService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(IdmServiceImpl.class);
 
-  @Autowired
-  MessagesService messages;
+  @Autowired private MessagesService messages;
 
-  @Autowired
-  CognitoServiceFacade cognitoService;
+  @Autowired private CognitoServiceFacade cognitoService;
 
-  @Autowired CwsUserInfoService cwsUserInfoService;
+  @Autowired private CwsUserInfoService cwsUserInfoService;
 
   @Autowired private PerryProperties configuration;
 
@@ -128,7 +126,7 @@ public class IdmServiceImpl implements IdmService {
         .withVerificationPassed().build();
   }
 
-  private UserVerificationResult composeNegativeResultWithMessage(MessageCodes errorCode, Object... params) {
+  private UserVerificationResult composeNegativeResultWithMessage(MessageCode errorCode, Object... params) {
     String message = messages.get(errorCode, params);
     LOGGER.info(message);
     return UserVerificationResult.Builder.anUserVerificationResult()
