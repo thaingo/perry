@@ -1,5 +1,9 @@
 package gov.ca.cwds.idm;
 
+import static gov.ca.cwds.service.messages.MessageCode.IDM_VALIDATION_FAILED;
+import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_ALREADY_EXISTS;
+
+import gov.ca.cwds.idm.dto.IdmApiCustomError;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserVerificationResult;
@@ -7,7 +11,8 @@ import gov.ca.cwds.idm.service.DictionaryProvider;
 import gov.ca.cwds.idm.service.IdmService;
 import gov.ca.cwds.rest.api.domain.UserAlreadyExistsException;
 import gov.ca.cwds.rest.api.domain.UserNotFoundPerryException;
-import gov.ca.cwds.rest.api.domain.UserValidationException;
+import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
+import gov.ca.cwds.service.messages.MessageCode;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -43,10 +48,9 @@ public class IdmResource {
 
   @RequestMapping(method = RequestMethod.GET, value = "/users", produces = "application/json")
   @ApiOperation(
-    value = "Users to manage by current logged-in admin",
-    response = User.class,
-    responseContainer = "List"
-  )
+      value = "Users to manage by current logged-in admin",
+      response = User.class,
+      responseContainer = "List")
   @ApiResponses(value = {@ApiResponse(code = 401, message = "Not Authorized")})
   public List<User> getUsers(
       @ApiParam(name = "lastName", value = "lastName to search for")
@@ -58,11 +62,10 @@ public class IdmResource {
   @RequestMapping(method = RequestMethod.GET, value = "/users/{id}", produces = "application/json")
   @ApiOperation(value = "Find User by ID", response = User.class)
   @ApiResponses(
-    value = {
-      @ApiResponse(code = 401, message = "Not Authorized"),
-      @ApiResponse(code = 404, message = "Not found")
-    }
-  )
+      value = {
+        @ApiResponse(code = 401, message = "Not Authorized"),
+        @ApiResponse(code = 404, message = "Not found")
+      })
   public ResponseEntity<User> getUser(
       @ApiParam(required = true, value = "The unique user ID", example = "userId1")
           @PathVariable
@@ -78,18 +81,16 @@ public class IdmResource {
   }
 
   @RequestMapping(
-    method = RequestMethod.PATCH,
-    value = "/users/{id}",
-    consumes = "application/json"
-  )
+      method = RequestMethod.PATCH,
+      value = "/users/{id}",
+      consumes = "application/json")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @ApiResponses(
-    value = {
-      @ApiResponse(code = 204, message = "No Content"),
-      @ApiResponse(code = 401, message = "Not Authorized"),
-      @ApiResponse(code = 404, message = "Not found")
-    }
-  )
+      value = {
+        @ApiResponse(code = 204, message = "No Content"),
+        @ApiResponse(code = 401, message = "Not Authorized"),
+        @ApiResponse(code = 404, message = "Not found")
+      })
   @ApiOperation(value = "Update User")
   public ResponseEntity updateUser(
       @ApiParam(required = true, value = "The unique user ID", example = "userId1")
@@ -143,24 +144,24 @@ public class IdmResource {
       return ResponseEntity.created(uri).build();
 
     } catch (UserAlreadyExistsException e) {
-      return createCustomResponseEntity(HttpStatus.CONFLICT, e.getMessage());
-    } catch (UserValidationException e) {
-      return createCustomResponseEntity(HttpStatus.BAD_REQUEST, e.getMessage());
+      return createCustomResponseEntity(
+          HttpStatus.CONFLICT, USER_WITH_EMAIL_ALREADY_EXISTS, e.getMessage());
+    } catch (UserIdmValidationException e) {
+      return createCustomResponseEntity(
+          HttpStatus.BAD_REQUEST, IDM_VALIDATION_FAILED, e.getMessage(), e.getCause().getMessage());
     }
   }
 
   @RequestMapping(method = RequestMethod.GET, value = "/permissions", produces = "application/json")
   @ApiResponses(
-    value = {
-      @ApiResponse(code = 401, message = "Not Authorized"),
-      @ApiResponse(code = 404, message = "Not found")
-    }
-  )
+      value = {
+        @ApiResponse(code = 401, message = "Not Authorized"),
+        @ApiResponse(code = 404, message = "Not found")
+      })
   @ApiOperation(
-    value = "Get List of possible permissions",
-    response = String.class,
-    responseContainer = "List"
-  )
+      value = "Get List of possible permissions",
+      response = String.class,
+      responseContainer = "List")
   public ResponseEntity<List<String>> getPermissions() {
     return Optional.ofNullable(dictionaryProvider.getPermissions())
         .map(permissions -> ResponseEntity.ok().body(permissions))
@@ -170,11 +171,10 @@ public class IdmResource {
   @RequestMapping(method = RequestMethod.PUT, value = "/permissions", consumes = "application/json")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @ApiResponses(
-    value = {
-      @ApiResponse(code = 204, message = "No Content"),
-      @ApiResponse(code = 401, message = "Not Authorized")
-    }
-  )
+      value = {
+        @ApiResponse(code = 204, message = "No Content"),
+        @ApiResponse(code = 401, message = "Not Authorized")
+      })
   @ApiOperation(value = "Overwrite the List of possible permissions")
   @PreAuthorize("hasAuthority('CARES-admin')")
   public ResponseEntity overwritePermissions(
@@ -187,7 +187,9 @@ public class IdmResource {
   }
 
   @RequestMapping(method = RequestMethod.GET, value = "users/verify", produces = "application/json")
-  @ApiOperation(value = "Check if user can be created by racfId and email", response = UserVerificationResult.class)
+  @ApiOperation(
+      value = "Check if user can be created by racfId and email",
+      response = UserVerificationResult.class)
   @ApiResponses(value = {@ApiResponse(code = 401, message = "Not Authorized")})
   public ResponseEntity<UserVerificationResult> verifyUser(
       @ApiParam(required = true, name = "racfid", value = "The RACFID to verify user by in CWS/CMS")
@@ -202,8 +204,14 @@ public class IdmResource {
   }
 
   private static ResponseEntity<IdmApiCustomError> createCustomResponseEntity(
-      HttpStatus httpStatus, String msg) {
+      HttpStatus httpStatus, MessageCode errorCode, String msg, String cause) {
     return new ResponseEntity<>(
-        new IdmApiCustomError(httpStatus, msg), httpStatus);
+        new IdmApiCustomError(httpStatus, errorCode, msg, cause), httpStatus);
+  }
+
+  private static ResponseEntity<IdmApiCustomError> createCustomResponseEntity(
+      HttpStatus httpStatus, MessageCode errorCode, String msg) {
+    return new ResponseEntity<>(
+        new IdmApiCustomError(httpStatus, errorCode, msg), httpStatus);
   }
 }

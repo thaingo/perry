@@ -27,7 +27,7 @@ import gov.ca.cwds.idm.dto.UsersSearchParameter;
 import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.rest.api.domain.UserAlreadyExistsException;
 import gov.ca.cwds.rest.api.domain.UserNotFoundPerryException;
-import gov.ca.cwds.rest.api.domain.UserValidationException;
+import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
 import gov.ca.cwds.service.messages.MessagesService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -123,14 +123,15 @@ public class CognitoServiceFacade {
       result = identityProvider.adminCreateUser(request);
 
     } catch (UsernameExistsException e) {
-      String errorCause = messages.get(USER_WITH_EMAIL_ALREADY_EXISTS, email);
-      String msg = messages.get(UNABLE_CREATE_NEW_IDM_USER, errorCause);
+      String causeMsg = messages.get(USER_WITH_EMAIL_ALREADY_EXISTS, email);
+      String msg = messages.get(UNABLE_CREATE_NEW_IDM_USER, causeMsg);
       LOGGER.error(msg);
-      throw new UserAlreadyExistsException(msg, e);
+      throw new UserAlreadyExistsException(causeMsg, e);
 
     } catch (InvalidParameterException e) {
-      LOGGER.error(messages.get(IDM_VALIDATION_FAILED), e);
-      throw new UserValidationException(e.getMessage(), e);
+      String msg = messages.get(IDM_VALIDATION_FAILED);
+      LOGGER.error(msg, e);
+      throw new UserIdmValidationException(msg, e);
     }
 
     return result.getUser().getUsername();
