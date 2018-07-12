@@ -56,10 +56,10 @@ import static gov.ca.cwds.idm.service.cognito.CognitoUtils.createRolesAttribute;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_CONNECT_TO_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_GET_USER_FROM_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_UPDATE_USER_IN_IDM;
-import static gov.ca.cwds.service.messages.MessageCode.IDM_VALIDATION_FAILED;
+import static gov.ca.cwds.service.messages.MessageCode.IDM_NEW_USER_VALIDATION_FAILED;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_CREATE_NEW_IDM_USER;
-import static gov.ca.cwds.service.messages.MessageCode.USER_NOT_FOUND_BY_ID;
-import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_ALREADY_EXISTS;
+import static gov.ca.cwds.service.messages.MessageCode.USER_NOT_FOUND_BY_ID_IN_IDM;
+import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
 
 @Service(value = "cognitoServiceFacade")
 @Profile("idm")
@@ -88,7 +88,7 @@ public class CognitoServiceFacade {
     try {
       return getCognitoUserById(id);
     } catch (UserNotFoundException e) {
-      throw new UserNotFoundPerryException(messages.get(USER_NOT_FOUND_BY_ID, id), e);
+      throw new UserNotFoundPerryException(messages.get(USER_NOT_FOUND_BY_ID_IN_IDM, id), e);
     } catch (Exception e) {
       throw new PerryException(messages.get(ERROR_GET_USER_FROM_IDM), e);
     }
@@ -100,7 +100,7 @@ public class CognitoServiceFacade {
       updateUserAttributes(id, existedCognitoUser, updateUserDto);
       changeUserEnabledStatus(id, existedCognitoUser.getEnabled(), updateUserDto.getEnabled());
     } catch (UserNotFoundException e) {
-      throw new UserNotFoundPerryException(messages.get(USER_NOT_FOUND_BY_ID, id), e);
+      throw new UserNotFoundPerryException(messages.get(USER_NOT_FOUND_BY_ID_IN_IDM, id), e);
     } catch (Exception e) {
       throw new PerryException(messages.get(ERROR_UPDATE_USER_IN_IDM), e);
     }
@@ -123,13 +123,13 @@ public class CognitoServiceFacade {
       result = identityProvider.adminCreateUser(request);
 
     } catch (UsernameExistsException e) {
-      String causeMsg = messages.get(USER_WITH_EMAIL_ALREADY_EXISTS, email);
+      String causeMsg = messages.get(USER_WITH_EMAIL_EXISTS_IN_IDM, email);
       String msg = messages.get(UNABLE_CREATE_NEW_IDM_USER, causeMsg);
       LOGGER.error(msg);
       throw new UserAlreadyExistsException(causeMsg, e);
 
     } catch (InvalidParameterException e) {
-      String msg = messages.get(IDM_VALIDATION_FAILED);
+      String msg = messages.get(IDM_NEW_USER_VALIDATION_FAILED);
       LOGGER.error(msg, e);
       throw new UserIdmValidationException(msg, e);
     }
@@ -141,7 +141,7 @@ public class CognitoServiceFacade {
     try {
       return CognitoUtils.getCountyName(getCognitoUserById(userId));
     } catch (UserNotFoundException e) {
-      throw new UserNotFoundPerryException(messages.get(USER_NOT_FOUND_BY_ID, userId), e);
+      throw new UserNotFoundPerryException(messages.get(USER_NOT_FOUND_BY_ID_IN_IDM, userId), e);
     }
   }
 

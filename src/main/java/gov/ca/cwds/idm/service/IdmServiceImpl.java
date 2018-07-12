@@ -1,11 +1,11 @@
 package gov.ca.cwds.idm.service;
 
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME;
-import static gov.ca.cwds.service.messages.MessageCode.DUPLICATE_USERID_FOR_RACFID;
+import static gov.ca.cwds.service.messages.MessageCode.DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS;
 import static gov.ca.cwds.service.messages.MessageCode.IDM_MAPPING_SCRIPT_ERROR;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY;
-import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID;
-import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_ALREADY_EXISTS;
+import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID_IN_CWSCMS;
+import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
 
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.PerryProperties;
@@ -70,7 +70,7 @@ public class IdmServiceImpl implements IdmService {
             .stream().collect(
                     Collectors.toMap(CwsUserInfo::getRacfId, e -> e,
                       (user1, user2) -> {
-                        LOGGER.warn(messages.get(DUPLICATE_USERID_FOR_RACFID, user1.getRacfId()));
+                        LOGGER.warn(messages.get(DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS, user1.getRacfId()));
                         return user1;
                       }));
 
@@ -107,7 +107,7 @@ public class IdmServiceImpl implements IdmService {
   public UserVerificationResult verifyUser(String racfId, String email) {
     CwsUserInfo cwsUser = getCwsUserByRacfId(racfId);
     if (cwsUser == null) {
-      return composeNegativeResultWithMessage(NO_USER_WITH_RACFID, racfId);
+      return composeNegativeResultWithMessage(NO_USER_WITH_RACFID_IN_CWSCMS, racfId);
     }
     Collection<UserType> cognitoUsers =
         cognitoService.search(
@@ -115,7 +115,7 @@ public class IdmServiceImpl implements IdmService {
                 .withEmail(email).build());
 
     if (!CollectionUtils.isEmpty(cognitoUsers)) {
-      return composeNegativeResultWithMessage(USER_WITH_EMAIL_ALREADY_EXISTS, email);
+      return composeNegativeResultWithMessage(USER_WITH_EMAIL_EXISTS_IN_IDM, email);
     }
     User user = composeUser(cwsUser, email);
     if (!Objects.equals(CurrentAuthenticatedUserUtil.getCurrentUserCountyName(), user.getCountyName())) {
