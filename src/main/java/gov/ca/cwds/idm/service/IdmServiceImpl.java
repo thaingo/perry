@@ -23,21 +23,11 @@ import gov.ca.cwds.idm.util.UsersSearchParametersUtil;
 import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType;
 import gov.ca.cwds.service.CwsUserInfoService;
+import gov.ca.cwds.service.dto.CwsUserInfo;
 import gov.ca.cwds.service.messages.MessageCode;
 import gov.ca.cwds.service.messages.MessagesService;
-import gov.ca.cwds.service.dto.CwsUserInfo;
 import gov.ca.cwds.service.scripts.IdmMappingScript;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
-import org.apache.commons.collections.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-
-import javax.script.ScriptException;
-import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -46,8 +36,14 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME;
+import javax.script.ScriptException;
+import org.apache.commons.collections.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
 
 @Service
 @Profile("idm")
@@ -114,7 +110,7 @@ public class IdmServiceImpl implements IdmService {
     Map<String, CwsUserInfo> idToCmsUser = cwsUserInfoService.findUsers(userNameToRacfId.values())
             .stream().collect(
                     Collectors.toMap(CwsUserInfo::getRacfId, e -> e, (user1, user2) -> {
-                      LOGGER.warn("UserAuthorization - duplicate UserId for RACFid: {}", user1.getRacfId());
+                      LOGGER.warn(messages.get(DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS, user1.getRacfId()));
                       return user1;
                     }));
     IdmMappingScript mapping = configuration.getIdentityManager().getIdmMapping();
@@ -123,7 +119,7 @@ public class IdmServiceImpl implements IdmService {
             .map( e -> { try {
               return mapping.map(e, idToCmsUser.get(userNameToRacfId.get(e.getUsername())));
             } catch (ScriptException ex) {
-              LOGGER.error("Error running the IdmMappingScript");
+              LOGGER.error(messages.get(IDM_MAPPING_SCRIPT_ERROR));
               throw new PerryException(ex.getMessage(), ex);
             }}).collect(Collectors.toList());
     return new UsersPage(users, userPage.getPaginationToken());
