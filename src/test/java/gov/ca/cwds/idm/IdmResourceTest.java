@@ -229,11 +229,11 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
   @Test
   @WithMockCustomUser
-  public void testSearchUsers() throws Exception {
+  public void testgetUsersPage() throws Exception {
 
     MvcResult result =
         mockMvc
-            .perform(MockMvcRequestBuilders.get("/idm/users?lastName=Ma"))
+            .perform(MockMvcRequestBuilders.get("/idm/users?paginationToken=somePaginationToken"))
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.content().contentType(CONTENT_TYPE))
             .andReturn();
@@ -741,20 +741,19 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
       setSearchYoloUsersRequestAndResult("", user0, user1, user2);
 
-      setSearchYoloUsersRequestAndResult("Ma", user0);
+      setSearchYoloUsersRequestAndResult("somePaginationToken", user0);
 
       setSearchUsersByEmailRequestAndResult("julio@gmail.com", "test@test.com", user1);
     }
 
-    private void setSearchYoloUsersRequestAndResult(String lastNameSubstr, TestUser... testUsers) {
+    private void setSearchYoloUsersRequestAndResult(String paginationToken, TestUser... testUsers) {
       ListUsersRequest request =
           new ListUsersRequest()
               .withUserPoolId(USERPOOL)
-              .withLimit(DEFAULT_PAGESIZE)
-              .withFilter("preferred_username = \"Yolo\"");
+              .withLimit(DEFAULT_PAGESIZE);
 
-      if (StringUtils.isNotEmpty(lastNameSubstr)) {
-        request.withFilter("family_name ^= \"" + lastNameSubstr + "\"");
+      if (StringUtils.isNotEmpty(paginationToken)) {
+        request.withPaginationToken(paginationToken);
       }
 
       List<UserType> userTypes =
