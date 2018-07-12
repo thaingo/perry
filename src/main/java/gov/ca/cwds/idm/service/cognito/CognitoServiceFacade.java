@@ -56,7 +56,7 @@ import static gov.ca.cwds.idm.service.cognito.CognitoUtils.createRolesAttribute;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_CONNECT_TO_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_GET_USER_FROM_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_UPDATE_USER_IN_IDM;
-import static gov.ca.cwds.service.messages.MessageCode.IDM_NEW_USER_VALIDATION_FAILED;
+import static gov.ca.cwds.service.messages.MessageCode.IDM_USER_VALIDATION_FAILED;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_CREATE_NEW_IDM_USER;
 import static gov.ca.cwds.service.messages.MessageCode.USER_NOT_FOUND_BY_ID_IN_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
@@ -129,7 +129,7 @@ public class CognitoServiceFacade {
       throw new UserAlreadyExistsException(causeMsg, e);
 
     } catch (InvalidParameterException e) {
-      String msg = messages.get(IDM_NEW_USER_VALIDATION_FAILED);
+      String msg = messages.get(IDM_USER_VALIDATION_FAILED);
       LOGGER.error(msg, e);
       throw new UserIdmValidationException(msg, e);
     }

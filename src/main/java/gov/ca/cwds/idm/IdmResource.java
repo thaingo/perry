@@ -1,6 +1,6 @@
 package gov.ca.cwds.idm;
 
-import static gov.ca.cwds.service.messages.MessageCode.IDM_NEW_USER_VALIDATION_FAILED;
+import static gov.ca.cwds.service.messages.MessageCode.IDM_USER_VALIDATION_FAILED;
 import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
 
 import gov.ca.cwds.idm.dto.IdmApiCustomError;
@@ -148,7 +148,7 @@ public class IdmResource {
           HttpStatus.CONFLICT, USER_WITH_EMAIL_EXISTS_IN_IDM, e.getMessage());
     } catch (UserIdmValidationException e) {
       return createCustomResponseEntity(
-          HttpStatus.BAD_REQUEST, IDM_NEW_USER_VALIDATION_FAILED, e.getMessage(), e.getCause().getMessage());
+          HttpStatus.BAD_REQUEST, IDM_USER_VALIDATION_FAILED, e.getMessage(), e.getCause().getMessage());
     }
   }
 

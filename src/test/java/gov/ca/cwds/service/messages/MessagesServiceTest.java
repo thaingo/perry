@@ -17,12 +17,14 @@ import org.springframework.test.context.junit4.SpringRunner;
 @ActiveProfiles({"dev"})
 public class MessagesServiceTest {
 
-  @Autowired
-  private MessagesService messagesService;
+  @Autowired private MessagesService messagesService;
 
   @Test
-  public void testGet(){
-    assertThat(messagesService.get(IDM_MAPPING_SCRIPT_ERROR), is("Error running the IdmMappingScript"));
-    assertThat(messagesService.get(NO_USER_WITH_RACFID_IN_CWSCMS, "ABCDEF"), is("No user with RACFID: ABCDEF found in CWSCMS"));
+  public void testGet() {
+    assertThat(
+        messagesService.get(IDM_MAPPING_SCRIPT_ERROR), is("Error running the IdmMappingScript"));
+    assertThat(
+        messagesService.get(NO_USER_WITH_RACFID_IN_CWSCMS, "ABCDEF"),
+        is("No user with RACFID: ABCDEF is found in CWSCMS"));
   }
 }
