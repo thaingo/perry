@@ -49,13 +49,13 @@ public class IdmServiceImpl implements IdmService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(IdmServiceImpl.class);
 
-  @Autowired private MessagesService messages;
-
   @Autowired private CognitoServiceFacade cognitoService;
 
   @Autowired private CwsUserInfoService cwsUserInfoService;
 
   @Autowired private PerryProperties configuration;
+
+  @Autowired private MessagesService messages;
 
   @Override
   public List<User> getUsers(String lastName) {

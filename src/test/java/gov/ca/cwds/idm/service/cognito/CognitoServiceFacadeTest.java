@@ -26,6 +26,7 @@ import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.rest.api.domain.UserNotFoundPerryException;
+import gov.ca.cwds.service.messages.MessagesService;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -41,6 +42,8 @@ public class CognitoServiceFacadeTest {
 
   private AWSCognitoIdentityProvider identityProvider = mock(AWSCognitoIdentityProvider.class);
 
+  private MessagesService messagesService = mock(MessagesService.class);
+
   @Before
   public void before() {
     CognitoProperties properties = new CognitoProperties();
@@ -52,6 +55,7 @@ public class CognitoServiceFacadeTest {
     fasade = new CognitoServiceFacade();
     fasade.setProperties(properties);
     fasade.setIdentityProvider(identityProvider);
+    fasade.setMessagesService(messagesService);
   }
 
   @Test
