@@ -25,4 +25,8 @@ public class MessagesService {
   public String get(MessageCodes messageCode, Object... args) {
     return accessor.getMessage(messageCode.getValue(), args);
   }
+
+  public void setMessageSource(MessageSource messageSource) {
+    this.messageSource = messageSource;
+  }
 }
