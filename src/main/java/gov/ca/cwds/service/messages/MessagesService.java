@@ -22,7 +22,7 @@ public class MessagesService {
     accessor = new MessageSourceAccessor(messageSource, DEFAULT_LOCALE);
   }
 
-  public String get(String code, Object... args) {
-    return accessor.getMessage(code, args);
+  public String get(MessageCodes messageCode, Object... args) {
+    return accessor.getMessage(messageCode.getValue(), args);
   }
 }

@@ -21,6 +21,7 @@ import gov.ca.cwds.idm.util.UsersSearchParametersUtil;
 import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType;
 import gov.ca.cwds.service.CwsUserInfoService;
+import gov.ca.cwds.service.messages.MessageCodes;
 import gov.ca.cwds.service.messages.MessagesService;
 import gov.ca.cwds.service.dto.CwsUserInfo;
 import gov.ca.cwds.service.scripts.IdmMappingScript;
@@ -127,11 +128,11 @@ public class IdmServiceImpl implements IdmService {
         .withVerificationPassed().build();
   }
 
-  private UserVerificationResult composeNegativeResultWithMessage(String errorCode, Object... params) {
+  private UserVerificationResult composeNegativeResultWithMessage(MessageCodes errorCode, Object... params) {
     String message = messages.get(errorCode, params);
     LOGGER.info(message);
     return UserVerificationResult.Builder.anUserVerificationResult()
-        .withVerificationFailed(errorCode, message)
+        .withVerificationFailed(errorCode.getValue(), message)
         .build();
   }
 
