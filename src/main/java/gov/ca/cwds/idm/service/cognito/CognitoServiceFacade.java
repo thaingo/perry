@@ -19,19 +19,6 @@ import static gov.ca.cwds.service.messages.MessageCode.IDM_USER_VALIDATION_FAILE
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_CREATE_NEW_IDM_USER;
 import static gov.ca.cwds.service.messages.MessageCode.USER_NOT_FOUND_BY_ID_IN_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
-
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.COUNTY_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.COUNTY_ATTR_NAME_2;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.EMAIL_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.EMAIL_DELIVERY;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.FIRST_NAME_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.LAST_NAME_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.OFFICE_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.PHONE_NUMBER_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_2;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.createPermissionsAttribute;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.createRolesAttribute;
 import static gov.ca.cwds.util.Utils.toUpperCase;
 
 import com.amazonaws.auth.AWSCredentialsProvider;
@@ -63,11 +50,6 @@ import gov.ca.cwds.rest.api.domain.UserAlreadyExistsException;
 import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
 import gov.ca.cwds.rest.api.domain.UserNotFoundPerryException;
 import gov.ca.cwds.service.messages.MessagesService;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import javax.annotation.PostConstruct;
-import gov.ca.cwds.rest.api.domain.UserValidationException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -133,7 +115,7 @@ public class CognitoServiceFacade {
       return result.getUser().getUsername();
 
     } catch (UsernameExistsException e) {
-      String causeMsg = messages.get(USER_WITH_EMAIL_EXISTS_IN_IDM, email);
+      String causeMsg = messages.get(USER_WITH_EMAIL_EXISTS_IN_IDM, user.getEmail());
       String msg = messages.get(UNABLE_CREATE_NEW_IDM_USER, causeMsg);
       LOGGER.error(msg);
       throw new UserAlreadyExistsException(causeMsg, e);

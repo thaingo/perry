@@ -1,13 +1,10 @@
 package gov.ca.cwds.idm.service;
 
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME;
-import static gov.ca.cwds.service.messages.MessageCode.DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS;
 import static gov.ca.cwds.service.messages.MessageCode.IDM_MAPPING_SCRIPT_ERROR;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY;
 import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID_IN_CWSCMS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
-
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME;
 import static gov.ca.cwds.util.Utils.toUpperCase;
 
 import com.amazonaws.services.cognitoidp.model.UserType;
@@ -29,7 +26,6 @@ import gov.ca.cwds.service.messages.MessageCode;
 import gov.ca.cwds.service.messages.MessagesService;
 import gov.ca.cwds.service.scripts.IdmMappingScript;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
-import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -130,7 +126,9 @@ public class IdmServiceImpl implements IdmService {
         .withVerificationPassed().build();
   }
 
-  private UserVerificationResult composeNegativeResultWithMessage(String message) {
+  private UserVerificationResult composeNegativeResultWithMessage(
+      MessageCode errorCode, Object... params) {
+    String message = messages.get(errorCode, params);
     LOGGER.info(message);
     return UserVerificationResult.Builder.anUserVerificationResult()
         .withVerificationFailed(errorCode.getValue(), message)
