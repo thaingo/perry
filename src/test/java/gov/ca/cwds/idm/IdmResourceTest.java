@@ -722,10 +722,6 @@ public class IdmResourceTest extends BaseLiquibaseTest {
       setSearchUsersByEmailRequestAndResult("julio@gmail.com", "test@test.com", user1);
     }
 
-    public AdminCreateUserRequest createAdminCreateUserRequest(User user) {
-      return super.createAdminCreateUserRequest(user);
-    }
-
     private void setSearchYoloUsersRequestAndResult(String paginationToken, TestUser... testUsers) {
       ListUsersRequest request =
           new ListUsersRequest()
