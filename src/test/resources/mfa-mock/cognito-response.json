@@ -1,0 +1,48 @@
+{
+  "idToken": {
+    "jwtToken": "eyJraWQiOiJEdTYxTVNjUzZDNnJrbGJFM2crdnVyZjZlbjlUcGxUZjN5TE10RFwvcTlEWT0iLCJhbGciOiJSUzI1NiJ9.eyJjdXN0b206UkFDRklEIjoiQlJBRFlHIiwiY3VzdG9tOlJBQ0ZJZCI6IkJSQURZRyIsInN1YiI6IjlhMTE1ODVkLTBhODYtNDcxNS1iZWRmLTNjZjc4M2JjNGJhZiIsInpvbmVpbmZvIjoiQ1dTLXdvcmtlcjpDV1MtYWRtaW4iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiaXNzIjoiaHR0cHM6XC9cL2NvZ25pdG8taWRwLnVzLXdlc3QtMi5hbWF6b25hd3MuY29tXC91cy13ZXN0LTJfYlV0QVN4VXo2IiwiY29nbml0bzp1c2VybmFtZSI6IjlhMTE1ODVkLTBhODYtNDcxNS1iZWRmLTNjZjc4M2JjNGJhZiIsImN1c3RvbTpSb2xlIjoiQ1dTLXdvcmtlcjpDV1MtYWRtaW4iLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJMb3MgQW5nZWxlcyIsImdpdmVuX25hbWUiOiJHcmVnIiwiY3VzdG9tOkNvdW50eSI6IkxvcyBBbmdlbGVzIiwiYXVkIjoiMmExZGYxdjhicjYwaTUycW9maTRxbWtqMmsiLCJjdXN0b206T2ZmaWNlIjoiQ2FzZVdvcmtlciIsInRva2VuX3VzZSI6ImlkIiwiYXV0aF90aW1lIjoxNTMwODk5MDczLCJwaG9uZV9udW1iZXIiOiIrMTkxNjExMTExMTEiLCJleHAiOjE1MzA5MDI2NzMsImlhdCI6MTUzMDg5OTA3MywiZmFtaWx5X25hbWUiOiJCcmFkeSIsImN1c3RvbTpQZXJtaXNzaW9uIjoiU25hcHNob3Qtcm9sbG91dDpGYWNpbGl0eS1zZWFyY2gtcm9sbG91dCIsImVtYWlsIjoiZG9uemFubzEyMytCUkFEWUdAZ21haWwuY29tIn0.RFdbqNwljC3HiNMcP9cXBPia-ONeyXZBteinFlhyscOQMA135eIvEnNtOitVk7qtGG20CvvjBcj_qkBOLdUGo4AaU7ngTy6UX-pdSm9MBvfrtd5NV6sssxW_i0H9mxGZXcVvWYUyGopPXwqHfDJGWMX1mdzx0LmUblyG0OMc9WxZadUIPw6rYO8utVVFYvRnO8CvCVswVl2pjITF1kiVxcxBY1gxkH2Gnc_f7ZlMOPk6jT5k5_0CSVI6SwqbxmVNoKmUK4OM1bcQvExVZAjOi6P53q2biUJ4ucBwHZCwmY3ZHkaGAR2wX-CUM6dvFdRBzkFzdWuobS0dlnpXy4mFIg",
+    "payload": {
+      "custom:RACFID": "BRADYG",
+      "custom:RACFId": "BRADYG",
+      "sub": "9a11585d-0a86-4715-bedf-3cf783bc4baf",
+      "zoneinfo": "CWS-worker:CWS-admin",
+      "email_verified": true,
+      "iss": "https://cognito-idp.us-west-2.amazonaws.com/us-west-2_bUtASxUz6",
+      "cognito:username": "9a11585d-0a86-4715-bedf-3cf783bc4baf",
+      "custom:Role": "CWS-worker:CWS-admin",
+      "preferred_username": "Los Angeles",
+      "given_name": "Greg",
+      "custom:County": "Los Angeles",
+      "aud": "2a1df1v8br60i52qofi4qmkj2k",
+      "custom:Office": "CaseWorker",
+      "token_use": "id",
+      "auth_time": 1530899073,
+      "phone_number": "+19161111111",
+      "exp": 1530902673,
+      "iat": 1530899073,
+      "family_name": "Brady",
+      "custom:Permission": "Snapshot-rollout:Facility-search-rollout",
+      "email": "donzano123+BRADYG@gmail.com"
+    }
+  },
+  "refreshToken": {
+    "token": "eyJjdHkiOiJKV1QiLCJlbmMiOiJBMjU2R0NNIiwiYWxnIjoiUlNBLU9BRVAifQ.rGbZmzygQfcW51PtRq7ngQrQoiMZe2C3HG0fJ8-gqjjdfj9qsdL3xsiTa0_qjYGPzvUsWCh682h9Wy7h_7QWO2gGUvABaOUw0uDhYcmhjN-TumNbo6UK5VRKHE8LbIMHVBMK_vqBzvsIo_P3TjXkR3SwMFjvSqn4Vrkud7o5m88uNewEy9Cg9KsfTka5Hvn5aeggwudZeOpZqyJbX3NSdHmsP-jIMWljjULconhIsPeO97u6ohbDGnmTxMny5I0OceRXl0hYPT75I9hEUPi_lCytIs5z27SzUfkJT5Ni5CbLRy-qldJIUSUBu-nRlTLkZOjVNlArz1lSfFDllI5rvg.2T1Z7e59XAqs1ogX.w-0J0kLy6wVyxbxMM6lemv3U3OZGAfHucaj_hMXKy4X4-HDJtjZZclipM2qe-Yp-4mj2GA0JCA5gMbIj2M04fT1Fl90QFEVqiKzdnI9Qo6FVw01Y4Rn3ufrNpfCxiysPLPgM_cyx7rSYP2nMCwfifvJm9JJCw5BMekQo_QkB_3eRXgv1f4QcgyQoRhAj2Hb9TnMK5UOXy7glUP0M1_ZOV3fSVqAqqM0vw3wc9G9jBYERtxgFGOg_yl6L6ssStDbamng0FrAKjAllrdZjtfSY8gBFS7au2WIzMr75N7sokFhCSH-1okbQuK54y-9DKAll2DoG-Cpqtp0-Y3FePRM4YO2lGYbzDLsqj_IbcR1vkbcMS-778FALF2DHWJy_10-uaS46PR-A-ASACH2D1w-iP7QqdHwrIX_riVOOLUiu9OKyGYGILKpmjbpV8TTAV1MtQiSW6DndTXjz-obGhvBWY2iNZe8hzDi1wfCPINNqqB-avb0PFfhjXRJi18f7V4kibXfj0Sc4_bue76xpAQx78X75jV3QUFFZYfF3h14xY4ABnrJFNFrxgEyqieLRizLKSuMi2UiQzS-T-9Vp88aHL95cgBPj81823xLqoj0chqxyMf2NgCz2euEmR4eorDz-IHBLi1_2b8ogl6OCgb1jbRUcy0uuS5VaPcEho7N4e-jbrtIOS2Qdyd6nIBJQs349iDT6nilDzvbkOBy3Rshhqj8YO0gYL61un9Abnr8MeDXod5rO5fgIXwP2WAc0Al9Pw45eShmqYsk-Z_wzLSU2p6LhkUUmc75fqw4D8ow76_Zm_-ngmxFqTFUJXNUMMbUQ7SIzNybTmZGHUSJ8FFkj3GkcoN7xrfhWSK7s5HHdnTcI8jhXXuNt21FoIlHkcAvLIndxj4DPov5z0mB7Q2tWzQk6DcvbkXGiv9gEKILjkr-Lz5mVvwxlHpwwSmlS1NSfjVOZf5OK42LuvcwAd4KIOE_EMhWHDvcWXRZYvjdgTknxwqOcC5p336_nsNFyeYSb7jm9aNzjviHB0LNcs6gNHKTYmfFhJ-x1hEP4flv-Y_DtArZZ0Tp9bG47HH0bxx_CGUuzTCOg8G4aYwr_Jxs8Ry2yDrw3OoOHxqBgbLlhoEjLa_ZI2YGqXw3nM9S5JAznBimPA1mRzfPJAYWUa-xTLz9VHoF_8-konQmutQODay0UqIj9uU27CzD4slaKYaNYpHExUZgrd71ngSe-aWEOSc6bzTt_t-pP8tEP6qD46FYNF3ZtcFTlvdfnHyEse73a1lmSXvaobsvQHyEUjgfwVwm80oHTfCBufx9mDwZfC7IbIj8Ro-m94gqy3GqQZVnwg0dhjUzmcZINI_g.vxPW0Fl2MjY5A48kuvKiow"
+  },
+  "accessToken": {
+    "jwtToken": "eyJraWQiOiJzWUFcL1VUTGdSTis4cTJSRUxEZXdBamhGd0RWaVR2Tm1DYThlMzYrMUZwOD0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiI5YTExNTg1ZC0wYTg2LTQ3MTUtYmVkZi0zY2Y3ODNiYzRiYWYiLCJkZXZpY2Vfa2V5IjoidXMtd2VzdC0yX2UyN2E2Y2IxLWVjYTQtNDQxYy1iMmQxLTRmZDZkNWExOWYwYiIsInRva2VuX3VzZSI6ImFjY2VzcyIsInNjb3BlIjoiYXdzLmNvZ25pdG8uc2lnbmluLnVzZXIuYWRtaW4iLCJhdXRoX3RpbWUiOjE1MzA4OTkwNzMsImlzcyI6Imh0dHBzOlwvXC9jb2duaXRvLWlkcC51cy13ZXN0LTIuYW1hem9uYXdzLmNvbVwvdXMtd2VzdC0yX2JVdEFTeFV6NiIsImV4cCI6MTUzMDkwMjY3MywiaWF0IjoxNTMwODk5MDczLCJqdGkiOiIwNDBlNTg4MS0yMzY5LTQ2MmEtOTYzNS00MmQ0ZDI2YThkODYiLCJjbGllbnRfaWQiOiIyYTFkZjF2OGJyNjBpNTJxb2ZpNHFta2oyayIsInVzZXJuYW1lIjoiOWExMTU4NWQtMGE4Ni00NzE1LWJlZGYtM2NmNzgzYmM0YmFmIn0.MTvqzH5DtLlNkJIv6fP0DbL62jW2Dv6Yca1l-XBVQ8gLEwtZyrva5rqtH1W-wXSzmzCkJ8WRm3JjrvayJZa5yjy4HjIfPumh4mfQOm5XFO3RR8GGBjPv5wl6aCzcZAX6Stxk88XoqlrasneqzAMo1L9xeTrKQe4UZ8ame-RiHfGAy-if2C4dNMbrX9SfYqqf0DDyW-dG83ijQJ-dzL4Hjim0YYXJ1jV43oRvv4R6dz3RnyYu9KxOTUjf9QLuIjuoKQxil0mhPavOyCMARin2kfzdGMg2Tp5ETJWW0LyetLGYvOHSUOJ2Lp2njZH1H92z5IjI4UQu5zC11tFoheN5DQ",
+    "payload": {
+      "sub": "9a11585d-0a86-4715-bedf-3cf783bc4baf",
+      "device_key": "us-west-2_e27a6cb1-eca4-441c-b2d1-4fd6d5a19f0b",
+      "token_use": "access",
+      "scope": "aws.cognito.signin.user.admin",
+      "auth_time": 1530899073,
+      "iss": "https://cognito-idp.us-west-2.amazonaws.com/us-west-2_bUtASxUz6",
+      "exp": 1530902673,
+      "iat": 1530899073,
+      "jti": "040e5881-2369-462a-9635-42d4d26a8d86",
+      "client_id": "2a1df1v8br60i52qofi4qmkj2k",
+      "username": "9a11585d-0a86-4715-bedf-3cf783bc4baf"
+    }
+  },
+  "clockDrift": 0
+}

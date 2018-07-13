@@ -182,6 +182,9 @@ dependencies {
     testCompile group: 'io.dropwizard', name: 'dropwizard-testing', version: '1.0.5'
 
     testCompile group: 'gov.ca.cwds.cals', name: 'cws-cms-data-model', version: cwdsModelVersion, changing: true
+    // https://mvnrepository.com/artifact/org.apache.commons/commons-io
+    testCompile group: 'org.apache.commons', name: 'commons-io', version: '1.3.2'
+
 }
 
 test {
