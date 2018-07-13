@@ -21,11 +21,11 @@ public class IdmBasicAuthenticationProvider implements AuthenticationProvider {
     if (auth.isAuthenticated()) {
       return auth;
     }
-    if (idmBasicAuthPass == null || idmBasicAuthUser == null) {
+    if (idmBasicAuthPass == null || idmBasicAuthUser == null || auth.getCredentials() == null) {
       return auth;
     }
     String username = auth.getName();
-    String password = Optional.ofNullable(auth.getCredentials()).map(Object::toString).orElse(null);
+    String password = auth.getCredentials().toString();
 
     if (idmBasicAuthUser.equals(username) && idmBasicAuthPass.equals(password)) {
       return new UsernamePasswordAuthenticationToken(
