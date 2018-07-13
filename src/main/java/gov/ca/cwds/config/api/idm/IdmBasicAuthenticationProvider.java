@@ -10,10 +10,10 @@ import java.util.Collections;
 import java.util.Optional;
 
 public class IdmBasicAuthenticationProvider implements AuthenticationProvider {
-  @Value("${perry.identityManager.idmBasicAuthUser:user}")
+  @Value("${perry.identityManager.idmBasicAuthUser}")
   private String idmBasicAuthUser;
 
-  @Value("${perry.identityManager.idmBasicAuthPass:blabla}")
+  @Value("${perry.identityManager.idmBasicAuthPass}")
   private String idmBasicAuthPass;
 
   @Override
