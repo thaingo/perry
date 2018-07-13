@@ -1,6 +1,7 @@
 package gov.ca.cwds.idm.service;
 
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME;
+import static gov.ca.cwds.util.Utils.toUpperCase;
 
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.PerryProperties;
@@ -177,7 +178,8 @@ public class IdmServiceImpl implements IdmService {
   private CwsUserInfo getCwsUserByRacfId(String racfId) {
     CwsUserInfo cwsUser = null;
     if (racfId != null) {
-      List<CwsUserInfo> users = cwsUserInfoService.findUsers(Collections.singletonList(racfId));
+      List<CwsUserInfo> users =
+          cwsUserInfoService.findUsers(Collections.singletonList(toUpperCase(racfId)));
       if (!CollectionUtils.isEmpty(users)) {
         cwsUser = users.get(0);
       }
