@@ -50,9 +50,13 @@ perry:
            hibernate.current_session_context_class : org.springframework.orm.hibernate5.SpringSessionContext
            hibernate.dialect: org.hibernate.dialect.H2Dialect
            hibernate.default_schema:
+    identityProvider:
+      idpMapping: ${IDP_MAPPING_SCRIPT:config/cognito.groovy}
     serviceProviders:
       default:
         identityMapping: config/dev.groovy
+      mfa:
+        identityMapping: config/default.groovy
     users: ${USERS:}
     whiteList: ${WHITE_LIST:*}
     homePageUrl: ${HOME_PAGE_URL:/}
