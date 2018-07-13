@@ -3,7 +3,6 @@ package gov.ca.cwds.idm.dto;
 public class UsersSearchParameter {
   private Integer pageSize;
   private String email;
-  private String paginationToken;
 
   public Integer getPageSize() {
     return pageSize;
@@ -21,18 +20,9 @@ public class UsersSearchParameter {
     this.email = email;
   }
 
-  public String getPaginationToken() {
-    return paginationToken;
-  }
-
-  public void setPaginationToken(String paginationToken) {
-    this.paginationToken = paginationToken;
-  }
-
   public static final class SearchParameterBuilder {
     private Integer pageSize;
     private String email;
-    private String paginationToken;
 
     private SearchParameterBuilder() {}
 
@@ -50,16 +40,10 @@ public class UsersSearchParameter {
       return this;
     }
 
-    public SearchParameterBuilder withPaginationToken(String paginationToken) {
-      this.paginationToken = paginationToken;
-      return this;
-    }
-
     public UsersSearchParameter build() {
       UsersSearchParameter usersSearchParameter = new UsersSearchParameter();
       usersSearchParameter.setPageSize(pageSize);
       usersSearchParameter.setEmail(email);
-      usersSearchParameter.setPaginationToken(paginationToken);
       return usersSearchParameter;
     }
   }
