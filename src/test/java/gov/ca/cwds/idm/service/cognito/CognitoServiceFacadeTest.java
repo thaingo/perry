@@ -254,6 +254,17 @@ public class CognitoServiceFacadeTest {
     assertAttr(attrMap, ROLES_ATTR_NAME, "CWS-admin:CWS-worker");
   }
 
+  @Test
+  public void testRacifIdLowerCase() {
+    User user = user();
+    user.setRacfid("rubblba ");
+
+    AdminCreateUserRequest request = fasade.createAdminCreateUserRequest(user);
+    Map<String, String> attrMap = attrMap(request.getUserAttributes());
+    assertAttr(attrMap, RACFID_ATTR_NAME, "RUBBLBA");
+    assertAttr(attrMap, RACFID_ATTR_NAME_2, "RUBBLBA");
+  }
+
   private User user() {
     User user = new User();
     user.setEmail("gonzales@gmail.com");
@@ -266,17 +277,6 @@ public class CognitoServiceFacadeTest {
     user.setPermissions(set("RFA-rollout", "Hotline-rollout"));
     user.setRoles(set("CWS-admin", "CWS-worker"));
     return user;
-  }
-
-  @Test
-  public void testRacifIdLowerCase() {
-    User user = user();
-    user.setRacfid("rubblba ");
-
-    AdminCreateUserRequest request = fasade.createAdminCreateUserRequest(user);
-    Map<String, String> attrMap = attrMap(request.getUserAttributes());
-    assertAttr(attrMap, RACFID_ATTR_NAME, "RUBBLBA");
-    assertAttr(attrMap, RACFID_ATTR_NAME_2, "RUBBLBA");
   }
 
   private static Map<String, String> attrMap(List<AttributeType> attrs) {
