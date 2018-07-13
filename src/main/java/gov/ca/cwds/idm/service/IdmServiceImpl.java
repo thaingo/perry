@@ -1,5 +1,8 @@
 package gov.ca.cwds.idm.service;
 
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME;
+import static gov.ca.cwds.util.Utils.toUpperCase;
+
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.PerryProperties;
 import gov.ca.cwds.data.persistence.auth.CwsOffice;
@@ -19,15 +22,6 @@ import gov.ca.cwds.service.CwsUserInfoService;
 import gov.ca.cwds.service.dto.CwsUserInfo;
 import gov.ca.cwds.service.scripts.IdmMappingScript;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
-import org.apache.commons.collections.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-
-import javax.script.ScriptException;
 import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Collections;
@@ -37,8 +31,14 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME;
+import javax.script.ScriptException;
+import org.apache.commons.collections.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
 
 @Service
 @Profile("idm")
@@ -177,7 +177,8 @@ public class IdmServiceImpl implements IdmService {
   private CwsUserInfo getCwsUserByRacfId(String racfId) {
     CwsUserInfo cwsUser = null;
     if (racfId != null) {
-      List<CwsUserInfo> users = cwsUserInfoService.findUsers(Collections.singletonList(racfId.toUpperCase()));
+      List<CwsUserInfo> users =
+          cwsUserInfoService.findUsers(Collections.singletonList(toUpperCase(racfId)));
       if (!CollectionUtils.isEmpty(users)) {
         cwsUser = users.get(0);
       }

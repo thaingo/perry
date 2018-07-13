@@ -255,7 +255,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @WithMockCustomUser
   public void testCreateUserSuccess() throws Exception {
     User user = user();
-    AdminCreateUserRequest request = createUserRequest(user);
+    AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
     setCreateUserResult(request, NEW_USER_SUCCESS_ID);
 
     mockMvc
@@ -276,7 +276,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     User user = user();
     user.setEmail("some.existing@email");
 
-    AdminCreateUserRequest request = createUserRequest(user);
+    AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
     when(cognito.adminCreateUser(request))
         .thenThrow(new UsernameExistsException("user already exists"));
 
@@ -297,7 +297,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     User user = user();
     user.setCountyName("OtherCounty");
 
-    AdminCreateUserRequest request = createUserRequest(user);
+    AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
 
     mockMvc
         .perform(
@@ -347,7 +347,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   public void testCreateUserCognitoValidationError() throws Exception {
     User user = user();
     user.setOffice("too long string");
-    AdminCreateUserRequest request = createUserRequest(user);
+    AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
     when(cognito.adminCreateUser(request))
         .thenThrow(new InvalidParameterException("invalid parameter"));
 
@@ -571,7 +571,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
   private void testCreateUserValidationError(User user) throws Exception {
 
-    AdminCreateUserRequest request = createUserRequest(user);
+    AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
 
     mockMvc
         .perform(
@@ -621,29 +621,29 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     return user;
   }
 
-  private static AdminCreateUserRequest createUserRequest(User user) {
-
-    AttributeType[] userAttributes =
-        new AttributeType[] {
-          attr(EMAIL_ATTR_NAME, nullToEmpty(user.getEmail())),
-          attr(FIRST_NAME_ATTR_NAME, nullToEmpty(user.getFirstName())),
-          attr(LAST_NAME_ATTR_NAME, nullToEmpty(user.getLastName())),
-          attr(COUNTY_ATTR_NAME, nullToEmpty(user.getCountyName())),
-          attr(COUNTY_ATTR_NAME_2, nullToEmpty(user.getCountyName())),
-          attr(OFFICE_ATTR_NAME, nullToEmpty(user.getOffice())),
-          attr(PHONE_NUMBER_ATTR_NAME, nullToEmpty(user.getPhoneNumber())),
-          attr(RACFID_ATTR_NAME, nullToEmpty(user.getRacfid())),
-          attr(RACFID_ATTR_NAME_2, nullToEmpty(user.getRacfid())),
-          attr(PERMISSIONS_ATTR_NAME, getCustomDelimeteredListAttributeValue(user.getPermissions())),
-          attr(ROLES_ATTR_NAME, getCustomDelimeteredListAttributeValue(user.getRoles()))
-        };
-
-    return new AdminCreateUserRequest()
-        .withUsername(user.getEmail())
-        .withUserPoolId(USERPOOL)
-        .withDesiredDeliveryMediums(EMAIL_DELIVERY)
-        .withUserAttributes(userAttributes);
-  }
+//  private static AdminCreateUserRequest createUserRequest(User user) {
+//
+//    AttributeType[] userAttributes =
+//        new AttributeType[] {
+//          attr(EMAIL_ATTR_NAME, nullToEmpty(user.getEmail())),
+//          attr(FIRST_NAME_ATTR_NAME, nullToEmpty(user.getFirstName())),
+//          attr(LAST_NAME_ATTR_NAME, nullToEmpty(user.getLastName())),
+//          attr(COUNTY_ATTR_NAME, nullToEmpty(user.getCountyName())),
+//          attr(COUNTY_ATTR_NAME_2, nullToEmpty(user.getCountyName())),
+//          attr(OFFICE_ATTR_NAME, nullToEmpty(user.getOffice())),
+//          attr(PHONE_NUMBER_ATTR_NAME, nullToEmpty(user.getPhoneNumber())),
+//          attr(RACFID_ATTR_NAME, nullToEmpty(user.getRacfid())),
+//          attr(RACFID_ATTR_NAME_2, nullToEmpty(user.getRacfid())),
+//          attr(PERMISSIONS_ATTR_NAME, getCustomDelimeteredListAttributeValue(user.getPermissions())),
+//          attr(ROLES_ATTR_NAME, getCustomDelimeteredListAttributeValue(user.getRoles()))
+//        };
+//
+//    return new AdminCreateUserRequest()
+//        .withUsername(user.getEmail())
+//        .withUserPoolId(USERPOOL)
+//        .withDesiredDeliveryMediums(EMAIL_DELIVERY)
+//        .withUserAttributes(userAttributes);
+//  }
 
   private AdminCreateUserRequest setCreateUserResult(AdminCreateUserRequest request, String newId) {
 
@@ -758,6 +758,10 @@ public class IdmResourceTest extends BaseLiquibaseTest {
       setSearchYoloUsersRequestAndResult("somePaginationToken", user0);
 
       setSearchUsersByEmailRequestAndResult("julio@gmail.com", "test@test.com", user1);
+    }
+
+    public AdminCreateUserRequest createAdminCreateUserRequest(User user) {
+      return super.createAdminCreateUserRequest(user);
     }
 
     private void setSearchYoloUsersRequestAndResult(String paginationToken, TestUser... testUsers) {
