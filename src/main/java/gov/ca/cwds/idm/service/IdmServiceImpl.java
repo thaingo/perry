@@ -177,7 +177,7 @@ public class IdmServiceImpl implements IdmService {
   private CwsUserInfo getCwsUserByRacfId(String racfId) {
     CwsUserInfo cwsUser = null;
     if (racfId != null) {
-      List<CwsUserInfo> users = cwsUserInfoService.findUsers(Collections.singletonList(racfId));
+      List<CwsUserInfo> users = cwsUserInfoService.findUsers(Collections.singletonList(racfId.toUpperCase()));
       if (!CollectionUtils.isEmpty(users)) {
         cwsUser = users.get(0);
       }
