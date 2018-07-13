@@ -3,6 +3,7 @@ package gov.ca.cwds.idm;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserVerificationResult;
+import gov.ca.cwds.idm.dto.UsersPage;
 import gov.ca.cwds.idm.service.DictionaryProvider;
 import gov.ca.cwds.idm.service.IdmService;
 import gov.ca.cwds.rest.api.domain.UserAlreadyExistsException;
@@ -43,16 +44,20 @@ public class IdmResource {
 
   @RequestMapping(method = RequestMethod.GET, value = "/users", produces = "application/json")
   @ApiOperation(
-    value = "Users to manage by current logged-in admin",
-    response = User.class,
-    responseContainer = "List"
+    value = "Users page",
+    response = UsersPage.class,
+    notes =
+        "This service is used by batch job to build the ES index. The client of this service should have 'IDM-job' role."
+            + "Once there is more items than a default page size (60) in the datasource you will get a paginationToken "
+            + "in a responce. Use it as a parameter to get a next page."
   )
   @ApiResponses(value = {@ApiResponse(code = 401, message = "Not Authorized")})
-  public List<User> getUsers(
-      @ApiParam(name = "lastName", value = "lastName to search for")
-          @RequestParam(name = "lastName", required = false)
-          String lastName) {
-    return idmService.getUsers(lastName);
+  @PreAuthorize("hasAuthority('IDM-job')")
+  public UsersPage getUsers(
+      @ApiParam(name = "paginationToken", value = "paginationToken for the next page")
+          @RequestParam(name = "paginationToken", required = false)
+          String paginationToken) {
+    return idmService.getUserPage(paginationToken);
   }
 
   @RequestMapping(method = RequestMethod.GET, value = "/users/{id}", produces = "application/json")
