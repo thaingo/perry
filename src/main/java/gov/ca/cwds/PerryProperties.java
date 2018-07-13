@@ -44,7 +44,7 @@ public class PerryProperties {
   private int idpMaxAttempts;
   private int idpValidateInterval;
 
-  private String loginPageUrl;
+  private String loginPageUrl = "/login.html";
 
   public static class IdentityProviderConfiguration {
 
