@@ -20,6 +20,20 @@ import static gov.ca.cwds.service.messages.MessageCode.UNABLE_CREATE_NEW_IDM_USE
 import static gov.ca.cwds.service.messages.MessageCode.USER_NOT_FOUND_BY_ID_IN_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
 
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.COUNTY_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.COUNTY_ATTR_NAME_2;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.EMAIL_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.EMAIL_DELIVERY;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.FIRST_NAME_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.LAST_NAME_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.OFFICE_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.PHONE_NUMBER_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_2;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.createPermissionsAttribute;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.createRolesAttribute;
+import static gov.ca.cwds.util.Utils.toUpperCase;
+
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
@@ -41,7 +55,6 @@ import com.amazonaws.services.cognitoidp.model.ListUsersResult;
 import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import com.amazonaws.services.cognitoidp.model.UsernameExistsException;
-import gov.ca.cwds.idm.dto.CognitoUserPage;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.UsersSearchParameter;
@@ -51,6 +64,12 @@ import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
 import gov.ca.cwds.rest.api.domain.UserNotFoundPerryException;
 import gov.ca.cwds.service.messages.MessagesService;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import javax.annotation.PostConstruct;
+import gov.ca.cwds.rest.api.domain.UserValidationException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.PostConstruct;
@@ -107,19 +126,11 @@ public class CognitoServiceFacade {
 
   public String createUser(User user) {
 
-    final String email = user.getEmail();
-
-    AdminCreateUserRequest request =
-        new AdminCreateUserRequest()
-            .withUsername(email)
-            .withUserPoolId(properties.getUserpool())
-            .withDesiredDeliveryMediums(EMAIL_DELIVERY)
-            .withUserAttributes(buildCreateUserAttributes(user));
-
-    AdminCreateUserResult result;
+    AdminCreateUserRequest request = createAdminCreateUserRequest(user);
 
     try {
-      result = identityProvider.adminCreateUser(request);
+      AdminCreateUserResult result = identityProvider.adminCreateUser(request);
+      return result.getUser().getUsername();
 
     } catch (UsernameExistsException e) {
       String causeMsg = messages.get(USER_WITH_EMAIL_EXISTS_IN_IDM, email);
@@ -132,8 +143,6 @@ public class CognitoServiceFacade {
       LOGGER.error(msg, e);
       throw new UserIdmValidationException(msg, e);
     }
-
-    return result.getUser().getUsername();
   }
 
   public String getCountyName(String userId) {
@@ -144,11 +153,20 @@ public class CognitoServiceFacade {
     }
   }
 
-  public CognitoUserPage search(UsersSearchParameter searchCriteria) {
-    ListUsersRequest request = composeRequest(searchCriteria);
+   public AdminCreateUserRequest createAdminCreateUserRequest(User user) {
+    return
+        new AdminCreateUserRequest()
+            .withUsername(user.getEmail())
+            .withUserPoolId(properties.getUserpool())
+            .withDesiredDeliveryMediums(EMAIL_DELIVERY)
+            .withUserAttributes(buildCreateUserAttributes(user));
+  }
+
+  public Collection<UserType> search(UsersSearchParameter parameter) {
+    ListUsersRequest request = composeRequest(parameter);
     try {
       ListUsersResult result = identityProvider.listUsers(request);
-      return new CognitoUserPage(result.getUsers(), result.getPaginationToken());
+      return result.getUsers();
     } catch (Exception e) {
       throw new PerryException(messages.get(ERROR_CONNECT_TO_IDM), e);
     }
@@ -160,6 +178,9 @@ public class CognitoServiceFacade {
   }
 
   private List<AttributeType> buildCreateUserAttributes(User user) {
+
+    String racfid = toUpperCase(user.getRacfid());
+
     AttributesBuilder attributesBuilder =
         new AttributesBuilder()
             .addAttribute(EMAIL_ATTR_NAME, user.getEmail())
@@ -169,8 +190,8 @@ public class CognitoServiceFacade {
             .addAttribute(COUNTY_ATTR_NAME_2, user.getCountyName())
             .addAttribute(OFFICE_ATTR_NAME, user.getOffice())
             .addAttribute(PHONE_NUMBER_ATTR_NAME, user.getPhoneNumber())
-            .addAttribute(RACFID_ATTR_NAME, user.getRacfid())
-            .addAttribute(RACFID_ATTR_NAME_2, user.getRacfid())
+            .addAttribute(RACFID_ATTR_NAME, racfid)
+            .addAttribute(RACFID_ATTR_NAME_2, racfid)
             .addAttribute(createPermissionsAttribute(user.getPermissions()))
             .addAttribute(createRolesAttribute(user.getRoles()));
     return attributesBuilder.build();
@@ -239,8 +260,11 @@ public class CognitoServiceFacade {
     if (parameter.getPageSize() != null) {
       request = request.withLimit(parameter.getPageSize());
     }
-    if (parameter.getPaginationToken() != null) {
-      request = request.withPaginationToken(parameter.getPaginationToken());
+    if (parameter.getUserCounty() != null) {
+      request = request.withFilter("preferred_username = \"" + parameter.getUserCounty() + "\"");
+    }
+    if (parameter.getLastName() != null) {
+      request = request.withFilter("family_name ^= \"" + parameter.getLastName() + "\"");
     }
     if (parameter.getEmail() != null) {
       request = request.withFilter("email = \"" + parameter.getEmail() + "\"");
