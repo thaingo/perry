@@ -3,15 +3,15 @@ package gov.ca.cwds.idm.service;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME;
 import static gov.ca.cwds.util.Utils.toUpperCase;
 
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME;
+
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.PerryProperties;
 import gov.ca.cwds.data.persistence.auth.CwsOffice;
 import gov.ca.cwds.data.persistence.auth.StaffPerson;
-import gov.ca.cwds.idm.dto.CognitoUserPage;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.UserVerificationResult;
-import gov.ca.cwds.idm.dto.UsersPage;
 import gov.ca.cwds.idm.dto.UsersSearchParameter;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.CognitoUtils;
@@ -54,6 +54,35 @@ public class IdmServiceImpl implements IdmService {
   @Autowired private PerryProperties configuration;
 
   @Override
+  public List<User> getUsers(String lastName) {
+    Collection<UserType> cognitoUsers = cognitoService.search(UsersSearchParametersUtil.composeSearchParameter(lastName));
+
+    Map<String, String> userNameToRacfId = new HashMap<>(cognitoUsers.size());
+    for (UserType user : cognitoUsers) {
+      userNameToRacfId.put(user.getUsername(), getRACFId(user));
+    }
+
+    Map<String, CwsUserInfo> idToCmsUser = cwsUserInfoService.findUsers(userNameToRacfId.values())
+            .stream().collect(
+                    Collectors.toMap(CwsUserInfo::getRacfId, e -> e,
+                      (user1, user2) -> {
+                        LOGGER.warn("UserAuthorization - duplicate UserId for RACFid: {}", user1.getRacfId());
+                        return user1;
+                      }));
+
+    IdmMappingScript mapping = configuration.getIdentityManager().getIdmMapping();
+    return cognitoUsers.stream().map(
+            e -> {
+              try {
+                return mapping.map(e, idToCmsUser.get(userNameToRacfId.get(e.getUsername())));
+              } catch (ScriptException ex) {
+                LOGGER.error("Error running the IdmMappingScript");
+                throw new PerryException(ex.getMessage(), ex);
+              }
+            }).collect(Collectors.toList());
+  }
+
+  @Override
   public User findUser(String id) {
     UserType cognitoUser = cognitoService.getById(id);
     return enrichCognitoUser(cognitoUser);
@@ -80,7 +109,7 @@ public class IdmServiceImpl implements IdmService {
     Collection<UserType> cognitoUsers =
         cognitoService.search(
             UsersSearchParameter.SearchParameterBuilder.aSearchParameters()
-                .withEmail(email).build()).getUsers();
+                .withEmail(email).build());
 
     if (!CollectionUtils.isEmpty(cognitoUsers)) {
       String message =
@@ -96,32 +125,6 @@ public class IdmServiceImpl implements IdmService {
     return UserVerificationResult.Builder.anUserVerificationResult()
         .withUser(user)
         .withVerificationPassed(true).build();
-  }
-
-  @Override
-  public UsersPage getUserPage(String paginationToken) {
-    CognitoUserPage userPage = cognitoService.search(UsersSearchParametersUtil.composeToGetAllByPages(paginationToken));
-    Collection<UserType> cognitoUsers = userPage.getUsers();
-    Map<String, String> userNameToRacfId = new HashMap<>(cognitoUsers.size());
-    for (UserType user : cognitoUsers) {
-      userNameToRacfId.put(user.getUsername(), getRACFId(user));
-    }
-    Map<String, CwsUserInfo> idToCmsUser = cwsUserInfoService.findUsers(userNameToRacfId.values())
-            .stream().collect(
-                    Collectors.toMap(CwsUserInfo::getRacfId, e -> e, (user1, user2) -> {
-                      LOGGER.warn("UserAuthorization - duplicate UserId for RACFid: {}", user1.getRacfId());
-                      return user1;
-                    }));
-    IdmMappingScript mapping = configuration.getIdentityManager().getIdmMapping();
-    List<User> users = cognitoUsers
-            .stream()
-            .map( e -> { try {
-              return mapping.map(e, idToCmsUser.get(userNameToRacfId.get(e.getUsername())));
-            } catch (ScriptException ex) {
-              LOGGER.error("Error running the IdmMappingScript");
-              throw new PerryException(ex.getMessage(), ex);
-            }}).collect(Collectors.toList());
-    return new UsersPage(users, userPage.getPaginationToken());
   }
 
   private UserVerificationResult composeNegativeResultWithMessage(String message) {
