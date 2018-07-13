@@ -12,6 +12,7 @@ import gov.ca.cwds.util.Utils;
 import java.io.IOException;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
@@ -24,6 +25,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.ResourceServerProperties;
 import org.springframework.context.annotation.Profile;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.DefaultOAuth2ClientContext;
 import org.springframework.security.oauth2.client.OAuth2ClientContext;
@@ -31,6 +34,7 @@ import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
+import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.util.SerializationUtils;
 import org.springframework.web.client.HttpClientErrorException;
@@ -115,20 +119,21 @@ public class OAuth2Service implements SsoService {
         && !clientContext.getAccessToken().isExpired();
   }
 
-  private Optional<PerryTokenEntity> validateIdp(PerryTokenEntity perryTokenEntity,
+  private Optional<PerryTokenEntity> validateIdp(
+      PerryTokenEntity perryTokenEntity,
       OAuth2ClientContext oAuth2ClientContext) {
+    Optional<PerryTokenEntity> result;
     OAuth2RestTemplate restTemplate = userRestTemplate(oAuth2ClientContext);
-    doPost(restTemplate, resourceServerProperties.getTokenInfoUri(),
-        restTemplate.getAccessToken().getValue());
-    String accessToken = restTemplate.getOAuth2ClientContext().getAccessToken().getValue();
-    if (!accessToken.equals(perryTokenEntity.getSsoToken())) {
-      perryTokenEntity.setSsoToken(accessToken);
-      perryTokenEntity
-          .setSecurityContext(SerializationUtils.serialize(restTemplate.getOAuth2ClientContext()));
-      return Optional.of(perryTokenEntity);
-    } else {
-      return Optional.empty();
+    Authentication currentAuth = setRunAsUser(perryTokenEntity);
+    try {
+      doPost(restTemplate,
+          resourceServerProperties.getTokenInfoUri(),
+          restTemplate.getAccessToken().getValue());
+    } finally {
+      SecurityContextHolder.getContext().setAuthentication(currentAuth);
+      result = refresh(restTemplate, perryTokenEntity);
     }
+    return result;
   }
 
   @Override
@@ -176,6 +181,29 @@ public class OAuth2Service implements SsoService {
   private OAuth2RestTemplate userRestTemplate(String accessToken) {
     return new OAuth2RestTemplate(resourceDetails,
         new DefaultOAuth2ClientContext(new DefaultOAuth2AccessToken(accessToken)));
+  }
+
+  private Optional<PerryTokenEntity> refresh(OAuth2RestTemplate restTemplate,
+      PerryTokenEntity perryTokenEntity) {
+    OAuth2ClientContext freshContext = restTemplate.getOAuth2ClientContext();
+    String freshAccessToken = freshContext.getAccessToken().getValue();
+    if (!freshAccessToken.equals(perryTokenEntity.getSsoToken())) {
+      perryTokenEntity.setSsoToken(freshAccessToken);
+      perryTokenEntity.setSecurityContext(SerializationUtils.serialize(freshContext));
+      return Optional.of(perryTokenEntity);
+    }
+    return Optional.empty();
+  }
+
+  private Authentication setRunAsUser(PerryTokenEntity perryTokenEntity) {
+    Authentication currentAuth = SecurityContextHolder.getContext().getAuthentication();
+    Authentication runAsAuth = new PreAuthenticatedAuthenticationToken(
+        perryTokenEntity.getUser(),
+        perryTokenEntity.getSsoToken(),
+        Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+    );
+    SecurityContextHolder.getContext().setAuthentication(runAsAuth);
+    return currentAuth;
   }
 
   private String doPost(OAuth2RestTemplate restTemplate, String url, String accessToken) {
