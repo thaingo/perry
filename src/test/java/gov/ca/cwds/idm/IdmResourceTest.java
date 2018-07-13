@@ -55,7 +55,6 @@ import java.util.stream.Collectors;
 
 import static com.google.common.base.Strings.nullToEmpty;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.COUNTY_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.COUNTY_ATTR_NAME_2;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.EMAIL_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.EMAIL_DELIVERY;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.FIRST_NAME_ATTR_NAME;
@@ -64,7 +63,6 @@ import static gov.ca.cwds.idm.service.cognito.CognitoUtils.OFFICE_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.PERMISSIONS_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.PHONE_NUMBER_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_2;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.ROLES_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.getCustomDelimeteredListAttributeValue;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
@@ -615,11 +613,9 @@ public class IdmResourceTest extends BaseLiquibaseTest {
           attr(FIRST_NAME_ATTR_NAME, nullToEmpty(user.getFirstName())),
           attr(LAST_NAME_ATTR_NAME, nullToEmpty(user.getLastName())),
           attr(COUNTY_ATTR_NAME, nullToEmpty(user.getCountyName())),
-          attr(COUNTY_ATTR_NAME_2, nullToEmpty(user.getCountyName())),
           attr(OFFICE_ATTR_NAME, nullToEmpty(user.getOffice())),
           attr(PHONE_NUMBER_ATTR_NAME, nullToEmpty(user.getPhoneNumber())),
           attr(RACFID_ATTR_NAME, nullToEmpty(user.getRacfid())),
-          attr(RACFID_ATTR_NAME_2, nullToEmpty(user.getRacfid())),
           attr(PERMISSIONS_ATTR_NAME, getCustomDelimeteredListAttributeValue(user.getPermissions())),
           attr(ROLES_ATTR_NAME, getCustomDelimeteredListAttributeValue(user.getRoles()))
         };
@@ -822,7 +818,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         attrs.add(attr("custom:role", testUser.getRoles()));
       }
       if (testUser.getRacfId() != null) {
-        attrs.add(attr("custom:RACFID", testUser.getRacfId()));
+        attrs.add(attr("preferred_username", testUser.getRacfId()));
       }
       return attrs;
     }
