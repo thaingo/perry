@@ -62,6 +62,7 @@ perry:
     homePageUrl: ${HOME_PAGE_URL:/}
     showErrors: ${SHOW_ERRORS:true}
     tokenRecordTimeout: ${TOKEN_RECORD_TIMEOUT:7} # days
+    loginPageUrl: ${LOGIN_PAGE_URL:/login.html}
     liquibase:
       schema:
         change-log: classpath:/liquibase/perry_schema.xml

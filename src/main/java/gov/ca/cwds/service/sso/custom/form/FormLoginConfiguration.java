@@ -44,7 +44,7 @@ public class FormLoginConfiguration extends WebSecurityConfigurerAdapter {
         .antMatchers("/**").permitAll()
         .and()
         .formLogin()
-        .loginPage("/login.html")
+        .loginPage(properties.getLoginPageUrl())
         .usernameParameter("CognitoResponse")
         .defaultSuccessUrl(properties.getHomePageUrl())
         .loginProcessingUrl("/login")
