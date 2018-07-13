@@ -26,7 +26,7 @@ public class TokenResource {
   private LoginService loginService;
 
   @GET
-  @RequestMapping(value = Constants.TOKEN_SERVICE_URL, produces = "plain/text",
+  @RequestMapping(value = Constants.TOKEN_SERVICE_URL, produces = "application/json",
       method = RequestMethod.GET)
   @ApiOperation(value = "Get perry token")
   @ApiResponses(value = {@ApiResponse(code = 200, message = "authorized"),

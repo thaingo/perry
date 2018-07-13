@@ -94,10 +94,11 @@ public class DevAuthenticationProvider implements AuthenticationProvider {
       JsonNode cognitoJson = objectMapper.readValue(cognitoJsonString, JsonNode.class);
       JsonNode payloadNode = cognitoJson.get("idToken").get("payload");
 
-      Map userAttributes = objectMapper.convertValue(payloadNode, Map.class);
+      Map payloadMap = objectMapper.convertValue(payloadNode, Map.class);
 
-      Map<String, List> userInfo = new HashMap<>();
-      userInfo.put("UserAttributes", mapToNameValueList(userAttributes));
+      Map<String, Object> userInfo = new HashMap<>();
+      userInfo.put("UserAttributes", mapToNameValueList(payloadMap));
+      userInfo.put("Username", payloadMap.get("cognito:username"));
 
       UniversalUserToken userToken =
           perryProperties.getIdentityProvider().getIdpMapping().map(userInfo);
