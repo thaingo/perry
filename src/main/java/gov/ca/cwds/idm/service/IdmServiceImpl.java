@@ -1,6 +1,7 @@
 package gov.ca.cwds.idm.service;
 
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME;
+import static gov.ca.cwds.service.messages.MessageCode.DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS;
 import static gov.ca.cwds.service.messages.MessageCode.IDM_MAPPING_SCRIPT_ERROR;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY;
 import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID_IN_CWSCMS;
@@ -70,7 +71,7 @@ public class IdmServiceImpl implements IdmService {
             .stream().collect(
                     Collectors.toMap(CwsUserInfo::getRacfId, e -> e,
                       (user1, user2) -> {
-                        LOGGER.warn("UserAuthorization - duplicate UserId for RACFid: {}", user1.getRacfId());
+                        LOGGER.warn(messages.get(DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS, user1.getRacfId()));
                         return user1;
                       }));
 
@@ -80,7 +81,7 @@ public class IdmServiceImpl implements IdmService {
               try {
                 return mapping.map(e, idToCmsUser.get(userNameToRacfId.get(e.getUsername())));
               } catch (ScriptException ex) {
-                LOGGER.error("Error running the IdmMappingScript");
+                LOGGER.error(messages.get(IDM_MAPPING_SCRIPT_ERROR));
                 throw new PerryException(ex.getMessage(), ex);
               }
             }).collect(Collectors.toList());

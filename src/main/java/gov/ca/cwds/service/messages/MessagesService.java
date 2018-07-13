@@ -1,6 +1,7 @@
 package gov.ca.cwds.service.messages;
 
-import java.util.Locale;
+import static gov.ca.cwds.config.Constants.DEFAULT_LOCALE;
+
 import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -9,8 +10,6 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class MessagesService {
-
-  private static final Locale DEFAULT_LOCALE  = Locale.US;
 
   @Autowired
   private MessageSource messageSource;
