@@ -21,7 +21,6 @@ import com.amazonaws.services.cognitoidp.model.ListUsersResult;
 import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import com.amazonaws.services.cognitoidp.model.UsernameExistsException;
-import gov.ca.cwds.idm.dto.CognitoUserPage;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.UsersSearchParameter;
@@ -135,11 +134,11 @@ public class CognitoServiceFacade {
     }
   }
 
-  public CognitoUserPage search(UsersSearchParameter searchCriteria) {
-    ListUsersRequest request = composeRequest(searchCriteria);
+  public Collection<UserType> search(UsersSearchParameter parameter) {
+    ListUsersRequest request = composeRequest(parameter);
     try {
       ListUsersResult result = identityProvider.listUsers(request);
-      return new CognitoUserPage(result.getUsers(), result.getPaginationToken());
+      return result.getUsers();
     } catch (Exception e) {
       throw new PerryException("Exception while connecting to AWS Cognito", e);
     }
@@ -230,8 +229,11 @@ public class CognitoServiceFacade {
     if (parameter.getPageSize() != null) {
       request = request.withLimit(parameter.getPageSize());
     }
-    if (parameter.getPaginationToken() != null) {
-      request = request.withPaginationToken(parameter.getPaginationToken());
+    if (parameter.getUserCounty() != null) {
+      request = request.withFilter("preferred_username = \"" + parameter.getUserCounty() + "\"");
+    }
+    if (parameter.getLastName() != null) {
+      request = request.withFilter("family_name ^= \"" + parameter.getLastName() + "\"");
     }
     if (parameter.getEmail() != null) {
       request = request.withFilter("email = \"" + parameter.getEmail() + "\"");
