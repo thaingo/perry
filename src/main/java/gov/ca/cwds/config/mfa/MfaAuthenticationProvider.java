@@ -50,7 +50,6 @@ public class MfaAuthenticationProvider implements AuthenticationProvider {
       Map details = (Map) auth2Authentication.getUserAuthentication().getDetails();
       details.put(MfaPageConfiguration.ACCESS_TOKEN_DETAIL_NAME, accessToken);
       details.put(MfaPageConfiguration.REFRESH_TOKEN_DETAIL_NAME, refreshToken);
-      //TODO exp fix
       details.put(MfaPageConfiguration.EXP_DETAIL_NAME, new Date(exp * 1000L));
       return auth2Authentication;
     } catch (Exception e) {
