@@ -57,6 +57,7 @@ public class DevAuthenticationProvider implements AuthenticationProvider {
 
   private Map getUserInfo(String json) {
     try {
+      System.out.println("Json: [" + json + "]");
       return  objectMapper.readValue(json, Map.class);
     } catch (IOException e) {
       throw new RuntimeException(e);

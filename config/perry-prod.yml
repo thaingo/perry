@@ -15,7 +15,7 @@ security:
      userInfoUri: ${SAF_USER_INFO_URI:}
      tokenInfoUri: ${SAF_VALIDATE_TOKEN_URI:}
      revokeTokenUri: ${SAF_REVOKE_TOKEN_URI:}
-     logoutTokenUri: ${SAF_LOGOUT_URI:}
+     .: ${SAF_LOGOUT_URI:}
 spring:
       datasource:
           driver-class-name: com.ibm.db2.jcc.DB2Driver
