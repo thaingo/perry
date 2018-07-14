@@ -36,6 +36,7 @@ import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.service.cognito.CognitoProperties;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
+import gov.ca.cwds.service.messages.MessagesService;
 import java.nio.charset.Charset;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -86,6 +87,8 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
   @Autowired private CognitoServiceFacade cognitoServiceFacade;
 
+  @Autowired private MessagesService messagesService;
+
   private MockMvc mockMvc;
 
   private AWSCognitoIdentityProvider cognito;
@@ -97,6 +100,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
   @Before
   public void before() {
+    cognitoServiceFacade.setMessagesService(messagesService);
     this.mockMvc =
         MockMvcBuilders.webAppContextSetup(webApplicationContext).apply(springSecurity()).build();
     cognito = cognitoServiceFacade.getIdentityProvider();

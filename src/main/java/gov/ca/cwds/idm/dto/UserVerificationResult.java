@@ -11,12 +11,12 @@ import java.io.Serializable;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class UserVerificationResult implements Serializable {
 
-
-  private static final long serialVersionUID = 6613962034554161045L;
+  private static final long serialVersionUID = 4868787126860023981L;
 
   private User user;
   private boolean verificationPassed;
   private String verificationMessage;
+  private String errorCode;
 
   public User getUser() {
     return user;
@@ -42,11 +42,20 @@ public class UserVerificationResult implements Serializable {
     this.verificationMessage = verificationMessage;
   }
 
+  public String getErrorCode() {
+    return errorCode;
+  }
+
+  public void setErrorCode(String errorCode) {
+    this.errorCode = errorCode;
+  }
+
 
   public static final class Builder {
     private User user;
     private boolean verificationPassed;
     private String verificationMessage;
+    private String errorCode;
 
     private Builder() {
     }
@@ -60,8 +69,8 @@ public class UserVerificationResult implements Serializable {
       return this;
     }
 
-    public Builder withVerificationPassed(boolean verificationPassed) {
-      this.verificationPassed = verificationPassed;
+    public Builder withVerificationPassed() {
+      this.verificationPassed = true;
       return this;
     }
 
@@ -70,11 +79,19 @@ public class UserVerificationResult implements Serializable {
       return this;
     }
 
+    public Builder withVerificationFailed(String errorCode, String verificationMessage) {
+      this.verificationPassed = false;
+      this.verificationMessage = verificationMessage;
+      this.errorCode = errorCode;
+      return this;
+    }
+
     public UserVerificationResult build() {
       UserVerificationResult userVerificationResult = new UserVerificationResult();
       userVerificationResult.setUser(user);
       userVerificationResult.setVerificationPassed(verificationPassed);
       userVerificationResult.setVerificationMessage(verificationMessage);
+      userVerificationResult.setErrorCode(errorCode);
       return userVerificationResult;
     }
   }

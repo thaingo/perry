@@ -12,6 +12,13 @@ import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_2;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.createPermissionsAttribute;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.createRolesAttribute;
+import static gov.ca.cwds.service.messages.MessageCode.ERROR_CONNECT_TO_IDM;
+import static gov.ca.cwds.service.messages.MessageCode.ERROR_GET_USER_FROM_IDM;
+import static gov.ca.cwds.service.messages.MessageCode.ERROR_UPDATE_USER_IN_IDM;
+import static gov.ca.cwds.service.messages.MessageCode.IDM_USER_VALIDATION_FAILED;
+import static gov.ca.cwds.service.messages.MessageCode.UNABLE_CREATE_NEW_IDM_USER;
+import static gov.ca.cwds.service.messages.MessageCode.USER_NOT_FOUND_BY_ID_IN_IDM;
+import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
 import static gov.ca.cwds.util.Utils.toUpperCase;
 
 import com.amazonaws.auth.AWSCredentialsProvider;
@@ -40,8 +47,9 @@ import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.UsersSearchParameter;
 import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.rest.api.domain.UserAlreadyExistsException;
+import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
 import gov.ca.cwds.rest.api.domain.UserNotFoundPerryException;
-import gov.ca.cwds.rest.api.domain.UserValidationException;
+import gov.ca.cwds.service.messages.MessagesService;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -59,6 +67,8 @@ public class CognitoServiceFacade {
   private static final Logger LOGGER = LoggerFactory.getLogger(CognitoServiceFacade.class);
 
   @Autowired private CognitoProperties properties;
+
+  @Autowired private MessagesService messages;
 
   private AWSCognitoIdentityProvider identityProvider;
 
@@ -78,9 +88,9 @@ public class CognitoServiceFacade {
     try {
       return getCognitoUserById(id);
     } catch (UserNotFoundException e) {
-      throw new UserNotFoundPerryException("User with id=" + id + " is not found", e);
+      throw new UserNotFoundPerryException(messages.get(USER_NOT_FOUND_BY_ID_IN_IDM, id), e);
     } catch (Exception e) {
-      throw new PerryException("Exception while getting user from AWS Cognito", e);
+      throw new PerryException(messages.get(ERROR_GET_USER_FROM_IDM), e);
     }
   }
 
@@ -90,9 +100,9 @@ public class CognitoServiceFacade {
       updateUserAttributes(id, existedCognitoUser, updateUserDto);
       changeUserEnabledStatus(id, existedCognitoUser.getEnabled(), updateUserDto.getEnabled());
     } catch (UserNotFoundException e) {
-      throw new UserNotFoundPerryException("User with id=" + id + " is not found", e);
+      throw new UserNotFoundPerryException(messages.get(USER_NOT_FOUND_BY_ID_IN_IDM, id), e);
     } catch (Exception e) {
-      throw new PerryException("Exception while updating user in AWS Cognito", e);
+      throw new PerryException(messages.get(ERROR_UPDATE_USER_IN_IDM), e);
     }
   }
 
@@ -105,14 +115,15 @@ public class CognitoServiceFacade {
       return result.getUser().getUsername();
 
     } catch (UsernameExistsException e) {
-      String msg =
-          "Unable to create new Cognito user. A User with email " + user.getEmail() + " already exists.";
+      String causeMsg = messages.get(USER_WITH_EMAIL_EXISTS_IN_IDM, user.getEmail());
+      String msg = messages.get(UNABLE_CREATE_NEW_IDM_USER, causeMsg);
       LOGGER.error(msg);
-      throw new UserAlreadyExistsException(msg, e);
+      throw new UserAlreadyExistsException(causeMsg, e);
 
     } catch (InvalidParameterException e) {
-      LOGGER.error("Cognito validation failed", e);
-      throw new UserValidationException(e.getMessage(), e);
+      String msg = messages.get(IDM_USER_VALIDATION_FAILED);
+      LOGGER.error(msg, e);
+      throw new UserIdmValidationException(msg, e);
     }
   }
 
@@ -120,7 +131,7 @@ public class CognitoServiceFacade {
     try {
       return CognitoUtils.getCountyName(getCognitoUserById(userId));
     } catch (UserNotFoundException e) {
-      throw new UserNotFoundPerryException("User with id=" + userId + " is not found", e);
+      throw new UserNotFoundPerryException(messages.get(USER_NOT_FOUND_BY_ID_IN_IDM, userId), e);
     }
   }
 
@@ -139,7 +150,7 @@ public class CognitoServiceFacade {
       ListUsersResult result = identityProvider.listUsers(request);
       return result.getUsers();
     } catch (Exception e) {
-      throw new PerryException("Exception while connecting to AWS Cognito", e);
+      throw new PerryException(messages.get(ERROR_CONNECT_TO_IDM), e);
     }
   }
 
@@ -257,5 +268,8 @@ public class CognitoServiceFacade {
 
   public void setIdentityProvider(AWSCognitoIdentityProvider identityProvider) {
     this.identityProvider = identityProvider;
+  }
+  public void setMessagesService(MessagesService messages) {
+    this.messages = messages;
   }
 }
