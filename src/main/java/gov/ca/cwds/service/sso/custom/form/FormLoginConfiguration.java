@@ -23,37 +23,36 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class FormLoginConfiguration extends WebSecurityConfigurerAdapter {
 
   @Autowired
+  PerryProperties properties;
+  @Autowired
   private DevAuthenticationProvider authProvider;
-
   @Autowired
   private LoginServiceValidatorFilter loginServiceValidatorFilter;
-
   @Autowired
   private PerryLogoutSuccessHandler perryLogoutSuccessHandler;
-
-  @Autowired
-  PerryProperties properties;
 
   @Override
   protected void configure(AuthenticationManagerBuilder auth) {
     auth.authenticationProvider(authProvider);
   }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http
-                .authorizeRequests()
-                .antMatchers("/authn/login").authenticated()
-                .antMatchers("/**").permitAll()
-                .and()
-                .formLogin()
-                .loginPage("/login.html")
-                .defaultSuccessUrl(properties.getHomePageUrl())
-                .loginProcessingUrl("/login")
-                .failureUrl("/login.html?error=true")
-                .and()
-                .logout().logoutUrl("/authn/logout").permitAll().logoutSuccessHandler(perryLogoutSuccessHandler)
-                .and().csrf().disable()
-                .addFilterBefore(loginServiceValidatorFilter, UsernamePasswordAuthenticationFilter.class);
-    }
+  @Override
+  protected void configure(HttpSecurity http) throws Exception {
+    http
+        .authorizeRequests()
+        .antMatchers("/authn/login").authenticated()
+        .antMatchers("/**").permitAll()
+        .and()
+        .formLogin()
+        .loginPage(properties.getLoginPageUrl())
+        .usernameParameter("CognitoResponse")
+        .defaultSuccessUrl(properties.getHomePageUrl())
+        .loginProcessingUrl("/login")
+        .failureUrl("/login.html?error=true")
+        .and()
+        .logout().logoutUrl("/authn/logout").permitAll()
+        .logoutSuccessHandler(perryLogoutSuccessHandler)
+        .and().csrf().disable()
+        .addFilterBefore(loginServiceValidatorFilter, UsernamePasswordAuthenticationFilter.class);
+  }
 }

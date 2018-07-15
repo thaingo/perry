@@ -38,16 +38,16 @@ test {
 }
 
 task testDevMode(type: Test, dependsOn: testClasses) {
-    systemProperty 'perry.health.check.url', project.property('perry.health.check.url')
-    systemProperty 'perry.url', project.property('perry.url')
-    systemProperty 'perry.username', project.property('perry.username')
-    systemProperty 'perry.password', project.property('perry.password')
-    systemProperty 'perry.json', project.property('perry.json')
-    systemProperty 'perry.threads.count', project.property('perry.threads.count')
-    systemProperty 'selenium.grid.url', project.property('selenium.grid.url')
-    systemProperty 'validate.repeat.count', project.property('validate.repeat.count')
-    systemProperties System.properties
-    include '**/TestDevMode*'
+    //systemProperty 'perry.health.check.url', project.property('perry.health.check.url')
+    //systemProperty 'perry.url', project.property('perry.url')
+    //systemProperty 'perry.username', project.property('perry.username')
+    //systemProperty 'perry.password', project.property('perry.password')
+    //systemProperty 'perry.json', project.property('perry.json')
+    //systemProperty 'perry.threads.count', project.property('perry.threads.count')
+    //systemProperty 'selenium.grid.url', project.property('selenium.grid.url')
+    //systemProperty 'validate.repeat.count', project.property('validate.repeat.count')
+    //systemProperties System.properties
+    //include '**/TestDevMode*'
 }
 
 task testCognitoMode(type: Test, dependsOn: testClasses) {
