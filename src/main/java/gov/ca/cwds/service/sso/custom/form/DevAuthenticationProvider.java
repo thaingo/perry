@@ -60,7 +60,6 @@ public class DevAuthenticationProvider implements AuthenticationProvider {
 
   private Map getUserInfo(String json) {
     try {
-      System.out.println("Json: [" + json + "]");
       return  objectMapper.readValue(json, Map.class);
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -101,6 +100,7 @@ public class DevAuthenticationProvider implements AuthenticationProvider {
       userInfo.put("UserAttributes", mapToNameValueList(payloadMap));
       userInfo.put("Username", payloadMap.get("cognito:username"));
 
+      System.out.println("Json: [" + cognitoJsonString + "]");
       UniversalUserToken userToken =
           perryProperties.getIdentityProvider().getIdpMapping().map(userInfo);
       return perryProperties.getServiceProviders().get("mfa").getIdentityMapping()
