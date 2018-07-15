@@ -100,7 +100,6 @@ public class DevAuthenticationProvider implements AuthenticationProvider {
       userInfo.put("UserAttributes", mapToNameValueList(payloadMap));
       userInfo.put("Username", payloadMap.get("cognito:username"));
 
-      System.out.println("Json: [" + cognitoJsonString + "]");
       UniversalUserToken userToken =
           perryProperties.getIdentityProvider().getIdpMapping().map(userInfo);
       return perryProperties.getServiceProviders().get("mfa").getIdentityMapping()

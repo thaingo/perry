@@ -65,5 +65,13 @@ public class PerryLoginTest extends BaseLiquibaseTest {
         .andExpect(MockMvcResultMatchers.status().is3xxRedirection()).andReturn();
 
     System.out.println("getRedirectedUrl: [" + result.getResponse().getRedirectedUrl() + "]");
+
+    session = (MockHttpSession) result.getRequest().getSession();
+
+    result = mockMvc
+        .perform(get(result.getResponse().getRedirectedUrl()).session(session))
+        .andExpect(MockMvcResultMatchers.status().is3xxRedirection()).andReturn();
+
+    System.out.println("getRedirectedUrl: [" + result.getResponse().getRedirectedUrl() + "]");
   }
 }
