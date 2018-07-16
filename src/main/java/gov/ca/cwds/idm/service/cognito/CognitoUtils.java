@@ -22,7 +22,11 @@ public class CognitoUtils {
   public static final String OFFICE_ATTR_NAME = "custom:Office";
   public static final String EMAIL_DELIVERY = "EMAIL";
   public static final String COUNTY_ATTR_NAME = "custom:County";
+
   public static final String RACFID_ATTR_NAME = "preferred_username";
+  public static final String RACFID_ATTR_NAME_CUSTOM_1 = "custom:RACFID";
+  public static final String RACFID_ATTR_NAME_CUSTOM_2 = "custom:RACFId";
+
   private static final String COGNITO_LIST_DELIMITER = ":";
 
   private CognitoUtils() {}
