@@ -1,23 +1,21 @@
-{
-  "user_list": [
-    {
-      "id": "2be3221f-8c2f-4386-8a95-a68f0282efb0",
-      "first_name": "Don",
-      "last_name": "Manzano",
-      "county_name": "Yolo",
-      "email": "donzano@gmail.com",
-      "user_create_date": "2018-05-04",
-      "user_last_modified_date": "2018-05-30",
-      "enabled": true,
-      "status": "FORCE_CHANGE_PASSWORD",
-      "permissions": [
-        "Snapshot-rollout",
-        "RFA-rollout"
-      ],
-      "roles": [
-        "CWS-worker",
-        "CWS-admin"
-      ]
-    }
-  ]
-}
+[
+  {
+    "id": "2be3221f-8c2f-4386-8a95-a68f0282efb0",
+    "first_name": "Don",
+    "last_name": "Manzano",
+    "county_name": "Yolo",
+    "email": "donzano@gmail.com",
+    "user_create_date": "2018-05-04",
+    "user_last_modified_date": "2018-05-30",
+    "enabled": true,
+    "status": "FORCE_CHANGE_PASSWORD",
+    "permissions": [
+      "Snapshot-rollout",
+      "RFA-rollout"
+    ],
+    "roles": [
+      "CWS-worker",
+      "CWS-admin"
+    ]
+  }
+]

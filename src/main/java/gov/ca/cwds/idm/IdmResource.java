@@ -1,15 +1,19 @@
 package gov.ca.cwds.idm;
 
+import static gov.ca.cwds.service.messages.MessageCode.IDM_USER_VALIDATION_FAILED;
+import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
+
+import gov.ca.cwds.idm.dto.IdmApiCustomError;
+import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.UserVerificationResult;
-import gov.ca.cwds.idm.persistence.model.Permission;
-import gov.ca.cwds.idm.dto.UsersPage;
 import gov.ca.cwds.idm.service.DictionaryProvider;
 import gov.ca.cwds.idm.service.IdmService;
 import gov.ca.cwds.rest.api.domain.UserAlreadyExistsException;
 import gov.ca.cwds.rest.api.domain.UserNotFoundPerryException;
-import gov.ca.cwds.rest.api.domain.UserValidationException;
+import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
+import gov.ca.cwds.service.messages.MessageCode;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -43,17 +47,16 @@ public class IdmResource {
 
   @RequestMapping(method = RequestMethod.GET, value = "/users", produces = "application/json")
   @ApiOperation(
-    value = "Users page",
-    response = UsersPage.class,
-    notes = "Once there is more items than a default pagesize(60) in the datasource  you will get a paginationToken " +
-            "in a responce. Use it as a parameter to get a next page."
+    value = "Users to manage by current logged-in admin",
+    response = User.class,
+    responseContainer = "List"
   )
   @ApiResponses(value = {@ApiResponse(code = 401, message = "Not Authorized")})
-  public UsersPage getUsers(
-      @ApiParam(name = "paginationToken", value = "paginationToken for the next page")
-          @RequestParam(name = "paginationToken", required = false)
-          String paginationToken) {
-    return idmService.getUserPage(paginationToken);
+  public List<User> getUsers(
+      @ApiParam(name = "lastName", value = "lastName to search for")
+          @RequestParam(name = "lastName", required = false)
+          String lastName) {
+    return idmService.getUsers(lastName);
   }
 
   @RequestMapping(method = RequestMethod.GET, value = "/users/{id}", produces = "application/json")
@@ -144,9 +147,11 @@ public class IdmResource {
       return ResponseEntity.created(uri).build();
 
     } catch (UserAlreadyExistsException e) {
-      return createCustomResponseEntity(HttpStatus.CONFLICT, e.getMessage());
-    } catch (UserValidationException e) {
-      return createCustomResponseEntity(HttpStatus.BAD_REQUEST, e.getMessage());
+      return createCustomResponseEntity(
+          HttpStatus.CONFLICT, USER_WITH_EMAIL_EXISTS_IN_IDM, e.getMessage());
+    } catch (UserIdmValidationException e) {
+      return createCustomResponseEntity(
+          HttpStatus.BAD_REQUEST, IDM_USER_VALIDATION_FAILED, e.getMessage(), e.getCause().getMessage());
     }
   }
 
@@ -201,8 +206,14 @@ public class IdmResource {
   }
 
   private static ResponseEntity<IdmApiCustomError> createCustomResponseEntity(
-      HttpStatus httpStatus, String msg) {
+      HttpStatus httpStatus, MessageCode errorCode, String msg, String cause) {
     return new ResponseEntity<>(
-        new IdmApiCustomError(httpStatus, msg), httpStatus);
+        new IdmApiCustomError(httpStatus, errorCode, msg, cause), httpStatus);
+  }
+
+  private static ResponseEntity<IdmApiCustomError> createCustomResponseEntity(
+      HttpStatus httpStatus, MessageCode errorCode, String msg) {
+    return new ResponseEntity<>(
+        new IdmApiCustomError(httpStatus, errorCode, msg), httpStatus);
   }
 }
