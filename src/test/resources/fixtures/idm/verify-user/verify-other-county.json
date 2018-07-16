@@ -1,4 +1,5 @@
   {
     "verification_passed": false,
-    "verification_message": "You are not authorized to add user from County other than yours"
+    "verification_message": "You are not authorized to add user from County other than yours",
+    "error_code": "CAP-004"
   }

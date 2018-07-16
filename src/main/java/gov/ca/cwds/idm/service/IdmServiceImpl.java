@@ -17,6 +17,8 @@ import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType;
 import gov.ca.cwds.service.CwsUserInfoService;
 import gov.ca.cwds.service.dto.CwsUserInfo;
+import gov.ca.cwds.service.messages.MessageCode;
+import gov.ca.cwds.service.messages.MessagesService;
 import gov.ca.cwds.service.scripts.IdmMappingScript;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import org.apache.commons.collections.CollectionUtils;
@@ -28,7 +30,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import javax.script.ScriptException;
-import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -39,6 +40,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME;
+import static gov.ca.cwds.service.messages.MessageCode.IDM_MAPPING_SCRIPT_ERROR;
+import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY;
+import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID_IN_CWSCMS;
+import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
+import static gov.ca.cwds.util.Utils.toUpperCase;
 
 @Service
 @Profile("idm")
@@ -46,12 +52,13 @@ public class IdmServiceImpl implements IdmService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(IdmServiceImpl.class);
 
-  @Autowired
-  CognitoServiceFacade cognitoService;
+  @Autowired private CognitoServiceFacade cognitoService;
 
-  @Autowired CwsUserInfoService cwsUserInfoService;
+  @Autowired private CwsUserInfoService cwsUserInfoService;
 
   @Autowired private PerryProperties configuration;
+
+  @Autowired private MessagesService messages;
 
   @Override
   public User findUser(String id) {
@@ -68,34 +75,6 @@ public class IdmServiceImpl implements IdmService {
   @Override
   public String createUser(User user) {
     return cognitoService.createUser(user);
-  }
-
-  @Override
-  public UserVerificationResult verifyUser(String racfId, String email) {
-    CwsUserInfo cwsUser = getCwsUserByRacfId(racfId);
-    if (cwsUser == null) {
-      String message = MessageFormat.format("No user with RACFID: {0} found in CWSCMS", racfId);
-      return composeNegativeResultWithMessage(message);
-    }
-    Collection<UserType> cognitoUsers =
-        cognitoService.search(
-            UsersSearchParameter.SearchParameterBuilder.aSearchParameters()
-                .withEmail(email).build()).getUsers();
-
-    if (!CollectionUtils.isEmpty(cognitoUsers)) {
-      String message =
-          MessageFormat.format("User with email: {0} is already present in Cognito", email);
-      return composeNegativeResultWithMessage(message);
-    }
-    User user = composeUser(cwsUser, email);
-    if (!Objects.equals(CurrentAuthenticatedUserUtil.getCurrentUserCountyName(), user.getCountyName())) {
-      return UserVerificationResult.Builder.anUserVerificationResult()
-          .withMessage("You are not authorized to add user from County other than yours")
-          .withVerificationPassed(false).build();
-    }
-    return UserVerificationResult.Builder.anUserVerificationResult()
-        .withUser(user)
-        .withVerificationPassed(true).build();
   }
 
   @Override
@@ -124,13 +103,38 @@ public class IdmServiceImpl implements IdmService {
     return new UsersPage(users, userPage.getPaginationToken());
   }
 
-  private UserVerificationResult composeNegativeResultWithMessage(String message) {
+  @Override
+  public UserVerificationResult verifyUser(String racfId, String email) {
+    CwsUserInfo cwsUser = getCwsUserByRacfId(racfId);
+    if (cwsUser == null) {
+      return composeNegativeResultWithMessage(NO_USER_WITH_RACFID_IN_CWSCMS, racfId);
+    }
+    Collection<UserType> cognitoUsers =
+        cognitoService.search(
+            UsersSearchParameter.SearchParameterBuilder.aSearchParameters()
+                .withEmail(email).build()).getUsers();
+
+    if (!CollectionUtils.isEmpty(cognitoUsers)) {
+      return composeNegativeResultWithMessage(USER_WITH_EMAIL_EXISTS_IN_IDM, email);
+    }
+    User user = composeUser(cwsUser, email);
+    if (!Objects.equals(CurrentAuthenticatedUserUtil.getCurrentUserCountyName(), user.getCountyName())) {
+      return composeNegativeResultWithMessage(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY);
+    }
+    return UserVerificationResult.Builder.anUserVerificationResult()
+        .withUser(user)
+        .withVerificationPassed().build();
+  }
+
+  private UserVerificationResult composeNegativeResultWithMessage(
+      MessageCode errorCode, Object... params) {
+    String message = messages.get(errorCode, params);
     LOGGER.info(message);
     return UserVerificationResult.Builder.anUserVerificationResult()
-        .withMessage(message)
-        .withVerificationPassed(false)
+        .withVerificationFailed(errorCode.getValue(), message)
         .build();
   }
+
 
   private User composeUser(CwsUserInfo cwsUser, String email) {
     User user = new User();
@@ -169,7 +173,7 @@ public class IdmServiceImpl implements IdmService {
     try {
       return configuration.getIdentityManager().getIdmMapping().map(cognitoUser, cwsUser);
     } catch (ScriptException e) {
-      LOGGER.error("Error running the IdmMappingScript");
+      LOGGER.error(messages.get(IDM_MAPPING_SCRIPT_ERROR));
       throw new PerryException(e.getMessage(), e);
     }
   }
@@ -177,7 +181,8 @@ public class IdmServiceImpl implements IdmService {
   private CwsUserInfo getCwsUserByRacfId(String racfId) {
     CwsUserInfo cwsUser = null;
     if (racfId != null) {
-      List<CwsUserInfo> users = cwsUserInfoService.findUsers(Collections.singletonList(racfId));
+      List<CwsUserInfo> users =
+          cwsUserInfoService.findUsers(Collections.singletonList(toUpperCase(racfId)));
       if (!CollectionUtils.isEmpty(users)) {
         cwsUser = users.get(0);
       }
