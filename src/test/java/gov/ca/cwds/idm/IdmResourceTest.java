@@ -1,17 +1,5 @@
 package gov.ca.cwds.idm;
 
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.PERMISSIONS_ATTR_NAME;
-import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
-import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertStrict;
-import static gov.ca.cwds.idm.util.UsersSearchParametersUtil.DEFAULT_PAGESIZE;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
 import com.amazonaws.services.cognitoidp.model.AdminCreateUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminCreateUserResult;
@@ -37,17 +25,8 @@ import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.service.cognito.CognitoProperties;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.service.messages.MessagesService;
-import java.nio.charset.Charset;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.stream.Collectors;
-import javax.annotation.PostConstruct;
 import liquibase.util.StringUtils;
+import org.apache.commons.codec.binary.Base64;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -55,6 +34,8 @@ import org.mockito.InOrder;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.ActiveProfiles;
@@ -65,7 +46,42 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import javax.annotation.PostConstruct;
+import java.nio.charset.Charset;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static gov.ca.cwds.idm.BaseLiquibaseTest.CMS_STORE_URL;
+import static gov.ca.cwds.idm.BaseLiquibaseTest.TOKEN_STORE_URL;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.PERMISSIONS_ATTR_NAME;
+import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
+import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertStrict;
+import static gov.ca.cwds.idm.util.UsersSearchParametersUtil.DEFAULT_PAGESIZE;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+
 @ActiveProfiles({"dev", "idm"})
+@SpringBootTest(
+  properties = {
+    "perry.identityManager.idmBasicAuthUser=" + IdmResourceTest.IDM_BASIC_AUTH_USER,
+    "perry.identityManager.idmBasicAuthPass=" + IdmResourceTest.IDM_BASIC_AUTH_PASS,
+    "perry.identityManager.idmMapping=config/idm.groovy",
+    "spring.jpa.hibernate.ddl-auto=none",
+    "perry.tokenStore.datasource.url=" + TOKEN_STORE_URL,
+    "spring.datasource.url=" + CMS_STORE_URL
+  }
+)
 public class IdmResourceTest extends BaseLiquibaseTest {
 
   private static final String USER_NO_RACFID_ID = "2be3221f-8c2f-4386-8a95-a68f0282efb0";
@@ -76,6 +92,12 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   private static final String ABSENT_USER_ID = "absentUserId";
   private static final String ERROR_USER_ID = "errorUserId";
   private static final String USERPOOL = "userpool";
+  private static final String SOME_PAGINATION_TOKEN = "somePaginationToken";
+
+  static final String IDM_BASIC_AUTH_USER = "user";
+  static final String IDM_BASIC_AUTH_PASS = "pass";
+
+  private static final String BASIC_AUTH_HEADER = prepareBasicAuthHeader();
 
   private static final MediaType CONTENT_TYPE =
       new MediaType(
@@ -104,6 +126,13 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     this.mockMvc =
         MockMvcBuilders.webAppContextSetup(webApplicationContext).apply(springSecurity()).build();
     cognito = cognitoServiceFacade.getIdentityProvider();
+  }
+
+  private static String prepareBasicAuthHeader() {
+    String authString = IDM_BASIC_AUTH_USER + ":" + IDM_BASIC_AUTH_PASS;
+    byte[] authEncBytes = Base64.encodeBase64(authString.getBytes());
+    String authStringEnc = new String(authEncBytes);
+    return "Basic " + authStringEnc;
   }
 
   @Test
@@ -204,12 +233,12 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   }
 
   @Test
-  @WithMockCustomUser
-  public void testGetAllYoloUsers() throws Exception {
-
+  public void testGetUsers() throws Exception {
     MvcResult result =
         mockMvc
-            .perform(MockMvcRequestBuilders.get("/idm/users"))
+            .perform(
+                MockMvcRequestBuilders.get("/idm/users")
+                    .header(HttpHeaders.AUTHORIZATION, BASIC_AUTH_HEADER))
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.content().contentType(CONTENT_TYPE))
             .andReturn();
@@ -218,12 +247,12 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   }
 
   @Test
-  @WithMockCustomUser
-  public void testSearchUsers() throws Exception {
-
+  public void testgetUsersPage() throws Exception {
     MvcResult result =
         mockMvc
-            .perform(MockMvcRequestBuilders.get("/idm/users?lastName=Ma"))
+            .perform(
+                MockMvcRequestBuilders.get("/idm/users?paginationToken=" + SOME_PAGINATION_TOKEN)
+                    .header(HttpHeaders.AUTHORIZATION, BASIC_AUTH_HEADER))
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.content().contentType(CONTENT_TYPE))
             .andReturn();
@@ -233,10 +262,18 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
   @Test
   @WithMockCustomUser(roles = {"OtherRole"})
-  public void testSearchUsersWithOtherRole() throws Exception {
-
+  public void testGetUsersWithOtherRole() throws Exception {
     mockMvc
-        .perform(MockMvcRequestBuilders.get("/idm/users?lastName=Ma"))
+        .perform(MockMvcRequestBuilders.get("/idm/users"))
+        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+        .andReturn();
+  }
+
+  @Test
+  @WithMockCustomUser()
+  public void testGetUsersWithAdminRole() throws Exception {
+    mockMvc
+        .perform(MockMvcRequestBuilders.get("/idm/users"))
         .andExpect(MockMvcResultMatchers.status().isUnauthorized())
         .andReturn();
   }
@@ -719,22 +756,19 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
       setUpGetErrorUserRequestAndResult();
 
-      setSearchYoloUsersRequestAndResult("", user0, user1, user2);
+      setListUsersRequestAndResult("", user0, user1, user2);
 
-      setSearchYoloUsersRequestAndResult("Ma", user0);
+      setListUsersRequestAndResult(SOME_PAGINATION_TOKEN, user0);
 
       setSearchUsersByEmailRequestAndResult("julio@gmail.com", "test@test.com", user1);
     }
 
-    private void setSearchYoloUsersRequestAndResult(String lastNameSubstr, TestUser... testUsers) {
+    private void setListUsersRequestAndResult(String paginationToken, TestUser... testUsers) {
       ListUsersRequest request =
-          new ListUsersRequest()
-              .withUserPoolId(USERPOOL)
-              .withLimit(DEFAULT_PAGESIZE)
-              .withFilter("preferred_username = \"Yolo\"");
+          new ListUsersRequest().withUserPoolId(USERPOOL).withLimit(DEFAULT_PAGESIZE);
 
-      if (StringUtils.isNotEmpty(lastNameSubstr)) {
-        request.withFilter("family_name ^= \"" + lastNameSubstr + "\"");
+      if (StringUtils.isNotEmpty(paginationToken)) {
+        request.withPaginationToken(paginationToken);
       }
 
       List<UserType> userTypes =
