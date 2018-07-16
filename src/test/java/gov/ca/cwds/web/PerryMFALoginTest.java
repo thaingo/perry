@@ -7,12 +7,15 @@ import static org.junit.Assert.assertThat;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
+import gov.ca.cwds.config.api.sp.PerrySpConfiguration;
 import gov.ca.cwds.idm.BaseLiquibaseTest;
 import gov.ca.cwds.service.sso.custom.form.FormService;
 import io.dropwizard.testing.FixtureHelpers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -25,7 +28,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-@ActiveProfiles({"dev", "test"})
+@ActiveProfiles({"dev", "test", "default"})
 @SpringBootTest(properties = {
     "spring.jpa.hibernate.ddl-auto=none",
     "perry.identityManager.idmMapping=config/idm.groovy",
@@ -35,8 +38,10 @@ import org.springframework.web.context.WebApplicationContext;
     "perry.identityProvider.idpMapping=config/cognito.groovy",
     "perry.serviceProviders.mfa.identityMapping=config/default.groovy",
     "perry.jwt.timeout=10"
-})
+}, classes = {PerryLoginTestConfiguration.class, PerrySpConfiguration.class})
 public class PerryMFALoginTest extends BaseLiquibaseTest {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(PerryMFALoginTest.class);
 
   @Autowired
   private FormService formService;
@@ -55,13 +60,14 @@ public class PerryMFALoginTest extends BaseLiquibaseTest {
 
   @Test
   public void whenValidMFAJsonProvided_thenAuthenticate() throws Exception {
+
     // Trying to access secured URL
     MvcResult result = mockMvc
         .perform(get("/authn/login?callback=/demo-sp.html"))
         .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
         .andExpect(MockMvcResultMatchers.redirectedUrl("http://localhost/login.html"))
         .andReturn();
-    System.out.println("Login page redirect: " + result.getResponse().getRedirectedUrl());
+    LOGGER.info("Login page redirect: {}", result.getResponse().getRedirectedUrl());
 
     // Sending MFA Json to /login endpoint
     result = mockMvc.perform(MockMvcRequestBuilders.post("/login")
@@ -72,7 +78,7 @@ public class PerryMFALoginTest extends BaseLiquibaseTest {
         .andExpect(MockMvcResultMatchers
             .redirectedUrl("http://localhost/authn/login?callback=/demo-sp.html"))
         .andReturn();
-    System.out.println("Login API redirect: " + result.getResponse().getRedirectedUrl());
+    LOGGER.info("Login API redirect: {}", result.getResponse().getRedirectedUrl());
 
     // Receiving access code
     result = mockMvc
@@ -83,7 +89,7 @@ public class PerryMFALoginTest extends BaseLiquibaseTest {
     String accessCodeUrl = result.getResponse().getRedirectedUrl();
     assertThat(result.getResponse().getRedirectedUrl(), containsString("accessCode="));
     String accessCode = accessCodeUrl.split("=")[1];
-    System.out.println("Access Code URL: " + accessCodeUrl);
+    LOGGER.info("Access Code URL: {}", accessCodeUrl);
 
     MockHttpSession httpSession = (MockHttpSession) result.getRequest().getSession();
     // Receiving Perry token
@@ -93,15 +99,20 @@ public class PerryMFALoginTest extends BaseLiquibaseTest {
         .andExpect(MockMvcResultMatchers.status().isOk())
         .andReturn();
     String token = result.getResponse().getContentAsString();
-    System.out.println("Perry token: " + token);
+    LOGGER.info("Perry token: {}", token);
     Assert.assertTrue(token.matches("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"));
+
+//    PerryTokenEntity perryTokenEntity = new PerryTokenEntity();
+//    perryTokenEntity.setAccessCode(accessCode);
+//    perryTokenEntity.setSsoToken(token);
+//
+//    Mockito.verify(formService, Mockito.times(5)).validate(perryTokenEntity);
 
     //Validate token and receive JSON with user information
     result = mockMvc
-        .perform(get("/authn/validate?token=" + token)
-            .session(httpSession))
+        .perform(get("/authn/validate?token=" + token))
         .andExpect(MockMvcResultMatchers.status().isOk())
         .andReturn();
-    System.out.println("Perry JSON: " + result.getResponse().getContentAsString());
+    LOGGER.info("Perry JSON: {}", result.getResponse().getContentAsString());
   }
 }
