@@ -1,6 +1,14 @@
 package gov.ca.cwds.idm;
 
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.COUNTY_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.EMAIL_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.FIRST_NAME_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.LAST_NAME_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.PERMISSIONS_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_CUSTOM_1;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_CUSTOM_2;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.ROLES_ATTR_NAME;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertStrict;
 import static gov.ca.cwds.idm.util.UsersSearchParametersUtil.DEFAULT_PAGESIZE;
@@ -785,25 +793,27 @@ public class IdmResourceTest extends BaseLiquibaseTest {
       Collection<AttributeType> attrs = new ArrayList<>();
 
       if (testUser.getEmail() != null) {
-        attrs.add(attr("email", testUser.getEmail()));
+        attrs.add(attr(EMAIL_ATTR_NAME, testUser.getEmail()));
       }
       if (testUser.getFirstName() != null) {
-        attrs.add(attr("given_name", testUser.getFirstName()));
+        attrs.add(attr(FIRST_NAME_ATTR_NAME, testUser.getFirstName()));
       }
       if (testUser.getLastName() != null) {
-        attrs.add(attr("family_name", testUser.getLastName()));
+        attrs.add(attr(LAST_NAME_ATTR_NAME, testUser.getLastName()));
       }
       if (testUser.getCounty() != null) {
-        attrs.add(attr("custom:County", testUser.getCounty()));
+        attrs.add(attr(COUNTY_ATTR_NAME, testUser.getCounty()));
       }
       if (testUser.getPermissions() != null) {
-        attrs.add(attr("custom:permission", testUser.getPermissions()));
+        attrs.add(attr(PERMISSIONS_ATTR_NAME, testUser.getPermissions()));
       }
       if (testUser.getRoles() != null) {
-        attrs.add(attr("custom:role", testUser.getRoles()));
+        attrs.add(attr(ROLES_ATTR_NAME, testUser.getRoles()));
       }
       if (testUser.getRacfId() != null) {
-        attrs.add(attr("preferred_username", testUser.getRacfId()));
+        attrs.add(attr(RACFID_ATTR_NAME, testUser.getRacfId()));
+        attrs.add(attr(RACFID_ATTR_NAME_CUSTOM_1, testUser.getRacfId()));
+        attrs.add(attr(RACFID_ATTR_NAME_CUSTOM_2, testUser.getRacfId()));
       }
       return attrs;
     }

@@ -1,7 +1,6 @@
 package gov.ca.cwds.idm.service.cognito;
 
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.COUNTY_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.COUNTY_ATTR_NAME_2;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.EMAIL_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.FIRST_NAME_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.LAST_NAME_ATTR_NAME;
@@ -9,7 +8,8 @@ import static gov.ca.cwds.idm.service.cognito.CognitoUtils.OFFICE_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.PERMISSIONS_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.PHONE_NUMBER_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_2;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_CUSTOM_1;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_CUSTOM_2;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.ROLES_ATTR_NAME;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -249,11 +249,11 @@ public class CognitoServiceFacadeTest {
     assertAttr(attrMap, FIRST_NAME_ATTR_NAME, "Garcia");
     assertAttr(attrMap, LAST_NAME_ATTR_NAME, "Gonzales");
     assertAttr(attrMap, COUNTY_ATTR_NAME, "Madera");
-    assertAttr(attrMap, COUNTY_ATTR_NAME_2, "Madera");
     assertAttr(attrMap, OFFICE_ATTR_NAME, "River Office");
     assertAttr(attrMap, PHONE_NUMBER_ATTR_NAME, "+19161111111");
     assertAttr(attrMap, RACFID_ATTR_NAME, "RUBBLBA");
-    assertAttr(attrMap, RACFID_ATTR_NAME_2, "RUBBLBA");
+    assertAttr(attrMap, RACFID_ATTR_NAME_CUSTOM_1, "RUBBLBA");
+    assertAttr(attrMap, RACFID_ATTR_NAME_CUSTOM_2, "RUBBLBA");
     assertAttr(attrMap, PERMISSIONS_ATTR_NAME, "RFA-rollout:Hotline-rollout");
     assertAttr(attrMap, ROLES_ATTR_NAME, "CWS-admin:CWS-worker");
   }
@@ -266,7 +266,8 @@ public class CognitoServiceFacadeTest {
     AdminCreateUserRequest request = fasade.createAdminCreateUserRequest(user);
     Map<String, String> attrMap = attrMap(request.getUserAttributes());
     assertAttr(attrMap, RACFID_ATTR_NAME, "RUBBLBA");
-    assertAttr(attrMap, RACFID_ATTR_NAME_2, "RUBBLBA");
+    assertAttr(attrMap, RACFID_ATTR_NAME_CUSTOM_1, "RUBBLBA");
+    assertAttr(attrMap, RACFID_ATTR_NAME_CUSTOM_2, "RUBBLBA");
   }
 
   private User user() {
