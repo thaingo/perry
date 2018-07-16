@@ -178,26 +178,7 @@ public class IdmResource {
         .map(permissions -> ResponseEntity.ok().body(permissions))
         .orElseGet(() -> ResponseEntity.notFound().build());
   }
-
-  @RequestMapping(method = RequestMethod.PUT, value = "/permissions", consumes = "application/json")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
-  @ApiResponses(
-    value = {
-      @ApiResponse(code = 204, message = "No Content"),
-      @ApiResponse(code = 401, message = "Not Authorized")
-    }
-  )
-  @ApiOperation(value = "Overwrite the List of possible permissions")
-  @PreAuthorize("hasAuthority('CARES-admin')")
-  public ResponseEntity overwritePermissions(
-      @ApiParam(required = true, name = "List of Permissions", value = "List new Permissions here")
-          @NotNull
-          @RequestBody
-          List<String> permissions) {
-    dictionaryProvider.overwritePermissions(permissions);
-    return ResponseEntity.noContent().build();
-  }
-
+  
   @RequestMapping(method = RequestMethod.GET, value = "users/verify", produces = "application/json")
   @ApiOperation(value = "Check if user can be created by racfId and email", response = UserVerificationResult.class)
   @ApiResponses(value = {@ApiResponse(code = 401, message = "Not Authorized")})
