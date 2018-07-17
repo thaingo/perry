@@ -1,16 +1,19 @@
 package gov.ca.cwds.idm.dto;
 
 public class UsersSearchCriteria {
+
   private Integer pageSize;
-  private String email;
   private String paginationToken;
+  private String email;
+  private String rafcid;
 
   public UsersSearchCriteria(){}
 
   public UsersSearchCriteria(UsersSearchCriteria another) {
     this.pageSize = another.pageSize;
-    this.email = another.email;
     this.paginationToken = another.paginationToken;
+    this.email = another.email;
+    this.rafcid = another.rafcid;
   }
 
   public Integer getPageSize() {
@@ -21,14 +24,6 @@ public class UsersSearchCriteria {
     this.pageSize = pageSize;
   }
 
-  public String getEmail() {
-    return email;
-  }
-
-  public void setEmail(String email) {
-    this.email = email;
-  }
-
   public String getPaginationToken() {
     return paginationToken;
   }
@@ -37,10 +32,27 @@ public class UsersSearchCriteria {
     this.paginationToken = paginationToken;
   }
 
+  public String getEmail() {
+    return email;
+  }
+
+  public void setEmail(String email) {
+    this.email = email;
+  }
+
+  public String getRafcid() {
+    return rafcid;
+  }
+
+  public void setRafcid(String rafcid) {
+    this.rafcid = rafcid;
+  }
+
   public static final class SearchParameterBuilder {
     private Integer pageSize;
-    private String email;
     private String paginationToken;
+    private String email;
+    private String rafcid;
 
     private SearchParameterBuilder() {}
 
@@ -53,21 +65,26 @@ public class UsersSearchCriteria {
       return this;
     }
 
+    public SearchParameterBuilder withPaginationToken(String paginationToken) {
+      this.paginationToken = paginationToken;
+      return this;
+    }
+
     public SearchParameterBuilder withEmail(String email) {
       this.email = email;
       return this;
     }
-
-    public SearchParameterBuilder withPaginationToken(String paginationToken) {
-      this.paginationToken = paginationToken;
+    public SearchParameterBuilder withRacfid(String rafcid) {
+      this.rafcid = rafcid;
       return this;
     }
 
     public UsersSearchCriteria build() {
       UsersSearchCriteria usersSearchParameter = new UsersSearchCriteria();
       usersSearchParameter.setPageSize(pageSize);
-      usersSearchParameter.setEmail(email);
       usersSearchParameter.setPaginationToken(paginationToken);
+      usersSearchParameter.setEmail(email);
+      usersSearchParameter.setRafcid(rafcid);
       return usersSearchParameter;
     }
   }
