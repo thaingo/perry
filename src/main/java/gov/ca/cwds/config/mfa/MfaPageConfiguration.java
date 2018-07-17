@@ -23,6 +23,7 @@ import org.springframework.security.oauth2.client.DefaultOAuth2ClientContext;
 import org.springframework.security.oauth2.client.OAuth2ClientContext;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.context.WebApplicationContext;
 
 @Profile("mfa")
 @Configuration
@@ -72,7 +73,7 @@ public class MfaPageConfiguration extends WebSecurityConfigurerAdapter {
 
   @Bean
   @Primary
-  @Scope(value = "session", proxyMode = ScopedProxyMode.INTERFACES)
+  @Scope(value = WebApplicationContext.SCOPE_SESSION, proxyMode = ScopedProxyMode.INTERFACES)
   public OAuth2ClientContext oAuth2ClientContext() {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     if (authentication instanceof OAuth2Authentication) {
