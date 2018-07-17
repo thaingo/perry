@@ -1,20 +1,20 @@
 package gov.ca.cwds.idm;
 
-import gov.ca.cwds.idm.dto.UserUpdate;
+import gov.ca.cwds.idm.dto.IdmApiCustomError;
 import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.UserVerificationResult;
 import gov.ca.cwds.idm.dto.UsersPage;
 import gov.ca.cwds.idm.service.DictionaryProvider;
 import gov.ca.cwds.idm.service.IdmService;
 import gov.ca.cwds.rest.api.domain.UserAlreadyExistsException;
+import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
 import gov.ca.cwds.rest.api.domain.UserNotFoundPerryException;
-import gov.ca.cwds.rest.api.domain.UserValidationException;
+import gov.ca.cwds.service.messages.MessageCode;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import java.net.URI;
-import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
@@ -27,11 +27,16 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import static gov.ca.cwds.service.messages.MessageCode.IDM_USER_VALIDATION_FAILED;
+import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
 
 @RestController
 @Profile("idm")
@@ -46,10 +51,13 @@ public class IdmResource {
   @ApiOperation(
     value = "Users page",
     response = UsersPage.class,
-    notes = "Once there is more items than a default pagesize(60) in the datasource  you will get a paginationToken " +
-            "in a responce. Use it as a parameter to get a next page."
+    notes =
+        "This service is used by batch job to build the ES index. The client of this service should have 'IDM-job' role."
+            + "Once there is more items than a default page size (60) in the datasource you will get a paginationToken "
+            + "in a responce. Use it as a parameter to get a next page."
   )
   @ApiResponses(value = {@ApiResponse(code = 401, message = "Not Authorized")})
+  @PreAuthorize("hasAuthority('IDM-job')")
   public UsersPage getUsers(
       @ApiParam(name = "paginationToken", value = "paginationToken for the next page")
           @RequestParam(name = "paginationToken", required = false)
@@ -145,9 +153,11 @@ public class IdmResource {
       return ResponseEntity.created(uri).build();
 
     } catch (UserAlreadyExistsException e) {
-      return createCustomResponseEntity(HttpStatus.CONFLICT, e.getMessage());
-    } catch (UserValidationException e) {
-      return createCustomResponseEntity(HttpStatus.BAD_REQUEST, e.getMessage());
+      return createCustomResponseEntity(
+          HttpStatus.CONFLICT, USER_WITH_EMAIL_EXISTS_IN_IDM, e.getMessage());
+    } catch (UserIdmValidationException e) {
+      return createCustomResponseEntity(
+          HttpStatus.BAD_REQUEST, IDM_USER_VALIDATION_FAILED, e.getMessage(), e.getCause().getMessage());
     }
   }
 
@@ -168,26 +178,7 @@ public class IdmResource {
         .map(permissions -> ResponseEntity.ok().body(permissions))
         .orElseGet(() -> ResponseEntity.notFound().build());
   }
-
-  @RequestMapping(method = RequestMethod.PUT, value = "/permissions", consumes = "application/json")
-  @ResponseStatus(HttpStatus.NO_CONTENT)
-  @ApiResponses(
-    value = {
-      @ApiResponse(code = 204, message = "No Content"),
-      @ApiResponse(code = 401, message = "Not Authorized")
-    }
-  )
-  @ApiOperation(value = "Overwrite the List of possible permissions")
-  @PreAuthorize("hasAuthority('CARES-admin')")
-  public ResponseEntity overwritePermissions(
-      @ApiParam(required = true, name = "List of Permissions", value = "List new Permissions here")
-          @NotNull
-          @RequestBody
-          List<String> permissions) {
-    dictionaryProvider.overwritePermissions(permissions);
-    return ResponseEntity.noContent().build();
-  }
-
+  
   @RequestMapping(method = RequestMethod.GET, value = "users/verify", produces = "application/json")
   @ApiOperation(value = "Check if user can be created by racfId and email", response = UserVerificationResult.class)
   @ApiResponses(value = {@ApiResponse(code = 401, message = "Not Authorized")})
@@ -204,8 +195,14 @@ public class IdmResource {
   }
 
   private static ResponseEntity<IdmApiCustomError> createCustomResponseEntity(
-      HttpStatus httpStatus, String msg) {
+      HttpStatus httpStatus, MessageCode errorCode, String msg, String cause) {
     return new ResponseEntity<>(
-        new IdmApiCustomError(httpStatus, msg), httpStatus);
+        new IdmApiCustomError(httpStatus, errorCode, msg, cause), httpStatus);
+  }
+
+  private static ResponseEntity<IdmApiCustomError> createCustomResponseEntity(
+      HttpStatus httpStatus, MessageCode errorCode, String msg) {
+    return new ResponseEntity<>(
+        new IdmApiCustomError(httpStatus, errorCode, msg), httpStatus);
   }
 }

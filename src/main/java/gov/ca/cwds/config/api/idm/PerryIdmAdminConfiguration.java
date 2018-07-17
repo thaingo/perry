@@ -2,6 +2,7 @@ package gov.ca.cwds.config.api.idm;
 
 import gov.ca.cwds.config.api.common.BaseApiConfiguration;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -10,6 +11,7 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 
 @Configuration
 @Order(2)
+@Profile("idm")
 @EnableWebSecurity
 public class PerryIdmAdminConfiguration extends BaseApiConfiguration {
   @Override

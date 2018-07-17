@@ -24,7 +24,9 @@ import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.service.cognito.CognitoProperties;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
+import gov.ca.cwds.service.messages.MessagesService;
 import liquibase.util.StringUtils;
+import org.apache.commons.codec.binary.Base64;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -32,6 +34,8 @@ import org.mockito.InOrder;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.ActiveProfiles;
@@ -53,20 +57,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.google.common.base.Strings.nullToEmpty;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.COUNTY_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.COUNTY_ATTR_NAME_2;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.EMAIL_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.EMAIL_DELIVERY;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.FIRST_NAME_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.LAST_NAME_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.OFFICE_ATTR_NAME;
+import static gov.ca.cwds.idm.BaseLiquibaseTest.CMS_STORE_URL;
+import static gov.ca.cwds.idm.BaseLiquibaseTest.TOKEN_STORE_URL;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.PERMISSIONS_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.PHONE_NUMBER_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_2;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.ROLES_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.getCustomDelimeteredListAttributeValue;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertStrict;
 import static gov.ca.cwds.idm.util.UsersSearchParametersUtil.DEFAULT_PAGESIZE;
@@ -79,6 +72,16 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 
 @ActiveProfiles({"dev", "idm"})
+@SpringBootTest(
+  properties = {
+    "perry.identityManager.idmBasicAuthUser=" + IdmResourceTest.IDM_BASIC_AUTH_USER,
+    "perry.identityManager.idmBasicAuthPass=" + IdmResourceTest.IDM_BASIC_AUTH_PASS,
+    "perry.identityManager.idmMapping=config/idm.groovy",
+    "spring.jpa.hibernate.ddl-auto=none",
+    "perry.tokenStore.datasource.url=" + TOKEN_STORE_URL,
+    "spring.datasource.url=" + CMS_STORE_URL
+  }
+)
 public class IdmResourceTest extends BaseLiquibaseTest {
 
   private static final String USER_NO_RACFID_ID = "2be3221f-8c2f-4386-8a95-a68f0282efb0";
@@ -89,6 +92,12 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   private static final String ABSENT_USER_ID = "absentUserId";
   private static final String ERROR_USER_ID = "errorUserId";
   private static final String USERPOOL = "userpool";
+  private static final String SOME_PAGINATION_TOKEN = "somePaginationToken";
+
+  static final String IDM_BASIC_AUTH_USER = "user";
+  static final String IDM_BASIC_AUTH_PASS = "pass";
+
+  private static final String BASIC_AUTH_HEADER = prepareBasicAuthHeader();
 
   private static final MediaType CONTENT_TYPE =
       new MediaType(
@@ -99,6 +108,8 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @Autowired private WebApplicationContext webApplicationContext;
 
   @Autowired private CognitoServiceFacade cognitoServiceFacade;
+
+  @Autowired private MessagesService messagesService;
 
   private MockMvc mockMvc;
 
@@ -111,9 +122,17 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
   @Before
   public void before() {
+    cognitoServiceFacade.setMessagesService(messagesService);
     this.mockMvc =
         MockMvcBuilders.webAppContextSetup(webApplicationContext).apply(springSecurity()).build();
     cognito = cognitoServiceFacade.getIdentityProvider();
+  }
+
+  private static String prepareBasicAuthHeader() {
+    String authString = IDM_BASIC_AUTH_USER + ":" + IDM_BASIC_AUTH_PASS;
+    byte[] authEncBytes = Base64.encodeBase64(authString.getBytes());
+    String authStringEnc = new String(authEncBytes);
+    return "Basic " + authStringEnc;
   }
 
   @Test
@@ -214,12 +233,12 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   }
 
   @Test
-  @WithMockCustomUser
-  public void testGetAllYoloUsers() throws Exception {
-
+  public void testGetUsers() throws Exception {
     MvcResult result =
         mockMvc
-            .perform(MockMvcRequestBuilders.get("/idm/users"))
+            .perform(
+                MockMvcRequestBuilders.get("/idm/users")
+                    .header(HttpHeaders.AUTHORIZATION, BASIC_AUTH_HEADER))
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.content().contentType(CONTENT_TYPE))
             .andReturn();
@@ -228,12 +247,12 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   }
 
   @Test
-  @WithMockCustomUser
   public void testgetUsersPage() throws Exception {
-
     MvcResult result =
         mockMvc
-            .perform(MockMvcRequestBuilders.get("/idm/users?paginationToken=somePaginationToken"))
+            .perform(
+                MockMvcRequestBuilders.get("/idm/users?paginationToken=" + SOME_PAGINATION_TOKEN)
+                    .header(HttpHeaders.AUTHORIZATION, BASIC_AUTH_HEADER))
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.content().contentType(CONTENT_TYPE))
             .andReturn();
@@ -243,10 +262,18 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
   @Test
   @WithMockCustomUser(roles = {"OtherRole"})
-  public void testSearchUsersWithOtherRole() throws Exception {
-
+  public void testGetUsersWithOtherRole() throws Exception {
     mockMvc
-        .perform(MockMvcRequestBuilders.get("/idm/users?lastName=Ma"))
+        .perform(MockMvcRequestBuilders.get("/idm/users"))
+        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+        .andReturn();
+  }
+
+  @Test
+  @WithMockCustomUser()
+  public void testGetUsersWithAdminRole() throws Exception {
+    mockMvc
+        .perform(MockMvcRequestBuilders.get("/idm/users"))
         .andExpect(MockMvcResultMatchers.status().isUnauthorized())
         .andReturn();
   }
@@ -255,7 +282,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @WithMockCustomUser
   public void testCreateUserSuccess() throws Exception {
     User user = user();
-    AdminCreateUserRequest request = createUserRequest(user);
+    AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
     setCreateUserResult(request, NEW_USER_SUCCESS_ID);
 
     mockMvc
@@ -276,7 +303,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     User user = user();
     user.setEmail("some.existing@email");
 
-    AdminCreateUserRequest request = createUserRequest(user);
+    AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
     when(cognito.adminCreateUser(request))
         .thenThrow(new UsernameExistsException("user already exists"));
 
@@ -297,7 +324,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     User user = user();
     user.setCountyName("OtherCounty");
 
-    AdminCreateUserRequest request = createUserRequest(user);
+    AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
 
     mockMvc
         .perform(
@@ -347,7 +374,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   public void testCreateUserCognitoValidationError() throws Exception {
     User user = user();
     user.setOffice("too long string");
-    AdminCreateUserRequest request = createUserRequest(user);
+    AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
     when(cognito.adminCreateUser(request))
         .thenThrow(new InvalidParameterException("invalid parameter"));
 
@@ -490,6 +517,20 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
   @Test
   @WithMockCustomUser
+  public void testVerifyUsersRacfidInLowerCase() throws Exception {
+    MvcResult result =
+        mockMvc
+            .perform(
+                MockMvcRequestBuilders.get("/idm/users/verify?email=test@test.com&racfid=smithbo"))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers.content().contentType(CONTENT_TYPE))
+            .andReturn();
+
+    assertNonStrict(result, "fixtures/idm/verify-user/verify-valid.json");
+  }
+
+  @Test
+  @WithMockCustomUser
   public void testVerifyUsersNoRacfId() throws Exception {
     MvcResult result =
         mockMvc
@@ -557,7 +598,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
   private void testCreateUserValidationError(User user) throws Exception {
 
-    AdminCreateUserRequest request = createUserRequest(user);
+    AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
 
     mockMvc
         .perform(
@@ -605,30 +646,6 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     user.setLastName("Gonzales");
     user.setCountyName(WithMockCustomUser.COUNTY);
     return user;
-  }
-
-  private static AdminCreateUserRequest createUserRequest(User user) {
-
-    AttributeType[] userAttributes =
-        new AttributeType[] {
-          attr(EMAIL_ATTR_NAME, nullToEmpty(user.getEmail())),
-          attr(FIRST_NAME_ATTR_NAME, nullToEmpty(user.getFirstName())),
-          attr(LAST_NAME_ATTR_NAME, nullToEmpty(user.getLastName())),
-          attr(COUNTY_ATTR_NAME, nullToEmpty(user.getCountyName())),
-          attr(COUNTY_ATTR_NAME_2, nullToEmpty(user.getCountyName())),
-          attr(OFFICE_ATTR_NAME, nullToEmpty(user.getOffice())),
-          attr(PHONE_NUMBER_ATTR_NAME, nullToEmpty(user.getPhoneNumber())),
-          attr(RACFID_ATTR_NAME, nullToEmpty(user.getRacfid())),
-          attr(RACFID_ATTR_NAME_2, nullToEmpty(user.getRacfid())),
-          attr(PERMISSIONS_ATTR_NAME, getCustomDelimeteredListAttributeValue(user.getPermissions())),
-          attr(ROLES_ATTR_NAME, getCustomDelimeteredListAttributeValue(user.getRoles()))
-        };
-
-    return new AdminCreateUserRequest()
-        .withUsername(user.getEmail())
-        .withUserPoolId(USERPOOL)
-        .withDesiredDeliveryMediums(EMAIL_DELIVERY)
-        .withUserAttributes(userAttributes);
   }
 
   private AdminCreateUserRequest setCreateUserResult(AdminCreateUserRequest request, String newId) {
@@ -739,18 +756,16 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
       setUpGetErrorUserRequestAndResult();
 
-      setSearchYoloUsersRequestAndResult("", user0, user1, user2);
+      setListUsersRequestAndResult("", user0, user1, user2);
 
-      setSearchYoloUsersRequestAndResult("somePaginationToken", user0);
+      setListUsersRequestAndResult(SOME_PAGINATION_TOKEN, user0);
 
       setSearchUsersByEmailRequestAndResult("julio@gmail.com", "test@test.com", user1);
     }
 
-    private void setSearchYoloUsersRequestAndResult(String paginationToken, TestUser... testUsers) {
+    private void setListUsersRequestAndResult(String paginationToken, TestUser... testUsers) {
       ListUsersRequest request =
-          new ListUsersRequest()
-              .withUserPoolId(USERPOOL)
-              .withLimit(DEFAULT_PAGESIZE);
+          new ListUsersRequest().withUserPoolId(USERPOOL).withLimit(DEFAULT_PAGESIZE);
 
       if (StringUtils.isNotEmpty(paginationToken)) {
         request.withPaginationToken(paginationToken);
