@@ -40,7 +40,7 @@ import org.springframework.web.context.WebApplicationContext;
     "perry.serviceProviders.default.identityMapping=config/dev.groovy",
     "perry.serviceProviders.mfa.identityMapping=config/default.groovy",
     "perry.jwt.timeout=10"
-}, classes = {PerryLoginTestConfiguration.class, PerryApplication.class})
+}, classes = {PerryApplication.class})
 
 public class PerryDevModeTest extends BaseLiquibaseTest {
 
