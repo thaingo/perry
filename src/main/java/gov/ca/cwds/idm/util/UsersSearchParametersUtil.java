@@ -1,6 +1,6 @@
 package gov.ca.cwds.idm.util;
 
-import gov.ca.cwds.idm.dto.UsersSearchCriteria;
+import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 
 public class UsersSearchParametersUtil {
 
@@ -8,8 +8,8 @@ public class UsersSearchParametersUtil {
 
   public static final int DEFAULT_PAGESIZE = 60;
 
-  public static UsersSearchCriteria composeToGetAllByPages(String paginationToken) {
-    return UsersSearchCriteria.SearchParameterBuilder.aSearchParameters()
+  public static CognitoUsersSearchCriteria composeToGetAllByPages(String paginationToken) {
+    return CognitoUsersSearchCriteria.SearchParameterBuilder.aSearchParameters()
             .withPaginationToken(paginationToken)
             .withPageSize(DEFAULT_PAGESIZE)
             .build();

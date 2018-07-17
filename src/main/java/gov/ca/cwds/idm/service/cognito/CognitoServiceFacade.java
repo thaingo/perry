@@ -42,10 +42,10 @@ import com.amazonaws.services.cognitoidp.model.ListUsersResult;
 import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import com.amazonaws.services.cognitoidp.model.UsernameExistsException;
-import gov.ca.cwds.idm.dto.CognitoUserPage;
+import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
-import gov.ca.cwds.idm.dto.UsersSearchCriteria;
+import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.rest.api.domain.UserAlreadyExistsException;
 import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
@@ -145,7 +145,7 @@ public class CognitoServiceFacade {
             .withUserAttributes(buildCreateUserAttributes(user));
   }
 
-  public CognitoUserPage search(UsersSearchCriteria searchCriteria) {
+  public CognitoUserPage search(CognitoUsersSearchCriteria searchCriteria) {
     ListUsersRequest request = composeListUsersRequest(searchCriteria);
     try {
       ListUsersResult result = identityProvider.listUsers(request);
@@ -155,7 +155,7 @@ public class CognitoServiceFacade {
     }
   }
 
-  public List<UserType> searchAllPages(UsersSearchCriteria searchCriteria) {
+  public List<UserType> searchAllPages(CognitoUsersSearchCriteria searchCriteria) {
     List<UserType> result = new ArrayList<>();
 
     CognitoUserPage userPage = search(searchCriteria);
@@ -165,13 +165,13 @@ public class CognitoServiceFacade {
   }
 
   private void addPage(List<UserType> result, CognitoUserPage userPage,
-      UsersSearchCriteria searchCriteria) {
+      CognitoUsersSearchCriteria searchCriteria) {
 
     result.addAll(userPage.getUsers());
     String paginationToken = userPage.getPaginationToken();
 
     if (StringUtils.isNotEmpty(paginationToken)) {
-      UsersSearchCriteria searchCriteria2 = new UsersSearchCriteria(searchCriteria);
+      CognitoUsersSearchCriteria searchCriteria2 = new CognitoUsersSearchCriteria(searchCriteria);
       searchCriteria2.setPaginationToken(paginationToken);
       CognitoUserPage userPage2 = search(searchCriteria2);
       addPage(result, userPage2, searchCriteria);
@@ -261,7 +261,7 @@ public class CognitoServiceFacade {
     }
   }
 
-  ListUsersRequest composeListUsersRequest(UsersSearchCriteria parameter) {
+  ListUsersRequest composeListUsersRequest(CognitoUsersSearchCriteria parameter) {
     ListUsersRequest request = new ListUsersRequest().withUserPoolId(properties.getUserpool());
     if (parameter.getPageSize() != null) {
       request = request.withLimit(parameter.getPageSize());

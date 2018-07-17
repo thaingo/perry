@@ -1,4 +1,4 @@
-package gov.ca.cwds.idm.dto;
+package gov.ca.cwds.idm.service.cognito.dto;
 
 import com.amazonaws.services.cognitoidp.model.UserType;
 

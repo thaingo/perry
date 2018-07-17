@@ -1,15 +1,15 @@
-package gov.ca.cwds.idm.dto;
+package gov.ca.cwds.idm.service.cognito.dto;
 
-public class UsersSearchCriteria {
+public class CognitoUsersSearchCriteria {
 
   private Integer pageSize;
   private String paginationToken;
   private String email;
   private String rafcid;
 
-  public UsersSearchCriteria(){}
+  public CognitoUsersSearchCriteria(){}
 
-  public UsersSearchCriteria(UsersSearchCriteria another) {
+  public CognitoUsersSearchCriteria(CognitoUsersSearchCriteria another) {
     this.pageSize = another.pageSize;
     this.paginationToken = another.paginationToken;
     this.email = another.email;
@@ -79,8 +79,8 @@ public class UsersSearchCriteria {
       return this;
     }
 
-    public UsersSearchCriteria build() {
-      UsersSearchCriteria usersSearchParameter = new UsersSearchCriteria();
+    public CognitoUsersSearchCriteria build() {
+      CognitoUsersSearchCriteria usersSearchParameter = new CognitoUsersSearchCriteria();
       usersSearchParameter.setPageSize(pageSize);
       usersSearchParameter.setPaginationToken(paginationToken);
       usersSearchParameter.setEmail(email);

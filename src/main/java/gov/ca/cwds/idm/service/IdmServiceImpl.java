@@ -4,12 +4,12 @@ import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.PerryProperties;
 import gov.ca.cwds.data.persistence.auth.CwsOffice;
 import gov.ca.cwds.data.persistence.auth.StaffPerson;
-import gov.ca.cwds.idm.dto.CognitoUserPage;
+import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.UserVerificationResult;
 import gov.ca.cwds.idm.dto.UsersPage;
-import gov.ca.cwds.idm.dto.UsersSearchCriteria;
+import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.CognitoUtils;
 import gov.ca.cwds.idm.util.UsersSearchParametersUtil;
@@ -111,7 +111,7 @@ public class IdmServiceImpl implements IdmService {
     }
     Collection<UserType> cognitoUsers =
         cognitoService.search(
-            UsersSearchCriteria.SearchParameterBuilder.aSearchParameters()
+            CognitoUsersSearchCriteria.SearchParameterBuilder.aSearchParameters()
                 .withEmail(email).build()).getUsers();
 
     if (!CollectionUtils.isEmpty(cognitoUsers)) {
