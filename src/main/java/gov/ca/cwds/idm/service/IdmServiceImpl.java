@@ -9,7 +9,7 @@ import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.UserVerificationResult;
 import gov.ca.cwds.idm.dto.UsersPage;
-import gov.ca.cwds.idm.dto.UsersSearchParameter;
+import gov.ca.cwds.idm.dto.UsersSearchCriteria;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.CognitoUtils;
 import gov.ca.cwds.idm.util.UsersSearchParametersUtil;
@@ -111,7 +111,7 @@ public class IdmServiceImpl implements IdmService {
     }
     Collection<UserType> cognitoUsers =
         cognitoService.search(
-            UsersSearchParameter.SearchParameterBuilder.aSearchParameters()
+            UsersSearchCriteria.SearchParameterBuilder.aSearchParameters()
                 .withEmail(email).build()).getUsers();
 
     if (!CollectionUtils.isEmpty(cognitoUsers)) {

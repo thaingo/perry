@@ -38,7 +38,7 @@ import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
-import gov.ca.cwds.idm.dto.UsersSearchParameter;
+import gov.ca.cwds.idm.dto.UsersSearchCriteria;
 import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.rest.api.domain.UserNotFoundPerryException;
 import gov.ca.cwds.service.messages.MessagesService;
@@ -284,7 +284,7 @@ public class CognitoServiceFacadeTest {
     UserType userType3 = userType("user3");
     UserType userType4 = userType("user4");
 
-    UsersSearchParameter searchCriteria = new UsersSearchParameter();
+    UsersSearchCriteria searchCriteria = new UsersSearchCriteria();
     searchCriteria.setEmail("search@all.email");
     searchCriteria.setPageSize(2);
 
@@ -317,10 +317,10 @@ public class CognitoServiceFacadeTest {
   }
 
   private ListUsersRequest setListUsersRequestAndResponse(
-      UsersSearchParameter searchCriteria, String requestPaginationToken,
+      UsersSearchCriteria searchCriteria, String requestPaginationToken,
       String responsePaginationToken, UserType... userTypes) {
 
-    UsersSearchParameter searchCriteria1 = new UsersSearchParameter(searchCriteria);
+    UsersSearchCriteria searchCriteria1 = new UsersSearchCriteria(searchCriteria);
     searchCriteria1.setPaginationToken(requestPaginationToken);
     ListUsersRequest request = facade.composeListUsersRequest(searchCriteria1);
     ListUsersResult listUsersResult =
