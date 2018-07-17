@@ -55,6 +55,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.PostConstruct;
+import liquibase.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -145,12 +146,35 @@ public class CognitoServiceFacade {
   }
 
   public CognitoUserPage search(UsersSearchParameter searchCriteria) {
-    ListUsersRequest request = composeRequest(searchCriteria);
+    ListUsersRequest request = composeListUsersRequest(searchCriteria);
     try {
       ListUsersResult result = identityProvider.listUsers(request);
       return new CognitoUserPage(result.getUsers(), result.getPaginationToken());
     } catch (Exception e) {
       throw new PerryException(messages.get(ERROR_CONNECT_TO_IDM), e);
+    }
+  }
+
+  public List<UserType> searchAllPages(UsersSearchParameter searchCriteria) {
+    List<UserType> result = new ArrayList<>();
+
+    CognitoUserPage userPage = search(searchCriteria);
+    addPage(result, userPage, searchCriteria);
+
+    return result;
+  }
+
+  private void addPage(List<UserType> result, CognitoUserPage userPage,
+      UsersSearchParameter searchCriteria) {
+
+    result.addAll(userPage.getUsers());
+    String paginationToken = userPage.getPaginationToken();
+
+    if (StringUtils.isNotEmpty(paginationToken)) {
+      UsersSearchParameter searchCriteria2 = new UsersSearchParameter(searchCriteria);
+      searchCriteria2.setPaginationToken(paginationToken);
+      CognitoUserPage userPage2 = search(searchCriteria2);
+      addPage(result, userPage2, searchCriteria);
     }
   }
 
@@ -237,7 +261,7 @@ public class CognitoServiceFacade {
     }
   }
 
-  private ListUsersRequest composeRequest(UsersSearchParameter parameter) {
+  ListUsersRequest composeListUsersRequest(UsersSearchParameter parameter) {
     ListUsersRequest request = new ListUsersRequest().withUserPoolId(properties.getUserpool());
     if (parameter.getPageSize() != null) {
       request = request.withLimit(parameter.getPageSize());

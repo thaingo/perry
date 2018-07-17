@@ -5,6 +5,14 @@ public class UsersSearchParameter {
   private String email;
   private String paginationToken;
 
+  public UsersSearchParameter(){}
+
+  public UsersSearchParameter(UsersSearchParameter another) {
+    this.pageSize = another.pageSize;
+    this.email = another.email;
+    this.paginationToken = another.paginationToken;
+  }
+
   public Integer getPageSize() {
     return pageSize;
   }
