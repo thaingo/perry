@@ -284,29 +284,20 @@ public class CognitoServiceFacadeTest {
     UserType userType3 = userType("user3");
     UserType userType4 = userType("user4");
 
-    UsersSearchParameter searchCriteria0 = new UsersSearchParameter();
-    searchCriteria0.setEmail("search@all.email");
-    searchCriteria0.setPageSize(2);
-    ListUsersRequest request0 = facade.composeListUsersRequest(searchCriteria0);
-    ListUsersResult listUsersResult0 =
-        new ListUsersResult().withUsers(userType0, userType1).withPaginationToken("1");
-    when(identityProvider.listUsers(request0)).thenReturn(listUsersResult0);
+    UsersSearchParameter searchCriteria = new UsersSearchParameter();
+    searchCriteria.setEmail("search@all.email");
+    searchCriteria.setPageSize(2);
 
-    UsersSearchParameter searchCriteria1 = new UsersSearchParameter(searchCriteria0);
-    searchCriteria1.setPaginationToken("1");
-    ListUsersRequest request1 = facade.composeListUsersRequest(searchCriteria1);
-    ListUsersResult listUsersResult1 =
-        new ListUsersResult().withUsers(userType2, userType3).withPaginationToken("2");
-    when(identityProvider.listUsers(request1)).thenReturn(listUsersResult1);
+    ListUsersRequest request0 =
+        setListUsersRequestAndResponse(searchCriteria, null, "1", userType0, userType1);
 
-    UsersSearchParameter searchCriteria2 = new UsersSearchParameter(searchCriteria1);
-    searchCriteria2.setPaginationToken("2");
-    ListUsersRequest request2 = facade.composeListUsersRequest(searchCriteria2);
-    ListUsersResult listUsersResult2 =
-        new ListUsersResult().withUsers(userType4).withPaginationToken(null);
-    when(identityProvider.listUsers(request2)).thenReturn(listUsersResult2);
+    ListUsersRequest request1 =
+        setListUsersRequestAndResponse(searchCriteria, "1", "2", userType2, userType3);
 
-    List<UserType> userTypes = facade.searchAllPages(searchCriteria0);
+    ListUsersRequest request2 =
+        setListUsersRequestAndResponse(searchCriteria, "2", null, userType4);
+
+    List<UserType> userTypes = facade.searchAllPages(searchCriteria);
 
     verify(identityProvider, times(1)).listUsers(request0);
     verify(identityProvider, times(1)).listUsers(request1);
@@ -323,7 +314,19 @@ public class CognitoServiceFacadeTest {
     assertThat(userTypes.get(2).getUsername(), is("user2"));
     assertThat(userTypes.get(3).getUsername(), is("user3"));
     assertThat(userTypes.get(4).getUsername(), is("user4"));
+  }
 
+  private ListUsersRequest setListUsersRequestAndResponse(
+      UsersSearchParameter searchCriteria, String requestPaginationToken,
+      String responsePaginationToken, UserType... userTypes) {
+
+    UsersSearchParameter searchCriteria1 = new UsersSearchParameter(searchCriteria);
+    searchCriteria1.setPaginationToken(requestPaginationToken);
+    ListUsersRequest request = facade.composeListUsersRequest(searchCriteria1);
+    ListUsersResult listUsersResult =
+        new ListUsersResult().withUsers(userTypes).withPaginationToken(responsePaginationToken);
+    when(identityProvider.listUsers(request)).thenReturn(listUsersResult);
+    return request;
   }
 
   private User user() {
