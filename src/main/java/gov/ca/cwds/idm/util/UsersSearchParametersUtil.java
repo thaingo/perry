@@ -1,7 +1,6 @@
 package gov.ca.cwds.idm.util;
 
 import gov.ca.cwds.idm.dto.UsersSearchParameter;
-import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 
 public class UsersSearchParametersUtil {
 
