@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 import gov.ca.cwds.PerryApplication;
 import gov.ca.cwds.idm.BaseLiquibaseTest;
+import gov.ca.cwds.idm.WithMockCustomUser;
 import gov.ca.cwds.service.sso.custom.form.FormService;
 import io.dropwizard.testing.FixtureHelpers;
 import org.junit.Assert;
@@ -60,6 +61,7 @@ public class PerryMFALoginTest extends BaseLiquibaseTest {
             .apply(springSecurity()).build();
   }
 
+  @WithMockCustomUser
   @Test
   public void whenValidMFAJsonProvided_thenAuthenticate() throws Exception {
 
