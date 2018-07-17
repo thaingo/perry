@@ -7,7 +7,7 @@ import static org.junit.Assert.assertThat;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
-import gov.ca.cwds.config.api.sp.PerrySpConfiguration;
+import gov.ca.cwds.PerryApplication;
 import gov.ca.cwds.idm.BaseLiquibaseTest;
 import gov.ca.cwds.service.sso.custom.form.FormService;
 import io.dropwizard.testing.FixtureHelpers;
@@ -36,9 +36,11 @@ import org.springframework.web.context.WebApplicationContext;
     "spring.datasource.url=" + CMS_STORE_URL,
     "perry.whiteList=" + "/demo-sp.html",
     "perry.identityProvider.idpMapping=config/cognito.groovy",
+    "perry.serviceProviders.default.identityMapping=config/dev.groovy",
     "perry.serviceProviders.mfa.identityMapping=config/default.groovy",
     "perry.jwt.timeout=10"
-}, classes = {PerryLoginTestConfiguration.class, PerrySpConfiguration.class})
+}, classes = {PerryLoginTestConfiguration.class, PerryApplication.class})
+
 public class PerryMFALoginTest extends BaseLiquibaseTest {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(PerryMFALoginTest.class);
@@ -100,7 +102,8 @@ public class PerryMFALoginTest extends BaseLiquibaseTest {
         .andReturn();
     String token = result.getResponse().getContentAsString();
     LOGGER.info("Perry token: {}", token);
-    Assert.assertTrue(token.matches("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"));
+    Assert
+        .assertTrue(token.matches("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"));
 
 //    PerryTokenEntity perryTokenEntity = new PerryTokenEntity();
 //    perryTokenEntity.setAccessCode(accessCode);
