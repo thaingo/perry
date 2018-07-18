@@ -285,7 +285,7 @@ public class CognitoServiceFacadeTest {
     UserType userType4 = userType("user4");
 
     CognitoUsersSearchCriteria searchCriteria = new CognitoUsersSearchCriteria();
-    searchCriteria.setEmail("search@all.email");
+    searchCriteria.setAttr(EMAIL_ATTR_NAME, "search@all.email");
     searchCriteria.setPageSize(2);
 
     ListUsersRequest request0 =
@@ -314,6 +314,14 @@ public class CognitoServiceFacadeTest {
     assertThat(userTypes.get(2).getUsername(), is("user2"));
     assertThat(userTypes.get(3).getUsername(), is("user3"));
     assertThat(userTypes.get(4).getUsername(), is("user4"));
+  }
+
+  @Test
+  public void testComposeListUsersRequest(){
+    CognitoUsersSearchCriteria criteria = new CognitoUsersSearchCriteria();
+    criteria.setAttr(RACFID_ATTR_NAME, "ABC");
+    ListUsersRequest request = facade.composeListUsersRequest(criteria);
+    assertThat(request.getFilter(), is(RACFID_ATTR_NAME + " = \"ABC\""));
   }
 
   private ListUsersRequest setListUsersRequestAndResponse(

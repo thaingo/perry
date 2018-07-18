@@ -4,16 +4,16 @@ public class CognitoUsersSearchCriteria {
 
   private Integer pageSize;
   private String paginationToken;
-  private String email;
-  private String rafcid;
+  private String attrName;
+  private String attrValue;
 
   public CognitoUsersSearchCriteria(){}
 
   public CognitoUsersSearchCriteria(CognitoUsersSearchCriteria another) {
     this.pageSize = another.pageSize;
     this.paginationToken = another.paginationToken;
-    this.email = another.email;
-    this.rafcid = another.rafcid;
+    this.attrName = another.attrName;
+    this.attrValue = another.attrValue;
   }
 
   public Integer getPageSize() {
@@ -32,27 +32,24 @@ public class CognitoUsersSearchCriteria {
     this.paginationToken = paginationToken;
   }
 
-  public String getEmail() {
-    return email;
+  public String getAttrName() {
+    return attrName;
   }
 
-  public void setEmail(String email) {
-    this.email = email;
+  public String getAttrValue() {
+    return attrValue;
   }
 
-  public String getRafcid() {
-    return rafcid;
-  }
-
-  public void setRafcid(String rafcid) {
-    this.rafcid = rafcid;
+  public void setAttr(String attrName, String attrValue) {
+    this.attrName = attrName;
+    this.attrValue = attrValue;
   }
 
   public static final class SearchParameterBuilder {
     private Integer pageSize;
     private String paginationToken;
-    private String email;
-    private String rafcid;
+    private String attrName;
+    private String attrValue;
 
     private SearchParameterBuilder() {}
 
@@ -70,12 +67,9 @@ public class CognitoUsersSearchCriteria {
       return this;
     }
 
-    public SearchParameterBuilder withEmail(String email) {
-      this.email = email;
-      return this;
-    }
-    public SearchParameterBuilder withRacfid(String rafcid) {
-      this.rafcid = rafcid;
+    public SearchParameterBuilder withAttr(String attrName, String attrValue) {
+      this.attrName = attrName;
+      this.attrValue = attrValue;
       return this;
     }
 
@@ -83,8 +77,7 @@ public class CognitoUsersSearchCriteria {
       CognitoUsersSearchCriteria usersSearchParameter = new CognitoUsersSearchCriteria();
       usersSearchParameter.setPageSize(pageSize);
       usersSearchParameter.setPaginationToken(paginationToken);
-      usersSearchParameter.setEmail(email);
-      usersSearchParameter.setRafcid(rafcid);
+      usersSearchParameter.setAttr(attrName, attrValue);
       return usersSearchParameter;
     }
   }

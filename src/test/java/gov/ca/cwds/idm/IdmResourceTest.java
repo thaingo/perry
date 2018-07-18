@@ -11,7 +11,7 @@ import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_CUST
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.ROLES_ATTR_NAME;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertStrict;
-import static gov.ca.cwds.idm.util.UsersSearchParametersUtil.DEFAULT_PAGESIZE;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.DEFAULT_PAGESIZE;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -79,17 +79,9 @@ import java.util.stream.Collectors;
 
 import static gov.ca.cwds.idm.BaseLiquibaseTest.CMS_STORE_URL;
 import static gov.ca.cwds.idm.BaseLiquibaseTest.TOKEN_STORE_URL;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.PERMISSIONS_ATTR_NAME;
-import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
-import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertStrict;
-import static gov.ca.cwds.idm.util.UsersSearchParametersUtil.DEFAULT_PAGESIZE;
-import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 
 @ActiveProfiles({"dev", "idm"})
 @SpringBootTest(

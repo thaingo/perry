@@ -261,16 +261,16 @@ public class CognitoServiceFacade {
     }
   }
 
-  ListUsersRequest composeListUsersRequest(CognitoUsersSearchCriteria parameter) {
+  ListUsersRequest composeListUsersRequest(CognitoUsersSearchCriteria criteria) {
     ListUsersRequest request = new ListUsersRequest().withUserPoolId(properties.getUserpool());
-    if (parameter.getPageSize() != null) {
-      request = request.withLimit(parameter.getPageSize());
+    if (criteria.getPageSize() != null) {
+      request = request.withLimit(criteria.getPageSize());
     }
-    if (parameter.getPaginationToken() != null) {
-      request = request.withPaginationToken(parameter.getPaginationToken());
+    if (criteria.getPaginationToken() != null) {
+      request = request.withPaginationToken(criteria.getPaginationToken());
     }
-    if (parameter.getEmail() != null) {
-      request = request.withFilter("email = \"" + parameter.getEmail() + "\"");
+    if (criteria.getAttrName() != null) {
+      request = request.withFilter(criteria.getAttrName() + " = \"" + criteria.getAttrValue() + "\"");
     }
     return request;
   }

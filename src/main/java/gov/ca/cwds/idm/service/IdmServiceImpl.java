@@ -4,6 +4,7 @@ import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.PerryProperties;
 import gov.ca.cwds.data.persistence.auth.CwsOffice;
 import gov.ca.cwds.data.persistence.auth.StaffPerson;
+import gov.ca.cwds.idm.dto.UsersSearchCriteria;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
@@ -12,7 +13,7 @@ import gov.ca.cwds.idm.dto.UsersPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.CognitoUtils;
-import gov.ca.cwds.idm.util.UsersSearchParametersUtil;
+import gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil;
 import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType;
 import gov.ca.cwds.service.CwsUserInfoService;
@@ -21,6 +22,8 @@ import gov.ca.cwds.service.messages.MessageCode;
 import gov.ca.cwds.service.messages.MessagesService;
 import gov.ca.cwds.service.scripts.IdmMappingScript;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
+import java.util.ArrayList;
+import java.util.Set;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +42,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.EMAIL_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME;
 import static gov.ca.cwds.service.messages.MessageCode.IDM_MAPPING_SCRIPT_ERROR;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY;
@@ -52,7 +56,7 @@ public class IdmServiceImpl implements IdmService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(IdmServiceImpl.class);
 
-  @Autowired private CognitoServiceFacade cognitoService;
+  @Autowired private CognitoServiceFacade cognitoServiceFacade;
 
   @Autowired private CwsUserInfoService cwsUserInfoService;
 
@@ -62,24 +66,24 @@ public class IdmServiceImpl implements IdmService {
 
   @Override
   public User findUser(String id) {
-    UserType cognitoUser = cognitoService.getById(id);
+    UserType cognitoUser = cognitoServiceFacade.getById(id);
     return enrichCognitoUser(cognitoUser);
   }
 
   @Override
   @PreAuthorize("@cognitoServiceFacade.getCountyName(#id) == principal.getParameter('county_name')")
   public void updateUser(String id, UserUpdate updateUserDto) {
-    cognitoService.updateUser(id, updateUserDto);
+    cognitoServiceFacade.updateUser(id, updateUserDto);
   }
 
   @Override
   public String createUser(User user) {
-    return cognitoService.createUser(user);
+    return cognitoServiceFacade.createUser(user);
   }
 
   @Override
   public UsersPage getUserPage(String paginationToken) {
-    CognitoUserPage userPage = cognitoService.search(UsersSearchParametersUtil.composeToGetAllByPages(paginationToken));
+    CognitoUserPage userPage = cognitoServiceFacade.search(CognitoUsersSearchCriteriaUtil.composeToGetPage(paginationToken));
     Collection<UserType> cognitoUsers = userPage.getUsers();
     Map<String, String> userNameToRacfId = new HashMap<>(cognitoUsers.size());
     for (UserType user : cognitoUsers) {
@@ -104,15 +108,29 @@ public class IdmServiceImpl implements IdmService {
   }
 
   @Override
+  public List<User> searchUsers(UsersSearchCriteria usersSearchCriteria) {
+    List<User> result = new ArrayList<>();
+    List<UserType> cognitoUsers = new ArrayList<>();
+
+    Set<String> racfids = usersSearchCriteria.getRacfids();
+    for(String racfid : racfids) {
+      CognitoUsersSearchCriteria searchCriteria = CognitoUsersSearchCriteriaUtil.composeToGetByRacfid(racfid);
+      cognitoUsers.addAll(cognitoServiceFacade.searchAllPages(searchCriteria));
+    }
+
+    return result;
+  }
+
+  @Override
   public UserVerificationResult verifyUser(String racfId, String email) {
     CwsUserInfo cwsUser = getCwsUserByRacfId(racfId);
     if (cwsUser == null) {
       return composeNegativeResultWithMessage(NO_USER_WITH_RACFID_IN_CWSCMS, racfId);
     }
     Collection<UserType> cognitoUsers =
-        cognitoService.search(
+        cognitoServiceFacade.search(
             CognitoUsersSearchCriteria.SearchParameterBuilder.aSearchParameters()
-                .withEmail(email).build()).getUsers();
+                .withAttr(EMAIL_ATTR_NAME, email).build()).getUsers();
 
     if (!CollectionUtils.isEmpty(cognitoUsers)) {
       return composeNegativeResultWithMessage(USER_WITH_EMAIL_EXISTS_IN_IDM, email);
