@@ -1,6 +1,8 @@
 package gov.ca.cwds.web;
 
+import gov.ca.cwds.service.sso.OAuth2Service;
 import gov.ca.cwds.service.sso.custom.form.FormService;
+import java.util.Map;
 import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,8 +15,8 @@ public class PerryLoginTestConfiguration {
 
   @Bean
   @Primary
-  public FormService formService() {
-    return Mockito.mock(FormService.class);
+  public OAuth2Service oAuth2Service() {
+    return Mockito.spy(MockOAuth2Service.class);
   }
 
 }
