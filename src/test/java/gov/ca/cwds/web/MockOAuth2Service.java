@@ -26,7 +26,7 @@ public class MockOAuth2Service extends OAuth2Service {
   public Map getUserInfo(String ssoToken) {
     if (EXPECTED_SSO_TOKEN
         .equals(ssoToken)) {
-      return constructUserInfo();
+      return constructUserInfo("fixtures/mfa/mfa-response.json");
     } else {
       throw new RuntimeException("Unexpected SSO token in getUserInformation method");
     }
@@ -35,15 +35,23 @@ public class MockOAuth2Service extends OAuth2Service {
   @Override
   @Retryable(interceptor = "retryInterceptor", value = HttpClientErrorException.class)
   public void validate(PerryTokenEntity perryTokenEntity) {
-
+    if (EXPECTED_SSO_TOKEN.equals(perryTokenEntity.getSsoToken())) {
+      return;
+    } else {
+      throw new RuntimeException("Invalid PerryTokenEntity in validate method");
+    }
   }
 
-  private Map<String, Object> constructUserInfo() {
+  @Override
+  public void invalidate(String ssoToken) {
+    throw new RuntimeException("Invalidate method should not be invoked on logout");
+  }
+
+  public static Map<String, Object> constructUserInfo(String mfaJson) {
     try {
       ObjectMapper objectMapper = new ObjectMapper();
       JsonNode cognitoJson = objectMapper
-          .readValue(FixtureHelpers.fixture("fixtures/mfa/mfa-response.json"), JsonNode.class);
-
+          .readValue(FixtureHelpers.fixture(mfaJson), JsonNode.class);
       JsonNode payloadNode = cognitoJson.get("idToken").get("payload");
       Map payloadMap = objectMapper.convertValue(payloadNode, Map.class);
       Map<String, Object> userInfo = new HashMap<>();
@@ -56,7 +64,7 @@ public class MockOAuth2Service extends OAuth2Service {
   }
 
   @SuppressWarnings("unchecked")
-  private List<Map> mapToNameValueList(Map input) {
+  private static List<Map> mapToNameValueList(Map input) {
     List<Map> result = new LinkedList<>();
     input.forEach((key, value) -> {
       Map nameValue = new HashMap<>();

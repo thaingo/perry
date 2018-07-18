@@ -2,22 +2,17 @@ package gov.ca.cwds.web;
 
 import static gov.ca.cwds.idm.BaseLiquibaseTest.CMS_STORE_URL;
 import static gov.ca.cwds.idm.BaseLiquibaseTest.TOKEN_STORE_URL;
+import static gov.ca.cwds.web.MockOAuth2Service.EXPECTED_SSO_TOKEN;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
-import org.codehaus.jackson.JsonNode;
 import gov.ca.cwds.PerryApplication;
 import gov.ca.cwds.idm.BaseLiquibaseTest;
 import gov.ca.cwds.service.sso.OAuth2Service;
 import io.dropwizard.testing.FixtureHelpers;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -32,6 +27,7 @@ import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -50,13 +46,36 @@ import org.springframework.web.context.WebApplicationContext;
     "perry.jwt.timeout=10",
     "security.oauth2.resource.revokeTokenUri=http://revoke.token.url",
     "security.oauth2.resource.userInfoUri=http://user.info.url",
-    "security.oauth2.resource.logoutTokenUri=http://logout.token.url"
+    "security.oauth2.resource.logoutTokenUri=http://logout.token.url",
+    "perry.idpMaxAttempts=2",
+    "idpRetryTimeout=0",
+    "idpValidateInterval=2"
 }, classes = {PerryLoginTestConfiguration.class, PerryApplication.class})
 
 public class PerryMFALoginTest extends BaseLiquibaseTest {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(PerryMFALoginTest.class);
+
+  public static final String SECURED_RESOURCE_URL = "/authn/login?callback=/demo-sp.html";
   public static final String MFA_LOGIN_URL = "http://localhost/mfa-login.html";
+  public static final String LOGIN_REDIRECT_URL = "http://localhost/authn/login?callback=/demo-sp.html";
+  public static final String AUTHN_TOKEN_URL = "/authn/token?accessCode=";
+  public static final String AUTHN_VALIDATE_URL = "/authn/validate?token=";
+  public static final String AUTHN_LOGOUT_URL = "/authn/logout?callback=/login.html";
+  public static final String ERROR_PAGE_URL = "/login.html?error=true";
+  public static final String LOGOUT_REDIRECT_URL = "http://logout.token.url?response_type=code&client_id=null&redirect_uri=http://localhost/login";
+
+  public static final String VALID_MFA_RESPONSE_JSON = "fixtures/mfa/mfa-response.json";
+  public static final String MISSING_RACFID_MFA_RESPONSE_JSON = "fixtures/mfa/mfa-response-missing-racfid.json";
+  public static final String KEY_INFO_MISSING_MFA_RESPONSE_JSON = "fixtures/mfa/mfa-response-missing-racfid.json";
+  public static final String AUTH_JSON = "fixtures/mfa/auth.json";
+  public static final String AUTH_MISSING_INFO_JSON = "fixtures/mfa/auth-missing-info.json";
+  public static final String AUTH_NO_RACFID_JSON = "fixtures/mfa/auth-no-racfid.json";
+
+
+
+  public static final String UUID_PATTERN = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
+
 
   @Autowired
   private OAuth2Service oAuth2Service;
@@ -80,106 +99,140 @@ public class PerryMFALoginTest extends BaseLiquibaseTest {
 
   @Test
   public void whenValidMFAJsonProvided_thenAuthenticate() throws Exception {
+    MvcResult result = navigateToSecureUrl();
+    result = sendMfaJson(result, FixtureHelpers.fixture(VALID_MFA_RESPONSE_JSON),
+        LOGIN_REDIRECT_URL);
+    result = retrieveAccessCode(result);
+    String accessCode = parseAccessCode(result);
+    result = retrieveToken(result, accessCode);
+    String token = result.getResponse().getContentAsString();
+    LOGGER.info("Perry token: {}", token);
+    Assert.assertTrue(token.matches(UUID_PATTERN));
+    result = validateToken(token, MockMvcResultMatchers.status().isOk(), AUTH_JSON);
+    String perryJson = result.getResponse().getContentAsString();
+    LOGGER.info("Perry JSON: {}", perryJson);
+    Assert.assertEquals(FixtureHelpers.fixture(AUTH_JSON), perryJson);
+    // TODO: review logout flow. Validate redirect URL
+    logout(result);
+    // TODO: fix token removal from database
+    validateToken(token, MockMvcResultMatchers.status().is4xxClientError(), AUTH_JSON);
+  }
 
-    // Trying to access secured URL
+  @Test
+  public void whenEmptyMFAJsonProvided_thenPerryErrorPage() throws Exception {
+    MvcResult result = navigateToSecureUrl();
+    sendMfaJson(result, "{}", ERROR_PAGE_URL);
+  }
+
+  @Test
+  public void whenRacfidMissingMFAJsonProvided_thenLoginSuccessfully() throws Exception {
+    Mockito.when(oAuth2Service.getUserInfo(EXPECTED_SSO_TOKEN))
+        .thenReturn(MockOAuth2Service.constructUserInfo(MISSING_RACFID_MFA_RESPONSE_JSON));
+    Mockito.doCallRealMethod().when(oAuth2Service).validate(any());
+    runLoginFlow(MISSING_RACFID_MFA_RESPONSE_JSON, AUTH_NO_RACFID_JSON);
+  }
+
+  @Test
+  public void whenKeyInfoMissingMFAJsonProvided_thenLoginSuccessfully() throws Exception {
+    Mockito.when(oAuth2Service.getUserInfo(EXPECTED_SSO_TOKEN))
+        .thenReturn(MockOAuth2Service.constructUserInfo(KEY_INFO_MISSING_MFA_RESPONSE_JSON));
+    Mockito.doCallRealMethod().when(oAuth2Service).validate(any());
+    runLoginFlow(KEY_INFO_MISSING_MFA_RESPONSE_JSON, AUTH_MISSING_INFO_JSON);
+  }
+
+  @Test
+  public void whenInvalidMFAJsonProvided_thenPerryErrorPage() throws Exception {
+    MvcResult result = navigateToSecureUrl();
+    sendMfaJson(result, "Invalid JSON", ERROR_PAGE_URL);
+  }
+
+  private MvcResult runLoginFlow(String mfaJson, String authJson) throws Exception {
+    MvcResult result = navigateToSecureUrl();
+    result = sendMfaJson(result, FixtureHelpers.fixture(mfaJson),
+        LOGIN_REDIRECT_URL);
+    result = retrieveAccessCode(result);
+    String accessCode = parseAccessCode(result);
+    result = retrieveToken(result, accessCode);
+    String token = result.getResponse().getContentAsString();
+    LOGGER.info("Perry token: {}", token);
+    Assert.assertTrue(token.matches(UUID_PATTERN));
+    result = validateToken(token, MockMvcResultMatchers.status().isOk(), authJson);
+    String perryJson = result.getResponse().getContentAsString();
+    LOGGER.info("Perry JSON: {}", perryJson);
+    Assert.assertEquals(FixtureHelpers.fixture(authJson), perryJson);
+    return result;
+  }
+
+  private MvcResult navigateToSecureUrl() throws Exception {
     MvcResult result = mockMvc
-        .perform(get("/authn/login?callback=/demo-sp.html"))
+        .perform(get(SECURED_RESOURCE_URL))
         .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
         .andExpect(MockMvcResultMatchers.redirectedUrl(MFA_LOGIN_URL))
         .andReturn();
     LOGGER.info("Login page redirect: {}", result.getResponse().getRedirectedUrl());
+    return result;
+  }
 
-    // Sending MFA Json to /login endpoint
-    result = mockMvc.perform(MockMvcRequestBuilders.post("/login")
-        .session((MockHttpSession) result.getRequest().getSession())
-        .param("CognitoResponse", FixtureHelpers.fixture("fixtures/mfa/mfa-response.json"))
-        .accept(MediaType.APPLICATION_JSON))
+  private void logout(MvcResult result) throws Exception {
+    result = mockMvc
+        .perform(get(AUTHN_LOGOUT_URL)
+            .session((MockHttpSession) result.getRequest().getSession()))
         .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
         .andExpect(MockMvcResultMatchers
-            .redirectedUrl("http://localhost/authn/login?callback=/demo-sp.html"))
+            .redirectedUrl(
+                LOGOUT_REDIRECT_URL))
         .andReturn();
-    LOGGER.info("Login API redirect: {}", result.getResponse().getRedirectedUrl());
+    LOGGER.info("Logout redirect URL: {}", result.getResponse().getRedirectedUrl());
+  }
 
-    // Receiving access code
+  private MvcResult validateToken(String token, ResultMatcher resultMatcher, String authJson) throws Exception {
+    MvcResult result;
+    result = mockMvc
+        .perform(get(AUTHN_VALIDATE_URL + token))
+        .andExpect(resultMatcher)
+        .andExpect(
+            MockMvcResultMatchers.content().json(FixtureHelpers.fixture(authJson)))
+        .andReturn();
+    return result;
+  }
+
+  private MvcResult retrieveToken(MvcResult result, String accessCode) throws Exception {
+    result = mockMvc
+        .perform(get(AUTHN_TOKEN_URL + accessCode)
+            .session((MockHttpSession) result.getRequest().getSession()))
+        .andExpect(MockMvcResultMatchers.status().isOk())
+        .andReturn();
+    return result;
+  }
+
+  private String parseAccessCode(MvcResult result) {
+    String accessCodeUrl = result.getResponse().getRedirectedUrl();
+    assertThat(result.getResponse().getRedirectedUrl(), containsString("accessCode="));
+    String accessCode = accessCodeUrl.split("=")[1];
+    LOGGER.info("Access Code URL: {}", accessCodeUrl);
+    return accessCode;
+  }
+
+  private MvcResult retrieveAccessCode(MvcResult result) throws Exception {
     result = mockMvc
         .perform(get(result.getResponse().getRedirectedUrl())
             .session((MockHttpSession) result.getRequest().getSession()))
         .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
         .andReturn();
-    String accessCodeUrl = result.getResponse().getRedirectedUrl();
-    assertThat(result.getResponse().getRedirectedUrl(), containsString("accessCode="));
-    String accessCode = accessCodeUrl.split("=")[1];
-    LOGGER.info("Access Code URL: {}", accessCodeUrl);
-
-    // Receiving Perry token
-    result = mockMvc
-        .perform(get("/authn/token?accessCode=" + accessCode)
-            .session((MockHttpSession) result.getRequest().getSession()))
-        .andExpect(MockMvcResultMatchers.status().isOk())
-        .andReturn();
-    String token = result.getResponse().getContentAsString();
-    LOGGER.info("Perry token: {}", token);
-    Assert
-        .assertTrue(token.matches("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"));
-
-    //Validate token and receive JSON with user information
-    result = mockMvc
-        .perform(get("/authn/validate?token=" + token))
-        .andExpect(MockMvcResultMatchers.status().isOk())
-        .andExpect(MockMvcResultMatchers.content().json(FixtureHelpers.fixture("fixtures/mfa/auth.json")))
-        .andReturn();
-    String perryJson = result.getResponse().getContentAsString();
-    LOGGER.info("Perry JSON: {}", perryJson);
-
-    // Logout
-    result = mockMvc
-        .perform(get("/authn/logout?callback=/login.html")
-            .session((MockHttpSession) result.getRequest().getSession()))
-        .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
-        .andExpect(MockMvcResultMatchers
-            .redirectedUrl("/login.html"))
-        .andReturn();
-    LOGGER.info("Logout redirect URL: {}", result.getResponse().getRedirectedUrl());
-
-//    result = mockMvc
-//        .perform(get("/authn/validate?token=" + token))
-//        .andExpect(MockMvcResultMatchers.status().is4xxClientError())
-//        .andReturn();
-//    LOGGER.info("Perry JSON: {}", result.getResponse().getContentAsString());
-
-
-    Mockito.verify(oAuth2Service, Mockito.times(5)).getUserInfo(token);
-
+    return result;
   }
 
-
-
-  @Test
-  public void whenEmptyMFAJsonProvided_thenPerryErrorPage() throws Exception {
-
-    // Trying to access secured URL
-    MvcResult result = mockMvc
-        .perform(get("/authn/login?callback=/demo-sp.html"))
-        .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
-        .andExpect(MockMvcResultMatchers.redirectedUrl(MFA_LOGIN_URL))
-        .andReturn();
-    LOGGER.info("Login page redirect: {}", result.getResponse().getRedirectedUrl());
-
-    // Sending MFA Json to /login endpoint
+  private MvcResult sendMfaJson(MvcResult result, String fixture, String redirectUrl)
+      throws Exception {
     result = mockMvc.perform(MockMvcRequestBuilders.post("/login")
         .session((MockHttpSession) result.getRequest().getSession())
-        .param("CognitoResponse", "{}")
+        .param("CognitoResponse", fixture)
         .accept(MediaType.APPLICATION_JSON))
         .andExpect(MockMvcResultMatchers.status().is3xxRedirection())
         .andExpect(MockMvcResultMatchers
-            .redirectedUrl("/login.html?error=true"))
+            .redirectedUrl(redirectUrl))
         .andReturn();
-    LOGGER.info("Error redirect: {}", result.getResponse().getRedirectedUrl());
+    LOGGER.info("Login API redirect: {}", result.getResponse().getRedirectedUrl());
+    return result;
   }
-
-//  private void setMockBehaviour(OAuth2Service oAuth2Service) throws IOException {
-//    String ssoToken = "eyJraWQiOiJzWUFcL1VUTGdSTis4cTJSRUxEZXdBamhGd0RWaVR2Tm1DYThlMzYrMUZwOD0iLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiI5YTExNTg1ZC0wYTg2LTQ3MTUtYmVkZi0zY2Y3ODNiYzRiYWYiLCJkZXZpY2Vfa2V5IjoidXMtd2VzdC0yX2UyN2E2Y2IxLWVjYTQtNDQxYy1iMmQxLTRmZDZkNWExOWYwYiIsInRva2VuX3VzZSI6ImFjY2VzcyIsInNjb3BlIjoiYXdzLmNvZ25pdG8uc2lnbmluLnVzZXIuYWRtaW4iLCJhdXRoX3RpbWUiOjE1MzA4OTkwNzMsImlzcyI6Imh0dHBzOlwvXC9jb2duaXRvLWlkcC51cy13ZXN0LTIuYW1hem9uYXdzLmNvbVwvdXMtd2VzdC0yX2JVdEFTeFV6NiIsImV4cCI6MTUzMDkwMjY3MywiaWF0IjoxNTMwODk5MDczLCJqdGkiOiIwNDBlNTg4MS0yMzY5LTQ2MmEtOTYzNS00MmQ0ZDI2YThkODYiLCJjbGllbnRfaWQiOiIyYTFkZjF2OGJyNjBpNTJxb2ZpNHFta2oyayIsInVzZXJuYW1lIjoiOWExMTU4NWQtMGE4Ni00NzE1LWJlZGYtM2NmNzgzYmM0YmFmIn0.MTvqzH5DtLlNkJIv6fP0DbL62jW2Dv6Yca1l-XBVQ8gLEwtZyrva5rqtH1W-wXSzmzCkJ8WRm3JjrvayJZa5yjy4HjIfPumh4mfQOm5XFO3RR8GGBjPv5wl6aCzcZAX6Stxk88XoqlrasneqzAMo1L9xeTrKQe4UZ8ame-RiHfGAy-if2C4dNMbrX9SfYqqf0DDyW-dG83ijQJ-dzL4Hjim0YYXJ1jV43oRvv4R6dz3RnyYu9KxOTUjf9QLuIjuoKQxil0mhPavOyCMARin2kfzdGMg2Tp5ETJWW0LyetLGYvOHSUOJ2Lp2njZH1H92z5IjI4UQu5zC11tFoheN5DQ";
-//    Mockito.when(oAuth2Service.getUserInfo(ssoToken)).thenReturn(constructUserInfo());
-//  }
-
 }
