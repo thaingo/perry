@@ -62,7 +62,7 @@ public class PerryMFALoginTest extends BaseLiquibaseTest {
   public static final String AUTHN_VALIDATE_URL = "/authn/validate?token=";
   public static final String AUTHN_LOGOUT_URL = "/authn/logout?callback=/login.html";
   public static final String ERROR_PAGE_URL = "/error";
-  public static final String LOGOUT_REDIRECT_URL = "http://logout.token.url?response_type=code&client_id=null&redirect_uri=http://localhost/login";
+  public static final String LOGOUT_REDIRECT_URL = "/login.html";
   public static final String VALID_MFA_RESPONSE_JSON = "fixtures/mfa/mfa-response.json";
   public static final String MISSING_RACFID_MFA_RESPONSE_JSON = "fixtures/mfa/mfa-response-missing-racfid.json";
   public static final String KEY_INFO_MISSING_MFA_RESPONSE_JSON = "fixtures/mfa/mfa-response-key-info-missing.json";
