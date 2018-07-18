@@ -5,8 +5,8 @@ import static gov.ca.cwds.idm.service.cognito.CognitoUtils.EMAIL_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.FIRST_NAME_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.LAST_NAME_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.PERMISSIONS_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_CUSTOM_1;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_CUSTOM;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_STANDARD;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_CUSTOM_2;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.ROLES_ATTR_NAME;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
@@ -849,8 +849,8 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         attrs.add(attr(ROLES_ATTR_NAME, testUser.getRoles()));
       }
       if (testUser.getRacfId() != null) {
-        attrs.add(attr(RACFID_ATTR_NAME, testUser.getRacfId()));
-        attrs.add(attr(RACFID_ATTR_NAME_CUSTOM_1, testUser.getRacfId()));
+        attrs.add(attr(RACFID_ATTR_NAME_CUSTOM, testUser.getRacfId()));
+        attrs.add(attr(RACFID_ATTR_NAME_STANDARD, testUser.getRacfId()));
         attrs.add(attr(RACFID_ATTR_NAME_CUSTOM_2, testUser.getRacfId()));
       }
       return attrs;
