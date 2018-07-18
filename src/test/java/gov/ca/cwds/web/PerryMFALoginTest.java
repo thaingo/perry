@@ -67,7 +67,7 @@ public class PerryMFALoginTest extends BaseLiquibaseTest {
 
   public static final String VALID_MFA_RESPONSE_JSON = "fixtures/mfa/mfa-response.json";
   public static final String MISSING_RACFID_MFA_RESPONSE_JSON = "fixtures/mfa/mfa-response-missing-racfid.json";
-  public static final String KEY_INFO_MISSING_MFA_RESPONSE_JSON = "fixtures/mfa/mfa-response-missing-racfid.json";
+  public static final String KEY_INFO_MISSING_MFA_RESPONSE_JSON = "fixtures/mfa/mfa-response-key-info-missing.json";
   public static final String AUTH_JSON = "fixtures/mfa/auth.json";
   public static final String AUTH_MISSING_INFO_JSON = "fixtures/mfa/auth-missing-info.json";
   public static final String AUTH_NO_RACFID_JSON = "fixtures/mfa/auth-no-racfid.json";
@@ -190,8 +190,6 @@ public class PerryMFALoginTest extends BaseLiquibaseTest {
     result = mockMvc
         .perform(get(AUTHN_VALIDATE_URL + token))
         .andExpect(resultMatcher)
-        .andExpect(
-            MockMvcResultMatchers.content().json(FixtureHelpers.fixture(authJson)))
         .andReturn();
     return result;
   }
