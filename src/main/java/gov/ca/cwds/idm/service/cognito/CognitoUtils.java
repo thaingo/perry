@@ -20,14 +20,12 @@ public class CognitoUtils {
   public static final String LAST_NAME_ATTR_NAME = "family_name";
   public static final String PHONE_NUMBER_ATTR_NAME = "phone_number";
   public static final String OFFICE_ATTR_NAME = "custom:Office";
-
   public static final String EMAIL_DELIVERY = "EMAIL";
-
   public static final String COUNTY_ATTR_NAME = "custom:County";
-  public static final String COUNTY_ATTR_NAME_2 = "preferred_username";
 
-  public static final String RACFID_ATTR_NAME = "custom:RACFID";
-  public static final String RACFID_ATTR_NAME_2 = "custom:RACFId";
+  public static final String RACFID_ATTR_NAME_CUSTOM = "custom:RACFID";
+  public static final String RACFID_ATTR_NAME_CUSTOM_2 = "custom:RACFId";
+  public static final String RACFID_ATTR_NAME_STANDARD = "preferred_username";
 
   private static final String COGNITO_LIST_DELIMITER = ":";
 
