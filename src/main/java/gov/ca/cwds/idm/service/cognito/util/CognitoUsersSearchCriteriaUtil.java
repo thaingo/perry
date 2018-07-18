@@ -1,7 +1,6 @@
 package gov.ca.cwds.idm.service.cognito.util;
 
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_STANDARD;
-
+import gov.ca.cwds.idm.service.cognito.StandardUserAttribute;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 
 public class CognitoUsersSearchCriteriaUtil {
@@ -20,7 +19,7 @@ public class CognitoUsersSearchCriteriaUtil {
   public static CognitoUsersSearchCriteria composeToGetByRacfid(String racfid) {
     return CognitoUsersSearchCriteria.SearchParameterBuilder.aSearchParameters()
         .withPageSize(DEFAULT_PAGESIZE)
-        .withAttr(RACFID_ATTR_NAME_STANDARD, racfid)
+        .withSearchAttr(StandardUserAttribute.RACFID_STANDARD, racfid)
         .build();
   }
 }

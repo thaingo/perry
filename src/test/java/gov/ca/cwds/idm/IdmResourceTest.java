@@ -1,14 +1,14 @@
 package gov.ca.cwds.idm;
 
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.COUNTY_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.EMAIL_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.FIRST_NAME_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.LAST_NAME_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.PERMISSIONS_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_CUSTOM;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_STANDARD;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_CUSTOM_2;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.ROLES_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.FIRST_NAME;
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.LAST_NAME;
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertStrict;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.DEFAULT_PAGESIZE;
@@ -831,13 +831,13 @@ public class IdmResourceTest extends BaseLiquibaseTest {
       Collection<AttributeType> attrs = new ArrayList<>();
 
       if (testUser.getEmail() != null) {
-        attrs.add(attr(EMAIL_ATTR_NAME, testUser.getEmail()));
+        attrs.add(attr(EMAIL.getName(), testUser.getEmail()));
       }
       if (testUser.getFirstName() != null) {
-        attrs.add(attr(FIRST_NAME_ATTR_NAME, testUser.getFirstName()));
+        attrs.add(attr(FIRST_NAME.getName(), testUser.getFirstName()));
       }
       if (testUser.getLastName() != null) {
-        attrs.add(attr(LAST_NAME_ATTR_NAME, testUser.getLastName()));
+        attrs.add(attr(LAST_NAME.getName(), testUser.getLastName()));
       }
       if (testUser.getCounty() != null) {
         attrs.add(attr(COUNTY_ATTR_NAME, testUser.getCounty()));
@@ -850,7 +850,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
       }
       if (testUser.getRacfId() != null) {
         attrs.add(attr(RACFID_ATTR_NAME_CUSTOM, testUser.getRacfId()));
-        attrs.add(attr(RACFID_ATTR_NAME_STANDARD, testUser.getRacfId()));
+        attrs.add(attr(RACFID_STANDARD.getName(), testUser.getRacfId()));
         attrs.add(attr(RACFID_ATTR_NAME_CUSTOM_2, testUser.getRacfId()));
       }
       return attrs;

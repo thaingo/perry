@@ -1,17 +1,17 @@
 package gov.ca.cwds.idm.service.cognito;
 
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.COUNTY_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.EMAIL_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.EMAIL_DELIVERY;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.FIRST_NAME_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.LAST_NAME_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.OFFICE_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.PHONE_NUMBER_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_CUSTOM;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_STANDARD;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_CUSTOM_2;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.createPermissionsAttribute;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.createRolesAttribute;
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.FIRST_NAME;
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.LAST_NAME;
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.PHONE_NUMBER;
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_CONNECT_TO_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_GET_USER_FROM_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_UPDATE_USER_IN_IDM;
@@ -189,15 +189,15 @@ public class CognitoServiceFacade {
 
     AttributesBuilder attributesBuilder =
         new AttributesBuilder()
-            .addAttribute(EMAIL_ATTR_NAME, user.getEmail())
-            .addAttribute(FIRST_NAME_ATTR_NAME, user.getFirstName())
-            .addAttribute(LAST_NAME_ATTR_NAME, user.getLastName())
+            .addAttribute(EMAIL.getName(), user.getEmail())
+            .addAttribute(FIRST_NAME.getName(), user.getFirstName())
+            .addAttribute(LAST_NAME.getName(), user.getLastName())
             .addAttribute(COUNTY_ATTR_NAME, user.getCountyName())
             .addAttribute(OFFICE_ATTR_NAME, user.getOffice())
-            .addAttribute(PHONE_NUMBER_ATTR_NAME, user.getPhoneNumber())
+            .addAttribute(PHONE_NUMBER.getName(), user.getPhoneNumber())
             .addAttribute(RACFID_ATTR_NAME_CUSTOM, racfid)
             .addAttribute(RACFID_ATTR_NAME_CUSTOM_2, racfid)
-            .addAttribute(RACFID_ATTR_NAME_STANDARD, racfid)
+            .addAttribute(RACFID_STANDARD.getName(), racfid)
             .addAttribute(createPermissionsAttribute(user.getPermissions()))
             .addAttribute(createRolesAttribute(user.getRoles()));
     return attributesBuilder.build();

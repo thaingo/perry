@@ -1,5 +1,7 @@
 package gov.ca.cwds.idm.service.cognito.dto;
 
+import gov.ca.cwds.idm.service.cognito.StandardUserAttribute;
+
 public class CognitoUsersSearchCriteria {
 
   private Integer pageSize;
@@ -40,15 +42,15 @@ public class CognitoUsersSearchCriteria {
     return attrValue;
   }
 
-  public void setAttr(String attrName, String attrValue) {
-    this.attrName = attrName;
+  public void setSearchAttr(StandardUserAttribute attr, String attrValue) {
+    this.attrName = attr.getName();
     this.attrValue = attrValue;
   }
 
   public static final class SearchParameterBuilder {
     private Integer pageSize;
     private String paginationToken;
-    private String attrName;
+    private StandardUserAttribute attr;
     private String attrValue;
 
     private SearchParameterBuilder() {}
@@ -67,8 +69,8 @@ public class CognitoUsersSearchCriteria {
       return this;
     }
 
-    public SearchParameterBuilder withAttr(String attrName, String attrValue) {
-      this.attrName = attrName;
+    public SearchParameterBuilder withSearchAttr(StandardUserAttribute attr, String attrValue) {
+      this.attr = attr;
       this.attrValue = attrValue;
       return this;
     }
@@ -77,7 +79,9 @@ public class CognitoUsersSearchCriteria {
       CognitoUsersSearchCriteria usersSearchParameter = new CognitoUsersSearchCriteria();
       usersSearchParameter.setPageSize(pageSize);
       usersSearchParameter.setPaginationToken(paginationToken);
-      usersSearchParameter.setAttr(attrName, attrValue);
+      if(attr != null) {
+        usersSearchParameter.setSearchAttr(attr, attrValue);
+      }
       return usersSearchParameter;
     }
   }

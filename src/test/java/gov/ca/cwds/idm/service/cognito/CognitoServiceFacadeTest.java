@@ -1,16 +1,16 @@
 package gov.ca.cwds.idm.service.cognito;
 
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.COUNTY_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.EMAIL_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.FIRST_NAME_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.LAST_NAME_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.OFFICE_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.PERMISSIONS_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.PHONE_NUMBER_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_CUSTOM;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_STANDARD;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_CUSTOM_2;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.ROLES_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.FIRST_NAME;
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.LAST_NAME;
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.PHONE_NUMBER;
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
@@ -250,14 +250,14 @@ public class CognitoServiceFacadeTest {
 
     Map<String, String> attrMap = attrMap(attrs);
 
-    assertAttr(attrMap, EMAIL_ATTR_NAME, "gonzales@gmail.com");
-    assertAttr(attrMap, FIRST_NAME_ATTR_NAME, "Garcia");
-    assertAttr(attrMap, LAST_NAME_ATTR_NAME, "Gonzales");
+    assertAttr(attrMap, EMAIL.getName(), "gonzales@gmail.com");
+    assertAttr(attrMap, FIRST_NAME.getName(), "Garcia");
+    assertAttr(attrMap, LAST_NAME.getName(), "Gonzales");
     assertAttr(attrMap, COUNTY_ATTR_NAME, "Madera");
     assertAttr(attrMap, OFFICE_ATTR_NAME, "River Office");
-    assertAttr(attrMap, PHONE_NUMBER_ATTR_NAME, "+19161111111");
+    assertAttr(attrMap, PHONE_NUMBER.getName(), "+19161111111");
     assertAttr(attrMap, RACFID_ATTR_NAME_CUSTOM, "RUBBLBA");
-    assertAttr(attrMap, RACFID_ATTR_NAME_STANDARD, "RUBBLBA");
+    assertAttr(attrMap, RACFID_STANDARD.getName(), "RUBBLBA");
     assertAttr(attrMap, RACFID_ATTR_NAME_CUSTOM_2, "RUBBLBA");
     assertAttr(attrMap, PERMISSIONS_ATTR_NAME, "RFA-rollout:Hotline-rollout");
     assertAttr(attrMap, ROLES_ATTR_NAME, "CWS-admin:CWS-worker");
@@ -271,7 +271,7 @@ public class CognitoServiceFacadeTest {
     AdminCreateUserRequest request = facade.createAdminCreateUserRequest(user);
     Map<String, String> attrMap = attrMap(request.getUserAttributes());
     assertAttr(attrMap, RACFID_ATTR_NAME_CUSTOM, "RUBBLBA");
-    assertAttr(attrMap, RACFID_ATTR_NAME_STANDARD, "RUBBLBA");
+    assertAttr(attrMap, RACFID_STANDARD.getName(), "RUBBLBA");
     assertAttr(attrMap, RACFID_ATTR_NAME_CUSTOM_2, "RUBBLBA");
   }
 
@@ -285,7 +285,7 @@ public class CognitoServiceFacadeTest {
     UserType userType4 = userType("user4");
 
     CognitoUsersSearchCriteria searchCriteria = new CognitoUsersSearchCriteria();
-    searchCriteria.setAttr(EMAIL_ATTR_NAME, "search@all.email");
+    searchCriteria.setSearchAttr(EMAIL, "search@all.email");
     searchCriteria.setPageSize(2);
 
     ListUsersRequest request0 =
@@ -319,9 +319,9 @@ public class CognitoServiceFacadeTest {
   @Test
   public void testComposeListUsersRequest(){
     CognitoUsersSearchCriteria criteria = new CognitoUsersSearchCriteria();
-    criteria.setAttr(RACFID_ATTR_NAME_STANDARD, "ABC");
+    criteria.setSearchAttr(RACFID_STANDARD, "ABC");
     ListUsersRequest request = facade.composeListUsersRequest(criteria);
-    assertThat(request.getFilter(), is(RACFID_ATTR_NAME_STANDARD + " = \"ABC\""));
+    assertThat(request.getFilter(), is(RACFID_STANDARD.getName() + " = \"ABC\""));
   }
 
   private ListUsersRequest setListUsersRequestAndResponse(

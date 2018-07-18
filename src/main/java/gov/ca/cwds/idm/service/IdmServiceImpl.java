@@ -5,6 +5,7 @@ import gov.ca.cwds.PerryProperties;
 import gov.ca.cwds.data.persistence.auth.CwsOffice;
 import gov.ca.cwds.data.persistence.auth.StaffPerson;
 import gov.ca.cwds.idm.dto.UsersSearchCriteria;
+import gov.ca.cwds.idm.service.cognito.StandardUserAttribute;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
@@ -43,7 +44,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_CUSTOM;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.EMAIL_ATTR_NAME;
+import static gov.ca.cwds.service.messages.MessageCode.DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS;
 import static gov.ca.cwds.service.messages.MessageCode.IDM_MAPPING_SCRIPT_ERROR;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY;
 import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID_IN_CWSCMS;
@@ -92,7 +93,7 @@ public class IdmServiceImpl implements IdmService {
     Map<String, CwsUserInfo> idToCmsUser = cwsUserInfoService.findUsers(userNameToRacfId.values())
             .stream().collect(
                     Collectors.toMap(CwsUserInfo::getRacfId, e -> e, (user1, user2) -> {
-                      LOGGER.warn("UserAuthorization - duplicate UserId for RACFid: {}", user1.getRacfId());
+                      LOGGER.warn(messages.get(DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS, user1.getRacfId()));
                       return user1;
                     }));
     IdmMappingScript mapping = configuration.getIdentityManager().getIdmMapping();
@@ -101,7 +102,7 @@ public class IdmServiceImpl implements IdmService {
             .map( e -> { try {
               return mapping.map(e, idToCmsUser.get(userNameToRacfId.get(e.getUsername())));
             } catch (ScriptException ex) {
-              LOGGER.error("Error running the IdmMappingScript");
+              LOGGER.error(messages.get(IDM_MAPPING_SCRIPT_ERROR));
               throw new PerryException(ex.getMessage(), ex);
             }}).collect(Collectors.toList());
     return new UsersPage(users, userPage.getPaginationToken());
@@ -130,7 +131,7 @@ public class IdmServiceImpl implements IdmService {
     Collection<UserType> cognitoUsers =
         cognitoServiceFacade.search(
             CognitoUsersSearchCriteria.SearchParameterBuilder.aSearchParameters()
-                .withAttr(EMAIL_ATTR_NAME, email).build()).getUsers();
+                .withSearchAttr(StandardUserAttribute.EMAIL, email).build()).getUsers();
 
     if (!CollectionUtils.isEmpty(cognitoUsers)) {
       return composeNegativeResultWithMessage(USER_WITH_EMAIL_EXISTS_IN_IDM, email);
