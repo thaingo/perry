@@ -117,7 +117,6 @@ public class PerryMFALoginTest extends BaseLiquibaseTest {
     Assert.assertEquals(FixtureHelpers.fixture(AUTH_JSON), perryJson);
     setLogoutHandlerSecurityContext(token, result.getRequest().getSession());
     logout(result);
-    // TODO: fix token removal from database
     validateToken(token, MockMvcResultMatchers.status().is4xxClientError(), AUTH_JSON);
   }
 
