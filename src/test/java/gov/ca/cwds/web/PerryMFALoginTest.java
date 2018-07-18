@@ -113,9 +113,14 @@ public class PerryMFALoginTest extends BaseLiquibaseTest {
   }
 
   @Test
-  public void whenEmptyMFAJsonProvided_thenPerryErrorPage() throws Exception {
-    MvcResult result = navigateToSecureUrl();
-    sendMfaJson(result, "{}", ERROR_PAGE_URL);
+  public void whenEmptyMFAJsonProvided_thenPerryErrorPage() {
+    try {
+      MvcResult result = navigateToSecureUrl();
+      sendMfaJson(result, "{}", ERROR_PAGE_URL);
+    } catch (Exception e) {
+      Assert.assertTrue(e instanceof PerryException);
+      Assert.assertTrue(e.getMessage().startsWith("COGNITO RESPONSE PROCESSING ERROR"));
+    }
   }
 
   @Test
