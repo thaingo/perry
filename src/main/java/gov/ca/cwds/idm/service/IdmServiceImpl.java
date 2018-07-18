@@ -105,7 +105,7 @@ public class IdmServiceImpl implements IdmService {
   @Override
   public List<User> searchUsersByRacfids(Set<String> racfids) {
     UsersSearchCriteria criteria = new UsersSearchCriteria();
-    criteria.setSearchAttr(StandardUserAttribute.RACFID_STANDARD);
+    criteria.setSearchAttr(RACFID_STANDARD);
     criteria.setValues(racfids);
     return searchUsers(criteria);
   }

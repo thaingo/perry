@@ -15,6 +15,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import java.util.HashSet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
@@ -63,6 +64,24 @@ public class IdmResource {
           @RequestParam(name = "paginationToken", required = false)
           String paginationToken) {
     return idmService.getUserPage(paginationToken);
+  }
+
+  @RequestMapping(method = RequestMethod.POST, value = "/users/search", consumes = "application/json")
+  @ApiResponses(
+      value = {
+          @ApiResponse(code = 401, message = "Not Authorized")
+      }
+  )
+  @ApiOperation(
+      value = "Search users with given RACFIDs list",
+      response = User.class,
+      responseContainer = "List")
+  @PreAuthorize("hasAuthority('IDM-job')")
+  public List<User> searchUsersByRacfid(
+      @ApiParam(required = true, name = "RACFIDs", value = "List of RACFIDs")
+      @NotNull
+      @RequestBody List<String> racfids) {
+    return idmService.searchUsersByRacfids(new HashSet<>(racfids));
   }
 
   @RequestMapping(method = RequestMethod.GET, value = "/users/{id}", produces = "application/json")
