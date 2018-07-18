@@ -1,12 +1,12 @@
 package gov.ca.cwds.idm.service.cognito;
 
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.COUNTY_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.EMAIL_DELIVERY;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.OFFICE_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_CUSTOM;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_CUSTOM_2;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.createPermissionsAttribute;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.createRolesAttribute;
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.COUNTY;
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.OFFICE;
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.RACFID_CUSTOM;
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.RACFID_CUSTOM_2;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.FIRST_NAME;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.LAST_NAME;
@@ -192,11 +192,11 @@ public class CognitoServiceFacade {
             .addAttribute(EMAIL.getName(), user.getEmail())
             .addAttribute(FIRST_NAME.getName(), user.getFirstName())
             .addAttribute(LAST_NAME.getName(), user.getLastName())
-            .addAttribute(COUNTY_ATTR_NAME, user.getCountyName())
-            .addAttribute(OFFICE_ATTR_NAME, user.getOffice())
+            .addAttribute(COUNTY.getName(), user.getCountyName())
+            .addAttribute(OFFICE.getName(), user.getOffice())
             .addAttribute(PHONE_NUMBER.getName(), user.getPhoneNumber())
-            .addAttribute(RACFID_ATTR_NAME_CUSTOM, racfid)
-            .addAttribute(RACFID_ATTR_NAME_CUSTOM_2, racfid)
+            .addAttribute(RACFID_CUSTOM.getName(), racfid)
+            .addAttribute(RACFID_CUSTOM_2.getName(), racfid)
             .addAttribute(RACFID_STANDARD.getName(), racfid)
             .addAttribute(createPermissionsAttribute(user.getPermissions()))
             .addAttribute(createRolesAttribute(user.getRoles()));

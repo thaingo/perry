@@ -43,7 +43,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_CUSTOM;
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.RACFID_CUSTOM;
 import static gov.ca.cwds.service.messages.MessageCode.DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS;
 import static gov.ca.cwds.service.messages.MessageCode.IDM_MAPPING_SCRIPT_ERROR;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY;
@@ -210,6 +210,6 @@ public class IdmServiceImpl implements IdmService {
   }
 
   static String getRACFId(UserType user) {
-    return CognitoUtils.getAttributeValue(user, RACFID_ATTR_NAME_CUSTOM);
+    return CognitoUtils.getAttributeValue(user, RACFID_CUSTOM.getName());
   }
 }

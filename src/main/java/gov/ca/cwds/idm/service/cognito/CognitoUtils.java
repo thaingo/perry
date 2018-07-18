@@ -1,5 +1,9 @@
 package gov.ca.cwds.idm.service.cognito;
 
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.COUNTY;
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PERMISSIONS;
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.ROLES;
+
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import org.apache.commons.collections.CollectionUtils;
@@ -13,15 +17,7 @@ import java.util.Set;
 
 public class CognitoUtils {
 
-  public static final String PERMISSIONS_ATTR_NAME = "custom:Permission";
-  public static final String ROLES_ATTR_NAME = "custom:Role";
-  public static final String OFFICE_ATTR_NAME = "custom:Office";
   public static final String EMAIL_DELIVERY = "EMAIL";
-  public static final String COUNTY_ATTR_NAME = "custom:County";
-
-  public static final String RACFID_ATTR_NAME_CUSTOM = "custom:RACFID";
-  public static final String RACFID_ATTR_NAME_CUSTOM_2 = "custom:RACFId";
-
   private static final String COGNITO_LIST_DELIMITER = ":";
 
   private CognitoUtils() {}
@@ -44,12 +40,12 @@ public class CognitoUtils {
   }
 
   public static String getCountyName(UserType cognitoUser) {
-    return getAttributeValue(cognitoUser, COUNTY_ATTR_NAME);
+    return getAttributeValue(cognitoUser, COUNTY.getName());
   }
 
   public static Set<String> getPermissions(UserType cognitoUser) {
 
-    Optional<AttributeType> permissionsAttrOpt = getAttribute(cognitoUser, PERMISSIONS_ATTR_NAME);
+    Optional<AttributeType> permissionsAttrOpt = getAttribute(cognitoUser, PERMISSIONS.getName());
 
     if (!permissionsAttrOpt.isPresent()) {
       return new HashSet<>();
@@ -74,11 +70,11 @@ public class CognitoUtils {
   }
 
   static AttributeType createPermissionsAttribute(Set<String> permissions) {
-    return attribute(PERMISSIONS_ATTR_NAME, getCustomDelimeteredListAttributeValue(permissions));
+    return attribute(PERMISSIONS.getName(), getCustomDelimeteredListAttributeValue(permissions));
   }
 
   static AttributeType createRolesAttribute(Set<String> roles) {
-    return attribute(ROLES_ATTR_NAME, getCustomDelimeteredListAttributeValue(roles));
+    return attribute(ROLES.getName(), getCustomDelimeteredListAttributeValue(roles));
   }
 
   static AttributeType attribute(String name, String value) {

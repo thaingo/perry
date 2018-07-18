@@ -1,11 +1,11 @@
 package gov.ca.cwds.idm.service.cognito;
 
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.COUNTY_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.OFFICE_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.PERMISSIONS_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_CUSTOM;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_CUSTOM_2;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.ROLES_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.COUNTY;
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.OFFICE;
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PERMISSIONS;
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.RACFID_CUSTOM;
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.RACFID_CUSTOM_2;
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.ROLES;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.FIRST_NAME;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.LAST_NAME;
@@ -144,7 +144,7 @@ public class CognitoServiceFacadeTest {
 
     List<AttributeType> mockAttrs = new ArrayList<>();
     AttributeType mockAttr = new AttributeType();
-    mockAttr.setName(PERMISSIONS_ATTR_NAME);
+    mockAttr.setName(PERMISSIONS.getName());
     mockAttr.setValue("Snapshot-rollout:Hotline-rollout");
     mockAttrs.add(mockAttr);
     mockResult.setUserAttributes(mockAttrs);
@@ -177,7 +177,7 @@ public class CognitoServiceFacadeTest {
 
     List<AttributeType> mockAttrs = new ArrayList<>();
     AttributeType mockAttr = new AttributeType();
-    mockAttr.setName(PERMISSIONS_ATTR_NAME);
+    mockAttr.setName(PERMISSIONS.getName());
     mockAttr.setValue("Snapshot-rollout");
     mockAttrs.add(mockAttr);
     mockResult.setUserAttributes(mockAttrs);
@@ -200,7 +200,7 @@ public class CognitoServiceFacadeTest {
 
     Collection<AttributeType> expectedUpdateAttributes = new ArrayList<>();
     AttributeType expectedPermissionsAttribute = new AttributeType();
-    expectedPermissionsAttribute.setName(PERMISSIONS_ATTR_NAME);
+    expectedPermissionsAttribute.setName(PERMISSIONS.getName());
     expectedPermissionsAttribute.setValue("Hotline-rollout");
     expectedUpdateAttributes.add(expectedPermissionsAttribute);
 
@@ -253,14 +253,14 @@ public class CognitoServiceFacadeTest {
     assertAttr(attrMap, EMAIL.getName(), "gonzales@gmail.com");
     assertAttr(attrMap, FIRST_NAME.getName(), "Garcia");
     assertAttr(attrMap, LAST_NAME.getName(), "Gonzales");
-    assertAttr(attrMap, COUNTY_ATTR_NAME, "Madera");
-    assertAttr(attrMap, OFFICE_ATTR_NAME, "River Office");
+    assertAttr(attrMap, COUNTY.getName(), "Madera");
+    assertAttr(attrMap, OFFICE.getName(), "River Office");
     assertAttr(attrMap, PHONE_NUMBER.getName(), "+19161111111");
-    assertAttr(attrMap, RACFID_ATTR_NAME_CUSTOM, "RUBBLBA");
+    assertAttr(attrMap, RACFID_CUSTOM.getName(), "RUBBLBA");
     assertAttr(attrMap, RACFID_STANDARD.getName(), "RUBBLBA");
-    assertAttr(attrMap, RACFID_ATTR_NAME_CUSTOM_2, "RUBBLBA");
-    assertAttr(attrMap, PERMISSIONS_ATTR_NAME, "RFA-rollout:Hotline-rollout");
-    assertAttr(attrMap, ROLES_ATTR_NAME, "CWS-admin:CWS-worker");
+    assertAttr(attrMap, RACFID_CUSTOM_2.getName(), "RUBBLBA");
+    assertAttr(attrMap, PERMISSIONS.getName(), "RFA-rollout:Hotline-rollout");
+    assertAttr(attrMap, ROLES.getName(), "CWS-admin:CWS-worker");
   }
 
   @Test
@@ -270,9 +270,9 @@ public class CognitoServiceFacadeTest {
 
     AdminCreateUserRequest request = facade.createAdminCreateUserRequest(user);
     Map<String, String> attrMap = attrMap(request.getUserAttributes());
-    assertAttr(attrMap, RACFID_ATTR_NAME_CUSTOM, "RUBBLBA");
+    assertAttr(attrMap, RACFID_CUSTOM.getName(), "RUBBLBA");
     assertAttr(attrMap, RACFID_STANDARD.getName(), "RUBBLBA");
-    assertAttr(attrMap, RACFID_ATTR_NAME_CUSTOM_2, "RUBBLBA");
+    assertAttr(attrMap, RACFID_CUSTOM_2.getName(), "RUBBLBA");
   }
 
   @Test

@@ -8,14 +8,14 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.COUNTY_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.PERMISSIONS_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.attribute;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.createPermissionsAttribute;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.getAttribute;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.getCountyName;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.getCustomDelimeteredListAttributeValue;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.getPermissions;
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.COUNTY;
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PERMISSIONS;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -103,7 +103,7 @@ public class CognitoUtilsTest {
     UserType cognitoUser = new UserType();
 
     AttributeType permissionsAttr = new AttributeType();
-    permissionsAttr.setName(PERMISSIONS_ATTR_NAME);
+    permissionsAttr.setName(PERMISSIONS.getName());
     permissionsAttr.setValue(null);
 
     cognitoUser.withAttributes(permissionsAttr);
@@ -117,7 +117,7 @@ public class CognitoUtilsTest {
     UserType cognitoUser = new UserType();
 
     AttributeType permissionsAttr = new AttributeType();
-    permissionsAttr.setName(PERMISSIONS_ATTR_NAME);
+    permissionsAttr.setName(PERMISSIONS.getName());
     permissionsAttr.setValue("");
 
     cognitoUser.withAttributes(permissionsAttr);
@@ -130,7 +130,7 @@ public class CognitoUtilsTest {
     UserType cognitoUser = new UserType();
 
     AttributeType permissionsAttr = new AttributeType();
-    permissionsAttr.setName(PERMISSIONS_ATTR_NAME);
+    permissionsAttr.setName(PERMISSIONS.getName());
     permissionsAttr.setValue("Snapshot-rollout:Hotline-rollout");
 
     cognitoUser.withAttributes(permissionsAttr);
@@ -166,7 +166,7 @@ public class CognitoUtilsTest {
     permissions.add("one");
     permissions.add("two");
     AttributeType attr = createPermissionsAttribute(permissions);
-    assertThat(attr.getName(), is(PERMISSIONS_ATTR_NAME));
+    assertThat(attr.getName(), is(PERMISSIONS.getName()));
     assertThat(attr.getValue(), is("one:two"));
   }
 
@@ -175,7 +175,7 @@ public class CognitoUtilsTest {
     UserType cognitoUser = new UserType();
 
     AttributeType attr = new AttributeType();
-    attr.setName(COUNTY_ATTR_NAME);
+    attr.setName(COUNTY.getName());
     attr.setValue("Yolo");
     cognitoUser.withAttributes(attr);
 

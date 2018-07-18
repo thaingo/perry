@@ -1,10 +1,10 @@
 package gov.ca.cwds.idm;
 
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.COUNTY_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.PERMISSIONS_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_CUSTOM;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_CUSTOM_2;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.ROLES_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.COUNTY;
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PERMISSIONS;
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.RACFID_CUSTOM;
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.RACFID_CUSTOM_2;
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.ROLES;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.FIRST_NAME;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.LAST_NAME;
@@ -411,7 +411,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
     AdminUpdateUserAttributesRequest updateAttributesRequest =
         setUpdateUserAttributesRequestAndResult(
-            USER_NO_RACFID_ID, attr(PERMISSIONS_ATTR_NAME, "RFA-rollout:Hotline-rollout"));
+            USER_NO_RACFID_ID, attr(PERMISSIONS.getName(), "RFA-rollout:Hotline-rollout"));
 
     AdminDisableUserRequest disableUserRequest = setDisableUserRequestAndResult(USER_NO_RACFID_ID);
 
@@ -442,7 +442,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
     AdminUpdateUserAttributesRequest updateAttributesRequest =
         setUpdateUserAttributesRequestAndResult(
-            USER_NO_RACFID_ID, attr(PERMISSIONS_ATTR_NAME, "RFA-rollout:Snapshot-rollout"));
+            USER_NO_RACFID_ID, attr(PERMISSIONS.getName(), "RFA-rollout:Snapshot-rollout"));
 
     AdminEnableUserRequest enableUserRequest = setEnableUserRequestAndResult(USER_NO_RACFID_ID);
 
@@ -840,18 +840,18 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         attrs.add(attr(LAST_NAME.getName(), testUser.getLastName()));
       }
       if (testUser.getCounty() != null) {
-        attrs.add(attr(COUNTY_ATTR_NAME, testUser.getCounty()));
+        attrs.add(attr(COUNTY.getName(), testUser.getCounty()));
       }
       if (testUser.getPermissions() != null) {
-        attrs.add(attr(PERMISSIONS_ATTR_NAME, testUser.getPermissions()));
+        attrs.add(attr(PERMISSIONS.getName(), testUser.getPermissions()));
       }
       if (testUser.getRoles() != null) {
-        attrs.add(attr(ROLES_ATTR_NAME, testUser.getRoles()));
+        attrs.add(attr(ROLES.getName(), testUser.getRoles()));
       }
       if (testUser.getRacfId() != null) {
-        attrs.add(attr(RACFID_ATTR_NAME_CUSTOM, testUser.getRacfId()));
+        attrs.add(attr(RACFID_CUSTOM.getName(), testUser.getRacfId()));
         attrs.add(attr(RACFID_STANDARD.getName(), testUser.getRacfId()));
-        attrs.add(attr(RACFID_ATTR_NAME_CUSTOM_2, testUser.getRacfId()));
+        attrs.add(attr(RACFID_CUSTOM_2.getName(), testUser.getRacfId()));
       }
       return attrs;
     }
