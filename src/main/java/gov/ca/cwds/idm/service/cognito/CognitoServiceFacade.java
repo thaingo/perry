@@ -7,8 +7,8 @@ import static gov.ca.cwds.idm.service.cognito.CognitoUtils.FIRST_NAME_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.LAST_NAME_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.OFFICE_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.PHONE_NUMBER_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_CUSTOM_1;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_CUSTOM;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_STANDARD;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_CUSTOM_2;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.createPermissionsAttribute;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.createRolesAttribute;
@@ -171,9 +171,9 @@ public class CognitoServiceFacade {
             .addAttribute(COUNTY_ATTR_NAME, user.getCountyName())
             .addAttribute(OFFICE_ATTR_NAME, user.getOffice())
             .addAttribute(PHONE_NUMBER_ATTR_NAME, user.getPhoneNumber())
-            .addAttribute(RACFID_ATTR_NAME, racfid)
-            .addAttribute(RACFID_ATTR_NAME_CUSTOM_1, racfid)
+            .addAttribute(RACFID_ATTR_NAME_CUSTOM, racfid)
             .addAttribute(RACFID_ATTR_NAME_CUSTOM_2, racfid)
+            .addAttribute(RACFID_ATTR_NAME_STANDARD, racfid)
             .addAttribute(createPermissionsAttribute(user.getPermissions()))
             .addAttribute(createRolesAttribute(user.getRoles()));
     return attributesBuilder.build();
