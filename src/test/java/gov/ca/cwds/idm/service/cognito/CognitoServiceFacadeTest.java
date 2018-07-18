@@ -319,9 +319,9 @@ public class CognitoServiceFacadeTest {
   @Test
   public void testComposeListUsersRequest(){
     CognitoUsersSearchCriteria criteria = new CognitoUsersSearchCriteria();
-    criteria.setAttr(RACFID_ATTR_NAME, "ABC");
+    criteria.setAttr(RACFID_ATTR_NAME_STANDARD, "ABC");
     ListUsersRequest request = facade.composeListUsersRequest(criteria);
-    assertThat(request.getFilter(), is(RACFID_ATTR_NAME + " = \"ABC\""));
+    assertThat(request.getFilter(), is(RACFID_ATTR_NAME_STANDARD + " = \"ABC\""));
   }
 
   private ListUsersRequest setListUsersRequestAndResponse(
