@@ -66,7 +66,7 @@ public abstract class BaseLiquibaseTest  {
     createDatabase(CMS_STORE_SCHEMA, CMS_CHANGE_LOG);
   }
 
-  static void runLiquibaseScript(String url, String changeLog) throws LiquibaseException {
+  public static void runLiquibaseScript(String url, String changeLog) throws LiquibaseException {
     try {
       Liquibase liquibase = new Liquibase(changeLog, new ClassLoaderResourceAccessor(),
           getDatabase(url, SPRING_BOOT_H2_USER, SPRING_BOOT_H2_PASSWORD));
