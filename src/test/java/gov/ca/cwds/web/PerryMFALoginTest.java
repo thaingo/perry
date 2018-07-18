@@ -11,6 +11,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 import gov.ca.cwds.PerryApplication;
 import gov.ca.cwds.idm.BaseLiquibaseTest;
+import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.service.sso.OAuth2Service;
 import io.dropwizard.testing.FixtureHelpers;
 import org.junit.Assert;
@@ -54,29 +55,22 @@ import org.springframework.web.context.WebApplicationContext;
 
 public class PerryMFALoginTest extends BaseLiquibaseTest {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(PerryMFALoginTest.class);
-
   public static final String SECURED_RESOURCE_URL = "/authn/login?callback=/demo-sp.html";
   public static final String MFA_LOGIN_URL = "http://localhost/mfa-login.html";
   public static final String LOGIN_REDIRECT_URL = "http://localhost/authn/login?callback=/demo-sp.html";
   public static final String AUTHN_TOKEN_URL = "/authn/token?accessCode=";
   public static final String AUTHN_VALIDATE_URL = "/authn/validate?token=";
   public static final String AUTHN_LOGOUT_URL = "/authn/logout?callback=/login.html";
-  public static final String ERROR_PAGE_URL = "/login.html?error=true";
+  public static final String ERROR_PAGE_URL = "/error";
   public static final String LOGOUT_REDIRECT_URL = "http://logout.token.url?response_type=code&client_id=null&redirect_uri=http://localhost/login";
-
   public static final String VALID_MFA_RESPONSE_JSON = "fixtures/mfa/mfa-response.json";
   public static final String MISSING_RACFID_MFA_RESPONSE_JSON = "fixtures/mfa/mfa-response-missing-racfid.json";
   public static final String KEY_INFO_MISSING_MFA_RESPONSE_JSON = "fixtures/mfa/mfa-response-key-info-missing.json";
   public static final String AUTH_JSON = "fixtures/mfa/auth.json";
   public static final String AUTH_MISSING_INFO_JSON = "fixtures/mfa/auth-missing-info.json";
   public static final String AUTH_NO_RACFID_JSON = "fixtures/mfa/auth-no-racfid.json";
-
-
-
   public static final String UUID_PATTERN = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
-
-
+  private static final Logger LOGGER = LoggerFactory.getLogger(PerryMFALoginTest.class);
   @Autowired
   private OAuth2Service oAuth2Service;
 
@@ -141,9 +135,14 @@ public class PerryMFALoginTest extends BaseLiquibaseTest {
   }
 
   @Test
-  public void whenInvalidMFAJsonProvided_thenPerryErrorPage() throws Exception {
-    MvcResult result = navigateToSecureUrl();
-    sendMfaJson(result, "Invalid JSON", ERROR_PAGE_URL);
+  public void whenInvalidMFAJsonProvided_thenPerryErrorPage() {
+    try {
+      MvcResult result = navigateToSecureUrl();
+      sendMfaJson(result, "Invalid JSON", ERROR_PAGE_URL);
+    } catch (Exception e) {
+      Assert.assertTrue(e instanceof PerryException);
+      Assert.assertTrue(e.getMessage().startsWith("COGNITO RESPONSE PROCESSING ERROR"));
+    }
   }
 
   private MvcResult runLoginFlow(String mfaJson, String authJson) throws Exception {
@@ -185,7 +184,8 @@ public class PerryMFALoginTest extends BaseLiquibaseTest {
     LOGGER.info("Logout redirect URL: {}", result.getResponse().getRedirectedUrl());
   }
 
-  private MvcResult validateToken(String token, ResultMatcher resultMatcher, String authJson) throws Exception {
+  private MvcResult validateToken(String token, ResultMatcher resultMatcher, String authJson)
+      throws Exception {
     MvcResult result;
     result = mockMvc
         .perform(get(AUTHN_VALIDATE_URL + token))
