@@ -16,10 +16,10 @@ public class CognitoUsersSearchCriteriaUtil {
             .build();
   }
 
-  public static CognitoUsersSearchCriteria composeToGetByRacfid(String racfid) {
+  public static CognitoUsersSearchCriteria composeToGetByAttribute(StandardUserAttribute attr, String value) {
     return CognitoUsersSearchCriteria.SearchParameterBuilder.aSearchParameters()
         .withPageSize(DEFAULT_PAGESIZE)
-        .withSearchAttr(StandardUserAttribute.RACFID_STANDARD, racfid)
+        .withSearchAttr(attr, value)
         .build();
   }
 }

@@ -44,6 +44,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.RACFID_CUSTOM;
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.service.messages.MessageCode.DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS;
 import static gov.ca.cwds.service.messages.MessageCode.IDM_MAPPING_SCRIPT_ERROR;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY;
@@ -85,41 +86,50 @@ public class IdmServiceImpl implements IdmService {
   @Override
   public UsersPage getUserPage(String paginationToken) {
     CognitoUserPage userPage = cognitoServiceFacade.search(CognitoUsersSearchCriteriaUtil.composeToGetPage(paginationToken));
-    Collection<UserType> cognitoUsers = userPage.getUsers();
+    List<User> users = enrichCognitoUsersByCws(userPage.getUsers());
+    return new UsersPage(users, userPage.getPaginationToken());
+  }
+
+  @Override
+  public List<User> searchUsers(UsersSearchCriteria criteria) {
+    List<UserType> cognitoUsers = new ArrayList<>();
+
+    for(String value : criteria.getValues()) {
+      CognitoUsersSearchCriteria searchCriteria =
+          CognitoUsersSearchCriteriaUtil.composeToGetByAttribute(criteria.getSearchAttr(), value);
+      cognitoUsers.addAll(cognitoServiceFacade.searchAllPages(searchCriteria));
+    }
+    return enrichCognitoUsersByCws(cognitoUsers);
+  }
+
+  @Override
+  public List<User> searchUsersByRacfids(Set<String> racfids) {
+    UsersSearchCriteria criteria = new UsersSearchCriteria();
+    criteria.setSearchAttr(StandardUserAttribute.RACFID_STANDARD);
+    criteria.setValues(racfids);
+    return searchUsers(criteria);
+  }
+
+  private List<User> enrichCognitoUsersByCws(Collection<UserType> cognitoUsers) {
     Map<String, String> userNameToRacfId = new HashMap<>(cognitoUsers.size());
     for (UserType user : cognitoUsers) {
       userNameToRacfId.put(user.getUsername(), getRACFId(user));
     }
     Map<String, CwsUserInfo> idToCmsUser = cwsUserInfoService.findUsers(userNameToRacfId.values())
-            .stream().collect(
-                    Collectors.toMap(CwsUserInfo::getRacfId, e -> e, (user1, user2) -> {
-                      LOGGER.warn(messages.get(DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS, user1.getRacfId()));
-                      return user1;
-                    }));
+        .stream().collect(
+            Collectors.toMap(CwsUserInfo::getRacfId, e -> e, (user1, user2) -> {
+              LOGGER.warn(messages.get(DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS, user1.getRacfId()));
+              return user1;
+            }));
     IdmMappingScript mapping = configuration.getIdentityManager().getIdmMapping();
-    List<User> users = cognitoUsers
-            .stream()
-            .map( e -> { try {
-              return mapping.map(e, idToCmsUser.get(userNameToRacfId.get(e.getUsername())));
-            } catch (ScriptException ex) {
-              LOGGER.error(messages.get(IDM_MAPPING_SCRIPT_ERROR));
-              throw new PerryException(ex.getMessage(), ex);
-            }}).collect(Collectors.toList());
-    return new UsersPage(users, userPage.getPaginationToken());
-  }
-
-  @Override
-  public List<User> searchUsers(UsersSearchCriteria usersSearchCriteria) {
-    List<User> result = new ArrayList<>();
-    List<UserType> cognitoUsers = new ArrayList<>();
-
-    Set<String> racfids = usersSearchCriteria.getRacfids();
-    for(String racfid : racfids) {
-      CognitoUsersSearchCriteria searchCriteria = CognitoUsersSearchCriteriaUtil.composeToGetByRacfid(racfid);
-      cognitoUsers.addAll(cognitoServiceFacade.searchAllPages(searchCriteria));
-    }
-
-    return result;
+    return cognitoUsers
+        .stream()
+        .map( e -> { try {
+          return mapping.map(e, idToCmsUser.get(userNameToRacfId.get(e.getUsername())));
+        } catch (ScriptException ex) {
+          LOGGER.error(messages.get(IDM_MAPPING_SCRIPT_ERROR));
+          throw new PerryException(ex.getMessage(), ex);
+        }}).collect(Collectors.toList());
   }
 
   @Override
