@@ -1,8 +1,8 @@
 package gov.ca.cwds.idm.service.cognito;
 
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.EMAIL_DELIVERY;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.createPermissionsAttribute;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.createRolesAttribute;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.EMAIL_DELIVERY;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.createPermissionsAttribute;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.createRolesAttribute;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.COUNTY;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.OFFICE;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.RACFID_CUSTOM;
@@ -46,6 +46,7 @@ import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
+import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
 import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.rest.api.domain.UserAlreadyExistsException;
 import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
@@ -269,8 +270,8 @@ public class CognitoServiceFacade {
     if (criteria.getPaginationToken() != null) {
       request = request.withPaginationToken(criteria.getPaginationToken());
     }
-    if (criteria.getAttrName() != null) {
-      request = request.withFilter(criteria.getAttrName() + " = \"" + criteria.getAttrValue() + "\"");
+    if (criteria.getSearchAttrName() != null) {
+      request = request.withFilter(criteria.getSearchAttrName() + " = \"" + criteria.getSearchAttrValue() + "\"");
     }
     return request;
   }

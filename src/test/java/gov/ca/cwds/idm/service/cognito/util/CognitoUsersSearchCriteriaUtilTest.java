@@ -1,4 +1,4 @@
-package gov.ca.cwds.service.cognito.util;
+package gov.ca.cwds.idm.service.cognito.util;
 
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import org.junit.Test;
@@ -14,8 +14,8 @@ public class CognitoUsersSearchCriteriaUtilTest {
   @Test
   public void testComposeToGetByRacfid(){
     CognitoUsersSearchCriteria criteria = composeToGetByRacfid("ABC");
-    assertThat(criteria.getAttrName(), is(RACFID_STANDARD.getName()));
-    assertThat(criteria.getAttrValue(), is("ABC"));
+    assertThat(criteria.getSearchAttrName(), is(RACFID_STANDARD.getName()));
+    assertThat(criteria.getSearchAttrValue(), is("ABC"));
     assertThat(criteria.getPageSize(), is(DEFAULT_PAGESIZE));
     assertThat(criteria.getPaginationToken(), is(nullValue()));
   }

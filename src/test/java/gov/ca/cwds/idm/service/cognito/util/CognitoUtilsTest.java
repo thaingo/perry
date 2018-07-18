@@ -1,4 +1,4 @@
-package gov.ca.cwds.idm.service.cognito;
+package gov.ca.cwds.idm.service.cognito.util;
 
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.UserType;
@@ -8,12 +8,12 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.attribute;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.createPermissionsAttribute;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.getAttribute;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.getCountyName;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.getCustomDelimeteredListAttributeValue;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.getPermissions;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.attribute;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.createPermissionsAttribute;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getAttribute;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getCountyName;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getCustomDelimeteredListAttributeValue;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getPermissions;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.COUNTY;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PERMISSIONS;
 import static org.hamcrest.CoreMatchers.hasItem;

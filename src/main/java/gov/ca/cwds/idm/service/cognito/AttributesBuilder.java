@@ -1,7 +1,7 @@
 package gov.ca.cwds.idm.service.cognito;
 
 import static com.google.common.base.Strings.nullToEmpty;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.attribute;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.attribute;
 
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import java.util.ArrayList;

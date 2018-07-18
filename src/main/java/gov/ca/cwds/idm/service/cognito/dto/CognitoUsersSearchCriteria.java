@@ -34,11 +34,11 @@ public class CognitoUsersSearchCriteria {
     this.paginationToken = paginationToken;
   }
 
-  public String getAttrName() {
+  public String getSearchAttrName() {
     return attrName;
   }
 
-  public String getAttrValue() {
+  public String getSearchAttrValue() {
     return attrValue;
   }
 

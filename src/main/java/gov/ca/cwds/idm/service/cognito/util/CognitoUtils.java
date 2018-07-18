@@ -1,4 +1,4 @@
-package gov.ca.cwds.idm.service.cognito;
+package gov.ca.cwds.idm.service.cognito.util;
 
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.COUNTY;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PERMISSIONS;
@@ -60,6 +60,12 @@ public class CognitoUtils {
 
     return new HashSet<>(Arrays.asList(permissionsStr.split(COGNITO_LIST_DELIMITER)));
   }
+  public static AttributeType attribute(String name, String value) {
+    AttributeType permissionsAttr = new AttributeType();
+    permissionsAttr.setName(name);
+    permissionsAttr.setValue(value);
+    return permissionsAttr;
+  }
 
   public static String getCustomDelimeteredListAttributeValue(Set<String> setOfValues) {
     if (CollectionUtils.isNotEmpty(setOfValues)) {
@@ -69,18 +75,11 @@ public class CognitoUtils {
     }
   }
 
-  static AttributeType createPermissionsAttribute(Set<String> permissions) {
+  public static AttributeType createPermissionsAttribute(Set<String> permissions) {
     return attribute(PERMISSIONS.getName(), getCustomDelimeteredListAttributeValue(permissions));
   }
 
-  static AttributeType createRolesAttribute(Set<String> roles) {
+  public static AttributeType createRolesAttribute(Set<String> roles) {
     return attribute(ROLES.getName(), getCustomDelimeteredListAttributeValue(roles));
-  }
-
-  static AttributeType attribute(String name, String value) {
-    AttributeType permissionsAttr = new AttributeType();
-    permissionsAttr.setName(name);
-    permissionsAttr.setValue(value);
-    return permissionsAttr;
   }
 }
