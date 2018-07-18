@@ -10,10 +10,14 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 import gov.ca.cwds.PerryApplication;
+import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.BaseLiquibaseTest;
 import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.service.sso.OAuth2Service;
 import io.dropwizard.testing.FixtureHelpers;
+import java.util.Arrays;
+import java.util.Collections;
+import javax.servlet.http.HttpSession;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -25,6 +29,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextImpl;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -106,7 +115,7 @@ public class PerryMFALoginTest extends BaseLiquibaseTest {
     String perryJson = result.getResponse().getContentAsString();
     LOGGER.info("Perry JSON: {}", perryJson);
     Assert.assertEquals(FixtureHelpers.fixture(AUTH_JSON), perryJson);
-    // TODO: review logout flow. Validate redirect URL
+    setLogoutHandlerSecurityContext(token, result.getRequest().getSession());
     logout(result);
     // TODO: fix token removal from database
     validateToken(token, MockMvcResultMatchers.status().is4xxClientError(), AUTH_JSON);
@@ -165,6 +174,22 @@ public class PerryMFALoginTest extends BaseLiquibaseTest {
     LOGGER.info("Perry JSON: {}", perryJson);
     Assert.assertEquals(FixtureHelpers.fixture(authJson), perryJson);
     return result;
+  }
+
+  private void setLogoutHandlerSecurityContext(String token, HttpSession session) {
+    UniversalUserToken userToken = new UniversalUserToken();
+    userToken.setToken(token);
+    UsernamePasswordAuthenticationToken authentication =
+        new UsernamePasswordAuthenticationToken(
+            userToken,
+            "",
+            Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+        );
+    SecurityContext securityContext = new SecurityContextImpl();
+    securityContext.setAuthentication(authentication);
+    session.setAttribute(
+        HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+        securityContext);
   }
 
   private MvcResult navigateToSecureUrl() throws Exception {

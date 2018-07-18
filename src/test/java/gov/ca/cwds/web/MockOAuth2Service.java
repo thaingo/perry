@@ -44,7 +44,7 @@ public class MockOAuth2Service extends OAuth2Service {
 
   @Override
   public void invalidate(String ssoToken) {
-    throw new RuntimeException("Invalidate method should not be invoked on logout");
+    System.out.println("Invalidating sso token: " + ssoToken);
   }
 
   public static Map<String, Object> constructUserInfo(String mfaJson) {
