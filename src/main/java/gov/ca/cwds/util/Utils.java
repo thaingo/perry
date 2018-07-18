@@ -1,5 +1,7 @@
 package gov.ca.cwds.util;
 
+import static gov.ca.cwds.config.Constants.DEFAULT_LOCALE;
+
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -27,6 +29,14 @@ public class Utils {
       return bean;
     } catch (Exception e) {
       return bean;
+    }
+  }
+
+  public static String toUpperCase(String str) {
+    if(str != null) {
+      return str.toUpperCase(DEFAULT_LOCALE);
+    } else {
+      return null;
     }
   }
 }

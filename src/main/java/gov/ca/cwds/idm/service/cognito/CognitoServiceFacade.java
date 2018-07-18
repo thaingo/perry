@@ -27,8 +27,9 @@ import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.UsersSearchParameter;
 import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.rest.api.domain.UserAlreadyExistsException;
+import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
 import gov.ca.cwds.rest.api.domain.UserNotFoundPerryException;
-import gov.ca.cwds.rest.api.domain.UserValidationException;
+import gov.ca.cwds.service.messages.MessagesService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +38,6 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -53,6 +53,14 @@ import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_2;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.createPermissionsAttribute;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.createRolesAttribute;
+import static gov.ca.cwds.service.messages.MessageCode.ERROR_CONNECT_TO_IDM;
+import static gov.ca.cwds.service.messages.MessageCode.ERROR_GET_USER_FROM_IDM;
+import static gov.ca.cwds.service.messages.MessageCode.ERROR_UPDATE_USER_IN_IDM;
+import static gov.ca.cwds.service.messages.MessageCode.IDM_USER_VALIDATION_FAILED;
+import static gov.ca.cwds.service.messages.MessageCode.UNABLE_CREATE_NEW_IDM_USER;
+import static gov.ca.cwds.service.messages.MessageCode.USER_NOT_FOUND_BY_ID_IN_IDM;
+import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
+import static gov.ca.cwds.util.Utils.toUpperCase;
 
 @Service(value = "cognitoServiceFacade")
 @Profile("idm")
@@ -60,6 +68,8 @@ public class CognitoServiceFacade {
   private static final Logger LOGGER = LoggerFactory.getLogger(CognitoServiceFacade.class);
 
   @Autowired private CognitoProperties properties;
+
+  @Autowired private MessagesService messages;
 
   private AWSCognitoIdentityProvider identityProvider;
 
@@ -79,9 +89,9 @@ public class CognitoServiceFacade {
     try {
       return getCognitoUserById(id);
     } catch (UserNotFoundException e) {
-      throw new UserNotFoundPerryException("User with id=" + id + " is not found", e);
+      throw new UserNotFoundPerryException(messages.get(USER_NOT_FOUND_BY_ID_IN_IDM, id), e);
     } catch (Exception e) {
-      throw new PerryException("Exception while getting user from AWS Cognito", e);
+      throw new PerryException(messages.get(ERROR_GET_USER_FROM_IDM), e);
     }
   }
 
@@ -91,48 +101,48 @@ public class CognitoServiceFacade {
       updateUserAttributes(id, existedCognitoUser, updateUserDto);
       changeUserEnabledStatus(id, existedCognitoUser.getEnabled(), updateUserDto.getEnabled());
     } catch (UserNotFoundException e) {
-      throw new UserNotFoundPerryException("User with id=" + id + " is not found", e);
+      throw new UserNotFoundPerryException(messages.get(USER_NOT_FOUND_BY_ID_IN_IDM, id), e);
     } catch (Exception e) {
-      throw new PerryException("Exception while updating user in AWS Cognito", e);
+      throw new PerryException(messages.get(ERROR_UPDATE_USER_IN_IDM), e);
     }
   }
 
   public String createUser(User user) {
 
-    final String email = user.getEmail();
-
-    AdminCreateUserRequest request =
-        new AdminCreateUserRequest()
-            .withUsername(email)
-            .withUserPoolId(properties.getUserpool())
-            .withDesiredDeliveryMediums(EMAIL_DELIVERY)
-            .withUserAttributes(buildCreateUserAttributes(user));
-
-    AdminCreateUserResult result;
+    AdminCreateUserRequest request = createAdminCreateUserRequest(user);
 
     try {
-      result = identityProvider.adminCreateUser(request);
+      AdminCreateUserResult result = identityProvider.adminCreateUser(request);
+      return result.getUser().getUsername();
 
     } catch (UsernameExistsException e) {
-      String msg =
-          "Unable to create new Cognito user. A User with email " + email + " already exists.";
+      String causeMsg = messages.get(USER_WITH_EMAIL_EXISTS_IN_IDM, user.getEmail());
+      String msg = messages.get(UNABLE_CREATE_NEW_IDM_USER, causeMsg);
       LOGGER.error(msg);
-      throw new UserAlreadyExistsException(msg, e);
+      throw new UserAlreadyExistsException(causeMsg, e);
 
     } catch (InvalidParameterException e) {
-      LOGGER.error("Cognito validation failed", e);
-      throw new UserValidationException(e.getMessage(), e);
+      String msg = messages.get(IDM_USER_VALIDATION_FAILED);
+      LOGGER.error(msg, e);
+      throw new UserIdmValidationException(msg, e);
     }
-
-    return result.getUser().getUsername();
   }
 
   public String getCountyName(String userId) {
     try {
       return CognitoUtils.getCountyName(getCognitoUserById(userId));
     } catch (UserNotFoundException e) {
-      throw new UserNotFoundPerryException("User with id=" + userId + " is not found", e);
+      throw new UserNotFoundPerryException(messages.get(USER_NOT_FOUND_BY_ID_IN_IDM, userId), e);
     }
+  }
+
+   public AdminCreateUserRequest createAdminCreateUserRequest(User user) {
+    return
+        new AdminCreateUserRequest()
+            .withUsername(user.getEmail())
+            .withUserPoolId(properties.getUserpool())
+            .withDesiredDeliveryMediums(EMAIL_DELIVERY)
+            .withUserAttributes(buildCreateUserAttributes(user));
   }
 
   public CognitoUserPage search(UsersSearchParameter searchCriteria) {
@@ -141,7 +151,7 @@ public class CognitoServiceFacade {
       ListUsersResult result = identityProvider.listUsers(request);
       return new CognitoUserPage(result.getUsers(), result.getPaginationToken());
     } catch (Exception e) {
-      throw new PerryException("Exception while connecting to AWS Cognito", e);
+      throw new PerryException(messages.get(ERROR_CONNECT_TO_IDM), e);
     }
   }
 
@@ -151,6 +161,9 @@ public class CognitoServiceFacade {
   }
 
   private List<AttributeType> buildCreateUserAttributes(User user) {
+
+    String racfid = toUpperCase(user.getRacfid());
+
     AttributesBuilder attributesBuilder =
         new AttributesBuilder()
             .addAttribute(EMAIL_ATTR_NAME, user.getEmail())
@@ -160,8 +173,8 @@ public class CognitoServiceFacade {
             .addAttribute(COUNTY_ATTR_NAME_2, user.getCountyName())
             .addAttribute(OFFICE_ATTR_NAME, user.getOffice())
             .addAttribute(PHONE_NUMBER_ATTR_NAME, user.getPhoneNumber())
-            .addAttribute(RACFID_ATTR_NAME, user.getRacfid())
-            .addAttribute(RACFID_ATTR_NAME_2, user.getRacfid())
+            .addAttribute(RACFID_ATTR_NAME, racfid)
+            .addAttribute(RACFID_ATTR_NAME_2, racfid)
             .addAttribute(createPermissionsAttribute(user.getPermissions()))
             .addAttribute(createRolesAttribute(user.getRoles()));
     return attributesBuilder.build();
@@ -253,5 +266,8 @@ public class CognitoServiceFacade {
 
   public void setIdentityProvider(AWSCognitoIdentityProvider identityProvider) {
     this.identityProvider = identityProvider;
+  }
+  public void setMessagesService(MessagesService messages) {
+    this.messages = messages;
   }
 }

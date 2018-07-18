@@ -1,5 +1,7 @@
 package gov.ca.cwds.config;
 
+import java.util.Locale;
+
 /**
  * Created by dmitry.rudenko on 9/14/2017.
  */
@@ -11,5 +13,6 @@ public interface Constants {
   String IDENTITY = "identity";
   String IDENTITY_JSON = "identity_json";
   String ERROR_CONTROLLER = "error";
+  Locale DEFAULT_LOCALE = Locale.US;
 }
 
