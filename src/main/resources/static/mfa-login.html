@@ -1,0 +1,72 @@
+<html>
+<head>
+  <title>CWDS Login</title>
+  <meta charset="UTF-8">
+  <link href="css/style.css" rel="stylesheet"/>
+</head>
+
+<body class='login-page'>
+<div class="info-box">
+  <noscript>
+    <h3>You must enable javascript to view this page.</h3>
+  </noscript>
+  <!--[if lt IE 9]>
+  <p> You are using an <strong>outdated</strong> browser. Please upgrade
+    your browser to improve your experience.</p>
+  <![endif]-->
+</div>
+
+<div class='login-image'>
+  <strong>Notice:</strong>
+  <p>Other users may be able to view the data that you enter into the system.
+    Users of this system are prohibited from entering the actual personal information of any
+    individual,
+    living or deceased, into the system, including but not limited any of the following alone or
+    in
+    any combination of an individual's name,
+    Social Security Number, physical description, home address, personal telephone number,
+    driver's
+    license or California ID number,
+    financial account numbers, education history, medical information, health insurance
+    information,
+    employment information,
+    familial relationships, personal e-mail addresses, usernames, and/or other similar personal
+    information.
+    Failure to comply with this data entry requirement shall constitute unauthorized use of the
+    system.</p>
+
+  <p>This system is the property of the State of California and may be accessed only by authorized
+    users.
+    Unauthorized use of this system is strictly prohibited and may result in, but is not limited
+    to,
+    disciplinary action and criminal prosecution.
+    The State of California may monitor any activity or communication on the system and retrieve
+    any
+    information stored within the system.
+    By accessing and using this system, you are consenting to such monitoring and information
+    retrieval for law enforcement and other purposes.
+    Users have no expectation of privacy as to any communication on, or to any information stored
+    within the system,
+    or to any devices used to access this system.</p>
+
+</div>
+<div class='login-panel'>
+  <div class='login-box'>
+    <form method="POST" id="login-form" action="login">
+      <div id="error" class='login-message'><!--{{message}}--></div>
+
+      <img src="images/CWDS-Logo---Color-Horizontal.png"/>
+
+      <label id="username-label" for="username">Authorization JSON</label>
+      <input name="CognitoResponse" id="username" >
+      <div id="login-error" class='login-invalid'></div>
+
+      <div class='gap-top'>
+        <button type="submit" class='btn btn-primary' id="submitBtn">Sign In</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+</body>
+</html>

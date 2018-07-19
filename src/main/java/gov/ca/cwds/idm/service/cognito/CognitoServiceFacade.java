@@ -1,15 +1,15 @@
 package gov.ca.cwds.idm.service.cognito;
 
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.COUNTY_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.COUNTY_ATTR_NAME_2;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.EMAIL_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.EMAIL_DELIVERY;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.FIRST_NAME_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.LAST_NAME_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.OFFICE_ATTR_NAME;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.PHONE_NUMBER_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_2;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_CUSTOM;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_STANDARD;
+import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_CUSTOM_2;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.createPermissionsAttribute;
 import static gov.ca.cwds.idm.service.cognito.CognitoUtils.createRolesAttribute;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_CONNECT_TO_IDM;
@@ -42,6 +42,7 @@ import com.amazonaws.services.cognitoidp.model.ListUsersResult;
 import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import com.amazonaws.services.cognitoidp.model.UsernameExistsException;
+import gov.ca.cwds.idm.dto.CognitoUserPage;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.UsersSearchParameter;
@@ -51,7 +52,6 @@ import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
 import gov.ca.cwds.rest.api.domain.UserNotFoundPerryException;
 import gov.ca.cwds.service.messages.MessagesService;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.PostConstruct;
@@ -144,11 +144,11 @@ public class CognitoServiceFacade {
             .withUserAttributes(buildCreateUserAttributes(user));
   }
 
-  public Collection<UserType> search(UsersSearchParameter parameter) {
-    ListUsersRequest request = composeRequest(parameter);
+  public CognitoUserPage search(UsersSearchParameter searchCriteria) {
+    ListUsersRequest request = composeRequest(searchCriteria);
     try {
       ListUsersResult result = identityProvider.listUsers(request);
-      return result.getUsers();
+      return new CognitoUserPage(result.getUsers(), result.getPaginationToken());
     } catch (Exception e) {
       throw new PerryException(messages.get(ERROR_CONNECT_TO_IDM), e);
     }
@@ -169,11 +169,11 @@ public class CognitoServiceFacade {
             .addAttribute(FIRST_NAME_ATTR_NAME, user.getFirstName())
             .addAttribute(LAST_NAME_ATTR_NAME, user.getLastName())
             .addAttribute(COUNTY_ATTR_NAME, user.getCountyName())
-            .addAttribute(COUNTY_ATTR_NAME_2, user.getCountyName())
             .addAttribute(OFFICE_ATTR_NAME, user.getOffice())
             .addAttribute(PHONE_NUMBER_ATTR_NAME, user.getPhoneNumber())
-            .addAttribute(RACFID_ATTR_NAME, racfid)
-            .addAttribute(RACFID_ATTR_NAME_2, racfid)
+            .addAttribute(RACFID_ATTR_NAME_CUSTOM, racfid)
+            .addAttribute(RACFID_ATTR_NAME_CUSTOM_2, racfid)
+            .addAttribute(RACFID_ATTR_NAME_STANDARD, racfid)
             .addAttribute(createPermissionsAttribute(user.getPermissions()))
             .addAttribute(createRolesAttribute(user.getRoles()));
     return attributesBuilder.build();
@@ -242,11 +242,8 @@ public class CognitoServiceFacade {
     if (parameter.getPageSize() != null) {
       request = request.withLimit(parameter.getPageSize());
     }
-    if (parameter.getUserCounty() != null) {
-      request = request.withFilter("preferred_username = \"" + parameter.getUserCounty() + "\"");
-    }
-    if (parameter.getLastName() != null) {
-      request = request.withFilter("family_name ^= \"" + parameter.getLastName() + "\"");
+    if (parameter.getPaginationToken() != null) {
+      request = request.withPaginationToken(parameter.getPaginationToken());
     }
     if (parameter.getEmail() != null) {
       request = request.withFilter("email = \"" + parameter.getEmail() + "\"");

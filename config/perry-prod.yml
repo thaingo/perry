@@ -46,6 +46,8 @@ perry:
       idpMapping: ${IDP_MAPPING_SCRIPT:config/idp.groovy}
     identityManager:
       idmMapping: ${IDM_MAPPING_SCRIPT:config/idm.groovy}
+      idmBasicAuthUser: ${IDM_BASIC_AUTH_USER:}
+      idmBasicAuthPass: ${IDM_BASIC_AUTH_PASSWORD:}
     jwt:
       timeout: ${TOKEN_TIMEOUT:10} #minutes
       issuer: ${TOKEN_ISSUER:perry}
@@ -71,6 +73,7 @@ perry:
     idpMaxAttempts: ${IDP_MAX_ATTEMPTS:5} #amount of retries
     idpRetryTimeout: ${IDP_RETRY_TIMEOUT:500}  #milliseconds
     idpValidateInterval: ${IDP_VALIDATE_INTERVAL:2} #seconds
+    loginPageUrl: ${LOGIN_PAGE_URL:/mfa-login.html}
     tokenStore:
         datasource:
             driver-class-name: org.postgresql.Driver
