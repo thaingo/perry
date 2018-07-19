@@ -42,6 +42,7 @@ import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN
 @RestController
 @Profile("idm")
 @RequestMapping(value = "/idm")
+@SuppressWarnings({"squid:S1166"})
 public class IdmResource {
 
   @Autowired private IdmService idmService;
