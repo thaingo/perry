@@ -5,9 +5,9 @@ import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 
 public class CognitoUsersSearchCriteriaUtil {
 
-  private CognitoUsersSearchCriteriaUtil() {}
-
   public static final int DEFAULT_PAGESIZE = 60;
+
+  private CognitoUsersSearchCriteriaUtil() {}
 
   public static CognitoUsersSearchCriteria composeToGetPage(String paginationToken) {
     return CognitoUsersSearchCriteria.SearchParameterBuilder.aSearchParameters()

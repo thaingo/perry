@@ -2,6 +2,7 @@ package gov.ca.cwds.idm.service.cognito.dto;
 
 import gov.ca.cwds.idm.service.cognito.StandardUserAttribute;
 
+@SuppressWarnings({"fb-contrib:OCP_OVERLY_CONCRETE_PARAMETER"})
 public class CognitoUsersSearchCriteria {
 
   private Integer pageSize;
@@ -76,13 +77,13 @@ public class CognitoUsersSearchCriteria {
     }
 
     public CognitoUsersSearchCriteria build() {
-      CognitoUsersSearchCriteria usersSearchParameter = new CognitoUsersSearchCriteria();
-      usersSearchParameter.setPageSize(pageSize);
-      usersSearchParameter.setPaginationToken(paginationToken);
+      CognitoUsersSearchCriteria searchCriteria = new CognitoUsersSearchCriteria();
+      searchCriteria.setPageSize(pageSize);
+      searchCriteria.setPaginationToken(paginationToken);
       if(attr != null) {
-        usersSearchParameter.setSearchAttr(attr, attrValue);
+        searchCriteria.setSearchAttr(attr, attrValue);
       }
-      return usersSearchParameter;
+      return searchCriteria;
     }
   }
 }
