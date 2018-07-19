@@ -1,5 +1,9 @@
 package gov.ca.cwds.idm;
 
+import static gov.ca.cwds.service.messages.MessageCode.IDM_USER_VALIDATION_FAILED;
+import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
+import static java.util.stream.Collectors.toSet;
+
 import gov.ca.cwds.idm.dto.IdmApiCustomError;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
@@ -11,11 +15,17 @@ import gov.ca.cwds.rest.api.domain.UserAlreadyExistsException;
 import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
 import gov.ca.cwds.rest.api.domain.UserNotFoundPerryException;
 import gov.ca.cwds.service.messages.MessageCode;
+import gov.ca.cwds.util.Utils;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import java.util.HashSet;
+import java.net.URI;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
@@ -29,15 +39,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import java.net.URI;
-import java.util.List;
-import java.util.Optional;
-
-import static gov.ca.cwds.service.messages.MessageCode.IDM_USER_VALIDATION_FAILED;
-import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
 
 @RestController
 @Profile("idm")
@@ -81,8 +82,9 @@ public class IdmResource {
   public List<User> searchUsersByRacfid(
       @ApiParam(required = true, name = "RACFIDs", value = "List of RACFIDs")
       @NotNull
-      @RequestBody List<String> racfids) {
-    return idmService.searchUsersByRacfids(new HashSet<>(racfids));
+      @RequestBody Set<String> values) {
+    Set<String> racfids = values.stream().map(Utils::toUpperCase).collect(toSet());
+    return idmService.searchUsersByRacfids(racfids);
   }
 
   @RequestMapping(method = RequestMethod.GET, value = "/users/{id}", produces = "application/json")

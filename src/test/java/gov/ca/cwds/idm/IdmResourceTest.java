@@ -272,6 +272,23 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   }
 
   @Test
+  public void testSearchUsersByRacfidFilterOutRepeats() throws Exception {
+
+    MvcResult result =
+        mockMvc
+            .perform(
+                MockMvcRequestBuilders.post("/idm/users/search")
+                    .contentType(CONTENT_TYPE)
+                    .content("[\"YOLOD\", \"yolod\", \"YOLOD\"]")
+                    .header(HttpHeaders.AUTHORIZATION, BASIC_AUTH_HEADER))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers.content().contentType(CONTENT_TYPE))
+            .andReturn();
+
+    assertNonStrict(result, "fixtures/idm/users-search/yolod.json");
+  }
+
+  @Test
   public void testgetUsersPage() throws Exception {
     MvcResult result =
         mockMvc
@@ -945,7 +962,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
           .thenThrow(new InternalErrorException("internal error"));
     }
 
-    public ListUsersRequest setSearchByRacfidRequestAndResult(TestUser testUser){
+    ListUsersRequest setSearchByRacfidRequestAndResult(TestUser testUser){
 
       ListUsersRequest request =
           composeListUsersRequest(composeToGetByAttribute(RACFID_STANDARD, testUser.getRacfId()));
