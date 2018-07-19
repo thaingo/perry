@@ -73,6 +73,7 @@ perry:
     idpMaxAttempts: ${IDP_MAX_ATTEMPTS:5} #amount of retries
     idpRetryTimeout: ${IDP_RETRY_TIMEOUT:500}  #milliseconds
     idpValidateInterval: ${IDP_VALIDATE_INTERVAL:2} #seconds
+    loginPageUrl: ${LOGIN_PAGE_URL:/mfa-login.html}
     tokenStore:
         datasource:
             driver-class-name: org.postgresql.Driver

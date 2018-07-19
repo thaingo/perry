@@ -44,6 +44,8 @@ public class PerryProperties {
   private int idpMaxAttempts;
   private int idpValidateInterval;
 
+  private String loginPageUrl = "/mfa-login.html";
+
   public static class IdentityProviderConfiguration {
 
     private IdpMappingScript idpMapping;
@@ -186,5 +188,13 @@ public class PerryProperties {
 
   public void setIdpValidateInterval(int idpValidateInterval) {
     this.idpValidateInterval = idpValidateInterval;
+  }
+
+  public String getLoginPageUrl() {
+    return loginPageUrl;
+  }
+
+  public void setLoginPageUrl(String loginPageUrl) {
+    this.loginPageUrl = loginPageUrl;
   }
 }

@@ -31,6 +31,14 @@ if [ "$SWAGGER" = true ] ; then
     JAVA_OPTS="$JAVA_OPTS,swagger"
 fi
 
+if [ "$MFA" = true ] ; then
+    echo "LOGIN TYPE: MFA"
+    JAVA_OPTS="$JAVA_OPTS,mfa"
+else
+    echo "LOGIN TYPE: OAUTH2"
+    JAVA_OPTS="$JAVA_OPTS,oauth2"
+fi
+
 if [ -x /paramfolder/parameters.sh ]; then
     source /paramfolder/parameters.sh
 fi
