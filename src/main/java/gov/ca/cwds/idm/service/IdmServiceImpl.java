@@ -23,6 +23,7 @@ import gov.ca.cwds.service.messages.MessageCode;
 import gov.ca.cwds.service.messages.MessagesService;
 import gov.ca.cwds.service.scripts.IdmMappingScript;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
+import gov.ca.cwds.util.Utils;
 import java.util.ArrayList;
 import java.util.Set;
 import org.apache.commons.collections.CollectionUtils;
@@ -51,6 +52,7 @@ import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USE
 import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID_IN_CWSCMS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
 import static gov.ca.cwds.util.Utils.toUpperCase;
+import static java.util.stream.Collectors.toSet;
 
 @Service
 @Profile("idm")
@@ -104,9 +106,11 @@ public class IdmServiceImpl implements IdmService {
 
   @Override
   public List<User> searchUsersByRacfids(Set<String> racfids) {
+    Set<String> values = racfids.stream().map(Utils::toUpperCase).collect(toSet());
+
     UsersSearchCriteria criteria = new UsersSearchCriteria();
     criteria.setSearchAttr(RACFID_STANDARD);
-    criteria.setValues(racfids);
+    criteria.setValues(values);
     return searchUsers(criteria);
   }
 
