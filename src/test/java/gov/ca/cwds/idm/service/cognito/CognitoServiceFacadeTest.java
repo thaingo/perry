@@ -250,17 +250,17 @@ public class CognitoServiceFacadeTest {
 
     Map<String, String> attrMap = attrMap(attrs);
 
-    assertAttr(attrMap, EMAIL.getName(), "gonzales@gmail.com");
-    assertAttr(attrMap, FIRST_NAME.getName(), "Garcia");
-    assertAttr(attrMap, LAST_NAME.getName(), "Gonzales");
-    assertAttr(attrMap, COUNTY.getName(), "Madera");
-    assertAttr(attrMap, OFFICE.getName(), "River Office");
-    assertAttr(attrMap, PHONE_NUMBER.getName(), "+19161111111");
-    assertAttr(attrMap, RACFID_CUSTOM.getName(), "RUBBLBA");
-    assertAttr(attrMap, RACFID_STANDARD.getName(), "RUBBLBA");
-    assertAttr(attrMap, RACFID_CUSTOM_2.getName(), "RUBBLBA");
-    assertAttr(attrMap, PERMISSIONS.getName(), "RFA-rollout:Hotline-rollout");
-    assertAttr(attrMap, ROLES.getName(), "CWS-admin:CWS-worker");
+    assertAttr(attrMap, EMAIL, "gonzales@gmail.com");
+    assertAttr(attrMap, FIRST_NAME, "Garcia");
+    assertAttr(attrMap, LAST_NAME, "Gonzales");
+    assertAttr(attrMap, COUNTY, "Madera");
+    assertAttr(attrMap, OFFICE, "River Office");
+    assertAttr(attrMap, PHONE_NUMBER, "+19161111111");
+    assertAttr(attrMap, RACFID_CUSTOM, "RUBBLBA");
+    assertAttr(attrMap, RACFID_STANDARD, "RUBBLBA");
+    assertAttr(attrMap, RACFID_CUSTOM_2, "RUBBLBA");
+    assertAttr(attrMap, PERMISSIONS, "RFA-rollout:Hotline-rollout");
+    assertAttr(attrMap, ROLES, "CWS-admin:CWS-worker");
   }
 
   @Test
@@ -270,9 +270,9 @@ public class CognitoServiceFacadeTest {
 
     AdminCreateUserRequest request = facade.createAdminCreateUserRequest(user);
     Map<String, String> attrMap = attrMap(request.getUserAttributes());
-    assertAttr(attrMap, RACFID_CUSTOM.getName(), "RUBBLBA");
-    assertAttr(attrMap, RACFID_STANDARD.getName(), "RUBBLBA");
-    assertAttr(attrMap, RACFID_CUSTOM_2.getName(), "RUBBLBA");
+    assertAttr(attrMap, RACFID_CUSTOM, "RUBBLBA");
+    assertAttr(attrMap, RACFID_STANDARD, "RUBBLBA");
+    assertAttr(attrMap, RACFID_CUSTOM_2, "RUBBLBA");
   }
 
   @Test
@@ -361,9 +361,9 @@ public class CognitoServiceFacadeTest {
     return attrs.stream().collect(Collectors.toMap(AttributeType::getName, AttributeType::getValue));
   }
 
-  private static void assertAttr(Map<String, String> attrMap, String name, String value) {
-    assertTrue(attrMap.containsKey(name));
-    assertThat(attrMap.get(name), is(value));
+  private static void assertAttr(Map<String, String> attrMap, UserAttribute attr, String value) {
+    assertTrue(attrMap.containsKey(attr.getName()));
+    assertThat(attrMap.get(attr.getName()), is(value));
   }
 
   private static Set<String> set(String... strs) {

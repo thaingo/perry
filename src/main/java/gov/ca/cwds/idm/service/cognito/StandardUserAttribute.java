@@ -1,6 +1,6 @@
 package gov.ca.cwds.idm.service.cognito;
 
-public enum StandardUserAttribute {
+public enum StandardUserAttribute implements UserAttribute {
   EMAIL("email"),
   FIRST_NAME("given_name"),
   LAST_NAME("family_name"),
@@ -13,6 +13,7 @@ public enum StandardUserAttribute {
     this.name = name;
   }
 
+  @Override
   public String getName() {
     return name;
   }

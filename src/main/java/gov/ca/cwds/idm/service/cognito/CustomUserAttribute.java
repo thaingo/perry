@@ -1,6 +1,6 @@
 package gov.ca.cwds.idm.service.cognito;
 
-public enum CustomUserAttribute {
+public enum CustomUserAttribute implements UserAttribute {
   PERMISSIONS("custom:Permission"),
   ROLES("custom:Role"),
   OFFICE("custom:Office"),
@@ -14,6 +14,7 @@ public enum CustomUserAttribute {
     this.name = name;
   }
 
+  @Override
   public String getName() {
     return name;
   }
