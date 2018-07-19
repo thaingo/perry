@@ -185,15 +185,15 @@ public class CognitoServiceFacade {
 
     AttributesBuilder attributesBuilder =
         new AttributesBuilder()
-            .addAttribute(EMAIL.getName(), user.getEmail())
-            .addAttribute(FIRST_NAME.getName(), user.getFirstName())
-            .addAttribute(LAST_NAME.getName(), user.getLastName())
-            .addAttribute(COUNTY.getName(), user.getCountyName())
-            .addAttribute(OFFICE.getName(), user.getOffice())
-            .addAttribute(PHONE_NUMBER.getName(), user.getPhoneNumber())
-            .addAttribute(RACFID_CUSTOM.getName(), racfid)
-            .addAttribute(RACFID_CUSTOM_2.getName(), racfid)
-            .addAttribute(RACFID_STANDARD.getName(), racfid)
+            .addAttribute(EMAIL, user.getEmail())
+            .addAttribute(FIRST_NAME, user.getFirstName())
+            .addAttribute(LAST_NAME, user.getLastName())
+            .addAttribute(COUNTY, user.getCountyName())
+            .addAttribute(OFFICE, user.getOffice())
+            .addAttribute(PHONE_NUMBER, user.getPhoneNumber())
+            .addAttribute(RACFID_CUSTOM, racfid)
+            .addAttribute(RACFID_CUSTOM_2, racfid)
+            .addAttribute(RACFID_STANDARD, racfid)
             .addAttribute(createPermissionsAttribute(user.getPermissions()))
             .addAttribute(createRolesAttribute(user.getRoles()));
     return attributesBuilder.build();

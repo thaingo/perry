@@ -33,8 +33,11 @@ public class AttributesBuilder {
     return this;
   }
 
-  public AttributesBuilder addAttribute(String attrName, String attrValue) {
-    AttributeType attr = attribute(attrName, attrValue);
+  public AttributesBuilder addAttribute(UserAttribute userAttribute, String attrValue) {
+    if (userAttribute == null) {
+      throw new IllegalArgumentException("UserAttribute may not be null");
+    }
+    AttributeType attr = attribute(userAttribute.getName(), attrValue);
     return addAttribute(attr);
   }
 }
