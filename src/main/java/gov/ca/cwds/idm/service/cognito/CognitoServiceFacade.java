@@ -158,24 +158,19 @@ public class CognitoServiceFacade {
 
   public List<UserType> searchAllPages(CognitoUsersSearchCriteria searchCriteria) {
     List<UserType> result = new ArrayList<>();
-
-    CognitoUserPage userPage = search(searchCriteria);
-    addPage(result, userPage, searchCriteria);
-
+    addPage(result, searchCriteria);
     return result;
   }
 
-  private void addPage(List<UserType> result, CognitoUserPage userPage,
-      CognitoUsersSearchCriteria searchCriteria) {
-
+  private void addPage(List<UserType> result, CognitoUsersSearchCriteria searchCriteria) {
+    CognitoUserPage userPage = search(searchCriteria);
     result.addAll(userPage.getUsers());
     String paginationToken = userPage.getPaginationToken();
 
     if (StringUtils.isNotEmpty(paginationToken)) {
       CognitoUsersSearchCriteria searchCriteria2 = new CognitoUsersSearchCriteria(searchCriteria);
       searchCriteria2.setPaginationToken(paginationToken);
-      CognitoUserPage userPage2 = search(searchCriteria2);
-      addPage(result, userPage2, searchCriteria);
+      addPage(result, searchCriteria2);
     }
   }
 
