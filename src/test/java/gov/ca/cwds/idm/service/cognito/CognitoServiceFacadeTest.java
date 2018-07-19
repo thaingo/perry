@@ -285,7 +285,7 @@ public class CognitoServiceFacadeTest {
     UserType userType4 = userType("user4");
 
     CognitoUsersSearchCriteria searchCriteria = new CognitoUsersSearchCriteria();
-    searchCriteria.setSearchAttr(EMAIL, "search@all.email");
+    searchCriteria.setSearchAttr(EMAIL, "searchPage@all.email");
     searchCriteria.setPageSize(2);
 
     ListUsersRequest request0 =

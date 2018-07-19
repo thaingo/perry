@@ -48,29 +48,29 @@ public class CognitoUsersSearchCriteria {
     this.attrValue = attrValue;
   }
 
-  public static final class SearchParameterBuilder {
+  public static final class SearchCriteriaBuilder {
     private Integer pageSize;
     private String paginationToken;
     private StandardUserAttribute attr;
     private String attrValue;
 
-    private SearchParameterBuilder() {}
+    private SearchCriteriaBuilder() {}
 
-    public static SearchParameterBuilder aSearchParameters() {
-      return new SearchParameterBuilder();
+    public static SearchCriteriaBuilder aSearchParameters() {
+      return new SearchCriteriaBuilder();
     }
 
-    public SearchParameterBuilder withPageSize(Integer pageSize) {
+    public SearchCriteriaBuilder withPageSize(Integer pageSize) {
       this.pageSize = pageSize;
       return this;
     }
 
-    public SearchParameterBuilder withPaginationToken(String paginationToken) {
+    public SearchCriteriaBuilder withPaginationToken(String paginationToken) {
       this.paginationToken = paginationToken;
       return this;
     }
 
-    public SearchParameterBuilder withSearchAttr(StandardUserAttribute attr, String attrValue) {
+    public SearchCriteriaBuilder withSearchAttr(StandardUserAttribute attr, String attrValue) {
       this.attr = attr;
       this.attrValue = attrValue;
       return this;

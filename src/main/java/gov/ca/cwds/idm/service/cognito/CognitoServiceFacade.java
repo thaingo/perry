@@ -146,7 +146,7 @@ public class CognitoServiceFacade {
             .withUserAttributes(buildCreateUserAttributes(user));
   }
 
-  public CognitoUserPage search(CognitoUsersSearchCriteria searchCriteria) {
+  public CognitoUserPage searchPage(CognitoUsersSearchCriteria searchCriteria) {
     ListUsersRequest request = composeListUsersRequest(searchCriteria);
     try {
       ListUsersResult result = identityProvider.listUsers(request);
@@ -163,7 +163,7 @@ public class CognitoServiceFacade {
   }
 
   private void addPage(List<UserType> result, CognitoUsersSearchCriteria searchCriteria) {
-    CognitoUserPage userPage = search(searchCriteria);
+    CognitoUserPage userPage = searchPage(searchCriteria);
     result.addAll(userPage.getUsers());
     String paginationToken = userPage.getPaginationToken();
 

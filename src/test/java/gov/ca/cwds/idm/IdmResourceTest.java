@@ -12,7 +12,7 @@ import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.FIRST_NAME;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.LAST_NAME;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.DEFAULT_PAGESIZE;
-import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetByAttribute;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByAttribute;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertStrict;
 import static org.mockito.Mockito.inOrder;
@@ -908,11 +908,13 @@ public class IdmResourceTest extends BaseLiquibaseTest {
       ListUsersRequest request_correct =
           new ListUsersRequest()
               .withUserPoolId(USERPOOL)
+              .withLimit(DEFAULT_PAGESIZE)
               .withFilter("email = \"" + email_correct + "\"");
 
       ListUsersRequest request_wrong =
           new ListUsersRequest()
               .withUserPoolId(USERPOOL)
+              .withLimit(DEFAULT_PAGESIZE)
               .withFilter("email = \"" + email_wrong + "\"");
 
       List<UserType> userTypes =
@@ -965,7 +967,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     ListUsersRequest setSearchByRacfidRequestAndResult(TestUser testUser){
 
       ListUsersRequest request =
-          composeListUsersRequest(composeToGetByAttribute(RACFID_STANDARD, testUser.getRacfId()));
+          composeListUsersRequest(composeToGetFirstPageByAttribute(RACFID_STANDARD, testUser.getRacfId()));
 
       ListUsersResult result = new ListUsersResult().withUsers(userType(testUser));
 

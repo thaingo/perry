@@ -15,7 +15,7 @@ public class CognitoUsersSearchCriteriaUtilTest {
   @Test
   public void testComposeToGetByRacfid() {
     CognitoUsersSearchCriteria criteria =
-        composeToGetByAttribute(StandardUserAttribute.RACFID_STANDARD, "ABC");
+        composeToGetFirstPageByAttribute(StandardUserAttribute.RACFID_STANDARD, "ABC");
     assertThat(criteria.getSearchAttrName(), is(RACFID_STANDARD.getName()));
     assertThat(criteria.getSearchAttrValue(), is("ABC"));
     assertThat(criteria.getPageSize(), is(DEFAULT_PAGESIZE));

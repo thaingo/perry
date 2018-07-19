@@ -1,7 +1,10 @@
 package gov.ca.cwds.idm.service.cognito.util;
 
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
+
 import gov.ca.cwds.idm.service.cognito.StandardUserAttribute;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
+import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria.SearchCriteriaBuilder;
 
 public class CognitoUsersSearchCriteriaUtil {
 
@@ -10,16 +13,21 @@ public class CognitoUsersSearchCriteriaUtil {
   private CognitoUsersSearchCriteriaUtil() {}
 
   public static CognitoUsersSearchCriteria composeToGetPage(String paginationToken) {
-    return CognitoUsersSearchCriteria.SearchParameterBuilder.aSearchParameters()
-            .withPaginationToken(paginationToken)
-            .withPageSize(DEFAULT_PAGESIZE)
-            .build();
+    return SearchCriteriaBuilder.aSearchParameters()
+        .withPaginationToken(paginationToken)
+        .withPageSize(DEFAULT_PAGESIZE)
+        .build();
   }
 
-  public static CognitoUsersSearchCriteria composeToGetByAttribute(StandardUserAttribute attr, String value) {
-    return CognitoUsersSearchCriteria.SearchParameterBuilder.aSearchParameters()
+  public static CognitoUsersSearchCriteria composeToGetFirstPageByAttribute(
+      StandardUserAttribute attr, String value) {
+    return SearchCriteriaBuilder.aSearchParameters()
         .withPageSize(DEFAULT_PAGESIZE)
         .withSearchAttr(attr, value)
         .build();
+  }
+
+  public static CognitoUsersSearchCriteria composeToGetFirstPageByEmail(String email) {
+    return composeToGetFirstPageByAttribute(EMAIL, email);
   }
 }
