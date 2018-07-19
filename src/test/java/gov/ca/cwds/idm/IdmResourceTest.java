@@ -1,5 +1,7 @@
 package gov.ca.cwds.idm;
 
+import static gov.ca.cwds.idm.BaseLiquibaseTest.CMS_STORE_URL;
+import static gov.ca.cwds.idm.BaseLiquibaseTest.TOKEN_STORE_URL;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.COUNTY;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PERMISSIONS;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.RACFID_CUSTOM;
@@ -9,9 +11,10 @@ import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.FIRST_NAME;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.LAST_NAME;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.DEFAULT_PAGESIZE;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetByAttribute;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertStrict;
-import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.DEFAULT_PAGESIZE;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -45,6 +48,16 @@ import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.service.cognito.CognitoProperties;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.service.messages.MessagesService;
+import java.nio.charset.Charset;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.annotation.PostConstruct;
 import liquibase.util.StringUtils;
 import org.apache.commons.codec.binary.Base64;
 import org.junit.Before;
@@ -65,23 +78,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-
-import javax.annotation.PostConstruct;
-import java.nio.charset.Charset;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static gov.ca.cwds.idm.BaseLiquibaseTest.CMS_STORE_URL;
-import static gov.ca.cwds.idm.BaseLiquibaseTest.TOKEN_STORE_URL;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 
 @ActiveProfiles({"dev", "idm"})
 @SpringBootTest(
@@ -256,6 +252,23 @@ public class IdmResourceTest extends BaseLiquibaseTest {
             .andReturn();
 
     assertNonStrict(result, "fixtures/idm/get-users/all-valid.json");
+  }
+
+  @Test
+  public void testSearchUsersByRacfid() throws Exception {
+
+    MvcResult result =
+        mockMvc
+            .perform(
+                MockMvcRequestBuilders.post("/idm/users/search")
+                    .contentType(CONTENT_TYPE)
+                    .content("[\"YOLOD\", \"SMITHBO\"]")
+                    .header(HttpHeaders.AUTHORIZATION, BASIC_AUTH_HEADER))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers.content().contentType(CONTENT_TYPE))
+            .andReturn();
+
+    assertNonStrict(result, "fixtures/idm/users-search/valid.json");
   }
 
   @Test
@@ -773,6 +786,10 @@ public class IdmResourceTest extends BaseLiquibaseTest {
       setListUsersRequestAndResult(SOME_PAGINATION_TOKEN, user0);
 
       setSearchUsersByEmailRequestAndResult("julio@gmail.com", "test@test.com", user1);
+
+      setSearchByRacfidRequestAndResult(user1);
+
+      setSearchByRacfidRequestAndResult(user2);
     }
 
     private void setListUsersRequestAndResult(String paginationToken, TestUser... testUsers) {
@@ -926,6 +943,18 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
       when(cognito.adminGetUser(getUserRequest))
           .thenThrow(new InternalErrorException("internal error"));
+    }
+
+    public ListUsersRequest setSearchByRacfidRequestAndResult(TestUser testUser){
+
+      ListUsersRequest request =
+          composeListUsersRequest(composeToGetByAttribute(RACFID_STANDARD, testUser.getRacfId()));
+
+      ListUsersResult result = new ListUsersResult().withUsers(userType(testUser));
+
+      when(cognito.listUsers(request)).thenReturn(result);
+
+      return request;
     }
   }
 

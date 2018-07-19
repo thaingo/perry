@@ -262,7 +262,7 @@ public class CognitoServiceFacade {
     }
   }
 
-  ListUsersRequest composeListUsersRequest(CognitoUsersSearchCriteria criteria) {
+  public ListUsersRequest composeListUsersRequest(CognitoUsersSearchCriteria criteria) {
     ListUsersRequest request = new ListUsersRequest().withUserPoolId(properties.getUserpool());
     if (criteria.getPageSize() != null) {
       request = request.withLimit(criteria.getPageSize());
