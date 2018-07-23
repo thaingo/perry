@@ -6,7 +6,6 @@ import gov.ca.cwds.idm.dto.UserVerificationResult;
 import gov.ca.cwds.idm.dto.UsersPage;
 import gov.ca.cwds.idm.dto.UsersSearchCriteria;
 import java.util.List;
-import java.util.Set;
 import org.springframework.security.access.method.P;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,6 +24,4 @@ public interface IdmService {
   String createUser(@P("user") User user);
 
   List<User> searchUsers(UsersSearchCriteria usersSearchCriteria);
-
-  List<User> searchUsersByRacfids(Set<String> racfids);
 }

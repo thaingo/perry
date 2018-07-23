@@ -1,48 +1,5 @@
 package gov.ca.cwds.idm.service;
 
-import com.amazonaws.services.cognitoidp.model.UserType;
-import gov.ca.cwds.PerryProperties;
-import gov.ca.cwds.data.persistence.auth.CwsOffice;
-import gov.ca.cwds.data.persistence.auth.StaffPerson;
-import gov.ca.cwds.idm.dto.UsersSearchCriteria;
-import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
-import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.dto.UserUpdate;
-import gov.ca.cwds.idm.dto.UserVerificationResult;
-import gov.ca.cwds.idm.dto.UsersPage;
-import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
-import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
-import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
-import gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil;
-import gov.ca.cwds.rest.api.domain.PerryException;
-import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType;
-import gov.ca.cwds.service.CwsUserInfoService;
-import gov.ca.cwds.service.dto.CwsUserInfo;
-import gov.ca.cwds.service.messages.MessageCode;
-import gov.ca.cwds.service.messages.MessagesService;
-import gov.ca.cwds.service.scripts.IdmMappingScript;
-import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
-import gov.ca.cwds.util.Utils;
-import java.util.ArrayList;
-import java.util.Set;
-import org.apache.commons.collections.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-
-import javax.script.ScriptException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.RACFID_CUSTOM;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByEmail;
@@ -53,6 +10,49 @@ import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID_IN_CW
 import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
 import static gov.ca.cwds.util.Utils.toUpperCase;
 import static java.util.stream.Collectors.toSet;
+
+import com.amazonaws.services.cognitoidp.model.UserType;
+import gov.ca.cwds.PerryProperties;
+import gov.ca.cwds.data.persistence.auth.CwsOffice;
+import gov.ca.cwds.data.persistence.auth.StaffPerson;
+import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.idm.dto.UserUpdate;
+import gov.ca.cwds.idm.dto.UserVerificationResult;
+import gov.ca.cwds.idm.dto.UsersPage;
+import gov.ca.cwds.idm.dto.UsersSearchCriteria;
+import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
+import gov.ca.cwds.idm.service.cognito.StandardUserAttribute;
+import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
+import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
+import gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil;
+import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
+import gov.ca.cwds.rest.api.domain.PerryException;
+import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType;
+import gov.ca.cwds.service.CwsUserInfoService;
+import gov.ca.cwds.service.dto.CwsUserInfo;
+import gov.ca.cwds.service.messages.MessageCode;
+import gov.ca.cwds.service.messages.MessagesService;
+import gov.ca.cwds.service.scripts.IdmMappingScript;
+import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
+import gov.ca.cwds.util.Utils;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.script.ScriptException;
+import org.apache.commons.collections.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
 
 @Service
 @Profile("idm")
@@ -94,24 +94,21 @@ public class IdmServiceImpl implements IdmService {
 
   @Override
   public List<User> searchUsers(UsersSearchCriteria criteria) {
+    StandardUserAttribute searchAttr = criteria.getSearchAttr();
+    Set<String> values = criteria.getValues();
+
+    if(searchAttr == RACFID_STANDARD) {
+      values = values.stream().map(Utils::toUpperCase).collect(toSet());
+    }
+
     List<UserType> cognitoUsers = new ArrayList<>();
 
-    for(String value : criteria.getValues()) {
-      CognitoUsersSearchCriteria searchCriteria =
-          CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByAttribute(criteria.getSearchAttr(), value);
-      cognitoUsers.addAll(cognitoServiceFacade.searchAllPages(searchCriteria));
+    for(String value : values) {
+      CognitoUsersSearchCriteria cognitoSearchCriteria =
+          CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByAttribute(searchAttr, value);
+      cognitoUsers.addAll(cognitoServiceFacade.searchAllPages(cognitoSearchCriteria));
     }
     return enrichCognitoUsersByCws(cognitoUsers);
-  }
-
-  @Override
-  public List<User> searchUsersByRacfids(Set<String> racfids) {
-    Set<String> values = racfids.stream().map(Utils::toUpperCase).collect(toSet());
-
-    UsersSearchCriteria criteria = new UsersSearchCriteria();
-    criteria.setSearchAttr(RACFID_STANDARD);
-    criteria.setValues(values);
-    return searchUsers(criteria);
   }
 
   private List<User> enrichCognitoUsersByCws(Collection<UserType> cognitoUsers) {

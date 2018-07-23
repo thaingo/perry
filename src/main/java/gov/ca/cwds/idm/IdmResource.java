@@ -1,5 +1,6 @@
 package gov.ca.cwds.idm;
 
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.service.messages.MessageCode.IDM_USER_VALIDATION_FAILED;
 import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
 
@@ -8,6 +9,7 @@ import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.UserVerificationResult;
 import gov.ca.cwds.idm.dto.UsersPage;
+import gov.ca.cwds.idm.dto.UsersSearchCriteria;
 import gov.ca.cwds.idm.service.DictionaryProvider;
 import gov.ca.cwds.idm.service.IdmService;
 import gov.ca.cwds.rest.api.domain.UserAlreadyExistsException;
@@ -81,7 +83,7 @@ public class IdmResource {
       @ApiParam(required = true, name = "RACFIDs", value = "List of RACFIDs")
       @NotNull
       @RequestBody Set<String> racfids) {
-    return idmService.searchUsersByRacfids(racfids);
+    return idmService.searchUsers(new UsersSearchCriteria(RACFID_STANDARD, racfids));
   }
 
   @RequestMapping(method = RequestMethod.GET, value = "/users/{id}", produces = "application/json")
