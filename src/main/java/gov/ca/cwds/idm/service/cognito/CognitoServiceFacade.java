@@ -1,17 +1,17 @@
 package gov.ca.cwds.idm.service.cognito;
 
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.COUNTY_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.EMAIL_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.EMAIL_DELIVERY;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.FIRST_NAME_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.LAST_NAME_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.OFFICE_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.PHONE_NUMBER_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_CUSTOM;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_STANDARD;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_CUSTOM_2;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.createPermissionsAttribute;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.createRolesAttribute;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.EMAIL_DELIVERY;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.createPermissionsAttribute;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.createRolesAttribute;
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.COUNTY;
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.OFFICE;
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.RACFID_CUSTOM;
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.RACFID_CUSTOM_2;
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.FIRST_NAME;
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.LAST_NAME;
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.PHONE_NUMBER;
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_CONNECT_TO_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_GET_USER_FROM_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_UPDATE_USER_IN_IDM;
@@ -42,10 +42,11 @@ import com.amazonaws.services.cognitoidp.model.ListUsersResult;
 import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import com.amazonaws.services.cognitoidp.model.UsernameExistsException;
-import gov.ca.cwds.idm.dto.CognitoUserPage;
+import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
-import gov.ca.cwds.idm.dto.UsersSearchParameter;
+import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
+import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
 import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.rest.api.domain.UserAlreadyExistsException;
 import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
@@ -55,6 +56,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.PostConstruct;
+import liquibase.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -144,13 +146,31 @@ public class CognitoServiceFacade {
             .withUserAttributes(buildCreateUserAttributes(user));
   }
 
-  public CognitoUserPage search(UsersSearchParameter searchCriteria) {
-    ListUsersRequest request = composeRequest(searchCriteria);
+  public CognitoUserPage searchPage(CognitoUsersSearchCriteria searchCriteria) {
+    ListUsersRequest request = composeListUsersRequest(searchCriteria);
     try {
       ListUsersResult result = identityProvider.listUsers(request);
       return new CognitoUserPage(result.getUsers(), result.getPaginationToken());
     } catch (Exception e) {
       throw new PerryException(messages.get(ERROR_CONNECT_TO_IDM), e);
+    }
+  }
+
+  public List<UserType> searchAllPages(CognitoUsersSearchCriteria searchCriteria) {
+    List<UserType> result = new ArrayList<>();
+    addPage(result, searchCriteria);
+    return result;
+  }
+
+  private void addPage(List<UserType> result, CognitoUsersSearchCriteria searchCriteria) {
+    CognitoUserPage userPage = searchPage(searchCriteria);
+    result.addAll(userPage.getUsers());
+    String paginationToken = userPage.getPaginationToken();
+
+    if (StringUtils.isNotEmpty(paginationToken)) {
+      CognitoUsersSearchCriteria searchCriteria2 = new CognitoUsersSearchCriteria(searchCriteria);
+      searchCriteria2.setPaginationToken(paginationToken);
+      addPage(result, searchCriteria2);
     }
   }
 
@@ -165,15 +185,15 @@ public class CognitoServiceFacade {
 
     AttributesBuilder attributesBuilder =
         new AttributesBuilder()
-            .addAttribute(EMAIL_ATTR_NAME, user.getEmail())
-            .addAttribute(FIRST_NAME_ATTR_NAME, user.getFirstName())
-            .addAttribute(LAST_NAME_ATTR_NAME, user.getLastName())
-            .addAttribute(COUNTY_ATTR_NAME, user.getCountyName())
-            .addAttribute(OFFICE_ATTR_NAME, user.getOffice())
-            .addAttribute(PHONE_NUMBER_ATTR_NAME, user.getPhoneNumber())
-            .addAttribute(RACFID_ATTR_NAME_CUSTOM, racfid)
-            .addAttribute(RACFID_ATTR_NAME_CUSTOM_2, racfid)
-            .addAttribute(RACFID_ATTR_NAME_STANDARD, racfid)
+            .addAttribute(EMAIL, user.getEmail())
+            .addAttribute(FIRST_NAME, user.getFirstName())
+            .addAttribute(LAST_NAME, user.getLastName())
+            .addAttribute(COUNTY, user.getCountyName())
+            .addAttribute(OFFICE, user.getOffice())
+            .addAttribute(PHONE_NUMBER, user.getPhoneNumber())
+            .addAttribute(RACFID_CUSTOM, racfid)
+            .addAttribute(RACFID_CUSTOM_2, racfid)
+            .addAttribute(RACFID_STANDARD, racfid)
             .addAttribute(createPermissionsAttribute(user.getPermissions()))
             .addAttribute(createRolesAttribute(user.getRoles()));
     return attributesBuilder.build();
@@ -237,22 +257,18 @@ public class CognitoServiceFacade {
     }
   }
 
-  private ListUsersRequest composeRequest(UsersSearchParameter parameter) {
+  public ListUsersRequest composeListUsersRequest(CognitoUsersSearchCriteria criteria) {
     ListUsersRequest request = new ListUsersRequest().withUserPoolId(properties.getUserpool());
-    if (parameter.getPageSize() != null) {
-      request = request.withLimit(parameter.getPageSize());
+    if (criteria.getPageSize() != null) {
+      request = request.withLimit(criteria.getPageSize());
     }
-    if (parameter.getPaginationToken() != null) {
-      request = request.withPaginationToken(parameter.getPaginationToken());
+    if (criteria.getPaginationToken() != null) {
+      request = request.withPaginationToken(criteria.getPaginationToken());
     }
-    if (parameter.getEmail() != null) {
-      request = request.withFilter("email = \"" + parameter.getEmail() + "\"");
+    if (criteria.getSearchAttrName() != null) {
+      request = request.withFilter(criteria.getSearchAttrName() + " = \"" + criteria.getSearchAttrValue() + "\"");
     }
     return request;
-  }
-
-  public CognitoProperties getProperties() {
-    return properties;
   }
 
   public void setProperties(CognitoProperties properties) {

@@ -1,13 +1,12 @@
 package gov.ca.cwds.idm.service.cognito;
 
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.attribute;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.attribute;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
 import com.amazonaws.services.cognitoidp.model.AttributeType;
-import gov.ca.cwds.idm.service.cognito.AttributesBuilder;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,10 +23,10 @@ public class AttributesBuilderTest {
   @Test
   public void testAddAttributeWithNameValue() {
     builder
-        .addAttribute("firstName", "firstValue")
-        .addAttribute("secondName", "")
-        .addAttribute("thirdName", "   ")
-        .addAttribute("forthName", null);
+        .addAttribute(() -> "firstName", "firstValue")
+        .addAttribute(() -> "secondName", "")
+        .addAttribute(() -> "thirdName", "   ")
+        .addAttribute(() -> "forthName", null);
     List<AttributeType> attrs = builder.build();
     assertThat(attrs, hasSize(4));
 
@@ -68,25 +67,31 @@ public class AttributesBuilderTest {
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void testAddAttributeNull() {
+  public void testAddAttributeNullAttribute() {
     builder.addAttribute(null);
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void testAddAttributeNullName() {
+  public void testAddAttributeNullUserAttribute() {
     builder.addAttribute(null, "value");
   }
 
   @Test(expected = IllegalArgumentException.class)
+  public void testAddAttributeNullName() {
+    builder.addAttribute(() -> null, "value");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
   public void testAddAttributeEmptyName() {
-    builder.addAttribute("", "value");
+    builder.addAttribute(() -> "", "value");
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testAddAttributeBlankName() {
-    builder.addAttribute("  ", "value");
+    builder.addAttribute(() -> "  ", "value");
   }
 
+  @Test
   public void testBuildEmptyBuider() {
     assertThat(builder.build(), empty());
   }
