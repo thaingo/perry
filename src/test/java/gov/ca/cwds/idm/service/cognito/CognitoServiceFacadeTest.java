@@ -38,6 +38,7 @@ import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
+import gov.ca.cwds.idm.service.UserLogService;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.rest.api.domain.UserNotFoundPerryException;
@@ -63,6 +64,8 @@ public class CognitoServiceFacadeTest {
 
   private MessagesService messagesService = mock(MessagesService.class);
 
+  private UserLogService userLogService = mock(UserLogService.class);
+
   @Before
   public void before() {
     CognitoProperties properties = new CognitoProperties();
@@ -75,6 +78,7 @@ public class CognitoServiceFacadeTest {
     facade.setProperties(properties);
     facade.setIdentityProvider(identityProvider);
     facade.setMessagesService(messagesService);
+    facade.setUserLogService(userLogService);
   }
 
   @Test

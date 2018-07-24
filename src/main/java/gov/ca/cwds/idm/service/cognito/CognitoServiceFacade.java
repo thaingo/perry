@@ -42,6 +42,7 @@ import com.amazonaws.services.cognitoidp.model.ListUsersResult;
 import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import com.amazonaws.services.cognitoidp.model.UsernameExistsException;
+import gov.ca.cwds.idm.service.UserLogService;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
@@ -71,6 +72,8 @@ public class CognitoServiceFacade {
   @Autowired private CognitoProperties properties;
 
   @Autowired private MessagesService messages;
+
+  @Autowired private UserLogService userLogService;
 
   private AWSCognitoIdentityProvider identityProvider;
 
@@ -114,7 +117,9 @@ public class CognitoServiceFacade {
 
     try {
       AdminCreateUserResult result = identityProvider.adminCreateUser(request);
-      return result.getUser().getUsername();
+      String username = result.getUser().getUsername();
+      userLogService.logCreate(username);
+      return username;
 
     } catch (UsernameExistsException e) {
       String causeMsg = messages.get(USER_WITH_EMAIL_EXISTS_IN_IDM, user.getEmail());
@@ -225,6 +230,7 @@ public class CognitoServiceFacade {
               .withUserAttributes(updateAttributes);
 
       identityProvider.adminUpdateUserAttributes(adminUpdateUserAttributesRequest);
+      userLogService.logUpdate(id);
     }
   }
 
@@ -254,6 +260,7 @@ public class CognitoServiceFacade {
             new AdminDisableUserRequest().withUsername(id).withUserPoolId(properties.getUserpool());
         identityProvider.adminDisableUser(adminDisableUserRequest);
       }
+      userLogService.logUpdate(id);
     }
   }
 
@@ -284,5 +291,8 @@ public class CognitoServiceFacade {
   }
   public void setMessagesService(MessagesService messages) {
     this.messages = messages;
+  }
+  public void setUserLogService(UserLogService userLogService) {
+    this.userLogService = userLogService;
   }
 }

@@ -45,6 +45,7 @@ import com.amazonaws.services.cognitoidp.model.UsernameExistsException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
+import gov.ca.cwds.idm.service.UserLogService;
 import gov.ca.cwds.idm.service.cognito.CognitoProperties;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.service.messages.MessagesService;
@@ -119,6 +120,8 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
   @Autowired private MessagesService messagesService;
 
+  @Autowired private UserLogService userLogService;
+
   private MockMvc mockMvc;
 
   private AWSCognitoIdentityProvider cognito;
@@ -131,6 +134,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @Before
   public void before() {
     cognitoServiceFacade.setMessagesService(messagesService);
+    cognitoServiceFacade.setUserLogService(userLogService);
     this.mockMvc =
         MockMvcBuilders.webAppContextSetup(webApplicationContext).apply(springSecurity()).build();
     cognito = cognitoServiceFacade.getIdentityProvider();

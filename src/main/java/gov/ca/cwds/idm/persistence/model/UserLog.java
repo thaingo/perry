@@ -1,6 +1,6 @@
 package gov.ca.cwds.idm.persistence.model;
 
-import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -11,6 +11,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -19,8 +21,8 @@ import javax.validation.constraints.Size;
 public class UserLog {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "sequenceGenerator")
-  @SequenceGenerator(name = "sequenceGenerator")
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "userLogGenerator")
+  @SequenceGenerator(name = "userLogGenerator", sequenceName = "USER_LOG_ID_SEQ")
   private Long id;
 
   @NotNull
@@ -34,8 +36,9 @@ public class UserLog {
   private Operation operation;
 
   @NotNull
+  @Temporal(TemporalType.TIMESTAMP )
   @Column(name = "operation_time")
-  private LocalDateTime operationTime;
+  private Date operationTime;
 
   public Long getId() {
     return id;
@@ -57,11 +60,11 @@ public class UserLog {
     this.operation = operation;
   }
 
-  public LocalDateTime getOperationTime() {
+  public Date getOperationTime() {
     return operationTime;
   }
 
-  public void setOperationTime(LocalDateTime operationTime) {
+  public void setOperationTime(Date operationTime) {
     this.operationTime = operationTime;
   }
 
