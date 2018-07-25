@@ -9,10 +9,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -21,8 +18,8 @@ import javax.validation.constraints.Size;
 public class UserLog {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "userLogGenerator")
-  @SequenceGenerator(name = "userLogGenerator", sequenceName = "USER_LOG_ID_SEQ")
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "id")
   private Long id;
 
   @NotNull
@@ -32,16 +29,19 @@ public class UserLog {
 
   @NotNull
   @Enumerated(EnumType.STRING)
-  @Column(name = "operation")
-  private Operation operation;
+  @Column(name = "operation_type")
+  private OperationType operationType;
 
   @NotNull
-  @Temporal(TemporalType.TIMESTAMP )
   @Column(name = "operation_time")
   private Date operationTime;
 
   public Long getId() {
     return id;
+  }
+
+  public void setId(Long id) {
+    this.id = id;
   }
 
   public String getUsername() {
@@ -52,12 +52,12 @@ public class UserLog {
     this.username = username;
   }
 
-  public Operation getOperation() {
-    return operation;
+  public OperationType getOperationType() {
+    return operationType;
   }
 
-  public void setOperation(Operation operation) {
-    this.operation = operation;
+  public void setOperationType(OperationType operationType) {
+    this.operationType = operationType;
   }
 
   public Date getOperationTime() {
@@ -78,12 +78,12 @@ public class UserLog {
     }
     UserLog userLog = (UserLog) o;
     return Objects.equals(getUsername(), userLog.getUsername()) &&
-        getOperation() == userLog.getOperation() &&
+        getOperationType() == userLog.getOperationType() &&
         Objects.equals(getOperationTime(), userLog.getOperationTime());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getUsername(), getOperation(), getOperationTime());
+    return Objects.hash(getUsername(), getOperationType(), getOperationTime());
   }
 }

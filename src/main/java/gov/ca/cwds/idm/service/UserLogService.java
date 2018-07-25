@@ -1,12 +1,17 @@
 package gov.ca.cwds.idm.service;
 
-import static gov.ca.cwds.idm.persistence.model.Operation.CREATE;
-import static gov.ca.cwds.idm.persistence.model.Operation.UPDATE;
+import static gov.ca.cwds.idm.persistence.model.OperationType.CREATE;
+import static gov.ca.cwds.idm.persistence.model.OperationType.UPDATE;
+import static gov.ca.cwds.service.messages.MessageCode.UNABLE_LOG_IDM_USER;
 
 import gov.ca.cwds.idm.persistence.UserLogRepository;
-import gov.ca.cwds.idm.persistence.model.Operation;
+import gov.ca.cwds.idm.persistence.model.OperationType;
 import gov.ca.cwds.idm.persistence.model.UserLog;
+import gov.ca.cwds.service.messages.MessagesService;
 import java.util.Date;
+import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -16,28 +21,45 @@ import org.springframework.transaction.annotation.Transactional;
 @Profile("idm")
 public class UserLogService {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(UserLogService.class);
+
   private UserLogRepository userLogRepository;
+  private  MessagesService messages;
 
   @Transactional(value = "tokenTransactionManager")
-  public UserLog logCreate(String username) {
+  public Optional<UserLog> logCreate(String username) {
     return log(username, CREATE);
   }
 
   @Transactional(value = "tokenTransactionManager")
-  public UserLog logUpdate(String username) {
+  public Optional<UserLog> logUpdate(String username) {
     return log(username, UPDATE);
   }
 
-  private UserLog log(String username, Operation operation) {
+  private Optional<UserLog> log(String username, OperationType operationType) {
     UserLog userLog = new UserLog();
     userLog.setUsername(username);
-    userLog.setOperation(operation);
+    userLog.setOperationType(operationType);
     userLog.setOperationTime(new Date());
-    return userLogRepository.save(userLog);
+
+    UserLog result = null;
+    try {
+      result = userLogRepository.save(userLog);
+    } catch (Exception e) {
+      String operationName = operationType.toString().toLowerCase();
+      String msg = messages.get(UNABLE_LOG_IDM_USER, operationName, username);
+      LOGGER.error(msg, e);
+    }
+    return Optional.ofNullable(result);
   }
 
   @Autowired
-  public void setPermissionRepository(UserLogRepository userLogRepository) {
+  public void setUserLogRepository(UserLogRepository userLogRepository) {
     this.userLogRepository = userLogRepository;
+  }
+
+  @Autowired
+  public void setMessages(MessagesService messages) {
+    this.messages = messages;
   }
 }
