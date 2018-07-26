@@ -61,11 +61,11 @@ public class UserLog {
   }
 
   public Date getOperationTime() {
-    return operationTime;
+    return new Date(operationTime.getTime());
   }
 
   public void setOperationTime(Date operationTime) {
-    this.operationTime = operationTime;
+    this.operationTime = new Date(operationTime.getTime());
   }
 
   @Override
