@@ -11,6 +11,8 @@ import org.springframework.aop.support.AopUtils;
 
 public class Utils {
 
+  private Utils(){}
+
   public static <T> T deserialize(byte[] data) {
     return SerializationUtils.deserialize(data);
   }
