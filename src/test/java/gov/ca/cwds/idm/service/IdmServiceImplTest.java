@@ -1,7 +1,7 @@
 package gov.ca.cwds.idm.service;
 
 import static gov.ca.cwds.idm.service.IdmServiceImpl.getRACFId;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_CUSTOM;
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.RACFID_CUSTOM;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
@@ -17,7 +17,7 @@ public class IdmServiceImplTest {
     UserType cognitoUser = new UserType();
 
     AttributeType attr = new AttributeType();
-    attr.setName(RACFID_ATTR_NAME_CUSTOM);
+    attr.setName(RACFID_CUSTOM.getName());
     attr.setValue("YOLOD");
     cognitoUser.withAttributes(attr);
 
