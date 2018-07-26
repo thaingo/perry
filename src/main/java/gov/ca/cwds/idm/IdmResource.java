@@ -1,5 +1,9 @@
 package gov.ca.cwds.idm;
 
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
+import static gov.ca.cwds.service.messages.MessageCode.IDM_USER_VALIDATION_FAILED;
+import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
+
 import gov.ca.cwds.idm.dto.IdmApiCustomError;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
@@ -35,17 +39,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import java.net.URI;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
-import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
-import static gov.ca.cwds.service.messages.MessageCode.IDM_USER_VALIDATION_FAILED;
-import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
 
 @RestController
 @Profile("idm")
