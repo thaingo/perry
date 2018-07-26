@@ -1,5 +1,6 @@
 package gov.ca.cwds.idm.persistence;
 
+import gov.ca.cwds.data.auth.ReadOnlyRepository;
 import gov.ca.cwds.idm.persistence.model.Permission;
 import java.util.List;
 import org.springframework.context.annotation.Profile;
