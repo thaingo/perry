@@ -10,6 +10,7 @@ import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.UserVerificationResult;
 import gov.ca.cwds.idm.dto.UsersPage;
 import gov.ca.cwds.idm.dto.UsersSearchCriteria;
+import gov.ca.cwds.idm.persistence.model.Permission;
 import gov.ca.cwds.idm.service.DictionaryProvider;
 import gov.ca.cwds.idm.service.IdmService;
 import gov.ca.cwds.rest.api.domain.UserAlreadyExistsException;
@@ -22,7 +23,6 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -68,21 +68,22 @@ public class IdmResource {
     return idmService.getUserPage(paginationToken);
   }
 
-  @RequestMapping(method = RequestMethod.POST, value = "/users/search", consumes = "application/json")
-  @ApiResponses(
-      value = {
-          @ApiResponse(code = 401, message = "Not Authorized")
-      }
+  @RequestMapping(
+    method = RequestMethod.POST,
+    value = "/users/search",
+    consumes = "application/json",
+    produces = "application/json"
   )
+  @ApiResponses(value = {@ApiResponse(code = 401, message = "Not Authorized")})
   @ApiOperation(
-      value = "Search users with given RACFIDs list",
-      response = User.class,
-      responseContainer = "List")
+    value = "Search users with given RACFIDs list",
+    response = User.class,
+    responseContainer = "List"
+  )
   @PreAuthorize("hasAuthority('IDM-job')")
   public List<User> searchUsersByRacfid(
-      @ApiParam(required = true, name = "RACFIDs", value = "List of RACFIDs")
-      @NotNull
-      @RequestBody Set<String> racfids) {
+      @ApiParam(required = true, name = "RACFIDs", value = "List of RACFIDs") @NotNull @RequestBody
+          Set<String> racfids) {
     return idmService.searchUsers(new UsersSearchCriteria(RACFID_STANDARD, racfids));
   }
 
@@ -191,15 +192,13 @@ public class IdmResource {
   )
   @ApiOperation(
     value = "Get List of possible permissions",
-    response = String.class,
+    response = Permission.class,
     responseContainer = "List"
   )
-  public ResponseEntity<List<String>> getPermissions() {
-    return Optional.ofNullable(dictionaryProvider.getPermissions())
-        .map(permissions -> ResponseEntity.ok().body(permissions))
-        .orElseGet(() -> ResponseEntity.notFound().build());
+  public List<Permission> getPermissions() {
+    return  dictionaryProvider.getPermissions();
   }
-  
+
   @RequestMapping(method = RequestMethod.GET, value = "users/verify", produces = "application/json")
   @ApiOperation(value = "Check if user can be created by racfId and email", response = UserVerificationResult.class)
   @ApiResponses(value = {@ApiResponse(code = 401, message = "Not Authorized")})

@@ -18,6 +18,10 @@ public class Permission {
   @Column(name = "name")
   private String name;
 
+  @NotNull
+  @Column(name = "description")
+  private String description;
+
   public String getName() {
     return name;
   }
@@ -26,11 +30,12 @@ public class Permission {
     this.name = name;
   }
 
-  public Permission() {
+  public String getDescription() {
+    return description;
   }
 
-  public Permission(String name) {
-    this.name = name;
+  public void setDescription(String description) {
+    this.description = description;
   }
 
   @Override
@@ -42,11 +47,12 @@ public class Permission {
       return false;
     }
     Permission permission = (Permission) o;
-    return Objects.equals(getName(), permission.getName());
+    return Objects.equals(getName(), permission.getName()) &&
+        Objects.equals(getDescription(), permission.getDescription());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getName());
+    return Objects.hash(getName(), getDescription());
   }
 }
