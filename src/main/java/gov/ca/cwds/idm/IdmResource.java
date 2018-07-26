@@ -1,9 +1,5 @@
 package gov.ca.cwds.idm;
 
-import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
-import static gov.ca.cwds.service.messages.MessageCode.IDM_USER_VALIDATION_FAILED;
-import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
-
 import gov.ca.cwds.idm.dto.IdmApiCustomError;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
@@ -20,12 +16,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import java.net.URI;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
@@ -39,6 +29,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import java.net.URI;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
+import static gov.ca.cwds.service.messages.MessageCode.IDM_USER_VALIDATION_FAILED;
+import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
 
 @RestController
 @Profile("idm")
@@ -68,21 +69,22 @@ public class IdmResource {
     return idmService.getUserPage(paginationToken);
   }
 
-  @RequestMapping(method = RequestMethod.POST, value = "/users/search", consumes = "application/json")
-  @ApiResponses(
-      value = {
-          @ApiResponse(code = 401, message = "Not Authorized")
-      }
+  @RequestMapping(
+    method = RequestMethod.POST,
+    value = "/users/search",
+    consumes = "application/json",
+    produces = "application/json"
   )
+  @ApiResponses(value = {@ApiResponse(code = 401, message = "Not Authorized")})
   @ApiOperation(
-      value = "Search users with given RACFIDs list",
-      response = User.class,
-      responseContainer = "List")
+    value = "Search users with given RACFIDs list",
+    response = User.class,
+    responseContainer = "List"
+  )
   @PreAuthorize("hasAuthority('IDM-job')")
   public List<User> searchUsersByRacfid(
-      @ApiParam(required = true, name = "RACFIDs", value = "List of RACFIDs")
-      @NotNull
-      @RequestBody Set<String> racfids) {
+      @ApiParam(required = true, name = "RACFIDs", value = "List of RACFIDs") @NotNull @RequestBody
+          Set<String> racfids) {
     return idmService.searchUsers(new UsersSearchCriteria(RACFID_STANDARD, racfids));
   }
 
