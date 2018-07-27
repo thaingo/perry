@@ -1,6 +1,7 @@
 package gov.ca.cwds.idm.service.cognito;
 
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.EMAIL_DELIVERY;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.buildCreateUserAttributes;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.createPermissionsAttribute;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.createRolesAttribute;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.COUNTY;
@@ -42,6 +43,7 @@ import com.amazonaws.services.cognitoidp.model.ListUsersResult;
 import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import com.amazonaws.services.cognitoidp.model.UsernameExistsException;
+import gov.ca.cwds.idm.service.UserLogService;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
@@ -71,6 +73,8 @@ public class CognitoServiceFacade {
   @Autowired private CognitoProperties properties;
 
   @Autowired private MessagesService messages;
+
+  @Autowired private UserLogService userLogService;
 
   private AWSCognitoIdentityProvider identityProvider;
 
@@ -114,7 +118,9 @@ public class CognitoServiceFacade {
 
     try {
       AdminCreateUserResult result = identityProvider.adminCreateUser(request);
-      return result.getUser().getUsername();
+      String username = result.getUser().getUsername();
+      userLogService.logCreate(username);
+      return username;
 
     } catch (UsernameExistsException e) {
       String causeMsg = messages.get(USER_WITH_EMAIL_EXISTS_IN_IDM, user.getEmail());
@@ -179,26 +185,6 @@ public class CognitoServiceFacade {
         new DescribeUserPoolRequest().withUserPoolId(properties.getUserpool()));
   }
 
-  private List<AttributeType> buildCreateUserAttributes(User user) {
-
-    String racfid = toUpperCase(user.getRacfid());
-
-    AttributesBuilder attributesBuilder =
-        new AttributesBuilder()
-            .addAttribute(EMAIL, user.getEmail())
-            .addAttribute(FIRST_NAME, user.getFirstName())
-            .addAttribute(LAST_NAME, user.getLastName())
-            .addAttribute(COUNTY, user.getCountyName())
-            .addAttribute(OFFICE, user.getOffice())
-            .addAttribute(PHONE_NUMBER, user.getPhoneNumber())
-            .addAttribute(RACFID_CUSTOM, racfid)
-            .addAttribute(RACFID_CUSTOM_2, racfid)
-            .addAttribute(RACFID_STANDARD, racfid)
-            .addAttribute(createPermissionsAttribute(user.getPermissions()))
-            .addAttribute(createRolesAttribute(user.getRoles()));
-    return attributesBuilder.build();
-  }
-
   private UserType getCognitoUserById(String id) {
     AdminGetUserRequest request =
         new AdminGetUserRequest().withUsername(id).withUserPoolId(properties.getUserpool());
@@ -225,6 +211,7 @@ public class CognitoServiceFacade {
               .withUserAttributes(updateAttributes);
 
       identityProvider.adminUpdateUserAttributes(adminUpdateUserAttributesRequest);
+      userLogService.logUpdate(id);
     }
   }
 
@@ -254,6 +241,7 @@ public class CognitoServiceFacade {
             new AdminDisableUserRequest().withUsername(id).withUserPoolId(properties.getUserpool());
         identityProvider.adminDisableUser(adminDisableUserRequest);
       }
+      userLogService.logUpdate(id);
     }
   }
 
@@ -284,5 +272,8 @@ public class CognitoServiceFacade {
   }
   public void setMessagesService(MessagesService messages) {
     this.messages = messages;
+  }
+  public void setUserLogService(UserLogService userLogService) {
+    this.userLogService = userLogService;
   }
 }

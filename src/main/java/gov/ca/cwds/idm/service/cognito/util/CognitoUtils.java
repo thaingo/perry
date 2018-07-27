@@ -1,11 +1,22 @@
 package gov.ca.cwds.idm.service.cognito.util;
 
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.COUNTY;
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.OFFICE;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PERMISSIONS;
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.RACFID_CUSTOM;
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.RACFID_CUSTOM_2;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.ROLES;
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.FIRST_NAME;
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.LAST_NAME;
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.PHONE_NUMBER;
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
+import static gov.ca.cwds.util.Utils.toUpperCase;
 
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.UserType;
+import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.idm.service.cognito.AttributesBuilder;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -81,5 +92,25 @@ public class CognitoUtils {
 
   public static AttributeType createRolesAttribute(Set<String> roles) {
     return attribute(ROLES.getName(), getCustomDelimeteredListAttributeValue(roles));
+  }
+
+  public static List<AttributeType> buildCreateUserAttributes(User user) {
+
+    String racfid = toUpperCase(user.getRacfid());
+
+    AttributesBuilder attributesBuilder =
+        new AttributesBuilder()
+            .addAttribute(EMAIL, user.getEmail())
+            .addAttribute(FIRST_NAME, user.getFirstName())
+            .addAttribute(LAST_NAME, user.getLastName())
+            .addAttribute(COUNTY, user.getCountyName())
+            .addAttribute(OFFICE, user.getOffice())
+            .addAttribute(PHONE_NUMBER, user.getPhoneNumber())
+            .addAttribute(RACFID_CUSTOM, racfid)
+            .addAttribute(RACFID_CUSTOM_2, racfid)
+            .addAttribute(RACFID_STANDARD, racfid)
+            .addAttribute(createPermissionsAttribute(user.getPermissions()))
+            .addAttribute(createRolesAttribute(user.getRoles()));
+    return attributesBuilder.build();
   }
 }
