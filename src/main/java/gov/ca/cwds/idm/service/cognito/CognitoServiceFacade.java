@@ -1,6 +1,7 @@
 package gov.ca.cwds.idm.service.cognito;
 
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.EMAIL_DELIVERY;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.buildCreateUserAttributes;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.createPermissionsAttribute;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.createRolesAttribute;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.COUNTY;
@@ -182,26 +183,6 @@ public class CognitoServiceFacade {
   public void healthCheck() {
     identityProvider.describeUserPool(
         new DescribeUserPoolRequest().withUserPoolId(properties.getUserpool()));
-  }
-
-  private List<AttributeType> buildCreateUserAttributes(User user) {
-
-    String racfid = toUpperCase(user.getRacfid());
-
-    AttributesBuilder attributesBuilder =
-        new AttributesBuilder()
-            .addAttribute(EMAIL, user.getEmail())
-            .addAttribute(FIRST_NAME, user.getFirstName())
-            .addAttribute(LAST_NAME, user.getLastName())
-            .addAttribute(COUNTY, user.getCountyName())
-            .addAttribute(OFFICE, user.getOffice())
-            .addAttribute(PHONE_NUMBER, user.getPhoneNumber())
-            .addAttribute(RACFID_CUSTOM, racfid)
-            .addAttribute(RACFID_CUSTOM_2, racfid)
-            .addAttribute(RACFID_STANDARD, racfid)
-            .addAttribute(createPermissionsAttribute(user.getPermissions()))
-            .addAttribute(createRolesAttribute(user.getRoles()));
-    return attributesBuilder.build();
   }
 
   private UserType getCognitoUserById(String id) {
