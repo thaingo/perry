@@ -11,7 +11,7 @@ elif ([ -z "$DEV_MODE" ] || ! $DEV_MODE); then
   JAVA_OPTS="-Dspring.profiles.active=prod,saf,liquibase"
   if [ "$MFA" = true ] ; then
     echo "LOGIN TYPE: MFA"
-    JAVA_OPTS="$JAVA_OPTS,mfa"
+    JAVA_OPTS="$JAVA_OPTS,mfa,cognito_refresh"
   else
     echo "LOGIN TYPE: OAUTH2"
     JAVA_OPTS="$JAVA_OPTS,oauth2"

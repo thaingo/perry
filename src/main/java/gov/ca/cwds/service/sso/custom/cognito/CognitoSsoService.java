@@ -21,7 +21,7 @@ import org.springframework.web.client.RestTemplate;
 
 @Service
 @Primary
-@Profile("mfa")
+@Profile("cognito_refresh")
 public class CognitoSsoService extends OAuth2Service {
 
   @Autowired
