@@ -15,9 +15,7 @@ import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUti
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByAttribute;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertStrict;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -46,14 +44,10 @@ import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import com.amazonaws.services.cognitoidp.model.UsernameExistsException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Iterables;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
-import gov.ca.cwds.idm.persistence.UserLogRepository;
-import gov.ca.cwds.idm.persistence.model.OperationType;
-import gov.ca.cwds.idm.persistence.model.UserLog;
 import gov.ca.cwds.idm.service.ElasticSearchService;
-import gov.ca.cwds.idm.service.UserLogService;
+import gov.ca.cwds.idm.service.IdmServiceImpl;
 import gov.ca.cwds.idm.service.cognito.CognitoProperties;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.service.messages.MessagesService;
@@ -128,7 +122,9 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
   @Autowired private MessagesService messagesService;
 
-  @Autowired private UserLogRepository userLogRepository;
+  @Autowired  private IdmServiceImpl idmService;
+
+  private ElasticSearchService elasticSearchService = mock(ElasticSearchService.class);
 
   private MockMvc mockMvc;
 
@@ -142,6 +138,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @Before
   public void before() {
     cognitoServiceFacade.setMessagesService(messagesService);
+    idmService.setElasticSearchService(elasticSearchService);
     this.mockMvc =
         MockMvcBuilders.webAppContextSetup(webApplicationContext).apply(springSecurity()).build();
     cognito = cognitoServiceFacade.getIdentityProvider();
@@ -350,6 +347,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         .andReturn();
 
     verify(cognito, times(1)).adminCreateUser(request);
+    verify(elasticSearchService, times(1)).createUser(any(User.class));
 
 //    Iterable<UserLog> userLogs = userLogRepository.findAll();
 //    int newUserLogsSize = Iterables.size(userLogs);
@@ -379,6 +377,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         .andReturn();
 
     verify(cognito, times(1)).adminCreateUser(request);
+    verify(elasticSearchService, times(0)).createUser(any(User.class));
   }
 
   @Test
@@ -398,6 +397,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         .andReturn();
 
     verify(cognito, times(0)).adminCreateUser(request);
+    verify(elasticSearchService, times(0)).createUser(any(User.class));
   }
 
   @Test
@@ -477,6 +477,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
     verify(cognito, times(1)).adminUpdateUserAttributes(updateAttributesRequest);
     verify(cognito, times(1)).adminDisableUser(disableUserRequest);
+    verify(elasticSearchService, times(2)).updateUser(any(User.class));
 
     InOrder inOrder = inOrder(cognito);
     inOrder.verify(cognito).adminUpdateUserAttributes(updateAttributesRequest);
@@ -520,6 +521,8 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     verify(cognito, times(0)).adminUpdateUserAttributes(updateAttributesRequest);
 
     verify(cognito, times(0)).adminEnableUser(enableUserRequest);
+
+    verify(elasticSearchService, times(0)).createUser(any(User.class));
   }
 
   @Test
@@ -540,6 +543,8 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         .andReturn();
 
     verify(cognito, times(0)).adminEnableUser(enableUserRequest);
+
+    verify(elasticSearchService, times(0)).createUser(any(User.class));
   }
 
   @Test
@@ -684,6 +689,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         .andReturn();
 
     verify(cognito, times(0)).adminCreateUser(request);
+    verify(elasticSearchService, times(0)).createUser(any(User.class));
   }
 
   private AdminUpdateUserAttributesRequest setUpdateUserAttributesRequestAndResult(

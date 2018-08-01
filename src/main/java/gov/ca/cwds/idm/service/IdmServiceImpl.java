@@ -273,4 +273,8 @@ public class IdmServiceImpl implements IdmService {
     }
     return cwsUser;
   }
+
+  public void setElasticSearchService(ElasticSearchService elasticSearchService) {
+    this.elasticSearchService = elasticSearchService;
+  }
 }
