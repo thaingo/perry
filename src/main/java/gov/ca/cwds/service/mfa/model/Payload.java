@@ -9,14 +9,22 @@ public class Payload {
   @JsonProperty("exp")
   private Integer exp;
 
-  @JsonProperty("exp")
+  @JsonProperty("device_key")
+  private String deviceKey;
+
   public Integer getExp() {
     return exp;
   }
 
-  @JsonProperty("exp")
   public void setExp(Integer exp) {
     this.exp = exp;
   }
 
+  public String getDeviceKey() {
+    return deviceKey;
+  }
+
+  public void setDeviceKey(String deviceKey) {
+    this.deviceKey = deviceKey;
+  }
 }
