@@ -34,15 +34,9 @@
             name="homepage" value="homepage" th:onclick="'window.location.href=\'' + ${@errorView.getProperties().getHomePageUrl()} + '\''">Back to Homepage
     </button>
 
-    <!--id: if no stacktrace available this button should be hidden-->
-    <button th:if="${@errorView.getProperties().isShowErrors()}" class="btn btn-lg  btn-primary btn-block" data-toggle="collapse"
-            data-target="#stacktrace" aria-expanded="true" aria-controls="stacktrace"
-            name="homepage" value="homepage">Error Details
-    </button>
-
     <br/>
 
-    <div th:if="${@errorView.getProperties().isShowErrors()}" class="collapse" id="stacktrace">
+    <div th:if="${@errorView.getProperties().isShowErrors()}" class="collapse in" id="stacktrace">
         <pre>
         <span th:text="${#httpServletRequest.getAttribute('javax.servlet.error.message')}"></span>
         </pre>
