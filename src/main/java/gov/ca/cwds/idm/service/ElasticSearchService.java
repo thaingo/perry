@@ -16,11 +16,38 @@ public class ElasticSearchService {
   @Autowired
   private UserLogService userLogService;
 
+  private static final String ES_CREATE_ENDPOINT = "/_create";
+
+  private String doraUrl = "http://localhost:8889/dora";
+  private String esIndexName = "users";
+  private String esTypeName = "user";
+
+
   public void createUser(User user) {
 
   }
 
   public void updateUser(User user) {
 
+  }
+
+  public void setDoraUrl(String doraUrl) {
+    this.doraUrl = doraUrl;
+  }
+
+  public void setEsIndexName(String esIndexName) {
+    this.esIndexName = esIndexName;
+  }
+
+  public void setEsTypeName(String esTypeName) {
+    this.esTypeName = esTypeName;
+  }
+
+  String getUpdateUrl(String id) {
+    return doraUrl + '/' + esIndexName + '/' + esTypeName + '/' + id;
+  }
+
+  String getCreateUrl(String id) {
+    return getUpdateUrl(id) + ES_CREATE_ENDPOINT;
   }
 }
