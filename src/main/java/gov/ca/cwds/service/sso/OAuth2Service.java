@@ -38,6 +38,7 @@ import org.springframework.security.web.authentication.preauth.PreAuthenticatedA
 import org.springframework.stereotype.Service;
 import org.springframework.util.SerializationUtils;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
 
 @Service
 @Profile("prod")
@@ -48,8 +49,8 @@ public class OAuth2Service implements SsoService {
   private OAuth2ProtectedResourceDetails resourceDetails;
   private OAuth2RestTemplate clientTemplate;
   @Autowired
-  private PerryProperties properties;
-  private ResourceServerProperties resourceServerProperties;
+  protected PerryProperties properties;
+  protected ResourceServerProperties resourceServerProperties;
   @Autowired(required = false)
   private OAuth2ClientContext clientContext;
   @Value("${security.oauth2.resource.revokeTokenUri}")
@@ -58,7 +59,7 @@ public class OAuth2Service implements SsoService {
   private OAuth2RequestHttpEntityFactory httpEntityFactory;
   @Autowired
   private TokenService tokenService;
-  private ObjectMapper objectMapper;
+  protected ObjectMapper objectMapper;
 
   @PostConstruct
   public void init() {
@@ -119,7 +120,7 @@ public class OAuth2Service implements SsoService {
         && !clientContext.getAccessToken().isExpired();
   }
 
-  private Optional<PerryTokenEntity> validateIdp(
+  protected Optional<PerryTokenEntity> validateIdp(
       PerryTokenEntity perryTokenEntity,
       OAuth2ClientContext oAuth2ClientContext) {
     Optional<PerryTokenEntity> result;
@@ -131,7 +132,7 @@ public class OAuth2Service implements SsoService {
           restTemplate.getAccessToken().getValue());
     } finally {
       SecurityContextHolder.getContext().setAuthentication(currentAuth);
-      result = refresh(restTemplate, perryTokenEntity);
+      result = refresh(restTemplate.getOAuth2ClientContext(), perryTokenEntity);
     }
     return result;
   }
@@ -183,9 +184,8 @@ public class OAuth2Service implements SsoService {
         new DefaultOAuth2ClientContext(new DefaultOAuth2AccessToken(accessToken)));
   }
 
-  private Optional<PerryTokenEntity> refresh(OAuth2RestTemplate restTemplate,
+  protected Optional<PerryTokenEntity> refresh(OAuth2ClientContext freshContext,
       PerryTokenEntity perryTokenEntity) {
-    OAuth2ClientContext freshContext = restTemplate.getOAuth2ClientContext();
     String freshAccessToken = freshContext.getAccessToken().getValue();
     if (!freshAccessToken.equals(perryTokenEntity.getSsoToken())) {
       perryTokenEntity.setSsoToken(freshAccessToken);
@@ -206,7 +206,7 @@ public class OAuth2Service implements SsoService {
     return currentAuth;
   }
 
-  private String doPost(OAuth2RestTemplate restTemplate, String url, String accessToken) {
+  protected String doPost(RestTemplate restTemplate, String url, String accessToken) {
     return restTemplate.postForObject(url,
         httpEntityFactory.build(url, accessToken),
         String.class);
