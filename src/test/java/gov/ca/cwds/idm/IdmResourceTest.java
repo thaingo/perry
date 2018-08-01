@@ -52,6 +52,7 @@ import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.persistence.UserLogRepository;
 import gov.ca.cwds.idm.persistence.model.OperationType;
 import gov.ca.cwds.idm.persistence.model.UserLog;
+import gov.ca.cwds.idm.service.ElasticSearchService;
 import gov.ca.cwds.idm.service.UserLogService;
 import gov.ca.cwds.idm.service.cognito.CognitoProperties;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
@@ -127,8 +128,6 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
   @Autowired private MessagesService messagesService;
 
-  @Autowired private UserLogService userLogService;
-
   @Autowired private UserLogRepository userLogRepository;
 
   private MockMvc mockMvc;
@@ -143,7 +142,6 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @Before
   public void before() {
     cognitoServiceFacade.setMessagesService(messagesService);
-    cognitoServiceFacade.setUserLogService(userLogService);
     this.mockMvc =
         MockMvcBuilders.webAppContextSetup(webApplicationContext).apply(springSecurity()).build();
     cognito = cognitoServiceFacade.getIdentityProvider();
@@ -336,7 +334,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @Test
   @WithMockCustomUser
   public void testCreateUserSuccess() throws Exception {
-    int oldUserLogsSize = Iterables.size(userLogRepository.findAll());
+//    int oldUserLogsSize = Iterables.size(userLogRepository.findAll());
 
     User user = user();
     AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
@@ -353,13 +351,13 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
     verify(cognito, times(1)).adminCreateUser(request);
 
-    Iterable<UserLog> userLogs = userLogRepository.findAll();
-    int newUserLogsSize = Iterables.size(userLogs);
-    assertTrue(newUserLogsSize == oldUserLogsSize + 1);
-
-    UserLog lastUserLog = Iterables.getLast(userLogs);
-    assertTrue(lastUserLog.getOperationType() == OperationType.CREATE);
-    assertThat(lastUserLog.getUsername(), is(NEW_USER_SUCCESS_ID));
+//    Iterable<UserLog> userLogs = userLogRepository.findAll();
+//    int newUserLogsSize = Iterables.size(userLogs);
+//    assertTrue(newUserLogsSize == oldUserLogsSize + 1);
+//
+//    UserLog lastUserLog = Iterables.getLast(userLogs);
+//    assertTrue(lastUserLog.getOperationType() == OperationType.CREATE);
+//    assertThat(lastUserLog.getUsername(), is(NEW_USER_SUCCESS_ID));
   }
 
   @Test
@@ -457,7 +455,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @Test
   @WithMockCustomUser
   public void testUpdateUser() throws Exception {
-    int oldUserLogsSize = Iterables.size(userLogRepository.findAll());
+//    int oldUserLogsSize = Iterables.size(userLogRepository.findAll());
 
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setEnabled(Boolean.FALSE);
@@ -484,17 +482,17 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     inOrder.verify(cognito).adminUpdateUserAttributes(updateAttributesRequest);
     inOrder.verify(cognito).adminDisableUser(disableUserRequest);
 
-    Iterable<UserLog> userLogs = userLogRepository.findAll();
-    int newUserLogsSize = Iterables.size(userLogs);
-    assertTrue(newUserLogsSize == oldUserLogsSize + 2);
+//    Iterable<UserLog> userLogs = userLogRepository.findAll();
+//    int newUserLogsSize = Iterables.size(userLogs);
+//    assertTrue(newUserLogsSize == oldUserLogsSize + 2);
 
-    UserLog beforeLastUserLog = Iterables.get(userLogs, newUserLogsSize - 2);
-    assertTrue(beforeLastUserLog.getOperationType() == OperationType.UPDATE);
-    assertThat(beforeLastUserLog.getUsername(), is(USER_NO_RACFID_ID));
-
-    UserLog lastUserLog = Iterables.getLast(userLogs);
-    assertTrue(lastUserLog.getOperationType() == OperationType.UPDATE);
-    assertThat(lastUserLog.getUsername(), is(USER_NO_RACFID_ID));
+//    UserLog beforeLastUserLog = Iterables.get(userLogs, newUserLogsSize - 2);
+//    assertTrue(beforeLastUserLog.getOperationType() == OperationType.UPDATE);
+//    assertThat(beforeLastUserLog.getUsername(), is(USER_NO_RACFID_ID));
+//
+//    UserLog lastUserLog = Iterables.getLast(userLogs);
+//    assertTrue(lastUserLog.getOperationType() == OperationType.UPDATE);
+//    assertThat(lastUserLog.getUsername(), is(USER_NO_RACFID_ID));
   }
 
   @Test

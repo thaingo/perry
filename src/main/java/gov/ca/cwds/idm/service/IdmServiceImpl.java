@@ -1,16 +1,21 @@
 package gov.ca.cwds.idm.service;
 
-import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.RACFID_CUSTOM;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByEmail;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getRACFId;
 import static gov.ca.cwds.service.messages.MessageCode.DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS;
+import static gov.ca.cwds.service.messages.MessageCode.ERROR_UPDATE_USER_IN_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.IDM_MAPPING_SCRIPT_ERROR;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY;
 import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID_IN_CWSCMS;
+import static gov.ca.cwds.service.messages.MessageCode.UNABLE_CREATE_IDM_USER_IN_ES;
+import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_IDM_USER_IN_ES;
+import static gov.ca.cwds.service.messages.MessageCode.USER_NOT_FOUND_BY_ID_IN_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
 import static gov.ca.cwds.util.Utils.toUpperCase;
 import static java.util.stream.Collectors.toSet;
 
+import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.PerryProperties;
 import gov.ca.cwds.data.persistence.auth.CwsOffice;
@@ -25,8 +30,8 @@ import gov.ca.cwds.idm.service.cognito.StandardUserAttribute;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil;
-import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
 import gov.ca.cwds.rest.api.domain.PerryException;
+import gov.ca.cwds.rest.api.domain.UserNotFoundPerryException;
 import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType;
 import gov.ca.cwds.service.CwsUserInfoService;
 import gov.ca.cwds.service.dto.CwsUserInfo;
@@ -68,6 +73,10 @@ public class IdmServiceImpl implements IdmService {
 
   @Autowired private MessagesService messages;
 
+  @Autowired private UserLogService userLogService;
+
+  @Autowired private ElasticSearchService elasticSearchService;
+
   @Override
   public User findUser(String id) {
     UserType cognitoUser = cognitoServiceFacade.getById(id);
@@ -77,12 +86,38 @@ public class IdmServiceImpl implements IdmService {
   @Override
   @PreAuthorize("@cognitoServiceFacade.getCountyName(#id) == principal.getParameter('county_name')")
   public void updateUser(String id, UserUpdate updateUserDto) {
-    cognitoServiceFacade.updateUser(id, updateUserDto);
+    try {
+      UserType existedCognitoUser = cognitoServiceFacade.getCognitoUserById(id);
+
+      boolean updateAttributesExecuted =
+          cognitoServiceFacade.updateUserAttributes(id, existedCognitoUser, updateUserDto);
+      if(updateAttributesExecuted) {
+        updateUserInElasticSearch(id);
+      }
+
+      boolean enableExecuted =
+          cognitoServiceFacade.changeUserEnabledStatus(id, existedCognitoUser.getEnabled(), updateUserDto.getEnabled());
+      if(enableExecuted) {
+        updateUserInElasticSearch(id);
+      }
+    } catch (UserNotFoundException e) {
+      String msg = messages.get(USER_NOT_FOUND_BY_ID_IN_IDM, id);
+      LOGGER.error(msg, e);
+      throw new UserNotFoundPerryException(msg, e);
+
+    } catch (Exception e) {
+      String msg = messages.get(ERROR_UPDATE_USER_IN_IDM);
+      LOGGER.error(msg, e);
+      throw new PerryException(msg, e);
+    }
   }
 
   @Override
   public String createUser(User user) {
-    return cognitoServiceFacade.createUser(user);
+    String id = cognitoServiceFacade.createUser(user);
+    user.setId(id);
+    createUserInElasticSearch(user);
+    return id;
   }
 
   @Override
@@ -154,6 +189,28 @@ public class IdmServiceImpl implements IdmService {
         .withVerificationPassed().build();
   }
 
+  private void updateUserInElasticSearch(String id) {
+    try {
+      User updatedUser = findUser(id);
+      elasticSearchService.updateUser(updatedUser);
+    } catch (Exception e) {
+      String msg = messages.get(UNABLE_UPDATE_IDM_USER_IN_ES, id);
+      LOGGER.error(msg, e);
+      userLogService.logUpdate(id);
+    }
+  }
+
+  private void createUserInElasticSearch(User user) {
+    String id = user.getId();
+    try {
+      elasticSearchService.createUser(user);
+    } catch (Exception e) {
+      String msg = messages.get(UNABLE_CREATE_IDM_USER_IN_ES, id);
+      LOGGER.error(msg, e);
+      userLogService.logCreate(id);
+    }
+  }
+
   private UserVerificationResult composeNegativeResultWithMessage(
       MessageCode errorCode, Object... params) {
     String message = messages.get(errorCode, params);
@@ -162,7 +219,6 @@ public class IdmServiceImpl implements IdmService {
         .withVerificationFailed(errorCode.getValue(), message)
         .build();
   }
-
 
   private User composeUser(CwsUserInfo cwsUser, String email) {
     User user = new User();
@@ -216,9 +272,5 @@ public class IdmServiceImpl implements IdmService {
       }
     }
     return cwsUser;
-  }
-
-  static String getRACFId(UserType user) {
-    return CognitoUtils.getAttributeValue(user, RACFID_CUSTOM.getName());
   }
 }
