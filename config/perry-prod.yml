@@ -151,3 +151,9 @@ logging:
         web: ${LOG_LEVEL:DEBUG}
         security: ${LOG_LEVEL:DEBUG}
       hibernate: ${LOG_LEVEL:DEBUG}
+elasticSearch:
+  doraUrl: ${DORA_URL:}
+  index: ${ES_USER_INDEX:users}
+  type: ${ES_USER_TYPE:user}
+
+

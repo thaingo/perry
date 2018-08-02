@@ -12,6 +12,10 @@ COGNITO_USERPOOL=us-east-2_O6J5giLUg
 
 IDP_MAPPING_SCRIPT=config/cognito.groovy
 
+DORA_URL=
+ES_USER_INDEX=users
+ES_USER_TYPE=user
+
 #cals-db2-data
 LOGLEVEL=INFO
 DB_CMS_DB2_HOST=cals_db2_data
