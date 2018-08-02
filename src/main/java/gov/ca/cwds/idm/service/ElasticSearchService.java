@@ -60,7 +60,7 @@ public class ElasticSearchService {
     restTemplate.put(urlTemplate, user, params);
   }
 
-  private String getUrlTemplate(OperationType operation){
+  static String getUrlTemplate(OperationType operation){
     if(operation == OperationType.CREATE) {
       return CREATE_URL_TEMPLATE;
     } else if(operation == OperationType.UPDATE){
