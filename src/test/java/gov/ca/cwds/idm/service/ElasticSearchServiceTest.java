@@ -12,8 +12,8 @@ public class ElasticSearchServiceTest {
   @Test
   public void testGetUrlTemplate(){
     assertThat(getUrlTemplate(OperationType.CREATE),
-        is("{doraUrl}/{esUserIndex}/{esUserType}/{id}/_create"));
+        is("{doraUrl}/{esUserIndex}/{esUserType}/{id}/_create?token={ssoToken}"));
     assertThat(getUrlTemplate(OperationType.UPDATE),
-        is("{doraUrl}/{esUserIndex}/{esUserType}/{id}"));
+        is("{doraUrl}/{esUserIndex}/{esUserType}/{id}?token={ssoToken}"));
   }
 }
