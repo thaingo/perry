@@ -69,7 +69,7 @@ public class ElasticSearchService {
 
   private ResponseEntity<String> putUser(User user, OperationType operation) {
 
-    if(operation == null){
+    if (operation == null) {
       throw new IllegalArgumentException("User operation type is null");
     }
 
@@ -88,10 +88,10 @@ public class ElasticSearchService {
     ResponseEntity<String> response =
         restTemplate.exchange(urlTemplate, HttpMethod.PUT, requestUpdate, String.class, params);
     LOGGER.info(
-        "User, username:{} was successfully {}d in Elastic Search index",
+        "User, username:{} was successfully {}d in Elastic Search index, Dora response string is:{}",
         user.getId(),
-        operation.toString().toLowerCase());
-    LOGGER.info("Response string is:{}", response.getBody());
+        operation.toString().toLowerCase(),
+        response.getBody());
     return response;
   }
 
