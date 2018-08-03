@@ -76,7 +76,7 @@ public class ElasticSearchService {
     HttpEntity<User> requestUpdate = new HttpEntity<>(user);
     String urlTemplate = getUrlTemplate(operation);
     String id = user.getId();
-    id = "128e120c-d643-44ac-ad9b-4a3fc767f04d"; // for mock
+//    id = "128e120c-d643-44ac-ad9b-4a3fc767f04d"; // for SoapUI mock
 
     Map<String, String> params = new HashMap<>();
     params.put(DORA_URL, esProperties.getDoraUrl());
@@ -108,5 +108,9 @@ public class ElasticSearchService {
 
   public void setElasticSearchProperties(ElasticSearchProperties esProperties) {
     this.esProperties = esProperties;
+  }
+
+  public void setRestTemplate(RestTemplate restTemplate) {
+    this.restTemplate = restTemplate;
   }
 }
