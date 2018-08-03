@@ -1,0 +1,9 @@
+idp,perryDevMode,perryDevMode or cognito
+perryProtocol,https,
+perryHost,web.preint.cwds.io,
+perryPort,443,
+usersFile,dev_mode_users.csv,
+validationCallsCount,5,
+loginCyclesCount,10,
+loginCycleDelay,1000,in milliseconds
+
