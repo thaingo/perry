@@ -1,22 +1,23 @@
 package gov.ca.cwds.idm.service.cognito;
 
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.COUNTY_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.EMAIL_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.FIRST_NAME_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.LAST_NAME_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.OFFICE_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.PERMISSIONS_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.PHONE_NUMBER_ATTR_NAME;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_CUSTOM;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_STANDARD;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.RACFID_ATTR_NAME_CUSTOM_2;
-import static gov.ca.cwds.idm.service.cognito.CognitoUtils.ROLES_ATTR_NAME;
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.COUNTY;
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.OFFICE;
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PERMISSIONS;
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.RACFID_CUSTOM;
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.RACFID_CUSTOM_2;
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.ROLES;
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.FIRST_NAME;
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.LAST_NAME;
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.PHONE_NUMBER;
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -30,11 +31,15 @@ import com.amazonaws.services.cognitoidp.model.AdminGetUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserResult;
 import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesRequest;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
+import com.amazonaws.services.cognitoidp.model.ListUsersRequest;
+import com.amazonaws.services.cognitoidp.model.ListUsersResult;
 import com.amazonaws.services.cognitoidp.model.UpdateUserAttributesRequest;
 import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
+import gov.ca.cwds.idm.service.UserLogService;
+import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.rest.api.domain.UserNotFoundPerryException;
 import gov.ca.cwds.service.messages.MessagesService;
@@ -49,14 +54,17 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.InOrder;
 
 public class CognitoServiceFacadeTest {
 
-  private CognitoServiceFacade fasade;
+  private CognitoServiceFacade facade;
 
   private AWSCognitoIdentityProvider identityProvider = mock(AWSCognitoIdentityProvider.class);
 
   private MessagesService messagesService = mock(MessagesService.class);
+
+  private UserLogService userLogService = mock(UserLogService.class);
 
   @Before
   public void before() {
@@ -66,16 +74,17 @@ public class CognitoServiceFacadeTest {
     properties.setUserpool("userpool");
     properties.setRegion("us-east-2");
 
-    fasade = new CognitoServiceFacade();
-    fasade.setProperties(properties);
-    fasade.setIdentityProvider(identityProvider);
-    fasade.setMessagesService(messagesService);
+    facade = new CognitoServiceFacade();
+    facade.setProperties(properties);
+    facade.setIdentityProvider(identityProvider);
+    facade.setMessagesService(messagesService);
+    facade.setUserLogService(userLogService);
   }
 
   @Test
   public void testInit() {
-    fasade.init();
-    AWSCognitoIdentityProvider identityProvider = fasade.getIdentityProvider();
+    facade.init();
+    AWSCognitoIdentityProvider identityProvider = facade.getIdentityProvider();
     assertThat(identityProvider, is(notNullValue()));
   }
 
@@ -99,7 +108,7 @@ public class CognitoServiceFacadeTest {
     when(identityProvider.adminGetUser(any(AdminGetUserRequest.class)))
         .thenReturn(mockResult);
 
-    UserType UserType = fasade.getById("id");
+    UserType UserType = facade.getById("id");
     AdminGetUserRequest expectedRequest = new AdminGetUserRequest().withUsername("id")
         .withUserPoolId("userpool");
     verify(identityProvider, times(1)).adminGetUser(expectedRequest);
@@ -121,14 +130,14 @@ public class CognitoServiceFacadeTest {
   public void testGetByIdUserNotFoundException() {
     when(identityProvider.adminGetUser(any(AdminGetUserRequest.class)))
         .thenThrow(new UserNotFoundException("user not found"));
-    fasade.getById("id");
+    facade.getById("id");
   }
 
   @Test(expected = PerryException.class)
   public void testGetByIdException() {
     when(identityProvider.adminGetUser(any(AdminGetUserRequest.class)))
         .thenThrow(new RuntimeException());
-    fasade.getById("id");
+    facade.getById("id");
   }
 
   @Test
@@ -139,7 +148,7 @@ public class CognitoServiceFacadeTest {
 
     List<AttributeType> mockAttrs = new ArrayList<>();
     AttributeType mockAttr = new AttributeType();
-    mockAttr.setName(PERMISSIONS_ATTR_NAME);
+    mockAttr.setName(PERMISSIONS.getName());
     mockAttr.setValue("Snapshot-rollout:Hotline-rollout");
     mockAttrs.add(mockAttr);
     mockResult.setUserAttributes(mockAttrs);
@@ -154,7 +163,7 @@ public class CognitoServiceFacadeTest {
     permissions.add("Hotline-rollout");
     userUpdate.setPermissions(permissions);
 
-    fasade.updateUser("id", userUpdate);
+    facade.updateUser("id", userUpdate);
 
     AdminGetUserRequest expectedRequest = new AdminGetUserRequest().withUsername("id")
         .withUserPoolId("userpool");
@@ -172,7 +181,7 @@ public class CognitoServiceFacadeTest {
 
     List<AttributeType> mockAttrs = new ArrayList<>();
     AttributeType mockAttr = new AttributeType();
-    mockAttr.setName(PERMISSIONS_ATTR_NAME);
+    mockAttr.setName(PERMISSIONS.getName());
     mockAttr.setValue("Snapshot-rollout");
     mockAttrs.add(mockAttr);
     mockResult.setUserAttributes(mockAttrs);
@@ -186,7 +195,7 @@ public class CognitoServiceFacadeTest {
     permissions.add("Hotline-rollout");
     userUpdate.setPermissions(permissions);
 
-    fasade.updateUser("id", userUpdate);
+    facade.updateUser("id", userUpdate);
 
     AdminGetUserRequest expectedAdminGetUserRequest =
         new AdminGetUserRequest().withUsername("id").withUserPoolId("userpool");
@@ -195,7 +204,7 @@ public class CognitoServiceFacadeTest {
 
     Collection<AttributeType> expectedUpdateAttributes = new ArrayList<>();
     AttributeType expectedPermissionsAttribute = new AttributeType();
-    expectedPermissionsAttribute.setName(PERMISSIONS_ATTR_NAME);
+    expectedPermissionsAttribute.setName(PERMISSIONS.getName());
     expectedPermissionsAttribute.setValue("Hotline-rollout");
     expectedUpdateAttributes.add(expectedPermissionsAttribute);
 
@@ -220,21 +229,21 @@ public class CognitoServiceFacadeTest {
   public void testUpdateUserNotFoundException() {
     when(identityProvider.adminGetUser(any(AdminGetUserRequest.class)))
         .thenThrow(new UserNotFoundException("user not found"));
-    fasade.updateUser("id", new UserUpdate());
+    facade.updateUser("id", new UserUpdate());
   }
 
   @Test(expected = PerryException.class)
   public void testUpdateUserException() {
     when(identityProvider.adminGetUser(any(AdminGetUserRequest.class)))
         .thenThrow(new RuntimeException());
-    fasade.updateUser("id", new UserUpdate());
+    facade.updateUser("id", new UserUpdate());
   }
 
   @Test
   public void testCreateAdminCreateUserRequest() {
     User user = user();
 
-    AdminCreateUserRequest request = fasade.createAdminCreateUserRequest(user);
+    AdminCreateUserRequest request = facade.createAdminCreateUserRequest(user);
 
     assertThat(request.getUsername(), is("gonzales@gmail.com"));
     assertThat(request.getUserPoolId(), is("userpool"));
@@ -245,17 +254,17 @@ public class CognitoServiceFacadeTest {
 
     Map<String, String> attrMap = attrMap(attrs);
 
-    assertAttr(attrMap, EMAIL_ATTR_NAME, "gonzales@gmail.com");
-    assertAttr(attrMap, FIRST_NAME_ATTR_NAME, "Garcia");
-    assertAttr(attrMap, LAST_NAME_ATTR_NAME, "Gonzales");
-    assertAttr(attrMap, COUNTY_ATTR_NAME, "Madera");
-    assertAttr(attrMap, OFFICE_ATTR_NAME, "River Office");
-    assertAttr(attrMap, PHONE_NUMBER_ATTR_NAME, "+19161111111");
-    assertAttr(attrMap, RACFID_ATTR_NAME_CUSTOM, "RUBBLBA");
-    assertAttr(attrMap, RACFID_ATTR_NAME_STANDARD, "RUBBLBA");
-    assertAttr(attrMap, RACFID_ATTR_NAME_CUSTOM_2, "RUBBLBA");
-    assertAttr(attrMap, PERMISSIONS_ATTR_NAME, "RFA-rollout:Hotline-rollout");
-    assertAttr(attrMap, ROLES_ATTR_NAME, "CWS-admin:CWS-worker");
+    assertAttr(attrMap, EMAIL, "gonzales@gmail.com");
+    assertAttr(attrMap, FIRST_NAME, "Garcia");
+    assertAttr(attrMap, LAST_NAME, "Gonzales");
+    assertAttr(attrMap, COUNTY, "Madera");
+    assertAttr(attrMap, OFFICE, "River Office");
+    assertAttr(attrMap, PHONE_NUMBER, "+19161111111");
+    assertAttr(attrMap, RACFID_CUSTOM, "RUBBLBA");
+    assertAttr(attrMap, RACFID_STANDARD, "RUBBLBA");
+    assertAttr(attrMap, RACFID_CUSTOM_2, "RUBBLBA");
+    assertAttr(attrMap, PERMISSIONS, "RFA-rollout:Hotline-rollout");
+    assertAttr(attrMap, ROLES, "CWS-admin:CWS-worker");
   }
 
   @Test
@@ -263,11 +272,73 @@ public class CognitoServiceFacadeTest {
     User user = user();
     user.setRacfid("rubblba ");
 
-    AdminCreateUserRequest request = fasade.createAdminCreateUserRequest(user);
+    AdminCreateUserRequest request = facade.createAdminCreateUserRequest(user);
     Map<String, String> attrMap = attrMap(request.getUserAttributes());
-    assertAttr(attrMap, RACFID_ATTR_NAME_CUSTOM, "RUBBLBA");
-    assertAttr(attrMap, RACFID_ATTR_NAME_STANDARD, "RUBBLBA");
-    assertAttr(attrMap, RACFID_ATTR_NAME_CUSTOM_2, "RUBBLBA");
+    assertAttr(attrMap, RACFID_CUSTOM, "RUBBLBA");
+    assertAttr(attrMap, RACFID_STANDARD, "RUBBLBA");
+    assertAttr(attrMap, RACFID_CUSTOM_2, "RUBBLBA");
+  }
+
+  @Test
+  public void testSearchAllPages() {
+
+    UserType userType0 = userType("user0");
+    UserType userType1 = userType("user1");
+    UserType userType2 = userType("user2");
+    UserType userType3 = userType("user3");
+    UserType userType4 = userType("user4");
+
+    CognitoUsersSearchCriteria searchCriteria = new CognitoUsersSearchCriteria();
+    searchCriteria.setSearchAttr(EMAIL, "searchPage@all.email");
+    searchCriteria.setPageSize(2);
+
+    ListUsersRequest request0 =
+        setListUsersRequestAndResponse(searchCriteria, null, "1", userType0, userType1);
+
+    ListUsersRequest request1 =
+        setListUsersRequestAndResponse(searchCriteria, "1", "2", userType2, userType3);
+
+    ListUsersRequest request2 =
+        setListUsersRequestAndResponse(searchCriteria, "2", null, userType4);
+
+    List<UserType> userTypes = facade.searchAllPages(searchCriteria);
+
+    verify(identityProvider, times(1)).listUsers(request0);
+    verify(identityProvider, times(1)).listUsers(request1);
+    verify(identityProvider, times(1)).listUsers(request2);
+
+    InOrder inOrder = inOrder(identityProvider);
+    inOrder.verify(identityProvider).listUsers(request0);
+    inOrder.verify(identityProvider).listUsers(request1);
+    inOrder.verify(identityProvider).listUsers(request2);
+
+    assertThat(userTypes, hasSize(5));
+    assertThat(userTypes.get(0).getUsername(), is("user0"));
+    assertThat(userTypes.get(1).getUsername(), is("user1"));
+    assertThat(userTypes.get(2).getUsername(), is("user2"));
+    assertThat(userTypes.get(3).getUsername(), is("user3"));
+    assertThat(userTypes.get(4).getUsername(), is("user4"));
+  }
+
+  @Test
+  public void testComposeListUsersRequest(){
+    CognitoUsersSearchCriteria criteria = new CognitoUsersSearchCriteria();
+    criteria.setSearchAttr(RACFID_STANDARD, "ABC");
+    ListUsersRequest request = facade.composeListUsersRequest(criteria);
+    assertThat(request.getFilter(), is(RACFID_STANDARD.getName() + " = \"ABC\""));
+  }
+
+  private ListUsersRequest setListUsersRequestAndResponse(
+      CognitoUsersSearchCriteria searchCriteria, String requestPaginationToken,
+      String responsePaginationToken, UserType... userTypes) {
+
+    CognitoUsersSearchCriteria searchCriteria1 = new CognitoUsersSearchCriteria(searchCriteria);
+    searchCriteria1.setPaginationToken(requestPaginationToken);
+    ListUsersRequest request = facade.composeListUsersRequest(searchCriteria1);
+    ListUsersResult listUsersResult =
+        new ListUsersResult().withUsers(userTypes).withPaginationToken(responsePaginationToken);
+    when(identityProvider.listUsers(request)).thenReturn(listUsersResult);
+    return request;
   }
 
   private User user() {
@@ -284,13 +355,19 @@ public class CognitoServiceFacadeTest {
     return user;
   }
 
+  private UserType userType(String name) {
+    UserType userType = new UserType();
+    userType.setUsername(name);
+    return userType;
+  }
+
   private static Map<String, String> attrMap(List<AttributeType> attrs) {
     return attrs.stream().collect(Collectors.toMap(AttributeType::getName, AttributeType::getValue));
   }
 
-  private static void assertAttr(Map<String, String> attrMap, String name, String value) {
-    assertTrue(attrMap.containsKey(name));
-    assertThat(attrMap.get(name), is(value));
+  private static void assertAttr(Map<String, String> attrMap, UserAttribute attr, String value) {
+    assertTrue(attrMap.containsKey(attr.getName()));
+    assertThat(attrMap.get(attr.getName()), is(value));
   }
 
   private static Set<String> set(String... strs) {

@@ -5,10 +5,17 @@ if ( ${COGNITO_MODE:?} ) ; then
   echo "COGNITO MODE"
   PERRY_CONFIG="--spring.config.location=config/perry-prod.yml"
   JAVA_OPTS="-Dspring.profiles.active=prod,cognito,liquibase"
+  if [ "$MFA" = true ] ; then
+    echo "LOGIN TYPE: MFA"
+    JAVA_OPTS="$JAVA_OPTS,mfa,cognito_refresh"
+  else
+    echo "LOGIN TYPE: OAUTH2"
+    JAVA_OPTS="$JAVA_OPTS,oauth2"
+  fi
 elif ([ -z "$DEV_MODE" ] || ! $DEV_MODE); then
   echo "PROD MODE"
   PERRY_CONFIG="--spring.config.location=config/perry-prod.yml"
-  JAVA_OPTS="-Dspring.profiles.active=prod,saf,liquibase"
+  JAVA_OPTS="-Dspring.profiles.active=prod,saf,liquibase,oauth2"
 else
   echo "DEV MODE"
   PERRY_CONFIG="--spring.config.location=config/perry-dev.yml"
@@ -29,14 +36,6 @@ fi
 
 if [ "$SWAGGER" = true ] ; then
     JAVA_OPTS="$JAVA_OPTS,swagger"
-fi
-
-if [ "$MFA" = true ] ; then
-    echo "LOGIN TYPE: MFA"
-    JAVA_OPTS="$JAVA_OPTS,mfa"
-else
-    echo "LOGIN TYPE: OAUTH2"
-    JAVA_OPTS="$JAVA_OPTS,oauth2"
 fi
 
 if [ -x /paramfolder/parameters.sh ]; then
