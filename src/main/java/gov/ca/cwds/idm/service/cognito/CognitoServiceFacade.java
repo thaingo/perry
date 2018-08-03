@@ -4,7 +4,7 @@ import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.EMAIL_DELIVERY;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.buildCreateUserAttributes;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.createPermissionsAttribute;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_CONNECT_TO_IDM;
-import static gov.ca.cwds.service.messages.MessageCode.ERROR_GET_USER_FROM_IDM;
+import static gov.ca.cwds.service.messages.MessageCode.ERROR_UPDATE_USER_IN_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.IDM_USER_VALIDATION_FAILED;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_CREATE_NEW_IDM_USER;
 import static gov.ca.cwds.service.messages.MessageCode.USER_NOT_FOUND_BY_ID_IN_IDM;
@@ -76,16 +76,6 @@ public class CognitoServiceFacade {
             .build();
   }
 
-  public UserType getById(String id) {
-    try {
-      return getCognitoUserById(id);
-    } catch (UserNotFoundException e) {
-      throw new UserNotFoundPerryException(messages.get(USER_NOT_FOUND_BY_ID_IN_IDM, id), e);
-    } catch (Exception e) {
-      throw new PerryException(messages.get(ERROR_GET_USER_FROM_IDM), e);
-    }
-  }
-
   public String createUser(User user) {
 
     AdminCreateUserRequest request = createAdminCreateUserRequest(user);
@@ -108,11 +98,7 @@ public class CognitoServiceFacade {
   }
 
   public String getCountyName(String userId) {
-    try {
-      return CognitoUtils.getCountyName(getCognitoUserById(userId));
-    } catch (UserNotFoundException e) {
-      throw new UserNotFoundPerryException(messages.get(USER_NOT_FOUND_BY_ID_IN_IDM, userId), e);
-    }
+    return CognitoUtils.getCountyName(getCognitoUserById(userId));
   }
 
    public AdminCreateUserRequest createAdminCreateUserRequest(User user) {
@@ -160,7 +146,21 @@ public class CognitoServiceFacade {
   public UserType getCognitoUserById(String id) {
     AdminGetUserRequest request =
         new AdminGetUserRequest().withUsername(id).withUserPoolId(properties.getUserpool());
-    AdminGetUserResult agur = identityProvider.adminGetUser(request);
+    AdminGetUserResult agur;
+
+    try {
+      agur = identityProvider.adminGetUser(request);
+    } catch (UserNotFoundException e) {
+      String msg = messages.get(USER_NOT_FOUND_BY_ID_IN_IDM, id);
+      LOGGER.error(msg, e);
+      throw new UserNotFoundPerryException(msg, e);
+
+    } catch (Exception e) {
+      String msg = messages.get(ERROR_UPDATE_USER_IN_IDM);
+      LOGGER.error(msg, e);
+      throw new PerryException(msg, e);
+    }
+
     return new UserType()
         .withUsername(agur.getUsername())
         .withAttributes(agur.getUserAttributes())
@@ -187,7 +187,18 @@ public class CognitoServiceFacade {
               .withUserPoolId(properties.getUserpool())
               .withUserAttributes(updateAttributes);
 
-      identityProvider.adminUpdateUserAttributes(adminUpdateUserAttributesRequest);
+      try {
+        identityProvider.adminUpdateUserAttributes(adminUpdateUserAttributesRequest);
+      } catch (UserNotFoundException e) {
+        String msg = messages.get(USER_NOT_FOUND_BY_ID_IN_IDM, id);
+        LOGGER.error(msg, e);
+        throw new UserNotFoundPerryException(msg, e);
+
+      } catch (Exception e) {
+        String msg = messages.get(ERROR_UPDATE_USER_IN_IDM);
+        LOGGER.error(msg, e);
+        throw new PerryException(msg, e);
+      }
 
       executed = true;
     }
@@ -219,7 +230,20 @@ public class CognitoServiceFacade {
       if (newEnabled) {
         AdminEnableUserRequest adminEnableUserRequest =
             new AdminEnableUserRequest().withUsername(id).withUserPoolId(properties.getUserpool());
-        identityProvider.adminEnableUser(adminEnableUserRequest);
+
+        try {
+          identityProvider.adminEnableUser(adminEnableUserRequest);
+        } catch (UserNotFoundException e) {
+          String msg = messages.get(USER_NOT_FOUND_BY_ID_IN_IDM, id);
+          LOGGER.error(msg, e);
+          throw new UserNotFoundPerryException(msg, e);
+
+        } catch (Exception e) {
+          String msg = messages.get(ERROR_UPDATE_USER_IN_IDM);
+          LOGGER.error(msg, e);
+          throw new PerryException(msg, e);
+        }
+
         executed =  true;
       } else {
         AdminDisableUserRequest adminDisableUserRequest =

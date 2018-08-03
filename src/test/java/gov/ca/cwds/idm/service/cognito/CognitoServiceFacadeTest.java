@@ -105,7 +105,7 @@ public class CognitoServiceFacadeTest {
     when(identityProvider.adminGetUser(any(AdminGetUserRequest.class)))
         .thenReturn(mockResult);
 
-    UserType UserType = facade.getById("id");
+    UserType UserType = facade.getCognitoUserById("id");
     AdminGetUserRequest expectedRequest = new AdminGetUserRequest().withUsername("id")
         .withUserPoolId("userpool");
     verify(identityProvider, times(1)).adminGetUser(expectedRequest);
@@ -127,14 +127,14 @@ public class CognitoServiceFacadeTest {
   public void testGetByIdUserNotFoundException() {
     when(identityProvider.adminGetUser(any(AdminGetUserRequest.class)))
         .thenThrow(new UserNotFoundException("user not found"));
-    facade.getById("id");
+    facade.getCognitoUserById("id");
   }
 
   @Test(expected = PerryException.class)
   public void testGetByIdException() {
     when(identityProvider.adminGetUser(any(AdminGetUserRequest.class)))
         .thenThrow(new RuntimeException());
-    facade.getById("id");
+    facade.getCognitoUserById("id");
   }
 
 //  @Test
