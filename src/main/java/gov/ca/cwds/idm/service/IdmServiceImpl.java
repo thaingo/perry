@@ -61,6 +61,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Profile("idm")
+@SuppressWarnings({"fb-contrib:EXS_EXCEPTION_SOFTENING_NO_CONSTRAINTS"})
 public class IdmServiceImpl implements IdmService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(IdmServiceImpl.class);
