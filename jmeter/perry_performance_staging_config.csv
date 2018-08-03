@@ -1,0 +1,9 @@
+idp,cognito,perryDevMode or cognito
+perryProtocol,https,
+perryHost,staging.cwds.ca.gov,
+perryPort,443,
+usersFile,cognito_users_perry.csv,
+validationCallsCount,1000,
+loginCyclesCount,10,
+loginCycleDelay,1000,in milliseconds
+
