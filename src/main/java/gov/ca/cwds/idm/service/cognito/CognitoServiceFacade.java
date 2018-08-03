@@ -10,6 +10,8 @@ import static gov.ca.cwds.service.messages.MessageCode.UNABLE_CREATE_NEW_IDM_USE
 import static gov.ca.cwds.service.messages.MessageCode.USER_NOT_FOUND_BY_ID_IN_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
 
+import com.amazonaws.AmazonWebServiceRequest;
+import com.amazonaws.AmazonWebServiceResult;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
@@ -44,6 +46,7 @@ import gov.ca.cwds.service.messages.MessagesService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 import javax.annotation.PostConstruct;
 import liquibase.util.StringUtils;
 import org.slf4j.Logger;
@@ -148,18 +151,7 @@ public class CognitoServiceFacade {
         new AdminGetUserRequest().withUsername(id).withUserPoolId(properties.getUserpool());
     AdminGetUserResult agur;
 
-    try {
-      agur = identityProvider.adminGetUser(request);
-    } catch (UserNotFoundException e) {
-      String msg = messages.get(USER_NOT_FOUND_BY_ID_IN_IDM, id);
-      LOGGER.error(msg, e);
-      throw new UserNotFoundPerryException(msg, e);
-
-    } catch (Exception e) {
-      String msg = messages.get(ERROR_UPDATE_USER_IN_IDM);
-      LOGGER.error(msg, e);
-      throw new PerryException(msg, e);
-    }
+    agur = executeInCognito(identityProvider::adminGetUser, request, id);
 
     return new UserType()
         .withUsername(agur.getUsername())
@@ -187,19 +179,7 @@ public class CognitoServiceFacade {
               .withUserPoolId(properties.getUserpool())
               .withUserAttributes(updateAttributes);
 
-      try {
-        identityProvider.adminUpdateUserAttributes(adminUpdateUserAttributesRequest);
-      } catch (UserNotFoundException e) {
-        String msg = messages.get(USER_NOT_FOUND_BY_ID_IN_IDM, id);
-        LOGGER.error(msg, e);
-        throw new UserNotFoundPerryException(msg, e);
-
-      } catch (Exception e) {
-        String msg = messages.get(ERROR_UPDATE_USER_IN_IDM);
-        LOGGER.error(msg, e);
-        throw new PerryException(msg, e);
-      }
-
+      executeInCognito(identityProvider::adminUpdateUserAttributes, adminUpdateUserAttributesRequest, id);
       executed = true;
     }
     return executed;
@@ -231,19 +211,7 @@ public class CognitoServiceFacade {
         AdminEnableUserRequest adminEnableUserRequest =
             new AdminEnableUserRequest().withUsername(id).withUserPoolId(properties.getUserpool());
 
-        try {
-          identityProvider.adminEnableUser(adminEnableUserRequest);
-        } catch (UserNotFoundException e) {
-          String msg = messages.get(USER_NOT_FOUND_BY_ID_IN_IDM, id);
-          LOGGER.error(msg, e);
-          throw new UserNotFoundPerryException(msg, e);
-
-        } catch (Exception e) {
-          String msg = messages.get(ERROR_UPDATE_USER_IN_IDM);
-          LOGGER.error(msg, e);
-          throw new PerryException(msg, e);
-        }
-
+        executeInCognito(identityProvider::adminEnableUser, adminEnableUserRequest, id);
         executed =  true;
       } else {
         AdminDisableUserRequest adminDisableUserRequest =
@@ -282,5 +250,22 @@ public class CognitoServiceFacade {
   }
   public void setMessagesService(MessagesService messages) {
     this.messages = messages;
+  }
+
+  private <T extends AmazonWebServiceRequest, R extends AmazonWebServiceResult>
+    R executeInCognito(Function<T, R> function, T request, String userId) {
+
+    try {
+      return function.apply(request);
+    } catch (UserNotFoundException e) {
+      String msg = messages.get(USER_NOT_FOUND_BY_ID_IN_IDM, userId);
+      LOGGER.error(msg, e);
+      throw new UserNotFoundPerryException(msg, e);
+
+    } catch (Exception e) {
+      String msg = messages.get(ERROR_UPDATE_USER_IN_IDM);
+      LOGGER.error(msg, e);
+      throw new PerryException(msg, e);
+    }
   }
 }
