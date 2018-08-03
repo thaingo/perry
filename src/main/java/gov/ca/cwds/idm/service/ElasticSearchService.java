@@ -11,6 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -27,30 +30,51 @@ public class ElasticSearchService {
   private static final String SSO_TOKEN = "ssoToken";
 
   private static final String CREATE_URL_TEMPLATE =
-      "{" + DORA_URL + "}/{" + ES_USER_INDEX + "}/{" + ES_USER_TYPE + "}/{" + ID + "}/_create?token={" + SSO_TOKEN + "}";
+      "{"
+          + DORA_URL
+          + "}/{"
+          + ES_USER_INDEX
+          + "}/{"
+          + ES_USER_TYPE
+          + "}/{"
+          + ID
+          + "}/_create?token={"
+          + SSO_TOKEN
+          + "}";
 
   private static final String UPDATE_URL_TEMPLATE =
-      "{"+ DORA_URL + "}/{" + ES_USER_INDEX + "}/{" + ES_USER_TYPE + "}/{" + ID + "}?token={" + SSO_TOKEN + "}";
+      "{"
+          + DORA_URL
+          + "}/{"
+          + ES_USER_INDEX
+          + "}/{"
+          + ES_USER_TYPE
+          + "}/{"
+          + ID
+          + "}?token={"
+          + SSO_TOKEN
+          + "}";
 
   @Autowired private ElasticSearchProperties esProperties;
 
   @Autowired private RestTemplate restTemplate;
 
-  public void createUser(User user) {
-    putUser(user, OperationType.CREATE);
-    LOGGER.info(
-        "User, username:{} was successfully inserted in Elastic Search index", user.getId());
+  public ResponseEntity<String> createUser(User user) {
+    return putUser(user, OperationType.CREATE);
   }
 
-  public void updateUser(User user) {
-    putUser(user, OperationType.UPDATE);
-    LOGGER.info("User, username:{} was successfully updated in Elastic Search index", user.getId());
+  public ResponseEntity<String> updateUser(User user) {
+    return putUser(user, OperationType.UPDATE);
   }
 
-  private void putUser(User user, OperationType operation) {
+  private ResponseEntity<String> putUser(User user, OperationType operation) {
 
+    if(operation == null){
+      throw new IllegalArgumentException("User operation type is null");
+    }
+
+    HttpEntity<User> requestUpdate = new HttpEntity<>(user);
     String urlTemplate = getUrlTemplate(operation);
-
     String id = user.getId();
     id = "128e120c-d643-44ac-ad9b-4a3fc767f04d"; // for mock
 
@@ -61,7 +85,14 @@ public class ElasticSearchService {
     params.put(ID, id);
     params.put(SSO_TOKEN, getSsoToken());
 
-    restTemplate.put(urlTemplate, user, params);
+    ResponseEntity<String> response =
+        restTemplate.exchange(urlTemplate, HttpMethod.PUT, requestUpdate, String.class, params);
+    LOGGER.info(
+        "User, username:{} was successfully {}d in Elastic Search index",
+        user.getId(),
+        operation.toString().toLowerCase());
+    LOGGER.info("Response string is:{}", response.getBody());
+    return response;
   }
 
   static String getUrlTemplate(OperationType operation) {
