@@ -7,6 +7,7 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 import gov.ca.cwds.idm.dto.User;
@@ -25,6 +26,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.http.client.MockClientHttpResponse;
 import org.springframework.test.web.client.MockRestServiceServer;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 @RunWith(PowerMockRunner.class)
@@ -32,6 +34,7 @@ import org.springframework.web.client.RestTemplate;
 public class ElasticSearchServiceTest {
 
   private static final String USER_ID = "123";
+  private static final String USER_ERROR_ID = "999";
   private static final String SSO_TOKEN = "abc";
   private static final String DORA_RESPONSE = "{\"_id\": \"123\"\"}";
 
@@ -93,6 +96,19 @@ public class ElasticSearchServiceTest {
     ResponseEntity<String> response = service.createUser(user);
     assertThat(response.getStatusCode(), is(HttpStatus.CREATED));
     assertThat(response.getBody(), is(DORA_RESPONSE));
+  }
+
+  @Test(expected = HttpServerErrorException.class)
+  public void testDoraError() {
+    mockServer
+        .expect(requestTo("http://localhost/dora/users/user/" + USER_ERROR_ID + "?token=" + SSO_TOKEN))
+        .andExpect(method(HttpMethod.PUT))
+        .andRespond(
+        request -> new MockClientHttpResponse("error".getBytes(), HttpStatus.INTERNAL_SERVER_ERROR));
+
+    User user = new User();
+    user.setId(USER_ERROR_ID);
+    service.updateUser(user);
   }
 
   @Test
