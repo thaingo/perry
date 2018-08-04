@@ -13,7 +13,6 @@ import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.persistence.model.OperationType;
 import gov.ca.cwds.idm.service.cognito.ElasticSearchProperties;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
-import java.io.IOException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,11 +23,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.ClientHttpRequest;
-import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.mock.http.client.MockClientHttpResponse;
 import org.springframework.test.web.client.MockRestServiceServer;
-import org.springframework.test.web.client.ResponseCreator;
 import org.springframework.web.client.RestTemplate;
 
 @RunWith(PowerMockRunner.class)
@@ -97,9 +93,6 @@ public class ElasticSearchServiceTest {
     ResponseEntity<String> response = service.createUser(user);
     assertThat(response.getStatusCode(), is(HttpStatus.CREATED));
     assertThat(response.getBody(), is(DORA_RESPONSE));
-
-    mockServer.verify();
-    mockServer.reset();
   }
 
   @Test
