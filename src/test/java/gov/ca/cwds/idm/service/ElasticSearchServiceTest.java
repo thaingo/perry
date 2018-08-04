@@ -13,6 +13,7 @@ import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.persistence.model.OperationType;
 import gov.ca.cwds.idm.service.cognito.ElasticSearchProperties;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
+import java.io.IOException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -23,16 +24,20 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.ClientHttpRequest;
+import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.mock.http.client.MockClientHttpResponse;
 import org.springframework.test.web.client.MockRestServiceServer;
+import org.springframework.test.web.client.ResponseCreator;
 import org.springframework.web.client.RestTemplate;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(fullyQualifiedNames = "gov.ca.cwds.util.CurrentAuthenticatedUserUtil")
 public class ElasticSearchServiceTest {
 
-  static final String USER_ID = "123";
-  static final String SSO_TOKEN = "abc";
-  static final String DORA_RESPONSE = "{\"_id\": \"user-id\"\"}";
+  private static final String USER_ID = "123";
+  private static final String SSO_TOKEN = "abc";
+  private static final String DORA_RESPONSE = "{\"_id\": \"123\"\"}";
 
   private ElasticSearchService service;
 
@@ -84,12 +89,13 @@ public class ElasticSearchServiceTest {
             requestTo(
                 "http://localhost/dora/users/user/" + USER_ID + "/_create?token=" + SSO_TOKEN))
         .andExpect(method(HttpMethod.PUT))
-        .andRespond(withSuccess(DORA_RESPONSE, MediaType.APPLICATION_JSON));
+        .andRespond(
+            request -> new MockClientHttpResponse(DORA_RESPONSE.getBytes(), HttpStatus.CREATED));
 
     User user = new User();
     user.setId(USER_ID);
     ResponseEntity<String> response = service.createUser(user);
-    assertThat(response.getStatusCode(), is(HttpStatus.OK));
+    assertThat(response.getStatusCode(), is(HttpStatus.CREATED));
     assertThat(response.getBody(), is(DORA_RESPONSE));
 
     mockServer.verify();
