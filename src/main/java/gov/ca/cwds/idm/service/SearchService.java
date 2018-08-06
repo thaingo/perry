@@ -19,9 +19,9 @@ import org.springframework.web.client.RestTemplate;
 
 @Service
 @Profile("idm")
-public class ElasticSearchService {
+public class SearchService {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(ElasticSearchService.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(SearchService.class);
 
   private static final String DORA_URL = "doraUrl";
   private static final String ES_USER_INDEX = "esUserIndex";

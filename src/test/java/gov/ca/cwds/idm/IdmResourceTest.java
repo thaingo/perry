@@ -55,7 +55,7 @@ import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.persistence.UserLogRepository;
 import gov.ca.cwds.idm.persistence.model.OperationType;
 import gov.ca.cwds.idm.persistence.model.UserLog;
-import gov.ca.cwds.idm.service.ElasticSearchService;
+import gov.ca.cwds.idm.service.SearchService;
 import gov.ca.cwds.idm.service.IdmServiceImpl;
 import gov.ca.cwds.idm.service.cognito.CognitoProperties;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
@@ -138,7 +138,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
   @Autowired private UserLogRepository userLogRepository;
 
-  private ElasticSearchService elasticSearchService = mock(ElasticSearchService.class);
+  private SearchService searchService = mock(SearchService.class);
 
   private MockMvc mockMvc;
 
@@ -154,7 +154,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @Before
   public void before() {
     cognitoServiceFacade.setMessagesService(messagesService);
-    idmService.setElasticSearchService(elasticSearchService);
+    idmService.setSearchService(searchService);
     this.mockMvc =
         MockMvcBuilders.webAppContextSetup(webApplicationContext).apply(springSecurity()).build();
     cognito = cognitoServiceFacade.getIdentityProvider();
@@ -361,7 +361,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         .andReturn();
 
     verify(cognito, times(1)).adminCreateUser(request);
-    verify(elasticSearchService, times(1)).createUser(any(User.class));
+    verify(searchService, times(1)).createUser(any(User.class));
   }
 
   @Test
@@ -378,7 +378,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     expectedNewUser.setId(NEW_USER_SUCCESS_ID);
 
     doThrow(new RestClientException("Elastic Search error"))
-        .when(elasticSearchService).createUser(refEq(expectedNewUser));
+        .when(searchService).createUser(refEq(expectedNewUser));
 
     AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
     setCreateUserResult(request, NEW_USER_SUCCESS_ID);
@@ -393,7 +393,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         .andReturn();
 
     verify(cognito, times(1)).adminCreateUser(request);
-    verify(elasticSearchService, times(1)).createUser(any(User.class));
+    verify(searchService, times(1)).createUser(any(User.class));
 
     Iterable<UserLog> userLogs = userLogRepository.findAll();
     int newUserLogsSize = Iterables.size(userLogs);
@@ -423,7 +423,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         .andReturn();
 
     verify(cognito, times(1)).adminCreateUser(request);
-    verify(elasticSearchService, times(0)).createUser(any(User.class));
+    verify(searchService, times(0)).createUser(any(User.class));
   }
 
   @Test
@@ -443,7 +443,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         .andReturn();
 
     verify(cognito, times(0)).adminCreateUser(request);
-    verify(elasticSearchService, times(0)).createUser(any(User.class));
+    verify(searchService, times(0)).createUser(any(User.class));
   }
 
   @Test
@@ -522,7 +522,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
     verify(cognito, times(1)).adminUpdateUserAttributes(updateAttributesRequest);
     verify(cognito, times(1)).adminDisableUser(disableUserRequest);
-    verify(elasticSearchService, times(2)).updateUser(any(User.class));
+    verify(searchService, times(2)).updateUser(any(User.class));
 
     InOrder inOrder = inOrder(cognito);
     inOrder.verify(cognito).adminUpdateUserAttributes(updateAttributesRequest);
@@ -534,7 +534,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   public void testUpdateUserDoraFail() throws Exception {
 
     doThrow(new RestClientException("Elastic Search error"))
-        .when(elasticSearchService).updateUser(any(User.class));
+        .when(searchService).updateUser(any(User.class));
 
     int oldUserLogsSize = Iterables.size(userLogRepository.findAll());
 
@@ -558,7 +558,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
     verify(cognito, times(1)).adminUpdateUserAttributes(updateAttributesRequest);
     verify(cognito, times(1)).adminDisableUser(disableUserRequest);
-    verify(elasticSearchService, times(2)).updateUser(any(User.class));
+    verify(searchService, times(2)).updateUser(any(User.class));
 
     InOrder inOrder = inOrder(cognito);
     inOrder.verify(cognito).adminUpdateUserAttributes(updateAttributesRequest);
@@ -603,7 +603,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
     verify(cognito, times(0)).adminEnableUser(enableUserRequest);
 
-    verify(elasticSearchService, times(0)).createUser(any(User.class));
+    verify(searchService, times(0)).createUser(any(User.class));
   }
 
   @Test
@@ -625,7 +625,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
     verify(cognito, times(0)).adminEnableUser(enableUserRequest);
 
-    verify(elasticSearchService, times(0)).createUser(any(User.class));
+    verify(searchService, times(0)).createUser(any(User.class));
   }
 
   @Test
@@ -770,7 +770,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         .andReturn();
 
     verify(cognito, times(0)).adminCreateUser(request);
-    verify(elasticSearchService, times(0)).createUser(any(User.class));
+    verify(searchService, times(0)).createUser(any(User.class));
   }
 
   private AdminUpdateUserAttributesRequest setUpdateUserAttributesRequestAndResult(

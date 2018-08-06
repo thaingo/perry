@@ -1,13 +1,12 @@
 package gov.ca.cwds.idm.service;
 
-import static gov.ca.cwds.idm.service.ElasticSearchService.getUrlTemplate;
+import static gov.ca.cwds.idm.service.SearchService.getUrlTemplate;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 import gov.ca.cwds.idm.dto.User;
@@ -31,14 +30,14 @@ import org.springframework.web.client.RestTemplate;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(fullyQualifiedNames = "gov.ca.cwds.util.CurrentAuthenticatedUserUtil")
-public class ElasticSearchServiceTest {
+public class SearchServiceTest {
 
   private static final String USER_ID = "123";
   private static final String USER_ERROR_ID = "999";
   private static final String SSO_TOKEN = "abc";
   private static final String DORA_RESPONSE = "{\"_id\": \"123\"\"}";
 
-  private ElasticSearchService service;
+  private SearchService service;
 
   private MockRestServiceServer mockServer;
 
@@ -47,7 +46,7 @@ public class ElasticSearchServiceTest {
     mockStatic(CurrentAuthenticatedUserUtil.class);
     when(CurrentAuthenticatedUserUtil.getSsoToken()).thenReturn(SSO_TOKEN);
 
-    service = new ElasticSearchService();
+    service = new SearchService();
 
     ElasticSearchProperties properties = new ElasticSearchProperties();
     properties.setDoraUrl("http://localhost/dora");

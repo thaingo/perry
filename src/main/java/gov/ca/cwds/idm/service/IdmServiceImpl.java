@@ -72,7 +72,7 @@ public class IdmServiceImpl implements IdmService {
 
   @Autowired private UserLogService userLogService;
 
-  @Autowired private ElasticSearchService elasticSearchService;
+  @Autowired private SearchService searchService;
 
   @Override
   public User findUser(String id) {
@@ -179,7 +179,7 @@ public class IdmServiceImpl implements IdmService {
   private void updateUserInElasticSearch(String id) {
     try {
       User updatedUser = findUser(id);
-      elasticSearchService.updateUser(updatedUser);
+      searchService.updateUser(updatedUser);
     } catch (Exception e) {
       String msg = messages.get(UNABLE_UPDATE_IDM_USER_IN_ES, id);
       LOGGER.error(msg, e);
@@ -190,7 +190,7 @@ public class IdmServiceImpl implements IdmService {
   private void createUserInElasticSearch(User user) {
     String id = user.getId();
     try {
-      elasticSearchService.createUser(user);
+      searchService.createUser(user);
     } catch (Exception e) {
       String msg = messages.get(UNABLE_CREATE_IDM_USER_IN_ES, id);
       LOGGER.error(msg, e);
@@ -261,7 +261,7 @@ public class IdmServiceImpl implements IdmService {
     return cwsUser;
   }
 
-  public void setElasticSearchService(ElasticSearchService elasticSearchService) {
-    this.elasticSearchService = elasticSearchService;
+  public void setSearchService(SearchService searchService) {
+    this.searchService = searchService;
   }
 }
