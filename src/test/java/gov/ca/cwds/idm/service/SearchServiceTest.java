@@ -119,4 +119,11 @@ public class SearchServiceTest {
         getUrlTemplate(OperationType.UPDATE),
         is("{doraUrl}/{esUserIndex}/{esUserType}/{id}?token={ssoToken}"));
   }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testPutUserOperationNull() {
+    User user = new User();
+    user.setId(USER_ID);
+    service.putUser(user, null);
+  }
 }
