@@ -11,7 +11,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.persistence.model.OperationType;
-import gov.ca.cwds.idm.service.cognito.ElasticSearchProperties;
+import gov.ca.cwds.idm.service.cognito.SearchProperties;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import org.junit.After;
 import org.junit.Before;
@@ -48,11 +48,11 @@ public class SearchServiceTest {
 
     service = new SearchService();
 
-    ElasticSearchProperties properties = new ElasticSearchProperties();
+    SearchProperties properties = new SearchProperties();
     properties.setDoraUrl("http://localhost/dora");
     properties.setIndex("users");
     properties.setType("user");
-    service.setElasticSearchProperties(properties);
+    service.setSearchProperties(properties);
 
     RestTemplate restTemplate = new RestTemplate();
     service.setRestTemplate(restTemplate);

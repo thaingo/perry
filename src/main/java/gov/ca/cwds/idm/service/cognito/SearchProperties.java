@@ -5,7 +5,7 @@ import org.springframework.context.annotation.Profile;
 
 @Profile("idm")
 @ConfigurationProperties(prefix = "elasticSearch")
-public class ElasticSearchProperties {
+public class SearchProperties {
 
   private String doraUrl;
   private String index;

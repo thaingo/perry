@@ -4,7 +4,7 @@ import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getSsoToken;
 
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.persistence.model.OperationType;
-import gov.ca.cwds.idm.service.cognito.ElasticSearchProperties;
+import gov.ca.cwds.idm.service.cognito.SearchProperties;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -55,7 +55,7 @@ public class SearchService {
           + SSO_TOKEN
           + "}";
 
-  @Autowired private ElasticSearchProperties esProperties;
+  @Autowired private SearchProperties searchProperties;
 
   @Autowired private RestTemplate restTemplate;
 
@@ -78,9 +78,9 @@ public class SearchService {
     String id = user.getId();
 
     Map<String, String> params = new HashMap<>();
-    params.put(DORA_URL, esProperties.getDoraUrl());
-    params.put(ES_USER_INDEX, esProperties.getIndex());
-    params.put(ES_USER_TYPE, esProperties.getType());
+    params.put(DORA_URL, searchProperties.getDoraUrl());
+    params.put(ES_USER_INDEX, searchProperties.getIndex());
+    params.put(ES_USER_TYPE, searchProperties.getType());
     params.put(ID, id);
     params.put(SSO_TOKEN, getSsoToken());
 
@@ -105,8 +105,8 @@ public class SearchService {
     }
   }
 
-  public void setElasticSearchProperties(ElasticSearchProperties esProperties) {
-    this.esProperties = esProperties;
+  public void setSearchProperties(SearchProperties searchProperties) {
+    this.searchProperties = searchProperties;
   }
 
   public void setRestTemplate(RestTemplate restTemplate) {
