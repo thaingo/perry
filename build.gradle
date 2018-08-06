@@ -37,6 +37,7 @@ project.ext {
     mainclass = 'gov.ca.cwds.PerryApplication'
     targetDockerHubOrganization = System.env.DOCKERHUB_ORG ?: 'cwds'
     cwdsModelVersion = '0.8.1_639-RC'
+    powerMockVersion = "1.7.3"
 
     // assume that Windows users use the Docker Toolbox
     buildEnv = 'JENKINS'
@@ -169,7 +170,7 @@ dependencies {
     }
     testCompile 'org.springframework:spring-test:4.3.0.RELEASE'
     testCompile 'org.springframework.security:spring-security-test:4.2.6.RELEASE'
-    testCompile 'org.mockito:mockito-core:2.18.3'
+    testCompile 'org.mockito:mockito-core:2.8.9'
     testCompile group: 'org.hamcrest', name: 'hamcrest-junit', version: '2.0.0.0'
     testCompile('org.glassfish.jersey.test-framework.providers:jersey-test-framework-provider-grizzly2:2.23.2') {
         exclude group: 'javax.servlet', module: 'javax.servlet-api'
@@ -182,6 +183,9 @@ dependencies {
     testCompile group: 'io.dropwizard', name: 'dropwizard-testing', version: '1.0.5'
 
     testCompile group: 'gov.ca.cwds.cals', name: 'cws-cms-data-model', version: cwdsModelVersion, changing: true
+
+    testCompile group: 'org.powermock', name: 'powermock-module-junit4', version: powerMockVersion
+    testCompile group: 'org.powermock', name: 'powermock-api-mockito2', version: powerMockVersion
 }
 
 test {

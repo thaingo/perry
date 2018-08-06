@@ -64,8 +64,6 @@ public class CognitoServiceFacadeTest {
 
   private MessagesService messagesService = mock(MessagesService.class);
 
-  private UserLogService userLogService = mock(UserLogService.class);
-
   @Before
   public void before() {
     CognitoProperties properties = new CognitoProperties();
@@ -78,7 +76,6 @@ public class CognitoServiceFacadeTest {
     facade.setProperties(properties);
     facade.setIdentityProvider(identityProvider);
     facade.setMessagesService(messagesService);
-    facade.setUserLogService(userLogService);
   }
 
   @Test
@@ -108,7 +105,7 @@ public class CognitoServiceFacadeTest {
     when(identityProvider.adminGetUser(any(AdminGetUserRequest.class)))
         .thenReturn(mockResult);
 
-    UserType UserType = facade.getById("id");
+    UserType UserType = facade.getCognitoUserById("id");
     AdminGetUserRequest expectedRequest = new AdminGetUserRequest().withUsername("id")
         .withUserPoolId("userpool");
     verify(identityProvider, times(1)).adminGetUser(expectedRequest);
@@ -130,113 +127,14 @@ public class CognitoServiceFacadeTest {
   public void testGetByIdUserNotFoundException() {
     when(identityProvider.adminGetUser(any(AdminGetUserRequest.class)))
         .thenThrow(new UserNotFoundException("user not found"));
-    facade.getById("id");
+    facade.getCognitoUserById("id");
   }
 
   @Test(expected = PerryException.class)
   public void testGetByIdException() {
     when(identityProvider.adminGetUser(any(AdminGetUserRequest.class)))
         .thenThrow(new RuntimeException());
-    facade.getById("id");
-  }
-
-  @Test
-  public void testUpdateUserNoChanges() {
-    AdminGetUserResult mockResult = new AdminGetUserResult();
-    mockResult.setUsername("id");
-    mockResult.setEnabled(Boolean.TRUE);
-
-    List<AttributeType> mockAttrs = new ArrayList<>();
-    AttributeType mockAttr = new AttributeType();
-    mockAttr.setName(PERMISSIONS.getName());
-    mockAttr.setValue("Snapshot-rollout:Hotline-rollout");
-    mockAttrs.add(mockAttr);
-    mockResult.setUserAttributes(mockAttrs);
-
-    when(identityProvider.adminGetUser(any(AdminGetUserRequest.class)))
-        .thenReturn(mockResult);
-
-    UserUpdate userUpdate = new UserUpdate();
-    userUpdate.setEnabled(Boolean.TRUE);
-    Set<String> permissions = new HashSet<>();
-    permissions.add("Snapshot-rollout");
-    permissions.add("Hotline-rollout");
-    userUpdate.setPermissions(permissions);
-
-    facade.updateUser("id", userUpdate);
-
-    AdminGetUserRequest expectedRequest = new AdminGetUserRequest().withUsername("id")
-        .withUserPoolId("userpool");
-    verify(identityProvider, times(1)).adminGetUser(expectedRequest);
-    verify(identityProvider, times(0)).updateUserAttributes(any(UpdateUserAttributesRequest.class));
-    verify(identityProvider, times(0)).adminDisableUser(any(AdminDisableUserRequest.class));
-    verify(identityProvider, times(0)).adminEnableUser(any(AdminEnableUserRequest.class));
-  }
-
-  @Test
-  public void testUpdateUser() {
-    AdminGetUserResult mockResult = new AdminGetUserResult();
-    mockResult.setUsername("id");
-    mockResult.setEnabled(Boolean.TRUE);
-
-    List<AttributeType> mockAttrs = new ArrayList<>();
-    AttributeType mockAttr = new AttributeType();
-    mockAttr.setName(PERMISSIONS.getName());
-    mockAttr.setValue("Snapshot-rollout");
-    mockAttrs.add(mockAttr);
-    mockResult.setUserAttributes(mockAttrs);
-
-    when(identityProvider.adminGetUser(any(AdminGetUserRequest.class)))
-        .thenReturn(mockResult);
-
-    UserUpdate userUpdate = new UserUpdate();
-    userUpdate.setEnabled(Boolean.FALSE);
-    Set<String> permissions = new HashSet<>();
-    permissions.add("Hotline-rollout");
-    userUpdate.setPermissions(permissions);
-
-    facade.updateUser("id", userUpdate);
-
-    AdminGetUserRequest expectedAdminGetUserRequest =
-        new AdminGetUserRequest().withUsername("id").withUserPoolId("userpool");
-    verify(identityProvider, times(1))
-        .adminGetUser(expectedAdminGetUserRequest);
-
-    Collection<AttributeType> expectedUpdateAttributes = new ArrayList<>();
-    AttributeType expectedPermissionsAttribute = new AttributeType();
-    expectedPermissionsAttribute.setName(PERMISSIONS.getName());
-    expectedPermissionsAttribute.setValue("Hotline-rollout");
-    expectedUpdateAttributes.add(expectedPermissionsAttribute);
-
-    AdminUpdateUserAttributesRequest expectedAdminUpdateUserAttributesRequest =
-        new AdminUpdateUserAttributesRequest()
-            .withUsername("id")
-            .withUserPoolId("userpool")
-            .withUserAttributes(expectedUpdateAttributes);
-    verify(identityProvider, times(1))
-        .adminUpdateUserAttributes(expectedAdminUpdateUserAttributesRequest);
-
-    AdminDisableUserRequest expectedAdminDisableUserRequest =
-        new AdminDisableUserRequest().withUsername("id").withUserPoolId("userpool");
-    verify(identityProvider, times(1))
-        .adminDisableUser(expectedAdminDisableUserRequest);
-
-    verify(identityProvider, times(0))
-        .adminEnableUser(any(AdminEnableUserRequest.class));
-  }
-
-  @Test(expected = UserNotFoundPerryException.class)
-  public void testUpdateUserNotFoundException() {
-    when(identityProvider.adminGetUser(any(AdminGetUserRequest.class)))
-        .thenThrow(new UserNotFoundException("user not found"));
-    facade.updateUser("id", new UserUpdate());
-  }
-
-  @Test(expected = PerryException.class)
-  public void testUpdateUserException() {
-    when(identityProvider.adminGetUser(any(AdminGetUserRequest.class)))
-        .thenThrow(new RuntimeException());
-    facade.updateUser("id", new UserUpdate());
+    facade.getCognitoUserById("id");
   }
 
   @Test

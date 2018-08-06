@@ -113,4 +113,8 @@ public class CognitoUtils {
             .addAttribute(createRolesAttribute(user.getRoles()));
     return attributesBuilder.build();
   }
+
+  public static String getRACFId(UserType user) {
+    return CognitoUtils.getAttributeValue(user, RACFID_CUSTOM.getName());
+  }
 }

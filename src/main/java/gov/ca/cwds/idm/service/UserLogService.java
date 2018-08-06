@@ -3,6 +3,8 @@ package gov.ca.cwds.idm.service;
 import static gov.ca.cwds.idm.persistence.model.OperationType.CREATE;
 import static gov.ca.cwds.idm.persistence.model.OperationType.UPDATE;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_LOG_IDM_USER;
+import static gov.ca.cwds.service.messages.MessageCode.UNABLE_LOG_IDM_USER_CREATE;
+import static gov.ca.cwds.service.messages.MessageCode.UNABLE_LOG_IDM_USER_UPDATE;
 
 import gov.ca.cwds.idm.persistence.UserLogRepository;
 import gov.ca.cwds.idm.persistence.model.OperationType;
@@ -46,8 +48,15 @@ public class UserLogService {
     try {
       result = userLogRepository.save(userLog);
     } catch (Exception e) {
-      String operationName = operationType.toString().toLowerCase();
-      String msg = messages.get(UNABLE_LOG_IDM_USER, operationName, username);
+
+      String msg;
+      if (operationType == OperationType.CREATE) {
+        msg = messages.get(UNABLE_LOG_IDM_USER_CREATE, username);
+      } else if (operationType == OperationType.UPDATE) {
+        msg = messages.get(UNABLE_LOG_IDM_USER_UPDATE, username);
+      } else {
+        msg = messages.get(UNABLE_LOG_IDM_USER, operationType.toString(), username);
+      }
       LOGGER.error(msg, e);
     }
     return Optional.ofNullable(result);

@@ -1,12 +1,14 @@
 package gov.ca.cwds.idm.service;
 
-import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.RACFID_CUSTOM;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByEmail;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getRACFId;
 import static gov.ca.cwds.service.messages.MessageCode.DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS;
 import static gov.ca.cwds.service.messages.MessageCode.IDM_MAPPING_SCRIPT_ERROR;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY;
 import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID_IN_CWSCMS;
+import static gov.ca.cwds.service.messages.MessageCode.UNABLE_CREATE_IDM_USER_IN_ES;
+import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_IDM_USER_IN_ES;
 import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
 import static gov.ca.cwds.util.Utils.toUpperCase;
 import static java.util.stream.Collectors.toSet;
@@ -25,7 +27,6 @@ import gov.ca.cwds.idm.service.cognito.StandardUserAttribute;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil;
-import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
 import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType;
 import gov.ca.cwds.service.CwsUserInfoService;
@@ -56,6 +57,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Profile("idm")
+@SuppressWarnings({"fb-contrib:EXS_EXCEPTION_SOFTENING_NO_CONSTRAINTS"})
 public class IdmServiceImpl implements IdmService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(IdmServiceImpl.class);
@@ -68,21 +70,41 @@ public class IdmServiceImpl implements IdmService {
 
   @Autowired private MessagesService messages;
 
+  @Autowired private UserLogService userLogService;
+
+  @Autowired private SearchService searchService;
+
   @Override
   public User findUser(String id) {
-    UserType cognitoUser = cognitoServiceFacade.getById(id);
+    UserType cognitoUser = cognitoServiceFacade.getCognitoUserById(id);
     return enrichCognitoUser(cognitoUser);
   }
 
   @Override
   @PreAuthorize("@cognitoServiceFacade.getCountyName(#id) == principal.getParameter('county_name')")
   public void updateUser(String id, UserUpdate updateUserDto) {
-    cognitoServiceFacade.updateUser(id, updateUserDto);
+
+    UserType existedCognitoUser = cognitoServiceFacade.getCognitoUserById(id);
+
+    boolean updateAttributesExecuted =
+        cognitoServiceFacade.updateUserAttributes(id, existedCognitoUser, updateUserDto);
+    if(updateAttributesExecuted) {
+      updateUserInSearch(id);
+    }
+
+    boolean enableExecuted =
+        cognitoServiceFacade.changeUserEnabledStatus(id, existedCognitoUser.getEnabled(), updateUserDto.getEnabled());
+    if(enableExecuted) {
+      updateUserInSearch(id);
+    }
   }
 
   @Override
   public String createUser(User user) {
-    return cognitoServiceFacade.createUser(user);
+    String id = cognitoServiceFacade.createUser(user);
+    user.setId(id);
+    createUserInSearch(user);
+    return id;
   }
 
   @Override
@@ -154,6 +176,28 @@ public class IdmServiceImpl implements IdmService {
         .withVerificationPassed().build();
   }
 
+  private void updateUserInSearch(String id) {
+    try {
+      User updatedUser = findUser(id);
+      searchService.updateUser(updatedUser);
+    } catch (Exception e) {
+      String msg = messages.get(UNABLE_UPDATE_IDM_USER_IN_ES, id);
+      LOGGER.error(msg, e);
+      userLogService.logUpdate(id);
+    }
+  }
+
+  private void createUserInSearch(User user) {
+    String id = user.getId();
+    try {
+      searchService.createUser(user);
+    } catch (Exception e) {
+      String msg = messages.get(UNABLE_CREATE_IDM_USER_IN_ES, id);
+      LOGGER.error(msg, e);
+      userLogService.logCreate(id);
+    }
+  }
+
   private UserVerificationResult composeNegativeResultWithMessage(
       MessageCode errorCode, Object... params) {
     String message = messages.get(errorCode, params);
@@ -162,7 +206,6 @@ public class IdmServiceImpl implements IdmService {
         .withVerificationFailed(errorCode.getValue(), message)
         .build();
   }
-
 
   private User composeUser(CwsUserInfo cwsUser, String email) {
     User user = new User();
@@ -218,7 +261,7 @@ public class IdmServiceImpl implements IdmService {
     return cwsUser;
   }
 
-  static String getRACFId(UserType user) {
-    return CognitoUtils.getAttributeValue(user, RACFID_CUSTOM.getName());
+  public void setSearchService(SearchService searchService) {
+    this.searchService = searchService;
   }
 }

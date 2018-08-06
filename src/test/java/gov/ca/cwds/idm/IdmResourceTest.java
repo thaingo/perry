@@ -16,8 +16,11 @@ import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUti
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertStrict;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.refEq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -52,7 +55,8 @@ import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.persistence.UserLogRepository;
 import gov.ca.cwds.idm.persistence.model.OperationType;
 import gov.ca.cwds.idm.persistence.model.UserLog;
-import gov.ca.cwds.idm.service.UserLogService;
+import gov.ca.cwds.idm.service.SearchService;
+import gov.ca.cwds.idm.service.IdmServiceImpl;
 import gov.ca.cwds.idm.service.cognito.CognitoProperties;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.service.messages.MessagesService;
@@ -85,6 +89,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.context.WebApplicationContext;
 
 @ActiveProfiles({"dev", "idm"})
@@ -107,6 +112,8 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   private static final String NEW_USER_SUCCESS_ID = "17067e4e-270f-4623-b86c-b4d4fa527a34";
   private static final String ABSENT_USER_ID = "absentUserId";
   private static final String ERROR_USER_ID = "errorUserId";
+  private static final String ES_ERROR_CREATE_USER_EMAIL = "es.error@create.com";
+
   private static final String USERPOOL = "userpool";
   private static final String SOME_PAGINATION_TOKEN = "somePaginationToken";
 
@@ -127,13 +134,17 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
   @Autowired private MessagesService messagesService;
 
-  @Autowired private UserLogService userLogService;
+  @Autowired  private IdmServiceImpl idmService;
 
   @Autowired private UserLogRepository userLogRepository;
+
+  private SearchService searchService = mock(SearchService.class);
 
   private MockMvc mockMvc;
 
   private AWSCognitoIdentityProvider cognito;
+  
+
 
   @BeforeClass
   public static void beforeClass() throws Exception {
@@ -143,7 +154,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @Before
   public void before() {
     cognitoServiceFacade.setMessagesService(messagesService);
-    cognitoServiceFacade.setUserLogService(userLogService);
+    idmService.setSearchService(searchService);
     this.mockMvc =
         MockMvcBuilders.webAppContextSetup(webApplicationContext).apply(springSecurity()).build();
     cognito = cognitoServiceFacade.getIdentityProvider();
@@ -336,8 +347,6 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @Test
   @WithMockCustomUser
   public void testCreateUserSuccess() throws Exception {
-    int oldUserLogsSize = Iterables.size(userLogRepository.findAll());
-
     User user = user();
     AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
     setCreateUserResult(request, NEW_USER_SUCCESS_ID);
@@ -352,6 +361,39 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         .andReturn();
 
     verify(cognito, times(1)).adminCreateUser(request);
+    verify(searchService, times(1)).createUser(any(User.class));
+  }
+
+  @Test
+  @WithMockCustomUser
+  public void testCreateUserDoraFail() throws Exception {
+
+    int oldUserLogsSize = Iterables.size(userLogRepository.findAll());
+
+    User user = user();
+    user.setEmail(ES_ERROR_CREATE_USER_EMAIL);
+
+    User expectedNewUser = user();
+    expectedNewUser.setEmail(ES_ERROR_CREATE_USER_EMAIL);
+    expectedNewUser.setId(NEW_USER_SUCCESS_ID);
+
+    doThrow(new RestClientException("Elastic Search error"))
+        .when(searchService).createUser(refEq(expectedNewUser));
+
+    AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
+    setCreateUserResult(request, NEW_USER_SUCCESS_ID);
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.post("/idm/users")
+                .contentType(CONTENT_TYPE)
+                .content(asJsonString(user)))
+        .andExpect(MockMvcResultMatchers.status().isCreated())
+        .andExpect(header().string("location", "http://localhost/idm/users/" + NEW_USER_SUCCESS_ID))
+        .andReturn();
+
+    verify(cognito, times(1)).adminCreateUser(request);
+    verify(searchService, times(1)).createUser(any(User.class));
 
     Iterable<UserLog> userLogs = userLogRepository.findAll();
     int newUserLogsSize = Iterables.size(userLogs);
@@ -381,6 +423,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         .andReturn();
 
     verify(cognito, times(1)).adminCreateUser(request);
+    verify(searchService, times(0)).createUser(any(User.class));
   }
 
   @Test
@@ -400,6 +443,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         .andReturn();
 
     verify(cognito, times(0)).adminCreateUser(request);
+    verify(searchService, times(0)).createUser(any(User.class));
   }
 
   @Test
@@ -457,7 +501,6 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @Test
   @WithMockCustomUser
   public void testUpdateUser() throws Exception {
-    int oldUserLogsSize = Iterables.size(userLogRepository.findAll());
 
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setEnabled(Boolean.FALSE);
@@ -479,6 +522,43 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
     verify(cognito, times(1)).adminUpdateUserAttributes(updateAttributesRequest);
     verify(cognito, times(1)).adminDisableUser(disableUserRequest);
+    verify(searchService, times(2)).updateUser(any(User.class));
+
+    InOrder inOrder = inOrder(cognito);
+    inOrder.verify(cognito).adminUpdateUserAttributes(updateAttributesRequest);
+    inOrder.verify(cognito).adminDisableUser(disableUserRequest);
+  }
+
+  @Test
+  @WithMockCustomUser
+  public void testUpdateUserDoraFail() throws Exception {
+
+    doThrow(new RestClientException("Elastic Search error"))
+        .when(searchService).updateUser(any(User.class));
+
+    int oldUserLogsSize = Iterables.size(userLogRepository.findAll());
+
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setEnabled(Boolean.FALSE);
+    userUpdate.setPermissions(new HashSet<>(Arrays.asList("RFA-rollout", "Hotline-rollout")));
+
+    AdminUpdateUserAttributesRequest updateAttributesRequest =
+        setUpdateUserAttributesRequestAndResult(
+            USER_WITH_RACFID_ID, attr(PERMISSIONS.getName(), "RFA-rollout:Hotline-rollout"));
+
+    AdminDisableUserRequest disableUserRequest = setDisableUserRequestAndResult(USER_WITH_RACFID_ID);
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.patch("/idm/users/" + USER_WITH_RACFID_ID)
+                .contentType(CONTENT_TYPE)
+                .content(asJsonString(userUpdate)))
+        .andExpect(MockMvcResultMatchers.status().isNoContent())
+        .andReturn();
+
+    verify(cognito, times(1)).adminUpdateUserAttributes(updateAttributesRequest);
+    verify(cognito, times(1)).adminDisableUser(disableUserRequest);
+    verify(searchService, times(2)).updateUser(any(User.class));
 
     InOrder inOrder = inOrder(cognito);
     inOrder.verify(cognito).adminUpdateUserAttributes(updateAttributesRequest);
@@ -490,11 +570,11 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
     UserLog beforeLastUserLog = Iterables.get(userLogs, newUserLogsSize - 2);
     assertTrue(beforeLastUserLog.getOperationType() == OperationType.UPDATE);
-    assertThat(beforeLastUserLog.getUsername(), is(USER_NO_RACFID_ID));
+    assertThat(beforeLastUserLog.getUsername(), is(USER_WITH_RACFID_ID));
 
     UserLog lastUserLog = Iterables.getLast(userLogs);
     assertTrue(lastUserLog.getOperationType() == OperationType.UPDATE);
-    assertThat(lastUserLog.getUsername(), is(USER_NO_RACFID_ID));
+    assertThat(lastUserLog.getUsername(), is(USER_WITH_RACFID_ID));
   }
 
   @Test
@@ -522,6 +602,8 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     verify(cognito, times(0)).adminUpdateUserAttributes(updateAttributesRequest);
 
     verify(cognito, times(0)).adminEnableUser(enableUserRequest);
+
+    verify(searchService, times(0)).createUser(any(User.class));
   }
 
   @Test
@@ -542,6 +624,8 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         .andReturn();
 
     verify(cognito, times(0)).adminEnableUser(enableUserRequest);
+
+    verify(searchService, times(0)).createUser(any(User.class));
   }
 
   @Test
@@ -686,6 +770,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         .andReturn();
 
     verify(cognito, times(0)).adminCreateUser(request);
+    verify(searchService, times(0)).createUser(any(User.class));
   }
 
   private AdminUpdateUserAttributesRequest setUpdateUserAttributesRequestAndResult(
@@ -784,7 +869,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
       setProperties(properties);
       setIdentityProvider(cognito);
 
-      TestUser user0 =
+      TestUser userWithoutRacfid =
           testUser(
               USER_NO_RACFID_ID,
               Boolean.TRUE,
@@ -799,7 +884,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
               "CWS-worker:CWS-admin",
               null);
 
-      TestUser user1 =
+      TestUser userWithRacfid =
           testUser(
               USER_WITH_RACFID_ID,
               Boolean.TRUE,
@@ -814,7 +899,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
               "CWS-worker:CWS-admin",
               "YOLOD");
 
-      TestUser user2 =
+      TestUser userWithRacfidAndDbData =
           testUser(
               USER_WITH_RACFID_AND_DB_DATA_ID,
               Boolean.TRUE,
@@ -833,15 +918,15 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
       setUpGetErrorUserRequestAndResult();
 
-      setListUsersRequestAndResult("", user0, user1, user2);
+      setListUsersRequestAndResult("", userWithoutRacfid, userWithRacfid, userWithRacfidAndDbData);
 
-      setListUsersRequestAndResult(SOME_PAGINATION_TOKEN, user0);
+      setListUsersRequestAndResult(SOME_PAGINATION_TOKEN, userWithoutRacfid);
 
-      setSearchUsersByEmailRequestAndResult("julio@gmail.com", "test@test.com", user1);
+      setSearchUsersByEmailRequestAndResult("julio@gmail.com", "test@test.com", userWithRacfid);
 
-      setSearchByRacfidRequestAndResult(user1);
+      setSearchByRacfidRequestAndResult(userWithRacfid);
 
-      setSearchByRacfidRequestAndResult(user2);
+      setSearchByRacfidRequestAndResult(userWithRacfidAndDbData);
     }
 
     private void setListUsersRequestAndResult(String paginationToken, TestUser... testUsers) {

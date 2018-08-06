@@ -1,7 +1,7 @@
 package gov.ca.cwds.idm.service;
 
-import static gov.ca.cwds.idm.service.IdmServiceImpl.getRACFId;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.RACFID_CUSTOM;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getRACFId;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
