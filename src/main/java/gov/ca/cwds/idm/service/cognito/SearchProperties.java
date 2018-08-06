@@ -4,7 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Profile;
 
 @Profile("idm")
-@ConfigurationProperties(prefix = "elasticSearch")
+@ConfigurationProperties(prefix = "search")
 public class SearchProperties {
 
   private String doraUrl;

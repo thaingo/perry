@@ -89,13 +89,13 @@ public class IdmServiceImpl implements IdmService {
     boolean updateAttributesExecuted =
         cognitoServiceFacade.updateUserAttributes(id, existedCognitoUser, updateUserDto);
     if(updateAttributesExecuted) {
-      updateUserInElasticSearch(id);
+      updateUserInSearch(id);
     }
 
     boolean enableExecuted =
         cognitoServiceFacade.changeUserEnabledStatus(id, existedCognitoUser.getEnabled(), updateUserDto.getEnabled());
     if(enableExecuted) {
-      updateUserInElasticSearch(id);
+      updateUserInSearch(id);
     }
   }
 
@@ -103,7 +103,7 @@ public class IdmServiceImpl implements IdmService {
   public String createUser(User user) {
     String id = cognitoServiceFacade.createUser(user);
     user.setId(id);
-    createUserInElasticSearch(user);
+    createUserInSearch(user);
     return id;
   }
 
@@ -176,7 +176,7 @@ public class IdmServiceImpl implements IdmService {
         .withVerificationPassed().build();
   }
 
-  private void updateUserInElasticSearch(String id) {
+  private void updateUserInSearch(String id) {
     try {
       User updatedUser = findUser(id);
       searchService.updateUser(updatedUser);
@@ -187,7 +187,7 @@ public class IdmServiceImpl implements IdmService {
     }
   }
 
-  private void createUserInElasticSearch(User user) {
+  private void createUserInSearch(User user) {
     String id = user.getId();
     try {
       searchService.createUser(user);
