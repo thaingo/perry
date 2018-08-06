@@ -67,7 +67,7 @@ public class SearchService {
     return putUser(user, OperationType.UPDATE);
   }
 
-  private ResponseEntity<String> putUser(User user, OperationType operation) {
+  ResponseEntity<String> putUser(User user, OperationType operation) {
 
     if (operation == null) {
       throw new IllegalArgumentException("User operation type is null");
