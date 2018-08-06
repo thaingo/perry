@@ -36,15 +36,11 @@
 
     <br/>
 
-    <div th:if="${@errorView.getProperties().isShowErrors()}" class="collapse in" id="stacktrace">
-        <pre>
-        <span th:text="${#httpServletRequest.getAttribute('javax.servlet.error.message')}"></span>
-        </pre>
+    <div th:if="${@errorView.getProperties().isShowErrors()}" class="alert" id="stacktrace">
+        <b>Error: </b><span th:text="${#httpServletRequest.getAttribute('javax.servlet.error.message')}"></span>
     </div>
 
 </div>
-
-
 
 <script th:src="@{/js/jquery-3.2.1.min.js}"></script>
 <script th:src="@{/js/bootstrap.min.js}"></script>
