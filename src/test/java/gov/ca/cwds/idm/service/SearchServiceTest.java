@@ -49,7 +49,7 @@ public class SearchServiceTest {
     service = new SearchService();
 
     SearchProperties properties = new SearchProperties();
-    properties.setDoraUrl("http://localhost/dora");
+    properties.setDoraUrl("http://localhost");
     properties.setIndex("users");
     properties.setType("user");
     service.setSearchProperties(properties);
@@ -114,10 +114,10 @@ public class SearchServiceTest {
   public void testGetUrlTemplate() {
     assertThat(
         getUrlTemplate(OperationType.CREATE),
-        is("{doraUrl}/{esUserIndex}/{esUserType}/{id}/_create?token={ssoToken}"));
+        is("{doraUrl}/dora/{esUserIndex}/{esUserType}/{id}/_create?token={ssoToken}"));
     assertThat(
         getUrlTemplate(OperationType.UPDATE),
-        is("{doraUrl}/{esUserIndex}/{esUserType}/{id}?token={ssoToken}"));
+        is("{doraUrl}/dora/{esUserIndex}/{esUserType}/{id}?token={ssoToken}"));
   }
 
   @Test(expected = IllegalArgumentException.class)

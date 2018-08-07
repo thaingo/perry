@@ -32,7 +32,7 @@ public class SearchService {
   private static final String CREATE_URL_TEMPLATE =
       "{"
           + DORA_URL
-          + "}/{"
+          + "}/dora/{"
           + ES_USER_INDEX
           + "}/{"
           + ES_USER_TYPE
@@ -45,7 +45,7 @@ public class SearchService {
   private static final String UPDATE_URL_TEMPLATE =
       "{"
           + DORA_URL
-          + "}/{"
+          + "}/dora/{"
           + ES_USER_INDEX
           + "}/{"
           + ES_USER_TYPE
@@ -73,19 +73,18 @@ public class SearchService {
       throw new IllegalArgumentException("User operation type is null");
     }
 
-    HttpEntity<User> requestUpdate = new HttpEntity<>(user);
+    HttpEntity<User> requestEntity = new HttpEntity<>(user);
     String urlTemplate = getUrlTemplate(operation);
-    String id = user.getId();
 
     Map<String, String> params = new HashMap<>();
     params.put(DORA_URL, searchProperties.getDoraUrl());
     params.put(ES_USER_INDEX, searchProperties.getIndex());
     params.put(ES_USER_TYPE, searchProperties.getType());
-    params.put(ID, id);
+    params.put(ID, user.getId());
     params.put(SSO_TOKEN, getSsoToken());
 
     ResponseEntity<String> response =
-        restTemplate.exchange(urlTemplate, HttpMethod.PUT, requestUpdate, String.class, params);
+        restTemplate.exchange(urlTemplate, HttpMethod.PUT, requestEntity, String.class, params);
     LOGGER.info(
         "User, username:{} was successfully {}d in Elastic Search index, Dora response string is:{}",
         user.getId(),
