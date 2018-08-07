@@ -115,6 +115,6 @@ logging:
         security: ${LOG_LEVEL:DEBUG}
       hibernate: ${LOG_LEVEL:DEBUG}
 search:
-  doraUrl: ${DORA_URL:}
+  doraUrl: ${DORA_URL:https://dora.preint.cwds.io}
   index: ${ES_USER_INDEX:users}
   type: ${ES_USER_TYPE:user}
