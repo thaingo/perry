@@ -147,8 +147,7 @@ public class CognitoServiceFacade {
   }
 
   public UserType getCognitoUserById(String id) {
-    AdminGetUserRequest request =
-        new AdminGetUserRequest().withUsername(id).withUserPoolId(properties.getUserpool());
+    AdminGetUserRequest request = createAdminGetUserRequest(id);
     AdminGetUserResult agur;
 
     agur = executeInCognito(identityProvider::adminGetUser, request, id);
@@ -160,6 +159,10 @@ public class CognitoServiceFacade {
         .withUserCreateDate(agur.getUserCreateDate())
         .withUserLastModifiedDate(agur.getUserLastModifiedDate())
         .withUserStatus(agur.getUserStatus());
+  }
+
+  public AdminGetUserRequest createAdminGetUserRequest(String id) {
+    return new AdminGetUserRequest().withUsername(id).withUserPoolId(properties.getUserpool());
   }
 
   /**

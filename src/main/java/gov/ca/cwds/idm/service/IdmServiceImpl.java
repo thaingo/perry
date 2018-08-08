@@ -102,8 +102,7 @@ public class IdmServiceImpl implements IdmService {
   @Override
   public String createUser(User user) {
     String id = cognitoServiceFacade.createUser(user);
-    user.setId(id);
-    createUserInSearch(user);
+    createUserInSearch(id);
     return id;
   }
 
@@ -187,10 +186,10 @@ public class IdmServiceImpl implements IdmService {
     }
   }
 
-  private void createUserInSearch(User user) {
-    String id = user.getId();
+  private void createUserInSearch(String id) {
     try {
-      searchService.createUser(user);
+      User createdUser = findUser(id);
+      searchService.createUser(createdUser);
     } catch (Exception e) {
       String msg = messages.get(UNABLE_CREATE_IDM_USER_IN_ES, id);
       LOGGER.error(msg, e);

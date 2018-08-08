@@ -19,7 +19,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.refEq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -55,8 +54,8 @@ import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.persistence.UserLogRepository;
 import gov.ca.cwds.idm.persistence.model.OperationType;
 import gov.ca.cwds.idm.persistence.model.UserLog;
-import gov.ca.cwds.idm.service.SearchService;
 import gov.ca.cwds.idm.service.IdmServiceImpl;
+import gov.ca.cwds.idm.service.SearchService;
 import gov.ca.cwds.idm.service.cognito.CognitoProperties;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.service.messages.MessagesService;
@@ -112,6 +111,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   private static final String NEW_USER_SUCCESS_ID = "17067e4e-270f-4623-b86c-b4d4fa527a34";
   private static final String ABSENT_USER_ID = "absentUserId";
   private static final String ERROR_USER_ID = "errorUserId";
+  private static final String NEW_USER_ES_FAIL_ID = "08e14c57-6e5e-48dd-8172-e8949c2a7f76";
   private static final String ES_ERROR_CREATE_USER_EMAIL = "es.error@create.com";
 
   private static final String USERPOOL = "userpool";
@@ -143,8 +143,6 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   private MockMvc mockMvc;
 
   private AWSCognitoIdentityProvider cognito;
-  
-
 
   @BeforeClass
   public static void beforeClass() throws Exception {
@@ -351,6 +349,9 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
     setCreateUserResult(request, NEW_USER_SUCCESS_ID);
 
+    AdminGetUserRequest getUserRequest =
+        cognitoServiceFacade.createAdminGetUserRequest(NEW_USER_SUCCESS_ID);
+
     mockMvc
         .perform(
             MockMvcRequestBuilders.post("/idm/users")
@@ -360,6 +361,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         .andExpect(header().string("location", "http://localhost/idm/users/" + NEW_USER_SUCCESS_ID))
         .andReturn();
 
+    verify(cognito, times(1)).adminGetUser(getUserRequest);
     verify(cognito, times(1)).adminCreateUser(request);
     verify(searchService, times(1)).createUser(any(User.class));
   }
@@ -373,15 +375,14 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     User user = user();
     user.setEmail(ES_ERROR_CREATE_USER_EMAIL);
 
-    User expectedNewUser = user();
-    expectedNewUser.setEmail(ES_ERROR_CREATE_USER_EMAIL);
-    expectedNewUser.setId(NEW_USER_SUCCESS_ID);
-
     doThrow(new RestClientException("Elastic Search error"))
-        .when(searchService).createUser(refEq(expectedNewUser));
+        .when(searchService).createUser(any(User.class));
 
     AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
-    setCreateUserResult(request, NEW_USER_SUCCESS_ID);
+    setCreateUserResult(request, NEW_USER_ES_FAIL_ID);
+
+    AdminGetUserRequest getUserRequest =
+        cognitoServiceFacade.createAdminGetUserRequest(NEW_USER_ES_FAIL_ID);
 
     mockMvc
         .perform(
@@ -389,19 +390,20 @@ public class IdmResourceTest extends BaseLiquibaseTest {
                 .contentType(CONTENT_TYPE)
                 .content(asJsonString(user)))
         .andExpect(MockMvcResultMatchers.status().isCreated())
-        .andExpect(header().string("location", "http://localhost/idm/users/" + NEW_USER_SUCCESS_ID))
+        .andExpect(header().string("location", "http://localhost/idm/users/" + NEW_USER_ES_FAIL_ID))
         .andReturn();
 
+    verify(cognito, times(1)).adminGetUser(getUserRequest);
     verify(cognito, times(1)).adminCreateUser(request);
     verify(searchService, times(1)).createUser(any(User.class));
 
     Iterable<UserLog> userLogs = userLogRepository.findAll();
     int newUserLogsSize = Iterables.size(userLogs);
-    assertTrue(newUserLogsSize == oldUserLogsSize + 1);
+    assertThat(newUserLogsSize, is(oldUserLogsSize + 1));
 
     UserLog lastUserLog = Iterables.getLast(userLogs);
     assertTrue(lastUserLog.getOperationType() == OperationType.CREATE);
-    assertThat(lastUserLog.getUsername(), is(NEW_USER_SUCCESS_ID));
+    assertThat(lastUserLog.getUsername(), is(NEW_USER_ES_FAIL_ID));
   }
 
   @Test
@@ -913,6 +915,36 @@ public class IdmResourceTest extends BaseLiquibaseTest {
               "test",
               null,
               "SMITHBO");
+
+      TestUser newSuccessUser =
+          testUser(
+              NEW_USER_SUCCESS_ID,
+              Boolean.TRUE,
+              "FORCE_CHANGE_PASSWORD",
+              date(2018, 5, 4),
+              date(2018, 5, 30),
+              "gonzales@gmail.com",
+              "Garcia",
+              "Gonzales",
+              WithMockCustomUser.COUNTY,
+              null,
+              null,
+              null);
+
+      TestUser doraFailUser =
+          testUser(
+              NEW_USER_ES_FAIL_ID,
+              Boolean.TRUE,
+              "FORCE_CHANGE_PASSWORD",
+              date(2018, 5, 4),
+              date(2018, 5, 30),
+              ES_ERROR_CREATE_USER_EMAIL,
+              "Garcia",
+              "Gonzales",
+              WithMockCustomUser.COUNTY,
+              null,
+              null,
+              null);
 
       setUpGetAbsentUserRequestAndResult();
 
