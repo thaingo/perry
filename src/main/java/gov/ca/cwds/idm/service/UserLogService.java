@@ -6,12 +6,16 @@ import static gov.ca.cwds.service.messages.MessageCode.UNABLE_LOG_IDM_USER;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_LOG_IDM_USER_CREATE;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_LOG_IDM_USER_UPDATE;
 
+import gov.ca.cwds.idm.dto.UserIdAndOperation;
 import gov.ca.cwds.idm.persistence.UserLogRepository;
 import gov.ca.cwds.idm.persistence.model.OperationType;
 import gov.ca.cwds.idm.persistence.model.UserLog;
 import gov.ca.cwds.service.messages.MessagesService;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +40,25 @@ public class UserLogService {
   @Transactional(value = "tokenTransactionManager")
   public Optional<UserLog> logUpdate(String username) {
     return log(username, UPDATE);
+  }
+
+  public Set<UserIdAndOperation> getUserIdAndOperation(Date lastJobTime) {
+    if(lastJobTime == null) {
+      throw new IllegalArgumentException("Last Job Time cannot be null");
+    }
+    Set<UserIdAndOperation> idAndOperationSet = new HashSet<>();
+
+    List<Object[]> iDAndOperationPairs = userLogRepository.getUserIdAndOperationTypes(lastJobTime);
+
+    for(Object[] iDAndOperationPair :  iDAndOperationPairs) {
+      String id = (String)iDAndOperationPair[0];
+      OperationType operationType  = (OperationType)iDAndOperationPair[1];
+
+
+      idAndOperationSet.add(new UserIdAndOperation(id, operationType));
+    }
+
+    return idAndOperationSet;
   }
 
   private Optional<UserLog> log(String username, OperationType operationType) {
