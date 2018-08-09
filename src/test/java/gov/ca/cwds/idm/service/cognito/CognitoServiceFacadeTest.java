@@ -25,27 +25,20 @@ import static org.mockito.Mockito.when;
 
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
 import com.amazonaws.services.cognitoidp.model.AdminCreateUserRequest;
-import com.amazonaws.services.cognitoidp.model.AdminDisableUserRequest;
-import com.amazonaws.services.cognitoidp.model.AdminEnableUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserResult;
-import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesRequest;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.ListUsersRequest;
 import com.amazonaws.services.cognitoidp.model.ListUsersResult;
-import com.amazonaws.services.cognitoidp.model.UpdateUserAttributesRequest;
 import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.dto.UserUpdate;
-import gov.ca.cwds.idm.service.UserLogService;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.rest.api.domain.UserNotFoundPerryException;
 import gov.ca.cwds.service.messages.MessagesService;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -140,10 +133,12 @@ public class CognitoServiceFacadeTest {
   @Test
   public void testCreateAdminCreateUserRequest() {
     User user = user();
+    user.setEmail("GONZALES@Gmail.com");
 
     AdminCreateUserRequest request = facade.createAdminCreateUserRequest(user);
 
     assertThat(request.getUsername(), is("gonzales@gmail.com"));
+
     assertThat(request.getUserPoolId(), is("userpool"));
     assertThat(request.getDesiredDeliveryMediums(), is(Arrays.asList("EMAIL")));
 

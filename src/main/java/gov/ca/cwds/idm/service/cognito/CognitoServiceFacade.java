@@ -9,6 +9,7 @@ import static gov.ca.cwds.service.messages.MessageCode.IDM_USER_VALIDATION_FAILE
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_CREATE_NEW_IDM_USER;
 import static gov.ca.cwds.service.messages.MessageCode.USER_NOT_FOUND_BY_ID_IN_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
+import static gov.ca.cwds.util.Utils.toLowerCase;
 
 import com.amazonaws.AmazonWebServiceRequest;
 import com.amazonaws.AmazonWebServiceResult;
@@ -105,6 +106,9 @@ public class CognitoServiceFacade {
   }
 
    public AdminCreateUserRequest createAdminCreateUserRequest(User user) {
+
+    user.setEmail(toLowerCase(user.getEmail()));
+
     return
         new AdminCreateUserRequest()
             .withUsername(user.getEmail())

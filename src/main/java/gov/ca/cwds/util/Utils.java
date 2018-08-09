@@ -41,4 +41,12 @@ public class Utils {
       return null;
     }
   }
+
+  public static String toLowerCase(String str) {
+    if(str != null) {
+      return str.toLowerCase(DEFAULT_LOCALE);
+    } else {
+      return null;
+    }
+  }
 }
