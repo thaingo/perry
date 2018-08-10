@@ -6,16 +6,15 @@ import static gov.ca.cwds.service.messages.MessageCode.UNABLE_LOG_IDM_USER;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_LOG_IDM_USER_CREATE;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_LOG_IDM_USER_UPDATE;
 
-import gov.ca.cwds.idm.dto.UserIdAndOperation;
 import gov.ca.cwds.idm.persistence.UserLogRepository;
 import gov.ca.cwds.idm.persistence.model.OperationType;
 import gov.ca.cwds.idm.persistence.model.UserLog;
 import gov.ca.cwds.service.messages.MessagesService;
 import java.util.Date;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,23 +41,30 @@ public class UserLogService {
     return log(username, UPDATE);
   }
 
-  public Set<UserIdAndOperation> getUserIdAndOperation(Date lastJobTime) {
+  @Transactional(value = "tokenTransactionManager", readOnly = true)
+  public Map<String, OperationType> getUserIdAndOperations(Date lastJobTime) {
     if(lastJobTime == null) {
       throw new IllegalArgumentException("Last Job Time cannot be null");
     }
-    Set<UserIdAndOperation> idAndOperationSet = new HashSet<>();
 
     List<Object[]> iDAndOperationPairs = userLogRepository.getUserIdAndOperationTypes(lastJobTime);
 
-    for(Object[] iDAndOperationPair :  iDAndOperationPairs) {
-      String id = (String)iDAndOperationPair[0];
-      OperationType operationType  = (OperationType)iDAndOperationPair[1];
+    return getIdAndOperationMap(iDAndOperationPairs);
+  }
 
+  static Map<String, OperationType> getIdAndOperationMap(List<Object[]> idAndOperationPairs) {
+    Map<String, OperationType> idAndOperationMap = new HashMap<>();
 
-      idAndOperationSet.add(new UserIdAndOperation(id, operationType));
+    for(Object[] idAndOperationPair :  idAndOperationPairs) {
+      String userId = (String)idAndOperationPair[0];
+      OperationType operation  = (OperationType)idAndOperationPair[1];
+      OperationType existedOperation = idAndOperationMap.get(userId);
+
+      if (existedOperation == null || (existedOperation == UPDATE && operation == CREATE)) {
+        idAndOperationMap.put(userId, operation);
+      }
     }
-
-    return idAndOperationSet;
+    return idAndOperationMap;
   }
 
   private Optional<UserLog> log(String username, OperationType operationType) {
