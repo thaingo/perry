@@ -11,7 +11,6 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 
-@SuppressWarnings({"squid:L55"})
 public class Utils {
 
   private Utils(){}
@@ -53,6 +52,7 @@ public class Utils {
     }
   }
 
+  @SuppressWarnings({"L55, squid:S1319"})//need HashSet in tests
   public static HashSet<String> toSet(String... values) {
     return new HashSet<>(Arrays.asList(values));
   }
