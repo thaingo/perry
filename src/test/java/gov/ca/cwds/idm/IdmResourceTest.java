@@ -15,6 +15,7 @@ import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUti
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByAttribute;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertStrict;
+import static gov.ca.cwds.util.Utils.toSet;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -506,7 +507,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setEnabled(Boolean.FALSE);
-    userUpdate.setPermissions(new HashSet<>(Arrays.asList("RFA-rollout", "Hotline-rollout")));
+    userUpdate.setPermissions(toSet("RFA-rollout", "Hotline-rollout"));
 
     AdminUpdateUserAttributesRequest updateAttributesRequest =
         setUpdateUserAttributesRequestAndResult(
@@ -542,7 +543,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setEnabled(Boolean.FALSE);
-    userUpdate.setPermissions(new HashSet<>(Arrays.asList("RFA-rollout", "Hotline-rollout")));
+    userUpdate.setPermissions(toSet("RFA-rollout", "Hotline-rollout"));
 
     AdminUpdateUserAttributesRequest updateAttributesRequest =
         setUpdateUserAttributesRequestAndResult(
@@ -585,7 +586,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setEnabled(Boolean.TRUE);
-    userUpdate.setPermissions(new HashSet<>(Arrays.asList("RFA-rollout", "Snapshot-rollout")));
+    userUpdate.setPermissions(toSet("RFA-rollout", "Snapshot-rollout"));
 
     AdminUpdateUserAttributesRequest updateAttributesRequest =
         setUpdateUserAttributesRequestAndResult(
@@ -636,7 +637,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setEnabled(Boolean.FALSE);
-    userUpdate.setPermissions(new HashSet<>(Arrays.asList("RFA-rollout", "Hotline-rollout")));
+    userUpdate.setPermissions(toSet("RFA-rollout", "Hotline-rollout"));
 
     mockMvc
         .perform(
@@ -653,7 +654,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setEnabled(Boolean.FALSE);
-    userUpdate.setPermissions(new HashSet<>(Arrays.asList("RFA-rollout", "Hotline-rollout")));
+    userUpdate.setPermissions(toSet("RFA-rollout", "Hotline-rollout"));
 
     mockMvc
         .perform(

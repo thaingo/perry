@@ -11,6 +11,7 @@ import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.FIRST_NAME;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.LAST_NAME;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.PHONE_NUMBER;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
+import static gov.ca.cwds.util.Utils.toSet;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
@@ -243,8 +244,8 @@ public class CognitoServiceFacadeTest {
     user.setRacfid("RUBBLBA ");
     user.setOffice("River Office");
     user.setPhoneNumber("+19161111111");
-    user.setPermissions(set("RFA-rollout", "Hotline-rollout"));
-    user.setRoles(set("CWS-admin", "CWS-worker"));
+    user.setPermissions(toSet("RFA-rollout", "Hotline-rollout"));
+    user.setRoles(toSet("CWS-admin", "CWS-worker"));
     return user;
   }
 
@@ -261,9 +262,5 @@ public class CognitoServiceFacadeTest {
   private static void assertAttr(Map<String, String> attrMap, UserAttribute attr, String value) {
     assertTrue(attrMap.containsKey(attr.getName()));
     assertThat(attrMap.get(attr.getName()), is(value));
-  }
-
-  private static Set<String> set(String... strs) {
-    return new HashSet<>(Arrays.asList(strs));
   }
 }
