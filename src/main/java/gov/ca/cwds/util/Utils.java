@@ -11,6 +11,7 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 
+@SuppressWarnings({"squid:L55"})
 public class Utils {
 
   private Utils(){}
