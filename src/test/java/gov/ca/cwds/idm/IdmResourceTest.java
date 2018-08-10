@@ -695,6 +695,20 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
   @Test
   @WithMockCustomUser
+  public void testVerifyUsersWithEmailInMixedCase() throws Exception {
+    MvcResult result =
+        mockMvc
+            .perform(
+                MockMvcRequestBuilders.get("/idm/users/verify?email=Test@Test.com&racfid=SMITHBO"))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers.content().contentType(CONTENT_TYPE))
+            .andReturn();
+
+    assertNonStrict(result, "fixtures/idm/verify-user/verify-valid.json");
+  }
+
+  @Test
+  @WithMockCustomUser
   public void testVerifyUsersNoRacfId() throws Exception {
     MvcResult result =
         mockMvc
