@@ -1,5 +1,6 @@
 package gov.ca.cwds.idm.service;
 
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByEmail;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getRACFId;
@@ -10,6 +11,7 @@ import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID_IN_CW
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_CREATE_IDM_USER_IN_ES;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_IDM_USER_IN_ES;
 import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
+import static gov.ca.cwds.util.Utils.toLowerCase;
 import static gov.ca.cwds.util.Utils.toUpperCase;
 import static java.util.stream.Collectors.toSet;
 
@@ -45,6 +47,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.script.ScriptException;
 import org.apache.commons.collections.CollectionUtils;
@@ -116,11 +119,7 @@ public class IdmServiceImpl implements IdmService {
   @Override
   public List<User> searchUsers(UsersSearchCriteria criteria) {
     StandardUserAttribute searchAttr = criteria.getSearchAttr();
-    Set<String> values = criteria.getValues();
-
-    if(searchAttr == RACFID_STANDARD) {
-      values = values.stream().map(Utils::toUpperCase).collect(toSet());
-    }
+    Set<String> values = transformSearchValues(criteria.getValues(), searchAttr);
 
     List<UserType> cognitoUsers = new ArrayList<>();
 
@@ -130,6 +129,42 @@ public class IdmServiceImpl implements IdmService {
       cognitoUsers.addAll(cognitoServiceFacade.searchAllPages(cognitoSearchCriteria));
     }
     return enrichCognitoUsersByCws(cognitoUsers);
+  }
+
+  @Override
+  public UserVerificationResult verifyUser(String racfId, String email) {
+    email = toLowerCase(email);
+
+    CwsUserInfo cwsUser = getCwsUserByRacfId(racfId);
+    if (cwsUser == null) {
+      return composeNegativeResultWithMessage(NO_USER_WITH_RACFID_IN_CWSCMS, racfId);
+    }
+    Collection<UserType> cognitoUsers =
+        cognitoServiceFacade.searchPage(composeToGetFirstPageByEmail(email)).getUsers();
+
+    if (!CollectionUtils.isEmpty(cognitoUsers)) {
+      return composeNegativeResultWithMessage(USER_WITH_EMAIL_EXISTS_IN_IDM, email);
+    }
+    User user = composeUser(cwsUser, email);
+    if (!Objects.equals(CurrentAuthenticatedUserUtil.getCurrentUserCountyName(), user.getCountyName())) {
+      return composeNegativeResultWithMessage(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY);
+    }
+    return UserVerificationResult.Builder.anUserVerificationResult()
+        .withUser(user)
+        .withVerificationPassed().build();
+  }
+
+  static Set<String> transformSearchValues(Set<String> values, StandardUserAttribute searchAttr) {
+    if(searchAttr == RACFID_STANDARD) {
+      values = applyFunctionToValues(values, Utils::toUpperCase);
+    } else if (searchAttr == EMAIL) {
+      values = applyFunctionToValues(values, Utils::toLowerCase);
+    }
+    return values;
+  }
+
+  private static Set<String> applyFunctionToValues(Set<String> values, Function<String, String> function) {
+    return values.stream().map(function).collect(toSet());
   }
 
   private List<User> enrichCognitoUsersByCws(Collection<UserType> cognitoUsers) {
@@ -152,27 +187,6 @@ public class IdmServiceImpl implements IdmService {
           LOGGER.error(messages.get(IDM_MAPPING_SCRIPT_ERROR));
           throw new PerryException(ex.getMessage(), ex);
         }}).collect(Collectors.toList());
-  }
-
-  @Override
-  public UserVerificationResult verifyUser(String racfId, String email) {
-    CwsUserInfo cwsUser = getCwsUserByRacfId(racfId);
-    if (cwsUser == null) {
-      return composeNegativeResultWithMessage(NO_USER_WITH_RACFID_IN_CWSCMS, racfId);
-    }
-    Collection<UserType> cognitoUsers =
-        cognitoServiceFacade.searchPage(composeToGetFirstPageByEmail(email)).getUsers();
-
-    if (!CollectionUtils.isEmpty(cognitoUsers)) {
-      return composeNegativeResultWithMessage(USER_WITH_EMAIL_EXISTS_IN_IDM, email);
-    }
-    User user = composeUser(cwsUser, email);
-    if (!Objects.equals(CurrentAuthenticatedUserUtil.getCurrentUserCountyName(), user.getCountyName())) {
-      return composeNegativeResultWithMessage(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY);
-    }
-    return UserVerificationResult.Builder.anUserVerificationResult()
-        .withUser(user)
-        .withVerificationPassed().build();
   }
 
   private void updateUserInSearch(String id) {

@@ -11,6 +11,7 @@ import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.FIRST_NAME;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.LAST_NAME;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.PHONE_NUMBER;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
+import static gov.ca.cwds.util.Utils.toSet;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
@@ -25,27 +26,20 @@ import static org.mockito.Mockito.when;
 
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
 import com.amazonaws.services.cognitoidp.model.AdminCreateUserRequest;
-import com.amazonaws.services.cognitoidp.model.AdminDisableUserRequest;
-import com.amazonaws.services.cognitoidp.model.AdminEnableUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserResult;
-import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesRequest;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.ListUsersRequest;
 import com.amazonaws.services.cognitoidp.model.ListUsersResult;
-import com.amazonaws.services.cognitoidp.model.UpdateUserAttributesRequest;
 import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.dto.UserUpdate;
-import gov.ca.cwds.idm.service.UserLogService;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.rest.api.domain.UserNotFoundPerryException;
 import gov.ca.cwds.service.messages.MessagesService;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -140,10 +134,12 @@ public class CognitoServiceFacadeTest {
   @Test
   public void testCreateAdminCreateUserRequest() {
     User user = user();
+    user.setEmail("GONZALES@Gmail.com");
 
     AdminCreateUserRequest request = facade.createAdminCreateUserRequest(user);
 
     assertThat(request.getUsername(), is("gonzales@gmail.com"));
+
     assertThat(request.getUserPoolId(), is("userpool"));
     assertThat(request.getDesiredDeliveryMediums(), is(Arrays.asList("EMAIL")));
 
@@ -248,8 +244,8 @@ public class CognitoServiceFacadeTest {
     user.setRacfid("RUBBLBA ");
     user.setOffice("River Office");
     user.setPhoneNumber("+19161111111");
-    user.setPermissions(set("RFA-rollout", "Hotline-rollout"));
-    user.setRoles(set("CWS-admin", "CWS-worker"));
+    user.setPermissions(toSet("RFA-rollout", "Hotline-rollout"));
+    user.setRoles(toSet("CWS-admin", "CWS-worker"));
     return user;
   }
 
@@ -266,9 +262,5 @@ public class CognitoServiceFacadeTest {
   private static void assertAttr(Map<String, String> attrMap, UserAttribute attr, String value) {
     assertTrue(attrMap.containsKey(attr.getName()));
     assertThat(attrMap.get(attr.getName()), is(value));
-  }
-
-  private static Set<String> set(String... strs) {
-    return new HashSet<>(Arrays.asList(strs));
   }
 }

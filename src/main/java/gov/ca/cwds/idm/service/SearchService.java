@@ -1,6 +1,7 @@
 package gov.ca.cwds.idm.service;
 
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getSsoToken;
+import static gov.ca.cwds.util.Utils.toLowerCase;
 
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.persistence.model.OperationType;
@@ -90,11 +91,14 @@ public class SearchService {
 
     ResponseEntity<String> response =
         restTemplate.exchange(urlTemplate, HttpMethod.PUT, requestEntity, String.class, params);
-    LOGGER.info(
-        "User, username:{} was successfully {}d in Elastic Search index, Dora response string is:{}",
-        user.getId(),
-        operation.toString().toLowerCase(),
-        response.getBody());
+
+    if (LOGGER.isInfoEnabled()){
+      LOGGER.info(
+          "User, username:{} was successfully {}d in Elastic Search index, Dora response string is:{}",
+          user.getId(),
+          toLowerCase(operation.toString()),
+          response.getBody());
+    }
     return response;
   }
 
