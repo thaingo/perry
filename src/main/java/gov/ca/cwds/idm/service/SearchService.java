@@ -91,11 +91,14 @@ public class SearchService {
 
     ResponseEntity<String> response =
         restTemplate.exchange(urlTemplate, HttpMethod.PUT, requestEntity, String.class, params);
-    LOGGER.info(
-        "User, username:{} was successfully {}d in Elastic Search index, Dora response string is:{}",
-        user.getId(),
-        toLowerCase(operation.toString()),
-        response.getBody());
+
+    if (LOGGER.isInfoEnabled()){
+      LOGGER.info(
+          "User, username:{} was successfully {}d in Elastic Search index, Dora response string is:{}",
+          user.getId(),
+          toLowerCase(operation.toString()),
+          response.getBody());
+    }
     return response;
   }
 
