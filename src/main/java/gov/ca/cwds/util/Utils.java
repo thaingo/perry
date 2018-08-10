@@ -52,7 +52,7 @@ public class Utils {
     }
   }
 
-  @SuppressWarnings({"L55, squid:S1319"})//need HashSet in tests
+  @SuppressWarnings({"squid:S1319"})//need HashSet in tests
   public static HashSet<String> toSet(String... values) {
     return new HashSet<>(Arrays.asList(values));
   }
