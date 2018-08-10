@@ -1,6 +1,7 @@
 package gov.ca.cwds.idm.service.cognito.util;
 
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
+import static gov.ca.cwds.util.Utils.toLowerCase;
 
 import gov.ca.cwds.idm.service.cognito.StandardUserAttribute;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
@@ -28,6 +29,6 @@ public class CognitoUsersSearchCriteriaUtil {
   }
 
   public static CognitoUsersSearchCriteria composeToGetFirstPageByEmail(String email) {
-    return composeToGetFirstPageByAttribute(EMAIL, email);
+    return composeToGetFirstPageByAttribute(EMAIL, toLowerCase(email));
   }
 }

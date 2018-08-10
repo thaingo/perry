@@ -4,6 +4,7 @@ import gov.ca.cwds.idm.service.cognito.StandardUserAttribute;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import org.junit.Test;
 
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.*;
 import static org.hamcrest.CoreMatchers.is;
@@ -18,6 +19,16 @@ public class CognitoUsersSearchCriteriaUtilTest {
         composeToGetFirstPageByAttribute(StandardUserAttribute.RACFID_STANDARD, "ABC");
     assertThat(criteria.getSearchAttrName(), is(RACFID_STANDARD.getName()));
     assertThat(criteria.getSearchAttrValue(), is("ABC"));
+    assertThat(criteria.getPageSize(), is(DEFAULT_PAGESIZE));
+    assertThat(criteria.getPaginationToken(), is(nullValue()));
+  }
+
+  @Test
+  public void testComposeToGetFirstPageByEmail() {
+    CognitoUsersSearchCriteria criteria =
+        composeToGetFirstPageByEmail("SOME@Email.com");
+    assertThat(criteria.getSearchAttrName(), is(EMAIL.getName()));
+    assertThat(criteria.getSearchAttrValue(), is("some@email.com"));
     assertThat(criteria.getPageSize(), is(DEFAULT_PAGESIZE));
     assertThat(criteria.getPaginationToken(), is(nullValue()));
   }

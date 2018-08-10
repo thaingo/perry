@@ -11,7 +11,6 @@ import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID_IN_CW
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_CREATE_IDM_USER_IN_ES;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_IDM_USER_IN_ES;
 import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
-import static gov.ca.cwds.util.Utils.toLowerCase;
 import static gov.ca.cwds.util.Utils.toUpperCase;
 import static java.util.stream.Collectors.toSet;
 
@@ -161,7 +160,7 @@ public class IdmServiceImpl implements IdmService {
     return values;
   }
 
-  static private Set<String> applyFunctionToValues(Set<String> values, Function<String, String> function) {
+  private static Set<String> applyFunctionToValues(Set<String> values, Function<String, String> function) {
     return values.stream().map(function::apply).collect(toSet());
   }
 
