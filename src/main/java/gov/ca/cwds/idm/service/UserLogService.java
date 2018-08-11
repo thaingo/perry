@@ -6,6 +6,7 @@ import static gov.ca.cwds.service.messages.MessageCode.UNABLE_LOG_IDM_USER;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_LOG_IDM_USER_CREATE;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_LOG_IDM_USER_UPDATE;
 
+import gov.ca.cwds.idm.dto.UserIdAndOperation;
 import gov.ca.cwds.idm.persistence.UserLogRepository;
 import gov.ca.cwds.idm.persistence.model.OperationType;
 import gov.ca.cwds.idm.persistence.model.UserLog;
@@ -15,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +31,7 @@ public class UserLogService {
   private static final Logger LOGGER = LoggerFactory.getLogger(UserLogService.class);
 
   private UserLogRepository userLogRepository;
-  private  MessagesService messages;
+  private MessagesService messages;
 
   @Transactional(value = "tokenTransactionManager")
   public Optional<UserLog> logCreate(String username) {
@@ -42,29 +44,32 @@ public class UserLogService {
   }
 
   @Transactional(value = "tokenTransactionManager", readOnly = true)
-  public Map<String, OperationType> getUserIdAndOperations(Date lastJobTime) {
-    if(lastJobTime == null) {
+  public List<UserIdAndOperation> getUserIdAndOperations(Date lastJobTime) {
+    if (lastJobTime == null) {
       throw new IllegalArgumentException("Last Job Time cannot be null");
     }
 
     List<Object[]> iDAndOperationPairs = userLogRepository.getUserIdAndOperationTypes(lastJobTime);
 
-    return getIdAndOperationMap(iDAndOperationPairs);
+    return getIdAndOperationList(iDAndOperationPairs);
   }
 
-  static Map<String, OperationType> getIdAndOperationMap(List<Object[]> idAndOperationPairs) {
+  static List<UserIdAndOperation> getIdAndOperationList(List<Object[]> idAndOperationPairs) {
     Map<String, OperationType> idAndOperationMap = new HashMap<>();
 
-    for(Object[] idAndOperationPair :  idAndOperationPairs) {
-      String userId = (String)idAndOperationPair[0];
-      OperationType operation  = (OperationType)idAndOperationPair[1];
+    for (Object[] idAndOperationPair : idAndOperationPairs) {
+      String userId = (String) idAndOperationPair[0];
+      OperationType operation = (OperationType) idAndOperationPair[1];
       OperationType existedOperation = idAndOperationMap.get(userId);
 
       if (existedOperation == null || (existedOperation == UPDATE && operation == CREATE)) {
         idAndOperationMap.put(userId, operation);
       }
     }
-    return idAndOperationMap;
+    return idAndOperationMap.entrySet()
+        .stream()
+        .map(e -> new UserIdAndOperation(e.getKey(), e.getValue()))
+        .collect(Collectors.toList());
   }
 
   private Optional<UserLog> log(String username, OperationType operationType) {

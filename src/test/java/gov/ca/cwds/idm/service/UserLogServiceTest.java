@@ -2,20 +2,21 @@ package gov.ca.cwds.idm.service;
 
 import static gov.ca.cwds.idm.persistence.model.OperationType.CREATE;
 import static gov.ca.cwds.idm.persistence.model.OperationType.UPDATE;
-import static gov.ca.cwds.idm.service.UserLogService.getIdAndOperationMap;
+import static gov.ca.cwds.idm.service.UserLogService.getIdAndOperationList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
-import gov.ca.cwds.idm.persistence.model.OperationType;
+import gov.ca.cwds.idm.dto.UserIdAndOperation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.junit.Test;
 
 public class UserLogServiceTest {
 
   @Test
-  public void testGetIdAndOperationMap() {
+  public void testGetIdAndOperationList() {
 
     List<Object[]> pairsList = new ArrayList<>();
 
@@ -24,10 +25,15 @@ public class UserLogServiceTest {
     pairsList.add(new Object[]{"b", UPDATE});
     pairsList.add(new Object[]{"c", UPDATE});
 
-    Map<String, OperationType> pairsMap = getIdAndOperationMap(pairsList);
-    assertThat(pairsMap.size(), is(3));
-    assertThat(pairsMap.get("a"), is(CREATE));
-    assertThat(pairsMap.get("b"), is(CREATE));
-    assertThat(pairsMap.get("c"), is(UPDATE));
+    List<UserIdAndOperation> objectList = getIdAndOperationList(pairsList);
+    assertThat(objectList.size(), is(3));
+
+    Map<String, UserIdAndOperation> testMap = objectList.stream().collect(
+        Collectors.toMap(UserIdAndOperation::getId, e -> e));
+
+    assertThat(testMap.size(), is(3));
+    assertThat(testMap.get("a").getOperation(), is(CREATE));
+    assertThat(testMap.get("b").getOperation(), is(CREATE));
+    assertThat(testMap.get("c").getOperation(), is(UPDATE));
   }
 }
