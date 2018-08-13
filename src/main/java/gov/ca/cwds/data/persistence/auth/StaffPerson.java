@@ -5,21 +5,31 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.jackson.JsonSnakeCase;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.apache.commons.lang3.StringUtils;
-import org.hibernate.annotations.Type;
-
+import java.util.Date;
+import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import java.util.Date;
+import org.apache.commons.lang3.StringUtils;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+import org.hibernate.annotations.Type;
 
-/** Created by dmitry.rudenko on 8/21/2017. */
+/**
+ * Created by dmitry.rudenko on 8/21/2017.
+ */
 @Entity
 @Table(name = "STFPERST")
 @ApiModel
 @JsonSnakeCase
 public class StaffPerson {
+
   @Id
   @Column(name = "IDENTIFIER")
   @ApiModelProperty(example = "q12")
@@ -53,6 +63,34 @@ public class StaffPerson {
   @Type(type = "date")
   private Date startDate;
 
+  @ManyToOne
+  @JoinColumn(name = "FKCWS_OFFT", insertable = false, updatable = false)
+  @Fetch(FetchMode.JOIN)
+  @LazyCollection(LazyCollectionOption.FALSE)
+  private CwsOffice office;
+
+  @OneToMany
+  @JoinColumn(name = "FKSTFPERST")
+  @Fetch(FetchMode.JOIN)
+  @LazyCollection(LazyCollectionOption.FALSE)
+  private Set<StaffUnitAuthority> unitAuthorities;
+
+  public CwsOffice getOffice() {
+    return office;
+  }
+
+  public void setOffice(CwsOffice office) {
+    this.office = office;
+  }
+
+  public Set<StaffUnitAuthority> getUnitAuthorities() {
+    return unitAuthorities;
+  }
+
+  public void setUnitAuthorities(
+      Set<StaffUnitAuthority> unitAuthorities) {
+    this.unitAuthorities = unitAuthorities;
+  }
 
   public String getId() {
     return id;

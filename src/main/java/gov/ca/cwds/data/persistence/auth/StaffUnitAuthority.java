@@ -1,14 +1,15 @@
 package gov.ca.cwds.data.persistence.auth;
 
 import gov.ca.cwds.data.persistence.cms.CmsPersistentObject;
-import org.apache.commons.lang3.StringUtils;
-import org.hibernate.annotations.Type;
-
+import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import java.util.Date;
+import org.apache.commons.lang3.StringUtils;
+import org.hibernate.annotations.Type;
 
 /**
  * {@link CmsPersistentObject} representing a StaffPersonUnitAuthority.
@@ -48,26 +49,28 @@ public class StaffUnitAuthority extends CmsPersistentObject {
   @Column(name = "THIRD_ID")
   private String thirdId;
 
+  @ManyToOne
+  @JoinColumn(name = "FKASG_UNIT", insertable = false, updatable = false)
+  private AssignmentUnit assignmentUnit;
+
   /**
-   * Default constructor
-   * <p>
-   * Required for Hibernate
+   * Default constructor <p> Required for Hibernate
    */
   public StaffUnitAuthority() {
     super();
   }
 
   /**
-   * @param authorityCode      The authorityCode
+   * @param authorityCode The authorityCode
    * @param countySpecificCode The countySpecificCode
-   * @param endDate            The endDate
-   * @param fkasgUnit          The fkasgUnit
-   * @param staffPersonId      The staffPersonId
-   * @param startDate          The startDate
-   * @param thirdId            The thirdId
+   * @param endDate The endDate
+   * @param fkasgUnit The fkasgUnit
+   * @param staffPersonId The staffPersonId
+   * @param startDate The startDate
+   * @param thirdId The thirdId
    */
   public StaffUnitAuthority(String authorityCode, String countySpecificCode, Date endDate,
-                            String fkasgUnit, String staffPersonId, Date startDate, String thirdId) {
+      String fkasgUnit, String staffPersonId, Date startDate, String thirdId) {
     super();
     this.authorityCode = authorityCode;
     this.countySpecificCode = countySpecificCode;
@@ -76,6 +79,14 @@ public class StaffUnitAuthority extends CmsPersistentObject {
     this.staffPersonId = staffPersonId;
     this.startDate = startDate;
     this.thirdId = thirdId;
+  }
+
+  public AssignmentUnit getAssignmentUnit() {
+    return assignmentUnit;
+  }
+
+  public void setAssignmentUnit(AssignmentUnit assignmentUnit) {
+    this.assignmentUnit = assignmentUnit;
   }
 
   /**
@@ -154,11 +165,11 @@ public class StaffUnitAuthority extends CmsPersistentObject {
     result = prime * result + ((startDate == null) ? 0 : startDate.hashCode());
     result = prime * result + ((thirdId == null) ? 0 : thirdId.hashCode());
     result =
-            prime * result
-                    + ((super.getLastUpdatedId() == null) ? 0 : super.getLastUpdatedId().hashCode());
+        prime * result
+            + ((super.getLastUpdatedId() == null) ? 0 : super.getLastUpdatedId().hashCode());
     result =
-            prime * result
-                    + ((super.getLastUpdatedTime() == null) ? 0 : super.getLastUpdatedTime().hashCode());
+        prime * result
+            + ((super.getLastUpdatedTime() == null) ? 0 : super.getLastUpdatedTime().hashCode());
     return result;
   }
 
