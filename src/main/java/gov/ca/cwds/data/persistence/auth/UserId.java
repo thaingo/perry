@@ -5,6 +5,7 @@ import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.CmsPersistentObject;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -64,7 +65,7 @@ public class UserId extends CmsPersistentObject {
   @JoinColumn(name = "FKUSERID_T")
   @LazyCollection(LazyCollectionOption.FALSE)
   @Fetch(FetchMode.JOIN)
-  private List<StaffAuthorityPrivilege> privileges;
+  private Set<StaffAuthorityPrivilege> privileges;
 
   @ManyToOne
   @JoinColumn(name = "FKSTFPERST", insertable = false, updatable = false)
@@ -110,12 +111,12 @@ public class UserId extends CmsPersistentObject {
     this.staffPerson = staffPerson;
   }
 
-  public List<StaffAuthorityPrivilege> getPrivileges() {
+  public Set<StaffAuthorityPrivilege> getPrivileges() {
     return privileges;
   }
 
   public void setPrivileges(
-      List<StaffAuthorityPrivilege> privileges) {
+      Set<StaffAuthorityPrivilege> privileges) {
     this.privileges = privileges;
   }
 

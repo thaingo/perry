@@ -25,12 +25,15 @@ public interface UserIdDao extends ReadOnlyRepository<UserId, String> {
   List<UserId> findActiveByLogonIdIn(@Param("logonIds") Collection<String> logonIds);
 
   @Query("SELECT u FROM UserId u "
-      + "left outer join fetch u.staffPerson sp "
-      + "left outer join fetch sp.unitAuthorities ua "
-      + "left outer join fetch ua.assignmentUnit "
-      + "left outer join fetch sp.office "
-      + "left outer join fetch u.privileges "
-      + "WHERE u.logonId = :logonId AND u.endDate is null")
+      + "LEFT OUTER JOIN FETCH u.staffPerson sp "
+      + "LEFT OUTER JOIN FETCH sp.unitAuthorities ua "
+      + "LEFT OUTER JOIN FETCH ua.assignmentUnit "
+      + "LEFT OUTER JOIN FETCH sp.office "
+      + "LEFT OUTER JOIN FETCH u.privileges p "
+      + "WHERE u.logonId = :logonId "
+      + "AND u.endDate IS NULL "
+      + "AND p.endDate IS NULL "
+      + "AND ua.endDate IS NULL")
   Set<UserId> findActiveByLogonId2(@Param("logonId") String logonId);
 
 
