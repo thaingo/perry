@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.CmsPersistentObject;
 import java.util.Date;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import javax.persistence.Column;

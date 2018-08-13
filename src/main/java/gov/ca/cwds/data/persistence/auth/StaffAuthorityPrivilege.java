@@ -3,14 +3,13 @@ package gov.ca.cwds.data.persistence.auth;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.CmsPersistentObject;
-import org.apache.commons.lang3.StringUtils;
-import org.hibernate.annotations.Type;
-
+import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.util.Date;
+import org.apache.commons.lang3.StringUtils;
+import org.hibernate.annotations.Type;
 
 /**
  * {@link PersistentObject} representing a StaffPersonPrivilege
@@ -63,9 +62,7 @@ public class StaffAuthorityPrivilege extends CmsPersistentObject {
   private Date startTime;
 
   /**
-   * Default constructor.
-   * <p>
-   * Required for Hibernate
+   * Default constructor. <p> Required for Hibernate
    */
   public StaffAuthorityPrivilege() {
     super();
@@ -74,19 +71,19 @@ public class StaffAuthorityPrivilege extends CmsPersistentObject {
   /**
    * Constructor. Build from fields.
    *
-   * @param countySpecificCode       county code
-   * @param endDate                  end date. null = active
-   * @param endTime                  end time
-   * @param fkuseridT                FK to user id table
-   * @param id                       The id
+   * @param countySpecificCode county code
+   * @param endDate end date. null = active
+   * @param endTime end time
+   * @param fkuseridT FK to user id table
+   * @param id The id
    * @param levelOfAuthPrivilegeCode The levelOfAuthPrivilegeCode
    * @param levelOfAuthPrivilegeType The levelOfAuthPrivilegeType
-   * @param startDate                The startDate
-   * @param startTime                The startTime
+   * @param startDate The startDate
+   * @param startTime The startTime
    */
   public StaffAuthorityPrivilege(String countySpecificCode, Date endDate, Date endTime,
-                                 String fkuseridT, String id, String levelOfAuthPrivilegeCode, Short levelOfAuthPrivilegeType,
-                                 Date startDate, Date startTime) {
+      String fkuseridT, String id, String levelOfAuthPrivilegeCode, Short levelOfAuthPrivilegeType,
+      Date startDate, Date startTime) {
     super();
     this.countySpecificCode = countySpecificCode;
     this.endDate = endDate;
@@ -187,15 +184,15 @@ public class StaffAuthorityPrivilege extends CmsPersistentObject {
     result = prime * result + ((fkuseridT == null) ? 0 : fkuseridT.hashCode());
     result = prime * result + ((id == null) ? 0 : id.hashCode());
     result = prime * result
-            + ((levelOfAuthPrivilegeCode == null) ? 0 : levelOfAuthPrivilegeCode.hashCode());
+        + ((levelOfAuthPrivilegeCode == null) ? 0 : levelOfAuthPrivilegeCode.hashCode());
     result = prime * result
-            + ((levelOfAuthPrivilegeType == null) ? 0 : levelOfAuthPrivilegeType.hashCode());
+        + ((levelOfAuthPrivilegeType == null) ? 0 : levelOfAuthPrivilegeType.hashCode());
     result = prime * result + ((startDate == null) ? 0 : startDate.hashCode());
     result = prime * result + ((startTime == null) ? 0 : startTime.hashCode());
     result = prime * result
-            + ((super.getLastUpdatedId() == null) ? 0 : super.getLastUpdatedId().hashCode());
+        + ((super.getLastUpdatedId() == null) ? 0 : super.getLastUpdatedId().hashCode());
     result = prime * result
-            + ((super.getLastUpdatedTime() == null) ? 0 : super.getLastUpdatedTime().hashCode());
+        + ((super.getLastUpdatedTime() == null) ? 0 : super.getLastUpdatedTime().hashCode());
     return result;
   }
 

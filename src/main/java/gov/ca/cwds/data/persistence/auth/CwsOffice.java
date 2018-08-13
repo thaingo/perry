@@ -6,14 +6,13 @@ import gov.ca.cwds.data.persistence.cms.CmsPersistentObject;
 import io.dropwizard.jackson.JsonSnakeCase;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import org.apache.commons.lang3.StringUtils;
-import org.hibernate.annotations.Type;
-
+import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.io.Serializable;
+import org.apache.commons.lang3.StringUtils;
+import org.hibernate.annotations.Type;
 
 /**
  * {@link CmsPersistentObject} representing a CWS Office.
@@ -125,45 +124,43 @@ public class CwsOffice extends CmsPersistentObject {
   private String directorsNameTitle;
 
   /**
-   * Default constructor
-   * <p>
-   * Required for Hibernate
+   * Default constructor <p> Required for Hibernate
    */
   public CwsOffice() {
     super();
   }
 
   /**
-   * @param officeId                    the primary key
-   * @param faxNumber                   the faxNumber
-   * @param geographicRegionTextCode    geographicRegionTextCode
-   * @param governmentEntityType        governmentEntityType
-   * @param headquarterIndicator        headquarterIndicator
-   * @param inactiveIndicator           inactiveIndicator
-   * @param mailStopDescription         mailStopDescription
-   * @param messagePhoneNumber          messagePhoneNumber
+   * @param officeId the primary key
+   * @param faxNumber the faxNumber
+   * @param geographicRegionTextCode geographicRegionTextCode
+   * @param governmentEntityType governmentEntityType
+   * @param headquarterIndicator headquarterIndicator
+   * @param inactiveIndicator inactiveIndicator
+   * @param mailStopDescription mailStopDescription
+   * @param messagePhoneNumber messagePhoneNumber
    * @param messagePhoneExtensionNumber the messagePhoneExtensionNumber
-   * @param cwsOffNumber                the cwsOffNumber
-   * @param primaryPhoneNumber          the primaryPhoneNumber
+   * @param cwsOffNumber the cwsOffNumber
+   * @param primaryPhoneNumber the primaryPhoneNumber
    * @param primaryPhoneExtensionNumber the primaryPhoneExtensionNumber
-   * @param staffPersonId               the staffPersonId
-   * @param commentDescription          the commentDescription
-   * @param agencyName                  the agencyName
-   * @param departmentDivisionName      the departmentDivisionName
-   * @param cwsOfficeName               the cwsOfficeName
-   * @param countySpecificCode          the countySpecificCode
-   * @param agencyCodeNumber            the agencyCodeNumber
-   * @param locationCountyType          the locationCountyType
-   * @param directorsNameTitle          the directorsNameTitle
+   * @param staffPersonId the staffPersonId
+   * @param commentDescription the commentDescription
+   * @param agencyName the agencyName
+   * @param departmentDivisionName the departmentDivisionName
+   * @param cwsOfficeName the cwsOfficeName
+   * @param countySpecificCode the countySpecificCode
+   * @param agencyCodeNumber the agencyCodeNumber
+   * @param locationCountyType the locationCountyType
+   * @param directorsNameTitle the directorsNameTitle
    */
   public CwsOffice(String officeId, Long faxNumber, String geographicRegionTextCode,
-                   Short governmentEntityType, String headquarterIndicator, String inactiveIndicator,
-                   String mailStopDescription, Long messagePhoneNumber,
-                   Integer messagePhoneExtensionNumber, String cwsOffNumber, Long primaryPhoneNumber,
-                   Integer primaryPhoneExtensionNumber, String staffPersonId, String commentDescription,
-                   String agencyName, String departmentDivisionName, String cwsOfficeName,
-                   String countySpecificCode, Short agencyCodeNumber, Short locationCountyType,
-                   String directorsNameTitle) {
+      Short governmentEntityType, String headquarterIndicator, String inactiveIndicator,
+      String mailStopDescription, Long messagePhoneNumber,
+      Integer messagePhoneExtensionNumber, String cwsOffNumber, Long primaryPhoneNumber,
+      Integer primaryPhoneExtensionNumber, String staffPersonId, String commentDescription,
+      String agencyName, String departmentDivisionName, String cwsOfficeName,
+      String countySpecificCode, Short agencyCodeNumber, Short locationCountyType,
+      String directorsNameTitle) {
     super();
     this.officeId = officeId;
     this.faxNumber = faxNumber;
@@ -343,7 +340,7 @@ public class CwsOffice extends CmsPersistentObject {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see java.lang.Object#hashCode()
    */
   @Override
@@ -357,42 +354,42 @@ public class CwsOffice extends CmsPersistentObject {
     result = prime * result + ((cwsOffNumber == null) ? 0 : cwsOffNumber.hashCode());
     result = prime * result + ((cwsOfficeName == null) ? 0 : cwsOfficeName.hashCode());
     result =
-            prime * result + ((departmentDivisionName == null) ? 0 : departmentDivisionName.hashCode());
+        prime * result + ((departmentDivisionName == null) ? 0 : departmentDivisionName.hashCode());
     result = prime * result + ((directorsNameTitle == null) ? 0 : directorsNameTitle.hashCode());
     result = prime * result + ((faxNumber == null) ? 0 : faxNumber.hashCode());
     result =
-            prime * result
-                    + ((geographicRegionTextCode == null) ? 0 : geographicRegionTextCode.hashCode());
+        prime * result
+            + ((geographicRegionTextCode == null) ? 0 : geographicRegionTextCode.hashCode());
     result =
-            prime * result + ((governmentEntityType == null) ? 0 : governmentEntityType.hashCode());
+        prime * result + ((governmentEntityType == null) ? 0 : governmentEntityType.hashCode());
     result =
-            prime * result + ((headquarterIndicator == null) ? 0 : headquarterIndicator.hashCode());
+        prime * result + ((headquarterIndicator == null) ? 0 : headquarterIndicator.hashCode());
     result = prime * result + ((inactiveIndicator == null) ? 0 : inactiveIndicator.hashCode());
     result = prime * result + ((locationCountyType == null) ? 0 : locationCountyType.hashCode());
     result = prime * result + ((mailStopDescription == null) ? 0 : mailStopDescription.hashCode());
     result =
-            prime * result
-                    + ((messagePhoneExtensionNumber == null) ? 0 : messagePhoneExtensionNumber.hashCode());
+        prime * result
+            + ((messagePhoneExtensionNumber == null) ? 0 : messagePhoneExtensionNumber.hashCode());
     result = prime * result + ((messagePhoneNumber == null) ? 0 : messagePhoneNumber.hashCode());
     result = prime * result + ((officeId == null) ? 0 : officeId.hashCode());
     result =
-            prime * result
-                    + ((primaryPhoneExtensionNumber == null) ? 0 : primaryPhoneExtensionNumber.hashCode());
+        prime * result
+            + ((primaryPhoneExtensionNumber == null) ? 0 : primaryPhoneExtensionNumber.hashCode());
     result = prime * result + ((primaryPhoneNumber == null) ? 0 : primaryPhoneNumber.hashCode());
     result = prime * result + ((staffPersonId == null) ? 0 : staffPersonId.hashCode());
     result =
-            prime * result
-                    + ((super.getLastUpdatedId() == null) ? 0 : super.getLastUpdatedId().hashCode());
+        prime * result
+            + ((super.getLastUpdatedId() == null) ? 0 : super.getLastUpdatedId().hashCode());
     result =
-            prime * result
-                    + ((super.getLastUpdatedTime() == null) ? 0 : super.getLastUpdatedTime().hashCode());
+        prime * result
+            + ((super.getLastUpdatedTime() == null) ? 0 : super.getLastUpdatedTime().hashCode());
 
     return result;
   }
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see java.lang.Object#equals(java.lang.Object)
    */
   @Override
