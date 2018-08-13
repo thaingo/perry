@@ -14,6 +14,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.LazyCollection;
@@ -185,30 +187,42 @@ public class UserId extends CmsPersistentObject {
     if (this == o) {
       return true;
     }
+
     if (!(o instanceof UserId)) {
       return false;
     }
+
     UserId userId = (UserId) o;
-    return Objects.equals(getEndDate(), userId.getEndDate()) &&
-        Objects.equals(getEndTime(), userId.getEndTime()) &&
-        Objects.equals(getFkfpstfprt(), userId.getFkfpstfprt()) &&
-        Objects.equals(getStaffPersonId(), userId.getStaffPersonId()) &&
-        Objects.equals(getId(), userId.getId()) &&
-        Objects.equals(getLogonId(), userId.getLogonId()) &&
-        Objects.equals(getSystemDomainType(), userId.getSystemDomainType()) &&
-        Objects.equals(getPrivileges(), userId.getPrivileges()) &&
-        Objects.equals(getStaffPerson(), userId.getStaffPerson()) &&
-        Objects.equals(getLastUpdatedTime(), userId.getLastUpdatedTime()) &&
-        Objects.equals(getLastUpdatedId(), userId.getLastUpdatedId());
+
+    return new EqualsBuilder()
+        .append(endDate, userId.endDate)
+        .append(endTime, userId.endTime)
+        .append(fkfpstfprt, userId.fkfpstfprt)
+        .append(staffPersonId, userId.staffPersonId)
+        .append(id, userId.id)
+        .append(logonId, userId.logonId)
+        .append(systemDomainType, userId.systemDomainType)
+        .append(privileges, userId.privileges)
+        .append(staffPerson, userId.staffPerson)
+        .append(getLastUpdatedId(), userId.getLastUpdatedId())
+        .append(getLastUpdatedTime(), userId.getLastUpdatedTime())
+        .isEquals();
   }
 
   @Override
   public final int hashCode() {
-
-    return Objects
-        .hash(getEndDate(), getEndTime(), getFkfpstfprt(), getStaffPersonId(), getId(),
-            getLogonId(),
-            getSystemDomainType(), getPrivileges(), getStaffPerson(),
-            getLastUpdatedTime(), getLastUpdatedId());
+    return new HashCodeBuilder(17, 37)
+        .append(endDate)
+        .append(endTime)
+        .append(fkfpstfprt)
+        .append(staffPersonId)
+        .append(id)
+        .append(logonId)
+        .append(systemDomainType)
+        .append(privileges)
+        .append(staffPerson)
+        .append(getLastUpdatedId())
+        .append(getLastUpdatedTime())
+        .toHashCode();
   }
 }

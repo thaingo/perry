@@ -8,6 +8,8 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.Type;
 
 /**
@@ -168,109 +170,47 @@ public class AssignmentUnit extends CmsPersistentObject {
     return startDate;
   }
 
-
-  /*
-   * (non-Javadoc)
-   *
-   * @see java.lang.Object#hashCode()
-   */
   @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result =
-        prime * result
-            + ((assignmentUnitDeskIndicator == null) ? 0 : assignmentUnitDeskIndicator.hashCode());
-    result = prime * result + ((assignmentUnitName == null) ? 0 : assignmentUnitName.hashCode());
-    result = prime * result + ((countySpecificCode == null) ? 0 : countySpecificCode.hashCode());
-    result = prime * result + ((cwsOfficeId == null) ? 0 : cwsOfficeId.hashCode());
-    result = prime * result + ((endDate == null) ? 0 : endDate.hashCode());
-    result = prime * result + ((id == null) ? 0 : id.hashCode());
-    result = prime * result + ((phoneNo == null) ? 0 : phoneNo.hashCode());
-    result = prime * result + ((startDate == null) ? 0 : startDate.hashCode());
-    result = prime * result + telExtNo;
-    return result;
-  }
-
-
-  /*
-   * (non-Javadoc)
-   *
-   * @see java.lang.Object#equals(java.lang.Object)
-   */
-  @Override
-  @SuppressFBWarnings("MDM_BIGDECIMAL_EQUALS") //BigDecimal.equals used for equals/hashCode only
-  public boolean equals(Object obj) {
-    if (this == obj) {
+  public final boolean equals(Object o) {
+    if (this == o) {
       return true;
     }
-    if (obj == null) {
+
+    if (!(o instanceof AssignmentUnit)) {
       return false;
     }
-    if (getClass() != obj.getClass()) {
-      return false;
-    }
-    AssignmentUnit other = (AssignmentUnit) obj;
-    if (assignmentUnitDeskIndicator == null) {
-      if (other.assignmentUnitDeskIndicator != null) {
-        return false;
-      }
-    } else if (!assignmentUnitDeskIndicator.equals(other.assignmentUnitDeskIndicator)) {
-      return false;
-    }
-    if (assignmentUnitName == null) {
-      if (other.assignmentUnitName != null) {
-        return false;
-      }
-    } else if (!assignmentUnitName.equals(other.assignmentUnitName)) {
-      return false;
-    }
-    if (countySpecificCode == null) {
-      if (other.countySpecificCode != null) {
-        return false;
-      }
-    } else if (!countySpecificCode.equals(other.countySpecificCode)) {
-      return false;
-    }
-    if (cwsOfficeId == null) {
-      if (other.cwsOfficeId != null) {
-        return false;
-      }
-    } else if (!cwsOfficeId.equals(other.cwsOfficeId)) {
-      return false;
-    }
-    if (endDate == null) {
-      if (other.endDate != null) {
-        return false;
-      }
-    } else if (!endDate.equals(other.endDate)) {
-      return false;
-    }
-    if (id == null) {
-      if (other.id != null) {
-        return false;
-      }
-    } else if (!id.equals(other.id)) {
-      return false;
-    }
-    if (phoneNo == null) {
-      if (other.phoneNo != null) {
-        return false;
-      }
-    } else if (!phoneNo.equals(other.phoneNo)) {
-      return false;
-    }
-    if (startDate == null) {
-      if (other.startDate != null) {
-        return false;
-      }
-    } else if (!startDate.equals(other.startDate)) {
-      return false;
-    }
-    if (telExtNo != other.telExtNo) {
-      return false;
-    }
-    return true;
+
+    AssignmentUnit that = (AssignmentUnit) o;
+
+    return new EqualsBuilder()
+        .append(telExtNo, that.telExtNo)
+        .append(phoneNo, that.phoneNo)
+        .append(assignmentUnitDeskIndicator, that.assignmentUnitDeskIndicator)
+        .append(countySpecificCode, that.countySpecificCode)
+        .append(endDate, that.endDate)
+        .append(cwsOfficeId, that.cwsOfficeId)
+        .append(assignmentUnitName, that.assignmentUnitName)
+        .append(startDate, that.startDate)
+        .append(id, that.id)
+        .append(getLastUpdatedId(), that.getLastUpdatedId())
+        .append(getLastUpdatedTime(), that.getLastUpdatedTime())
+        .isEquals();
   }
 
+  @Override
+  public final int hashCode() {
+    return new HashCodeBuilder(17, 37)
+        .append(phoneNo)
+        .append(telExtNo)
+        .append(assignmentUnitDeskIndicator)
+        .append(countySpecificCode)
+        .append(endDate)
+        .append(cwsOfficeId)
+        .append(assignmentUnitName)
+        .append(startDate)
+        .append(id)
+        .append(getLastUpdatedId())
+        .append(getLastUpdatedTime())
+        .toHashCode();
+  }
 }

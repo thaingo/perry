@@ -16,6 +16,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.LazyCollection;
@@ -154,26 +156,38 @@ public class StaffPerson {
     if (this == o) {
       return true;
     }
+
     if (!(o instanceof StaffPerson)) {
       return false;
     }
+
     StaffPerson that = (StaffPerson) o;
-    return Objects.equals(getId(), that.getId()) &&
-        Objects.equals(getCountyCode(), that.getCountyCode()) &&
-        Objects.equals(getFirstName(), that.getFirstName()) &&
-        Objects.equals(getLastName(), that.getLastName()) &&
-        Objects.equals(getCwsOffice(), that.getCwsOffice()) &&
-        Objects.equals(getEndDate(), that.getEndDate()) &&
-        Objects.equals(getStartDate(), that.getStartDate()) &&
-        Objects.equals(getOffice(), that.getOffice()) &&
-        Objects.equals(getUnitAuthorities(), that.getUnitAuthorities());
+
+    return new EqualsBuilder()
+        .append(id, that.id)
+        .append(countyCode, that.countyCode)
+        .append(firstName, that.firstName)
+        .append(lastName, that.lastName)
+        .append(cwsOffice, that.cwsOffice)
+        .append(endDate, that.endDate)
+        .append(startDate, that.startDate)
+        .append(office, that.office)
+        .append(unitAuthorities, that.unitAuthorities)
+        .isEquals();
   }
 
   @Override
   public final int hashCode() {
-
-    return Objects
-        .hash(getId(), getCountyCode(), getFirstName(), getLastName(), getCwsOffice(), getEndDate(),
-            getStartDate(), getOffice(), getUnitAuthorities());
+    return new HashCodeBuilder(17, 37)
+        .append(id)
+        .append(countyCode)
+        .append(firstName)
+        .append(lastName)
+        .append(cwsOffice)
+        .append(endDate)
+        .append(startDate)
+        .append(office)
+        .append(unitAuthorities)
+        .toHashCode();
   }
 }

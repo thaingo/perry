@@ -10,6 +10,8 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.Type;
 
 /**
@@ -175,31 +177,43 @@ public class StaffAuthorityPrivilege extends CmsPersistentObject {
     if (this == o) {
       return true;
     }
+
     if (!(o instanceof StaffAuthorityPrivilege)) {
       return false;
     }
+
     StaffAuthorityPrivilege that = (StaffAuthorityPrivilege) o;
-    return Objects.equals(getCountySpecificCode(), that.getCountySpecificCode()) &&
-        Objects.equals(getEndDate(), that.getEndDate()) &&
-        Objects.equals(getEndTime(), that.getEndTime()) &&
-        Objects.equals(getFkuseridT(), that.getFkuseridT()) &&
-        Objects.equals(getId(), that.getId()) &&
-        Objects.equals(getLevelOfAuthPrivilegeCode(), that.getLevelOfAuthPrivilegeCode()) &&
-        Objects.equals(getLevelOfAuthPrivilegeType(), that.getLevelOfAuthPrivilegeType()) &&
-        Objects.equals(getStartDate(), that.getStartDate()) &&
-        Objects.equals(getStartTime(), that.getStartTime()) &&
-        Objects.equals(getLastUpdatedTime(), that.getLastUpdatedTime()) &&
-        Objects.equals(getLastUpdatedId(), that.getLastUpdatedId());
+
+    return new EqualsBuilder()
+        .append(countySpecificCode, that.countySpecificCode)
+        .append(endDate, that.endDate)
+        .append(endTime, that.endTime)
+        .append(fkuseridT, that.fkuseridT)
+        .append(id, that.id)
+        .append(levelOfAuthPrivilegeCode, that.levelOfAuthPrivilegeCode)
+        .append(levelOfAuthPrivilegeType, that.levelOfAuthPrivilegeType)
+        .append(startDate, that.startDate)
+        .append(startTime, that.startTime)
+        .append(getLastUpdatedId(), that.getLastUpdatedId())
+        .append(getLastUpdatedTime(), that.getLastUpdatedTime())
+        .isEquals();
   }
 
   @Override
   public final int hashCode() {
-
-    return Objects
-        .hash(getCountySpecificCode(), getEndDate(), getEndTime(), getFkuseridT(), getId(),
-            getLevelOfAuthPrivilegeCode(), getLevelOfAuthPrivilegeType(), getStartDate(),
-            getStartTime(),
-            getLastUpdatedTime(), getLastUpdatedId());
+    return new HashCodeBuilder(17, 37)
+        .append(countySpecificCode)
+        .append(endDate)
+        .append(endTime)
+        .append(fkuseridT)
+        .append(id)
+        .append(levelOfAuthPrivilegeCode)
+        .append(levelOfAuthPrivilegeType)
+        .append(startDate)
+        .append(startTime)
+        .append(getLastUpdatedId())
+        .append(getLastUpdatedTime())
+        .toHashCode();
   }
 }
 

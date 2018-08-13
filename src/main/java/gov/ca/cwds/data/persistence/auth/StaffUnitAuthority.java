@@ -10,6 +10,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.Type;
 
 /**
@@ -154,27 +156,40 @@ public class StaffUnitAuthority extends CmsPersistentObject {
     if (this == o) {
       return true;
     }
+
     if (!(o instanceof StaffUnitAuthority)) {
       return false;
     }
+
     StaffUnitAuthority that = (StaffUnitAuthority) o;
-    return Objects.equals(getAuthorityCode(), that.getAuthorityCode()) &&
-        Objects.equals(getCountySpecificCode(), that.getCountySpecificCode()) &&
-        Objects.equals(getEndDate(), that.getEndDate()) &&
-        Objects.equals(getFkasgUnit(), that.getFkasgUnit()) &&
-        Objects.equals(getStaffPersonId(), that.getStaffPersonId()) &&
-        Objects.equals(getStartDate(), that.getStartDate()) &&
-        Objects.equals(getThirdId(), that.getThirdId()) &&
-        Objects.equals(getAssignmentUnit(), that.getAssignmentUnit()) &&
-        Objects.equals(getLastUpdatedTime(), that.getLastUpdatedTime()) &&
-        Objects.equals(getLastUpdatedId(), that.getLastUpdatedId());
+
+    return new EqualsBuilder()
+        .append(authorityCode, that.authorityCode)
+        .append(countySpecificCode, that.countySpecificCode)
+        .append(endDate, that.endDate)
+        .append(fkasgUnit, that.fkasgUnit)
+        .append(staffPersonId, that.staffPersonId)
+        .append(startDate, that.startDate)
+        .append(thirdId, that.thirdId)
+        .append(assignmentUnit, that.assignmentUnit)
+        .append(getLastUpdatedId(), that.getLastUpdatedId())
+        .append(getLastUpdatedTime(), that.getLastUpdatedTime())
+        .isEquals();
   }
 
   @Override
   public final int hashCode() {
-
-    return Objects.hash(getAuthorityCode(), getCountySpecificCode(), getEndDate(), getFkasgUnit(),
-        getStaffPersonId(), getStartDate(), getThirdId(), getAssignmentUnit(),
-        getLastUpdatedTime(), getLastUpdatedId());
+    return new HashCodeBuilder(17, 37)
+        .append(authorityCode)
+        .append(countySpecificCode)
+        .append(endDate)
+        .append(fkasgUnit)
+        .append(staffPersonId)
+        .append(startDate)
+        .append(thirdId)
+        .append(assignmentUnit)
+        .append(getLastUpdatedId())
+        .append(getLastUpdatedTime())
+        .toHashCode();
   }
 }

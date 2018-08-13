@@ -13,6 +13,8 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.Type;
 
 /**
@@ -344,52 +346,66 @@ public class CwsOffice extends CmsPersistentObject {
     if (this == o) {
       return true;
     }
+
     if (!(o instanceof CwsOffice)) {
       return false;
     }
+
     CwsOffice cwsOffice = (CwsOffice) o;
-    return Objects.equals(getOfficeId(), cwsOffice.getOfficeId()) &&
-        Objects.equals(getGovernmentEntityType(), cwsOffice.getGovernmentEntityType()) &&
-        Objects.equals(getFaxNumber(), cwsOffice.getFaxNumber()) &&
-        Objects
-            .equals(getGeographicRegionTextCode(), cwsOffice.getGeographicRegionTextCode()) &&
-        Objects.equals(getHeadquarterIndicator(), cwsOffice.getHeadquarterIndicator()) &&
-        Objects.equals(getInactiveIndicator(), cwsOffice.getInactiveIndicator()) &&
-        Objects.equals(getMailStopDescription(), cwsOffice.getMailStopDescription()) &&
-        Objects.equals(getMessagePhoneNumber(), cwsOffice.getMessagePhoneNumber()) &&
-        Objects
-            .equals(getMessagePhoneExtensionNumber(), cwsOffice.getMessagePhoneExtensionNumber()) &&
-        Objects.equals(getCwsOffNumber(), cwsOffice.getCwsOffNumber()) &&
-        Objects.equals(getPrimaryPhoneNumber(), cwsOffice.getPrimaryPhoneNumber()) &&
-        Objects
-            .equals(getPrimaryPhoneExtensionNumber(), cwsOffice.getPrimaryPhoneExtensionNumber()) &&
-        Objects.equals(getStaffPersonId(), cwsOffice.getStaffPersonId()) &&
-        Objects.equals(getCommentDescription(), cwsOffice.getCommentDescription()) &&
-        Objects.equals(getAgencyName(), cwsOffice.getAgencyName()) &&
-        Objects.equals(getDepartmentDivisionName(), cwsOffice.getDepartmentDivisionName())
-        &&
-        Objects.equals(getCwsOfficeName(), cwsOffice.getCwsOfficeName()) &&
-        Objects.equals(getCountySpecificCode(), cwsOffice.getCountySpecificCode()) &&
-        Objects.equals(getAgencyCodeNumber(), cwsOffice.getAgencyCodeNumber()) &&
-        Objects.equals(getLocationCountyType(), cwsOffice.getLocationCountyType()) &&
-        Objects.equals(getDirectorsNameTitle(), cwsOffice.getDirectorsNameTitle()) &&
-        Objects.equals(getLastUpdatedTime(), cwsOffice.getLastUpdatedTime()) &&
-        Objects.equals(getLastUpdatedId(), cwsOffice.getLastUpdatedId());
+
+    return new EqualsBuilder()
+        .append(officeId, cwsOffice.officeId)
+        .append(governmentEntityType, cwsOffice.governmentEntityType)
+        .append(faxNumber, cwsOffice.faxNumber)
+        .append(geographicRegionTextCode, cwsOffice.geographicRegionTextCode)
+        .append(headquarterIndicator, cwsOffice.headquarterIndicator)
+        .append(inactiveIndicator, cwsOffice.inactiveIndicator)
+        .append(mailStopDescription, cwsOffice.mailStopDescription)
+        .append(messagePhoneNumber, cwsOffice.messagePhoneNumber)
+        .append(messagePhoneExtensionNumber, cwsOffice.messagePhoneExtensionNumber)
+        .append(cwsOffNumber, cwsOffice.cwsOffNumber)
+        .append(primaryPhoneNumber, cwsOffice.primaryPhoneNumber)
+        .append(primaryPhoneExtensionNumber, cwsOffice.primaryPhoneExtensionNumber)
+        .append(staffPersonId, cwsOffice.staffPersonId)
+        .append(commentDescription, cwsOffice.commentDescription)
+        .append(agencyName, cwsOffice.agencyName)
+        .append(departmentDivisionName, cwsOffice.departmentDivisionName)
+        .append(cwsOfficeName, cwsOffice.cwsOfficeName)
+        .append(countySpecificCode, cwsOffice.countySpecificCode)
+        .append(agencyCodeNumber, cwsOffice.agencyCodeNumber)
+        .append(locationCountyType, cwsOffice.locationCountyType)
+        .append(directorsNameTitle, cwsOffice.directorsNameTitle)
+        .append(getLastUpdatedId(), cwsOffice.getLastUpdatedId())
+        .append(getLastUpdatedTime(), cwsOffice.getLastUpdatedTime())
+        .isEquals();
   }
 
   @Override
   public final int hashCode() {
-
-    return Objects
-        .hash(getOfficeId(), getGovernmentEntityType(), getFaxNumber(),
-            getGeographicRegionTextCode(),
-            getHeadquarterIndicator(), getInactiveIndicator(), getMailStopDescription(),
-            getMessagePhoneNumber(), getMessagePhoneExtensionNumber(), getCwsOffNumber(),
-            getPrimaryPhoneNumber(), getPrimaryPhoneExtensionNumber(), getStaffPersonId(),
-            getCommentDescription(), getAgencyName(), getDepartmentDivisionName(),
-            getCwsOfficeName(),
-            getCountySpecificCode(), getAgencyCodeNumber(), getLocationCountyType(),
-            getDirectorsNameTitle(),
-            getLastUpdatedTime(), getLastUpdatedId());
+    return new HashCodeBuilder(17, 37)
+        .append(officeId)
+        .append(governmentEntityType)
+        .append(faxNumber)
+        .append(geographicRegionTextCode)
+        .append(headquarterIndicator)
+        .append(inactiveIndicator)
+        .append(mailStopDescription)
+        .append(messagePhoneNumber)
+        .append(messagePhoneExtensionNumber)
+        .append(cwsOffNumber)
+        .append(primaryPhoneNumber)
+        .append(primaryPhoneExtensionNumber)
+        .append(staffPersonId)
+        .append(commentDescription)
+        .append(agencyName)
+        .append(departmentDivisionName)
+        .append(cwsOfficeName)
+        .append(countySpecificCode)
+        .append(agencyCodeNumber)
+        .append(locationCountyType)
+        .append(directorsNameTitle)
+        .append(getLastUpdatedId())
+        .append(getLastUpdatedTime())
+        .toHashCode();
   }
 }
