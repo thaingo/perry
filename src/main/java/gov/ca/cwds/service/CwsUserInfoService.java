@@ -89,7 +89,7 @@ public class CwsUserInfoService {
   private boolean isSocialWorker(UserId userId) {
     return Optional.ofNullable(userId.getPrivileges())
         .orElse(Collections.emptySet()).stream()
-        .anyMatch(p -> "1468".equals(p.getLevelOfAuthPrivilegeCode()) &&
+        .anyMatch(p -> p.getLevelOfAuthPrivilegeType() == 1468 &&
             "P".equals(p.getLevelOfAuthPrivilegeCode()));
   }
 
