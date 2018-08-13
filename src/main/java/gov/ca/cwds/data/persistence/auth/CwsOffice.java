@@ -340,7 +340,7 @@ public class CwsOffice extends CmsPersistentObject {
   }
 
   @Override
-  public boolean equals(Object o) {
+  public final boolean equals(Object o) {
     if (this == o) {
       return true;
     }
@@ -378,7 +378,7 @@ public class CwsOffice extends CmsPersistentObject {
   }
 
   @Override
-  public int hashCode() {
+  public final int hashCode() {
 
     return Objects
         .hash(getOfficeId(), getGovernmentEntityType(), getFaxNumber(),
