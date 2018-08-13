@@ -1,6 +1,10 @@
 package gov.ca.cwds.data.auth;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+
 import gov.ca.cwds.data.persistence.auth.UserId;
+import java.util.Set;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,11 +18,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.util.List;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 
 
 @RunWith(SpringRunner.class)
@@ -44,7 +43,7 @@ public class UserIdDaoIT {
   public void testFindByLogonId() {
     String logonId = "logonId";
     entityManager.merge(entity("id", logonId));
-    List<UserId> users = userIdDao.findActiveByLogonId(logonId);
+    Set<UserId> users = userIdDao.findActiveByLogonId(logonId);
     assertThat(users.size(), is(1));
   }
 

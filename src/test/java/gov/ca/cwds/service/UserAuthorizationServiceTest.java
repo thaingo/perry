@@ -13,14 +13,15 @@ import gov.ca.cwds.data.persistence.auth.StaffPerson;
 import gov.ca.cwds.data.persistence.auth.StaffUnitAuthority;
 import gov.ca.cwds.data.persistence.auth.UserId;
 import gov.ca.cwds.rest.api.domain.auth.UserAuthorization;
+import java.util.Collections;
+import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.util.Collections;
-import java.util.Date;
-
-/** Created by dmitry.rudenko on 10/3/2017. */
+/**
+ * Created by dmitry.rudenko on 10/3/2017.
+ */
 public class UserAuthorizationServiceTest {
 
   private static final String STAFF_ID = "staffId";
@@ -49,11 +50,8 @@ public class UserAuthorizationServiceTest {
     staffPersonDao = Mockito.mock(StaffPersonDao.class);
 
     CwsUserInfoService cwsUserInfoService = new CwsUserInfoService();
-    cwsUserInfoService.setAssignmentUnitDao(assignmentUnitDao);
     cwsUserInfoService.setCwsOfficeDao(cwsOfficeDao);
-    cwsUserInfoService.setStaffAuthorityPrivilegeDao(staffAuthorityPrivilegeDao);
     cwsUserInfoService.setUserIdDao(userIdDao);
-    cwsUserInfoService.setStaffUnitAuthorityDao(staffUnitAuthorityDao);
     cwsUserInfoService.setStaffPersonDao(staffPersonDao);
 
     userAuthorizationService = new UserAuthorizationService();
@@ -66,7 +64,7 @@ public class UserAuthorizationServiceTest {
     String racfid = "racfid";
     UserId userId = new UserId(null, null, null, STAFF_ID, ID, LOGON_ID, null);
     Mockito.when(userIdDao.findActiveByLogonId(racfid))
-        .thenReturn(Collections.singletonList(userId));
+        .thenReturn(Collections.singleton(userId));
 
     Mockito.when(staffAuthorityPrivilegeDao.findSocialWorkerPrivileges(userId.getId()))
         .thenReturn(Collections.emptyList());
