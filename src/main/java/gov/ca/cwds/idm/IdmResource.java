@@ -7,6 +7,7 @@ import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN
 
 import gov.ca.cwds.idm.dto.IdmApiCustomError;
 import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.idm.dto.UserIdAndOperation;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.UserVerificationResult;
 import gov.ca.cwds.idm.dto.UsersPage;
@@ -55,7 +56,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 public class IdmResource {
 
   public static final String DATETIME_FORMAT_PATTERN = "yyyy-MM-dd-HH.mm.ss.SSS";
-  private static final SimpleDateFormat DATETIME_FORMAT = new SimpleDateFormat(DATETIME_FORMAT_PATTERN);
 
   private static final Logger LOGGER = LoggerFactory.getLogger(IdmResource.class);
 
@@ -116,7 +116,7 @@ public class IdmResource {
   })
   @ApiOperation(
       value = "Get list of failed User creates and updates in Dora",
-      response = User.class,
+      response = UserIdAndOperation.class,
       responseContainer = "List",
       notes = "This service is used by batch job to build the ES index. The client of this service should have 'IDM-job' role."
   )
@@ -129,7 +129,7 @@ public class IdmResource {
 
     Date lastJobTime;
     try {
-      lastJobTime = DATETIME_FORMAT.parse(lastJobTimeStr);
+      lastJobTime = new SimpleDateFormat(DATETIME_FORMAT_PATTERN).parse(lastJobTimeStr);
     } catch (ParseException e) {
       String msg = messages.get(INVALIDE_DATE_FORMAT, DATETIME_FORMAT_PATTERN);
       LOGGER.error(msg, e);
