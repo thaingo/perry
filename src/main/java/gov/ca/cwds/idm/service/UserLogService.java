@@ -51,10 +51,10 @@ public class UserLogService {
 
     List<Object[]> iDAndOperationPairs = userLogRepository.getUserIdAndOperationTypes(lastJobTime);
 
-    return getIdAndOperationList(iDAndOperationPairs);
+    return filterIdAndOperationList(iDAndOperationPairs);
   }
 
-  static List<UserIdAndOperation> getIdAndOperationList(List<Object[]> idAndOperationPairs) {
+  static List<UserIdAndOperation> filterIdAndOperationList(List<Object[]> idAndOperationPairs) {
     Map<String, OperationType> idAndOperationMap = new HashMap<>();
 
     for (Object[] idAndOperationPair : idAndOperationPairs) {
@@ -62,7 +62,7 @@ public class UserLogService {
       OperationType operation = (OperationType) idAndOperationPair[1];
       OperationType existedOperation = idAndOperationMap.get(userId);
 
-      if (existedOperation == null || (existedOperation == UPDATE && operation == CREATE)) {
+      if (existedOperation == null || (existedOperation == CREATE && operation == UPDATE)) {
         idAndOperationMap.put(userId, operation);
       }
     }
