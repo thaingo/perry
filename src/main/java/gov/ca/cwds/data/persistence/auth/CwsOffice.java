@@ -7,6 +7,7 @@ import io.dropwizard.jackson.JsonSnakeCase;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.io.Serializable;
+import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -338,234 +339,57 @@ public class CwsOffice extends CmsPersistentObject {
     return directorsNameTitle;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see java.lang.Object#hashCode()
-   */
   @Override
-  public final int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((agencyCodeNumber == null) ? 0 : agencyCodeNumber.hashCode());
-    result = prime * result + ((agencyName == null) ? 0 : agencyName.hashCode());
-    result = prime * result + ((commentDescription == null) ? 0 : commentDescription.hashCode());
-    result = prime * result + ((countySpecificCode == null) ? 0 : countySpecificCode.hashCode());
-    result = prime * result + ((cwsOffNumber == null) ? 0 : cwsOffNumber.hashCode());
-    result = prime * result + ((cwsOfficeName == null) ? 0 : cwsOfficeName.hashCode());
-    result =
-        prime * result + ((departmentDivisionName == null) ? 0 : departmentDivisionName.hashCode());
-    result = prime * result + ((directorsNameTitle == null) ? 0 : directorsNameTitle.hashCode());
-    result = prime * result + ((faxNumber == null) ? 0 : faxNumber.hashCode());
-    result =
-        prime * result
-            + ((geographicRegionTextCode == null) ? 0 : geographicRegionTextCode.hashCode());
-    result =
-        prime * result + ((governmentEntityType == null) ? 0 : governmentEntityType.hashCode());
-    result =
-        prime * result + ((headquarterIndicator == null) ? 0 : headquarterIndicator.hashCode());
-    result = prime * result + ((inactiveIndicator == null) ? 0 : inactiveIndicator.hashCode());
-    result = prime * result + ((locationCountyType == null) ? 0 : locationCountyType.hashCode());
-    result = prime * result + ((mailStopDescription == null) ? 0 : mailStopDescription.hashCode());
-    result =
-        prime * result
-            + ((messagePhoneExtensionNumber == null) ? 0 : messagePhoneExtensionNumber.hashCode());
-    result = prime * result + ((messagePhoneNumber == null) ? 0 : messagePhoneNumber.hashCode());
-    result = prime * result + ((officeId == null) ? 0 : officeId.hashCode());
-    result =
-        prime * result
-            + ((primaryPhoneExtensionNumber == null) ? 0 : primaryPhoneExtensionNumber.hashCode());
-    result = prime * result + ((primaryPhoneNumber == null) ? 0 : primaryPhoneNumber.hashCode());
-    result = prime * result + ((staffPersonId == null) ? 0 : staffPersonId.hashCode());
-    result =
-        prime * result
-            + ((super.getLastUpdatedId() == null) ? 0 : super.getLastUpdatedId().hashCode());
-    result =
-        prime * result
-            + ((super.getLastUpdatedTime() == null) ? 0 : super.getLastUpdatedTime().hashCode());
-
-    return result;
-  }
-
-  /*
-   * (non-Javadoc)
-   *
-   * @see java.lang.Object#equals(java.lang.Object)
-   */
-  @Override
-  public final boolean equals(Object obj) {
-    if (this == obj) {
+  public boolean equals(Object o) {
+    if (this == o) {
       return true;
     }
-    if (obj == null) {
+    if (!(o instanceof CwsOffice)) {
       return false;
     }
-    if (!(obj instanceof CwsOffice)) {
-      return false;
-    }
-    CwsOffice other = (CwsOffice) obj;
-    if (agencyCodeNumber == null) {
-      if (other.agencyCodeNumber != null) {
-        return false;
-      }
-    } else if (!agencyCodeNumber.equals(other.agencyCodeNumber)) {
-      return false;
-    }
-    if (agencyName == null) {
-      if (other.agencyName != null) {
-        return false;
-      }
-    } else if (!agencyName.equals(other.agencyName)) {
-      return false;
-    }
-    if (commentDescription == null) {
-      if (other.commentDescription != null) {
-        return false;
-      }
-    } else if (!commentDescription.equals(other.commentDescription)) {
-      return false;
-    }
-    if (countySpecificCode == null) {
-      if (other.countySpecificCode != null) {
-        return false;
-      }
-    } else if (!countySpecificCode.equals(other.countySpecificCode)) {
-      return false;
-    }
-    if (cwsOffNumber == null) {
-      if (other.cwsOffNumber != null) {
-        return false;
-      }
-    } else if (!cwsOffNumber.equals(other.cwsOffNumber)) {
-      return false;
-    }
-    if (cwsOfficeName == null) {
-      if (other.cwsOfficeName != null) {
-        return false;
-      }
-    } else if (!cwsOfficeName.equals(other.cwsOfficeName)) {
-      return false;
-    }
-    if (departmentDivisionName == null) {
-      if (other.departmentDivisionName != null) {
-        return false;
-      }
-    } else if (!departmentDivisionName.equals(other.departmentDivisionName)) {
-      return false;
-    }
-    if (directorsNameTitle == null) {
-      if (other.directorsNameTitle != null) {
-        return false;
-      }
-    } else if (!directorsNameTitle.equals(other.directorsNameTitle)) {
-      return false;
-    }
-    if (faxNumber == null) {
-      if (other.faxNumber != null) {
-        return false;
-      }
-    } else if (!faxNumber.equals(other.faxNumber)) {
-      return false;
-    }
-    if (geographicRegionTextCode == null) {
-      if (other.geographicRegionTextCode != null) {
-        return false;
-      }
-    } else if (!geographicRegionTextCode.equals(other.geographicRegionTextCode)) {
-      return false;
-    }
-    if (governmentEntityType == null) {
-      if (other.governmentEntityType != null) {
-        return false;
-      }
-    } else if (!governmentEntityType.equals(other.governmentEntityType)) {
-      return false;
-    }
-    if (headquarterIndicator == null) {
-      if (other.headquarterIndicator != null) {
-        return false;
-      }
-    } else if (!headquarterIndicator.equals(other.headquarterIndicator)) {
-      return false;
-    }
-    if (inactiveIndicator == null) {
-      if (other.inactiveIndicator != null) {
-        return false;
-      }
-    } else if (!inactiveIndicator.equals(other.inactiveIndicator)) {
-      return false;
-    }
-    if (locationCountyType == null) {
-      if (other.locationCountyType != null) {
-        return false;
-      }
-    } else if (!locationCountyType.equals(other.locationCountyType)) {
-      return false;
-    }
-    if (mailStopDescription == null) {
-      if (other.mailStopDescription != null) {
-        return false;
-      }
-    } else if (!mailStopDescription.equals(other.mailStopDescription)) {
-      return false;
-    }
-    if (messagePhoneExtensionNumber == null) {
-      if (other.messagePhoneExtensionNumber != null) {
-        return false;
-      }
-    } else if (!messagePhoneExtensionNumber.equals(other.messagePhoneExtensionNumber)) {
-      return false;
-    }
-    if (messagePhoneNumber == null) {
-      if (other.messagePhoneNumber != null) {
-        return false;
-      }
-    } else if (!messagePhoneNumber.equals(other.messagePhoneNumber)) {
-      return false;
-    }
-    if (officeId == null) {
-      if (other.officeId != null) {
-        return false;
-      }
-    } else if (!officeId.equals(other.officeId)) {
-      return false;
-    }
-    if (primaryPhoneExtensionNumber == null) {
-      if (other.primaryPhoneExtensionNumber != null) {
-        return false;
-      }
-    } else if (!primaryPhoneExtensionNumber.equals(other.primaryPhoneExtensionNumber)) {
-      return false;
-    }
-    if (primaryPhoneNumber == null) {
-      if (other.primaryPhoneNumber != null) {
-        return false;
-      }
-    } else if (!primaryPhoneNumber.equals(other.primaryPhoneNumber)) {
-      return false;
-    }
-    if (staffPersonId == null) {
-      if (other.staffPersonId != null) {
-        return false;
-      }
-    } else if (!staffPersonId.equals(other.staffPersonId)) {
-      return false;
-    }
-    if (super.getLastUpdatedId() == null) {
-      if (other.getLastUpdatedId() != null) {
-        return false;
-      }
-    } else if (!super.getLastUpdatedId().equals(other.getLastUpdatedId())) {
-      return false;
-    }
-    if (super.getLastUpdatedTime() == null) {
-      if (other.getLastUpdatedTime() != null) {
-        return false;
-      }
-    } else if (!super.getLastUpdatedTime().equals(other.getLastUpdatedTime())) {
-      return false;
-    }
-    return true;
+    CwsOffice cwsOffice = (CwsOffice) o;
+    return Objects.equals(getOfficeId(), cwsOffice.getOfficeId()) &&
+        Objects.equals(getGovernmentEntityType(), cwsOffice.getGovernmentEntityType()) &&
+        Objects.equals(getFaxNumber(), cwsOffice.getFaxNumber()) &&
+        Objects
+            .equals(getGeographicRegionTextCode(), cwsOffice.getGeographicRegionTextCode()) &&
+        Objects.equals(getHeadquarterIndicator(), cwsOffice.getHeadquarterIndicator()) &&
+        Objects.equals(getInactiveIndicator(), cwsOffice.getInactiveIndicator()) &&
+        Objects.equals(getMailStopDescription(), cwsOffice.getMailStopDescription()) &&
+        Objects.equals(getMessagePhoneNumber(), cwsOffice.getMessagePhoneNumber()) &&
+        Objects
+            .equals(getMessagePhoneExtensionNumber(), cwsOffice.getMessagePhoneExtensionNumber()) &&
+        Objects.equals(getCwsOffNumber(), cwsOffice.getCwsOffNumber()) &&
+        Objects.equals(getPrimaryPhoneNumber(), cwsOffice.getPrimaryPhoneNumber()) &&
+        Objects
+            .equals(getPrimaryPhoneExtensionNumber(), cwsOffice.getPrimaryPhoneExtensionNumber()) &&
+        Objects.equals(getStaffPersonId(), cwsOffice.getStaffPersonId()) &&
+        Objects.equals(getCommentDescription(), cwsOffice.getCommentDescription()) &&
+        Objects.equals(getAgencyName(), cwsOffice.getAgencyName()) &&
+        Objects.equals(getDepartmentDivisionName(), cwsOffice.getDepartmentDivisionName())
+        &&
+        Objects.equals(getCwsOfficeName(), cwsOffice.getCwsOfficeName()) &&
+        Objects.equals(getCountySpecificCode(), cwsOffice.getCountySpecificCode()) &&
+        Objects.equals(getAgencyCodeNumber(), cwsOffice.getAgencyCodeNumber()) &&
+        Objects.equals(getLocationCountyType(), cwsOffice.getLocationCountyType()) &&
+        Objects.equals(getDirectorsNameTitle(), cwsOffice.getDirectorsNameTitle()) &&
+        Objects.equals(getLastUpdatedTime(), cwsOffice.getLastUpdatedTime()) &&
+        Objects.equals(getLastUpdatedId(), cwsOffice.getLastUpdatedId());
   }
 
+  @Override
+  public int hashCode() {
+
+    return Objects
+        .hash(getOfficeId(), getGovernmentEntityType(), getFaxNumber(),
+            getGeographicRegionTextCode(),
+            getHeadquarterIndicator(), getInactiveIndicator(), getMailStopDescription(),
+            getMessagePhoneNumber(), getMessagePhoneExtensionNumber(), getCwsOffNumber(),
+            getPrimaryPhoneNumber(), getPrimaryPhoneExtensionNumber(), getStaffPersonId(),
+            getCommentDescription(), getAgencyName(), getDepartmentDivisionName(),
+            getCwsOfficeName(),
+            getCountySpecificCode(), getAgencyCodeNumber(), getLocationCountyType(),
+            getDirectorsNameTitle(),
+            getLastUpdatedTime(), getLastUpdatedId());
+  }
 }
