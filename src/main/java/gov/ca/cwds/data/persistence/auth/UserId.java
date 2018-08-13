@@ -5,6 +5,7 @@ import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.CmsPersistentObject;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -179,110 +180,36 @@ public class UserId extends CmsPersistentObject {
     return systemDomainType;
   }
 
-  /**
-   * {@inheritDoc}
-   *
-   * @see Object#hashCode()
-   */
-  @Override
-  public final int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((endDate == null) ? 0 : endDate.hashCode());
-    result = prime * result + ((endTime == null) ? 0 : endTime.hashCode());
-    result = prime * result + ((fkfpstfprt == null) ? 0 : fkfpstfprt.hashCode());
-    result = prime * result + ((id == null) ? 0 : id.hashCode());
-    result = prime * result + ((logonId == null) ? 0 : logonId.hashCode());
-    result = prime * result + ((staffPersonId == null) ? 0 : staffPersonId.hashCode());
-    result = prime * result + ((systemDomainType == null) ? 0 : systemDomainType.hashCode());
-    result = prime * result
-        + ((super.getLastUpdatedId() == null) ? 0 : super.getLastUpdatedId().hashCode());
-    result = prime * result
-        + ((super.getLastUpdatedTime() == null) ? 0 : super.getLastUpdatedTime().hashCode());
-    return result;
-  }
 
-  /**
-   * {@inheritDoc}
-   *
-   * @see Object#equals(Object)
-   */
   @Override
-  public final boolean equals(Object obj) {
-    if (this == obj) {
+  public final boolean equals(Object o) {
+    if (this == o) {
       return true;
     }
-    if (obj == null) {
+    if (!(o instanceof UserId)) {
       return false;
     }
-    if (!(obj instanceof UserId)) {
-      return false;
-    }
-    UserId other = (UserId) obj;
-    if (endDate == null) {
-      if (other.endDate != null) {
-        return false;
-      }
-    } else if (!endDate.equals(other.endDate)) {
-      return false;
-    }
-    if (endTime == null) {
-      if (other.endTime != null) {
-        return false;
-      }
-    } else if (!endTime.equals(other.endTime)) {
-      return false;
-    }
-    if (fkfpstfprt == null) {
-      if (other.fkfpstfprt != null) {
-        return false;
-      }
-    } else if (!fkfpstfprt.equals(other.fkfpstfprt)) {
-      return false;
-    }
-    if (id == null) {
-      if (other.id != null) {
-        return false;
-      }
-    } else if (!id.equals(other.id)) {
-      return false;
-    }
-    if (logonId == null) {
-      if (other.logonId != null) {
-        return false;
-      }
-    } else if (!logonId.equals(other.logonId)) {
-      return false;
-    }
-    if (staffPersonId == null) {
-      if (other.staffPersonId != null) {
-        return false;
-      }
-    } else if (!staffPersonId.equals(other.staffPersonId)) {
-      return false;
-    }
-    if (systemDomainType == null) {
-      if (other.systemDomainType != null) {
-        return false;
-      }
-    } else if (!systemDomainType.equals(other.systemDomainType)) {
-      return false;
-    }
-    if (super.getLastUpdatedId() == null) {
-      if (other.getLastUpdatedId() != null) {
-        return false;
-      }
-    } else if (!super.getLastUpdatedId().equals(other.getLastUpdatedId())) {
-      return false;
-    }
-    if (super.getLastUpdatedTime() == null) {
-      if (other.getLastUpdatedTime() != null) {
-        return false;
-      }
-    } else if (!super.getLastUpdatedTime().equals(other.getLastUpdatedTime())) {
-      return false;
-    }
-    return true;
+    UserId userId = (UserId) o;
+    return Objects.equals(getEndDate(), userId.getEndDate()) &&
+        Objects.equals(getEndTime(), userId.getEndTime()) &&
+        Objects.equals(getFkfpstfprt(), userId.getFkfpstfprt()) &&
+        Objects.equals(getStaffPersonId(), userId.getStaffPersonId()) &&
+        Objects.equals(getId(), userId.getId()) &&
+        Objects.equals(getLogonId(), userId.getLogonId()) &&
+        Objects.equals(getSystemDomainType(), userId.getSystemDomainType()) &&
+        Objects.equals(getPrivileges(), userId.getPrivileges()) &&
+        Objects.equals(getStaffPerson(), userId.getStaffPerson()) &&
+        Objects.equals(getLastUpdatedTime(), userId.getLastUpdatedTime()) &&
+        Objects.equals(getLastUpdatedId(), userId.getLastUpdatedId());
   }
 
+  @Override
+  public final int hashCode() {
+
+    return Objects
+        .hash(getEndDate(), getEndTime(), getFkfpstfprt(), getStaffPersonId(), getId(),
+            getLogonId(),
+            getSystemDomainType(), getPrivileges(), getStaffPerson(),
+            getLastUpdatedTime(), getLastUpdatedId());
+  }
 }

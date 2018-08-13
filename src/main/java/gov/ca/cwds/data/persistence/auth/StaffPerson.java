@@ -6,6 +6,7 @@ import io.dropwizard.jackson.JsonSnakeCase;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Date;
+import java.util.Objects;
 import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -146,5 +147,33 @@ public class StaffPerson {
 
   public void setStartDate(Date startDate) {
     this.startDate = startDate;
+  }
+
+  @Override
+  public final boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof StaffPerson)) {
+      return false;
+    }
+    StaffPerson that = (StaffPerson) o;
+    return Objects.equals(getId(), that.getId()) &&
+        Objects.equals(getCountyCode(), that.getCountyCode()) &&
+        Objects.equals(getFirstName(), that.getFirstName()) &&
+        Objects.equals(getLastName(), that.getLastName()) &&
+        Objects.equals(getCwsOffice(), that.getCwsOffice()) &&
+        Objects.equals(getEndDate(), that.getEndDate()) &&
+        Objects.equals(getStartDate(), that.getStartDate()) &&
+        Objects.equals(getOffice(), that.getOffice()) &&
+        Objects.equals(getUnitAuthorities(), that.getUnitAuthorities());
+  }
+
+  @Override
+  public final int hashCode() {
+
+    return Objects
+        .hash(getId(), getCountyCode(), getFirstName(), getLastName(), getCwsOffice(), getEndDate(),
+            getStartDate(), getOffice(), getUnitAuthorities());
   }
 }
