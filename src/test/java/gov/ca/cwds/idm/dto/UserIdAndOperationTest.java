@@ -14,6 +14,11 @@ public class UserIdAndOperationTest {
     UserIdAndOperation idOp1 = new UserIdAndOperation("a", OperationType.CREATE);
     UserIdAndOperation idOp2 = new UserIdAndOperation("b", OperationType.CREATE);
     UserIdAndOperation idOp3 = new UserIdAndOperation("a", OperationType.UPDATE);
+    UserIdAndOperation idOp4 = idOp0;
+
+    assertTrue(idOp0.equals(idOp4));
+
+    assertFalse(idOp0.equals("abc"));
 
     assertTrue(idOp0 != idOp1);
     assertTrue(idOp0.equals(idOp1));
