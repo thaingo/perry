@@ -12,9 +12,7 @@ import gov.ca.cwds.idm.persistence.model.OperationType;
 import gov.ca.cwds.idm.persistence.model.UserLog;
 import gov.ca.cwds.service.messages.MessagesService;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -51,24 +49,9 @@ public class UserLogService {
 
     List<Object[]> iDAndOperationPairs = userLogRepository.getUserIdAndOperationTypes(lastJobTime);
 
-    return filterIdAndOperationList(iDAndOperationPairs);
-  }
-
-  static List<UserIdAndOperation> filterIdAndOperationList(List<Object[]> idAndOperationPairs) {
-    Map<String, OperationType> idAndOperationMap = new HashMap<>();
-
-    for (Object[] idAndOperationPair : idAndOperationPairs) {
-      String userId = (String) idAndOperationPair[0];
-      OperationType operation = (OperationType) idAndOperationPair[1];
-      OperationType existedOperation = idAndOperationMap.get(userId);
-
-      if (existedOperation == null || (existedOperation == CREATE && operation == UPDATE)) {
-        idAndOperationMap.put(userId, operation);
-      }
-    }
-    return idAndOperationMap.entrySet()
+    return iDAndOperationPairs
         .stream()
-        .map(e -> new UserIdAndOperation(e.getKey(), e.getValue()))
+        .map(e -> new UserIdAndOperation((String) e[0], (OperationType) e[1]))
         .collect(Collectors.toList());
   }
 

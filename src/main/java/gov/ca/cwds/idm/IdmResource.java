@@ -7,7 +7,7 @@ import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN
 
 import gov.ca.cwds.idm.dto.IdmApiCustomError;
 import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.dto.UserIdAndOperation;
+import gov.ca.cwds.idm.dto.UserAndOperation;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.UserVerificationResult;
 import gov.ca.cwds.idm.dto.UsersPage;
@@ -15,7 +15,6 @@ import gov.ca.cwds.idm.dto.UsersSearchCriteria;
 import gov.ca.cwds.idm.persistence.model.Permission;
 import gov.ca.cwds.idm.service.DictionaryProvider;
 import gov.ca.cwds.idm.service.IdmService;
-import gov.ca.cwds.idm.service.UserLogService;
 import gov.ca.cwds.rest.api.domain.UserAlreadyExistsException;
 import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
 import gov.ca.cwds.rest.api.domain.UserNotFoundPerryException;
@@ -62,8 +61,6 @@ public class IdmResource {
   @Autowired private IdmService idmService;
 
   @Autowired private DictionaryProvider dictionaryProvider;
-
-  @Autowired private UserLogService userLogService;
 
   @Autowired private MessagesService messages;
 
@@ -116,7 +113,7 @@ public class IdmResource {
   })
   @ApiOperation(
       value = "Get list of failed User creates and updates in Dora",
-      response = UserIdAndOperation.class,
+      response = UserAndOperation.class,
       responseContainer = "List",
       notes = "This service is used by batch job to build the ES index. The client of this service should have 'IDM-job' role."
   )
@@ -135,7 +132,7 @@ public class IdmResource {
       LOGGER.error(msg, e);
       return createCustomResponseEntity(HttpStatus.BAD_REQUEST, INVALIDE_DATE_FORMAT, msg);
     }
-    return ResponseEntity.ok().body(userLogService.getUserIdAndOperations(lastJobTime));
+    return ResponseEntity.ok().body(idmService.getFailedOperations(lastJobTime));
   }
 
   @RequestMapping(method = RequestMethod.GET, value = "/users/{id}", produces = "application/json")

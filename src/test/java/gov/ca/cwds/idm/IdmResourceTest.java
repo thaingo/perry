@@ -760,12 +760,12 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   public void testGetFailedOperations() throws Exception {
     userLogRepository.deleteAll();
 
-    userLog("c", CREATE, 1000);
-    userLog("e", CREATE, 2000);
-    userLog("a", CREATE, 3000);
-    userLog("b", CREATE, 4000);
-    userLog("b", UPDATE, 5000);
-    userLog("c", UPDATE, 6000);
+    userLog(USER_WITH_RACFID_AND_DB_DATA_ID, CREATE, 1000);
+    userLog("this-id-should-be-unused", CREATE, 2000);
+    userLog(USER_NO_RACFID_ID, CREATE, 3000);
+    userLog(USER_WITH_RACFID_ID, CREATE, 4000);
+    userLog(USER_WITH_RACFID_ID, UPDATE, 5000);
+    userLog(USER_WITH_RACFID_AND_DB_DATA_ID, UPDATE, 6000);
 
     MvcResult result =
         mockMvc
@@ -776,6 +776,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
             .andReturn();
+    System.out.println(result.getResponse().getContentAsString());
 
     assertNonStrict(result, "fixtures/idm/failed-operations/failed-operations-valid.json");
   }
