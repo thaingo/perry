@@ -2,6 +2,8 @@ package gov.ca.cwds.idm;
 
 import static gov.ca.cwds.idm.BaseLiquibaseTest.CMS_STORE_URL;
 import static gov.ca.cwds.idm.BaseLiquibaseTest.TOKEN_STORE_URL;
+import static gov.ca.cwds.idm.persistence.model.OperationType.CREATE;
+import static gov.ca.cwds.idm.persistence.model.OperationType.UPDATE;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.COUNTY;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PERMISSIONS;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.RACFID_CUSTOM;
@@ -50,12 +52,14 @@ import com.amazonaws.services.cognitoidp.model.UsernameExistsException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Iterables;
 import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.idm.dto.UserIdAndOperation;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.persistence.UserLogRepository;
 import gov.ca.cwds.idm.persistence.model.OperationType;
 import gov.ca.cwds.idm.persistence.model.UserLog;
 import gov.ca.cwds.idm.service.IdmServiceImpl;
 import gov.ca.cwds.idm.service.SearchService;
+import gov.ca.cwds.idm.service.UserLogService;
 import gov.ca.cwds.idm.service.cognito.CognitoProperties;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.service.messages.MessagesService;
@@ -67,10 +71,12 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import liquibase.util.StringUtils;
 import org.apache.commons.codec.binary.Base64;
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -117,8 +123,8 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   private static final String USERPOOL = "userpool";
   private static final String SOME_PAGINATION_TOKEN = "somePaginationToken";
 
-  static final String IDM_BASIC_AUTH_USER = "user";
-  static final String IDM_BASIC_AUTH_PASS = "pass";
+  static public final String IDM_BASIC_AUTH_USER = "user";
+  static public final String IDM_BASIC_AUTH_PASS = "pass";
 
   private static final String BASIC_AUTH_HEADER = prepareBasicAuthHeader();
 
@@ -137,6 +143,8 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @Autowired  private IdmServiceImpl idmService;
 
   @Autowired private UserLogRepository userLogRepository;
+
+  @Autowired  private UserLogService userLogService;
 
   private SearchService searchService = mock(SearchService.class);
 
@@ -745,6 +753,38 @@ public class IdmResourceTest extends BaseLiquibaseTest {
             .andReturn();
 
     assertNonStrict(result, "fixtures/idm/verify-user/verify-other-county.json");
+  }
+
+  @Test
+  public void testGetUserIdAndOperations() {
+    userLogRepository.deleteAll();
+
+    userLog("c", CREATE, 1000);
+    userLog("e", CREATE, 2000);
+    userLog("a", CREATE, 3000);
+    userLog("b", CREATE, 4000);
+    userLog("b", UPDATE, 5000);
+    userLog("c", UPDATE, 6000);
+
+    List<UserIdAndOperation> objectList = userLogService.getUserIdAndOperations(new Date(2000));
+
+    assertThat(objectList.size(), Matchers.is(3));
+
+    Map<String, UserIdAndOperation> testMap = objectList.stream().collect(
+        Collectors.toMap(UserIdAndOperation::getId, e -> e));
+
+    assertThat(testMap.size(), Matchers.is(3));
+    assertThat(testMap.get("a").getOperation(), is(CREATE));
+    assertThat(testMap.get("b").getOperation(), is(UPDATE));
+    assertThat(testMap.get("c").getOperation(), is(UPDATE));
+  }
+
+  private UserLog userLog(String userName, OperationType operation,  long date) {
+    UserLog log = new UserLog();
+    log.setUsername(userName);
+    log.setOperationType(operation);
+    log.setOperationTime(new Date(date));
+    return userLogRepository.save(log);
   }
 
   private void testGetValidYoloUser(String userId, String fixtureFilePath) throws Exception {
