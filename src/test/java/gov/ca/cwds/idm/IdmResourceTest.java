@@ -710,7 +710,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
             .perform(
                 MockMvcRequestBuilders.get("/idm/users/verify?email=Test@Test.com&racfid=SMITHBO"))
             .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.content().contentType(CONTENT_TYPE))
+            .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
             .andReturn();
 
     assertNonStrict(result, "fixtures/idm/verify-user/verify-valid.json");
