@@ -122,14 +122,14 @@ public class IdmResource {
   )
   @PreAuthorize("hasAuthority('IDM-job')")
   public ResponseEntity getFailedOperations(
-      @ApiParam(required = true, name = "lastJobTime",
-          value = "Last time of successful batch job execution in yyyy-MM-dd-HH.mm.ss.SSS format")
-      @RequestParam(name = "lastJobTime")
-          String lastJobTimeStr) {
+      @ApiParam(required = true, name = "date",
+          value = "Last date of successful batch job execution in yyyy-MM-dd-HH.mm.ss.SSS format")
+      @RequestParam(name = "date")
+          String lastJobDateStr) {
 
     Date lastJobTime;
     try {
-      lastJobTime = new SimpleDateFormat(DATETIME_FORMAT_PATTERN).parse(lastJobTimeStr);
+      lastJobTime = new SimpleDateFormat(DATETIME_FORMAT_PATTERN).parse(lastJobDateStr);
     } catch (ParseException e) {
       String msg = messages.get(INVALIDE_DATE_FORMAT, DATETIME_FORMAT_PATTERN);
       LOGGER.error(msg, e);

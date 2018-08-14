@@ -1,0 +1,14 @@
+[
+  {
+    "id": "a",
+    "operation": "CREATE"
+  },
+  {
+    "id": "b",
+    "operation": "UPDATE"
+  },
+  {
+    "id": "c",
+    "operation": "UPDATE"
+  }
+]

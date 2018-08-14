@@ -2,6 +2,7 @@ package gov.ca.cwds.idm;
 
 import static gov.ca.cwds.idm.BaseLiquibaseTest.CMS_STORE_URL;
 import static gov.ca.cwds.idm.BaseLiquibaseTest.TOKEN_STORE_URL;
+import static gov.ca.cwds.idm.IdmResource.DATETIME_FORMAT_PATTERN;
 import static gov.ca.cwds.idm.persistence.model.OperationType.CREATE;
 import static gov.ca.cwds.idm.persistence.model.OperationType.UPDATE;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.COUNTY;
@@ -52,7 +53,6 @@ import com.amazonaws.services.cognitoidp.model.UsernameExistsException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Iterables;
 import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.dto.UserIdAndOperation;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.persistence.UserLogRepository;
 import gov.ca.cwds.idm.persistence.model.OperationType;
@@ -64,6 +64,8 @@ import gov.ca.cwds.idm.service.cognito.CognitoProperties;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.service.messages.MessagesService;
 import java.nio.charset.Charset;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -71,12 +73,10 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import liquibase.util.StringUtils;
 import org.apache.commons.codec.binary.Base64;
-import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -128,7 +128,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
   private static final String BASIC_AUTH_HEADER = prepareBasicAuthHeader();
 
-  private static final MediaType CONTENT_TYPE =
+  private static final MediaType JSON_CONTENT_TYPE =
       new MediaType(
           MediaType.APPLICATION_JSON.getType(),
           MediaType.APPLICATION_JSON.getSubtype(),
@@ -181,7 +181,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         mockMvc
             .perform(MockMvcRequestBuilders.get("/idm/permissions"))
             .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.content().contentType(CONTENT_TYPE))
+            .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
             .andReturn();
 
     assertStrict(result, "fixtures/idm/permissions/valid.json");
@@ -205,7 +205,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         mockMvc
             .perform(MockMvcRequestBuilders.get("/idm/permissions"))
             .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.content().contentType(CONTENT_TYPE))
+            .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
             .andReturn();
 
     assertStrict(result, "fixtures/idm/permissions/valid.json");
@@ -278,7 +278,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
                 MockMvcRequestBuilders.get("/idm/users")
                     .header(HttpHeaders.AUTHORIZATION, BASIC_AUTH_HEADER))
             .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.content().contentType(CONTENT_TYPE))
+            .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
             .andReturn();
 
     assertNonStrict(result, "fixtures/idm/get-users/all-valid.json");
@@ -291,11 +291,11 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         mockMvc
             .perform(
                 MockMvcRequestBuilders.post("/idm/users/search")
-                    .contentType(CONTENT_TYPE)
+                    .contentType(JSON_CONTENT_TYPE)
                     .content("[\"YOLOD\", \"SMITHBO\"]")
                     .header(HttpHeaders.AUTHORIZATION, BASIC_AUTH_HEADER))
             .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.content().contentType(CONTENT_TYPE))
+            .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
             .andReturn();
 
     assertNonStrict(result, "fixtures/idm/users-search/valid.json");
@@ -308,11 +308,11 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         mockMvc
             .perform(
                 MockMvcRequestBuilders.post("/idm/users/search")
-                    .contentType(CONTENT_TYPE)
+                    .contentType(JSON_CONTENT_TYPE)
                     .content("[\"YOLOD\", \"yolod\", \"YOLOD\"]")
                     .header(HttpHeaders.AUTHORIZATION, BASIC_AUTH_HEADER))
             .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.content().contentType(CONTENT_TYPE))
+            .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
             .andReturn();
 
     assertNonStrict(result, "fixtures/idm/users-search/yolod.json");
@@ -326,7 +326,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
                 MockMvcRequestBuilders.get("/idm/users?paginationToken=" + SOME_PAGINATION_TOKEN)
                     .header(HttpHeaders.AUTHORIZATION, BASIC_AUTH_HEADER))
             .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.content().contentType(CONTENT_TYPE))
+            .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
             .andReturn();
 
     assertNonStrict(result, "fixtures/idm/get-users/search-valid.json");
@@ -363,7 +363,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     mockMvc
         .perform(
             MockMvcRequestBuilders.post("/idm/users")
-                .contentType(CONTENT_TYPE)
+                .contentType(JSON_CONTENT_TYPE)
                 .content(asJsonString(user)))
         .andExpect(MockMvcResultMatchers.status().isCreated())
         .andExpect(header().string("location", "http://localhost/idm/users/" + NEW_USER_SUCCESS_ID))
@@ -395,7 +395,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     mockMvc
         .perform(
             MockMvcRequestBuilders.post("/idm/users")
-                .contentType(CONTENT_TYPE)
+                .contentType(JSON_CONTENT_TYPE)
                 .content(asJsonString(user)))
         .andExpect(MockMvcResultMatchers.status().isCreated())
         .andExpect(header().string("location", "http://localhost/idm/users/" + NEW_USER_ES_FAIL_ID))
@@ -427,7 +427,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     mockMvc
         .perform(
             MockMvcRequestBuilders.post("/idm/users")
-                .contentType(CONTENT_TYPE)
+                .contentType(JSON_CONTENT_TYPE)
                 .content(asJsonString(user)))
         .andExpect(MockMvcResultMatchers.status().isConflict())
         .andReturn();
@@ -447,7 +447,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     mockMvc
         .perform(
             MockMvcRequestBuilders.post("/idm/users")
-                .contentType(CONTENT_TYPE)
+                .contentType(JSON_CONTENT_TYPE)
                 .content(asJsonString(user)))
         .andExpect(MockMvcResultMatchers.status().isUnauthorized())
         .andReturn();
@@ -500,7 +500,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     mockMvc
         .perform(
             MockMvcRequestBuilders.post("/idm/users")
-                .contentType(CONTENT_TYPE)
+                .contentType(JSON_CONTENT_TYPE)
                 .content(asJsonString(user)))
         .andExpect(MockMvcResultMatchers.status().isBadRequest())
         .andReturn();
@@ -525,7 +525,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     mockMvc
         .perform(
             MockMvcRequestBuilders.patch("/idm/users/" + USER_NO_RACFID_ID)
-                .contentType(CONTENT_TYPE)
+                .contentType(JSON_CONTENT_TYPE)
                 .content(asJsonString(userUpdate)))
         .andExpect(MockMvcResultMatchers.status().isNoContent())
         .andReturn();
@@ -561,7 +561,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     mockMvc
         .perform(
             MockMvcRequestBuilders.patch("/idm/users/" + USER_WITH_RACFID_ID)
-                .contentType(CONTENT_TYPE)
+                .contentType(JSON_CONTENT_TYPE)
                 .content(asJsonString(userUpdate)))
         .andExpect(MockMvcResultMatchers.status().isNoContent())
         .andReturn();
@@ -604,7 +604,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     mockMvc
         .perform(
             MockMvcRequestBuilders.patch("/idm/users/" + USER_NO_RACFID_ID)
-                .contentType(CONTENT_TYPE)
+                .contentType(JSON_CONTENT_TYPE)
                 .content(asJsonString(userUpdate)))
         .andExpect(MockMvcResultMatchers.status().isNoContent())
         .andReturn();
@@ -628,7 +628,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     mockMvc
         .perform(
             MockMvcRequestBuilders.patch("/idm/users/" + USER_NO_RACFID_ID)
-                .contentType(CONTENT_TYPE)
+                .contentType(JSON_CONTENT_TYPE)
                 .content(asJsonString(userUpdate)))
         .andExpect(MockMvcResultMatchers.status().isNoContent())
         .andReturn();
@@ -649,7 +649,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     mockMvc
         .perform(
             MockMvcRequestBuilders.patch("/idm/users/" + USER_NO_RACFID_ID)
-                .contentType(CONTENT_TYPE)
+                .contentType(JSON_CONTENT_TYPE)
                 .content(asJsonString(userUpdate)))
         .andExpect(MockMvcResultMatchers.status().isUnauthorized())
         .andReturn();
@@ -666,7 +666,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     mockMvc
         .perform(
             MockMvcRequestBuilders.patch("/idm/users/" + USER_NO_RACFID_ID)
-                .contentType(CONTENT_TYPE)
+                .contentType(JSON_CONTENT_TYPE)
                 .content(asJsonString(userUpdate)))
         .andExpect(MockMvcResultMatchers.status().isUnauthorized())
         .andReturn();
@@ -680,7 +680,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
             .perform(
                 MockMvcRequestBuilders.get("/idm/users/verify?email=test@test.com&racfid=SMITHBO"))
             .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.content().contentType(CONTENT_TYPE))
+            .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
             .andReturn();
 
     assertNonStrict(result, "fixtures/idm/verify-user/verify-valid.json");
@@ -694,7 +694,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
             .perform(
                 MockMvcRequestBuilders.get("/idm/users/verify?email=test@test.com&racfid=smithbo"))
             .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.content().contentType(CONTENT_TYPE))
+            .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
             .andReturn();
 
     assertNonStrict(result, "fixtures/idm/verify-user/verify-valid.json");
@@ -708,7 +708,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
             .perform(
                 MockMvcRequestBuilders.get("/idm/users/verify?email=test@test.com&racfid=SMITHB1"))
             .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.content().contentType(CONTENT_TYPE))
+            .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
             .andReturn();
 
     assertNonStrict(result, "fixtures/idm/verify-user/verify-no-racfid.json");
@@ -723,7 +723,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
                 MockMvcRequestBuilders.get(
                     "/idm/users/verify?email=julio@gmail.com&racfid=SMITHBO"))
             .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.content().contentType(CONTENT_TYPE))
+            .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
             .andReturn();
 
     assertNonStrict(result, "fixtures/idm/verify-user/verify-user-present.json");
@@ -749,14 +749,14 @@ public class IdmResourceTest extends BaseLiquibaseTest {
             .perform(
                 MockMvcRequestBuilders.get("/idm/users/verify?email=test@test.com&racfid=SMITHBO"))
             .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.content().contentType(CONTENT_TYPE))
+            .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
             .andReturn();
 
     assertNonStrict(result, "fixtures/idm/verify-user/verify-other-county.json");
   }
 
   @Test
-  public void testGetUserIdAndOperations() {
+  public void testGetFailedOperations() throws Exception {
     userLogRepository.deleteAll();
 
     userLog("c", CREATE, 1000);
@@ -766,17 +766,20 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     userLog("b", UPDATE, 5000);
     userLog("c", UPDATE, 6000);
 
-    List<UserIdAndOperation> objectList = userLogService.getUserIdAndOperations(new Date(2000));
+    Date lastJobDate = new Date(2000);
+    DateFormat dateFormat = new SimpleDateFormat(DATETIME_FORMAT_PATTERN);
+    String lastJobDateStr = dateFormat.format(lastJobDate);
 
-    assertThat(objectList.size(), Matchers.is(3));
+    MvcResult result =
+        mockMvc
+            .perform(
+                MockMvcRequestBuilders.get("/idm/users/failed-operations?date=" + lastJobDateStr)
+                    .header(HttpHeaders.AUTHORIZATION, BASIC_AUTH_HEADER))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
+            .andReturn();
 
-    Map<String, UserIdAndOperation> testMap = objectList.stream().collect(
-        Collectors.toMap(UserIdAndOperation::getId, e -> e));
-
-    assertThat(testMap.size(), Matchers.is(3));
-    assertThat(testMap.get("a").getOperation(), is(CREATE));
-    assertThat(testMap.get("b").getOperation(), is(UPDATE));
-    assertThat(testMap.get("c").getOperation(), is(UPDATE));
+    assertNonStrict(result, "fixtures/idm/failed-operations/failed-operations-valid.json");
   }
 
   private UserLog userLog(String userName, OperationType operation,  long date) {
@@ -793,7 +796,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         mockMvc
             .perform(MockMvcRequestBuilders.get("/idm/users/" + userId))
             .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.content().contentType(CONTENT_TYPE))
+            .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
             .andReturn();
 
     assertNonStrict(result, fixtureFilePath);
@@ -806,7 +809,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     mockMvc
         .perform(
             MockMvcRequestBuilders.post("/idm/users")
-                .contentType(CONTENT_TYPE)
+                .contentType(JSON_CONTENT_TYPE)
                 .content(asJsonString(user)))
         .andExpect(MockMvcResultMatchers.status().isBadRequest())
         .andReturn();
