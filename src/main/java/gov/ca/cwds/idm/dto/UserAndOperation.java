@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import gov.ca.cwds.idm.persistence.model.OperationType;
 import java.io.Serializable;
-import java.util.Objects;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
@@ -28,23 +27,5 @@ public class UserAndOperation implements Serializable {
 
   public OperationType getOperation() {
     return operation;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (!(o instanceof UserAndOperation)) {
-      return false;
-    }
-    UserAndOperation that = (UserAndOperation) o;
-    return Objects.equals(user.getId(), that.user.getId()) &&
-        operation == that.operation;
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(user.getId(), operation);
   }
 }

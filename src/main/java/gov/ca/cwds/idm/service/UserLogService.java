@@ -42,6 +42,7 @@ public class UserLogService {
   }
 
   @Transactional(value = "tokenTransactionManager", readOnly = true)
+  @SuppressWarnings({"fb-contrib:CLI_CONSTANT_LIST_INDEX"})
   public List<UserIdAndOperation> getUserIdAndOperations(Date lastJobTime) {
     if (lastJobTime == null) {
       throw new IllegalArgumentException("Last Job Time cannot be null");
