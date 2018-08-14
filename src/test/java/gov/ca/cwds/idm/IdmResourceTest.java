@@ -16,6 +16,7 @@ import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.LAST_NAME;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.DEFAULT_PAGESIZE;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByAttribute;
+import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertStrict;
 import static org.hamcrest.CoreMatchers.is;
@@ -788,6 +789,18 @@ public class IdmResourceTest extends BaseLiquibaseTest {
                 "/idm/users/failed-operations?date=" + getDateString(new Date(2000))))
         .andExpect(MockMvcResultMatchers.status().isUnauthorized())
         .andReturn();
+  }
+
+  @Test
+  public void testGetFailedOperationsInvalidDateFormat() throws Exception {
+    MvcResult result =
+        mockMvc
+            .perform(
+                MockMvcRequestBuilders.get("/idm/users/failed-operations?date=2018-08-01-13.26.33")
+                    .header(HttpHeaders.AUTHORIZATION, BASIC_AUTH_HEADER))
+            .andExpect(MockMvcResultMatchers.status().isBadRequest())
+            .andReturn();
+    assertExtensible(result, "fixtures/idm/failed-operations/failed-operations-invalid-date.json");
   }
 
   private UserLog userLog(String userName, OperationType operation,  long date) {
