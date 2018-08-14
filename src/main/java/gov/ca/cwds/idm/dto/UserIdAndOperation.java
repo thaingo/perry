@@ -39,8 +39,8 @@ public class UserIdAndOperation implements Serializable {
       return false;
     }
     UserIdAndOperation that = (UserIdAndOperation) o;
-    return Objects.equals(id, that.id) &&
-        operation == that.operation;
+    return operation == that.operation &&
+        Objects.equals(id, that.id);
   }
 
   @Override
