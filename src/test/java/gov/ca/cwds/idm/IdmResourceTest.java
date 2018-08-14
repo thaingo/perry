@@ -766,14 +766,11 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     userLog("b", UPDATE, 5000);
     userLog("c", UPDATE, 6000);
 
-    Date lastJobDate = new Date(2000);
-    DateFormat dateFormat = new SimpleDateFormat(DATETIME_FORMAT_PATTERN);
-    String lastJobDateStr = dateFormat.format(lastJobDate);
-
     MvcResult result =
         mockMvc
             .perform(
-                MockMvcRequestBuilders.get("/idm/users/failed-operations?date=" + lastJobDateStr)
+                MockMvcRequestBuilders.get(
+                    "/idm/users/failed-operations?date=" + getDateString(new Date(2000)))
                     .header(HttpHeaders.AUTHORIZATION, BASIC_AUTH_HEADER))
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
@@ -782,12 +779,28 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     assertNonStrict(result, "fixtures/idm/failed-operations/failed-operations-valid.json");
   }
 
+  @Test
+  @WithMockCustomUser
+  public void testGetFailedOperationsNoBasicAuth() throws Exception {
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.get(
+                "/idm/users/failed-operations?date=" + getDateString(new Date(2000))))
+        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+        .andReturn();
+  }
+
   private UserLog userLog(String userName, OperationType operation,  long date) {
     UserLog log = new UserLog();
     log.setUsername(userName);
     log.setOperationType(operation);
     log.setOperationTime(new Date(date));
     return userLogRepository.save(log);
+  }
+
+  private static String getDateString(Date date) {
+    DateFormat dateFormat = new SimpleDateFormat(DATETIME_FORMAT_PATTERN);
+    return dateFormat.format(date);
   }
 
   private void testGetValidYoloUser(String userId, String fixtureFilePath) throws Exception {
