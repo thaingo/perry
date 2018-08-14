@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import gov.ca.cwds.data.persistence.PersistentObject;
 import gov.ca.cwds.data.persistence.cms.CmsPersistentObject;
 import java.util.Date;
-import java.util.Objects;
 import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -21,6 +20,7 @@ import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.hibernate.annotations.Type;
+import org.hibernate.annotations.Where;
 
 /**
  * {@link PersistentObject} representing a UserId
@@ -67,6 +67,7 @@ public class UserId extends CmsPersistentObject {
   @JoinColumn(name = "FKUSERID_T")
   @LazyCollection(LazyCollectionOption.FALSE)
   @Fetch(FetchMode.JOIN)
+  @Where(clause = "END_DT IS NULL")
   private Set<StaffAuthorityPrivilege> privileges;
 
   @ManyToOne

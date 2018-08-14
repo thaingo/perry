@@ -27,9 +27,7 @@ public interface UserIdDao extends ReadOnlyRepository<UserId, String> {
       + "LEFT OUTER JOIN FETCH sp.office "
       + "LEFT OUTER JOIN FETCH u.privileges p "
       + "WHERE u.logonId = :logonId "
-      + "AND u.endDate IS NULL "
-      + "AND p.endDate IS NULL "
-      + "AND ua.endDate IS NULL")
+      + "AND u.endDate IS NULL ")
   Set<UserId> findActiveByLogonId(@Param("logonId") String logonId);
 
 

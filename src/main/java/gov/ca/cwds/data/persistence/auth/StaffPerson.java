@@ -6,7 +6,6 @@ import io.dropwizard.jackson.JsonSnakeCase;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Date;
-import java.util.Objects;
 import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -23,6 +22,7 @@ import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.hibernate.annotations.Type;
+import org.hibernate.annotations.Where;
 
 /**
  * Created by dmitry.rudenko on 8/21/2017.
@@ -76,6 +76,7 @@ public class StaffPerson {
   @JoinColumn(name = "FKSTFPERST")
   @Fetch(FetchMode.JOIN)
   @LazyCollection(LazyCollectionOption.FALSE)
+  @Where(clause = "END_DT IS NULL")
   private Set<StaffUnitAuthority> unitAuthorities;
 
   public CwsOffice getOffice() {
