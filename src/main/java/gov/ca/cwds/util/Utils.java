@@ -4,7 +4,9 @@ import static gov.ca.cwds.config.Constants.DEFAULT_LOCALE;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import org.apache.commons.lang3.SerializationUtils;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
@@ -40,5 +42,18 @@ public class Utils {
     } else {
       return null;
     }
+  }
+
+  public static String toLowerCase(String str) {
+    if(str != null) {
+      return str.toLowerCase(DEFAULT_LOCALE);
+    } else {
+      return null;
+    }
+  }
+
+  @SuppressWarnings({"squid:S1319"})//need HashSet in tests
+  public static HashSet<String> toSet(String... values) {
+    return new HashSet<>(Arrays.asList(values));
   }
 }

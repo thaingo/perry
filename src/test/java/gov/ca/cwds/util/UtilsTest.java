@@ -14,4 +14,12 @@ public class UtilsTest {
     assertThat(toUpperCase("Abc"), is("ABC"));
     assertThat(toUpperCase("ABC"), is("ABC"));
   }
+
+  @Test
+  public void testToLowerCase() {
+    assertThat(toLowerCase(null), is(nullValue()));
+    assertThat(toLowerCase("gonzales@gmail.com"), is("gonzales@gmail.com"));
+    assertThat(toLowerCase("Gonzales@Gmail.Com"), is("gonzales@gmail.com"));
+    assertThat(toLowerCase("GONZALES@GMAIL.COM"), is("gonzales@gmail.com"));
+  }
 }
