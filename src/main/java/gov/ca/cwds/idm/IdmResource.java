@@ -27,6 +27,7 @@ import io.swagger.annotations.ApiResponses;
 import java.net.URI;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -227,7 +228,10 @@ public class IdmResource {
           HttpStatus.CONFLICT, USER_WITH_EMAIL_EXISTS_IN_IDM, e.getMessage());
     } catch (UserIdmValidationException e) {
       return createCustomResponseEntity(
-          HttpStatus.BAD_REQUEST, IDM_USER_VALIDATION_FAILED, e.getMessage(), e.getCause().getMessage());
+          HttpStatus.BAD_REQUEST,
+          IDM_USER_VALIDATION_FAILED,
+          e.getMessage(),
+          Collections.singletonList(e.getCause().getMessage()));
     }
   }
 
@@ -263,9 +267,9 @@ public class IdmResource {
   }
 
   private static ResponseEntity<IdmApiCustomError> createCustomResponseEntity(
-      HttpStatus httpStatus, MessageCode errorCode, String msg, String cause) {
+      HttpStatus httpStatus, MessageCode errorCode, String msg, List<String> causes) {
     return new ResponseEntity<>(
-        new IdmApiCustomError(httpStatus, errorCode, msg, cause), httpStatus);
+        new IdmApiCustomError(httpStatus, errorCode, msg, causes), httpStatus);
   }
 
   private static ResponseEntity<IdmApiCustomError> createCustomResponseEntity(
