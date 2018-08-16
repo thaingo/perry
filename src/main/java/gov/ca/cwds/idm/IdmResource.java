@@ -4,6 +4,7 @@ import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STAND
 import static gov.ca.cwds.service.messages.MessageCode.IDM_USER_VALIDATION_FAILED;
 import static gov.ca.cwds.service.messages.MessageCode.INVALIDE_DATE_FORMAT;
 import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
+import static java.util.stream.Collectors.toList;
 
 import gov.ca.cwds.idm.dto.IdmApiCustomError;
 import gov.ca.cwds.idm.dto.User;
@@ -15,6 +16,7 @@ import gov.ca.cwds.idm.dto.UsersSearchCriteria;
 import gov.ca.cwds.idm.persistence.model.Permission;
 import gov.ca.cwds.idm.service.DictionaryProvider;
 import gov.ca.cwds.idm.service.IdmService;
+import gov.ca.cwds.rest.api.domain.PartialSuccessException;
 import gov.ca.cwds.rest.api.domain.UserAlreadyExistsException;
 import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
 import gov.ca.cwds.rest.api.domain.UserNotFoundPerryException;
@@ -216,12 +218,8 @@ public class IdmResource {
           User user) {
     try {
       String newUserId = idmService.createUser(user);
-      URI uri =
-          ServletUriComponentsBuilder.fromCurrentRequest()
-              .path("/{id}")
-              .buildAndExpand(newUserId)
-              .toUri();
-      return ResponseEntity.created(uri).build();
+      URI locationUri = getNewUserLocationUri(newUserId);
+      return ResponseEntity.created(locationUri).build();
 
     } catch (UserAlreadyExistsException e) {
       return createCustomResponseEntity(
@@ -232,7 +230,25 @@ public class IdmResource {
           IDM_USER_VALIDATION_FAILED,
           e.getMessage(),
           Collections.singletonList(e.getCause().getMessage()));
+    } catch (PartialSuccessException e) {
+      ResponseEntity<IdmApiCustomError> responseEntity = createCustomResponseEntity(
+          HttpStatus.INTERNAL_SERVER_ERROR,
+          e.getErrorCode(),
+          e.getMessage(),
+          e.getCauses().stream().map(Exception::getMessage).collect(toList()));
+
+      URI locationUri = getNewUserLocationUri(e.getUserId());
+      responseEntity.getHeaders().setLocation(locationUri);
+
+      return responseEntity;
     }
+  }
+
+  private URI getNewUserLocationUri(String newUserId){
+    return  ServletUriComponentsBuilder.fromCurrentRequest()
+        .path("/{id}")
+        .buildAndExpand(newUserId)
+        .toUri();
   }
 
   @RequestMapping(method = RequestMethod.GET, value = "/permissions", produces = "application/json")
