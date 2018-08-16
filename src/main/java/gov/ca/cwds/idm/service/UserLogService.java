@@ -32,12 +32,12 @@ public class UserLogService {
   private MessagesService messages;
 
   @Transactional(value = "tokenTransactionManager")
-  public Optional<UserLog> logCreate(String username) {
+  public UserLogResult logCreate(String username) {
     return log(username, CREATE);
   }
 
   @Transactional(value = "tokenTransactionManager")
-  public Optional<UserLog> logUpdate(String username) {
+  public UserLogResult logUpdate(String username) {
     return log(username, UPDATE);
   }
 
@@ -56,16 +56,22 @@ public class UserLogService {
         .collect(Collectors.toList());
   }
 
-  private Optional<UserLog> log(String username, OperationType operationType) {
+  private UserLogResult log(String username, OperationType operationType) {
+    UserLogResult result = new UserLogResult();
+
     UserLog userLog = new UserLog();
     userLog.setUsername(username);
     userLog.setOperationType(operationType);
     userLog.setOperationTime(new Date());
 
-    UserLog result = null;
     try {
-      result = userLogRepository.save(userLog);
+      UserLog returnedUserLog = userLogRepository.save(userLog);
+      result.setResultType(ResultType.SUCCESS);
+      result.setUserLog(Optional.of(returnedUserLog));
+
     } catch (Exception e) {
+      result.setResultType(ResultType.FAIL);
+      result.setException(Optional.of(e));
 
       String msg;
       if (operationType == OperationType.CREATE) {
@@ -77,7 +83,8 @@ public class UserLogService {
       }
       LOGGER.error(msg, e);
     }
-    return Optional.ofNullable(result);
+
+    return result;
   }
 
   @Autowired
