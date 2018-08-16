@@ -398,8 +398,6 @@ public class IdmResourceTest extends BaseLiquibaseTest {
                 header().string("location", "http://localhost/idm/users/" + NEW_USER_ES_FAIL_ID))
             .andReturn();
 
-    System.out.println(result.getResponse().getContentAsString());
-
     assertExtensible(result, "fixtures/idm/partial-success-user-create/log-success.json");
 
     verify(cognito, times(1)).adminCreateUser(request);
