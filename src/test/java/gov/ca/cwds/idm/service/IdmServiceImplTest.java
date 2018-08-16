@@ -7,10 +7,64 @@ import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STAND
 import static gov.ca.cwds.util.Utils.toSet;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import com.amazonaws.services.cognitoidp.model.UserType;
+import gov.ca.cwds.idm.IdmResourceTest;
+import gov.ca.cwds.idm.WithMockCustomUser;
+import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.idm.persistence.UserLogRepository;
+import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
+import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
+import gov.ca.cwds.service.CwsUserInfoService;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit4.SpringRunner;
 
+@RunWith(SpringRunner.class)
+@ActiveProfiles({"dev", "idm"})
+@SpringBootTest(properties = {
+    "perry.identityManager.idmBasicAuthUser=" + IdmResourceTest.IDM_BASIC_AUTH_USER,
+    "perry.identityManager.idmBasicAuthPass=" + IdmResourceTest.IDM_BASIC_AUTH_PASS,
+    "perry.identityManager.idmMapping=config/idm.groovy",
+    "spring.jpa.hibernate.ddl-auto=none"
+})
 public class IdmServiceImplTest {
+
+  private static final String NEW_USER_SUCCESS_ID = "17067e4e-270f-4623-b86c-b4d4fa527a34";
+
+  @Autowired
+  private IdmServiceImpl service;
+  @Autowired
+  private UserLogService userLogService;
+
+  private CognitoServiceFacade cognitoServiceFacadeMock = mock(CognitoServiceFacade.class);
+  private CwsUserInfoService cwsUserInfoServiceMock = mock(CwsUserInfoService.class);
+  private UserLogRepository userLogRepositoryMock = mock(UserLogRepository.class);
+  private SearchService searchServiceMock = mock(SearchService.class);
+
+  @Before
+  public void before() {
+    service.setCognitoServiceFacade(cognitoServiceFacadeMock);
+    service.setCwsUserInfoService(cwsUserInfoServiceMock);
+    service.setSearchService(searchServiceMock);
+
+    userLogService.setUserLogRepository(userLogRepositoryMock);
+  }
+
+  @Test
+  @WithMockCustomUser
+  public void testCreateUserSuccess() {
+    User user = user();
+    setCreateUserResult(user, NEW_USER_SUCCESS_ID);
+    String id = service.createUser(user);
+    assertThat(id, is(NEW_USER_SUCCESS_ID));
+  }
 
   @Test
   public void testTransformSearchValues() {
@@ -23,5 +77,25 @@ public class IdmServiceImplTest {
     assertThat(
         transformSearchValues(toSet("John", "JOHN", "john"), FIRST_NAME),
         is(toSet("John", "JOHN", "john")));
+  }
+
+  private static User user() {
+    User user = new User();
+    user.setEmail("gonzales@gmail.com");
+    user.setFirstName("Garcia");
+    user.setLastName("Gonzales");
+    user.setCountyName("Yolo");
+    return user;
+  }
+
+  private void setCreateUserResult(User user, String newId) {
+
+    UserType newUser = new UserType();
+    newUser.setUsername(newId);
+    newUser.setEnabled(true);
+    newUser.setUserStatus("FORCE_CHANGE_PASSWORD");
+    newUser.withAttributes(CognitoUtils.buildCreateUserAttributes(user));
+
+    when(cognitoServiceFacadeMock.createUser(user)).thenReturn(newUser);
   }
 }

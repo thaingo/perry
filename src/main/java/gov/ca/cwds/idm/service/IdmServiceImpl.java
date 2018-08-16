@@ -345,4 +345,21 @@ public class IdmServiceImpl implements IdmService {
   public void setSearchService(SearchService searchService) {
     this.searchService = searchService;
   }
+
+  public void setCognitoServiceFacade(
+      CognitoServiceFacade cognitoServiceFacade) {
+    this.cognitoServiceFacade = cognitoServiceFacade;
+  }
+
+  public void setCwsUserInfoService(CwsUserInfoService cwsUserInfoService) {
+    this.cwsUserInfoService = cwsUserInfoService;
+  }
+
+  public void setUserLogService(UserLogService userLogService) {
+    this.userLogService = userLogService;
+  }
+
+  public void setMessages(MessagesService messages) {
+    this.messages = messages;
+  }
 }

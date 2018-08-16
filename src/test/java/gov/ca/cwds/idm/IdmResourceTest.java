@@ -146,8 +146,6 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
   @Autowired private UserLogRepository userLogRepository;
 
-  @Autowired  private UserLogService userLogService;
-
   private SearchService searchService = mock(SearchService.class);
 
   private MockMvc mockMvc;
