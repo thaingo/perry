@@ -13,7 +13,6 @@ import gov.ca.cwds.idm.persistence.model.UserLog;
 import gov.ca.cwds.service.messages.MessagesService;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,11 +66,11 @@ public class UserLogService {
     try {
       UserLog returnedUserLog = userLogRepository.save(userLog);
       result.setResultType(ResultType.SUCCESS);
-      result.setUserLog(Optional.of(returnedUserLog));
+      result.setUserLog(returnedUserLog);
 
     } catch (Exception e) {
       result.setResultType(ResultType.FAIL);
-      result.setException(Optional.of(e));
+      result.setException(e);
 
       String msg;
       if (operationType == OperationType.CREATE) {

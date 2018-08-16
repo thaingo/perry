@@ -236,15 +236,23 @@ public class IdmServiceImpl implements IdmService {
     }
   }
 
-  private void createUserInSearch(UserType userType) {
+  private PutUserInSearchResult createUserInSearch(UserType userType) {
+    PutUserInSearchResult result = new PutUserInSearchResult();
     try {
       User user = enrichCognitoUser(userType);
       searchService.createUser(user);
+      result.setResultType(ResultType.SUCCESS);
+
     } catch (Exception e) {
+      result.setResultType(ResultType.FAIL);
+      result.setException(e);
+
       String msg = messages.get(UNABLE_CREATE_IDM_USER_IN_ES, userType.getUsername());
       LOGGER.error(msg, e);
-      userLogService.logCreate(userType.getUsername());
+
+      result.setUserLogResult(userLogService.logCreate(userType.getUsername()));
     }
+    return result;
   }
 
   private UserVerificationResult composeNegativeResultWithMessage(
