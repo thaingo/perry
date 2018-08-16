@@ -58,15 +58,14 @@ public class UserLogService {
   private UserLogResult log(String username, OperationType operationType) {
     UserLogResult result = new UserLogResult();
 
-    UserLog userLog = new UserLog();
-    userLog.setUsername(username);
-    userLog.setOperationType(operationType);
-    userLog.setOperationTime(new Date());
-
     try {
-      UserLog returnedUserLog = userLogRepository.save(userLog);
+      UserLog userLog = new UserLog();
+      userLog.setUsername(username);
+      userLog.setOperationType(operationType);
+      userLog.setOperationTime(new Date());
+
+      userLogRepository.save(userLog);
       result.setResultType(ResultType.SUCCESS);
-      result.setUserLog(returnedUserLog);
 
     } catch (Exception e) {
       result.setResultType(ResultType.FAIL);

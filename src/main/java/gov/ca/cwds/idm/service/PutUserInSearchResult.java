@@ -1,7 +1,5 @@
 package gov.ca.cwds.idm.service;
 
-import java.util.Optional;
-
 public class PutUserInSearchResult {
 
   private ResultType resultType = ResultType.WAS_NOT_EXECUTED;
@@ -16,16 +14,16 @@ public class PutUserInSearchResult {
     this.resultType = resultType;
   }
 
-  public Optional<Exception> getException() {
-    return Optional.ofNullable(exception);
+  public Exception getException() {
+    return exception;
   }
 
   public void setException(Exception exception) {
     this.exception = exception;
   }
 
-  public Optional<UserLogResult> getUserLogResult() {
-    return Optional.ofNullable(userLogResult);
+  public UserLogResult getUserLogResult() {
+    return userLogResult;
   }
 
   public void setUserLogResult(UserLogResult userLogResult) {
