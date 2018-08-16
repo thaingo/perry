@@ -387,14 +387,20 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
     setCreateUserResult(request, NEW_USER_ES_FAIL_ID);
 
-    mockMvc
-        .perform(
-            MockMvcRequestBuilders.post("/idm/users")
-                .contentType(JSON_CONTENT_TYPE)
-                .content(asJsonString(user)))
-        .andExpect(MockMvcResultMatchers.status().isCreated())
-        .andExpect(header().string("location", "http://localhost/idm/users/" + NEW_USER_ES_FAIL_ID))
-        .andReturn();
+    MvcResult result =
+        mockMvc
+            .perform(
+                MockMvcRequestBuilders.post("/idm/users")
+                    .contentType(JSON_CONTENT_TYPE)
+                    .content(asJsonString(user)))
+            .andExpect(MockMvcResultMatchers.status().isInternalServerError())
+            .andExpect(
+                header().string("location", "http://localhost/idm/users/" + NEW_USER_ES_FAIL_ID))
+            .andReturn();
+
+    System.out.println(result.getResponse().getContentAsString());
+
+    assertExtensible(result, "fixtures/idm/partial-success-user-create/log-success.json");
 
     verify(cognito, times(1)).adminCreateUser(request);
     verify(searchService, times(1)).createUser(any(User.class));

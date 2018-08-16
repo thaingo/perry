@@ -39,6 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -224,23 +225,25 @@ public class IdmResource {
     } catch (UserAlreadyExistsException e) {
       return createCustomResponseEntity(
           HttpStatus.CONFLICT, USER_WITH_EMAIL_EXISTS_IN_IDM, e.getMessage());
+
     } catch (UserIdmValidationException e) {
       return createCustomResponseEntity(
           HttpStatus.BAD_REQUEST,
           IDM_USER_VALIDATION_FAILED,
           e.getMessage(),
           Collections.singletonList(e.getCause().getMessage()));
+
     } catch (PartialSuccessException e) {
-      ResponseEntity<IdmApiCustomError> responseEntity = createCustomResponseEntity(
+      URI locationUri = getNewUserLocationUri(e.getUserId());
+      HttpHeaders headers = new HttpHeaders();
+      headers.setLocation(locationUri);
+
+      return createCustomResponseEntity(
           HttpStatus.INTERNAL_SERVER_ERROR,
           e.getErrorCode(),
           e.getMessage(),
+          headers,
           e.getCauses().stream().map(Exception::getMessage).collect(toList()));
-
-      URI locationUri = getNewUserLocationUri(e.getUserId());
-      responseEntity.getHeaders().setLocation(locationUri);
-
-      return responseEntity;
     }
   }
 
@@ -283,14 +286,20 @@ public class IdmResource {
   }
 
   private static ResponseEntity<IdmApiCustomError> createCustomResponseEntity(
+      HttpStatus httpStatus, MessageCode errorCode, String msg) {
+    return new ResponseEntity<>(
+        new IdmApiCustomError(httpStatus, errorCode, msg), httpStatus);
+  }
+
+  private static ResponseEntity<IdmApiCustomError> createCustomResponseEntity(
       HttpStatus httpStatus, MessageCode errorCode, String msg, List<String> causes) {
     return new ResponseEntity<>(
         new IdmApiCustomError(httpStatus, errorCode, msg, causes), httpStatus);
   }
 
   private static ResponseEntity<IdmApiCustomError> createCustomResponseEntity(
-      HttpStatus httpStatus, MessageCode errorCode, String msg) {
+      HttpStatus httpStatus, MessageCode errorCode, String msg, HttpHeaders headers, List<String> causes) {
     return new ResponseEntity<>(
-        new IdmApiCustomError(httpStatus, errorCode, msg), httpStatus);
+        new IdmApiCustomError(httpStatus, errorCode, msg, causes), headers, httpStatus);
   }
 }

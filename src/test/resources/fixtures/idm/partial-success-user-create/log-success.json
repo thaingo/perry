@@ -1,0 +1,8 @@
+{
+  "status": "INTERNAL_SERVER_ERROR",
+  "message": "User, username: 08e14c57-6e5e-48dd-8172-e8949c2a7f76 was successfully created in Cognito but failed to be saved in search system",
+  "error_code": "CAP-018",
+  "causes": [
+    "Elastic Search error"
+  ]
+}

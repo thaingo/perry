@@ -2,6 +2,8 @@ package gov.ca.cwds.idm.service;
 
 import static gov.ca.cwds.idm.persistence.model.OperationType.CREATE;
 import static gov.ca.cwds.idm.persistence.model.OperationType.UPDATE;
+import static gov.ca.cwds.idm.service.ResultType.FAIL;
+import static gov.ca.cwds.idm.service.ResultType.SUCCESS;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByEmail;
@@ -12,6 +14,8 @@ import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USE
 import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID_IN_CWSCMS;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_CREATE_IDM_USER_IN_ES;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_IDM_USER_IN_ES;
+import static gov.ca.cwds.service.messages.MessageCode.USER_CREATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
+import static gov.ca.cwds.service.messages.MessageCode.USER_CREATE_SAVE_TO_SEARCH_ERROR;
 import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
 import static gov.ca.cwds.util.Utils.toLowerCase;
 import static gov.ca.cwds.util.Utils.toUpperCase;
@@ -34,6 +38,7 @@ import gov.ca.cwds.idm.service.cognito.StandardUserAttribute;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil;
+import gov.ca.cwds.rest.api.domain.PartialSuccessException;
 import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType;
 import gov.ca.cwds.service.CwsUserInfoService;
@@ -111,8 +116,27 @@ public class IdmServiceImpl implements IdmService {
   @Override
   public String createUser(User user) {
     UserType userType = cognitoServiceFacade.createUser(user);
-    createUserInSearch(userType);
-    return userType.getUsername();
+    String userId = userType.getUsername();
+    PutUserInSearchResult doraResult = createUserInSearch(userType);
+
+    if (doraResult.getResultType() == FAIL) {
+      UserLogResult dbLogResult = doraResult.getUserLogResult();
+
+      if (dbLogResult.getResultType() == SUCCESS) {
+        String msg = messages.get(USER_CREATE_SAVE_TO_SEARCH_ERROR, userId);
+        throw new PartialSuccessException(
+            userId, msg, USER_CREATE_SAVE_TO_SEARCH_ERROR, doraResult.getException());
+      } else {//logging in db failed
+        String msg = messages.get(USER_CREATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS, userId);
+        throw new PartialSuccessException(
+            userId,
+            msg,
+            USER_CREATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS,
+            doraResult.getException(),
+            dbLogResult.getException());
+      }
+    }
+    return userId;
   }
 
   @Override
@@ -241,10 +265,10 @@ public class IdmServiceImpl implements IdmService {
     try {
       User user = enrichCognitoUser(userType);
       searchService.createUser(user);
-      result.setResultType(ResultType.SUCCESS);
+      result.setResultType(SUCCESS);
 
     } catch (Exception e) {
-      result.setResultType(ResultType.FAIL);
+      result.setResultType(FAIL);
       result.setException(e);
 
       String msg = messages.get(UNABLE_CREATE_IDM_USER_IN_ES, userType.getUsername());
