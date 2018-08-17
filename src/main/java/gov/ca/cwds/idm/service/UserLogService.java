@@ -31,12 +31,12 @@ public class UserLogService {
   private MessagesService messages;
 
   @Transactional(value = "tokenTransactionManager")
-  public UserLogResult logCreate(String username) {
+  public TryCatchExecution<String> logCreate(String username) {
     return log(username, CREATE);
   }
 
   @Transactional(value = "tokenTransactionManager")
-  public UserLogResult logUpdate(String username) {
+  public TryCatchExecution<String> logUpdate(String username) {
     return log(username, UPDATE);
   }
 
@@ -55,34 +55,32 @@ public class UserLogService {
         .collect(Collectors.toList());
   }
 
-  private UserLogResult log(String username, OperationType operationType) {
-    UserLogResult result = new UserLogResult();
+  private TryCatchExecution<String> log(String username, OperationType operationType) {
 
-    try {
-      UserLog userLog = new UserLog();
-      userLog.setUsername(username);
-      userLog.setOperationType(operationType);
-      userLog.setOperationTime(new Date());
+    return new TryCatchExecution<>(
+        username,
 
-      userLogRepository.save(userLog);
-      result.setResultType(ResultType.SUCCESS);
+        userName -> {
+          UserLog userLog = new UserLog();
+          userLog.setUsername(userName);
+          userLog.setOperationType(operationType);
+          userLog.setOperationTime(new Date());
 
-    } catch (Exception e) {
-      result.setResultType(ResultType.FAIL);
-      result.setException(e);
+          userLogRepository.save(userLog);
+        },
 
-      String msg;
-      if (operationType == OperationType.CREATE) {
-        msg = messages.get(UNABLE_LOG_IDM_USER_CREATE, username);
-      } else if (operationType == OperationType.UPDATE) {
-        msg = messages.get(UNABLE_LOG_IDM_USER_UPDATE, username);
-      } else {
-        msg = messages.get(UNABLE_LOG_IDM_USER, operationType.toString(), username);
-      }
-      LOGGER.error(msg, e);
-    }
-
-    return result;
+        e -> {
+          String msg;
+          if (operationType == OperationType.CREATE) {
+            msg = messages.get(UNABLE_LOG_IDM_USER_CREATE, username);
+          } else if (operationType == OperationType.UPDATE) {
+            msg = messages.get(UNABLE_LOG_IDM_USER_UPDATE, username);
+          } else {
+            msg = messages.get(UNABLE_LOG_IDM_USER, operationType.toString(), username);
+          }
+          LOGGER.error(msg, e);
+        }
+    );
   }
 
   @Autowired

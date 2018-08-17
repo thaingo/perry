@@ -4,7 +4,7 @@ public class PutUserInSearchResult {
 
   private ResultType resultType = ResultType.WAS_NOT_EXECUTED;
   private Exception exception;
-  private UserLogResult userLogResult;
+  private TryCatchExecution userLogResult;
 
   public ResultType getResultType() {
     return resultType;
@@ -22,11 +22,11 @@ public class PutUserInSearchResult {
     this.exception = exception;
   }
 
-  public UserLogResult getUserLogResult() {
+  public TryCatchExecution getUserLogResult() {
     return userLogResult;
   }
 
-  public void setUserLogResult(UserLogResult userLogResult) {
+  public void setUserLogResult(TryCatchExecution userLogResult) {
     this.userLogResult = userLogResult;
   }
 }

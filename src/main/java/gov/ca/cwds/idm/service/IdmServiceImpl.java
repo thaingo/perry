@@ -120,7 +120,7 @@ public class IdmServiceImpl implements IdmService {
     PutUserInSearchResult doraResult = createUserInSearch(userType);
 
     if (doraResult.getResultType() == FAIL) {
-      UserLogResult dbLogResult = doraResult.getUserLogResult();
+      TryCatchExecution dbLogResult = doraResult.getUserLogResult();
 
       if (dbLogResult.getResultType() == SUCCESS) {
         String msg = messages.get(USER_CREATE_SAVE_TO_SEARCH_ERROR, userId);
