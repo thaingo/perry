@@ -1,4 +1,4 @@
-package gov.ca.cwds.idm.service;
+package gov.ca.cwds.idm.service.trycatch;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -6,6 +6,9 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import gov.ca.cwds.idm.service.ResultType;
+import gov.ca.cwds.idm.service.trycatch.TryCatchExecution;
+import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
 public class TryCatchExecutionTest {
@@ -26,7 +29,7 @@ public class TryCatchExecutionTest {
           }
         };
 
-    assertThat(execution.getResultType(), is(ResultType.SUCCESS));
+    assertThat(execution.getResultType(), CoreMatchers.is(ResultType.SUCCESS));
     assertThat(execution.getException(), nullValue());
   }
 

@@ -38,6 +38,8 @@ import gov.ca.cwds.idm.service.cognito.StandardUserAttribute;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil;
+import gov.ca.cwds.idm.service.trycatch.PutInSearchExecution;
+import gov.ca.cwds.idm.service.trycatch.TryCatchExecution;
 import gov.ca.cwds.rest.api.domain.PartialSuccessException;
 import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType;

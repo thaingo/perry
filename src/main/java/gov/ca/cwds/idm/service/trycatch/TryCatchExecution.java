@@ -1,4 +1,6 @@
-package gov.ca.cwds.idm.service;
+package gov.ca.cwds.idm.service.trycatch;
+
+import gov.ca.cwds.idm.service.ResultType;
 
 public abstract class TryCatchExecution<T> {
 

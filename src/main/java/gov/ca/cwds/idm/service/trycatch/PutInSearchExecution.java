@@ -1,4 +1,4 @@
-package gov.ca.cwds.idm.service;
+package gov.ca.cwds.idm.service.trycatch;
 
 import com.amazonaws.services.cognitoidp.model.UserType;
 
