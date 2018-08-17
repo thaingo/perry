@@ -1,22 +1,5 @@
 package gov.ca.cwds.idm.service;
 
-import static gov.ca.cwds.idm.persistence.model.OperationType.CREATE;
-import static gov.ca.cwds.idm.persistence.model.OperationType.UPDATE;
-import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
-import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
-import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByEmail;
-import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getRACFId;
-import static gov.ca.cwds.service.messages.MessageCode.DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS;
-import static gov.ca.cwds.service.messages.MessageCode.IDM_MAPPING_SCRIPT_ERROR;
-import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY;
-import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID_IN_CWSCMS;
-import static gov.ca.cwds.service.messages.MessageCode.UNABLE_CREATE_IDM_USER_IN_ES;
-import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_IDM_USER_IN_ES;
-import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
-import static gov.ca.cwds.util.Utils.toLowerCase;
-import static gov.ca.cwds.util.Utils.toUpperCase;
-import static java.util.stream.Collectors.toSet;
-
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.PerryProperties;
 import gov.ca.cwds.data.persistence.auth.CwsOffice;
@@ -43,6 +26,15 @@ import gov.ca.cwds.service.messages.MessagesService;
 import gov.ca.cwds.service.scripts.IdmMappingScript;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import gov.ca.cwds.util.Utils;
+import org.apache.commons.collections.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+
+import javax.script.ScriptException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -55,14 +47,23 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import javax.script.ScriptException;
-import org.apache.commons.collections.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
+
+import static gov.ca.cwds.idm.persistence.model.OperationType.CREATE;
+import static gov.ca.cwds.idm.persistence.model.OperationType.UPDATE;
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByEmail;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getRACFId;
+import static gov.ca.cwds.service.messages.MessageCode.DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS;
+import static gov.ca.cwds.service.messages.MessageCode.IDM_MAPPING_SCRIPT_ERROR;
+import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY;
+import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID_IN_CWSCMS;
+import static gov.ca.cwds.service.messages.MessageCode.UNABLE_CREATE_IDM_USER_IN_ES;
+import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_IDM_USER_IN_ES;
+import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
+import static gov.ca.cwds.util.Utils.toLowerCase;
+import static gov.ca.cwds.util.Utils.toUpperCase;
+import static java.util.stream.Collectors.toSet;
 
 @Service
 @Profile("idm")
