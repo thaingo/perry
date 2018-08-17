@@ -65,17 +65,22 @@ public class UserLogService {
       }
       @Override
       protected void catchMethod(Exception e) {
-        String msg;
-        if (operationType == OperationType.CREATE) {
-          msg = messages.get(UNABLE_LOG_IDM_USER_CREATE, username);
-        } else if (operationType == OperationType.UPDATE) {
-          msg = messages.get(UNABLE_LOG_IDM_USER_UPDATE, username);
-        } else {
-          msg = messages.get(UNABLE_LOG_IDM_USER, operationType.toString(), username);
-        }
+        String msg = getErrorMessage(username, operationType);
         LOGGER.error(msg, e);
       }
     };
+  }
+
+  private String getErrorMessage(String username, OperationType operationType) {
+    String msg;
+    if (operationType == OperationType.CREATE) {
+      msg = messages.get(UNABLE_LOG_IDM_USER_CREATE, username);
+    } else if (operationType == OperationType.UPDATE) {
+      msg = messages.get(UNABLE_LOG_IDM_USER_UPDATE, username);
+    } else {
+      msg = messages.get(UNABLE_LOG_IDM_USER, operationType.toString(), username);
+    }
+    return msg;
   }
 
   @Autowired
