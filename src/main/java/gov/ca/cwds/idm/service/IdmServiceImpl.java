@@ -280,7 +280,7 @@ public class IdmServiceImpl implements IdmService {
       Optional.ofNullable(office.getPrimaryPhoneNumber())
           .ifPresent(e -> user.setPhoneNumber(e.toString()));
       Optional.ofNullable(office.getPrimaryPhoneExtensionNumber())
-          .ifPresent(e -> user.setPhoneExtensionNumber(e.toString()));
+          .ifPresent(user::setPhoneExtensionNumber);
       Optional.ofNullable(office.getGovernmentEntityType())
           .ifPresent(
               x -> user.setCountyName((GovernmentEntityType.findBySysId(x)).getDescription()));
