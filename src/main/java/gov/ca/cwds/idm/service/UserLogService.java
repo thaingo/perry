@@ -51,10 +51,6 @@ public class UserLogService {
         .collect(Collectors.toList());
   }
 
-  public UserLogService() {
-    super();
-  }
-
   private TryCatchExecution<String> log(String username, OperationType operationType) {
 
     return new TryCatchExecution<String>(username){
