@@ -117,23 +117,23 @@ public class IdmServiceImpl implements IdmService {
   public String createUser(User user) {
     UserType userType = cognitoServiceFacade.createUser(user);
     String userId = userType.getUsername();
-    PutUserInSearchResult doraResult = createUserInSearch(userType);
+    PutInSearchExecution doraExecution = createUserInSearch(userType);
 
-    if (doraResult.getResultType() == FAIL) {
-      TryCatchExecution dbLogResult = doraResult.getUserLogResult();
+    if (doraExecution.getResultType() == FAIL) {
+      TryCatchExecution dbLogExecution = doraExecution.getUserLogExecution();
 
-      if (dbLogResult.getResultType() == SUCCESS) {
+      if (dbLogExecution.getResultType() == SUCCESS) {
         String msg = messages.get(USER_CREATE_SAVE_TO_SEARCH_ERROR, userId);
         throw new PartialSuccessException(
-            userId, msg, USER_CREATE_SAVE_TO_SEARCH_ERROR, doraResult.getException());
+            userId, msg, USER_CREATE_SAVE_TO_SEARCH_ERROR, doraExecution.getException());
       } else {//logging in db failed
         String msg = messages.get(USER_CREATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS, userId);
         throw new PartialSuccessException(
             userId,
             msg,
             USER_CREATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS,
-            doraResult.getException(),
-            dbLogResult.getException());
+            doraExecution.getException(),
+            dbLogExecution.getException());
       }
     }
     return userId;
@@ -260,23 +260,22 @@ public class IdmServiceImpl implements IdmService {
     }
   }
 
-  private PutUserInSearchResult createUserInSearch(UserType userType) {
-    PutUserInSearchResult result = new PutUserInSearchResult();
-    try {
-      User user = enrichCognitoUser(userType);
-      searchService.createUser(user);
-      result.setResultType(SUCCESS);
+  private PutInSearchExecution createUserInSearch(UserType userType) {
 
-    } catch (Exception e) {
-      result.setResultType(FAIL);
-      result.setException(e);
+    return new PutInSearchExecution(userType){
+      @Override
+      protected void tryMethod(UserType userType) {
+        User user = enrichCognitoUser(userType);
+        searchService.createUser(user);
+      }
 
-      String msg = messages.get(UNABLE_CREATE_IDM_USER_IN_ES, userType.getUsername());
-      LOGGER.error(msg, e);
-
-      result.setUserLogResult(userLogService.logCreate(userType.getUsername()));
-    }
-    return result;
+      @Override
+      protected void catchMethod(Exception e) {
+        String msg = messages.get(UNABLE_CREATE_IDM_USER_IN_ES, userType.getUsername());
+        LOGGER.error(msg, e);
+        setUserLogExecution(userLogService.logCreate(userType.getUsername()));
+      }
+    };
   }
 
   private UserVerificationResult composeNegativeResultWithMessage(

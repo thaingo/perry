@@ -55,32 +55,35 @@ public class UserLogService {
         .collect(Collectors.toList());
   }
 
+  public UserLogService() {
+    super();
+  }
+
   private TryCatchExecution<String> log(String username, OperationType operationType) {
 
-    return new TryCatchExecution<>(
-        username,
+    return new TryCatchExecution<String>(username){
+      @Override
+      protected void tryMethod(String username) {
+        UserLog userLog = new UserLog();
+        userLog.setUsername(username);
+        userLog.setOperationType(operationType);
+        userLog.setOperationTime(new Date());
 
-        userName -> {
-          UserLog userLog = new UserLog();
-          userLog.setUsername(userName);
-          userLog.setOperationType(operationType);
-          userLog.setOperationTime(new Date());
-
-          userLogRepository.save(userLog);
-        },
-
-        e -> {
-          String msg;
-          if (operationType == OperationType.CREATE) {
-            msg = messages.get(UNABLE_LOG_IDM_USER_CREATE, username);
-          } else if (operationType == OperationType.UPDATE) {
-            msg = messages.get(UNABLE_LOG_IDM_USER_UPDATE, username);
-          } else {
-            msg = messages.get(UNABLE_LOG_IDM_USER, operationType.toString(), username);
-          }
-          LOGGER.error(msg, e);
+        userLogRepository.save(userLog);
+      }
+      @Override
+      protected void catchMethod(Exception e) {
+        String msg;
+        if (operationType == OperationType.CREATE) {
+          msg = messages.get(UNABLE_LOG_IDM_USER_CREATE, username);
+        } else if (operationType == OperationType.UPDATE) {
+          msg = messages.get(UNABLE_LOG_IDM_USER_UPDATE, username);
+        } else {
+          msg = messages.get(UNABLE_LOG_IDM_USER, operationType.toString(), username);
         }
-    );
+        LOGGER.error(msg, e);
+      }
+    };
   }
 
   @Autowired
