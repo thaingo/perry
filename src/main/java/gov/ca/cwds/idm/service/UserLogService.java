@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Profile("idm")
@@ -30,17 +29,14 @@ public class UserLogService {
   private UserLogRepository userLogRepository;
   private MessagesService messages;
 
-  @Transactional(value = "tokenTransactionManager")
   public TryCatchExecution<String> logCreate(String username) {
     return log(username, CREATE);
   }
 
-  @Transactional(value = "tokenTransactionManager")
   public TryCatchExecution<String> logUpdate(String username) {
     return log(username, UPDATE);
   }
 
-  @Transactional(value = "tokenTransactionManager", readOnly = true)
   @SuppressWarnings({"fb-contrib:CLI_CONSTANT_LIST_INDEX"})
   public List<UserIdAndOperation> getUserIdAndOperations(Date lastJobTime) {
     if (lastJobTime == null) {
