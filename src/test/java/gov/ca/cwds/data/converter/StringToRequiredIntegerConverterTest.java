@@ -12,7 +12,7 @@ public class StringToRequiredIntegerConverterTest {
   public void testConvertingToEntity() {
     assertNull(converter.convertToEntityAttribute(0));
     assertNull(converter.convertToEntityAttribute(null));
-    assertEquals(String.valueOf(11), converter.convertToEntityAttribute(11));
+    assertEquals("11", converter.convertToEntityAttribute(11));
   }
 
   @Test
