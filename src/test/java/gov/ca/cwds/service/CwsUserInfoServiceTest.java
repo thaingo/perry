@@ -123,13 +123,13 @@ public class CwsUserInfoServiceTest {
     if (result.get(1).getCwsOffice() != null) {
       assert result.get(1).getCwsOffice().getCountySpecificCode().equals(COUNTY_CODE);
     } else {
-   //   assert result.get(1).getStaffPerson().getCwsOffice() == null;
+      assert result.get(1).getStaffPerson().getOffice() == null;
     }
 
     if (result.get(2).getCwsOffice() != null) {
-      assert result.get(2).getCwsOffice().getCountySpecificCode().equals("COUNTY_CODE");
+      assert result.get(2).getCwsOffice().getCountySpecificCode().equals(COUNTY_CODE);
     } else {
-     // assert result.get(2).getStaffPerson().getCwsOffice() == null;
+      assert result.get(2).getStaffPerson().getOffice() == null;
     }
   }
 
