@@ -1,6 +1,5 @@
 package gov.ca.cwds.data.persistence.auth;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.dropwizard.jackson.JsonSnakeCase;
 import io.swagger.annotations.ApiModel;
@@ -53,10 +52,6 @@ public class StaffPerson {
   @ApiModelProperty(example = "Smith")
   @JsonProperty("last_name")
   private String lastName;
-
-  @Column(name = "FKCWS_OFFT")
-  @JsonIgnore
-  private String cwsOffice;
 
   @Column(name = "END_DT")
   @Type(type = "date")
@@ -112,14 +107,6 @@ public class StaffPerson {
     this.countyCode = countyCode;
   }
 
-  public String getCwsOffice() {
-    return cwsOffice;
-  }
-
-  public void setCwsOffice(String cwsOffice) {
-    this.cwsOffice = cwsOffice;
-  }
-
   public String getFirstName() {
     return StringUtils.trimToEmpty(firstName);
   }
@@ -169,7 +156,6 @@ public class StaffPerson {
         .append(countyCode, that.countyCode)
         .append(firstName, that.firstName)
         .append(lastName, that.lastName)
-        .append(cwsOffice, that.cwsOffice)
         .append(endDate, that.endDate)
         .append(startDate, that.startDate)
         .append(office, that.office)
@@ -184,7 +170,6 @@ public class StaffPerson {
         .append(countyCode)
         .append(firstName)
         .append(lastName)
-        .append(cwsOffice)
         .append(endDate)
         .append(startDate)
         .append(office)
