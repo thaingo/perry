@@ -2,7 +2,7 @@ package gov.ca.cwds.idm;
 
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.service.messages.MessageCode.IDM_USER_VALIDATION_FAILED;
-import static gov.ca.cwds.service.messages.MessageCode.INVALIDE_DATE_FORMAT;
+import static gov.ca.cwds.service.messages.MessageCode.INVALID_DATE_FORMAT;
 import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
 import static java.util.stream.Collectors.toList;
 
@@ -133,9 +133,9 @@ public class IdmResource {
     try {
       lastJobTime = new SimpleDateFormat(DATETIME_FORMAT_PATTERN).parse(lastJobDateStr);
     } catch (ParseException e) {
-      String msg = messages.get(INVALIDE_DATE_FORMAT, DATETIME_FORMAT_PATTERN);
+      String msg = messages.get(INVALID_DATE_FORMAT, DATETIME_FORMAT_PATTERN);
       LOGGER.error(msg, e);
-      return createCustomResponseEntity(HttpStatus.BAD_REQUEST, INVALIDE_DATE_FORMAT, msg);
+      return createCustomResponseEntity(HttpStatus.BAD_REQUEST, INVALID_DATE_FORMAT, msg);
     }
     return ResponseEntity.ok().body(idmService.getFailedOperations(lastJobTime));
   }
