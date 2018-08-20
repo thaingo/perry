@@ -40,6 +40,7 @@ import com.amazonaws.services.cognitoidp.model.UsernameExistsException;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.persistence.model.OperationType;
+import gov.ca.cwds.idm.service.ChangeUserEnabledRequest;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
@@ -215,8 +216,12 @@ public class CognitoServiceFacade {
   /**
    @return true if Cognito operations were really executed, false otherwise
    */
-  public boolean changeUserEnabledStatus(String id, Boolean existedEnabled, Boolean newEnabled) {
+  public boolean changeUserEnabledStatus(ChangeUserEnabledRequest request) {
     boolean executed = false;
+
+    String id = request.getUserId();
+    Boolean existedEnabled = request.getExistedEnabled();
+    Boolean newEnabled = request.getNewEnabled();
 
     if (newEnabled != null && !newEnabled.equals(existedEnabled)) {
       if (newEnabled) {

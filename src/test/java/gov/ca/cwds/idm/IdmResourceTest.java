@@ -536,7 +536,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
     verify(cognito, times(1)).adminUpdateUserAttributes(updateAttributesRequest);
     verify(cognito, times(1)).adminDisableUser(disableUserRequest);
-    verify(searchService, times(2)).updateUser(any(User.class));
+    verify(searchService, times(1)).updateUser(any(User.class));
 
     InOrder inOrder = inOrder(cognito);
     inOrder.verify(cognito).adminUpdateUserAttributes(updateAttributesRequest);
@@ -572,7 +572,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
     verify(cognito, times(1)).adminUpdateUserAttributes(updateAttributesRequest);
     verify(cognito, times(1)).adminDisableUser(disableUserRequest);
-    verify(searchService, times(2)).updateUser(any(User.class));
+    verify(searchService, times(1)).updateUser(any(User.class));
 
     InOrder inOrder = inOrder(cognito);
     inOrder.verify(cognito).adminUpdateUserAttributes(updateAttributesRequest);
@@ -580,11 +580,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
     Iterable<UserLog> userLogs = userLogRepository.findAll();
     int newUserLogsSize = Iterables.size(userLogs);
-    assertTrue(newUserLogsSize == oldUserLogsSize + 2);
-
-    UserLog beforeLastUserLog = Iterables.get(userLogs, newUserLogsSize - 2);
-    assertTrue(beforeLastUserLog.getOperationType() == OperationType.UPDATE);
-    assertThat(beforeLastUserLog.getUsername(), is(USER_WITH_RACFID_ID));
+    assertTrue(newUserLogsSize == oldUserLogsSize + 1);
 
     UserLog lastUserLog = Iterables.getLast(userLogs);
     assertTrue(lastUserLog.getOperationType() == OperationType.UPDATE);

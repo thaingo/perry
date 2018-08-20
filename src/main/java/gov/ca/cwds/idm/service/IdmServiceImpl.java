@@ -4,6 +4,7 @@ import static gov.ca.cwds.idm.persistence.model.OperationType.CREATE;
 import static gov.ca.cwds.idm.persistence.model.OperationType.UPDATE;
 import static gov.ca.cwds.idm.service.OperationResultType.FAIL;
 import static gov.ca.cwds.idm.service.OperationResultType.SUCCESS;
+import static gov.ca.cwds.idm.service.OperationResultType.WAS_NOT_EXECUTED;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByEmail;
@@ -13,7 +14,6 @@ import static gov.ca.cwds.service.messages.MessageCode.IDM_MAPPING_SCRIPT_ERROR;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY;
 import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID_IN_CWSCMS;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_CREATE_IDM_USER_IN_ES;
-import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_IDM_USER_IN_ES;
 import static gov.ca.cwds.service.messages.MessageCode.USER_CREATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_CREATE_SAVE_TO_SEARCH_ERROR;
 import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
@@ -38,8 +38,8 @@ import gov.ca.cwds.idm.service.cognito.StandardUserAttribute;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil;
-import gov.ca.cwds.idm.service.execution.PutInSearchExecution;
 import gov.ca.cwds.idm.service.execution.OptionalExecution;
+import gov.ca.cwds.idm.service.execution.PutInSearchExecution;
 import gov.ca.cwds.rest.api.domain.PartialSuccessException;
 import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType;
@@ -101,18 +101,56 @@ public class IdmServiceImpl implements IdmService {
   @PreAuthorize("@cognitoServiceFacade.getCountyName(#id) == principal.getParameter('county_name')")
   public void updateUser(String id, UserUpdate updateUserDto) {
 
+    OperationResultType updateAttrResult = WAS_NOT_EXECUTED;
+    OperationResultType updateEnableResult = WAS_NOT_EXECUTED;
+    OperationResultType doraResult = WAS_NOT_EXECUTED;
+    OperationResultType logDbResult = WAS_NOT_EXECUTED;
+
+    Exception updateEnableException = null;
+    Exception doraException = null;
+    Exception logDbException = null;
+
     UserType existedCognitoUser = cognitoServiceFacade.getCognitoUserById(id);
 
-    boolean updateAttributesExecuted =
-        cognitoServiceFacade.updateUserAttributes(id, existedCognitoUser, updateUserDto);
-    if(updateAttributesExecuted) {
-      updateUserInSearch(id);
+    if(cognitoServiceFacade.updateUserAttributes(id, existedCognitoUser, updateUserDto)) {
+      updateAttrResult = SUCCESS;
     }
 
-    boolean enableExecuted =
-        cognitoServiceFacade.changeUserEnabledStatus(id, existedCognitoUser.getEnabled(), updateUserDto.getEnabled());
-    if(enableExecuted) {
-      updateUserInSearch(id);
+    OptionalExecution<ChangeUserEnabledRequest, Boolean> changeUserEnabledExecution =
+        new OptionalExecution<ChangeUserEnabledRequest, Boolean>(
+            new ChangeUserEnabledRequest(id, existedCognitoUser.getEnabled(), updateUserDto.getEnabled())){
+      @Override
+      protected Boolean tryMethod(ChangeUserEnabledRequest changeUserEnabledRequest) {
+        return cognitoServiceFacade.changeUserEnabledStatus(changeUserEnabledRequest);
+      }
+      @Override
+      protected void catchMethod(Exception e) {
+        LOGGER.error("Unable to update user enabled status", e);
+      }
+    };
+
+    updateEnableResult = changeUserEnabledExecution.getResultType();
+    updateEnableException = changeUserEnabledExecution.getException();
+
+    if(updateEnableResult == FAIL && updateAttrResult == WAS_NOT_EXECUTED) {
+      if(updateEnableException instanceof RuntimeException) {
+        throw (RuntimeException)updateEnableException;
+      } else {//cannot happen, just to satisfy compliler
+        throw new RuntimeException(updateEnableException);
+      }
+    }
+
+    if(updateAttrResult == SUCCESS || updateEnableResult == SUCCESS) {
+      PutInSearchExecution doraExecution = updateUserInSearch(id);
+
+      doraResult = doraExecution.getResultType();
+
+      if(doraResult == FAIL) {
+        doraException = doraExecution.getException();
+        OptionalExecution dbLogExecution = doraExecution.getUserLogExecution();
+        logDbResult = dbLogExecution.getResultType();
+        logDbException = dbLogExecution.getException();
+      }
     }
   }
 
@@ -252,26 +290,29 @@ public class IdmServiceImpl implements IdmService {
         }}).collect(Collectors.toList());
   }
 
-  private void updateUserInSearch(String id) {
-    try {
-      User updatedUser = findUser(id);
-      searchService.updateUser(updatedUser);
-    } catch (Exception e) {
-      String msg = messages.get(UNABLE_UPDATE_IDM_USER_IN_ES, id);
-      LOGGER.error(msg, e);
-      userLogService.logUpdate(id);
-    }
+  private PutInSearchExecution<String> updateUserInSearch(String id) {
+    return new PutInSearchExecution<String>(id){
+      @Override
+      protected ResponseEntity<String> tryMethod(String id) {
+        User updatedUser = findUser(id);
+        return searchService.updateUser(updatedUser);
+      }
+      @Override
+      protected void catchMethod(Exception e) {
+        String msg = messages.get(UNABLE_CREATE_IDM_USER_IN_ES, id);
+        LOGGER.error(msg, e);
+        setUserLogExecution(userLogService.logUpdate(id));
+      }
+    };
   }
 
   private PutInSearchExecution createUserInSearch(UserType userType) {
-
-    return new PutInSearchExecution(userType){
+    return new PutInSearchExecution<UserType>(userType){
       @Override
       protected ResponseEntity<String> tryMethod(UserType userType) {
         User user = enrichCognitoUser(userType);
         return searchService.createUser(user);
       }
-
       @Override
       protected void catchMethod(Exception e) {
         String msg = messages.get(UNABLE_CREATE_IDM_USER_IN_ES, userType.getUsername());
