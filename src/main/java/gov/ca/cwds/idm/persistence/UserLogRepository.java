@@ -14,7 +14,7 @@ public interface UserLogRepository extends CrudRepository<UserLog, Long> {
 
   @Transactional(value = "tokenTransactionManager")
   @Override
-  <S extends UserLog> S save(S entity);
+  UserLog save(UserLog entity);
 
   @Query(
       "select u.username, u.operationType from UserLog u "

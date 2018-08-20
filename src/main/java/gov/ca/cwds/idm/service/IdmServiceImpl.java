@@ -38,8 +38,8 @@ import gov.ca.cwds.idm.service.cognito.StandardUserAttribute;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil;
-import gov.ca.cwds.idm.service.trycatch.PutInSearchExecution;
-import gov.ca.cwds.idm.service.trycatch.TryCatchExecution;
+import gov.ca.cwds.idm.service.execution.PutInSearchExecution;
+import gov.ca.cwds.idm.service.execution.OptionalExecution;
 import gov.ca.cwds.rest.api.domain.PartialSuccessException;
 import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType;
@@ -68,6 +68,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -122,7 +123,7 @@ public class IdmServiceImpl implements IdmService {
     PutInSearchExecution doraExecution = createUserInSearch(userType);
 
     if (doraExecution.getResultType() == FAIL) {
-      TryCatchExecution dbLogExecution = doraExecution.getUserLogExecution();
+      OptionalExecution dbLogExecution = doraExecution.getUserLogExecution();
 
       if (dbLogExecution.getResultType() == SUCCESS) {
         String msg = messages.get(USER_CREATE_SAVE_TO_SEARCH_ERROR, userId);
@@ -266,9 +267,9 @@ public class IdmServiceImpl implements IdmService {
 
     return new PutInSearchExecution(userType){
       @Override
-      protected void tryMethod(UserType userType) {
+      protected ResponseEntity<String> tryMethod(UserType userType) {
         User user = enrichCognitoUser(userType);
-        searchService.createUser(user);
+        return searchService.createUser(user);
       }
 
       @Override

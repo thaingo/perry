@@ -1,4 +1,4 @@
-package gov.ca.cwds.idm.service.trycatch;
+package gov.ca.cwds.idm.service.execution;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -10,16 +10,16 @@ import gov.ca.cwds.idm.service.OperationResultType;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
-public class TryCatchExecutionTest {
+public class OptionalExecutionTest {
 
   @Test
   public void testSuccess() {
-    TryCatchExecution<String> execution =
-        new TryCatchExecution<String>("abc") {
+    OptionalExecution<String, String> execution =
+        new OptionalExecution<String, String>("abc") {
 
           @Override
-          protected void tryMethod(String str) {
-            str.toUpperCase();
+          protected String tryMethod(String str) {
+            return str.toUpperCase();
           }
 
           @Override
@@ -30,17 +30,18 @@ public class TryCatchExecutionTest {
 
     assertThat(execution.getResultType(), CoreMatchers.is(OperationResultType.SUCCESS));
     assertThat(execution.getException(), nullValue());
+    assertThat(execution.getResponse(), is("ABC"));
   }
 
   @Test
   public void testFail() {
 
-    TryCatchExecution<Integer> execution =
-        new TryCatchExecution<Integer>(0) {
+    OptionalExecution<Integer, Integer> execution =
+        new OptionalExecution<Integer, Integer>(0) {
 
           @Override
-          protected void tryMethod(Integer i) {
-            Integer r = 1 / i;
+          protected Integer tryMethod(Integer i) {
+            return 1 / i;
           }
 
           @Override
@@ -52,5 +53,6 @@ public class TryCatchExecutionTest {
     assertThat(execution.getResultType(), is(OperationResultType.FAIL));
     assertThat(execution.getException(), notNullValue());
     assertTrue(execution.getException() instanceof ArithmeticException);
+    assertThat(execution.getResponse(), nullValue());
   }
 }

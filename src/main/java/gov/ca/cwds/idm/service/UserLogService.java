@@ -10,7 +10,7 @@ import gov.ca.cwds.idm.dto.UserIdAndOperation;
 import gov.ca.cwds.idm.persistence.UserLogRepository;
 import gov.ca.cwds.idm.persistence.model.OperationType;
 import gov.ca.cwds.idm.persistence.model.UserLog;
-import gov.ca.cwds.idm.service.trycatch.TryCatchExecution;
+import gov.ca.cwds.idm.service.execution.OptionalExecution;
 import gov.ca.cwds.service.messages.MessagesService;
 import java.util.Date;
 import java.util.List;
@@ -30,11 +30,11 @@ public class UserLogService {
   private UserLogRepository userLogRepository;
   private MessagesService messages;
 
-  public TryCatchExecution<String> logCreate(String username) {
+  public OptionalExecution<String, UserLog> logCreate(String username) {
     return log(username, CREATE);
   }
 
-  public TryCatchExecution<String> logUpdate(String username) {
+  public OptionalExecution<String, UserLog> logUpdate(String username) {
     return log(username, UPDATE);
   }
 
@@ -52,17 +52,17 @@ public class UserLogService {
         .collect(Collectors.toList());
   }
 
-  private TryCatchExecution<String> log(String username, OperationType operationType) {
+  private OptionalExecution<String, UserLog> log(String username, OperationType operationType) {
 
-    return new TryCatchExecution<String>(username){
+    return new OptionalExecution<String, UserLog>(username){
       @Override
-      protected void tryMethod(String username) {
+      protected UserLog tryMethod(String username) {
         UserLog userLog = new UserLog();
         userLog.setUsername(username);
         userLog.setOperationType(operationType);
         userLog.setOperationTime(new Date());
 
-        userLogRepository.save(userLog);
+        return userLogRepository.save(userLog);
       }
       @Override
       protected void catchMethod(Exception e) {
