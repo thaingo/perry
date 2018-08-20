@@ -6,8 +6,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-import gov.ca.cwds.idm.service.ResultType;
-import gov.ca.cwds.idm.service.trycatch.TryCatchExecution;
+import gov.ca.cwds.idm.service.OperationResultType;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
@@ -29,7 +28,7 @@ public class TryCatchExecutionTest {
           }
         };
 
-    assertThat(execution.getResultType(), CoreMatchers.is(ResultType.SUCCESS));
+    assertThat(execution.getResultType(), CoreMatchers.is(OperationResultType.SUCCESS));
     assertThat(execution.getException(), nullValue());
   }
 
@@ -50,7 +49,7 @@ public class TryCatchExecutionTest {
           }
         };
 
-    assertThat(execution.getResultType(), is(ResultType.FAIL));
+    assertThat(execution.getResultType(), is(OperationResultType.FAIL));
     assertThat(execution.getException(), notNullValue());
     assertTrue(execution.getException() instanceof ArithmeticException);
   }

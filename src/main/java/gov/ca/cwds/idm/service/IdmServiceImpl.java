@@ -2,8 +2,8 @@ package gov.ca.cwds.idm.service;
 
 import static gov.ca.cwds.idm.persistence.model.OperationType.CREATE;
 import static gov.ca.cwds.idm.persistence.model.OperationType.UPDATE;
-import static gov.ca.cwds.idm.service.ResultType.FAIL;
-import static gov.ca.cwds.idm.service.ResultType.SUCCESS;
+import static gov.ca.cwds.idm.service.OperationResultType.FAIL;
+import static gov.ca.cwds.idm.service.OperationResultType.SUCCESS;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByEmail;

@@ -1,10 +1,10 @@
 package gov.ca.cwds.idm.service.trycatch;
 
-import gov.ca.cwds.idm.service.ResultType;
+import gov.ca.cwds.idm.service.OperationResultType;
 
 public abstract class TryCatchExecution<T> {
 
-  private ResultType resultType;
+  private OperationResultType resultType;
   private Exception exception;
 
   @SuppressWarnings({"fb-contrib:PCOA_PARTIALLY_CONSTRUCTED_OBJECT_ACCESS"})
@@ -12,10 +12,10 @@ public abstract class TryCatchExecution<T> {
   public TryCatchExecution(T input){
     try {
       tryMethod(input);
-      resultType = ResultType.SUCCESS;
+      resultType = OperationResultType.SUCCESS;
 
     } catch (Exception e) {
-      resultType = ResultType.FAIL;
+      resultType = OperationResultType.FAIL;
       exception = e;
       catchMethod(e);
     }
@@ -25,7 +25,7 @@ public abstract class TryCatchExecution<T> {
 
   protected abstract void catchMethod(Exception e);
 
-  public ResultType getResultType() {
+  public OperationResultType getResultType() {
     return resultType;
   }
 
