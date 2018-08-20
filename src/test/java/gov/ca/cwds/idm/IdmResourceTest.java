@@ -146,8 +146,6 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
   @Autowired private UserLogRepository userLogRepository;
 
-  @Autowired  private UserLogService userLogService;
-
   private SearchService searchService = mock(SearchService.class);
 
   private MockMvc mockMvc;
@@ -367,9 +365,6 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
     setCreateUserResult(request, NEW_USER_SUCCESS_ID);
 
-    AdminGetUserRequest getUserRequest =
-        cognitoServiceFacade.createAdminGetUserRequest(NEW_USER_SUCCESS_ID);
-
     mockMvc
         .perform(
             MockMvcRequestBuilders.post("/idm/users")
@@ -379,7 +374,6 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         .andExpect(header().string("location", "http://localhost/idm/users/" + NEW_USER_SUCCESS_ID))
         .andReturn();
 
-    verify(cognito, times(1)).adminGetUser(getUserRequest);
     verify(cognito, times(1)).adminCreateUser(request);
     verify(searchService, times(1)).createUser(any(User.class));
   }
@@ -399,19 +393,19 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
     setCreateUserResult(request, NEW_USER_ES_FAIL_ID);
 
-    AdminGetUserRequest getUserRequest =
-        cognitoServiceFacade.createAdminGetUserRequest(NEW_USER_ES_FAIL_ID);
+    MvcResult result =
+        mockMvc
+            .perform(
+                MockMvcRequestBuilders.post("/idm/users")
+                    .contentType(JSON_CONTENT_TYPE)
+                    .content(asJsonString(user)))
+            .andExpect(MockMvcResultMatchers.status().isInternalServerError())
+            .andExpect(
+                header().string("location", "http://localhost/idm/users/" + NEW_USER_ES_FAIL_ID))
+            .andReturn();
 
-    mockMvc
-        .perform(
-            MockMvcRequestBuilders.post("/idm/users")
-                .contentType(JSON_CONTENT_TYPE)
-                .content(asJsonString(user)))
-        .andExpect(MockMvcResultMatchers.status().isCreated())
-        .andExpect(header().string("location", "http://localhost/idm/users/" + NEW_USER_ES_FAIL_ID))
-        .andReturn();
+    assertExtensible(result, "fixtures/idm/partial-success-user-create/log-success.json");
 
-    verify(cognito, times(1)).adminGetUser(getUserRequest);
     verify(cognito, times(1)).adminCreateUser(request);
     verify(searchService, times(1)).createUser(any(User.class));
 
