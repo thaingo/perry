@@ -6,6 +6,7 @@ import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.FIRST_NAME;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.service.messages.MessageCode.USER_CREATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_CREATE_SAVE_TO_SEARCH_ERROR;
+import static gov.ca.cwds.service.messages.MessageCode.USER_PARTIAL_UPDATE;
 import static gov.ca.cwds.service.messages.MessageCode.USER_UPDATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
 import static gov.ca.cwds.util.Utils.toSet;
 import static org.hamcrest.CoreMatchers.is;
@@ -20,6 +21,7 @@ import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.IdmResourceTest;
 import gov.ca.cwds.idm.WithMockCustomUser;
 import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.idm.dto.UserEnableStatusRequest;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.persistence.UserLogRepository;
 import gov.ca.cwds.idm.persistence.model.UserLog;
@@ -134,7 +136,7 @@ public class IdmServiceImplTest {
 
     User existedUser = user();
     existedUser.setPermissions(toSet("old permission"));
-    UserType existedUserType = userType(new User(), USER_ID);
+    UserType existedUserType = userType(existedUser, USER_ID);
 
     setUpdateUserAttributesResult(USER_ID, userUpdate, true);
     setGetCognitoUserById(USER_ID, existedUserType);
@@ -160,6 +162,36 @@ public class IdmServiceImplTest {
   }
 
   @Test
+  @WithMockCustomUser
+  public void testPartialUpdateUser() {
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setPermissions(toSet("new permission"));
+    userUpdate.setEnabled(Boolean.FALSE);
+
+    User existedUser = user();
+    existedUser.setPermissions(toSet("old permission"));
+    UserType existedUserType = userType(existedUser, USER_ID);
+
+    setUpdateUserAttributesResult(USER_ID, userUpdate, true);
+    setGetCognitoUserById(USER_ID, existedUserType);
+
+    RuntimeException enableStatusError = new RuntimeException("Change Enable Status Error");
+    setChangeUserEnabledStatusFail(enableStatusError);
+
+    try {
+      service.updateUser(USER_ID, userUpdate);
+      fail("should throw PartialSuccessException");
+    } catch (PartialSuccessException e) {
+      assertThat(e.getUserId(), is(USER_ID));
+      assertThat(e.getErrorCode(), is(USER_PARTIAL_UPDATE));
+
+      List<Exception> causes = e.getCauses();
+      assertThat(causes.size(), is(1));
+      assertThat(causes.get(0), is(enableStatusError));
+    }
+  }
+
+  @Test
   public void testTransformSearchValues() {
     assertThat(
         transformSearchValues(toSet("ROOBLA", "roobla", "Roobla"), RACFID_STANDARD),
@@ -178,7 +210,7 @@ public class IdmServiceImplTest {
     user.setFirstName("Garcia");
     user.setLastName("Gonzales");
     user.setCountyName("Yolo");
-    user.setEnabled(true);
+    user.setEnabled(Boolean.TRUE);
     return user;
   }
 
@@ -190,6 +222,11 @@ public class IdmServiceImplTest {
   private void setUpdateUserAttributesResult(String userId, UserUpdate userUpdate, boolean result) {
     when(cognitoServiceFacadeMock.updateUserAttributes(eq(userId), any(UserType.class), eq(userUpdate)))
         .thenReturn(result);
+  }
+
+  private void setChangeUserEnabledStatusFail(RuntimeException error) {
+    when(cognitoServiceFacadeMock.changeUserEnabledStatus(any(UserEnableStatusRequest.class)))
+        .thenThrow(error);
   }
 
   private void setGetCognitoUserById(String userId, UserType result) {

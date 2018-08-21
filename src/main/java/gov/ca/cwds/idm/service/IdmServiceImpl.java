@@ -18,9 +18,9 @@ import static gov.ca.cwds.service.messages.MessageCode.UNABLE_CREATE_IDM_USER_IN
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_IDM_USER_IN_ES;
 import static gov.ca.cwds.service.messages.MessageCode.USER_CREATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_CREATE_SAVE_TO_SEARCH_ERROR;
-import static gov.ca.cwds.service.messages.MessageCode.USER_ENABLE_UPDATE_AND_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
-import static gov.ca.cwds.service.messages.MessageCode.USER_ENABLE_UPDATE_AND_SAVE_TO_SEARCH_ERRORS;
-import static gov.ca.cwds.service.messages.MessageCode.USER_ENABLE_UPDATE_ERROR;
+import static gov.ca.cwds.service.messages.MessageCode.USER_PARTIAL_UPDATE_AND_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
+import static gov.ca.cwds.service.messages.MessageCode.USER_PARTIAL_UPDATE_AND_SAVE_TO_SEARCH_ERRORS;
+import static gov.ca.cwds.service.messages.MessageCode.USER_PARTIAL_UPDATE;
 import static gov.ca.cwds.service.messages.MessageCode.USER_NOTHING_UPDATED;
 import static gov.ca.cwds.service.messages.MessageCode.USER_UPDATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_UPDATE_SAVE_TO_SEARCH_ERROR;
@@ -125,15 +125,18 @@ public class IdmServiceImpl implements IdmService {
       updateAttributesStatus = SUCCESS;
     }
 
-    OptionalExecution<UserEnableStatusRequest, Boolean> changeUserEnabledExecution =
+    OptionalExecution<UserEnableStatusRequest, Boolean> updateUserEnabledExecution =
         executeUpdateEnableStatusOptionally(userId, updateUserDto, existedCognitoUser);
 
-    updateEnableStatus = changeUserEnabledExecution.getExecutionStatus();
-    Boolean changeEnabledWasExecuted = changeUserEnabledExecution.getResult();
-    if(!changeEnabledWasExecuted){
-      updateEnableStatus = WAS_NOT_EXECUTED;
+    updateEnableStatus = updateUserEnabledExecution.getExecutionStatus();
+
+    if (updateEnableStatus == SUCCESS) {
+      if (!updateUserEnabledExecution.getResult()) {
+        updateEnableStatus = WAS_NOT_EXECUTED;
+      }
+    } else if (updateEnableStatus == FAIL) {
+      updateEnableException = updateUserEnabledExecution.getException();
     }
-    updateEnableException = changeUserEnabledExecution.getException();
 
     if(updateEnableStatus == FAIL && updateAttributesStatus == WAS_NOT_EXECUTED) {
         throw (RuntimeException)updateEnableException;
@@ -176,19 +179,19 @@ public class IdmServiceImpl implements IdmService {
 
     if (updateAttributesStatus == SUCCESS && updateEnableStatus == FAIL) {//partial update
       if (doraStatus == SUCCESS) {
-        throwPartialSuccessException(userId, USER_ENABLE_UPDATE_ERROR, updateEnableException);
+        throwPartialSuccessException(userId, USER_PARTIAL_UPDATE, updateEnableException);
 
       } else if (doraStatus == FAIL && logDbStatus == SUCCESS) {
         throwPartialSuccessException(
             userId,
-            USER_ENABLE_UPDATE_AND_SAVE_TO_SEARCH_ERRORS,
+            USER_PARTIAL_UPDATE_AND_SAVE_TO_SEARCH_ERRORS,
             updateEnableException,
             doraException);
 
       } else if (doraStatus == FAIL && logDbStatus == FAIL) {
         throwPartialSuccessException(
             userId,
-            USER_ENABLE_UPDATE_AND_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS,
+            USER_PARTIAL_UPDATE_AND_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS,
             updateEnableException,
             doraException,
             logDbException);
