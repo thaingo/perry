@@ -228,7 +228,11 @@ public class IdmServiceImpl implements IdmService {
     UserType userType = cognitoServiceFacade.createUser(user);
     String userId = userType.getUsername();
     PutInSearchExecution doraExecution = createUserInSearch(userType);
+    handleCreatePartialSuccess(userId, doraExecution);
+    return userId;
+  }
 
+  private void handleCreatePartialSuccess(String userId, PutInSearchExecution doraExecution) {
     if (doraExecution.getExecutionStatus() == FAIL) {
       OptionalExecution dbLogExecution = doraExecution.getUserLogExecution();
 
@@ -248,7 +252,6 @@ public class IdmServiceImpl implements IdmService {
             dbLogExecution.getException());
       }
     }
-    return userId;
   }
 
   @Override
