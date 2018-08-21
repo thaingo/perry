@@ -106,6 +106,7 @@ public class CognitoServiceFacade {
     }
   }
 
+  //method is used in annotation, don't remove it
   public String getCountyName(String userId) {
     return CognitoUtils.getCountyName(getCognitoUserById(userId));
   }
@@ -227,13 +228,13 @@ public class CognitoServiceFacade {
       if (newEnabled) {
         AdminEnableUserRequest adminEnableUserRequest =
             new AdminEnableUserRequest().withUsername(id).withUserPoolId(properties.getUserpool());
-
         executeInCognito(identityProvider::adminEnableUser, adminEnableUserRequest, id, UPDATE);
         executed =  true;
+
       } else {
         AdminDisableUserRequest adminDisableUserRequest =
             new AdminDisableUserRequest().withUsername(id).withUserPoolId(properties.getUserpool());
-        identityProvider.adminDisableUser(adminDisableUserRequest);
+        executeInCognito(identityProvider::adminDisableUser, adminDisableUserRequest, id, UPDATE);
         executed =  true;
       }
     }

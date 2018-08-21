@@ -1,6 +1,6 @@
 package gov.ca.cwds.idm.service.execution;
 
-import gov.ca.cwds.idm.service.OperationResultType;
+import gov.ca.cwds.idm.service.ExecutionStatus;
 
 /**
  * Class to encapsulate optional execution of some logic i.e. execution which in case of some
@@ -12,19 +12,19 @@ import gov.ca.cwds.idm.service.OperationResultType;
  */
 public abstract class OptionalExecution<T, R> {
 
-  private OperationResultType resultType;
+  private ExecutionStatus executionStatus;
   private Exception exception;
-  private R response;
+  private R result;
 
   @SuppressWarnings({"fb-contrib:PCOA_PARTIALLY_CONSTRUCTED_OBJECT_ACCESS"})
   //implementations of tryMethod() should not use resultType field by design
   public OptionalExecution(T input){
     try {
-      response = tryMethod(input);
-      resultType = OperationResultType.SUCCESS;
+      result = tryMethod(input);
+      executionStatus = ExecutionStatus.SUCCESS;
 
     } catch (Exception e) {
-      resultType = OperationResultType.FAIL;
+      executionStatus = ExecutionStatus.FAIL;
       exception = e;
       catchMethod(e);
     }
@@ -50,8 +50,8 @@ public abstract class OptionalExecution<T, R> {
   /**
    * @return SUCCESS if tryMethod was executed successfully or FAIL otherwise.
    */
-  public OperationResultType getResultType() {
-    return resultType;
+  public ExecutionStatus getExecutionStatus() {
+    return executionStatus;
   }
 
   /**
@@ -64,7 +64,7 @@ public abstract class OptionalExecution<T, R> {
   /**
    * @return result of tryMethod if it was executed successfully or null otherwise.
    */
-  public R getResponse() {
-    return response;
+  public R getResult() {
+    return result;
   }
 }

@@ -2,14 +2,15 @@ package gov.ca.cwds.idm.service;
 
 import static gov.ca.cwds.idm.persistence.model.OperationType.CREATE;
 import static gov.ca.cwds.idm.persistence.model.OperationType.UPDATE;
-import static gov.ca.cwds.idm.service.OperationResultType.FAIL;
-import static gov.ca.cwds.idm.service.OperationResultType.SUCCESS;
-import static gov.ca.cwds.idm.service.OperationResultType.WAS_NOT_EXECUTED;
+import static gov.ca.cwds.idm.service.ExecutionStatus.FAIL;
+import static gov.ca.cwds.idm.service.ExecutionStatus.SUCCESS;
+import static gov.ca.cwds.idm.service.ExecutionStatus.WAS_NOT_EXECUTED;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByEmail;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getRACFId;
 import static gov.ca.cwds.service.messages.MessageCode.DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS;
+import static gov.ca.cwds.service.messages.MessageCode.ERROR_UPDATE_USER_ENABLED_STATUS;
 import static gov.ca.cwds.service.messages.MessageCode.IDM_MAPPING_SCRIPT_ERROR;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY;
 import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID_IN_CWSCMS;
@@ -17,6 +18,11 @@ import static gov.ca.cwds.service.messages.MessageCode.UNABLE_CREATE_IDM_USER_IN
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_IDM_USER_IN_ES;
 import static gov.ca.cwds.service.messages.MessageCode.USER_CREATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_CREATE_SAVE_TO_SEARCH_ERROR;
+import static gov.ca.cwds.service.messages.MessageCode.USER_ENABLE_UPDATE_AND_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
+import static gov.ca.cwds.service.messages.MessageCode.USER_ENABLE_UPDATE_AND_SAVE_TO_SEARCH_ERRORS;
+import static gov.ca.cwds.service.messages.MessageCode.USER_ENABLE_UPDATE_ERROR;
+import static gov.ca.cwds.service.messages.MessageCode.USER_UPDATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
+import static gov.ca.cwds.service.messages.MessageCode.USER_UPDATE_SAVE_TO_SEARCH_ERROR;
 import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
 import static gov.ca.cwds.util.Utils.toLowerCase;
 import static gov.ca.cwds.util.Utils.toUpperCase;
@@ -100,60 +106,100 @@ public class IdmServiceImpl implements IdmService {
   }
 
   @Override
-  @PreAuthorize("@cognitoServiceFacade.getCountyName(#id) == principal.getParameter('county_name')")
-  public void updateUser(String id, UserUpdate updateUserDto) {
+  @PreAuthorize("@cognitoServiceFacade.getCountyName(#userId) == principal.getParameter('county_name')")
+  public void updateUser(String userId, UserUpdate updateUserDto) {
 
-    OperationResultType updateAttrResult = WAS_NOT_EXECUTED;
-    OperationResultType updateEnableResult = WAS_NOT_EXECUTED;
-    OperationResultType doraResult = WAS_NOT_EXECUTED;
-    OperationResultType logDbResult = WAS_NOT_EXECUTED;
+    ExecutionStatus updateAttributesStatus = WAS_NOT_EXECUTED;
+    ExecutionStatus updateEnableStatus;
+    ExecutionStatus doraStatus = WAS_NOT_EXECUTED;
+    ExecutionStatus logDbStatus = WAS_NOT_EXECUTED;
 
     Exception updateEnableException = null;
     Exception doraException = null;
     Exception logDbException = null;
 
-    UserType existedCognitoUser = cognitoServiceFacade.getCognitoUserById(id);
+    UserType existedCognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
 
-    if(cognitoServiceFacade.updateUserAttributes(id, existedCognitoUser, updateUserDto)) {
-      updateAttrResult = SUCCESS;
+    if(cognitoServiceFacade.updateUserAttributes(userId, existedCognitoUser, updateUserDto)) {
+      updateAttributesStatus = SUCCESS;
     }
 
     OptionalExecution<UserEnableStatusRequest, Boolean> changeUserEnabledExecution =
-        new OptionalExecution<UserEnableStatusRequest, Boolean>(
-            new UserEnableStatusRequest(id, existedCognitoUser.getEnabled(), updateUserDto.getEnabled())){
+        executeUpdateEnableStatusOptionally(userId, updateUserDto, existedCognitoUser);
+
+    updateEnableStatus = changeUserEnabledExecution.getExecutionStatus();
+    Boolean changeEnabledWasExecuted = changeUserEnabledExecution.getResult();
+    if(!changeEnabledWasExecuted){
+      updateEnableStatus = WAS_NOT_EXECUTED;
+    }
+    updateEnableException = changeUserEnabledExecution.getException();
+
+    if(updateEnableStatus == FAIL && updateAttributesStatus == WAS_NOT_EXECUTED) {
+        throw (RuntimeException)updateEnableException;
+    }
+
+    if(updateAttributesStatus == SUCCESS || updateEnableStatus == SUCCESS) {
+      PutInSearchExecution doraExecution = updateUserInSearch(userId);
+
+      doraStatus = doraExecution.getExecutionStatus();
+      if(doraStatus == FAIL) {
+        doraException = doraExecution.getException();
+        OptionalExecution dbLogExecution = doraExecution.getUserLogExecution();
+        logDbStatus = dbLogExecution.getExecutionStatus();
+        logDbException = dbLogExecution.getException();
+      }
+    }
+
+    if (updateEnableStatus == SUCCESS && doraStatus == FAIL && logDbStatus == SUCCESS) {
+      throwPartialSuccessException(userId, USER_UPDATE_SAVE_TO_SEARCH_ERROR, doraException);
+
+    } else if (updateEnableStatus == SUCCESS && doraStatus == FAIL && logDbStatus == FAIL) {
+      throwPartialSuccessException(
+          userId, USER_UPDATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS, doraException, logDbException);
+
+    } else if (updateAttributesStatus == SUCCESS
+        && updateEnableStatus == FAIL
+        && doraStatus == SUCCESS) {
+      throwPartialSuccessException(userId, USER_ENABLE_UPDATE_ERROR, updateEnableException);
+
+    } else if (updateAttributesStatus == SUCCESS
+        && updateEnableStatus == FAIL
+        && doraStatus == FAIL
+        && logDbStatus == SUCCESS) {
+      throwPartialSuccessException(
+          userId,
+          USER_ENABLE_UPDATE_AND_SAVE_TO_SEARCH_ERRORS,
+          updateEnableException,
+          doraException);
+
+    } else if (updateAttributesStatus == SUCCESS
+        && updateEnableStatus == FAIL
+        && doraStatus == FAIL
+        && logDbStatus == FAIL) {
+      throwPartialSuccessException(
+          userId,
+          USER_ENABLE_UPDATE_AND_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS,
+          updateEnableException,
+          doraException,
+          logDbException);
+    }
+  }
+
+  private OptionalExecution<UserEnableStatusRequest, Boolean> executeUpdateEnableStatusOptionally(
+      String userId, UserUpdate updateUserDto, UserType existedCognitoUser) {
+
+    return new OptionalExecution<UserEnableStatusRequest, Boolean>(
+        new UserEnableStatusRequest(
+            userId, existedCognitoUser.getEnabled(), updateUserDto.getEnabled())) {
       @Override
       protected Boolean tryMethod(UserEnableStatusRequest userEnableStatusRequest) {
         return cognitoServiceFacade.changeUserEnabledStatus(userEnableStatusRequest);
       }
       @Override
       protected void catchMethod(Exception e) {
-        LOGGER.error("Unable to update user enabled status", e);
+        LOGGER.error(messages.get(ERROR_UPDATE_USER_ENABLED_STATUS, userId), e);
       }
     };
-
-    updateEnableResult = changeUserEnabledExecution.getResultType();
-    updateEnableException = changeUserEnabledExecution.getException();
-
-    if(updateEnableResult == FAIL && updateAttrResult == WAS_NOT_EXECUTED) {
-      if(updateEnableException instanceof RuntimeException) {
-        throw (RuntimeException)updateEnableException;
-      } else {//cannot happen, just to satisfy compliler
-        throw new RuntimeException(updateEnableException);
-      }
-    }
-
-    if(updateAttrResult == SUCCESS || updateEnableResult == SUCCESS) {
-      PutInSearchExecution doraExecution = updateUserInSearch(id);
-
-      doraResult = doraExecution.getResultType();
-
-      if(doraResult == FAIL) {
-        doraException = doraExecution.getException();
-        OptionalExecution dbLogExecution = doraExecution.getUserLogExecution();
-        logDbResult = dbLogExecution.getResultType();
-        logDbException = dbLogExecution.getException();
-      }
-    }
   }
 
   @Override
@@ -162,19 +208,21 @@ public class IdmServiceImpl implements IdmService {
     String userId = userType.getUsername();
     PutInSearchExecution doraExecution = createUserInSearch(userType);
 
-    if (doraExecution.getResultType() == FAIL) {
+    if (doraExecution.getExecutionStatus() == FAIL) {
       OptionalExecution dbLogExecution = doraExecution.getUserLogExecution();
 
-      if (dbLogExecution.getResultType() == SUCCESS) {
-        String msg = messages.get(USER_CREATE_SAVE_TO_SEARCH_ERROR, userId);
+      if (dbLogExecution.getExecutionStatus() == SUCCESS) {
+        MessageCode errorCode = USER_CREATE_SAVE_TO_SEARCH_ERROR;
+        String msg = messages.get(errorCode, userId);
         throw new PartialSuccessException(
-            userId, msg, USER_CREATE_SAVE_TO_SEARCH_ERROR, doraExecution.getException());
+            userId, msg, errorCode, doraExecution.getException());
       } else {//logging in db failed
-        String msg = messages.get(USER_CREATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS, userId);
+        MessageCode errorCode = USER_CREATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
+            String msg = messages.get(errorCode, userId);
         throw new PartialSuccessException(
             userId,
             msg,
-            USER_CREATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS,
+            errorCode,
             doraExecution.getException(),
             dbLogExecution.getException());
       }
@@ -213,6 +261,14 @@ public class IdmServiceImpl implements IdmService {
         .stream()
         .map(e -> new UserAndOperation(findUser(e.getId()), e.getOperation()))
         .collect(Collectors.toList());
+  }
+
+  private void throwPartialSuccessException(
+      String userId, MessageCode errorCode, Exception... causes) {
+    String msg = messages.get(errorCode, userId);
+    PartialSuccessException e = new PartialSuccessException(userId, msg, errorCode, causes);
+    LOGGER.error(msg, e);
+    throw e;
   }
 
   private static List<UserIdAndOperation> filterIdAndOperationList(List<UserIdAndOperation> inputList) {

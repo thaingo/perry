@@ -562,13 +562,16 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
     AdminDisableUserRequest disableUserRequest = setDisableUserRequestAndResult(USER_WITH_RACFID_ID);
 
-    mockMvc
-        .perform(
-            MockMvcRequestBuilders.patch("/idm/users/" + USER_WITH_RACFID_ID)
-                .contentType(JSON_CONTENT_TYPE)
-                .content(asJsonString(userUpdate)))
-        .andExpect(MockMvcResultMatchers.status().isNoContent())
-        .andReturn();
+    MvcResult result =
+        mockMvc
+            .perform(
+                MockMvcRequestBuilders.patch("/idm/users/" + USER_WITH_RACFID_ID)
+                    .contentType(JSON_CONTENT_TYPE)
+                    .content(asJsonString(userUpdate)))
+            .andExpect(MockMvcResultMatchers.status().isInternalServerError())
+            .andReturn();
+
+    assertExtensible(result, "fixtures/idm/partial-success-user-update/log-success.json");
 
     verify(cognito, times(1)).adminUpdateUserAttributes(updateAttributesRequest);
     verify(cognito, times(1)).adminDisableUser(disableUserRequest);
