@@ -1,6 +1,7 @@
 package gov.ca.cwds.idm.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import gov.ca.cwds.idm.persistence.model.OperationType;
@@ -16,7 +17,8 @@ public class UserAndOperation implements Serializable {
 
   private final OperationType operation;
 
-  public UserAndOperation(User user, OperationType operation) {
+  public UserAndOperation(
+      @JsonProperty("user") User user, @JsonProperty("operation") OperationType operation) {
     this.user = user;
     this.operation = operation;
   }
