@@ -21,6 +21,7 @@ import static gov.ca.cwds.service.messages.MessageCode.USER_CREATE_SAVE_TO_SEARC
 import static gov.ca.cwds.service.messages.MessageCode.USER_ENABLE_UPDATE_AND_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_ENABLE_UPDATE_AND_SAVE_TO_SEARCH_ERRORS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_ENABLE_UPDATE_ERROR;
+import static gov.ca.cwds.service.messages.MessageCode.USER_NOTHING_UPDATED;
 import static gov.ca.cwds.service.messages.MessageCode.USER_UPDATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_UPDATE_SAVE_TO_SEARCH_ERROR;
 import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
@@ -148,6 +149,8 @@ public class IdmServiceImpl implements IdmService {
         logDbStatus = dbLogExecution.getExecutionStatus();
         logDbException = dbLogExecution.getException();
       }
+    } else {
+      LOGGER.info(messages.get(USER_NOTHING_UPDATED, userId));
     }
 
     handleUpdatePartialSuccess(
@@ -171,38 +174,33 @@ public class IdmServiceImpl implements IdmService {
       Exception doraException,
       Exception logDbException) {
 
-    if (updateEnableStatus == SUCCESS && doraStatus == FAIL && logDbStatus == SUCCESS) {
-      throwPartialSuccessException(userId, USER_UPDATE_SAVE_TO_SEARCH_ERROR, doraException);
+    if (updateAttributesStatus == SUCCESS && updateEnableStatus == FAIL) {//partial update
+      if (doraStatus == SUCCESS) {
+        throwPartialSuccessException(userId, USER_ENABLE_UPDATE_ERROR, updateEnableException);
 
-    } else if (updateEnableStatus == SUCCESS && doraStatus == FAIL && logDbStatus == FAIL) {
-      throwPartialSuccessException(
-          userId, USER_UPDATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS, doraException, logDbException);
+      } else if (doraStatus == FAIL && logDbStatus == SUCCESS) {
+        throwPartialSuccessException(
+            userId,
+            USER_ENABLE_UPDATE_AND_SAVE_TO_SEARCH_ERRORS,
+            updateEnableException,
+            doraException);
 
-    } else if (updateAttributesStatus == SUCCESS
-        && updateEnableStatus == FAIL
-        && doraStatus == SUCCESS) {
-      throwPartialSuccessException(userId, USER_ENABLE_UPDATE_ERROR, updateEnableException);
+      } else if (doraStatus == FAIL && logDbStatus == FAIL) {
+        throwPartialSuccessException(
+            userId,
+            USER_ENABLE_UPDATE_AND_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS,
+            updateEnableException,
+            doraException,
+            logDbException);
+      }
+    } else {//no partial update
+      if (doraStatus == FAIL && logDbStatus == SUCCESS) {
+        throwPartialSuccessException(userId, USER_UPDATE_SAVE_TO_SEARCH_ERROR, doraException);
 
-    } else if (updateAttributesStatus == SUCCESS
-        && updateEnableStatus == FAIL
-        && doraStatus == FAIL
-        && logDbStatus == SUCCESS) {
-      throwPartialSuccessException(
-          userId,
-          USER_ENABLE_UPDATE_AND_SAVE_TO_SEARCH_ERRORS,
-          updateEnableException,
-          doraException);
-
-    } else if (updateAttributesStatus == SUCCESS
-        && updateEnableStatus == FAIL
-        && doraStatus == FAIL
-        && logDbStatus == FAIL) {
-      throwPartialSuccessException(
-          userId,
-          USER_ENABLE_UPDATE_AND_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS,
-          updateEnableException,
-          doraException,
-          logDbException);
+      } else if (doraStatus == FAIL && logDbStatus == FAIL) {
+        throwPartialSuccessException(
+            userId, USER_UPDATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS, doraException, logDbException);
+      }
     }
   }
 
