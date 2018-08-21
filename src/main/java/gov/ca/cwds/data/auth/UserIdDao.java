@@ -17,7 +17,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface UserIdDao extends ReadOnlyRepository<UserId, String> {
 
-  @Query("SELECT U FROM UserId U WHERE U.logonId in :logonIds AND U.endDate is null")
+  @Query("SELECT U FROM UserId U "
+      + "LEFT OUTER JOIN FETCH U.staffPerson sp "
+      + "LEFT OUTER JOIN FETCH sp.office "
+      + "WHERE U.logonId in :logonIds "
+      + "AND U.endDate is null")
   List<UserId> findActiveByLogonIdIn(@Param("logonIds") Collection<String> logonIds);
 
   @Query("SELECT u FROM UserId u "

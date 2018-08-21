@@ -63,14 +63,10 @@ public class StaffPerson {
 
   @ManyToOne
   @JoinColumn(name = "FKCWS_OFFT", insertable = false, updatable = false)
-  @Fetch(FetchMode.JOIN)
-  @LazyCollection(LazyCollectionOption.FALSE)
   private CwsOffice office;
 
   @OneToMany
   @JoinColumn(name = "FKSTFPERST")
-  @Fetch(FetchMode.JOIN)
-  @LazyCollection(LazyCollectionOption.FALSE)
   @Where(clause = "END_DT IS NULL")
   private Set<StaffUnitAuthority> unitAuthorities;
 

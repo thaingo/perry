@@ -62,15 +62,11 @@ public class UserId extends CmsPersistentObject {
 
   @OneToMany
   @JoinColumn(name = "FKUSERID_T")
-  @LazyCollection(LazyCollectionOption.FALSE)
-  @Fetch(FetchMode.JOIN)
   @Where(clause = "END_DT IS NULL")
   private Set<StaffAuthorityPrivilege> privileges;
 
   @ManyToOne
   @JoinColumn(name = "FKSTFPERST", insertable = false, updatable = false)
-  @LazyCollection(LazyCollectionOption.FALSE)
-  @Fetch(FetchMode.JOIN)
   private StaffPerson staffPerson;
 
   /**
