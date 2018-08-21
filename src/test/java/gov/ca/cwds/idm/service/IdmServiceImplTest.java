@@ -31,7 +31,6 @@ import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
 import gov.ca.cwds.rest.api.domain.PartialSuccessException;
 import gov.ca.cwds.service.CwsUserInfoService;
-import java.util.HashSet;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
@@ -262,6 +261,29 @@ public class IdmServiceImplTest {
       assertThat(causes.get(0), is(enableStatusError));
       assertThat(causes.get(1), is(doraError));
       assertThat(causes.get(2), is(dbError));
+    }
+  }
+
+  @Test
+  @WithMockCustomUser
+  public void testUpdateUser_AttrsNotSetAndEnableStatusError() {
+    UserUpdate userUpdate = new UserUpdate();
+     userUpdate.setEnabled(Boolean.FALSE);
+
+    User existedUser = user();
+    existedUser.setPermissions(toSet("old permission"));
+    UserType existedUserType = userType(existedUser, USER_ID);
+
+    setGetCognitoUserById(USER_ID, existedUserType);
+
+    RuntimeException enableStatusError = new RuntimeException("Change Enable Status Error");
+    setChangeUserEnabledStatusFail(enableStatusError);
+
+    try {
+      service.updateUser(USER_ID, userUpdate);
+      fail("should throw RuntimeException");
+    } catch (RuntimeException e) {
+      assertThat(e, is(enableStatusError));
     }
   }
 
