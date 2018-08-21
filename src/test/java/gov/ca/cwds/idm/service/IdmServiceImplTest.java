@@ -7,6 +7,7 @@ import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STAND
 import static gov.ca.cwds.service.messages.MessageCode.USER_CREATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_CREATE_SAVE_TO_SEARCH_ERROR;
 import static gov.ca.cwds.service.messages.MessageCode.USER_PARTIAL_UPDATE;
+import static gov.ca.cwds.service.messages.MessageCode.USER_PARTIAL_UPDATE_AND_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_PARTIAL_UPDATE_AND_SAVE_TO_SEARCH_ERRORS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_UPDATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
 import static gov.ca.cwds.util.Utils.toSet;
@@ -223,6 +224,44 @@ public class IdmServiceImplTest {
       assertThat(causes.size(), is(2));
       assertThat(causes.get(0), is(enableStatusError));
       assertThat(causes.get(1), is(doraError));
+    }
+  }
+
+  @Test
+  @WithMockCustomUser
+  public void testPartialUpdateUser_SearchAndDbLogFail() {
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setPermissions(toSet("new permission"));
+    userUpdate.setEnabled(Boolean.FALSE);
+
+    User existedUser = user();
+    existedUser.setPermissions(toSet("old permission"));
+    UserType existedUserType = userType(existedUser, USER_ID);
+
+    setUpdateUserAttributesResult(USER_ID, userUpdate, true);
+    setGetCognitoUserById(USER_ID, existedUserType);
+
+    RuntimeException enableStatusError = new RuntimeException("Change Enable Status Error");
+    setChangeUserEnabledStatusFail(enableStatusError);
+
+    Exception doraError = new RuntimeException("Dora error");
+    when(searchServiceMock.updateUser(any(User.class))).thenThrow(doraError);
+
+    Exception dbError = new RuntimeException("DB error");
+    when(userLogRepositoryMock.save(any(UserLog.class))).thenThrow(dbError);
+
+    try {
+      service.updateUser(USER_ID, userUpdate);
+      fail("should throw PartialSuccessException");
+    } catch (PartialSuccessException e) {
+      assertThat(e.getUserId(), is(USER_ID));
+      assertThat(e.getErrorCode(), is(USER_PARTIAL_UPDATE_AND_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS));
+
+      List<Exception> causes = e.getCauses();
+      assertThat(causes.size(), is(3));
+      assertThat(causes.get(0), is(enableStatusError));
+      assertThat(causes.get(1), is(doraError));
+      assertThat(causes.get(2), is(dbError));
     }
   }
 
