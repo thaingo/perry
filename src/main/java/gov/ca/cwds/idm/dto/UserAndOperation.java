@@ -1,5 +1,6 @@
 package gov.ca.cwds.idm.dto;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
@@ -17,6 +18,7 @@ public class UserAndOperation implements Serializable {
 
   private final OperationType operation;
 
+  @JsonCreator
   public UserAndOperation(
       @JsonProperty("user") User user, @JsonProperty("operation") OperationType operation) {
     this.user = user;
