@@ -28,6 +28,7 @@ import gov.ca.cwds.data.persistence.auth.CwsOffice;
 import gov.ca.cwds.data.persistence.auth.StaffPerson;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserAndOperation;
+import gov.ca.cwds.idm.dto.UserEnableStatusRequest;
 import gov.ca.cwds.idm.dto.UserIdAndOperation;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.UserVerificationResult;
@@ -117,12 +118,12 @@ public class IdmServiceImpl implements IdmService {
       updateAttrResult = SUCCESS;
     }
 
-    OptionalExecution<ChangeUserEnabledRequest, Boolean> changeUserEnabledExecution =
-        new OptionalExecution<ChangeUserEnabledRequest, Boolean>(
-            new ChangeUserEnabledRequest(id, existedCognitoUser.getEnabled(), updateUserDto.getEnabled())){
+    OptionalExecution<UserEnableStatusRequest, Boolean> changeUserEnabledExecution =
+        new OptionalExecution<UserEnableStatusRequest, Boolean>(
+            new UserEnableStatusRequest(id, existedCognitoUser.getEnabled(), updateUserDto.getEnabled())){
       @Override
-      protected Boolean tryMethod(ChangeUserEnabledRequest changeUserEnabledRequest) {
-        return cognitoServiceFacade.changeUserEnabledStatus(changeUserEnabledRequest);
+      protected Boolean tryMethod(UserEnableStatusRequest userEnableStatusRequest) {
+        return cognitoServiceFacade.changeUserEnabledStatus(userEnableStatusRequest);
       }
       @Override
       protected void catchMethod(Exception e) {

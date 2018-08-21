@@ -38,9 +38,9 @@ import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import com.amazonaws.services.cognitoidp.model.UsernameExistsException;
 import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.idm.dto.UserEnableStatusRequest;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.persistence.model.OperationType;
-import gov.ca.cwds.idm.service.ChangeUserEnabledRequest;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
@@ -216,7 +216,7 @@ public class CognitoServiceFacade {
   /**
    @return true if Cognito operations were really executed, false otherwise
    */
-  public boolean changeUserEnabledStatus(ChangeUserEnabledRequest request) {
+  public boolean changeUserEnabledStatus(UserEnableStatusRequest request) {
     boolean executed = false;
 
     String id = request.getUserId();
