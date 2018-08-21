@@ -136,10 +136,9 @@ public class IdmServiceImpl implements IdmService {
       }
     } else if (updateEnableStatus == FAIL) {
       updateEnableException = updateUserEnabledExecution.getException();
-    }
-
-    if(updateEnableStatus == FAIL && updateAttributesStatus == WAS_NOT_EXECUTED) {
+      if(updateAttributesStatus == WAS_NOT_EXECUTED) {
         throw (RuntimeException)updateEnableException;
+      }
     }
 
     if(updateAttributesStatus == SUCCESS || updateEnableStatus == SUCCESS) {
