@@ -150,6 +150,27 @@ public class IdmServiceImpl implements IdmService {
       }
     }
 
+    handleUpdatePartialSuccess(
+        userId,
+        updateAttributesStatus,
+        updateEnableStatus,
+        doraStatus,
+        logDbStatus,
+        updateEnableException,
+        doraException,
+        logDbException);
+  }
+
+  private void handleUpdatePartialSuccess(
+      String userId,
+      ExecutionStatus updateAttributesStatus,
+      ExecutionStatus updateEnableStatus,
+      ExecutionStatus doraStatus,
+      ExecutionStatus logDbStatus,
+      Exception updateEnableException,
+      Exception doraException,
+      Exception logDbException) {
+
     if (updateEnableStatus == SUCCESS && doraStatus == FAIL && logDbStatus == SUCCESS) {
       throwPartialSuccessException(userId, USER_UPDATE_SAVE_TO_SEARCH_ERROR, doraException);
 
