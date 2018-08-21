@@ -14,6 +14,7 @@ import static gov.ca.cwds.service.messages.MessageCode.IDM_MAPPING_SCRIPT_ERROR;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY;
 import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID_IN_CWSCMS;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_CREATE_IDM_USER_IN_ES;
+import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_IDM_USER_IN_ES;
 import static gov.ca.cwds.service.messages.MessageCode.USER_CREATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_CREATE_SAVE_TO_SEARCH_ERROR;
 import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
@@ -299,7 +300,7 @@ public class IdmServiceImpl implements IdmService {
       }
       @Override
       protected void catchMethod(Exception e) {
-        String msg = messages.get(UNABLE_CREATE_IDM_USER_IN_ES, id);
+        String msg = messages.get(UNABLE_UPDATE_IDM_USER_IN_ES, id);
         LOGGER.error(msg, e);
         setUserLogExecution(userLogService.logUpdate(id));
       }
