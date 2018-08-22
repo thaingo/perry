@@ -22,7 +22,7 @@ public interface UserIdDao extends ReadOnlyRepository<UserId, String> {
       + "LEFT OUTER JOIN FETCH sp.office "
       + "WHERE U.logonId in :logonIds "
       + "AND U.endDate is null")
-  List<UserId> findActiveByLogonIdIn(@Param("logonIds") Collection<String> logonIds);
+  Set<UserId> findActiveByLogonIdIn(@Param("logonIds") Collection<String> logonIds);
 
   @Query("SELECT u FROM UserId u "
       + "LEFT OUTER JOIN FETCH u.staffPerson sp "

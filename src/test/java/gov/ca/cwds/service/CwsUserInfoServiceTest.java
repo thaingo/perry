@@ -7,6 +7,7 @@ import gov.ca.cwds.data.persistence.auth.StaffPerson;
 import gov.ca.cwds.data.persistence.auth.UserId;
 import gov.ca.cwds.service.dto.CwsUserInfo;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
@@ -113,7 +114,7 @@ public class CwsUserInfoServiceTest {
     userId3.setStaffPerson(staffPerson3);
 
     Mockito.when(userIdDao.findActiveByLogonIdIn(Mockito.anyCollection()))
-        .thenReturn(Arrays.asList(userId1, userId2, userId3));
+        .thenReturn(new HashSet<>(Arrays.asList(userId1, userId2, userId3)));
 
     List<CwsUserInfo> result = cwsUserInfoService.findUsers(keys);
 

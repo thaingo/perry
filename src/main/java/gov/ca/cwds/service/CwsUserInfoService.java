@@ -95,7 +95,7 @@ public class CwsUserInfoService {
     if (CollectionUtils.isEmpty(filtered)) {
       return Collections.emptyList();
     }
-    List<UserId> userIdList = userIdDao.findActiveByLogonIdIn(filtered);
+    Set<UserId> userIdList = userIdDao.findActiveByLogonIdIn(filtered);
     return userIdList.stream().map(this::composeCwsUserInfo).collect(Collectors.toList());
   }
 
