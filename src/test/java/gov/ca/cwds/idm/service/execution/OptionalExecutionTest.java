@@ -6,7 +6,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-import gov.ca.cwds.idm.service.OperationResultType;
+import gov.ca.cwds.idm.service.ExecutionStatus;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
@@ -28,9 +28,9 @@ public class OptionalExecutionTest {
           }
         };
 
-    assertThat(execution.getResultType(), CoreMatchers.is(OperationResultType.SUCCESS));
+    assertThat(execution.getExecutionStatus(), CoreMatchers.is(ExecutionStatus.SUCCESS));
     assertThat(execution.getException(), nullValue());
-    assertThat(execution.getResponse(), is("ABC"));
+    assertThat(execution.getResult(), is("ABC"));
   }
 
   @Test
@@ -50,9 +50,9 @@ public class OptionalExecutionTest {
           }
         };
 
-    assertThat(execution.getResultType(), is(OperationResultType.FAIL));
+    assertThat(execution.getExecutionStatus(), is(ExecutionStatus.FAIL));
     assertThat(execution.getException(), notNullValue());
     assertTrue(execution.getException() instanceof ArithmeticException);
-    assertThat(execution.getResponse(), nullValue());
+    assertThat(execution.getResult(), nullValue());
   }
 }

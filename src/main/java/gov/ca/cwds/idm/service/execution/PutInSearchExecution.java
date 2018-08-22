@@ -1,16 +1,14 @@
 package gov.ca.cwds.idm.service.execution;
 
-import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.persistence.model.UserLog;
 import org.springframework.http.ResponseEntity;
 
-public abstract class PutInSearchExecution extends
-    OptionalExecution<UserType, ResponseEntity<String>> {
+public abstract class PutInSearchExecution<T> extends
+    OptionalExecution<T, ResponseEntity<String>> {
 
   private OptionalExecution<String, UserLog> userLogExecution;
 
-  public PutInSearchExecution(
-      UserType input) {
+  public PutInSearchExecution(T input) {
     super(input);
   }
 

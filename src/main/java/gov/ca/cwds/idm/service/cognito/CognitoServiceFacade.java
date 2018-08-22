@@ -38,6 +38,7 @@ import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import com.amazonaws.services.cognitoidp.model.UsernameExistsException;
 import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.idm.dto.UserEnableStatusRequest;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.persistence.model.OperationType;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
@@ -105,6 +106,7 @@ public class CognitoServiceFacade {
     }
   }
 
+  //method is used in annotation, don't remove it
   public String getCountyName(String userId) {
     return CognitoUtils.getCountyName(getCognitoUserById(userId));
   }
@@ -215,20 +217,24 @@ public class CognitoServiceFacade {
   /**
    @return true if Cognito operations were really executed, false otherwise
    */
-  public boolean changeUserEnabledStatus(String id, Boolean existedEnabled, Boolean newEnabled) {
+  public boolean changeUserEnabledStatus(UserEnableStatusRequest request) {
     boolean executed = false;
+
+    String id = request.getUserId();
+    Boolean existedEnabled = request.getExistedEnabled();
+    Boolean newEnabled = request.getNewEnabled();
 
     if (newEnabled != null && !newEnabled.equals(existedEnabled)) {
       if (newEnabled) {
         AdminEnableUserRequest adminEnableUserRequest =
             new AdminEnableUserRequest().withUsername(id).withUserPoolId(properties.getUserpool());
-
         executeInCognito(identityProvider::adminEnableUser, adminEnableUserRequest, id, UPDATE);
         executed =  true;
+
       } else {
         AdminDisableUserRequest adminDisableUserRequest =
             new AdminDisableUserRequest().withUsername(id).withUserPoolId(properties.getUserpool());
-        identityProvider.adminDisableUser(adminDisableUserRequest);
+        executeInCognito(identityProvider::adminDisableUser, adminDisableUserRequest, id, UPDATE);
         executed =  true;
       }
     }
