@@ -42,6 +42,7 @@ import gov.ca.cwds.idm.dto.UserVerificationResult;
 import gov.ca.cwds.idm.dto.UsersPage;
 import gov.ca.cwds.idm.dto.UsersSearchCriteria;
 import gov.ca.cwds.idm.persistence.model.OperationType;
+import gov.ca.cwds.idm.persistence.model.UserLog;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.StandardUserAttribute;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
@@ -111,13 +112,6 @@ public class IdmServiceImpl implements IdmService {
   public void updateUser(String userId, UserUpdate updateUserDto) {
 
     ExecutionStatus updateAttributesStatus = WAS_NOT_EXECUTED;
-    ExecutionStatus updateEnableStatus;
-    ExecutionStatus doraStatus = WAS_NOT_EXECUTED;
-    ExecutionStatus logDbStatus = WAS_NOT_EXECUTED;
-
-    Exception updateEnableException = null;
-    Exception doraException = null;
-    Exception logDbException = null;
 
     UserType existedCognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
 
@@ -128,29 +122,15 @@ public class IdmServiceImpl implements IdmService {
     OptionalExecution<UserEnableStatusRequest, Boolean> updateUserEnabledExecution =
         executeUpdateEnableStatusOptionally(userId, updateUserDto, existedCognitoUser);
 
-    updateEnableStatus = updateUserEnabledExecution.getExecutionStatus();
-
-    if (updateEnableStatus == SUCCESS) {
-      if (!updateUserEnabledExecution.getResult()) {
-        updateEnableStatus = WAS_NOT_EXECUTED;
-      }
-    } else if (updateEnableStatus == FAIL) {
-      updateEnableException = updateUserEnabledExecution.getException();
-      if(updateAttributesStatus == WAS_NOT_EXECUTED) {
-        throw (RuntimeException)updateEnableException;
-      }
+    if (updateUserEnabledExecution.getExecutionStatus() == SUCCESS && !updateUserEnabledExecution.getResult()) {
+        updateUserEnabledExecution.setExecutionStatus(WAS_NOT_EXECUTED);
+    } else if (updateAttributesStatus == WAS_NOT_EXECUTED && updateUserEnabledExecution.getExecutionStatus() == FAIL) {
+        throw (RuntimeException)updateUserEnabledExecution.getException();
     }
 
-    if(updateAttributesStatus == SUCCESS || updateEnableStatus == SUCCESS) {
-      PutInSearchExecution doraExecution = updateUserInSearch(userId);
-
-      doraStatus = doraExecution.getExecutionStatus();
-      if(doraStatus == FAIL) {
-        doraException = doraExecution.getException();
-        OptionalExecution dbLogExecution = doraExecution.getUserLogExecution();
-        logDbStatus = dbLogExecution.getExecutionStatus();
-        logDbException = dbLogExecution.getException();
-      }
+    PutInSearchExecution<String> doraExecution = null;
+    if(updateAttributesStatus == SUCCESS || updateUserEnabledExecution.getExecutionStatus() == SUCCESS) {
+      doraExecution = updateUserInSearch(userId);
     } else {
       LOGGER.info(messages.get(USER_NOTHING_UPDATED, userId));
     }
@@ -158,23 +138,34 @@ public class IdmServiceImpl implements IdmService {
     handleUpdatePartialSuccess(
         userId,
         updateAttributesStatus,
-        updateEnableStatus,
-        doraStatus,
-        logDbStatus,
-        updateEnableException,
-        doraException,
-        logDbException);
+        updateUserEnabledExecution,
+        doraExecution);
   }
 
   private void handleUpdatePartialSuccess(
       String userId,
       ExecutionStatus updateAttributesStatus,
-      ExecutionStatus updateEnableStatus,
-      ExecutionStatus doraStatus,
-      ExecutionStatus logDbStatus,
-      Exception updateEnableException,
-      Exception doraException,
-      Exception logDbException) {
+      OptionalExecution<UserEnableStatusRequest, Boolean> updateUserEnabledExecution,
+      PutInSearchExecution<String> doraExecution) {
+
+    ExecutionStatus updateEnableStatus = updateUserEnabledExecution.getExecutionStatus();
+    Exception updateEnableException = updateUserEnabledExecution.getException();
+
+    ExecutionStatus doraStatus = WAS_NOT_EXECUTED;
+    Exception doraException = null;
+    ExecutionStatus logDbStatus = WAS_NOT_EXECUTED;
+    Exception logDbException = null;
+
+    if(doraExecution != null) {
+      doraStatus = doraExecution.getExecutionStatus();
+      doraException = doraExecution.getException();
+
+      OptionalExecution<String, UserLog> userLogExecution = doraExecution.getUserLogExecution();
+      if(userLogExecution != null) {
+        logDbStatus = userLogExecution.getExecutionStatus();
+        logDbException = userLogExecution.getException();
+      }
+    }
 
     if (updateAttributesStatus == SUCCESS && updateEnableStatus == FAIL) {//partial update
       if (doraStatus == SUCCESS) {

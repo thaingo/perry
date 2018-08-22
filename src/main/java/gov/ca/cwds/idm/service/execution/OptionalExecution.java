@@ -54,6 +54,10 @@ public abstract class OptionalExecution<T, R> {
     return executionStatus;
   }
 
+  public void setExecutionStatus(ExecutionStatus executionStatus) {
+    this.executionStatus = executionStatus;
+  }
+
   /**
    *  @return Exception thrown in tryMethod or null if execution was successful.
    */
