@@ -165,33 +165,56 @@ public class IdmServiceImpl implements IdmService {
       }
     }
 
-    if (updateAttributesStatus == SUCCESS && updateEnableStatus == FAIL) {//partial update
-      if (doraStatus == SUCCESS) {
-        throwPartialSuccessException(userId, USER_PARTIAL_UPDATE, updateEnableException);
+    if (updateAttributesStatus == SUCCESS && updateEnableStatus == FAIL) {//partial Cognito update
+      handleUpdatePartialSuccessWithCognitoFail(
+          userId, updateEnableException, doraStatus, doraException, logDbStatus, logDbException);
+    } else {//no Cognito partial update
+      handleUpdatePartialSuccessNoCognitoFail(
+          userId, doraStatus, doraException, logDbStatus, logDbException);
+    }
+  }
 
-      } else if (doraStatus == FAIL && logDbStatus == SUCCESS) {
-        throwPartialSuccessException(
-            userId,
-            USER_PARTIAL_UPDATE_AND_SAVE_TO_SEARCH_ERRORS,
-            updateEnableException,
-            doraException);
+  private void handleUpdatePartialSuccessWithCognitoFail(
+      String userId,
+      Exception updateEnableException,
+      ExecutionStatus doraStatus,
+      Exception doraException,
+      ExecutionStatus logDbStatus,
+      Exception logDbException) {
 
-      } else if (doraStatus == FAIL && logDbStatus == FAIL) {
-        throwPartialSuccessException(
-            userId,
-            USER_PARTIAL_UPDATE_AND_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS,
-            updateEnableException,
-            doraException,
-            logDbException);
-      }
-    } else {//no partial update
-      if (doraStatus == FAIL && logDbStatus == SUCCESS) {
-        throwPartialSuccessException(userId, USER_UPDATE_SAVE_TO_SEARCH_ERROR, doraException);
+    if (doraStatus == SUCCESS) {
+      throwPartialSuccessException(userId, USER_PARTIAL_UPDATE, updateEnableException);
 
-      } else if (doraStatus == FAIL && logDbStatus == FAIL) {
-        throwPartialSuccessException(
-            userId, USER_UPDATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS, doraException, logDbException);
-      }
+    } else if (doraStatus == FAIL && logDbStatus == SUCCESS) {
+      throwPartialSuccessException(
+          userId,
+          USER_PARTIAL_UPDATE_AND_SAVE_TO_SEARCH_ERRORS,
+          updateEnableException,
+          doraException);
+
+    } else if (doraStatus == FAIL && logDbStatus == FAIL) {
+      throwPartialSuccessException(
+          userId,
+          USER_PARTIAL_UPDATE_AND_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS,
+          updateEnableException,
+          doraException,
+          logDbException);
+    }
+  }
+
+  private void handleUpdatePartialSuccessNoCognitoFail(
+      String userId,
+      ExecutionStatus doraStatus,
+      Exception doraException,
+      ExecutionStatus logDbStatus,
+      Exception logDbException) {
+
+    if (doraStatus == FAIL && logDbStatus == SUCCESS) {
+      throwPartialSuccessException(userId, USER_UPDATE_SAVE_TO_SEARCH_ERROR, doraException);
+
+    } else if (doraStatus == FAIL && logDbStatus == FAIL) {
+      throwPartialSuccessException(
+          userId, USER_UPDATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS, doraException, logDbException);
     }
   }
 
