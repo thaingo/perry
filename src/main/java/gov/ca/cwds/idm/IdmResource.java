@@ -190,6 +190,12 @@ public class IdmResource {
       return ResponseEntity.noContent().build();
     } catch (UserNotFoundPerryException e) {
       return ResponseEntity.notFound().build();
+    } catch (PartialSuccessException e) {
+      return createCustomResponseEntity(
+          HttpStatus.INTERNAL_SERVER_ERROR,
+          e.getErrorCode(),
+          e.getMessage(),
+          e.getCauses().stream().map(Exception::getMessage).collect(toList()));
     }
   }
 
