@@ -111,13 +111,10 @@ public class IdmServiceImpl implements IdmService {
   @PreAuthorize("@cognitoServiceFacade.getCountyName(#userId) == principal.getParameter('county_name')")
   public void updateUser(String userId, UserUpdate updateUserDto) {
 
-    ExecutionStatus updateAttributesStatus = WAS_NOT_EXECUTED;
-
     UserType existedCognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
 
-    if(cognitoServiceFacade.updateUserAttributes(userId, existedCognitoUser, updateUserDto)) {
-      updateAttributesStatus = SUCCESS;
-    }
+    ExecutionStatus updateAttributesStatus =
+        updateUserAttributes(userId, updateUserDto, existedCognitoUser);
 
     OptionalExecution<UserEnableStatusRequest, Boolean> updateUserEnabledExecution =
         executeUpdateEnableStatusOptionally(userId, updateUserDto, existedCognitoUser);
@@ -138,6 +135,15 @@ public class IdmServiceImpl implements IdmService {
         updateAttributesStatus,
         updateUserEnabledExecution,
         doraExecution);
+  }
+
+  private ExecutionStatus updateUserAttributes(String userId, UserUpdate updateUserDto, UserType existedCognitoUser) {
+    ExecutionStatus updateAttributesStatus = WAS_NOT_EXECUTED;
+
+    if(cognitoServiceFacade.updateUserAttributes(userId, existedCognitoUser, updateUserDto)) {
+      updateAttributesStatus = SUCCESS;
+    }
+    return updateAttributesStatus;
   }
 
   private void handleUpdatePartialSuccess(
