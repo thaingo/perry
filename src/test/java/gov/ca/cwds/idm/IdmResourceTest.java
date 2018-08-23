@@ -602,14 +602,14 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
     AdminUpdateUserAttributesRequest updateAttributesRequest =
         setUpdateUserAttributesRequestAndResult(
-            USER_WITH_RACFID_ID, attr(PERMISSIONS.getName(), "RFA-rollout:Hotline-rollout"));
+            USER_WITH_RACFID_AND_DB_DATA_ID, attr(PERMISSIONS.getName(), "RFA-rollout:Hotline-rollout"));
 
-    AdminDisableUserRequest disableUserRequest = setDisableUserRequestAndFail(USER_WITH_RACFID_ID);
+    AdminDisableUserRequest disableUserRequest = setDisableUserRequestAndFail(USER_WITH_RACFID_AND_DB_DATA_ID);
 
     MvcResult result =
         mockMvc
             .perform(
-                MockMvcRequestBuilders.patch("/idm/users/" + USER_WITH_RACFID_ID)
+                MockMvcRequestBuilders.patch("/idm/users/" + USER_WITH_RACFID_AND_DB_DATA_ID)
                     .contentType(JSON_CONTENT_TYPE)
                     .content(asJsonString(userUpdate)))
             .andExpect(MockMvcResultMatchers.status().isInternalServerError())
