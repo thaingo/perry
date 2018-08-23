@@ -122,10 +122,8 @@ public class IdmServiceImpl implements IdmService {
     OptionalExecution<UserEnableStatusRequest, Boolean> updateUserEnabledExecution =
         executeUpdateEnableStatusOptionally(userId, updateUserDto, existedCognitoUser);
 
-    if (updateUserEnabledExecution.getExecutionStatus() == SUCCESS && !updateUserEnabledExecution.getResult()) {
-        updateUserEnabledExecution.setExecutionStatus(WAS_NOT_EXECUTED);
-    } else if (updateAttributesStatus == WAS_NOT_EXECUTED && updateUserEnabledExecution.getExecutionStatus() == FAIL) {
-        throw (RuntimeException)updateUserEnabledExecution.getException();
+    if (updateAttributesStatus == WAS_NOT_EXECUTED && updateUserEnabledExecution.getExecutionStatus() == FAIL) {
+      throw (RuntimeException)updateUserEnabledExecution.getException();
     }
 
     PutInSearchExecution<String> doraExecution = null;
@@ -200,7 +198,7 @@ public class IdmServiceImpl implements IdmService {
   private OptionalExecution<UserEnableStatusRequest, Boolean> executeUpdateEnableStatusOptionally(
       String userId, UserUpdate updateUserDto, UserType existedCognitoUser) {
 
-    return new OptionalExecution<UserEnableStatusRequest, Boolean>(
+    OptionalExecution<UserEnableStatusRequest, Boolean> updateUserEnabledExecution = new OptionalExecution<UserEnableStatusRequest, Boolean>(
         new UserEnableStatusRequest(
             userId, existedCognitoUser.getEnabled(), updateUserDto.getEnabled())) {
       @Override
@@ -212,6 +210,11 @@ public class IdmServiceImpl implements IdmService {
         LOGGER.error(messages.get(ERROR_UPDATE_USER_ENABLED_STATUS, userId), e);
       }
     };
+
+    if (updateUserEnabledExecution.getExecutionStatus() == SUCCESS && !updateUserEnabledExecution.getResult()) {
+      updateUserEnabledExecution.setExecutionStatus(WAS_NOT_EXECUTED);
+    }
+    return updateUserEnabledExecution;
   }
 
   @Override
