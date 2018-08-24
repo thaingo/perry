@@ -57,7 +57,9 @@ public class SearchServiceTest {
     service.setSearchProperties(properties);
 
     RestTemplate restTemplate = new RestTemplate();
-    service.setRestTemplate(restTemplate);
+    SearchRestSender restSender = new SearchRestSender();
+    restSender.setRestTemplate(restTemplate);
+    service.setRestSender(restSender);
 
     mockServer = MockRestServiceServer.bindTo(restTemplate).build();
   }

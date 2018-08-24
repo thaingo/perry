@@ -17,8 +17,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.RestClientException;
 
 @Service
 @Profile("idm")
@@ -60,8 +62,13 @@ public class SearchService {
 
   @Autowired private SearchProperties searchProperties;
 
-  @Autowired private RestTemplate restTemplate;
+//  @Autowired private RestTemplate restTemplate;
+@Autowired private SearchRestSender restSender;
 
+//  @Retryable(
+//      value = { RestClientException.class },
+//      maxAttempts = 3,
+//      backoff = @Backoff(delay = 500))
   public ResponseEntity<String> createUser(User user) {
     return putUser(user, OperationType.CREATE);
   }
@@ -90,7 +97,8 @@ public class SearchService {
     params.put(SSO_TOKEN, getSsoToken());
 
     ResponseEntity<String> response =
-        restTemplate.exchange(urlTemplate, HttpMethod.PUT, requestEntity, String.class, params);
+//        restTemplate.exchange(urlTemplate, HttpMethod.PUT, requestEntity, String.class, params);
+        restSender.send(urlTemplate, requestEntity, params);
 
     if (LOGGER.isInfoEnabled()){
       LOGGER.info(
@@ -117,7 +125,10 @@ public class SearchService {
     this.searchProperties = searchProperties;
   }
 
-  public void setRestTemplate(RestTemplate restTemplate) {
-    this.restTemplate = restTemplate;
+//  public void setRestTemplate(RestTemplate restTemplate) {
+//    this.restTemplate = restTemplate;
+//  }
+  public void setRestSender(SearchRestSender restSender) {
+    this.restSender = restSender;
   }
 }
