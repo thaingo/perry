@@ -389,9 +389,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
     setCreateUserResult(request, NEW_USER_SUCCESS_ID);
 
-    when(mockRestTemplate.exchange(any(String.class), any(HttpMethod.class),
-        any(HttpEntity.class), any(Class.class), any(Map.class))).thenReturn(ResponseEntity.ok().body("{success:true}"));
-
+    setDoraSuccess();
 
     mockMvc
         .perform(
@@ -404,6 +402,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
     verify(cognito, times(1)).adminCreateUser(request);
     verify(spySearchService, times(1)).createUser(any(User.class));
+    verifyDoraCalls(1);
   }
 
   @Test
@@ -415,9 +414,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     User user = user();
     user.setEmail(ES_ERROR_CREATE_USER_EMAIL);
 
-    doThrow(new RestClientException("Elastic Search error"))
-        .when(mockRestTemplate).exchange(any(String.class), any(HttpMethod.class),
-        any(HttpEntity.class), any(Class.class), any(Map.class));
+    setDoraError();
 
     AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
     setCreateUserResult(request, NEW_USER_ES_FAIL_ID);
@@ -437,6 +434,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
     verify(cognito, times(1)).adminCreateUser(request);
     verify(spySearchService, times(1)).createUser(any(User.class));
+    verifyDoraCalls(3);
 
     Iterable<UserLog> userLogs = userLogRepository.findAll();
     int newUserLogsSize = Iterables.size(userLogs);
@@ -553,8 +551,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         setUpdateUserAttributesRequestAndResult(
             USER_NO_RACFID_ID, attr(PERMISSIONS.getName(), "RFA-rollout:Hotline-rollout"));
 
-    when(mockRestTemplate.exchange(any(String.class), any(HttpMethod.class),
-        any(HttpEntity.class), any(Class.class), any(Map.class))).thenReturn(ResponseEntity.ok().body("{success:true}"));
+    setDoraSuccess();
 
     AdminDisableUserRequest disableUserRequest = setDisableUserRequestAndResult(USER_NO_RACFID_ID);
 
@@ -573,15 +570,14 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     InOrder inOrder = inOrder(cognito);
     inOrder.verify(cognito).adminUpdateUserAttributes(updateAttributesRequest);
     inOrder.verify(cognito).adminDisableUser(disableUserRequest);
+    verifyDoraCalls(1);
   }
 
   @Test
   @WithMockCustomUser
   public void testUpdateUserDoraFail() throws Exception {
 
-    doThrow(new RestClientException("Elastic Search error"))
-        .when(mockRestTemplate).exchange(any(String.class), any(HttpMethod.class),
-        any(HttpEntity.class), any(Class.class), any(Map.class));
+    setDoraError();
 
     int oldUserLogsSize = Iterables.size(userLogRepository.findAll());
 
@@ -609,6 +605,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     verify(cognito, times(1)).adminUpdateUserAttributes(updateAttributesRequest);
     verify(cognito, times(1)).adminDisableUser(disableUserRequest);
     verify(spySearchService, times(1)).updateUser(any(User.class));
+    verifyDoraCalls(3);
 
     InOrder inOrder = inOrder(cognito);
     inOrder.verify(cognito).adminUpdateUserAttributes(updateAttributesRequest);
@@ -637,8 +634,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         setUpdateUserAttributesRequestAndResult(
             USER_WITH_RACFID_AND_DB_DATA_ID, attr(PERMISSIONS.getName(), "RFA-rollout:Hotline-rollout"));
 
-    when(mockRestTemplate.exchange(any(String.class), any(HttpMethod.class),
-        any(HttpEntity.class), any(Class.class), any(Map.class))).thenReturn(ResponseEntity.ok().body("{success:true}"));
+    setDoraSuccess();
 
     AdminDisableUserRequest disableUserRequest = setDisableUserRequestAndFail(USER_WITH_RACFID_AND_DB_DATA_ID);
 
@@ -656,6 +652,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     verify(cognito, times(1)).adminUpdateUserAttributes(updateAttributesRequest);
     verify(cognito, times(1)).adminDisableUser(disableUserRequest);
     verify(spySearchService, times(1)).updateUser(any(User.class));
+    verifyDoraCalls(1);
 
     InOrder inOrder = inOrder(cognito);
     inOrder.verify(cognito).adminUpdateUserAttributes(updateAttributesRequest);
@@ -689,10 +686,9 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         .andReturn();
 
     verify(cognito, times(0)).adminUpdateUserAttributes(updateAttributesRequest);
-
     verify(cognito, times(0)).adminEnableUser(enableUserRequest);
-
     verify(spySearchService, times(0)).createUser(any(User.class));
+    verifyDoraCalls(0);
   }
 
   @Test
@@ -713,7 +709,6 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         .andReturn();
 
     verify(cognito, times(0)).adminEnableUser(enableUserRequest);
-
     verify(spySearchService, times(0)).createUser(any(User.class));
   }
 
@@ -1424,5 +1419,30 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     protected String getSsoToken() {
       return SSO_TOKEN;
     }
+  }
+
+  private void setDoraSuccess() {
+    when(mockRestTemplate.exchange(
+        any(String.class),
+        any(HttpMethod.class),
+        any(HttpEntity.class),
+        any(Class.class),
+        any(Map.class)))
+        .thenReturn(ResponseEntity.ok().body("{success:true}"));
+  }
+
+  private void setDoraError() {
+    doThrow(new RestClientException("Elastic Search error"))
+        .when(mockRestTemplate).exchange(any(String.class), any(HttpMethod.class),
+        any(HttpEntity.class), any(Class.class), any(Map.class));
+  }
+
+  private void verifyDoraCalls(int times) {
+    verify(mockRestTemplate, times(times)).exchange(
+        any(String.class),
+        any(HttpMethod.class),
+        any(HttpEntity.class),
+        any(Class.class),
+        any(Map.class));
   }
 }

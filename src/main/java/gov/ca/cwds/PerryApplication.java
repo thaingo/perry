@@ -15,6 +15,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.client.RestTemplate;
@@ -29,6 +30,7 @@ import javax.persistence.EntityManagerFactory;
 @EnableGlobalMethodSecurity(prePostEnabled=true)
 @EntityScan("gov.ca.cwds.data.persistence.auth")
 @EnableConfigurationProperties({PerryProperties.class, CognitoProperties.class, SearchProperties.class})
+@EnableRetry
 public class PerryApplication {
 
   @Bean
