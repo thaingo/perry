@@ -21,8 +21,8 @@ public class SearchRestSender {
 
   @Retryable(
       value = {RestClientException.class},
-      maxAttemptsExpression = "#{${perry.doraWsMaxAttempts}}",
-      backoff = @Backoff(delayExpression = "#{${perry.doraWsRetryTimeoutMs}}"))
+      maxAttemptsExpression = "${perry.doraWsMaxAttempts}",
+      backoff = @Backoff(delayExpression = "${perry.doraWsRetryTimeoutMs}"))
   public ResponseEntity<String> send(
       String urlTemplate, HttpEntity<User> requestEntity, Map<String, String> params) {
     return restTemplate.exchange(urlTemplate, HttpMethod.PUT, requestEntity, String.class, params);
