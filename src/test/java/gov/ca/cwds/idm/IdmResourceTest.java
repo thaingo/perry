@@ -116,7 +116,7 @@ import org.springframework.web.context.WebApplicationContext;
     "perry.tokenStore.datasource.url=" + TOKEN_STORE_URL,
     "spring.datasource.url=" + CMS_STORE_URL,
     "perry.doraWsMaxAttempts=" + DORA_WS_MAX_ATTEMPTS,
-    "perry.doraWsRetryTimeoutMs=500"
+    "perry.doraWsRetryDelayMs=500"
   }
 )
 public class IdmResourceTest extends BaseLiquibaseTest {

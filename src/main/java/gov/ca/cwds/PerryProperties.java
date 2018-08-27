@@ -47,7 +47,7 @@ public class PerryProperties {
   private String loginPageUrl = "/mfa-login.html";
 
   private int doraWsMaxAttempts;
-  private int doraWsRetryTimeoutMs;
+  private int doraWsRetryDelayMs;
 
   public static class IdentityProviderConfiguration {
 
@@ -209,11 +209,11 @@ public class PerryProperties {
     this.doraWsMaxAttempts = doraWsMaxAttempts;
   }
 
-  public int getDoraWsRetryTimeoutMs() {
-    return doraWsRetryTimeoutMs;
+  public int getDoraWsRetryDelayMs() {
+    return doraWsRetryDelayMs;
   }
 
-  public void setDoraWsRetryTimeoutMs(int doraWsRetryTimeoutMs) {
-    this.doraWsRetryTimeoutMs = doraWsRetryTimeoutMs;
+  public void setDoraWsRetryDelayMs(int doraWsRetryDelayMs) {
+    this.doraWsRetryDelayMs = doraWsRetryDelayMs;
   }
 }
