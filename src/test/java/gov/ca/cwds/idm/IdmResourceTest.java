@@ -3,6 +3,7 @@ package gov.ca.cwds.idm;
 import static gov.ca.cwds.idm.BaseLiquibaseTest.CMS_STORE_URL;
 import static gov.ca.cwds.idm.BaseLiquibaseTest.TOKEN_STORE_URL;
 import static gov.ca.cwds.idm.IdmResource.DATETIME_FORMAT_PATTERN;
+import static gov.ca.cwds.idm.IdmResourceTest.DORA_WS_MAX_ATTEMPTS;
 import static gov.ca.cwds.idm.persistence.model.OperationType.CREATE;
 import static gov.ca.cwds.idm.persistence.model.OperationType.UPDATE;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.COUNTY;
@@ -113,7 +114,9 @@ import org.springframework.web.context.WebApplicationContext;
     "perry.identityManager.idmMapping=config/idm.groovy",
     "spring.jpa.hibernate.ddl-auto=none",
     "perry.tokenStore.datasource.url=" + TOKEN_STORE_URL,
-    "spring.datasource.url=" + CMS_STORE_URL
+    "spring.datasource.url=" + CMS_STORE_URL,
+    "perry.doraWsMaxAttempts=" + DORA_WS_MAX_ATTEMPTS,
+    "perry.doraWsRetryTimeoutMs=500"
   }
 )
 public class IdmResourceTest extends BaseLiquibaseTest {
@@ -144,6 +147,8 @@ public class IdmResourceTest extends BaseLiquibaseTest {
           MediaType.APPLICATION_JSON.getType(),
           MediaType.APPLICATION_JSON.getSubtype(),
           Charset.forName("utf8"));
+
+  public static final int DORA_WS_MAX_ATTEMPTS = 3;
 
   @Autowired private WebApplicationContext webApplicationContext;
 
@@ -434,7 +439,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
     verify(cognito, times(1)).adminCreateUser(request);
     verify(spySearchService, times(1)).createUser(any(User.class));
-    verifyDoraCalls(3);
+    verifyDoraCalls(DORA_WS_MAX_ATTEMPTS);
 
     Iterable<UserLog> userLogs = userLogRepository.findAll();
     int newUserLogsSize = Iterables.size(userLogs);
@@ -605,7 +610,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     verify(cognito, times(1)).adminUpdateUserAttributes(updateAttributesRequest);
     verify(cognito, times(1)).adminDisableUser(disableUserRequest);
     verify(spySearchService, times(1)).updateUser(any(User.class));
-    verifyDoraCalls(3);
+    verifyDoraCalls(DORA_WS_MAX_ATTEMPTS);
 
     InOrder inOrder = inOrder(cognito);
     inOrder.verify(cognito).adminUpdateUserAttributes(updateAttributesRequest);
@@ -1428,7 +1433,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         any(HttpEntity.class),
         any(Class.class),
         any(Map.class)))
-        .thenReturn(ResponseEntity.ok().body("{success:true}"));
+        .thenReturn(ResponseEntity.ok().body("{\"success\":true}"));
   }
 
   private void setDoraError() {

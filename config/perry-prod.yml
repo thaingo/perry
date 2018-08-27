@@ -74,6 +74,8 @@ perry:
     idpRetryTimeout: ${IDP_RETRY_TIMEOUT:500}  #milliseconds
     idpValidateInterval: ${IDP_VALIDATE_INTERVAL:2} #seconds
     loginPageUrl: ${LOGIN_PAGE_URL:/mfa-login.html}
+    doraWsMaxAttempts: ${DORA_WS_MAX_ATTEMPTS:3} #amount of retries
+    doraWsRetryTimeoutMs: ${DORA_WS_RETRY_TIMEOUT_MS:500}  #milliseconds
     tokenStore:
         datasource:
             driver-class-name: org.postgresql.Driver
