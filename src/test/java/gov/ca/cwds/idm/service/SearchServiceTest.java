@@ -5,15 +5,18 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
+import static org.springframework.test.web.client.ExpectedCount.times;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 
+import gov.ca.cwds.PerryProperties;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.persistence.model.OperationType;
 import gov.ca.cwds.idm.service.cognito.SearchProperties;
+import gov.ca.cwds.idm.service.retry.SearchRetryConfiguration;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import org.junit.After;
 import org.junit.Before;
@@ -50,15 +53,24 @@ public class SearchServiceTest {
 
     service = new SearchService();
 
+    PerryProperties perryProperties = new PerryProperties();
+    perryProperties.setDoraWsMaxAttempts(3);
+    perryProperties.setDoraWsRetryDelayMs(500);
+
     SearchProperties properties = new SearchProperties();
     properties.setDoraUrl("http://localhost");
     properties.setIndex("users");
     properties.setType("user");
     service.setSearchProperties(properties);
 
+    SearchRetryConfiguration searchRetryConfiguration = new SearchRetryConfiguration();
+    searchRetryConfiguration.setProperties(perryProperties);
+
     RestTemplate restTemplate = new RestTemplate();
     SearchRestSender restSender = new SearchRestSender();
     restSender.setRestTemplate(restTemplate);
+    restSender.setRetryTemplate(searchRetryConfiguration.retryTemplate());
+
     service.setRestSender(restSender);
 
     mockServer = MockRestServiceServer.bindTo(restTemplate).build();
@@ -105,7 +117,7 @@ public class SearchServiceTest {
   @Test(expected = HttpServerErrorException.class)
   public void testDoraError() {
     mockServer
-        .expect(requestTo("http://localhost/dora/users/user/" + USER_ERROR_ID + "?token=" + SSO_TOKEN))
+        .expect(times(3), requestTo("http://localhost/dora/users/user/" + USER_ERROR_ID + "?token=" + SSO_TOKEN))
         .andExpect(method(HttpMethod.PUT))
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
         .andRespond(
