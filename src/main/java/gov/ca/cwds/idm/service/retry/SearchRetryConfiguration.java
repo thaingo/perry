@@ -18,8 +18,6 @@ public class SearchRetryConfiguration {
 
   private PerryProperties properties;
 
-  private RetryListener searchRetryListener;
-
   @Bean(name = "searchRetryTemplate")
   public RetryTemplate retryTemplate() {
     RetryTemplate retryTemplate = new RetryTemplate();
