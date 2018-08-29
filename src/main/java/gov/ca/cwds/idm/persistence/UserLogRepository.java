@@ -12,19 +12,22 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Profile("idm")
 @Transactional(value = "tokenTransactionManager")
+@SuppressWarnings({"squid:S1214"})//implementation details are queries and they are put here by Spring Data design
 public interface UserLogRepository extends CrudRepository<UserLog, Long> {
+
+  String LAST_DATE = "lastDate";
 
   @Override
   UserLog save(UserLog entity);
 
   @Query(
       "select u.username, u.operationType from UserLog u "
-          + "where u.operationTime > :lastDate "
-          + "group by u.username, u.operationType")
+          + "where u.operationTime > :" + LAST_DATE
+          + " group by u.username, u.operationType")
   @Transactional(readOnly = true)
-  List<Object[]> getUserIdAndOperationTypes(@Param("lastDate") Date lastDate);
+  List<Object[]> getUserIdAndOperationTypes(@Param(LAST_DATE) Date lastDate);
 
-  @Query("delete from UserLog u where u.operationTime <= :lastDate")
+  @Query("delete from UserLog u where u.operationTime <= :" + LAST_DATE)
   @Modifying
-  int deleteLogsBeforeDate(@Param("lastDate") Date lastDate);
+  int deleteLogsBeforeDate(@Param(LAST_DATE) Date lastDate);
 }
