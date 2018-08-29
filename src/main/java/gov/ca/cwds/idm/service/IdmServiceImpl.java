@@ -303,11 +303,7 @@ public class IdmServiceImpl implements IdmService {
   @Override
   public List<UserAndOperation> getFailedOperations(Date lastJobTime) {
 
-    try {
-      userLogService.deleteAlreadyProcessedLogs(lastJobTime);
-    } catch (Exception e) {
-      LOGGER.error(messages.get(UNABLE_TO_PURGE_PROCESSED_USER_LOGS, lastJobTime), e);
-    }
+    deleteProcessedLogs(lastJobTime);
 
     List<UserIdAndOperation> dbList = userLogService.getUserIdAndOperations(lastJobTime);
 
@@ -315,6 +311,18 @@ public class IdmServiceImpl implements IdmService {
         .stream()
         .map(e -> new UserAndOperation(findUser(e.getId()), e.getOperation()))
         .collect(Collectors.toList());
+  }
+
+  private void deleteProcessedLogs(Date lastJobTime) {
+    int deletedCount = 0;
+    try {
+      deletedCount = userLogService.deleteProcessedLogs(lastJobTime);
+    } catch (Exception e) {
+      LOGGER.error(messages.get(UNABLE_TO_PURGE_PROCESSED_USER_LOGS, lastJobTime), e);
+    }
+    if (deletedCount > 0) {
+      LOGGER.info("{} processed user log records are deleted", deletedCount);
+    }
   }
 
   private void throwPartialSuccessException(

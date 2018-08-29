@@ -11,21 +11,20 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 @Profile("idm")
+@Transactional(value = "tokenTransactionManager")
 public interface UserLogRepository extends CrudRepository<UserLog, Long> {
 
-  @Transactional(value = "tokenTransactionManager")
   @Override
   UserLog save(UserLog entity);
 
   @Query(
       "select u.username, u.operationType from UserLog u "
-          + "where u.operationTime > :lastJobTime "
+          + "where u.operationTime > :lastDate "
           + "group by u.username, u.operationType")
-  @Transactional(value = "tokenTransactionManager", readOnly = true)
-  List<Object[]> getUserIdAndOperationTypes(@Param("lastJobTime") Date lastJobTime);
+  @Transactional(readOnly = true)
+  List<Object[]> getUserIdAndOperationTypes(@Param("lastDate") Date lastDate);
 
   @Query("delete from UserLog u where u.operationTime <= :lastDate")
   @Modifying
-  @Transactional(value = "tokenTransactionManager")
-  int deleteLogsBeforeLastDate(@Param("lastDate") Date lastDate);
+  int deleteLogsBeforeDate(@Param("lastDate") Date lastDate);
 }
