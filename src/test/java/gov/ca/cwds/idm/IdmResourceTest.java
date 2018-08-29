@@ -76,6 +76,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -871,6 +872,16 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     System.out.println(result.getResponse().getContentAsString());
 
     assertNonStrict(result, "fixtures/idm/failed-operations/failed-operations-valid.json");
+
+    Iterable<UserLog> userLogs = userLogRepository.findAll();
+    int newUserLogsSize = Iterables.size(userLogs);
+    assertThat(newUserLogsSize, is(4));
+
+    Iterator<UserLog> it = userLogs.iterator();
+    assertUserLog(it, USER_NO_RACFID_ID, CREATE, 3000);
+    assertUserLog(it, USER_WITH_RACFID_ID, CREATE, 4000);
+    assertUserLog(it, USER_WITH_RACFID_ID, UPDATE, 5000);
+    assertUserLog(it, USER_WITH_RACFID_AND_DB_DATA_ID, UPDATE, 6000);
   }
 
   @Test
@@ -902,6 +913,19 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     log.setOperationType(operation);
     log.setOperationTime(new Date(date));
     return userLogRepository.save(log);
+  }
+
+  private void assertUserLog(
+      UserLog userLog, String username, OperationType operationType, long time) {
+    assertThat(userLog.getUsername(), is(username));
+    assertThat(userLog.getOperationType(), is(operationType));
+    assertThat(userLog.getOperationTime(), is(new Date(time)));
+  }
+
+  private void assertUserLog(
+      Iterator<UserLog> iterator, String username, OperationType operationType, long time) {
+    UserLog userLog = iterator.next();
+    assertUserLog(userLog, username, operationType, time);
   }
 
   private static String getDateString(Date date) {

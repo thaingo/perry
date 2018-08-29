@@ -15,6 +15,7 @@ import static gov.ca.cwds.service.messages.MessageCode.IDM_MAPPING_SCRIPT_ERROR;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY;
 import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID_IN_CWSCMS;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_CREATE_IDM_USER_IN_ES;
+import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_PURGE_PROCESSED_USER_LOGS;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_IDM_USER_IN_ES;
 import static gov.ca.cwds.service.messages.MessageCode.USER_CREATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_CREATE_SAVE_TO_SEARCH_ERROR;
@@ -302,12 +303,26 @@ public class IdmServiceImpl implements IdmService {
   @Override
   public List<UserAndOperation> getFailedOperations(Date lastJobTime) {
 
+    deleteProcessedLogs(lastJobTime);
+
     List<UserIdAndOperation> dbList = userLogService.getUserIdAndOperations(lastJobTime);
 
     return filterIdAndOperationList(dbList)
         .stream()
         .map(e -> new UserAndOperation(findUser(e.getId()), e.getOperation()))
         .collect(Collectors.toList());
+  }
+
+  private void deleteProcessedLogs(Date lastJobTime) {
+    int deletedCount = 0;
+    try {
+      deletedCount = userLogService.deleteProcessedLogs(lastJobTime);
+    } catch (Exception e) {
+      LOGGER.error(messages.get(UNABLE_TO_PURGE_PROCESSED_USER_LOGS, lastJobTime), e);
+    }
+    if (deletedCount > 0) {
+      LOGGER.info("{} processed user log records are deleted", deletedCount);
+    }
   }
 
   private void throwPartialSuccessException(

@@ -52,6 +52,10 @@ public class UserLogService {
         .collect(Collectors.toList());
   }
 
+  public int deleteProcessedLogs(Date lastJobTime) {
+    return userLogRepository.deleteLogsBeforeDate(lastJobTime);
+  }
+
   private OptionalExecution<String, UserLog> log(String username, OperationType operationType) {
 
     return new OptionalExecution<String, UserLog>(username){
