@@ -4,6 +4,7 @@ import gov.ca.cwds.idm.persistence.model.UserLog;
 import java.util.Date;
 import java.util.List;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -24,6 +25,7 @@ public interface UserLogRepository extends CrudRepository<UserLog, Long> {
   List<Object[]> getUserIdAndOperationTypes(@Param("lastJobTime") Date lastJobTime);
 
   @Query("delete from UserLog u where u.operationTime <= :lastDate")
+  @Modifying
   @Transactional(value = "tokenTransactionManager")
   int deleteLogsBeforeLastDate(@Param("lastDate") Date lastDate);
 }
