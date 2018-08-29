@@ -25,7 +25,7 @@ import gov.ca.cwds.idm.WithMockCustomUser;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserEnableStatusRequest;
 import gov.ca.cwds.idm.dto.UserUpdate;
-import gov.ca.cwds.idm.persistence.UserLogRepository;
+import gov.ca.cwds.idm.persistence.UserLogTransactionalRepository;
 import gov.ca.cwds.idm.persistence.model.UserLog;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
@@ -59,7 +59,8 @@ public class IdmServiceImplTest {
 
   private CognitoServiceFacade cognitoServiceFacadeMock = mock(CognitoServiceFacade.class);
   private CwsUserInfoService cwsUserInfoServiceMock = mock(CwsUserInfoService.class);
-  private UserLogRepository userLogRepositoryMock = mock(UserLogRepository.class);
+  private UserLogTransactionalRepository userLogTransactionalRepositoryMock =
+      mock(UserLogTransactionalRepository.class);
   private SearchService searchServiceMock = mock(SearchService.class);
 
   @Before
@@ -68,7 +69,7 @@ public class IdmServiceImplTest {
     service.setCwsUserInfoService(cwsUserInfoServiceMock);
     service.setSearchService(searchServiceMock);
 
-    userLogService.setUserLogRepository(userLogRepositoryMock);
+    userLogService.setUserLogTransactionalRepository(userLogTransactionalRepositoryMock);
   }
 
   @Test
@@ -113,7 +114,7 @@ public class IdmServiceImplTest {
     when(searchServiceMock.createUser(any(User.class))).thenThrow(doraError);
 
     Exception dbError = new RuntimeException("DB error");
-    when(userLogRepositoryMock.save(any(UserLog.class))).thenThrow(dbError);
+    when(userLogTransactionalRepositoryMock.save(any(UserLog.class))).thenThrow(dbError);
 
     try {
       service.createUser(user);
@@ -146,7 +147,7 @@ public class IdmServiceImplTest {
     when(searchServiceMock.updateUser(any(User.class))).thenThrow(doraError);
 
     Exception dbError = new RuntimeException("DB error");
-    when(userLogRepositoryMock.save(any(UserLog.class))).thenThrow(dbError);
+    when(userLogTransactionalRepositoryMock.save(any(UserLog.class))).thenThrow(dbError);
 
     try {
       service.updateUser(USER_ID, userUpdate);
@@ -247,7 +248,7 @@ public class IdmServiceImplTest {
     when(searchServiceMock.updateUser(any(User.class))).thenThrow(doraError);
 
     Exception dbError = new RuntimeException("DB error");
-    when(userLogRepositoryMock.save(any(UserLog.class))).thenThrow(dbError);
+    when(userLogTransactionalRepositoryMock.save(any(UserLog.class))).thenThrow(dbError);
 
     try {
       service.updateUser(USER_ID, userUpdate);
