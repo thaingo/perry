@@ -2,7 +2,7 @@ package gov.ca.cwds.data.persistence.auth;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import gov.ca.cwds.data.persistence.PersistentObject;
-import gov.ca.cwds.data.persistence.cms.CmsPersistentObject;
+import gov.ca.cwds.data.legacy.cms.CmsPersistentObject;
 import java.util.Date;
 import java.util.Objects;
 import javax.persistence.Column;
@@ -194,8 +194,8 @@ public class StaffAuthorityPrivilege extends CmsPersistentObject {
         .append(levelOfAuthPrivilegeType, that.levelOfAuthPrivilegeType)
         .append(startDate, that.startDate)
         .append(startTime, that.startTime)
-        .append(getLastUpdatedId(), that.getLastUpdatedId())
-        .append(getLastUpdatedTime(), that.getLastUpdatedTime())
+        .append(getLastUpdateId(), that.getLastUpdateId())
+        .append(getLastUpdateTime(), that.getLastUpdateTime())
         .isEquals();
   }
 
@@ -211,8 +211,8 @@ public class StaffAuthorityPrivilege extends CmsPersistentObject {
         .append(levelOfAuthPrivilegeType)
         .append(startDate)
         .append(startTime)
-        .append(getLastUpdatedId())
-        .append(getLastUpdatedTime())
+        .append(getLastUpdateId())
+        .append(getLastUpdateTime())
         .toHashCode();
   }
 }

@@ -3,7 +3,7 @@ package gov.ca.cwds.data.persistence.auth;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import gov.ca.cwds.data.converter.StringToRequiredIntegerConverter;
-import gov.ca.cwds.data.persistence.cms.CmsPersistentObject;
+import gov.ca.cwds.data.legacy.cms.CmsPersistentObject;
 import io.dropwizard.jackson.JsonSnakeCase;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -376,8 +376,8 @@ public class CwsOffice extends CmsPersistentObject {
         .append(agencyCodeNumber, cwsOffice.agencyCodeNumber)
         .append(locationCountyType, cwsOffice.locationCountyType)
         .append(directorsNameTitle, cwsOffice.directorsNameTitle)
-        .append(getLastUpdatedId(), cwsOffice.getLastUpdatedId())
-        .append(getLastUpdatedTime(), cwsOffice.getLastUpdatedTime())
+        .append(getLastUpdateId(), cwsOffice.getLastUpdateId())
+        .append(getLastUpdateTime(), cwsOffice.getLastUpdateTime())
         .isEquals();
   }
 
@@ -405,8 +405,8 @@ public class CwsOffice extends CmsPersistentObject {
         .append(agencyCodeNumber)
         .append(locationCountyType)
         .append(directorsNameTitle)
-        .append(getLastUpdatedId())
-        .append(getLastUpdatedTime())
+        .append(getLastUpdateId())
+        .append(getLastUpdateTime())
         .toHashCode();
   }
 }

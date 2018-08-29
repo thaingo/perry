@@ -1,8 +1,7 @@
 package gov.ca.cwds.data.persistence.auth;
 
-import gov.ca.cwds.data.persistence.cms.CmsPersistentObject;
+import gov.ca.cwds.data.legacy.cms.CmsPersistentObject;
 import java.util.Date;
-import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -172,8 +171,8 @@ public class StaffUnitAuthority extends CmsPersistentObject {
         .append(startDate, that.startDate)
         .append(thirdId, that.thirdId)
         .append(assignmentUnit, that.assignmentUnit)
-        .append(getLastUpdatedId(), that.getLastUpdatedId())
-        .append(getLastUpdatedTime(), that.getLastUpdatedTime())
+        .append(getLastUpdateId(), that.getLastUpdateId())
+        .append(getLastUpdateTime(), that.getLastUpdateTime())
         .isEquals();
   }
 
@@ -188,8 +187,8 @@ public class StaffUnitAuthority extends CmsPersistentObject {
         .append(startDate)
         .append(thirdId)
         .append(assignmentUnit)
-        .append(getLastUpdatedId())
-        .append(getLastUpdatedTime())
+        .append(getLastUpdateId())
+        .append(getLastUpdateTime())
         .toHashCode();
   }
 }

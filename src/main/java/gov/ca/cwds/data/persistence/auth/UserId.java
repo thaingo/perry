@@ -1,8 +1,8 @@
 package gov.ca.cwds.data.persistence.auth;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import gov.ca.cwds.data.legacy.cms.CmsPersistentObject;
 import gov.ca.cwds.data.persistence.PersistentObject;
-import gov.ca.cwds.data.persistence.cms.CmsPersistentObject;
 import java.util.Date;
 import java.util.Set;
 import javax.persistence.Column;
@@ -15,10 +15,6 @@ import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.Where;
 
@@ -189,8 +185,8 @@ public class UserId extends CmsPersistentObject {
         .append(systemDomainType, userId.systemDomainType)
         .append(privileges, userId.privileges)
         .append(staffPerson, userId.staffPerson)
-        .append(getLastUpdatedId(), userId.getLastUpdatedId())
-        .append(getLastUpdatedTime(), userId.getLastUpdatedTime())
+        .append(getLastUpdateId(), userId.getLastUpdateId())
+        .append(getLastUpdateTime(), userId.getLastUpdateTime())
         .isEquals();
   }
 
@@ -205,8 +201,8 @@ public class UserId extends CmsPersistentObject {
         .append(systemDomainType)
         .append(privileges)
         .append(staffPerson)
-        .append(getLastUpdatedId())
-        .append(getLastUpdatedTime())
+        .append(getLastUpdateId())
+        .append(getLastUpdateTime())
         .toHashCode();
   }
 }

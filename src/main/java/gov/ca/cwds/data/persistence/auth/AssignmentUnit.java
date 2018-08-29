@@ -1,7 +1,6 @@
 package gov.ca.cwds.data.persistence.auth;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import gov.ca.cwds.data.persistence.cms.CmsPersistentObject;
+import gov.ca.cwds.data.legacy.cms.CmsPersistentObject;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -192,8 +191,8 @@ public class AssignmentUnit extends CmsPersistentObject {
         .append(assignmentUnitName, that.assignmentUnitName)
         .append(startDate, that.startDate)
         .append(id, that.id)
-        .append(getLastUpdatedId(), that.getLastUpdatedId())
-        .append(getLastUpdatedTime(), that.getLastUpdatedTime())
+        .append(getLastUpdateId(), that.getLastUpdateId())
+        .append(getLastUpdateTime(), that.getLastUpdateTime())
         .isEquals();
   }
 
@@ -209,8 +208,8 @@ public class AssignmentUnit extends CmsPersistentObject {
         .append(assignmentUnitName)
         .append(startDate)
         .append(id)
-        .append(getLastUpdatedId())
-        .append(getLastUpdatedTime())
+        .append(getLastUpdateId())
+        .append(getLastUpdateTime())
         .toHashCode();
   }
 }

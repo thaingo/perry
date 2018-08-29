@@ -38,6 +38,7 @@ project.ext {
     targetDockerHubOrganization = System.env.DOCKERHUB_ORG ?: 'cwds'
     cwdsModelVersion = '0.8.4_650-RC'
     powerMockVersion = "1.7.3"
+    coreApiVersion = '1.7.5_856-RC'
 
     // assume that Windows users use the Docker Toolbox
     buildEnv = 'JENKINS'
@@ -158,11 +159,15 @@ dependencies {
     compile group: 'com.ibm', name: 'db2jcc4', version: '4.21.29'
     compile group: 'com.ibm', name: 'db2jcc_license_cisuz', version: '4.0.0'
 
-    compile ('gov.ca.cwds.api:api-core:0.19.118') {
-        exclude group: 'org.glassfish.jersey.core'
+    compile (group: 'gov.ca.cwds.api', name:'legacy-data-access', version: coreApiVersion) {
+        exclude(group: 'org.slf4j')
+        exclude(group: 'io.dropwizard', module: 'dropwizard-hibernate')
+        exclude(group: 'io.dropwizard', module: 'dropwizard-validation')
     }
 
-    compile project(':jwt-security');
+    compile group: 'org.hibernate', name: 'hibernate-java8', version: '5.0.12.Final'
+
+    compile project(':jwt-security')
 
     compile group: 'javax.interceptor', name: 'javax.interceptor-api', version: '1.2'
     testCompile(group: 'org.springframework.boot', name: 'spring-boot-starter-test', version:'1.5.2.RELEASE') {
