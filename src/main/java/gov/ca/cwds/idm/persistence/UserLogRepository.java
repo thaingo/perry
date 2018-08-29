@@ -22,4 +22,8 @@ public interface UserLogRepository extends CrudRepository<UserLog, Long> {
           + "group by u.username, u.operationType")
   @Transactional(value = "tokenTransactionManager", readOnly = true)
   List<Object[]> getUserIdAndOperationTypes(@Param("lastJobTime") Date lastJobTime);
+
+  @Query("delete from UserLog u where u.operationTime <= :lastDate")
+  @Transactional(value = "tokenTransactionManager")
+  int deleteLogsBeforeLastDate(@Param("lastDate") Date lastDate);
 }
