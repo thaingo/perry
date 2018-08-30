@@ -31,7 +31,7 @@ public class SearchRetryConfiguration {
     SimpleRetryPolicy retryPolicy =
         new SimpleRetryPolicy(
             properties.getDoraWsMaxAttempts(),
-            Collections.singletonMap(RestClientException.class, true));
+            Collections.singletonMap(RestClientException.class, Boolean.TRUE));
     retryTemplate.setRetryPolicy(retryPolicy);
 
     retryTemplate.registerListener(searchRetryListener());
