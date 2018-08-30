@@ -46,6 +46,9 @@ public class PerryProperties {
 
   private String loginPageUrl = "/mfa-login.html";
 
+  private int doraWsMaxAttempts;
+  private int doraWsRetryDelayMs;
+
   public static class IdentityProviderConfiguration {
 
     private IdpMappingScript idpMapping;
@@ -196,5 +199,21 @@ public class PerryProperties {
 
   public void setLoginPageUrl(String loginPageUrl) {
     this.loginPageUrl = loginPageUrl;
+  }
+
+  public int getDoraWsMaxAttempts() {
+    return doraWsMaxAttempts;
+  }
+
+  public void setDoraWsMaxAttempts(int doraWsMaxAttempts) {
+    this.doraWsMaxAttempts = doraWsMaxAttempts;
+  }
+
+  public int getDoraWsRetryDelayMs() {
+    return doraWsRetryDelayMs;
+  }
+
+  public void setDoraWsRetryDelayMs(int doraWsRetryDelayMs) {
+    this.doraWsRetryDelayMs = doraWsRetryDelayMs;
   }
 }

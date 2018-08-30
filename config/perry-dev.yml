@@ -19,6 +19,8 @@ spring:
           port: ${REDIS_PORT:6379}
 
 perry:
+    doraWsMaxAttempts: ${DORA_WS_MAX_ATTEMPTS:3} #amount of retries
+    doraWsRetryDelayMs: ${DORA_WS_RETRY_DELAY_MS:500}  #milliseconds
     identityManager:
           idmMapping: ${IDM_MAPPING_SCRIPT:config/idm.groovy}
           idmBasicAuthUser: ${IDM_BASIC_AUTH_USER:}

@@ -1,11 +1,11 @@
 package gov.ca.cwds.idm.service;
 
-import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getSsoToken;
 import static gov.ca.cwds.util.Utils.toLowerCase;
 
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.persistence.model.OperationType;
 import gov.ca.cwds.idm.service.cognito.SearchProperties;
+import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -14,13 +14,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
-@Service
+@Service(value = "searchService")
 @Profile("idm")
 public class SearchService {
 
@@ -60,7 +58,7 @@ public class SearchService {
 
   @Autowired private SearchProperties searchProperties;
 
-  @Autowired private RestTemplate restTemplate;
+  @Autowired private SearchRestSender restSender;
 
   public ResponseEntity<String> createUser(User user) {
     return putUser(user, OperationType.CREATE);
@@ -68,6 +66,10 @@ public class SearchService {
 
   public ResponseEntity<String> updateUser(User user) {
     return putUser(user, OperationType.UPDATE);
+  }
+
+  protected String getSsoToken() {
+    return CurrentAuthenticatedUserUtil.getSsoToken();
   }
 
   ResponseEntity<String> putUser(User user, OperationType operation) {
@@ -89,8 +91,7 @@ public class SearchService {
     params.put(ID, user.getId());
     params.put(SSO_TOKEN, getSsoToken());
 
-    ResponseEntity<String> response =
-        restTemplate.exchange(urlTemplate, HttpMethod.PUT, requestEntity, String.class, params);
+    ResponseEntity<String> response = restSender.send(urlTemplate, requestEntity, params);
 
     if (LOGGER.isInfoEnabled()){
       LOGGER.info(
@@ -117,7 +118,7 @@ public class SearchService {
     this.searchProperties = searchProperties;
   }
 
-  public void setRestTemplate(RestTemplate restTemplate) {
-    this.restTemplate = restTemplate;
+  public void setRestSender(SearchRestSender restSender) {
+    this.restSender = restSender;
   }
 }
