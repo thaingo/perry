@@ -3,6 +3,7 @@ package gov.ca.cwds.idm;
 import static gov.ca.cwds.idm.BaseLiquibaseTest.CMS_STORE_URL;
 import static gov.ca.cwds.idm.BaseLiquibaseTest.TOKEN_STORE_URL;
 import static gov.ca.cwds.idm.IdmResource.DATETIME_FORMAT_PATTERN;
+import static gov.ca.cwds.idm.IdmResourceTest.DORA_WS_MAX_ATTEMPTS;
 import static gov.ca.cwds.idm.persistence.model.OperationType.CREATE;
 import static gov.ca.cwds.idm.persistence.model.OperationType.UPDATE;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.COUNTY;
@@ -27,6 +28,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -60,10 +62,11 @@ import gov.ca.cwds.idm.persistence.UserLogRepository;
 import gov.ca.cwds.idm.persistence.model.OperationType;
 import gov.ca.cwds.idm.persistence.model.UserLog;
 import gov.ca.cwds.idm.service.IdmServiceImpl;
+import gov.ca.cwds.idm.service.SearchRestSender;
 import gov.ca.cwds.idm.service.SearchService;
-import gov.ca.cwds.idm.service.UserLogService;
 import gov.ca.cwds.idm.service.cognito.CognitoProperties;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
+import gov.ca.cwds.idm.service.cognito.SearchProperties;
 import gov.ca.cwds.service.messages.MessagesService;
 import java.nio.charset.Charset;
 import java.text.DateFormat;
@@ -75,6 +78,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import liquibase.util.StringUtils;
@@ -87,8 +91,11 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -97,6 +104,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.WebApplicationContext;
 
 @ActiveProfiles({"dev", "idm"})
@@ -107,7 +115,9 @@ import org.springframework.web.context.WebApplicationContext;
     "perry.identityManager.idmMapping=config/idm.groovy",
     "spring.jpa.hibernate.ddl-auto=none",
     "perry.tokenStore.datasource.url=" + TOKEN_STORE_URL,
-    "spring.datasource.url=" + CMS_STORE_URL
+    "spring.datasource.url=" + CMS_STORE_URL,
+    "perry.doraWsMaxAttempts=" + DORA_WS_MAX_ATTEMPTS,
+    "perry.doraWsRetryDelayMs=500"
   }
 )
 public class IdmResourceTest extends BaseLiquibaseTest {
@@ -123,6 +133,8 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   private static final String NEW_USER_ES_FAIL_ID = "08e14c57-6e5e-48dd-8172-e8949c2a7f76";
   private static final String ES_ERROR_CREATE_USER_EMAIL = "es.error@create.com";
 
+  private static final String SSO_TOKEN = "b02aa833-f8b2-4d28-8796-3abe059313d1";
+
   private static final String USERPOOL = "userpool";
   private static final String SOME_PAGINATION_TOKEN = "somePaginationToken";
 
@@ -137,6 +149,8 @@ public class IdmResourceTest extends BaseLiquibaseTest {
           MediaType.APPLICATION_JSON.getSubtype(),
           Charset.forName("utf8"));
 
+  public static final int DORA_WS_MAX_ATTEMPTS = 3;
+
   @Autowired private WebApplicationContext webApplicationContext;
 
   @Autowired private CognitoServiceFacade cognitoServiceFacade;
@@ -147,7 +161,15 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
   @Autowired private UserLogRepository userLogRepository;
 
-  private SearchService searchService = mock(SearchService.class);
+  @Autowired private SearchService searchService;
+
+  @Autowired private SearchRestSender searchRestSender;
+
+  @Autowired private SearchProperties searchProperties;
+
+  private SearchService spySearchService;
+
+  private RestTemplate mockRestTemplate = mock(RestTemplate.class);
 
   private MockMvc mockMvc;
 
@@ -160,8 +182,15 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
   @Before
   public void before() {
+
     cognitoServiceFacade.setMessagesService(messagesService);
-    idmService.setSearchService(searchService);
+
+    searchRestSender.setRestTemplate(mockRestTemplate);
+    searchService.setRestSender(searchRestSender);
+    searchService.setSearchProperties(searchProperties);
+    spySearchService = spy(searchService);
+
+    idmService.setSearchService(spySearchService);
     this.mockMvc =
         MockMvcBuilders.webAppContextSetup(webApplicationContext).apply(springSecurity()).build();
     cognito = cognitoServiceFacade.getIdentityProvider();
@@ -366,6 +395,8 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
     setCreateUserResult(request, NEW_USER_SUCCESS_ID);
 
+    setDoraSuccess();
+
     mockMvc
         .perform(
             MockMvcRequestBuilders.post("/idm/users")
@@ -376,7 +407,8 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         .andReturn();
 
     verify(cognito, times(1)).adminCreateUser(request);
-    verify(searchService, times(1)).createUser(any(User.class));
+    verify(spySearchService, times(1)).createUser(any(User.class));
+    verifyDoraCalls(1);
   }
 
   @Test
@@ -388,8 +420,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     User user = user();
     user.setEmail(ES_ERROR_CREATE_USER_EMAIL);
 
-    doThrow(new RestClientException("Elastic Search error"))
-        .when(searchService).createUser(any(User.class));
+    setDoraError();
 
     AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
     setCreateUserResult(request, NEW_USER_ES_FAIL_ID);
@@ -408,7 +439,8 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     assertExtensible(result, "fixtures/idm/partial-success-user-create/log-success.json");
 
     verify(cognito, times(1)).adminCreateUser(request);
-    verify(searchService, times(1)).createUser(any(User.class));
+    verify(spySearchService, times(1)).createUser(any(User.class));
+    verifyDoraCalls(DORA_WS_MAX_ATTEMPTS);
 
     Iterable<UserLog> userLogs = userLogRepository.findAll();
     int newUserLogsSize = Iterables.size(userLogs);
@@ -438,7 +470,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         .andReturn();
 
     verify(cognito, times(1)).adminCreateUser(request);
-    verify(searchService, times(0)).createUser(any(User.class));
+    verify(spySearchService, times(0)).createUser(any(User.class));
   }
 
   @Test
@@ -458,7 +490,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         .andReturn();
 
     verify(cognito, times(0)).adminCreateUser(request);
-    verify(searchService, times(0)).createUser(any(User.class));
+    verify(spySearchService, times(0)).createUser(any(User.class));
   }
 
   @Test
@@ -525,6 +557,8 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         setUpdateUserAttributesRequestAndResult(
             USER_NO_RACFID_ID, attr(PERMISSIONS.getName(), "RFA-rollout:Hotline-rollout"));
 
+    setDoraSuccess();
+
     AdminDisableUserRequest disableUserRequest = setDisableUserRequestAndResult(USER_NO_RACFID_ID);
 
     mockMvc
@@ -537,19 +571,19 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
     verify(cognito, times(1)).adminUpdateUserAttributes(updateAttributesRequest);
     verify(cognito, times(1)).adminDisableUser(disableUserRequest);
-    verify(searchService, times(1)).updateUser(any(User.class));
+    verify(spySearchService, times(1)).updateUser(any(User.class));
 
     InOrder inOrder = inOrder(cognito);
     inOrder.verify(cognito).adminUpdateUserAttributes(updateAttributesRequest);
     inOrder.verify(cognito).adminDisableUser(disableUserRequest);
+    verifyDoraCalls(1);
   }
 
   @Test
   @WithMockCustomUser
   public void testUpdateUserDoraFail() throws Exception {
 
-    doThrow(new RestClientException("Elastic Search error"))
-        .when(searchService).updateUser(any(User.class));
+    setDoraError();
 
     int oldUserLogsSize = Iterables.size(userLogRepository.findAll());
 
@@ -576,7 +610,8 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
     verify(cognito, times(1)).adminUpdateUserAttributes(updateAttributesRequest);
     verify(cognito, times(1)).adminDisableUser(disableUserRequest);
-    verify(searchService, times(1)).updateUser(any(User.class));
+    verify(spySearchService, times(1)).updateUser(any(User.class));
+    verifyDoraCalls(DORA_WS_MAX_ATTEMPTS);
 
     InOrder inOrder = inOrder(cognito);
     inOrder.verify(cognito).adminUpdateUserAttributes(updateAttributesRequest);
@@ -605,6 +640,8 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         setUpdateUserAttributesRequestAndResult(
             USER_WITH_RACFID_AND_DB_DATA_ID, attr(PERMISSIONS.getName(), "RFA-rollout:Hotline-rollout"));
 
+    setDoraSuccess();
+
     AdminDisableUserRequest disableUserRequest = setDisableUserRequestAndFail(USER_WITH_RACFID_AND_DB_DATA_ID);
 
     MvcResult result =
@@ -620,7 +657,8 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
     verify(cognito, times(1)).adminUpdateUserAttributes(updateAttributesRequest);
     verify(cognito, times(1)).adminDisableUser(disableUserRequest);
-    verify(searchService, times(1)).updateUser(any(User.class));
+    verify(spySearchService, times(1)).updateUser(any(User.class));
+    verifyDoraCalls(1);
 
     InOrder inOrder = inOrder(cognito);
     inOrder.verify(cognito).adminUpdateUserAttributes(updateAttributesRequest);
@@ -654,10 +692,9 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         .andReturn();
 
     verify(cognito, times(0)).adminUpdateUserAttributes(updateAttributesRequest);
-
     verify(cognito, times(0)).adminEnableUser(enableUserRequest);
-
-    verify(searchService, times(0)).createUser(any(User.class));
+    verify(spySearchService, times(0)).createUser(any(User.class));
+    verifyDoraCalls(0);
   }
 
   @Test
@@ -678,8 +715,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         .andReturn();
 
     verify(cognito, times(0)).adminEnableUser(enableUserRequest);
-
-    verify(searchService, times(0)).createUser(any(User.class));
+    verify(spySearchService, times(0)).createUser(any(User.class));
   }
 
   @Test
@@ -922,7 +958,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         .andReturn();
 
     verify(cognito, times(0)).adminCreateUser(request);
-    verify(searchService, times(0)).createUser(any(User.class));
+    verify(spySearchService, times(0)).createUser(any(User.class));
   }
 
   private AdminUpdateUserAttributesRequest setUpdateUserAttributesRequestAndResult(
@@ -948,7 +984,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   private AdminDisableUserRequest setDisableUserRequestAndFail(String id) {
     AdminDisableUserRequest request =
         new AdminDisableUserRequest().withUsername(id).withUserPoolId(USERPOOL);
-     when(cognito.adminDisableUser(request)).thenThrow(new RuntimeException("Update enable status error"));
+    when(cognito.adminDisableUser(request)).thenThrow(new RuntimeException("Update enable status error"));
     return request;
   }
 
@@ -998,6 +1034,8 @@ public class IdmResourceTest extends BaseLiquibaseTest {
         throws BeansException {
       if (beanName.equals("cognitoServiceFacade")) {
         return new TestCognitoServiceFacade();
+      } else if(beanName.equals("searchService")) {
+        return new TestSearchService();
       } else {
         return bean;
       }
@@ -1403,5 +1441,37 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     public String getRacfId() {
       return racfId;
     }
+  }
+
+  public static class TestSearchService extends SearchService {
+    @Override
+    protected String getSsoToken() {
+      return SSO_TOKEN;
+    }
+  }
+
+  private void setDoraSuccess() {
+    when(mockRestTemplate.exchange(
+        any(String.class),
+        any(HttpMethod.class),
+        any(HttpEntity.class),
+        any(Class.class),
+        any(Map.class)))
+        .thenReturn(ResponseEntity.ok().body("{\"success\":true}"));
+  }
+
+  private void setDoraError() {
+    doThrow(new RestClientException("Elastic Search error"))
+        .when(mockRestTemplate).exchange(any(String.class), any(HttpMethod.class),
+        any(HttpEntity.class), any(Class.class), any(Map.class));
+  }
+
+  private void verifyDoraCalls(int times) {
+    verify(mockRestTemplate, times(times)).exchange(
+        any(String.class),
+        any(HttpMethod.class),
+        any(HttpEntity.class),
+        any(Class.class),
+        any(Map.class));
   }
 }
