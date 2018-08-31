@@ -7,7 +7,7 @@ import static gov.ca.cwds.service.messages.MessageCode.UNABLE_LOG_IDM_USER_CREAT
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_LOG_IDM_USER_UPDATE;
 
 import gov.ca.cwds.idm.dto.UserIdAndOperation;
-import gov.ca.cwds.idm.persistence.UserLogRepository;
+import gov.ca.cwds.idm.persistence.UserLogTransactionalRepository;
 import gov.ca.cwds.idm.persistence.model.OperationType;
 import gov.ca.cwds.idm.persistence.model.UserLog;
 import gov.ca.cwds.idm.service.execution.OptionalExecution;
@@ -27,7 +27,7 @@ public class UserLogService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(UserLogService.class);
 
-  private UserLogRepository userLogRepository;
+  private UserLogTransactionalRepository userLogTransactionalRepository;
   private MessagesService messages;
 
   public OptionalExecution<String, UserLog> logCreate(String username) {
@@ -44,7 +44,7 @@ public class UserLogService {
       throw new IllegalArgumentException("Last Job Time cannot be null");
     }
 
-    List<Object[]> iDAndOperationPairs = userLogRepository.getUserIdAndOperationTypes(lastJobTime);
+    List<Object[]> iDAndOperationPairs = userLogTransactionalRepository.getUserIdAndOperationTypes(lastJobTime);
 
     return iDAndOperationPairs
         .stream()
@@ -53,7 +53,7 @@ public class UserLogService {
   }
 
   public int deleteProcessedLogs(Date lastJobTime) {
-    return userLogRepository.deleteLogsBeforeDate(lastJobTime);
+    return userLogTransactionalRepository.deleteLogsBeforeDate(lastJobTime);
   }
 
   private OptionalExecution<String, UserLog> log(String username, OperationType operationType) {
@@ -66,7 +66,7 @@ public class UserLogService {
         userLog.setOperationType(operationType);
         userLog.setOperationTime(new Date());
 
-        return userLogRepository.save(userLog);
+        return userLogTransactionalRepository.save(userLog);
       }
       @Override
       protected void catchMethod(Exception e) {
@@ -89,8 +89,9 @@ public class UserLogService {
   }
 
   @Autowired
-  public void setUserLogRepository(UserLogRepository userLogRepository) {
-    this.userLogRepository = userLogRepository;
+  public void setUserLogTransactionalRepository(
+      UserLogTransactionalRepository userLogTransactionalRepository) {
+    this.userLogTransactionalRepository = userLogTransactionalRepository;
   }
 
   @Autowired

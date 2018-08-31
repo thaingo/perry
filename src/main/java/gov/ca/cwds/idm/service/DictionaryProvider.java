@@ -1,5 +1,7 @@
 package gov.ca.cwds.idm.service;
 
+import static gov.ca.cwds.config.TokenServiceConfiguration.TOKEN_TRANSACTION_MANAGER;
+
 import gov.ca.cwds.idm.persistence.PermissionRepository;
 import gov.ca.cwds.idm.persistence.model.Permission;
 import java.util.List;
@@ -14,7 +16,7 @@ public class DictionaryProvider {
 
   private PermissionRepository permissionRepository;
 
-  @Transactional(value = "tokenTransactionManager", readOnly = true)
+  @Transactional(value = TOKEN_TRANSACTION_MANAGER, readOnly = true)
   public List<Permission> getPermissions() {
     return permissionRepository.findPermissions();
   }

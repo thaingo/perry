@@ -1,5 +1,7 @@
 package gov.ca.cwds.config;
 
+import static gov.ca.cwds.config.TokenServiceConfiguration.TOKEN_TRANSACTION_MANAGER;
+
 import gov.ca.cwds.data.reissue.TokenRepository;
 import gov.ca.cwds.data.reissue.model.PerryTokenEntity;
 import gov.ca.cwds.idm.persistence.PermissionRepository;
@@ -24,10 +26,12 @@ import org.springframework.transaction.PlatformTransactionManager;
  * Created by TPT2 on 10/24/2017.
  */
 @Configuration
-@EnableJpaRepositories(entityManagerFactoryRef = "tokenEntityManagerFactory", transactionManagerRef = "tokenTransactionManager",
+@EnableJpaRepositories(entityManagerFactoryRef = "tokenEntityManagerFactory", transactionManagerRef = TOKEN_TRANSACTION_MANAGER,
     basePackageClasses = {TokenRepository.class, PermissionRepository.class, UserLogRepository.class})
 @EntityScan(basePackageClasses = PerryTokenEntity.class)
 public class TokenServiceConfiguration {
+
+  public static final String TOKEN_TRANSACTION_MANAGER = "tokenTransactionManager";
 
   @Bean("tokenStoreDatasourceProperties")
   @ConfigurationProperties("perry.tokenStore.datasource")
