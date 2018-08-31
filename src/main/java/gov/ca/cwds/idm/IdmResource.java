@@ -29,6 +29,9 @@ import io.swagger.annotations.ApiResponses;
 import java.net.URI;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -128,11 +131,11 @@ public class IdmResource {
           value = "Last date of successful batch job execution in yyyy-MM-dd-HH.mm.ss.SSS format")
       @RequestParam(name = "date")
           String lastJobDateStr) {
-
-    Date lastJobTime;
+    LocalDateTime lastJobTime;
     try {
-      lastJobTime = new SimpleDateFormat(DATETIME_FORMAT_PATTERN).parse(lastJobDateStr);
-    } catch (ParseException e) {
+      DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATETIME_FORMAT_PATTERN);
+      lastJobTime = LocalDateTime.parse(lastJobDateStr, formatter);
+    } catch (DateTimeParseException e) {
       String msg = messages.get(INVALID_DATE_FORMAT, DATETIME_FORMAT_PATTERN);
       LOGGER.error(msg, e);
       return createCustomResponseEntity(HttpStatus.BAD_REQUEST, INVALID_DATE_FORMAT, msg);

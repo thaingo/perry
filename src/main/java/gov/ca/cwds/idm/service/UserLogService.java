@@ -40,7 +40,7 @@ public class UserLogService {
   }
 
   @SuppressWarnings({"fb-contrib:CLI_CONSTANT_LIST_INDEX"})
-  public List<UserIdAndOperation> getUserIdAndOperations(Date lastJobTime) {
+  public List<UserIdAndOperation> getUserIdAndOperations(LocalDateTime lastJobTime) {
     if (lastJobTime == null) {
       throw new IllegalArgumentException("Last Job Time cannot be null");
     }
@@ -53,7 +53,7 @@ public class UserLogService {
         .collect(Collectors.toList());
   }
 
-  public int deleteProcessedLogs(Date lastJobTime) {
+  public int deleteProcessedLogs(LocalDateTime lastJobTime) {
     return userLogTransactionalRepository.deleteLogsBeforeDate(lastJobTime);
   }
 

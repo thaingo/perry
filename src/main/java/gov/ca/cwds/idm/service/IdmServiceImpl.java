@@ -61,6 +61,7 @@ import gov.ca.cwds.service.messages.MessagesService;
 import gov.ca.cwds.service.scripts.IdmMappingScript;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import gov.ca.cwds.util.Utils;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -301,7 +302,7 @@ public class IdmServiceImpl implements IdmService {
   }
 
   @Override
-  public List<UserAndOperation> getFailedOperations(Date lastJobTime) {
+  public List<UserAndOperation> getFailedOperations(LocalDateTime lastJobTime) {
 
     deleteProcessedLogs(lastJobTime);
 
@@ -313,7 +314,7 @@ public class IdmServiceImpl implements IdmService {
         .collect(Collectors.toList());
   }
 
-  private void deleteProcessedLogs(Date lastJobTime) {
+  private void deleteProcessedLogs(LocalDateTime lastJobTime) {
     int deletedCount = 0;
     try {
       deletedCount = userLogService.deleteProcessedLogs(lastJobTime);

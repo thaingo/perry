@@ -6,7 +6,7 @@ import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.UserVerificationResult;
 import gov.ca.cwds.idm.dto.UsersPage;
 import gov.ca.cwds.idm.dto.UsersSearchCriteria;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.security.access.method.P;
 import org.springframework.security.access.prepost.PostAuthorize;
@@ -27,5 +27,5 @@ public interface IdmService {
 
   List<User> searchUsers(UsersSearchCriteria usersSearchCriteria);
 
-  List<UserAndOperation> getFailedOperations(Date lastJobTime);
+  List<UserAndOperation> getFailedOperations(LocalDateTime lastJobTime);
 }
