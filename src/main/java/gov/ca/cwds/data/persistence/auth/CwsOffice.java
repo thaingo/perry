@@ -2,9 +2,10 @@ package gov.ca.cwds.data.persistence.auth;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import gov.ca.cwds.data.converter.StringToRequiredIntegerConverter;
-import gov.ca.cwds.data.legacy.cms.CmsPersistentObject;
-import io.dropwizard.jackson.JsonSnakeCase;
+import gov.ca.cwds.data.persistence.CmsPersistentObject;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.io.Serializable;
@@ -23,11 +24,10 @@ import org.hibernate.annotations.Type;
  *
  * @author CWDS API Team
  */
-
 @Entity
 @Table(name = "CWS_OFFT")
 @ApiModel
-@JsonSnakeCase
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class CwsOffice extends CmsPersistentObject {
 
   /**

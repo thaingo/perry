@@ -1,7 +1,8 @@
 package gov.ca.cwds.data.persistence.auth;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.dropwizard.jackson.JsonSnakeCase;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Date;
@@ -19,13 +20,11 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.Where;
 
-/**
- * Created by dmitry.rudenko on 8/21/2017.
- */
+/** Created by dmitry.rudenko on 8/21/2017. */
 @Entity
 @Table(name = "STFPERST")
 @ApiModel
-@JsonSnakeCase
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class StaffPerson {
 
   @Id
@@ -78,8 +77,7 @@ public class StaffPerson {
     return unitAuthorities;
   }
 
-  public void setUnitAuthorities(
-      Set<StaffUnitAuthority> unitAuthorities) {
+  public void setUnitAuthorities(Set<StaffUnitAuthority> unitAuthorities) {
     this.unitAuthorities = unitAuthorities;
   }
 

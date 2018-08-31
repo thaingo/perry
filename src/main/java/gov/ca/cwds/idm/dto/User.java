@@ -1,5 +1,8 @@
 package gov.ca.cwds.idm.dto;
 
+import static gov.ca.cwds.util.Utils.DATE_FORMAT;
+import static gov.ca.cwds.util.Utils.TIME_FORMAT;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
@@ -12,8 +15,7 @@ import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import static gov.ca.cwds.rest.api.domain.DomainObject.DATE_FORMAT;
-import static gov.ca.cwds.rest.api.domain.DomainObject.TIME_FORMAT;
+
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)

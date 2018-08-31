@@ -38,7 +38,6 @@ project.ext {
     targetDockerHubOrganization = System.env.DOCKERHUB_ORG ?: 'cwds'
     cwdsModelVersion = '0.8.4_650-RC'
     powerMockVersion = "1.7.3"
-    coreApiVersion = '1.7.5_856-RC'
 
     // assume that Windows users use the Docker Toolbox
     buildEnv = 'JENKINS'
@@ -159,13 +158,9 @@ dependencies {
     compile group: 'com.ibm', name: 'db2jcc4', version: '4.21.29'
     compile group: 'com.ibm', name: 'db2jcc_license_cisuz', version: '4.0.0'
 
-    compile (group: 'gov.ca.cwds.api', name:'legacy-data-access', version: coreApiVersion) {
-        exclude(group: 'org.slf4j')
-        exclude(group: 'io.dropwizard', module: 'dropwizard-hibernate')
-        exclude(group: 'io.dropwizard', module: 'dropwizard-validation')
-    }
-
     compile group: 'org.hibernate', name: 'hibernate-java8', version: '5.0.12.Final'
+    compile group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.0'
+    compile group: 'org.eclipse.jetty', name: 'jetty-server', version: '9.4.11.v20180605'
 
     compile project(':jwt-security')
 

@@ -1,6 +1,7 @@
 package gov.ca.cwds.data.persistence.auth;
 
-import gov.ca.cwds.data.legacy.cms.CmsPersistentObject;
+import gov.ca.cwds.data.persistence.CmsPersistentObject;
+import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -22,9 +23,7 @@ import org.hibernate.annotations.Type;
 @Table(name = "STFUATHT")
 public class StaffUnitAuthority extends CmsPersistentObject {
 
-  /**
-   * Base serialization version. Increment per version of this class.
-   */
+  /** Base serialization version. Increment per version of this class. */
   private static final long serialVersionUID = 1L;
 
   @Column(name = "UNTAUTH_CD")
@@ -56,7 +55,9 @@ public class StaffUnitAuthority extends CmsPersistentObject {
   private AssignmentUnit assignmentUnit;
 
   /**
-   * Default constructor <p> Required for Hibernate
+   * Default constructor
+   *
+   * <p>Required for Hibernate
    */
   public StaffUnitAuthority() {
     super();
@@ -71,8 +72,14 @@ public class StaffUnitAuthority extends CmsPersistentObject {
    * @param startDate The startDate
    * @param thirdId The thirdId
    */
-  public StaffUnitAuthority(String authorityCode, String countySpecificCode, Date endDate,
-      String fkasgUnit, String staffPersonId, Date startDate, String thirdId) {
+  public StaffUnitAuthority(
+      String authorityCode,
+      String countySpecificCode,
+      Date endDate,
+      String fkasgUnit,
+      String staffPersonId,
+      Date startDate,
+      String thirdId) {
     super();
     this.authorityCode = authorityCode;
     this.countySpecificCode = countySpecificCode;
@@ -94,58 +101,44 @@ public class StaffUnitAuthority extends CmsPersistentObject {
   /**
    * {@inheritDoc}
    *
-   * @see gov.ca.cwds.data.persistence.PersistentObject#getPrimaryKey()
+   * @see gov.ca.cwds.data.persistence.CmsPersistentObject#getPrimaryKey()
    */
   @Override
-  public String getPrimaryKey() {
+  public Serializable getPrimaryKey() {
     return getThirdId();
   }
 
-  /**
-   * @return the authorityCode
-   */
+  /** @return the authorityCode */
   public String getAuthorityCode() {
     return StringUtils.trimToEmpty(authorityCode);
   }
 
-  /**
-   * @return the countySpecificCode
-   */
+  /** @return the countySpecificCode */
   public String getCountySpecificCode() {
     return StringUtils.trimToEmpty(countySpecificCode);
   }
 
-  /**
-   * @return the endDate
-   */
+  /** @return the endDate */
   public Date getEndDate() {
     return endDate;
   }
 
-  /**
-   * @return the fkasgUnit
-   */
+  /** @return the fkasgUnit */
   public String getFkasgUnit() {
     return StringUtils.trimToEmpty(fkasgUnit);
   }
 
-  /**
-   * @return the staffPersonId
-   */
+  /** @return the staffPersonId */
   public String getStaffPersonId() {
     return StringUtils.trimToEmpty(staffPersonId);
   }
 
-  /**
-   * @return the startDate
-   */
+  /** @return the startDate */
   public Date getStartDate() {
     return startDate;
   }
 
-  /**
-   * @return the thirdId
-   */
+  /** @return the thirdId */
   public String getThirdId() {
     return StringUtils.trimToEmpty(thirdId);
   }

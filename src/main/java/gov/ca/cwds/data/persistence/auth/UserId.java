@@ -1,8 +1,8 @@
 package gov.ca.cwds.data.persistence.auth;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import gov.ca.cwds.data.legacy.cms.CmsPersistentObject;
-import gov.ca.cwds.data.persistence.PersistentObject;
+import gov.ca.cwds.data.persistence.CmsPersistentObject;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Set;
 import javax.persistence.Column;
@@ -19,7 +19,7 @@ import org.hibernate.annotations.Type;
 import org.hibernate.annotations.Where;
 
 /**
- * {@link PersistentObject} representing a UserId
+ * {@link CmsPersistentObject} representing a UserId
  *
  * @author CWDS API Team
  */
@@ -113,10 +113,10 @@ public class UserId extends CmsPersistentObject {
   /**
    * {@inheritDoc}
    *
-   * @see PersistentObject#getPrimaryKey()
+   * @see CmsPersistentObject#getPrimaryKey()
    */
   @Override
-  public String getPrimaryKey() {
+  public Serializable getPrimaryKey() {
     return getId();
   }
 

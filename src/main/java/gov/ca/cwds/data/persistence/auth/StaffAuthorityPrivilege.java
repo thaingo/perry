@@ -1,10 +1,9 @@
 package gov.ca.cwds.data.persistence.auth;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import gov.ca.cwds.data.persistence.PersistentObject;
-import gov.ca.cwds.data.legacy.cms.CmsPersistentObject;
+import gov.ca.cwds.data.persistence.CmsPersistentObject;
+import java.io.Serializable;
 import java.util.Date;
-import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -15,18 +14,15 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.Type;
 
 /**
- * {@link PersistentObject} representing a StaffPersonPrivilege
+ * {@link CmsPersistentObject} representing a StaffPersonPrivilege
  *
  * @author CWDS API Team
  */
-
 @Entity
 @Table(name = "STF_PVLT")
 public class StaffAuthorityPrivilege extends CmsPersistentObject {
 
-  /**
-   * Base serialization version. Increment per version of this class.
-   */
+  /** Base serialization version. Increment per version of this class. */
   private static final long serialVersionUID = 1L;
 
   @Column(name = "CNTY_SPFCD")
@@ -65,7 +61,9 @@ public class StaffAuthorityPrivilege extends CmsPersistentObject {
   private Date startTime;
 
   /**
-   * Default constructor. <p> Required for Hibernate
+   * Default constructor.
+   *
+   * <p>Required for Hibernate
    */
   public StaffAuthorityPrivilege() {
     super();
@@ -84,9 +82,16 @@ public class StaffAuthorityPrivilege extends CmsPersistentObject {
    * @param startDate The startDate
    * @param startTime The startTime
    */
-  public StaffAuthorityPrivilege(String countySpecificCode, Date endDate, Date endTime,
-      String fkuseridT, String id, String levelOfAuthPrivilegeCode, Short levelOfAuthPrivilegeType,
-      Date startDate, Date startTime) {
+  public StaffAuthorityPrivilege(
+      String countySpecificCode,
+      Date endDate,
+      Date endTime,
+      String fkuseridT,
+      String id,
+      String levelOfAuthPrivilegeCode,
+      Short levelOfAuthPrivilegeType,
+      Date startDate,
+      Date startTime) {
     super();
     this.countySpecificCode = countySpecificCode;
     this.endDate = endDate;
@@ -102,72 +107,54 @@ public class StaffAuthorityPrivilege extends CmsPersistentObject {
   /**
    * {@inheritDoc}
    *
-   * @see PersistentObject#getPrimaryKey()
+   * @see CmsPersistentObject#getPrimaryKey()
    */
   @Override
-  public String getPrimaryKey() {
+  public Serializable getPrimaryKey() {
     return getId();
   }
 
-  /**
-   * @return county code
-   */
+  /** @return county code */
   public String getCountySpecificCode() {
     return StringUtils.trimToEmpty(countySpecificCode);
   }
 
-  /**
-   * @return the end date. Null = currently active.
-   */
+  /** @return the end date. Null = currently active. */
   public Date getEndDate() {
     return endDate;
   }
 
-  /**
-   * @return the end time
-   */
+  /** @return the end time */
   public Date getEndTime() {
     return endTime;
   }
 
-  /**
-   * @return foreign key to the user table
-   */
+  /** @return foreign key to the user table */
   public String getFkuseridT() {
     return StringUtils.trimToEmpty(fkuseridT);
   }
 
-  /**
-   * @return the primary key
-   */
+  /** @return the primary key */
   public String getId() {
     return StringUtils.trimToEmpty(id);
   }
 
-  /**
-   * @return the levelOfAuthPrivilegeCode
-   */
+  /** @return the levelOfAuthPrivilegeCode */
   public String getLevelOfAuthPrivilegeCode() {
     return StringUtils.trimToEmpty(levelOfAuthPrivilegeCode);
   }
 
-  /**
-   * @return the levelOfAuthPrivilegeType
-   */
+  /** @return the levelOfAuthPrivilegeType */
   public Short getLevelOfAuthPrivilegeType() {
     return levelOfAuthPrivilegeType;
   }
 
-  /**
-   * @return the startDate
-   */
+  /** @return the startDate */
   public Date getStartDate() {
     return startDate;
   }
 
-  /**
-   * @return the startTime
-   */
+  /** @return the startTime */
   public Date getStartTime() {
     return startTime;
   }
@@ -216,4 +203,3 @@ public class StaffAuthorityPrivilege extends CmsPersistentObject {
         .toHashCode();
   }
 }
-
