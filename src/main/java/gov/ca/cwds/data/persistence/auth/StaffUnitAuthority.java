@@ -2,7 +2,7 @@ package gov.ca.cwds.data.persistence.auth;
 
 import gov.ca.cwds.data.persistence.CmsPersistentObject;
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDate;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -32,9 +32,8 @@ public class StaffUnitAuthority extends CmsPersistentObject {
   @Column(name = "CNTY_SPFCD")
   private String countySpecificCode;
 
-  @Type(type = "date")
   @Column(name = "END_DT")
-  private Date endDate;
+  private LocalDate endDate;
 
   @Column(name = "FKASG_UNIT")
   private String fkasgUnit;
@@ -42,9 +41,8 @@ public class StaffUnitAuthority extends CmsPersistentObject {
   @Column(name = "FKSTFPERST")
   private String staffPersonId;
 
-  @Type(type = "date")
   @Column(name = "START_DT")
-  private Date startDate;
+  private LocalDate startDate;
 
   @Id
   @Column(name = "THIRD_ID")
@@ -75,10 +73,10 @@ public class StaffUnitAuthority extends CmsPersistentObject {
   public StaffUnitAuthority(
       String authorityCode,
       String countySpecificCode,
-      Date endDate,
+      LocalDate endDate,
       String fkasgUnit,
       String staffPersonId,
-      Date startDate,
+      LocalDate startDate,
       String thirdId) {
     super();
     this.authorityCode = authorityCode;
@@ -119,7 +117,7 @@ public class StaffUnitAuthority extends CmsPersistentObject {
   }
 
   /** @return the endDate */
-  public Date getEndDate() {
+  public LocalDate getEndDate() {
     return endDate;
   }
 
@@ -134,7 +132,7 @@ public class StaffUnitAuthority extends CmsPersistentObject {
   }
 
   /** @return the startDate */
-  public Date getStartDate() {
+  public LocalDate getStartDate() {
     return startDate;
   }
 

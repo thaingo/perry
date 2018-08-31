@@ -71,7 +71,10 @@ import gov.ca.cwds.service.messages.MessagesService;
 import java.nio.charset.Charset;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -911,7 +914,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     UserLog log = new UserLog();
     log.setUsername(userName);
     log.setOperationType(operation);
-    log.setOperationTime(new Date(date));
+    log.setOperationTime(LocalDateTime.ofInstant(Instant.ofEpochMilli(date), ZoneId.systemDefault()));
     return userLogRepository.save(log);
   }
 

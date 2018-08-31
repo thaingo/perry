@@ -160,7 +160,10 @@ dependencies {
 
     compile group: 'org.hibernate', name: 'hibernate-java8', version: '5.0.12.Final'
     compile group: 'javax.ws.rs', name: 'javax.ws.rs-api', version: '2.0'
-    compile group: 'org.eclipse.jetty', name: 'jetty-server', version: '9.4.11.v20180605'
+    
+    compile ('gov.ca.cwds.api:api-core:0.19.118') {
+        exclude group: 'org.glassfish.jersey.core'
+    }
 
     compile project(':jwt-security')
 
@@ -176,6 +179,8 @@ dependencies {
         exclude group: 'javax.servlet', module: 'javax.servlet-api'
         exclude group: 'junit', module: 'junit'
     }
+
+    testCompile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.8.6"
 
     // https://mvnrepository.com/artifact/nl.jqno.equalsverifier/equalsverifier
     testCompile group: 'nl.jqno.equalsverifier', name: 'equalsverifier', version: '2.1.6'

@@ -3,8 +3,9 @@ package gov.ca.cwds.util;
 import static gov.ca.cwds.config.Constants.DEFAULT_LOCALE;
 
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -62,9 +63,11 @@ public class Utils {
     return new HashSet<>(Arrays.asList(values));
   }
 
-  public static String formatDate(Date date) {
+
+  public static String formatDate(LocalDate date) {
     if (date != null) {
-      return new SimpleDateFormat(DATE_FORMAT).format(date);
+      DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
+      return date.format(formatter);
     }
     return null;
   }

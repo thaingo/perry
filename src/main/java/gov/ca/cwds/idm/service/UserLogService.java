@@ -12,6 +12,7 @@ import gov.ca.cwds.idm.persistence.model.OperationType;
 import gov.ca.cwds.idm.persistence.model.UserLog;
 import gov.ca.cwds.idm.service.execution.OptionalExecution;
 import gov.ca.cwds.service.messages.MessagesService;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -64,7 +65,7 @@ public class UserLogService {
         UserLog userLog = new UserLog();
         userLog.setUsername(username);
         userLog.setOperationType(operationType);
-        userLog.setOperationTime(new Date());
+        userLog.setOperationTime(LocalDateTime.now());
 
         return userLogTransactionalRepository.save(userLog);
       }

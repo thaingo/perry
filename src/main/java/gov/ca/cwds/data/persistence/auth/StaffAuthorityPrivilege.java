@@ -3,7 +3,8 @@ package gov.ca.cwds.data.persistence.auth;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import gov.ca.cwds.data.persistence.CmsPersistentObject;
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -28,14 +29,12 @@ public class StaffAuthorityPrivilege extends CmsPersistentObject {
   @Column(name = "CNTY_SPFCD")
   private String countySpecificCode;
 
-  @Type(type = "date")
   @Column(name = "END_DT")
-  private Date endDate;
+  private LocalDate endDate;
 
   @JsonFormat(pattern = "HH:mm:ss")
-  @Type(type = "time")
   @Column(name = "END_TIME")
-  private Date endTime;
+  private LocalTime endTime;
 
   @Column(name = "FKUSERID_T", length = CMS_ID_LEN)
   private String fkuseridT;
@@ -51,14 +50,12 @@ public class StaffAuthorityPrivilege extends CmsPersistentObject {
   @Column(name = "LVL_PRVC")
   private Short levelOfAuthPrivilegeType;
 
-  @Type(type = "date")
   @Column(name = "START_DT")
-  private Date startDate;
+  private LocalDate startDate;
 
   @JsonFormat(pattern = "HH:mm:ss")
-  @Type(type = "time")
   @Column(name = "START_TIME")
-  private Date startTime;
+  private LocalTime startTime;
 
   /**
    * Default constructor.
@@ -84,14 +81,14 @@ public class StaffAuthorityPrivilege extends CmsPersistentObject {
    */
   public StaffAuthorityPrivilege(
       String countySpecificCode,
-      Date endDate,
-      Date endTime,
+      LocalDate endDate,
+      LocalTime endTime,
       String fkuseridT,
       String id,
       String levelOfAuthPrivilegeCode,
       Short levelOfAuthPrivilegeType,
-      Date startDate,
-      Date startTime) {
+      LocalDate startDate,
+      LocalTime startTime) {
     super();
     this.countySpecificCode = countySpecificCode;
     this.endDate = endDate;
@@ -120,12 +117,12 @@ public class StaffAuthorityPrivilege extends CmsPersistentObject {
   }
 
   /** @return the end date. Null = currently active. */
-  public Date getEndDate() {
+  public LocalDate getEndDate() {
     return endDate;
   }
 
   /** @return the end time */
-  public Date getEndTime() {
+  public LocalTime getEndTime() {
     return endTime;
   }
 
@@ -150,12 +147,12 @@ public class StaffAuthorityPrivilege extends CmsPersistentObject {
   }
 
   /** @return the startDate */
-  public Date getStartDate() {
+  public LocalDate getStartDate() {
     return startDate;
   }
 
   /** @return the startTime */
-  public Date getStartTime() {
+  public LocalTime getStartTime() {
     return startTime;
   }
 

@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -49,12 +49,10 @@ public class StaffPerson {
   private String lastName;
 
   @Column(name = "END_DT")
-  @Type(type = "date")
-  private Date endDate;
+  private LocalDate endDate;
 
   @Column(name = "START_DT")
-  @Type(type = "date")
-  private Date startDate;
+  private LocalDate startDate;
 
   @ManyToOne
   @JoinColumn(name = "FKCWS_OFFT", insertable = false, updatable = false)
@@ -113,19 +111,19 @@ public class StaffPerson {
     this.lastName = lastName;
   }
 
-  public Date getEndDate() {
+  public LocalDate getEndDate() {
     return endDate;
   }
 
-  public void setEndDate(Date endDate) {
+  public void setEndDate(LocalDate endDate) {
     this.endDate = endDate;
   }
 
-  public Date getStartDate() {
+  public LocalDate getStartDate() {
     return startDate;
   }
 
-  public void setStartDate(Date startDate) {
+  public void setStartDate(LocalDate startDate) {
     this.startDate = startDate;
   }
 
