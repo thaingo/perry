@@ -11,14 +11,23 @@ public class CurrentAuthenticatedUserUtil {
   private static final String COUNTY_NAME_PARAM = "county_name";
 
   public static String getCurrentUserCountyName() {
-    SecurityContext securityContext = SecurityContextHolder.getContext();
+    SecurityContext securityContext = getSecurityContext();
     UniversalUserToken userToken =
         (UniversalUserToken) securityContext.getAuthentication().getPrincipal();
     return (String) userToken.getParameter(COUNTY_NAME_PARAM);
   }
 
   public static String getSsoToken() {
-    SecurityContext securityContext = SecurityContextHolder.getContext();
+    SecurityContext securityContext = getSecurityContext();
     return ((PerryTokenEntity) securityContext.getAuthentication().getDetails()).getToken();
+  }
+
+  public static String getUserId() {
+    SecurityContext securityContext = getSecurityContext();
+    return securityContext.getAuthentication().getPrincipal().toString();
+  }
+
+  private static SecurityContext getSecurityContext() {
+    return SecurityContextHolder.getContext();
   }
 }
