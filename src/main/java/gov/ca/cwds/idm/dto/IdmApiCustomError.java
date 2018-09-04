@@ -1,5 +1,7 @@
 package gov.ca.cwds.idm.dto;
 
+import static gov.ca.cwds.config.LoggingFilter.REQUEST_ID;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -10,6 +12,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -32,6 +35,9 @@ public class IdmApiCustomError  implements Serializable {
   private String errorCode;
 
   @JsonProperty
+  private String incidentId;
+
+  @JsonProperty
   private List<String> causes = new ArrayList<>();
 
   private IdmApiCustomError() {
@@ -41,6 +47,7 @@ public class IdmApiCustomError  implements Serializable {
   public IdmApiCustomError(HttpStatus status) {
     this();
     this.status = status;
+    this.incidentId = MDC.get(REQUEST_ID);
   }
 
   public IdmApiCustomError(HttpStatus status, String message) {
@@ -72,6 +79,10 @@ public class IdmApiCustomError  implements Serializable {
 
   public String getErrorCode() {
     return errorCode;
+  }
+
+  public String getIncidentId() {
+    return incidentId;
   }
 
   public List<String> getCauses() {
