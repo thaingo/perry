@@ -2,6 +2,7 @@ package gov.ca.cwds.config;
 
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.UUID;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -25,8 +26,8 @@ public class LoggingFilter extends GenericFilterBean {
       final String uniqueId = UUID.randomUUID().toString();
       MDC.put(REQUEST_ID, uniqueId);
 
-      final String userId = CurrentAuthenticatedUserUtil.getUserId();
-      MDC.put(USER_ID, userId);
+      Optional<String> userId = CurrentAuthenticatedUserUtil.getUserId();
+      MDC.put(USER_ID, userId.orElse(null));
 
       chain.doFilter(request, response);
     } finally {
