@@ -21,10 +21,13 @@ import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertStrict;
 import static gov.ca.cwds.util.Utils.toSet;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -35,6 +38,10 @@ import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.LoggingEvent;
+import ch.qos.logback.core.Appender;
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
 import com.amazonaws.services.cognitoidp.model.AdminCreateUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminCreateUserResult;
@@ -56,6 +63,7 @@ import com.amazonaws.services.cognitoidp.model.UserType;
 import com.amazonaws.services.cognitoidp.model.UsernameExistsException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Iterables;
+import gov.ca.cwds.config.LoggingFilter;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.persistence.UserLogRepository;
@@ -83,10 +91,17 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import liquibase.util.StringUtils;
 import org.apache.commons.codec.binary.Base64;
+
+
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InOrder;
+
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -96,6 +111,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -109,16 +125,16 @@ import org.springframework.web.context.WebApplicationContext;
 
 @ActiveProfiles({"dev", "idm"})
 @SpringBootTest(
-  properties = {
-    "perry.identityManager.idmBasicAuthUser=" + IdmResourceTest.IDM_BASIC_AUTH_USER,
-    "perry.identityManager.idmBasicAuthPass=" + IdmResourceTest.IDM_BASIC_AUTH_PASS,
-    "perry.identityManager.idmMapping=config/idm.groovy",
-    "spring.jpa.hibernate.ddl-auto=none",
-    "perry.tokenStore.datasource.url=" + TOKEN_STORE_URL,
-    "spring.datasource.url=" + CMS_STORE_URL,
-    "perry.doraWsMaxAttempts=" + DORA_WS_MAX_ATTEMPTS,
-    "perry.doraWsRetryDelayMs=500"
-  }
+    properties = {
+        "perry.identityManager.idmBasicAuthUser=" + IdmResourceTest.IDM_BASIC_AUTH_USER,
+        "perry.identityManager.idmBasicAuthPass=" + IdmResourceTest.IDM_BASIC_AUTH_PASS,
+        "perry.identityManager.idmMapping=config/idm.groovy",
+        "spring.jpa.hibernate.ddl-auto=none",
+        "perry.tokenStore.datasource.url=" + TOKEN_STORE_URL,
+        "spring.datasource.url=" + CMS_STORE_URL,
+        "perry.doraWsMaxAttempts=" + DORA_WS_MAX_ATTEMPTS,
+        "perry.doraWsRetryDelayMs=500"
+    }
 )
 public class IdmResourceTest extends BaseLiquibaseTest {
 
@@ -175,6 +191,11 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
   private AWSCognitoIdentityProvider cognito;
 
+  private Appender mockAppender = mock(Appender.class);
+
+  @Captor
+  private ArgumentCaptor<LoggingEvent> captorLoggingEvent;
+
   @BeforeClass
   public static void beforeClass() throws Exception {
     runLiquibaseScript(CMS_STORE_URL, "liquibase/cms-data.xml");
@@ -194,6 +215,9 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     this.mockMvc =
         MockMvcBuilders.webAppContextSetup(webApplicationContext).apply(springSecurity()).build();
     cognito = cognitoServiceFacade.getIdentityProvider();
+
+    Logger rootLogger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+    rootLogger.addAppender(mockAppender);
   }
 
   private static String prepareBasicAuthHeader() {
@@ -653,6 +677,18 @@ public class IdmResourceTest extends BaseLiquibaseTest {
             .andExpect(MockMvcResultMatchers.status().isInternalServerError())
             .andReturn();
 
+    verify(mockAppender, atLeast(1)).doAppend(captorLoggingEvent.capture());
+    LoggingEvent loggingEvent = captorLoggingEvent.getValue();
+    Map<String, String> mdcMap = loggingEvent.getMDCPropertyMap();
+    assertTrue(mdcMap.containsKey(LoggingFilter.REQUEST_ID));
+    String requestId = mdcMap.get(LoggingFilter.REQUEST_ID);
+    assertNotNull(requestId);
+    assertTrue(mdcMap.containsKey(LoggingFilter.USER_ID));
+    assertThat(mdcMap.get(LoggingFilter.USER_ID), is("userId"));
+    String strResponse = result.getResponse().getContentAsString();
+    assertThat(
+        strResponse, containsString("\"incident_id\":\"" + requestId + "\""));
+
     assertExtensible(result, "fixtures/idm/partial-success-user-update/partial-update.json");
 
     verify(cognito, times(1)).adminUpdateUserAttributes(updateAttributesRequest);
@@ -667,7 +703,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     Iterable<UserLog> userLogs = userLogRepository.findAll();
     int newUserLogsSize = Iterables.size(userLogs);
     assertTrue(newUserLogsSize == oldUserLogsSize);
-  }
+}
 
   @Test
   @WithMockCustomUser
