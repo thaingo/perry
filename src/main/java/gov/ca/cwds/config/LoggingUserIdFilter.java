@@ -26,7 +26,7 @@ public class LoggingUserIdFilter extends GenericFilterBean {
 
       chain.doFilter(request, response);
     } finally {
-      MDC.clear();
+      MDC.remove(USER_ID);
     }
   }
 }
