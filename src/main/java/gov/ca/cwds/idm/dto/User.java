@@ -1,19 +1,22 @@
 package gov.ca.cwds.idm.dto;
 
+import static gov.ca.cwds.util.Utils.DATE_FORMAT;
+import static gov.ca.cwds.util.Utils.TIME_FORMAT;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import java.time.LocalDate;
+import java.util.Date;
 import org.hibernate.validator.constraints.NotBlank;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import static gov.ca.cwds.rest.api.domain.DomainObject.DATE_FORMAT;
-import static gov.ca.cwds.rest.api.domain.DomainObject.TIME_FORMAT;
+
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
@@ -35,10 +38,10 @@ public class User implements Serializable {
   private String racfid;
 
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_FORMAT)
-  private Date startDate;
+  private LocalDate startDate;
 
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_FORMAT)
-  private Date endDate;
+  private LocalDate endDate;
 
   private String office;
 
@@ -135,19 +138,19 @@ public class User implements Serializable {
     this.status = status;
   }
 
-  public Date getStartDate() {
+  public LocalDate getStartDate() {
     return startDate;
   }
 
-  public void setStartDate(Date startDate) {
+  public void setStartDate(LocalDate startDate) {
     this.startDate = startDate;
   }
 
-  public Date getEndDate() {
+  public LocalDate getEndDate() {
     return endDate;
   }
 
-  public void setEndDate(Date endDate) {
+  public void setEndDate(LocalDate endDate) {
     this.endDate = endDate;
   }
 

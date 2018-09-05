@@ -1,8 +1,8 @@
 package gov.ca.cwds.data.persistence.auth;
 
-import gov.ca.cwds.data.persistence.cms.CmsPersistentObject;
-import java.util.Date;
-import java.util.Objects;
+import gov.ca.cwds.data.persistence.CmsPersistentObject;
+import java.io.Serializable;
+import java.time.LocalDate;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -23,9 +23,7 @@ import org.hibernate.annotations.Type;
 @Table(name = "STFUATHT")
 public class StaffUnitAuthority extends CmsPersistentObject {
 
-  /**
-   * Base serialization version. Increment per version of this class.
-   */
+  /** Base serialization version. Increment per version of this class. */
   private static final long serialVersionUID = 1L;
 
   @Column(name = "UNTAUTH_CD")
@@ -34,9 +32,8 @@ public class StaffUnitAuthority extends CmsPersistentObject {
   @Column(name = "CNTY_SPFCD")
   private String countySpecificCode;
 
-  @Type(type = "date")
   @Column(name = "END_DT")
-  private Date endDate;
+  private LocalDate endDate;
 
   @Column(name = "FKASG_UNIT")
   private String fkasgUnit;
@@ -44,9 +41,8 @@ public class StaffUnitAuthority extends CmsPersistentObject {
   @Column(name = "FKSTFPERST")
   private String staffPersonId;
 
-  @Type(type = "date")
   @Column(name = "START_DT")
-  private Date startDate;
+  private LocalDate startDate;
 
   @Id
   @Column(name = "THIRD_ID")
@@ -57,7 +53,9 @@ public class StaffUnitAuthority extends CmsPersistentObject {
   private AssignmentUnit assignmentUnit;
 
   /**
-   * Default constructor <p> Required for Hibernate
+   * Default constructor
+   *
+   * <p>Required for Hibernate
    */
   public StaffUnitAuthority() {
     super();
@@ -72,8 +70,14 @@ public class StaffUnitAuthority extends CmsPersistentObject {
    * @param startDate The startDate
    * @param thirdId The thirdId
    */
-  public StaffUnitAuthority(String authorityCode, String countySpecificCode, Date endDate,
-      String fkasgUnit, String staffPersonId, Date startDate, String thirdId) {
+  public StaffUnitAuthority(
+      String authorityCode,
+      String countySpecificCode,
+      LocalDate endDate,
+      String fkasgUnit,
+      String staffPersonId,
+      LocalDate startDate,
+      String thirdId) {
     super();
     this.authorityCode = authorityCode;
     this.countySpecificCode = countySpecificCode;
@@ -95,58 +99,44 @@ public class StaffUnitAuthority extends CmsPersistentObject {
   /**
    * {@inheritDoc}
    *
-   * @see gov.ca.cwds.data.persistence.PersistentObject#getPrimaryKey()
+   * @see gov.ca.cwds.data.persistence.CmsPersistentObject#getPrimaryKey()
    */
   @Override
-  public String getPrimaryKey() {
+  public Serializable getPrimaryKey() {
     return getThirdId();
   }
 
-  /**
-   * @return the authorityCode
-   */
+  /** @return the authorityCode */
   public String getAuthorityCode() {
     return StringUtils.trimToEmpty(authorityCode);
   }
 
-  /**
-   * @return the countySpecificCode
-   */
+  /** @return the countySpecificCode */
   public String getCountySpecificCode() {
     return StringUtils.trimToEmpty(countySpecificCode);
   }
 
-  /**
-   * @return the endDate
-   */
-  public Date getEndDate() {
+  /** @return the endDate */
+  public LocalDate getEndDate() {
     return endDate;
   }
 
-  /**
-   * @return the fkasgUnit
-   */
+  /** @return the fkasgUnit */
   public String getFkasgUnit() {
     return StringUtils.trimToEmpty(fkasgUnit);
   }
 
-  /**
-   * @return the staffPersonId
-   */
+  /** @return the staffPersonId */
   public String getStaffPersonId() {
     return StringUtils.trimToEmpty(staffPersonId);
   }
 
-  /**
-   * @return the startDate
-   */
-  public Date getStartDate() {
+  /** @return the startDate */
+  public LocalDate getStartDate() {
     return startDate;
   }
 
-  /**
-   * @return the thirdId
-   */
+  /** @return the thirdId */
   public String getThirdId() {
     return StringUtils.trimToEmpty(thirdId);
   }
@@ -172,8 +162,8 @@ public class StaffUnitAuthority extends CmsPersistentObject {
         .append(startDate, that.startDate)
         .append(thirdId, that.thirdId)
         .append(assignmentUnit, that.assignmentUnit)
-        .append(getLastUpdatedId(), that.getLastUpdatedId())
-        .append(getLastUpdatedTime(), that.getLastUpdatedTime())
+        .append(getLastUpdateId(), that.getLastUpdateId())
+        .append(getLastUpdateTime(), that.getLastUpdateTime())
         .isEquals();
   }
 
@@ -188,8 +178,8 @@ public class StaffUnitAuthority extends CmsPersistentObject {
         .append(startDate)
         .append(thirdId)
         .append(assignmentUnit)
-        .append(getLastUpdatedId())
-        .append(getLastUpdatedTime())
+        .append(getLastUpdateId())
+        .append(getLastUpdateTime())
         .toHashCode();
   }
 }

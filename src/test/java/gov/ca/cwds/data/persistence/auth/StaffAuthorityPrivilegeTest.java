@@ -14,7 +14,7 @@ public class StaffAuthorityPrivilegeTest {
 
   @Test
   public void equalsHashCodeWork() {
-    EqualsVerifier.forClass(StaffAuthorityPrivilege.class).suppress(Warning.NONFINAL_FIELDS)
+    EqualsVerifier.forClass(StaffAuthorityPrivilege.class).withRedefinedSuperclass().suppress(Warning.NONFINAL_FIELDS)
         .verify();
   }
 

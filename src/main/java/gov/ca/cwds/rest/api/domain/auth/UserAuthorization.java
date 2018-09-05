@@ -1,25 +1,21 @@
 package gov.ca.cwds.rest.api.domain.auth;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import gov.ca.cwds.data.persistence.auth.CwsOffice;
 import gov.ca.cwds.data.persistence.auth.StaffPerson;
-import gov.ca.cwds.rest.api.Request;
-import gov.ca.cwds.rest.api.Response;
-import gov.ca.cwds.rest.api.domain.DomainObject;
-import io.dropwizard.jackson.JsonSnakeCase;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-
 import java.util.Set;
 
 /**
- * {@link DomainObject} representing a request for User Authorization.
  *
  * @author CWDS API Team
  */
 @ApiModel
-@JsonSnakeCase
-public final class UserAuthorization extends DomainObject implements Request, Response {
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
+public final class UserAuthorization {
 
   /**
    * default

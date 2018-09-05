@@ -12,6 +12,7 @@ import gov.ca.cwds.idm.persistence.model.OperationType;
 import gov.ca.cwds.idm.persistence.model.UserLog;
 import gov.ca.cwds.idm.service.execution.OptionalExecution;
 import gov.ca.cwds.service.messages.MessagesService;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -39,7 +40,7 @@ public class UserLogService {
   }
 
   @SuppressWarnings({"fb-contrib:CLI_CONSTANT_LIST_INDEX"})
-  public List<UserIdAndOperation> getUserIdAndOperations(Date lastJobTime) {
+  public List<UserIdAndOperation> getUserIdAndOperations(LocalDateTime lastJobTime) {
     if (lastJobTime == null) {
       throw new IllegalArgumentException("Last Job Time cannot be null");
     }
@@ -52,7 +53,7 @@ public class UserLogService {
         .collect(Collectors.toList());
   }
 
-  public int deleteProcessedLogs(Date lastJobTime) {
+  public int deleteProcessedLogs(LocalDateTime lastJobTime) {
     return userLogTransactionalRepository.deleteLogsBeforeDate(lastJobTime);
   }
 
@@ -64,7 +65,7 @@ public class UserLogService {
         UserLog userLog = new UserLog();
         userLog.setUsername(username);
         userLog.setOperationType(operationType);
-        userLog.setOperationTime(new Date());
+        userLog.setOperationTime(LocalDateTime.now());
 
         return userLogTransactionalRepository.save(userLog);
       }

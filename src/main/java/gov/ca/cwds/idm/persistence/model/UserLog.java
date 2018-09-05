@@ -1,6 +1,6 @@
 package gov.ca.cwds.idm.persistence.model;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -34,7 +34,7 @@ public class UserLog {
 
   @NotNull
   @Column(name = "operation_time")
-  private Date operationTime;
+  private LocalDateTime operationTime;
 
   public Long getId() {
     return id;
@@ -60,12 +60,12 @@ public class UserLog {
     this.operationType = operationType;
   }
 
-  public Date getOperationTime() {
-    return new Date(operationTime.getTime());
+  public LocalDateTime getOperationTime() {
+    return operationTime;
   }
 
-  public void setOperationTime(Date operationTime) {
-    this.operationTime = new Date(operationTime.getTime());
+  public void setOperationTime(LocalDateTime operationTime) {
+    this.operationTime = operationTime;
   }
 
   @Override

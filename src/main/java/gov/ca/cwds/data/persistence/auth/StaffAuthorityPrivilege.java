@@ -1,10 +1,10 @@
 package gov.ca.cwds.data.persistence.auth;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import gov.ca.cwds.data.persistence.PersistentObject;
-import gov.ca.cwds.data.persistence.cms.CmsPersistentObject;
-import java.util.Date;
-import java.util.Objects;
+import gov.ca.cwds.data.persistence.CmsPersistentObject;
+import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -15,31 +15,26 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.Type;
 
 /**
- * {@link PersistentObject} representing a StaffPersonPrivilege
+ * {@link CmsPersistentObject} representing a StaffPersonPrivilege
  *
  * @author CWDS API Team
  */
-
 @Entity
 @Table(name = "STF_PVLT")
 public class StaffAuthorityPrivilege extends CmsPersistentObject {
 
-  /**
-   * Base serialization version. Increment per version of this class.
-   */
+  /** Base serialization version. Increment per version of this class. */
   private static final long serialVersionUID = 1L;
 
   @Column(name = "CNTY_SPFCD")
   private String countySpecificCode;
 
-  @Type(type = "date")
   @Column(name = "END_DT")
-  private Date endDate;
+  private LocalDate endDate;
 
   @JsonFormat(pattern = "HH:mm:ss")
-  @Type(type = "time")
   @Column(name = "END_TIME")
-  private Date endTime;
+  private LocalTime endTime;
 
   @Column(name = "FKUSERID_T", length = CMS_ID_LEN)
   private String fkuseridT;
@@ -55,17 +50,17 @@ public class StaffAuthorityPrivilege extends CmsPersistentObject {
   @Column(name = "LVL_PRVC")
   private Short levelOfAuthPrivilegeType;
 
-  @Type(type = "date")
   @Column(name = "START_DT")
-  private Date startDate;
+  private LocalDate startDate;
 
   @JsonFormat(pattern = "HH:mm:ss")
-  @Type(type = "time")
   @Column(name = "START_TIME")
-  private Date startTime;
+  private LocalTime startTime;
 
   /**
-   * Default constructor. <p> Required for Hibernate
+   * Default constructor.
+   *
+   * <p>Required for Hibernate
    */
   public StaffAuthorityPrivilege() {
     super();
@@ -84,9 +79,16 @@ public class StaffAuthorityPrivilege extends CmsPersistentObject {
    * @param startDate The startDate
    * @param startTime The startTime
    */
-  public StaffAuthorityPrivilege(String countySpecificCode, Date endDate, Date endTime,
-      String fkuseridT, String id, String levelOfAuthPrivilegeCode, Short levelOfAuthPrivilegeType,
-      Date startDate, Date startTime) {
+  public StaffAuthorityPrivilege(
+      String countySpecificCode,
+      LocalDate endDate,
+      LocalTime endTime,
+      String fkuseridT,
+      String id,
+      String levelOfAuthPrivilegeCode,
+      Short levelOfAuthPrivilegeType,
+      LocalDate startDate,
+      LocalTime startTime) {
     super();
     this.countySpecificCode = countySpecificCode;
     this.endDate = endDate;
@@ -102,73 +104,55 @@ public class StaffAuthorityPrivilege extends CmsPersistentObject {
   /**
    * {@inheritDoc}
    *
-   * @see PersistentObject#getPrimaryKey()
+   * @see CmsPersistentObject#getPrimaryKey()
    */
   @Override
-  public String getPrimaryKey() {
+  public Serializable getPrimaryKey() {
     return getId();
   }
 
-  /**
-   * @return county code
-   */
+  /** @return county code */
   public String getCountySpecificCode() {
     return StringUtils.trimToEmpty(countySpecificCode);
   }
 
-  /**
-   * @return the end date. Null = currently active.
-   */
-  public Date getEndDate() {
+  /** @return the end date. Null = currently active. */
+  public LocalDate getEndDate() {
     return endDate;
   }
 
-  /**
-   * @return the end time
-   */
-  public Date getEndTime() {
+  /** @return the end time */
+  public LocalTime getEndTime() {
     return endTime;
   }
 
-  /**
-   * @return foreign key to the user table
-   */
+  /** @return foreign key to the user table */
   public String getFkuseridT() {
     return StringUtils.trimToEmpty(fkuseridT);
   }
 
-  /**
-   * @return the primary key
-   */
+  /** @return the primary key */
   public String getId() {
     return StringUtils.trimToEmpty(id);
   }
 
-  /**
-   * @return the levelOfAuthPrivilegeCode
-   */
+  /** @return the levelOfAuthPrivilegeCode */
   public String getLevelOfAuthPrivilegeCode() {
     return StringUtils.trimToEmpty(levelOfAuthPrivilegeCode);
   }
 
-  /**
-   * @return the levelOfAuthPrivilegeType
-   */
+  /** @return the levelOfAuthPrivilegeType */
   public Short getLevelOfAuthPrivilegeType() {
     return levelOfAuthPrivilegeType;
   }
 
-  /**
-   * @return the startDate
-   */
-  public Date getStartDate() {
+  /** @return the startDate */
+  public LocalDate getStartDate() {
     return startDate;
   }
 
-  /**
-   * @return the startTime
-   */
-  public Date getStartTime() {
+  /** @return the startTime */
+  public LocalTime getStartTime() {
     return startTime;
   }
 
@@ -194,8 +178,8 @@ public class StaffAuthorityPrivilege extends CmsPersistentObject {
         .append(levelOfAuthPrivilegeType, that.levelOfAuthPrivilegeType)
         .append(startDate, that.startDate)
         .append(startTime, that.startTime)
-        .append(getLastUpdatedId(), that.getLastUpdatedId())
-        .append(getLastUpdatedTime(), that.getLastUpdatedTime())
+        .append(getLastUpdateId(), that.getLastUpdateId())
+        .append(getLastUpdateTime(), that.getLastUpdateTime())
         .isEquals();
   }
 
@@ -211,9 +195,8 @@ public class StaffAuthorityPrivilege extends CmsPersistentObject {
         .append(levelOfAuthPrivilegeType)
         .append(startDate)
         .append(startTime)
-        .append(getLastUpdatedId())
-        .append(getLastUpdatedTime())
+        .append(getLastUpdateId())
+        .append(getLastUpdateTime())
         .toHashCode();
   }
 }
-

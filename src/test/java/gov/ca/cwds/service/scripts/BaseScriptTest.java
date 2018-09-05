@@ -1,16 +1,15 @@
 package gov.ca.cwds.service.scripts;
 
+import static io.dropwizard.testing.FixtureHelpers.fixture;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.ca.cwds.UniversalUserToken;
-import gov.ca.cwds.rest.api.domain.auth.StaffAuthorityPrivilege;
 import gov.ca.cwds.rest.api.domain.auth.UserAuthorization;
 import io.dropwizard.jackson.Jackson;
-import org.junit.Assert;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
-import static io.dropwizard.testing.FixtureHelpers.fixture;
+import org.junit.Assert;
 
 /**
  * Created by dmitry.rudenko on 8/16/2017.

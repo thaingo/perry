@@ -1,8 +1,9 @@
 package gov.ca.cwds.rest.api.domain.auth;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import gov.ca.cwds.data.persistence.auth.CmsUserAuthPrivilege;
-import io.dropwizard.jackson.JsonSnakeCase;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -12,7 +13,7 @@ import io.swagger.annotations.ApiModelProperty;
  * @author CWDS API Team
  */
 @ApiModel
-@JsonSnakeCase
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class StaffAuthorityPrivilege {
 
   @ApiModelProperty(example = "1482")
@@ -31,7 +32,6 @@ public class StaffAuthorityPrivilege {
   @JsonProperty("auth_privilege_code_desc")
   private String authPrivilegeCodeDesc;
 
-
   @ApiModelProperty(example = "21")
   @JsonProperty("county_code")
   private String countyCode;
@@ -44,22 +44,23 @@ public class StaffAuthorityPrivilege {
   @JsonProperty("end_date")
   private String endDate;
 
-
   /**
    * JSON Constructor
    *
    * @param authPrivilegeType the authority privilege type
    * @param authPrivilegeCode the authority privilege code
-   * @param countyCode        the county code
-   * @param endDate           the endDate
+   * @param countyCode the county code
+   * @param endDate the endDate
    */
-  public StaffAuthorityPrivilege(@JsonProperty("auth_privilege_type") String authPrivilegeType,
-                                 @JsonProperty("auth_privilege_code") String authPrivilegeCode,
-                                 @JsonProperty("county_code") String countyCode, @JsonProperty("end_date") String endDate) {
+  public StaffAuthorityPrivilege(
+      @JsonProperty("auth_privilege_type") String authPrivilegeType,
+      @JsonProperty("auth_privilege_code") String authPrivilegeCode,
+      @JsonProperty("county_code") String countyCode,
+      @JsonProperty("end_date") String endDate) {
     super();
     this.authPrivilegeType = authPrivilegeType;
     this.authPrivilegeTypeDesc =
-            CmsUserAuthPrivilege.getInstance().getUserAuthPrivDescription(authPrivilegeType);
+        CmsUserAuthPrivilege.getInstance().getUserAuthPrivDescription(authPrivilegeType);
     this.authPrivilegeCode = authPrivilegeCode;
     this.authPrivilegeCodeDesc = AuthPrivilege.getAuthPrivilegeDescription(authPrivilegeCode);
     this.countyCode = countyCode;
@@ -67,66 +68,44 @@ public class StaffAuthorityPrivilege {
     this.county = GovernmentEntityType.findByCountyCd(countyCode).getDescription();
   }
 
-
-  /**
-   * @return the authPrivilegeType
-   */
+  /** @return the authPrivilegeType */
   public String getAuthPrivilegeType() {
     return authPrivilegeType;
   }
 
-
-  /**
-   * @return the endDate
-   */
+  /** @return the endDate */
   public String getEndDate() {
     return endDate;
   }
 
-
-  /**
-   * @return the authPrivilegeTypeDesc
-   */
+  /** @return the authPrivilegeTypeDesc */
   public String getAuthPrivilegeTypeDesc() {
     return authPrivilegeTypeDesc;
   }
 
-
-  /**
-   * @return the authPrivilegeCode
-   */
+  /** @return the authPrivilegeCode */
   public String getAuthPrivilegeCode() {
     return authPrivilegeCode;
   }
 
-
-  /**
-   * @return the authPrivilegeCodeDesc
-   */
+  /** @return the authPrivilegeCodeDesc */
   public String getAuthPrivilegeCodeDesc() {
     return authPrivilegeCodeDesc;
   }
 
-
-  /**
-   * @return the countyCode
-   */
+  /** @return the countyCode */
   public String getCountyCode() {
     return countyCode;
   }
 
-
-  /**
-   * @return the county
-   */
+  /** @return the county */
   public String getCounty() {
     return county;
   }
 
-
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see java.lang.Object#hashCode()
    */
   @Override
@@ -135,20 +114,19 @@ public class StaffAuthorityPrivilege {
     int result = 1;
     result = prime * result + ((authPrivilegeCode == null) ? 0 : authPrivilegeCode.hashCode());
     result =
-            prime * result + ((authPrivilegeCodeDesc == null) ? 0 : authPrivilegeCodeDesc.hashCode());
+        prime * result + ((authPrivilegeCodeDesc == null) ? 0 : authPrivilegeCodeDesc.hashCode());
     result = prime * result + ((authPrivilegeType == null) ? 0 : authPrivilegeType.hashCode());
     result =
-            prime * result + ((authPrivilegeTypeDesc == null) ? 0 : authPrivilegeTypeDesc.hashCode());
+        prime * result + ((authPrivilegeTypeDesc == null) ? 0 : authPrivilegeTypeDesc.hashCode());
     result = prime * result + ((county == null) ? 0 : county.hashCode());
     result = prime * result + ((endDate == null) ? 0 : endDate.hashCode());
     result = prime * result + ((countyCode == null) ? 0 : countyCode.hashCode());
     return result;
   }
 
-
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see java.lang.Object#equals(java.lang.Object)
    */
   @Override
@@ -214,6 +192,4 @@ public class StaffAuthorityPrivilege {
     }
     return true;
   }
-
-
 }
