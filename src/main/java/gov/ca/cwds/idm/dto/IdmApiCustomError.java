@@ -1,6 +1,6 @@
 package gov.ca.cwds.idm.dto;
 
-import static gov.ca.cwds.config.LoggingFilter.REQUEST_ID;
+import static gov.ca.cwds.config.LoggingRequestIdFilter.REQUEST_ID;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
