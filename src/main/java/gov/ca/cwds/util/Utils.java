@@ -3,7 +3,11 @@ package gov.ca.cwds.util;
 import static gov.ca.cwds.config.Constants.DEFAULT_LOCALE;
 
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -13,10 +17,14 @@ import org.springframework.aop.support.AopUtils;
 
 public class Utils {
 
+  public static final String DATE_FORMAT = "yyyy-MM-dd";
+  public static final String TIME_FORMAT = "HH:mm:ss";
+
   private Utils(){}
 
+  @SuppressWarnings("unchecked")
   public static <T> T deserialize(byte[] data) {
-    return SerializationUtils.deserialize(data);
+    return (T) SerializationUtils.deserialize(data);
   }
 
   public static LocalDateTime fromDate(Date date) {
@@ -55,5 +63,14 @@ public class Utils {
   @SuppressWarnings({"squid:S1319"})//need HashSet in tests
   public static HashSet<String> toSet(String... values) {
     return new HashSet<>(Arrays.asList(values));
+  }
+
+
+  public static String formatDate(LocalDate date) {
+    if (date != null) {
+      DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
+      return date.format(formatter);
+    }
+    return null;
   }
 }

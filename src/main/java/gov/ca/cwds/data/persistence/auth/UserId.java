@@ -1,9 +1,10 @@
 package gov.ca.cwds.data.persistence.auth;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import gov.ca.cwds.data.persistence.PersistentObject;
-import gov.ca.cwds.data.persistence.cms.CmsPersistentObject;
-import java.util.Date;
+import gov.ca.cwds.data.persistence.CmsPersistentObject;
+import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -15,15 +16,11 @@ import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.Where;
 
 /**
- * {@link PersistentObject} representing a UserId
+ * {@link CmsPersistentObject} representing a UserId
  *
  * @author CWDS API Team
  */
@@ -35,16 +32,15 @@ public class UserId extends CmsPersistentObject {
   /**
    * Base serialization version. Increment per version of this class.
    */
-  private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 2L;
 
-  @Type(type = "date")
+
   @Column(name = "END_DT")
-  private Date endDate;
+  private LocalDate endDate;
 
   @JsonFormat(pattern = "HH:mm:ss")
-  @Type(type = "time")
   @Column(name = "END_TM")
-  private Date endTime;
+  private LocalTime endTime;
 
   @Column(name = "FKFPSTFPRT", length = CMS_ID_LEN)
   private String fkfpstfprt;
@@ -86,7 +82,7 @@ public class UserId extends CmsPersistentObject {
    * @param logonId The logonId
    * @param systemDomainType The system domain type
    */
-  public UserId(Date endDate, Date endTime, String fkfpstfprt, String id,
+  public UserId(LocalDate endDate, LocalTime endTime, String fkfpstfprt, String id,
       String logonId, Short systemDomainType) {
     super();
     this.endDate = endDate;
@@ -117,24 +113,24 @@ public class UserId extends CmsPersistentObject {
   /**
    * {@inheritDoc}
    *
-   * @see PersistentObject#getPrimaryKey()
+   * @see CmsPersistentObject#getPrimaryKey()
    */
   @Override
-  public String getPrimaryKey() {
+  public Serializable getPrimaryKey() {
     return getId();
   }
 
   /**
    * @return the endDate
    */
-  public Date getEndDate() {
+  public LocalDate getEndDate() {
     return endDate;
   }
 
   /**
    * @return the endTime
    */
-  public Date getEndTime() {
+  public LocalTime getEndTime() {
     return endTime;
   }
 
@@ -189,8 +185,8 @@ public class UserId extends CmsPersistentObject {
         .append(systemDomainType, userId.systemDomainType)
         .append(privileges, userId.privileges)
         .append(staffPerson, userId.staffPerson)
-        .append(getLastUpdatedId(), userId.getLastUpdatedId())
-        .append(getLastUpdatedTime(), userId.getLastUpdatedTime())
+        .append(getLastUpdateId(), userId.getLastUpdateId())
+        .append(getLastUpdateTime(), userId.getLastUpdateTime())
         .isEquals();
   }
 
@@ -205,8 +201,8 @@ public class UserId extends CmsPersistentObject {
         .append(systemDomainType)
         .append(privileges)
         .append(staffPerson)
-        .append(getLastUpdatedId())
-        .append(getLastUpdatedTime())
+        .append(getLastUpdateId())
+        .append(getLastUpdateTime())
         .toHashCode();
   }
 }

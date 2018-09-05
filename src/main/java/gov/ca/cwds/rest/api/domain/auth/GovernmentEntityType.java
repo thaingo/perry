@@ -1,7 +1,5 @@
 package gov.ca.cwds.rest.api.domain.auth;
 
-import gov.ca.cwds.data.ApiSysCodeAware;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,7 +9,7 @@ import java.util.Map;
  *
  * @author CWDS API Team
  */
-public enum GovernmentEntityType implements ApiSysCodeAware {
+public enum GovernmentEntityType {
 
   /**
    * None
@@ -323,13 +321,11 @@ public enum GovernmentEntityType implements ApiSysCodeAware {
     this.countyCd = countyCd;
   }
 
-  @Override
   public int getSysId() {
     return this.sysId;
   }
 
 
-  @Override
   public String getDescription() {
     return description;
   }
@@ -338,8 +334,8 @@ public enum GovernmentEntityType implements ApiSysCodeAware {
     return countyCd;
   }
 
-  @Override
-  public ApiSysCodeAware lookupBySysId(int sysId) {
+
+  public GovernmentEntityType lookupBySysId(int sysId) {
     return mapBySysId.get(sysId);
   }
 

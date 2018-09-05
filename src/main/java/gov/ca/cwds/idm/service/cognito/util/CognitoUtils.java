@@ -23,8 +23,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.util.CollectionUtils;
 
 public class CognitoUtils {
 
@@ -81,7 +81,7 @@ public class CognitoUtils {
   }
 
   public static String getCustomDelimeteredListAttributeValue(Set<String> setOfValues) {
-    if (CollectionUtils.isNotEmpty(setOfValues)) {
+    if (!CollectionUtils.isEmpty(setOfValues)) {
       return String.join(COGNITO_LIST_DELIMITER, setOfValues);
     } else {
       return "";
