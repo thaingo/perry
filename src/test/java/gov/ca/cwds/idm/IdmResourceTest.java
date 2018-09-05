@@ -250,20 +250,6 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   }
 
   @Test
-  @WithMockCustomUser(roles = {"CARES-admin"})
-  public void testGetPermissionsWithCaresAdminRole() throws Exception {
-
-    MvcResult result =
-        mockMvc
-            .perform(MockMvcRequestBuilders.get("/idm/permissions"))
-            .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
-            .andReturn();
-
-    assertStrict(result, "fixtures/idm/permissions/valid.json");
-  }
-
-  @Test
   @WithMockCustomUser
   public void testGetUserNoRacfId() throws Exception {
     testGetValidYoloUser(USER_NO_RACFID_ID, "fixtures/idm/get-user/no-racfid-valid.json");
@@ -674,19 +660,6 @@ public class IdmResourceTest extends BaseLiquibaseTest {
                     .content(asJsonString(userUpdate)))
             .andExpect(MockMvcResultMatchers.status().isInternalServerError())
             .andReturn();
-
-    verify(mockAppender, atLeast(1)).doAppend(captorLoggingEvent.capture());
-    LoggingEvent loggingEvent = captorLoggingEvent.getValue();
-    Map<String, String> mdcMap = loggingEvent.getMDCPropertyMap();
-    assertTrue(mdcMap.containsKey(LoggingRequestIdFilter.REQUEST_ID));
-    String requestId = mdcMap.get(LoggingRequestIdFilter.REQUEST_ID);
-    assertNotNull(requestId);
-    assertTrue(mdcMap.containsKey(LoggingUserIdFilter.USER_ID));
-    assertThat(mdcMap.get(LoggingUserIdFilter.USER_ID), is("userId"));
-    String strResponse = result.getResponse().getContentAsString();
-    assertThat(
-        strResponse, containsString("\"incident_id\":\"" + requestId + "\""));
-
     assertExtensible(result, "fixtures/idm/partial-success-user-update/partial-update.json");
 
     verify(cognito, times(1)).adminUpdateUserAttributes(updateAttributesRequest);
@@ -702,6 +675,35 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     int newUserLogsSize = Iterables.size(userLogs);
     assertTrue(newUserLogsSize == oldUserLogsSize);
 }
+
+  @Test
+  @WithMockCustomUser
+  public void testIncidentIdisPresentInCustomError() throws Exception {
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setEnabled(Boolean.FALSE);
+    userUpdate.setPermissions(toSet("RFA-rollout", "Hotline-rollout"));
+
+    MvcResult result =
+        mockMvc
+            .perform(
+                MockMvcRequestBuilders.patch("/idm/users/" + USER_WITH_RACFID_AND_DB_DATA_ID)
+                    .contentType(JSON_CONTENT_TYPE)
+                    .content(asJsonString(userUpdate)))
+            .andExpect(MockMvcResultMatchers.status().isInternalServerError())
+            .andReturn();
+
+    verify(mockAppender, atLeast(1)).doAppend(captorLoggingEvent.capture());
+    LoggingEvent loggingEvent = captorLoggingEvent.getValue();
+    Map<String, String> mdcMap = loggingEvent.getMDCPropertyMap();
+    assertTrue(mdcMap.containsKey(LoggingRequestIdFilter.REQUEST_ID));
+    String requestId = mdcMap.get(LoggingRequestIdFilter.REQUEST_ID);
+    assertNotNull(requestId);
+    assertTrue(mdcMap.containsKey(LoggingUserIdFilter.USER_ID));
+    assertThat(mdcMap.get(LoggingUserIdFilter.USER_ID), is("userId"));
+    String strResponse = result.getResponse().getContentAsString();
+    assertThat(
+        strResponse, containsString("\"incident_id\":\"" + requestId + "\""));
+  }
 
   @Test
   @WithMockCustomUser
