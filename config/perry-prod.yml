@@ -144,8 +144,8 @@ cognito:
 logging:
   file: ${LOG_FILE:perry-log.txt}
   pattern:
-    console: "%d %-5level %logger : %msg%n"
-    file: "%d %-5level [%thread] %logger : %msg%n"
+    console: "%d %-5level [%thread] [%X{REQUEST_ID}] %logger [%X{USER_ID}] : %msg%n"
+    file: "%d %-5level [%thread] [%X{REQUEST_ID}] %logger [%X{USER_ID}] : %msg%n"
   level:
     gov.ca.cwds.config.logging: ${LOG_LEVEL:DEBUG}
     org:

@@ -2,7 +2,6 @@ package gov.ca.cwds.idm.persistence;
 
 import gov.ca.cwds.idm.persistence.model.UserLog;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.Modifying;

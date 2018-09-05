@@ -13,7 +13,6 @@ import gov.ca.cwds.idm.persistence.model.UserLog;
 import gov.ca.cwds.idm.service.execution.OptionalExecution;
 import gov.ca.cwds.service.messages.MessagesService;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
