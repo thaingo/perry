@@ -14,7 +14,7 @@ public class StaffUnitAuthorityTest {
 
   @Test
   public void equalsHashCodeWork() {
-    EqualsVerifier.forClass(StaffUnitAuthority.class).suppress(Warning.NONFINAL_FIELDS).verify();
+    EqualsVerifier.forClass(StaffUnitAuthority.class).withRedefinedSuperclass().suppress(Warning.NONFINAL_FIELDS).verify();
   }
 
   /*

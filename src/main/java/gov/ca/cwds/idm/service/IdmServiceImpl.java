@@ -19,10 +19,10 @@ import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_PURGE_PROCESSED
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_IDM_USER_IN_ES;
 import static gov.ca.cwds.service.messages.MessageCode.USER_CREATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_CREATE_SAVE_TO_SEARCH_ERROR;
+import static gov.ca.cwds.service.messages.MessageCode.USER_NOTHING_UPDATED;
+import static gov.ca.cwds.service.messages.MessageCode.USER_PARTIAL_UPDATE;
 import static gov.ca.cwds.service.messages.MessageCode.USER_PARTIAL_UPDATE_AND_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_PARTIAL_UPDATE_AND_SAVE_TO_SEARCH_ERRORS;
-import static gov.ca.cwds.service.messages.MessageCode.USER_PARTIAL_UPDATE;
-import static gov.ca.cwds.service.messages.MessageCode.USER_NOTHING_UPDATED;
 import static gov.ca.cwds.service.messages.MessageCode.USER_UPDATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_UPDATE_SAVE_TO_SEARCH_ERROR;
 import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
@@ -61,6 +61,7 @@ import gov.ca.cwds.service.messages.MessagesService;
 import gov.ca.cwds.service.scripts.IdmMappingScript;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import gov.ca.cwds.util.Utils;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -74,7 +75,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.script.ScriptException;
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,6 +82,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Service
 @Profile("idm")
@@ -301,7 +302,7 @@ public class IdmServiceImpl implements IdmService {
   }
 
   @Override
-  public List<UserAndOperation> getFailedOperations(Date lastJobTime) {
+  public List<UserAndOperation> getFailedOperations(LocalDateTime lastJobTime) {
 
     deleteProcessedLogs(lastJobTime);
 
@@ -313,7 +314,7 @@ public class IdmServiceImpl implements IdmService {
         .collect(Collectors.toList());
   }
 
-  private void deleteProcessedLogs(Date lastJobTime) {
+  private void deleteProcessedLogs(LocalDateTime lastJobTime) {
     int deletedCount = 0;
     try {
       deletedCount = userLogService.deleteProcessedLogs(lastJobTime);

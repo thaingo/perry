@@ -3,7 +3,7 @@ package gov.ca.cwds.idm.persistence;
 import static gov.ca.cwds.config.TokenServiceConfiguration.TOKEN_TRANSACTION_MANAGER;
 
 import gov.ca.cwds.idm.persistence.model.UserLog;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
@@ -23,11 +23,11 @@ public class UserLogTransactionalRepository {
   }
 
   @Transactional(value = TOKEN_TRANSACTION_MANAGER, readOnly = true)
-  public List<Object[]> getUserIdAndOperationTypes(Date lastDate) {
+  public List<Object[]> getUserIdAndOperationTypes(LocalDateTime lastDate) {
     return userLogRepository.getUserIdAndOperationTypes(lastDate);
   }
 
-  public int deleteLogsBeforeDate(Date lastDate) {
+  public int deleteLogsBeforeDate(LocalDateTime lastDate) {
     return userLogRepository.deleteLogsBeforeDate(lastDate);
   }
 }

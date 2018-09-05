@@ -1,6 +1,7 @@
 package gov.ca.cwds.idm.persistence;
 
 import gov.ca.cwds.idm.persistence.model.UserLog;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import org.springframework.context.annotation.Profile;
@@ -22,9 +23,9 @@ public interface UserLogRepository extends CrudRepository<UserLog, Long> {
       "select u.username, u.operationType from UserLog u "
           + "where u.operationTime > :" + LAST_DATE
           + " group by u.username, u.operationType")
-  List<Object[]> getUserIdAndOperationTypes(@Param(LAST_DATE) Date lastDate);
+  List<Object[]> getUserIdAndOperationTypes(@Param(LAST_DATE) LocalDateTime lastDate);
 
   @Query("delete from UserLog u where u.operationTime <= :" + LAST_DATE)
   @Modifying
-  int deleteLogsBeforeDate(@Param(LAST_DATE) Date lastDate);
+  int deleteLogsBeforeDate(@Param(LAST_DATE) LocalDateTime lastDate);
 }

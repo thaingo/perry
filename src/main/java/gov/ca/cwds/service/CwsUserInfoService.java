@@ -1,13 +1,13 @@
 package gov.ca.cwds.service;
 
+import static gov.ca.cwds.util.Utils.formatDate;
+
 import gov.ca.cwds.data.auth.UserIdDao;
 import gov.ca.cwds.data.persistence.auth.CwsOffice;
 import gov.ca.cwds.data.persistence.auth.StaffPerson;
 import gov.ca.cwds.data.persistence.auth.UserId;
-import gov.ca.cwds.rest.api.domain.DomainChef;
 import gov.ca.cwds.rest.api.domain.auth.StaffAuthorityPrivilege;
 import gov.ca.cwds.rest.api.domain.auth.StaffUnitAuthority;
-import gov.ca.cwds.rest.services.CrudsService;
 import gov.ca.cwds.service.dto.CwsUserInfo;
 import java.io.Serializable;
 import java.util.Collection;
@@ -17,13 +17,13 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 @Service
 @Transactional("transactionManager")
@@ -33,14 +33,8 @@ public class CwsUserInfoService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CwsUserInfoService.class);
 
-  @Autowired
-  private UserIdDao userIdDao;
+  @Autowired private UserIdDao userIdDao;
 
-  /**
-   * {@inheritDoc}
-   *
-   * @see CrudsService#find(Serializable)
-   */
   public CwsUserInfo composeForUserAuthorization(Serializable primaryKey) {
     Optional<UserId> userId = findUserId(primaryKey);
     if (!userId.isPresent()) {
@@ -51,7 +45,7 @@ public class CwsUserInfoService {
     return getCwsUserInfo(user);
   }
 
-  //just because of codeclimate 25 lines of code allowed rule
+  // just because of codeclimate 25 lines of code allowed rule
   private CwsUserInfo getCwsUserInfo(UserId user) {
     boolean socialWorker = isSocialWorker(user);
     Set<StaffAuthorityPrivilege> userAuthPrivs = getStaffAuthorityPriveleges(user);
@@ -80,9 +74,12 @@ public class CwsUserInfoService {
 
   private boolean isSocialWorker(UserId userId) {
     return Optional.ofNullable(userId.getPrivileges())
-        .orElse(Collections.emptySet()).stream()
-        .anyMatch(p -> p.getLevelOfAuthPrivilegeType() == 1468 &&
-            "P".equals(p.getLevelOfAuthPrivilegeCode()));
+        .orElse(Collections.emptySet())
+        .stream()
+        .anyMatch(
+            p ->
+                p.getLevelOfAuthPrivilegeType() == 1468
+                    && "P".equals(p.getLevelOfAuthPrivilegeCode()));
   }
 
   public List<CwsUserInfo> findUsers(Collection<String> racfIds) {
@@ -129,16 +126,16 @@ public class CwsUserInfoService {
    * @return Set of StaffUnitAuthority for the Staff Person
    */
   private Set<StaffUnitAuthority> getStaffUnitAuthorities(UserId user) {
-    return user.getStaffPerson().getUnitAuthorities()
+    return user.getStaffPerson()
+        .getUnitAuthorities()
         .stream()
         .map(
             staffUnitAuth -> {
-              String endDate = DomainChef.cookDate(staffUnitAuth.getEndDate());
+              String endDate = formatDate(staffUnitAuth.getEndDate());
               String assignedUnitKey = staffUnitAuth.getFkasgUnit().trim();
               String assignedUnitEndDate = "";
               if (StringUtils.isNotBlank(assignedUnitKey)) {
-                assignedUnitEndDate = DomainChef
-                    .cookDate(staffUnitAuth.getAssignmentUnit().getEndDate());
+                assignedUnitEndDate = formatDate(staffUnitAuth.getAssignmentUnit().getEndDate());
               }
               return new StaffUnitAuthority(
                   staffUnitAuth.getAuthorityCode(),
@@ -157,7 +154,8 @@ public class CwsUserInfoService {
    * @return Set of StaffAuthorityPrivilege for the User
    */
   private Set<StaffAuthorityPrivilege> getStaffAuthorityPriveleges(UserId userId) {
-    return userId.getPrivileges()
+    return userId
+        .getPrivileges()
         .stream()
         .map(
             priv ->
@@ -165,12 +163,11 @@ public class CwsUserInfoService {
                     priv.getLevelOfAuthPrivilegeType().toString(),
                     priv.getLevelOfAuthPrivilegeCode(),
                     priv.getCountySpecificCode(),
-                    DomainChef.cookDate(priv.getEndDate())))
+                    formatDate(priv.getEndDate())))
         .collect(Collectors.toSet());
   }
 
   public void setUserIdDao(UserIdDao userIdDao) {
     this.userIdDao = userIdDao;
   }
-
 }

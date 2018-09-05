@@ -1,12 +1,10 @@
 package gov.ca.cwds.service;
 
 import gov.ca.cwds.rest.api.domain.auth.UserAuthorization;
-import gov.ca.cwds.rest.services.CrudsService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.io.Serializable;
 import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * Business layer object to work on {@link UserAuthorization}
@@ -17,11 +15,6 @@ import java.util.Optional;
 public class UserAuthorizationService {
   @Autowired private CwsUserInfoService cwsUserInfoService;
 
-  /**
-   * {@inheritDoc}
-   *
-   * @see CrudsService#find(Serializable)
-   */
   public UserAuthorization find(Serializable primaryKey) {
     return Optional.ofNullable(cwsUserInfoService.composeForUserAuthorization(primaryKey))
         .map(

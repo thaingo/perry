@@ -14,7 +14,7 @@ public class UserIdTest {
 
   @Test
   public void equalsHashCodeWork() {
-    EqualsVerifier.forClass(UserId.class).suppress(Warning.NONFINAL_FIELDS).verify();
+    EqualsVerifier.forClass(UserId.class).withRedefinedSuperclass().suppress(Warning.NONFINAL_FIELDS).verify();
   }
 
   /*

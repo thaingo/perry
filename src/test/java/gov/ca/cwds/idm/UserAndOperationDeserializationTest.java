@@ -6,6 +6,8 @@ import static org.junit.Assert.assertTrue;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import gov.ca.cwds.idm.dto.UserAndOperation;
 import gov.ca.cwds.idm.persistence.model.OperationType;
 import java.text.SimpleDateFormat;
@@ -22,7 +24,10 @@ public class UserAndOperationDeserializationTest {
   public void testDeserialization() throws Exception {
     String json = fixture("fixtures/idm/failed-operations/users-and-operations.json");
 
-    List<UserAndOperation> objects = new ObjectMapper().readValue(json, new TypeReference<List<UserAndOperation>>(){});
+    ObjectMapper mapper = new ObjectMapper();
+    mapper.registerModule(new JavaTimeModule());
+
+    List<UserAndOperation> objects = mapper.readValue(json, new TypeReference<List<UserAndOperation>>(){});
 
     assertTrue(objects.size() == 2);
     UserAndOperation first = objects.get(0);

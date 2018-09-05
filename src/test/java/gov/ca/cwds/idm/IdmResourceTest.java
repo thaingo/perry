@@ -77,9 +77,9 @@ import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.SearchProperties;
 import gov.ca.cwds.service.messages.MessagesService;
 import java.nio.charset.Charset;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -888,19 +888,25 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @Test
   public void testGetFailedOperations() throws Exception {
     userLogRepository.deleteAll();
+    LocalDateTime log1time = LocalDateTime.of(2018, 1, 1, 12, 00, 15);
+    LocalDateTime log0time = log1time.minusHours(4).plusMinutes(13);
+    LocalDateTime log2time = log1time.plusMinutes(10);
+    LocalDateTime log3time = log2time.plusMinutes(10).minusSeconds(15);
+    LocalDateTime log4time = log3time.plusMonths(1).minusHours(7);
+    LocalDateTime log5time = log4time.plusWeeks(2).minusHours(6).plusMinutes(18);
 
-    userLog(USER_WITH_RACFID_AND_DB_DATA_ID, CREATE, 1000);
-    userLog("this-id-should-be-unused", CREATE, 2000);
-    userLog(USER_NO_RACFID_ID, CREATE, 3000);
-    userLog(USER_WITH_RACFID_ID, CREATE, 4000);
-    userLog(USER_WITH_RACFID_ID, UPDATE, 5000);
-    userLog(USER_WITH_RACFID_AND_DB_DATA_ID, UPDATE, 6000);
+    userLog(USER_WITH_RACFID_AND_DB_DATA_ID, CREATE, log0time);
+    userLog("this-id-should-be-unused", CREATE, log1time);
+    userLog(USER_NO_RACFID_ID, CREATE, log2time);
+    userLog(USER_WITH_RACFID_ID, CREATE, log3time);
+    userLog(USER_WITH_RACFID_ID, UPDATE, log4time);
+    userLog(USER_WITH_RACFID_AND_DB_DATA_ID, UPDATE, log5time);
 
     MvcResult result =
         mockMvc
             .perform(
                 MockMvcRequestBuilders.get(
-                    "/idm/users/failed-operations?date=" + getDateString(new Date(2000)))
+                    "/idm/users/failed-operations?date=" + getDateString(log1time))
                     .header(HttpHeaders.AUTHORIZATION, BASIC_AUTH_HEADER))
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
@@ -914,10 +920,10 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     assertThat(newUserLogsSize, is(4));
 
     Iterator<UserLog> it = userLogs.iterator();
-    assertUserLog(it, USER_NO_RACFID_ID, CREATE, 3000);
-    assertUserLog(it, USER_WITH_RACFID_ID, CREATE, 4000);
-    assertUserLog(it, USER_WITH_RACFID_ID, UPDATE, 5000);
-    assertUserLog(it, USER_WITH_RACFID_AND_DB_DATA_ID, UPDATE, 6000);
+    assertUserLog(it, USER_NO_RACFID_ID, CREATE, log2time);
+    assertUserLog(it, USER_WITH_RACFID_ID, CREATE, log3time);
+    assertUserLog(it, USER_WITH_RACFID_ID, UPDATE, log4time);
+    assertUserLog(it, USER_WITH_RACFID_AND_DB_DATA_ID, UPDATE, log5time);
   }
 
   @Test
@@ -926,7 +932,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     mockMvc
         .perform(
             MockMvcRequestBuilders.get(
-                "/idm/users/failed-operations?date=" + getDateString(new Date(2000))))
+                "/idm/users/failed-operations?date=" + getDateString(LocalDateTime.now())))
         .andExpect(MockMvcResultMatchers.status().isUnauthorized())
         .andReturn();
   }
@@ -943,30 +949,30 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     assertExtensible(result, "fixtures/idm/failed-operations/failed-operations-invalid-date.json");
   }
 
-  private UserLog userLog(String userName, OperationType operation,  long date) {
+  private UserLog userLog(String userName, OperationType operation,  LocalDateTime dateTime) {
     UserLog log = new UserLog();
     log.setUsername(userName);
     log.setOperationType(operation);
-    log.setOperationTime(new Date(date));
+    log.setOperationTime(dateTime);
     return userLogRepository.save(log);
   }
 
   private void assertUserLog(
-      UserLog userLog, String username, OperationType operationType, long time) {
+      UserLog userLog, String username, OperationType operationType, LocalDateTime time) {
     assertThat(userLog.getUsername(), is(username));
     assertThat(userLog.getOperationType(), is(operationType));
-    assertThat(userLog.getOperationTime(), is(new Date(time)));
+    assertThat(userLog.getOperationTime(), is(time));
   }
 
   private void assertUserLog(
-      Iterator<UserLog> iterator, String username, OperationType operationType, long time) {
+      Iterator<UserLog> iterator, String username, OperationType operationType, LocalDateTime time) {
     UserLog userLog = iterator.next();
     assertUserLog(userLog, username, operationType, time);
   }
 
-  private static String getDateString(Date date) {
-    DateFormat dateFormat = new SimpleDateFormat(DATETIME_FORMAT_PATTERN);
-    return dateFormat.format(date);
+  private static String getDateString(LocalDateTime date) {
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATETIME_FORMAT_PATTERN);
+    return date.format(formatter);
   }
 
   private void testGetValidYoloUser(String userId, String fixtureFilePath) throws Exception {
