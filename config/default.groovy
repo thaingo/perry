@@ -1,3 +1,5 @@
+import static gov.ca.cwds.config.api.idm.Role.CWS_ADMIN
+
 import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType
 
 def authorization = user.authorization
@@ -39,7 +41,7 @@ if (authorization) {
             privileges     : privileges + user.permissions,
             authorityCodes : authorityCodes]
 
-    if (user.roles?.contains("CWS-admin")) {
+    if (user.roles?.contains(CWS_ADMIN)) {
         token.userName = user.parameters["userName"]
     }
 
@@ -65,7 +67,7 @@ else {
         token.privileges += ["CWS Case Management System", "Resource Management"]
     }
 
-    if (user.roles?.contains("CWS-admin")) {
+    if (user.roles?.contains(CWS_ADMIN)) {
         token.userName = user.parameters["userName"]
     }
 
