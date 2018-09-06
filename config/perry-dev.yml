@@ -17,6 +17,8 @@ spring:
           host: ${REDIS_HOST:192.168.99.100}
           password: ${REDIS_PASSWORD:}
           port: ${REDIS_PORT:6379}
+      jackson:
+          serialization.write_dates_as_timestamps: false
 
 perry:
     doraWsMaxAttempts: ${DORA_WS_MAX_ATTEMPTS:3} #amount of retries
