@@ -1,5 +1,6 @@
 package gov.ca.cwds.idm.service.cognito;
 
+import static gov.ca.cwds.config.api.idm.Role.CWS_ADMIN;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.COUNTY;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.OFFICE;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PERMISSIONS;
@@ -246,7 +247,7 @@ public class CognitoServiceFacadeTest {
     user.setOffice("River Office");
     user.setPhoneNumber("+19161111111");
     user.setPermissions(toSet("RFA-rollout", "Hotline-rollout"));
-    user.setRoles(toSet("CWS-admin", "CWS-worker"));
+    user.setRoles(toSet(CWS_ADMIN, "CWS-worker"));
     return user;
   }
 

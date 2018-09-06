@@ -1,5 +1,7 @@
 package gov.ca.cwds.service.scripts;
 
+import static gov.ca.cwds.config.api.idm.Role.CWS_ADMIN;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -36,13 +38,13 @@ public class DefaultMappingTest extends BaseScriptTest {
 
   @Test
   public void testGroovyMappingCWSAdmin() throws Exception {
-    roles = Arrays.asList("role1", "role2", "CWS-admin");
+    roles = Arrays.asList("role1", "role2", CWS_ADMIN);
     test("/scripts/default/default.groovy", "/scripts/default/default-admin.json", "scripts/default/authz.json");
   }
 
   @Test
   public void testGroovyMappingNonRacfIdCWSAdmin() throws Exception {
-    roles = Arrays.asList("role1", "role2", "CWS-admin");
+    roles = Arrays.asList("role1", "role2", CWS_ADMIN);
     test("/scripts/default/default.groovy", "/scripts/default/default-nonracf-admin.json", null);
   }
 }
