@@ -1,6 +1,6 @@
 package gov.ca.cwds.idm;
 
-import static gov.ca.cwds.config.api.idm.Roles.CWS_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -11,5 +11,5 @@ import org.springframework.security.test.context.support.WithSecurityContext;
 public @interface WithMockCustomUser {
   String COUNTY = "Yolo";
   String county() default COUNTY;
-  String[] roles() default CWS_ADMIN;
+  String[] roles() default COUNTY_ADMIN;
 }

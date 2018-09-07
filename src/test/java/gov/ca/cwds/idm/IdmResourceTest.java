@@ -1,5 +1,6 @@
 package gov.ca.cwds.idm;
 
+import static gov.ca.cwds.config.api.idm.Roles.CWS_ADMIN;
 import static gov.ca.cwds.idm.BaseLiquibaseTest.CMS_STORE_URL;
 import static gov.ca.cwds.idm.BaseLiquibaseTest.TOKEN_STORE_URL;
 import static gov.ca.cwds.idm.IdmResource.DATETIME_FORMAT_PATTERN;
@@ -252,6 +253,12 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @Test
   @WithMockCustomUser
   public void testGetUserNoRacfId() throws Exception {
+    testGetValidYoloUser(USER_NO_RACFID_ID, "fixtures/idm/get-user/no-racfid-valid.json");
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {CWS_ADMIN})
+  public void testGetUserNoRacfIdCwsAdmin() throws Exception {
     testGetValidYoloUser(USER_NO_RACFID_ID, "fixtures/idm/get-user/no-racfid-valid.json");
   }
 
