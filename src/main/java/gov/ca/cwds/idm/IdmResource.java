@@ -44,10 +44,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -69,7 +71,7 @@ public class IdmResource {
 
   @Autowired private MessagesService messages;
 
-  @RequestMapping(method = RequestMethod.GET, value = "/users", produces = "application/json")
+  @GetMapping(value = "/users", produces = "application/json")
   @ApiOperation(
     value = "Users page",
     response = UsersPage.class,
@@ -79,7 +81,7 @@ public class IdmResource {
             + "in a responce. Use it as a parameter to get a next page."
   )
   @ApiResponses(value = {@ApiResponse(code = 401, message = "Not Authorized")})
-  @PreAuthorize("hasAuthority('IDM-job')")
+  @PreAuthorize("hasAuthority(T(gov.ca.cwds.config.api.idm.Roles).IDM_JOB)")
   public UsersPage getUsers(
       @ApiParam(name = "paginationToken", value = "paginationToken for the next page")
           @RequestParam(name = "paginationToken", required = false)
@@ -87,8 +89,7 @@ public class IdmResource {
     return idmService.getUserPage(paginationToken);
   }
 
-  @RequestMapping(
-    method = RequestMethod.POST,
+  @PostMapping(
     value = "/users/search",
     consumes = "application/json",
     produces = "application/json"
@@ -100,15 +101,14 @@ public class IdmResource {
     responseContainer = "List",
     notes = "This service is used by batch job to build the ES index. The client of this service should have 'IDM-job' role."
   )
-  @PreAuthorize("hasAuthority('IDM-job')")
+  @PreAuthorize("hasAuthority(T(gov.ca.cwds.config.api.idm.Roles).IDM_JOB)")
   public List<User> searchUsersByRacfid(
       @ApiParam(required = true, name = "RACFIDs", value = "List of RACFIDs") @NotNull @RequestBody
           Set<String> racfids) {
     return idmService.searchUsers(new UsersSearchCriteria(RACFID_STANDARD, racfids));
   }
 
-  @RequestMapping(
-      method = RequestMethod.GET,
+  @GetMapping(
       value = "/users/failed-operations",
       produces = "application/json"
   )
@@ -122,7 +122,7 @@ public class IdmResource {
       responseContainer = "List",
       notes = "This service is used by batch job to build the ES index. The client of this service should have 'IDM-job' role."
   )
-  @PreAuthorize("hasAuthority('IDM-job')")
+  @PreAuthorize("hasAuthority(T(gov.ca.cwds.config.api.idm.Roles).IDM_JOB)")
   public ResponseEntity getFailedOperations(
       @ApiParam(required = true, name = "date",
           value = "Last date of successful batch job execution in yyyy-MM-dd-HH.mm.ss.SSS format")
@@ -140,7 +140,7 @@ public class IdmResource {
     return ResponseEntity.ok().body(idmService.getFailedOperations(lastJobTime));
   }
 
-  @RequestMapping(method = RequestMethod.GET, value = "/users/{id}", produces = "application/json")
+  @GetMapping(value = "/users/{id}", produces = "application/json")
   @ApiOperation(value = "Find User by ID", response = User.class)
   @ApiResponses(
     value = {
@@ -148,7 +148,9 @@ public class IdmResource {
       @ApiResponse(code = 404, message = "Not found")
     }
   )
-  @PreAuthorize("hasAnyAuthority('CWS-admin', 'County-admin')")
+  @PreAuthorize("hasAnyAuthority("
+      + "T(gov.ca.cwds.config.api.idm.Roles).CWS_ADMIN, "
+      + "T(gov.ca.cwds.config.api.idm.Roles).COUNTY_ADMIN)")
   public ResponseEntity<User> getUser(
       @ApiParam(required = true, value = "The unique user ID", example = "userId1")
           @PathVariable
@@ -163,8 +165,7 @@ public class IdmResource {
     }
   }
 
-  @RequestMapping(
-    method = RequestMethod.PATCH,
+  @PatchMapping(
     value = "/users/{id}",
     consumes = "application/json"
   )
@@ -177,7 +178,9 @@ public class IdmResource {
     }
   )
   @ApiOperation(value = "Update User")
-  @PreAuthorize("hasAnyAuthority('CWS-admin', 'County-admin')")
+  @PreAuthorize("hasAnyAuthority("
+      + "T(gov.ca.cwds.config.api.idm.Roles).CWS_ADMIN, "
+      + "T(gov.ca.cwds.config.api.idm.Roles).COUNTY_ADMIN)")
   public ResponseEntity updateUser(
       @ApiParam(required = true, value = "The unique user ID", example = "userId1")
           @PathVariable
@@ -201,7 +204,7 @@ public class IdmResource {
     }
   }
 
-  @RequestMapping(method = RequestMethod.POST, value = "/users", consumes = "application/json")
+  @PostMapping(value = "/users", consumes = "application/json")
   @ResponseStatus(HttpStatus.CREATED)
   @ApiResponses(
       value = {
@@ -220,7 +223,9 @@ public class IdmResource {
               + "email, first_name, last_name, county_name, RACFID, permissions, office, phone_number.\n "
               + "Other properties values will be set by the system automatically.\n"
               + "Required properties are: email, first_name, last_name, county_name.")
-  @PreAuthorize("hasAnyAuthority('CWS-admin', 'County-admin')")
+  @PreAuthorize("hasAnyAuthority("
+      + "T(gov.ca.cwds.config.api.idm.Roles).CWS_ADMIN, "
+      + "T(gov.ca.cwds.config.api.idm.Roles).COUNTY_ADMIN)")
   public ResponseEntity createUser(
       @ApiParam(required = true, name = "User", value = "The User create data")
           @NotNull
@@ -264,7 +269,7 @@ public class IdmResource {
         .toUri();
   }
 
-  @RequestMapping(method = RequestMethod.GET, value = "/permissions", produces = "application/json")
+  @GetMapping(value = "/permissions", produces = "application/json")
   @ApiResponses(
     value = {
       @ApiResponse(code = 401, message = "Not Authorized"),
@@ -276,15 +281,19 @@ public class IdmResource {
     response = Permission.class,
     responseContainer = "List"
   )
-  @PreAuthorize("hasAnyAuthority('CWS-admin', 'County-admin')")
+  @PreAuthorize("hasAnyAuthority("
+      + "T(gov.ca.cwds.config.api.idm.Roles).CWS_ADMIN, "
+      + "T(gov.ca.cwds.config.api.idm.Roles).COUNTY_ADMIN)")
   public List<Permission> getPermissions() {
     return  dictionaryProvider.getPermissions();
   }
 
-  @RequestMapping(method = RequestMethod.GET, value = "users/verify", produces = "application/json")
+  @GetMapping(value = "users/verify", produces = "application/json")
   @ApiOperation(value = "Check if user can be created by racfId and email", response = UserVerificationResult.class)
   @ApiResponses(value = {@ApiResponse(code = 401, message = "Not Authorized")})
-  @PreAuthorize("hasAnyAuthority('CWS-admin', 'County-admin')")
+  @PreAuthorize("hasAnyAuthority("
+      + "T(gov.ca.cwds.config.api.idm.Roles).CWS_ADMIN, "
+      + "T(gov.ca.cwds.config.api.idm.Roles).COUNTY_ADMIN)")
   public ResponseEntity<UserVerificationResult> verifyUser(
       @ApiParam(required = true, name = "racfid", value = "The RACFID to verify user by in CWS/CMS")
           @NotNull
