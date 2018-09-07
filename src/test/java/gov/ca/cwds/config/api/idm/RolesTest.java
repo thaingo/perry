@@ -9,6 +9,7 @@ import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.getAdminRoles;
 import static gov.ca.cwds.config.api.idm.Roles.isAdmin;
+import static gov.ca.cwds.config.api.idm.Roles.isNonRacfIdCalsUser;
 import static gov.ca.cwds.util.Utils.toSet;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.assertFalse;
@@ -32,7 +33,7 @@ public class RolesTest {
   }
 
   @Test
-  public void testisAdmin() {
+  public void testIsAdmin() {
     assertFalse(isAdmin(userToken()));
     assertFalse(isAdmin(userToken(CWS_WORKER)));
     assertFalse(isAdmin(userToken(IDM_JOB)));
@@ -42,7 +43,17 @@ public class RolesTest {
     assertTrue(isAdmin(userToken(OFFICE_ADMIN)));
   }
 
-  static UniversalUserToken userToken(String... roles) {
+  @Test
+  public void testIsNonRacfIdCalsUser() {
+    assertFalse(isNonRacfIdCalsUser(userToken()));
+    assertFalse(isNonRacfIdCalsUser(userToken(CWS_WORKER)));
+    assertFalse(isNonRacfIdCalsUser(userToken(COUNTY_ADMIN)));
+    assertTrue(isNonRacfIdCalsUser(userToken(CALS_EXTERNAL_WORKER)));
+    assertTrue(isNonRacfIdCalsUser(userToken(OFFICE_ADMIN, CALS_EXTERNAL_WORKER)));
+    assertTrue(isNonRacfIdCalsUser(userToken(CALS_EXTERNAL_WORKER, CWS_WORKER)));
+  }
+
+  static private UniversalUserToken userToken(String... roles) {
     UniversalUserToken token = new UniversalUserToken();
     token.setRoles(toSet(roles));
     return token;
