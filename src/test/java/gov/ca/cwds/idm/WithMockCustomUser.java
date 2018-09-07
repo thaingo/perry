@@ -1,6 +1,6 @@
 package gov.ca.cwds.idm;
 
-import static gov.ca.cwds.config.api.idm.Role.CWS_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.CWS_ADMIN;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

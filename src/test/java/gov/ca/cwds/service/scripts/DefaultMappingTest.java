@@ -1,6 +1,6 @@
 package gov.ca.cwds.service.scripts;
 
-import static gov.ca.cwds.config.api.idm.Role.CWS_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.CWS_ADMIN;
 
 import java.util.Arrays;
 import java.util.List;
@@ -11,7 +11,7 @@ import org.junit.Test;
 /**
  * Created by leonid.marushevskyi on 1/3/2018.
  */
-public class DefaultMappingTest extends BaseScriptTest {
+public class DefaultMappingTest extends ScriptTestBase {
 
   private List<String> roles;
 

@@ -1,7 +1,10 @@
 package gov.ca.cwds.config.api.idm;
 
-import static gov.ca.cwds.config.api.idm.Role.CWS_ADMIN;
-import static gov.ca.cwds.config.api.idm.Role.IDM_JOB;
+import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.CWS_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.IDM_JOB;
+import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 
 import gov.ca.cwds.config.api.common.BaseApiConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -21,7 +24,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 public class PerryIdmConfiguration extends BaseApiConfiguration {
   @Override
   protected void configure(HttpSecurity http) throws Exception {
-    http.antMatcher("/idm/**").authorizeRequests().anyRequest().hasAnyAuthority(CWS_ADMIN, IDM_JOB)
+    http.antMatcher("/idm/**").authorizeRequests().anyRequest()
+    .hasAnyAuthority(CWS_ADMIN, IDM_JOB, COUNTY_ADMIN, STATE_ADMIN, OFFICE_ADMIN)
     .and().antMatcher("/idm/**").httpBasic();
     super.configure(http);
   }

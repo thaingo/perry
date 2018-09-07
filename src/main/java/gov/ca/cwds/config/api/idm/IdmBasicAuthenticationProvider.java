@@ -1,6 +1,6 @@
 package gov.ca.cwds.config.api.idm;
 
-import static gov.ca.cwds.config.api.idm.Role.IDM_JOB;
+import static gov.ca.cwds.config.api.idm.Roles.IDM_JOB;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationProvider;
