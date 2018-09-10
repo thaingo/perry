@@ -20,7 +20,8 @@ public class Roles {
   public static final String OFFICE_ADMIN = "Office-admin";
 
   public static boolean isAdmin(UniversalUserToken user) {
-    return !Collections.disjoint(user.getRoles(), getAdminRoles());
+    Set<String> adminRoles = getAdminRoles();
+    return !Collections.disjoint(user.getRoles(), adminRoles);
   }
 
   public static boolean isNonRacfIdCalsUser(UniversalUserToken user) {

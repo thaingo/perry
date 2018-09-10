@@ -44,12 +44,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -71,7 +69,7 @@ public class IdmResource {
 
   @Autowired private MessagesService messages;
 
-  @GetMapping(value = "/users", produces = "application/json")
+  @RequestMapping(method = RequestMethod.GET, value = "/users", produces = "application/json")
   @ApiOperation(
     value = "Users page",
     response = UsersPage.class,
@@ -89,7 +87,8 @@ public class IdmResource {
     return idmService.getUserPage(paginationToken);
   }
 
-  @PostMapping(
+  @RequestMapping(
+    method = RequestMethod.POST,
     value = "/users/search",
     consumes = "application/json",
     produces = "application/json"
@@ -108,7 +107,8 @@ public class IdmResource {
     return idmService.searchUsers(new UsersSearchCriteria(RACFID_STANDARD, racfids));
   }
 
-  @GetMapping(
+  @RequestMapping(
+      method = RequestMethod.GET,
       value = "/users/failed-operations",
       produces = "application/json"
   )
@@ -140,7 +140,7 @@ public class IdmResource {
     return ResponseEntity.ok().body(idmService.getFailedOperations(lastJobTime));
   }
 
-  @GetMapping(value = "/users/{id}", produces = "application/json")
+  @RequestMapping(method = RequestMethod.GET, value = "/users/{id}", produces = "application/json")
   @ApiOperation(value = "Find User by ID", response = User.class)
   @ApiResponses(
     value = {
@@ -165,7 +165,8 @@ public class IdmResource {
     }
   }
 
-  @PatchMapping(
+  @RequestMapping(
+    method = RequestMethod.PATCH,
     value = "/users/{id}",
     consumes = "application/json"
   )
@@ -204,7 +205,7 @@ public class IdmResource {
     }
   }
 
-  @PostMapping(value = "/users", consumes = "application/json")
+  @RequestMapping(method = RequestMethod.POST, value = "/users", consumes = "application/json")
   @ResponseStatus(HttpStatus.CREATED)
   @ApiResponses(
       value = {
@@ -269,7 +270,7 @@ public class IdmResource {
         .toUri();
   }
 
-  @GetMapping(value = "/permissions", produces = "application/json")
+  @RequestMapping(method = RequestMethod.GET, value = "/permissions", produces = "application/json")
   @ApiResponses(
     value = {
       @ApiResponse(code = 401, message = "Not Authorized"),
@@ -288,7 +289,7 @@ public class IdmResource {
     return  dictionaryProvider.getPermissions();
   }
 
-  @GetMapping(value = "users/verify", produces = "application/json")
+  @RequestMapping(method = RequestMethod.GET, value = "users/verify", produces = "application/json")
   @ApiOperation(value = "Check if user can be created by racfId and email", response = UserVerificationResult.class)
   @ApiResponses(value = {@ApiResponse(code = 401, message = "Not Authorized")})
   @PreAuthorize("hasAnyAuthority("
