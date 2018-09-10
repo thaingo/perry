@@ -1,7 +1,5 @@
-import static gov.ca.cwds.config.api.idm.Roles.isAdmin
-import static gov.ca.cwds.config.api.idm.Roles.isNonRacfIdCalsUser
-
 import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType
+import gov.ca.cwds.config.api.idm.Roles
 
 def authorization = user.authorization
 
@@ -42,7 +40,7 @@ if (authorization) {
             privileges     : privileges + user.permissions,
             authorityCodes : authorityCodes]
 
-    if (isAdmin(user)) {
+    if (Roles.isAdmin(user)) {
         token.userName = user.parameters["userName"]
     }
 
@@ -63,11 +61,11 @@ else {
                  county_name    : countyName,
                  privileges     : user.permissions]
 
-    if (isNonRacfIdCalsUser(user)) {
+    if (Roles.isNonRacfIdCalsUser(user)) {
         token.privileges += ["CWS Case Management System", "Resource Management"]
     }
 
-    if (isAdmin(user)) {
+    if (Roles.isAdmin(user)) {
         token.userName = user.parameters["userName"]
     }
 
