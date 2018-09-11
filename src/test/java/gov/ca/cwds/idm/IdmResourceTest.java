@@ -1,6 +1,8 @@
 package gov.ca.cwds.idm;
 
 import static gov.ca.cwds.config.api.idm.Roles.CWS_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.idm.BaseLiquibaseTest.CMS_STORE_URL;
 import static gov.ca.cwds.idm.BaseLiquibaseTest.TOKEN_STORE_URL;
 import static gov.ca.cwds.idm.IdmResource.DATETIME_FORMAT_PATTERN;
@@ -241,8 +243,42 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   }
 
   @Test
+  @WithMockCustomUser(roles = {CWS_ADMIN})
+  public void testGetPermissionsCwsAdmin() throws Exception {
+
+    MvcResult result =
+        mockMvc
+            .perform(MockMvcRequestBuilders.get("/idm/permissions"))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
+            .andReturn();
+
+    assertStrict(result, "fixtures/idm/permissions/valid.json");
+  }
+
+  @Test
   @WithMockCustomUser(roles = {"OtherRole"})
   public void testGetPermissionsWithOtherRole() throws Exception {
+
+    mockMvc
+        .perform(MockMvcRequestBuilders.get("/idm/permissions"))
+        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+        .andReturn();
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {STATE_ADMIN})
+  public void testGetPermissionsStateAdmin() throws Exception {
+
+    mockMvc
+        .perform(MockMvcRequestBuilders.get("/idm/permissions"))
+        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+        .andReturn();
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {OFFICE_ADMIN})
+  public void testGetPermissionsOfficeAdmin() throws Exception {
 
     mockMvc
         .perform(MockMvcRequestBuilders.get("/idm/permissions"))
