@@ -231,21 +231,16 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @Test
   @WithMockCustomUser
   public void testGetPermissions() throws Exception {
-
-    MvcResult result =
-        mockMvc
-            .perform(MockMvcRequestBuilders.get("/idm/permissions"))
-            .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
-            .andReturn();
-
-    assertStrict(result, "fixtures/idm/permissions/valid.json");
+    assertGetPermissionsSuccess();
   }
 
   @Test
   @WithMockCustomUser(roles = {CWS_ADMIN})
   public void testGetPermissionsCwsAdmin() throws Exception {
+    assertGetPermissionsSuccess();
+  }
 
+  private void assertGetPermissionsSuccess() throws Exception {
     MvcResult result =
         mockMvc
             .perform(MockMvcRequestBuilders.get("/idm/permissions"))
@@ -259,27 +254,22 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @Test
   @WithMockCustomUser(roles = {"OtherRole"})
   public void testGetPermissionsWithOtherRole() throws Exception {
-
-    mockMvc
-        .perform(MockMvcRequestBuilders.get("/idm/permissions"))
-        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
-        .andReturn();
+    assertGetPermissionsUnauthorized();
   }
 
   @Test
   @WithMockCustomUser(roles = {STATE_ADMIN})
   public void testGetPermissionsStateAdmin() throws Exception {
-
-    mockMvc
-        .perform(MockMvcRequestBuilders.get("/idm/permissions"))
-        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
-        .andReturn();
+    assertGetPermissionsUnauthorized();
   }
 
   @Test
   @WithMockCustomUser(roles = {OFFICE_ADMIN})
   public void testGetPermissionsOfficeAdmin() throws Exception {
+    assertGetPermissionsUnauthorized();
+  }
 
+  private void assertGetPermissionsUnauthorized() throws Exception {
     mockMvc
         .perform(MockMvcRequestBuilders.get("/idm/permissions"))
         .andExpect(MockMvcResultMatchers.status().isUnauthorized())
