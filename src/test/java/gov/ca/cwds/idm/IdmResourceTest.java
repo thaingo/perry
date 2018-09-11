@@ -414,15 +414,34 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @Test
   @WithMockCustomUser(roles = {"OtherRole"})
   public void testGetUsersWithOtherRole() throws Exception {
-    mockMvc
-        .perform(MockMvcRequestBuilders.get("/idm/users"))
-        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
-        .andReturn();
+    assertGetUsersUnauthorized();
   }
 
   @Test
   @WithMockCustomUser()
-  public void testGetUsersWithAdminRole() throws Exception {
+  public void testGetUsersCountyAdmin() throws Exception {
+    assertGetUsersUnauthorized();
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {CWS_ADMIN})
+  public void testGetUsersWithCwsAdmin() throws Exception {
+    assertGetUsersUnauthorized();
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {STATE_ADMIN})
+  public void testGetUsersWithStateAdmin() throws Exception {
+    assertGetUsersUnauthorized();
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {OFFICE_ADMIN})
+  public void testGetUsersWithOfficeAdmin() throws Exception {
+    assertGetUsersUnauthorized();
+  }
+
+  private void assertGetUsersUnauthorized() throws Exception {
     mockMvc
         .perform(MockMvcRequestBuilders.get("/idm/users"))
         .andExpect(MockMvcResultMatchers.status().isUnauthorized())
