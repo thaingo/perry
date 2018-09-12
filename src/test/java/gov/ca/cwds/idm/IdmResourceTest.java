@@ -253,13 +253,13 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @Test
   @WithMockCustomUser(roles = {STATE_ADMIN})
   public void testGetPermissionsStateAdmin() throws Exception {
-    assertGetPermissionsUnauthorized();
+    assertGetPermissionsSuccess();
   }
 
   @Test
   @WithMockCustomUser(roles = {OFFICE_ADMIN})
   public void testGetPermissionsOfficeAdmin() throws Exception {
-    assertGetPermissionsUnauthorized();
+    assertGetPermissionsSuccess();
   }
 
   private void assertGetPermissionsUnauthorized() throws Exception {
