@@ -824,24 +824,28 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @Test
   @WithMockCustomUser(county = "Madera")
   public void testUpdateUserByOtherCountyAdmin() throws Exception {
-
-    UserUpdate userUpdate = new UserUpdate();
-    userUpdate.setEnabled(Boolean.FALSE);
-    userUpdate.setPermissions(toSet("RFA-rollout", "Hotline-rollout"));
-
-    mockMvc
-        .perform(
-            MockMvcRequestBuilders.patch("/idm/users/" + USER_NO_RACFID_ID)
-                .contentType(JSON_CONTENT_TYPE)
-                .content(asJsonString(userUpdate)))
-        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
-        .andReturn();
+    assertUpdateUserUnauthorized();
   }
 
   @Test
   @WithMockCustomUser(roles = {"OtherRole"})
   public void testUpdateUserWithOtherRole() throws Exception {
+    assertUpdateUserUnauthorized();
+  }
 
+  @Test
+  @WithMockCustomUser(roles = {STATE_ADMIN})
+  public void testUpdateUserStateAdmin() throws Exception {
+    assertUpdateUserUnauthorized();
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {OFFICE_ADMIN})
+  public void testUpdateUserOfficeAdmin() throws Exception {
+    assertUpdateUserUnauthorized();
+  }
+
+  private void assertUpdateUserUnauthorized() throws Exception {
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setEnabled(Boolean.FALSE);
     userUpdate.setPermissions(toSet("RFA-rollout", "Hotline-rollout"));
@@ -929,13 +933,27 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @Test
   @WithMockCustomUser(roles = {"OtherRole"})
   public void testVerifyUserWithOtherRole() throws Exception {
+    assertVerifyUserUnauthorized();
+  }
 
-    MvcResult result =
-        mockMvc
-            .perform(
-                MockMvcRequestBuilders.get("/idm/users/verify?email=test@test.com&racfid=CWDS"))
-            .andExpect(MockMvcResultMatchers.status().isUnauthorized())
-            .andReturn();
+  @Test
+  @WithMockCustomUser(roles = {STATE_ADMIN})
+  public void testVerifyUserStateAdmin() throws Exception {
+    assertVerifyUserUnauthorized();
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {OFFICE_ADMIN})
+  public void testVerifyUserOfficeAdmin() throws Exception {
+    assertVerifyUserUnauthorized();
+  }
+
+  private void assertVerifyUserUnauthorized() throws Exception {
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.get("/idm/users/verify?email=test@test.com&racfid=CWDS"))
+        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+        .andReturn();
   }
 
   @Test
