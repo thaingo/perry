@@ -310,28 +310,36 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @Test
   @WithMockCustomUser
   public void testGetUserError() throws Exception {
-    mockMvc
-        .perform(MockMvcRequestBuilders.get("/idm/users/" + ERROR_USER_ID))
-        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
-        .andReturn();
+    assertGetUserUnauthorized(ERROR_USER_ID);
   }
 
   @Test
   @WithMockCustomUser(county = "Madera")
   public void testGetUserByOtherCountyAdmin() throws Exception {
-
-    mockMvc
-        .perform(MockMvcRequestBuilders.get("/idm/users/" + USER_NO_RACFID_ID))
-        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
-        .andReturn();
+    assertGetUserUnauthorized(USER_NO_RACFID_ID);
   }
 
   @Test
   @WithMockCustomUser(roles = {"OtherRole"})
   public void testGetUserWithOtherRole() throws Exception {
+    assertGetUserUnauthorized(USER_NO_RACFID_ID);
+  }
 
+  @Test
+  @WithMockCustomUser(roles = {STATE_ADMIN})
+  public void testGetUserStateAdmin() throws Exception {
+    assertGetUserUnauthorized(USER_NO_RACFID_ID);
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {OFFICE_ADMIN})
+  public void testGetUserOfficeAdmin() throws Exception {
+    assertGetUserUnauthorized(USER_NO_RACFID_ID);
+  }
+
+  private void assertGetUserUnauthorized(String userId) throws Exception {
     mockMvc
-        .perform(MockMvcRequestBuilders.get("/idm/users/" + USER_NO_RACFID_ID))
+        .perform(MockMvcRequestBuilders.get("/idm/users/" + userId))
         .andExpect(MockMvcResultMatchers.status().isUnauthorized())
         .andReturn();
   }
