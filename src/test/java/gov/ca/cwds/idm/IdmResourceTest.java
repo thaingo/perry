@@ -393,7 +393,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   }
 
   @Test
-  public void testgetUsersPage() throws Exception {
+  public void testGetUsersPage() throws Exception {
     MvcResult result =
         mockMvc
             .perform(
@@ -458,6 +458,32 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     verify(cognito, times(1)).adminCreateUser(request);
     verify(spySearchService, times(1)).createUser(any(User.class));
     verifyDoraCalls(1);
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {STATE_ADMIN})
+  public void testCreateUserStateAdmin() throws Exception {
+    assertCreateUserUnauthorized();
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {OFFICE_ADMIN})
+  public void testCreateUserOfficeAdmin() throws Exception {
+    assertCreateUserUnauthorized();
+  }
+
+  private void assertCreateUserUnauthorized() throws Exception {
+    User user = user();
+    AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
+    setCreateUserResult(request, NEW_USER_SUCCESS_ID);
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.post("/idm/users")
+                .contentType(JSON_CONTENT_TYPE)
+                .content(asJsonString(user)))
+        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+        .andReturn();
   }
 
   @Test
