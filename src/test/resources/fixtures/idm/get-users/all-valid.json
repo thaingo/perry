@@ -16,7 +16,7 @@
       ],
       "roles": [
         "CWS-worker",
-        "CWS-admin"
+        "County-admin"
       ]
     },
     {
@@ -35,7 +35,7 @@
       ],
       "roles": [
         "CWS-worker",
-        "CWS-admin"
+        "County-admin"
       ]
     },
     {

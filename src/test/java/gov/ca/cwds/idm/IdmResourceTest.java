@@ -1,5 +1,7 @@
 package gov.ca.cwds.idm;
 
+import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.idm.BaseLiquibaseTest.CMS_STORE_URL;
 import static gov.ca.cwds.idm.BaseLiquibaseTest.TOKEN_STORE_URL;
 import static gov.ca.cwds.idm.IdmResource.DATETIME_FORMAT_PATTERN;
@@ -228,7 +230,10 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @Test
   @WithMockCustomUser
   public void testGetPermissions() throws Exception {
+    assertGetPermissionsSuccess();
+  }
 
+  private void assertGetPermissionsSuccess() throws Exception {
     MvcResult result =
         mockMvc
             .perform(MockMvcRequestBuilders.get("/idm/permissions"))
@@ -242,7 +247,22 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @Test
   @WithMockCustomUser(roles = {"OtherRole"})
   public void testGetPermissionsWithOtherRole() throws Exception {
+    assertGetPermissionsUnauthorized();
+  }
 
+  @Test
+  @WithMockCustomUser(roles = {STATE_ADMIN})
+  public void testGetPermissionsStateAdmin() throws Exception {
+    assertGetPermissionsUnauthorized();
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {OFFICE_ADMIN})
+  public void testGetPermissionsOfficeAdmin() throws Exception {
+    assertGetPermissionsUnauthorized();
+  }
+
+  private void assertGetPermissionsUnauthorized() throws Exception {
     mockMvc
         .perform(MockMvcRequestBuilders.get("/idm/permissions"))
         .andExpect(MockMvcResultMatchers.status().isUnauthorized())
@@ -290,28 +310,36 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @Test
   @WithMockCustomUser
   public void testGetUserError() throws Exception {
-    mockMvc
-        .perform(MockMvcRequestBuilders.get("/idm/users/" + ERROR_USER_ID))
-        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
-        .andReturn();
+    assertGetUserUnauthorized(ERROR_USER_ID);
   }
 
   @Test
   @WithMockCustomUser(county = "Madera")
   public void testGetUserByOtherCountyAdmin() throws Exception {
-
-    mockMvc
-        .perform(MockMvcRequestBuilders.get("/idm/users/" + USER_NO_RACFID_ID))
-        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
-        .andReturn();
+    assertGetUserUnauthorized(USER_NO_RACFID_ID);
   }
 
   @Test
   @WithMockCustomUser(roles = {"OtherRole"})
   public void testGetUserWithOtherRole() throws Exception {
+    assertGetUserUnauthorized(USER_NO_RACFID_ID);
+  }
 
+  @Test
+  @WithMockCustomUser(roles = {STATE_ADMIN})
+  public void testGetUserStateAdmin() throws Exception {
+    assertGetUserUnauthorized(USER_NO_RACFID_ID);
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {OFFICE_ADMIN})
+  public void testGetUserOfficeAdmin() throws Exception {
+    assertGetUserUnauthorized(USER_NO_RACFID_ID);
+  }
+
+  private void assertGetUserUnauthorized(String userId) throws Exception {
     mockMvc
-        .perform(MockMvcRequestBuilders.get("/idm/users/" + USER_NO_RACFID_ID))
+        .perform(MockMvcRequestBuilders.get("/idm/users/" + userId))
         .andExpect(MockMvcResultMatchers.status().isUnauthorized())
         .andReturn();
   }
@@ -365,7 +393,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   }
 
   @Test
-  public void testgetUsersPage() throws Exception {
+  public void testGetUsersPage() throws Exception {
     MvcResult result =
         mockMvc
             .perform(
@@ -381,15 +409,28 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @Test
   @WithMockCustomUser(roles = {"OtherRole"})
   public void testGetUsersWithOtherRole() throws Exception {
-    mockMvc
-        .perform(MockMvcRequestBuilders.get("/idm/users"))
-        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
-        .andReturn();
+    assertGetUsersUnauthorized();
   }
 
   @Test
   @WithMockCustomUser()
-  public void testGetUsersWithAdminRole() throws Exception {
+  public void testGetUsersCountyAdmin() throws Exception {
+    assertGetUsersUnauthorized();
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {STATE_ADMIN})
+  public void testGetUsersWithStateAdmin() throws Exception {
+    assertGetUsersUnauthorized();
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {OFFICE_ADMIN})
+  public void testGetUsersWithOfficeAdmin() throws Exception {
+    assertGetUsersUnauthorized();
+  }
+
+  private void assertGetUsersUnauthorized() throws Exception {
     mockMvc
         .perform(MockMvcRequestBuilders.get("/idm/users"))
         .andExpect(MockMvcResultMatchers.status().isUnauthorized())
@@ -417,6 +458,32 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     verify(cognito, times(1)).adminCreateUser(request);
     verify(spySearchService, times(1)).createUser(any(User.class));
     verifyDoraCalls(1);
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {STATE_ADMIN})
+  public void testCreateUserStateAdmin() throws Exception {
+    assertCreateUserUnauthorized();
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {OFFICE_ADMIN})
+  public void testCreateUserOfficeAdmin() throws Exception {
+    assertCreateUserUnauthorized();
+  }
+
+  private void assertCreateUserUnauthorized() throws Exception {
+    User user = user();
+    AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
+    setCreateUserResult(request, NEW_USER_SUCCESS_ID);
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.post("/idm/users")
+                .contentType(JSON_CONTENT_TYPE)
+                .content(asJsonString(user)))
+        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+        .andReturn();
   }
 
   @Test
@@ -757,24 +824,28 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @Test
   @WithMockCustomUser(county = "Madera")
   public void testUpdateUserByOtherCountyAdmin() throws Exception {
-
-    UserUpdate userUpdate = new UserUpdate();
-    userUpdate.setEnabled(Boolean.FALSE);
-    userUpdate.setPermissions(toSet("RFA-rollout", "Hotline-rollout"));
-
-    mockMvc
-        .perform(
-            MockMvcRequestBuilders.patch("/idm/users/" + USER_NO_RACFID_ID)
-                .contentType(JSON_CONTENT_TYPE)
-                .content(asJsonString(userUpdate)))
-        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
-        .andReturn();
+    assertUpdateUserUnauthorized();
   }
 
   @Test
   @WithMockCustomUser(roles = {"OtherRole"})
   public void testUpdateUserWithOtherRole() throws Exception {
+    assertUpdateUserUnauthorized();
+  }
 
+  @Test
+  @WithMockCustomUser(roles = {STATE_ADMIN})
+  public void testUpdateUserStateAdmin() throws Exception {
+    assertUpdateUserUnauthorized();
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {OFFICE_ADMIN})
+  public void testUpdateUserOfficeAdmin() throws Exception {
+    assertUpdateUserUnauthorized();
+  }
+
+  private void assertUpdateUserUnauthorized() throws Exception {
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setEnabled(Boolean.FALSE);
     userUpdate.setPermissions(toSet("RFA-rollout", "Hotline-rollout"));
@@ -862,13 +933,27 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @Test
   @WithMockCustomUser(roles = {"OtherRole"})
   public void testVerifyUserWithOtherRole() throws Exception {
+    assertVerifyUserUnauthorized();
+  }
 
-    MvcResult result =
-        mockMvc
-            .perform(
-                MockMvcRequestBuilders.get("/idm/users/verify?email=test@test.com&racfid=CWDS"))
-            .andExpect(MockMvcResultMatchers.status().isUnauthorized())
-            .andReturn();
+  @Test
+  @WithMockCustomUser(roles = {STATE_ADMIN})
+  public void testVerifyUserStateAdmin() throws Exception {
+    assertVerifyUserUnauthorized();
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {OFFICE_ADMIN})
+  public void testVerifyUserOfficeAdmin() throws Exception {
+    assertVerifyUserUnauthorized();
+  }
+
+  private void assertVerifyUserUnauthorized() throws Exception {
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.get("/idm/users/verify?email=test@test.com&racfid=CWDS"))
+        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+        .andReturn();
   }
 
   @Test
@@ -1120,7 +1205,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
               "Manzano",
               WithMockCustomUser.COUNTY,
               "RFA-rollout:Snapshot-rollout:",
-              "CWS-worker:CWS-admin",
+              "CWS-worker:County-admin",
               null);
 
       TestUser userWithRacfid =
@@ -1135,7 +1220,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
               "Iglecias",
               WithMockCustomUser.COUNTY,
               "Hotline-rollout",
-              "CWS-worker:CWS-admin",
+              "CWS-worker:County-admin",
               "YOLOD");
 
       TestUser userWithRacfidAndDbData =
