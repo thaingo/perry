@@ -2,7 +2,6 @@ package gov.ca.cwds.config.api.idm;
 
 import static gov.ca.cwds.config.api.idm.Roles.CALS_EXTERNAL_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
-import static gov.ca.cwds.config.api.idm.Roles.CWS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.IDM_JOB;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
@@ -25,8 +24,7 @@ public class RolesTest {
   @Test
   public void testGetAdminRoles() {
     Set<String> adminRoles = getAdminRoles();
-    assertThat(adminRoles, hasSize(4));
-    assertTrue(adminRoles.contains(CWS_ADMIN));
+    assertThat(adminRoles, hasSize(3));
     assertTrue(adminRoles.contains(COUNTY_ADMIN));
     assertTrue(adminRoles.contains(STATE_ADMIN));
     assertTrue(adminRoles.contains(OFFICE_ADMIN));

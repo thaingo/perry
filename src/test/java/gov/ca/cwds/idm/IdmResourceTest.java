@@ -1,6 +1,5 @@
 package gov.ca.cwds.idm;
 
-import static gov.ca.cwds.config.api.idm.Roles.CWS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.idm.BaseLiquibaseTest.CMS_STORE_URL;
@@ -234,12 +233,6 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     assertGetPermissionsSuccess();
   }
 
-  @Test
-  @WithMockCustomUser(roles = {CWS_ADMIN})
-  public void testGetPermissionsCwsAdmin() throws Exception {
-    assertGetPermissionsSuccess();
-  }
-
   private void assertGetPermissionsSuccess() throws Exception {
     MvcResult result =
         mockMvc
@@ -279,12 +272,6 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @Test
   @WithMockCustomUser
   public void testGetUserNoRacfId() throws Exception {
-    testGetValidYoloUser(USER_NO_RACFID_ID, "fixtures/idm/get-user/no-racfid-valid.json");
-  }
-
-  @Test
-  @WithMockCustomUser(roles = {CWS_ADMIN})
-  public void testGetUserNoRacfIdCwsAdmin() throws Exception {
     testGetValidYoloUser(USER_NO_RACFID_ID, "fixtures/idm/get-user/no-racfid-valid.json");
   }
 
@@ -420,12 +407,6 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @Test
   @WithMockCustomUser()
   public void testGetUsersCountyAdmin() throws Exception {
-    assertGetUsersUnauthorized();
-  }
-
-  @Test
-  @WithMockCustomUser(roles = {CWS_ADMIN})
-  public void testGetUsersWithCwsAdmin() throws Exception {
     assertGetUsersUnauthorized();
   }
 

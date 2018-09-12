@@ -1,7 +1,6 @@
 package gov.ca.cwds.config.api.idm;
 
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
-import static gov.ca.cwds.config.api.idm.Roles.CWS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.IDM_JOB;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
@@ -25,7 +24,7 @@ public class PerryIdmConfiguration extends BaseApiConfiguration {
   @Override
   protected void configure(HttpSecurity http) throws Exception {
     http.antMatcher("/idm/**").authorizeRequests().anyRequest()
-    .hasAnyAuthority(CWS_ADMIN, IDM_JOB, COUNTY_ADMIN, STATE_ADMIN, OFFICE_ADMIN)
+    .hasAnyAuthority(IDM_JOB, COUNTY_ADMIN, STATE_ADMIN, OFFICE_ADMIN)
     .and().antMatcher("/idm/**").httpBasic();
     super.configure(http);
   }

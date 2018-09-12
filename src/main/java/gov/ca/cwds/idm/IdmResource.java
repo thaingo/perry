@@ -148,9 +148,7 @@ public class IdmResource {
       @ApiResponse(code = 404, message = "Not found")
     }
   )
-  @PreAuthorize("hasAnyAuthority("
-      + "T(gov.ca.cwds.config.api.idm.Roles).CWS_ADMIN, "
-      + "T(gov.ca.cwds.config.api.idm.Roles).COUNTY_ADMIN)")
+  @PreAuthorize("hasAnyAuthority(T(gov.ca.cwds.config.api.idm.Roles).COUNTY_ADMIN)")
   public ResponseEntity<User> getUser(
       @ApiParam(required = true, value = "The unique user ID", example = "userId1")
           @PathVariable
@@ -179,9 +177,7 @@ public class IdmResource {
     }
   )
   @ApiOperation(value = "Update User")
-  @PreAuthorize("hasAnyAuthority("
-      + "T(gov.ca.cwds.config.api.idm.Roles).CWS_ADMIN, "
-      + "T(gov.ca.cwds.config.api.idm.Roles).COUNTY_ADMIN)")
+  @PreAuthorize("hasAnyAuthority(T(gov.ca.cwds.config.api.idm.Roles).COUNTY_ADMIN)")
   public ResponseEntity updateUser(
       @ApiParam(required = true, value = "The unique user ID", example = "userId1")
           @PathVariable
@@ -224,9 +220,7 @@ public class IdmResource {
               + "email, first_name, last_name, county_name, RACFID, permissions, office, phone_number.\n "
               + "Other properties values will be set by the system automatically.\n"
               + "Required properties are: email, first_name, last_name, county_name.")
-  @PreAuthorize("hasAnyAuthority("
-      + "T(gov.ca.cwds.config.api.idm.Roles).CWS_ADMIN, "
-      + "T(gov.ca.cwds.config.api.idm.Roles).COUNTY_ADMIN)")
+  @PreAuthorize("hasAnyAuthority(T(gov.ca.cwds.config.api.idm.Roles).COUNTY_ADMIN)")
   public ResponseEntity createUser(
       @ApiParam(required = true, name = "User", value = "The User create data")
           @NotNull
@@ -282,9 +276,7 @@ public class IdmResource {
     response = Permission.class,
     responseContainer = "List"
   )
-  @PreAuthorize("hasAnyAuthority("
-      + "T(gov.ca.cwds.config.api.idm.Roles).CWS_ADMIN, "
-      + "T(gov.ca.cwds.config.api.idm.Roles).COUNTY_ADMIN)")
+  @PreAuthorize("hasAnyAuthority(T(gov.ca.cwds.config.api.idm.Roles).COUNTY_ADMIN)")
   public List<Permission> getPermissions() {
     return  dictionaryProvider.getPermissions();
   }
@@ -292,9 +284,7 @@ public class IdmResource {
   @RequestMapping(method = RequestMethod.GET, value = "users/verify", produces = "application/json")
   @ApiOperation(value = "Check if user can be created by racfId and email", response = UserVerificationResult.class)
   @ApiResponses(value = {@ApiResponse(code = 401, message = "Not Authorized")})
-  @PreAuthorize("hasAnyAuthority("
-      + "T(gov.ca.cwds.config.api.idm.Roles).CWS_ADMIN, "
-      + "T(gov.ca.cwds.config.api.idm.Roles).COUNTY_ADMIN)")
+  @PreAuthorize("hasAnyAuthority(T(gov.ca.cwds.config.api.idm.Roles).COUNTY_ADMIN)")
   public ResponseEntity<UserVerificationResult> verifyUser(
       @ApiParam(required = true, name = "racfid", value = "The RACFID to verify user by in CWS/CMS")
           @NotNull

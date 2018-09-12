@@ -11,7 +11,6 @@ public class Roles {
   private Roles() {
   }
 
-  public static final String CWS_ADMIN = "CWS-admin";
   public static final String CWS_WORKER = "CWS-worker";
   public static final String CALS_EXTERNAL_WORKER = "CALS-external-worker";
   public static final String IDM_JOB = "IDM-job";
@@ -29,6 +28,6 @@ public class Roles {
   }
 
   static Set<String> getAdminRoles() {
-    return toSet(CWS_ADMIN, COUNTY_ADMIN, STATE_ADMIN, OFFICE_ADMIN);
+    return toSet(COUNTY_ADMIN, STATE_ADMIN, OFFICE_ADMIN);
   }
 }
