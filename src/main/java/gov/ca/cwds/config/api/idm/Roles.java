@@ -5,7 +5,11 @@ import static gov.ca.cwds.util.Utils.toSet;
 import gov.ca.cwds.UniversalUserToken;
 import java.util.Collections;
 import java.util.Set;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Service;
 
+@Service(value = "roles")
+@Profile("idm")
 public class Roles {
 
   private Roles() {

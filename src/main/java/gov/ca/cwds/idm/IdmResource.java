@@ -276,10 +276,7 @@ public class IdmResource {
     response = Permission.class,
     responseContainer = "List"
   )
-  @PreAuthorize("hasAnyAuthority("
-      + "T(gov.ca.cwds.config.api.idm.Roles).COUNTY_ADMIN, "
-      + "T(gov.ca.cwds.config.api.idm.Roles).STATE_ADMIN, "
-      + "T(gov.ca.cwds.config.api.idm.Roles).OFFICE_ADMIN)")
+  @PreAuthorize("@roles.isAdmin(principal)")
   public List<Permission> getPermissions() {
     return  dictionaryProvider.getPermissions();
   }
