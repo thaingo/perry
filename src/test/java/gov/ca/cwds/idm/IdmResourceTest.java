@@ -326,9 +326,9 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   }
 
   @Test
-  @WithMockCustomUser(roles = {STATE_ADMIN})
-  public void testGetUserStateAdmin() throws Exception {
-    assertGetUserUnauthorized(USER_NO_RACFID_ID);
+  @WithMockCustomUser(roles = {STATE_ADMIN}, county = "Madera")
+  public void testGetUserStateAdminDifferentCounty() throws Exception {
+    testGetValidYoloUser(USER_WITH_RACFID_ID, "fixtures/idm/get-user/with-racfid-valid.json");
   }
 
   @Test

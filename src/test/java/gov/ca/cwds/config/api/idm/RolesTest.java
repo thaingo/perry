@@ -7,11 +7,17 @@ import static gov.ca.cwds.config.api.idm.Roles.IDM_JOB;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.getAdminRoles;
+import static gov.ca.cwds.config.api.idm.Roles.getStrongestAdminRole;
 import static gov.ca.cwds.config.api.idm.Roles.isAdmin;
+import static gov.ca.cwds.config.api.idm.Roles.isMostlyCountyAdmin;
+import static gov.ca.cwds.config.api.idm.Roles.isMostlyOfficeAdmin;
+import static gov.ca.cwds.config.api.idm.Roles.isMostlyStateAdmin;
 import static gov.ca.cwds.config.api.idm.Roles.isNonRacfIdCalsUser;
 import static gov.ca.cwds.util.Utils.toSet;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
@@ -49,6 +55,45 @@ public class RolesTest {
     assertTrue(isNonRacfIdCalsUser(userToken(CALS_EXTERNAL_WORKER)));
     assertTrue(isNonRacfIdCalsUser(userToken(OFFICE_ADMIN, CALS_EXTERNAL_WORKER)));
     assertTrue(isNonRacfIdCalsUser(userToken(CALS_EXTERNAL_WORKER, CWS_WORKER)));
+  }
+
+  @Test
+  public void testGetStrongestAdminRole() {
+    assertNull(getStrongestAdminRole(userToken()));
+    assertNull(getStrongestAdminRole(userToken(IDM_JOB)));
+
+    assertThat(getStrongestAdminRole(userToken(STATE_ADMIN)), is(STATE_ADMIN));
+    assertThat(getStrongestAdminRole(userToken(COUNTY_ADMIN)), is(COUNTY_ADMIN));
+    assertThat(getStrongestAdminRole(userToken(OFFICE_ADMIN)), is(OFFICE_ADMIN));
+    assertThat(getStrongestAdminRole(userToken(STATE_ADMIN, COUNTY_ADMIN)), is(STATE_ADMIN));
+    assertThat(getStrongestAdminRole(userToken(OFFICE_ADMIN, COUNTY_ADMIN)), is(COUNTY_ADMIN));
+    assertThat(getStrongestAdminRole(userToken(OFFICE_ADMIN, STATE_ADMIN)), is(STATE_ADMIN));
+  }
+
+  @Test
+  public void testIsMostlyStateAdmin() {
+    assertTrue(isMostlyStateAdmin(userToken(OFFICE_ADMIN, STATE_ADMIN, COUNTY_ADMIN)));
+    assertTrue(isMostlyStateAdmin(userToken(STATE_ADMIN, COUNTY_ADMIN)));
+    assertTrue(isMostlyStateAdmin(userToken(STATE_ADMIN)));
+    assertFalse(isMostlyStateAdmin(userToken(COUNTY_ADMIN, OFFICE_ADMIN)));
+    assertFalse(isMostlyStateAdmin(userToken(IDM_JOB)));
+    assertFalse(isMostlyStateAdmin(userToken()));
+  }
+
+  @Test
+  public void testIsMostlyCountyAdmin() {
+    assertTrue(isMostlyCountyAdmin(userToken(OFFICE_ADMIN, COUNTY_ADMIN)));
+    assertTrue(isMostlyCountyAdmin(userToken(COUNTY_ADMIN)));
+    assertFalse(isMostlyCountyAdmin(userToken(OFFICE_ADMIN)));
+    assertFalse(isMostlyCountyAdmin(userToken(IDM_JOB)));
+    assertFalse(isMostlyCountyAdmin(userToken()));
+  }
+
+  @Test
+  public void testIsMostlyOfficeAdmin() {
+    assertTrue(isMostlyOfficeAdmin(userToken(OFFICE_ADMIN)));
+    assertFalse(isMostlyOfficeAdmin(userToken(IDM_JOB)));
+    assertFalse(isMostlyOfficeAdmin(userToken()));
   }
 
   static private UniversalUserToken userToken(String... roles) {
