@@ -37,7 +37,7 @@
         "Hotline-rollout"
       ],
       "roles": [
-        "CWS-admin",
+        "County-admin",
         "CWS-worker"
       ]
     },
@@ -59,7 +59,7 @@
         "RFA-rollout"
       ],
       "roles": [
-        "CWS-admin",
+        "County-admin",
         "CWS-worker"
       ]
     },

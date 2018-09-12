@@ -1153,7 +1153,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
               "Manzano",
               WithMockCustomUser.COUNTY,
               "RFA-rollout:Snapshot-rollout:",
-              "CWS-worker:CWS-admin",
+              "CWS-worker:County-admin",
               null);
 
       TestUser userWithRacfid =
@@ -1168,7 +1168,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
               "Iglecias",
               WithMockCustomUser.COUNTY,
               "Hotline-rollout",
-              "CWS-worker:CWS-admin",
+              "CWS-worker:County-admin",
               "YOLOD");
 
       TestUser userWithRacfidAndDbData =
