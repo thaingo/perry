@@ -20,16 +20,16 @@ public class AuthorizeService {
     return byUserAndAdmin(user, admin);
   }
 
-   boolean byUserAndAdmin(User user, UniversalUserToken admin) {
-    if(isMostlyStateAdmin(admin)) {
+  boolean byUserAndAdmin(User user, UniversalUserToken admin) {
+    if (isMostlyStateAdmin(admin)) {
       return true;
 
-    } else if(isMostlyCountyAdmin(admin)) {
+    } else if (isMostlyCountyAdmin(admin)) {
       String userCountyName = user.getCountyName();
       String adminCountyName = getCountyName(admin);
       return areNotNullAndEquals(userCountyName, adminCountyName);
 
-    } else if(isMostlyOfficeAdmin(admin)){
+    } else if (isMostlyOfficeAdmin(admin)) {
       String userOfficeName = user.getOffice();
       String adminOfficeId = getAdminOfficeId(admin);
       return areNotNullAndEquals(userOfficeName, adminOfficeId);
@@ -38,7 +38,7 @@ public class AuthorizeService {
   }
 
   private static String getAdminOfficeId(UniversalUserToken admin) {
-    return (String)admin.getParameter("office_id");
+    return (String) admin.getParameter("office_id");
   }
 
   static boolean areNotNullAndEquals(String str1, String str2) {

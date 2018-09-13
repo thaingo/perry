@@ -904,6 +904,16 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @Test
   @WithMockCustomUser
   public void testVerifyUsersNoRacfId() throws Exception {
+    assertVerufyUserSuccess();
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {STATE_ADMIN}, county = "Madera")
+  public void testVerifyUserStateAdmin() throws Exception {
+    assertVerufyUserSuccess();
+  }
+
+  private void assertVerufyUserSuccess() throws Exception {
     MvcResult result =
         mockMvc
             .perform(
@@ -933,12 +943,6 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @Test
   @WithMockCustomUser(roles = {"OtherRole"})
   public void testVerifyUserWithOtherRole() throws Exception {
-    assertVerifyUserUnauthorized();
-  }
-
-  @Test
-  @WithMockCustomUser(roles = {STATE_ADMIN})
-  public void testVerifyUserStateAdmin() throws Exception {
     assertVerifyUserUnauthorized();
   }
 

@@ -59,7 +59,6 @@ import gov.ca.cwds.service.dto.CwsUserInfo;
 import gov.ca.cwds.service.messages.MessageCode;
 import gov.ca.cwds.service.messages.MessagesService;
 import gov.ca.cwds.service.scripts.IdmMappingScript;
-import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import gov.ca.cwds.util.Utils;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -68,7 +67,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -101,6 +99,8 @@ public class IdmServiceImpl implements IdmService {
   @Autowired private UserLogService userLogService;
 
   @Autowired private SearchService searchService;
+
+  @Autowired private AuthorizeService authorizeService;
 
   @Override
   public User findUser(String id) {
@@ -367,9 +367,11 @@ public class IdmServiceImpl implements IdmService {
       return composeNegativeResultWithMessage(USER_WITH_EMAIL_EXISTS_IN_IDM, email);
     }
     User user = composeUser(cwsUser, email);
-    if (!Objects.equals(CurrentAuthenticatedUserUtil.getCurrentUserCountyName(), user.getCountyName())) {
+
+    if(!authorizeService.byUser(user)){
       return composeNegativeResultWithMessage(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY);
     }
+
     return UserVerificationResult.Builder.anUserVerificationResult()
         .withUser(user)
         .withVerificationPassed().build();
@@ -524,5 +526,9 @@ public class IdmServiceImpl implements IdmService {
 
   public void setMessages(MessagesService messages) {
     this.messages = messages;
+  }
+
+  public void setAuthorizeService(AuthorizeService authorizeService) {
+    this.authorizeService = authorizeService;
   }
 }
