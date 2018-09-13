@@ -2,8 +2,8 @@ package gov.ca.cwds.idm.service;
 
 import static gov.ca.cwds.config.TokenServiceConfiguration.TOKEN_TRANSACTION_MANAGER;
 
-import gov.ca.cwds.idm.persistence.PermissionRepository;
-import gov.ca.cwds.idm.persistence.model.Permission;
+import gov.ca.cwds.idm.persistence.ns.repository.PermissionRepository;
+import gov.ca.cwds.idm.persistence.ns.entity.Permission;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;

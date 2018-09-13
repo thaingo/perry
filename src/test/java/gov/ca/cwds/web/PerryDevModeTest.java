@@ -1,35 +1,30 @@
 package gov.ca.cwds.web;
 
-import static gov.ca.cwds.idm.BaseLiquibaseTest.CMS_STORE_URL;
-import static gov.ca.cwds.idm.BaseLiquibaseTest.TOKEN_STORE_URL;
+import static gov.ca.cwds.Constants.CMS_STORE_URL;
+import static gov.ca.cwds.Constants.TOKEN_STORE_URL;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertThat;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
+import gov.ca.cwds.BaseIntegrationTest;
 import gov.ca.cwds.PerryApplication;
-import gov.ca.cwds.idm.BaseLiquibaseTest;
-import gov.ca.cwds.service.sso.custom.form.FormService;
 import io.dropwizard.testing.FixtureHelpers;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 @ActiveProfiles({"dev"})
+@RunWith(SpringRunner.class)
 @SpringBootTest(properties = {
     "spring.jpa.hibernate.ddl-auto=none",
     "perry.identityManager.idmMapping=config/idm.groovy",
@@ -41,22 +36,9 @@ import org.springframework.web.context.WebApplicationContext;
     "perry.serviceProviders.mfa.identityMapping=config/default.groovy",
     "perry.jwt.timeout=10"
 }, classes = {PerryApplication.class})
-
-public class PerryDevModeTest extends BaseLiquibaseTest {
+public class PerryDevModeTest extends BaseIntegrationTest {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(PerryDevModeTest.class);
-
-  @Autowired
-  private WebApplicationContext webApplicationContext;
-
-  private MockMvc mockMvc;
-
-  @Before
-  public void before() {
-    this.mockMvc =
-        MockMvcBuilders.webAppContextSetup(webApplicationContext)
-            .apply(springSecurity()).build();
-  }
 
   @Test
   public void whenValidMFAJsonProvided_thenAuthenticate() throws Exception {

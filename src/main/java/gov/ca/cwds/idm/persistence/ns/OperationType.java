@@ -1,4 +1,4 @@
-package gov.ca.cwds.idm.persistence.model;
+package gov.ca.cwds.idm.persistence.ns;
 
 public enum OperationType {
   CREATE,

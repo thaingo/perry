@@ -1,8 +1,9 @@
-package gov.ca.cwds.idm.persistence;
+package gov.ca.cwds.idm.service;
 
 import static gov.ca.cwds.config.TokenServiceConfiguration.TOKEN_TRANSACTION_MANAGER;
 
-import gov.ca.cwds.idm.persistence.model.UserLog;
+import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
+import gov.ca.cwds.idm.persistence.ns.repository.UserLogRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Profile("idm")
 @Service
 @Transactional(value = TOKEN_TRANSACTION_MANAGER)
-public class UserLogTransactionalRepository {
+public class UserLogTransactionalService {
 
   @Autowired
   private UserLogRepository userLogRepository;

@@ -1,15 +1,14 @@
 package gov.ca.cwds.idm.service;
 
-import static gov.ca.cwds.idm.persistence.model.OperationType.CREATE;
-import static gov.ca.cwds.idm.persistence.model.OperationType.UPDATE;
+import static gov.ca.cwds.idm.persistence.ns.OperationType.CREATE;
+import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_LOG_IDM_USER;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_LOG_IDM_USER_CREATE;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_LOG_IDM_USER_UPDATE;
 
 import gov.ca.cwds.idm.dto.UserIdAndOperation;
-import gov.ca.cwds.idm.persistence.UserLogTransactionalRepository;
-import gov.ca.cwds.idm.persistence.model.OperationType;
-import gov.ca.cwds.idm.persistence.model.UserLog;
+import gov.ca.cwds.idm.persistence.ns.OperationType;
+import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
 import gov.ca.cwds.idm.service.execution.OptionalExecution;
 import gov.ca.cwds.service.messages.MessagesService;
 import java.time.LocalDateTime;
@@ -27,7 +26,7 @@ public class UserLogService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(UserLogService.class);
 
-  private UserLogTransactionalRepository userLogTransactionalRepository;
+  private UserLogTransactionalService userLogTransactionalService;
   private MessagesService messages;
 
   public OptionalExecution<String, UserLog> logCreate(String username) {
@@ -44,7 +43,7 @@ public class UserLogService {
       throw new IllegalArgumentException("Last Job Time cannot be null");
     }
 
-    List<Object[]> iDAndOperationPairs = userLogTransactionalRepository.getUserIdAndOperationTypes(lastJobTime);
+    List<Object[]> iDAndOperationPairs = userLogTransactionalService.getUserIdAndOperationTypes(lastJobTime);
 
     return iDAndOperationPairs
         .stream()
@@ -53,7 +52,7 @@ public class UserLogService {
   }
 
   public int deleteProcessedLogs(LocalDateTime lastJobTime) {
-    return userLogTransactionalRepository.deleteLogsBeforeDate(lastJobTime);
+    return userLogTransactionalService.deleteLogsBeforeDate(lastJobTime);
   }
 
   private OptionalExecution<String, UserLog> log(String username, OperationType operationType) {
@@ -66,7 +65,7 @@ public class UserLogService {
         userLog.setOperationType(operationType);
         userLog.setOperationTime(LocalDateTime.now());
 
-        return userLogTransactionalRepository.save(userLog);
+        return userLogTransactionalService.save(userLog);
       }
       @Override
       protected void catchMethod(Exception e) {
@@ -89,9 +88,9 @@ public class UserLogService {
   }
 
   @Autowired
-  public void setUserLogTransactionalRepository(
-      UserLogTransactionalRepository userLogTransactionalRepository) {
-    this.userLogTransactionalRepository = userLogTransactionalRepository;
+  public void setUserLogTransactionalService(
+      UserLogTransactionalService userLogTransactionalService) {
+    this.userLogTransactionalService = userLogTransactionalService;
   }
 
   @Autowired
