@@ -36,7 +36,7 @@ public class OfficesResourceTest extends BaseIntegrationTest {
 
   @Test
   @WithMockCustomUser
-  public void testGetPermissions() throws Exception {
+  public void testGetOffices() throws Exception {
 
     MvcResult result =
         mockMvc

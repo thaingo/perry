@@ -12,8 +12,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface OfficeRepository extends ReadOnlyRepository<CwsOffice, String> {
 
-  @Query("select new gov.ca.cwds.idm.dto.Office(office.officeId, office.cwsOfficeName,"
-      + " office.governmentEntityType, county.shortDescription) from CwsOffice office,"
+  @Query("select new gov.ca.cwds.idm.dto.Office(office.officeId, trim(office.cwsOfficeName),"
+      + " office.governmentEntityType, trim(county.shortDescription)) from CwsOffice office,"
       + " County county where office.governmentEntityType = county.systemId ")
   List<Office> findOffices();
 }
