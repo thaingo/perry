@@ -16,7 +16,7 @@
     "permission2"
   ],
   "userName": "testUserName",
-  "adminOffices": [
+  "adminOfficeIds": [
     "15"
   ]
 }

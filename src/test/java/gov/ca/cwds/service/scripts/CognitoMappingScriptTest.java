@@ -47,6 +47,6 @@ public class CognitoMappingScriptTest {
     Assert.assertEquals("RACFID", userToken.getUserId());
     Assert.assertTrue(userToken.getRoles().isEmpty());
     Assert.assertEquals("perry", userToken.getParameter("userName"));
-    Assert.assertEquals(null, userToken.getParameter("custom:office"));
+    Assert.assertNull(userToken.getParameter("custom:office"));
   }
 }

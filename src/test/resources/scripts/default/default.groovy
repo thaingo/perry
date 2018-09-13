@@ -44,7 +44,7 @@ if (authorization) {
     }
 
     if (Roles.isOfficeAdmin(user)) {
-        token.adminOffices = [user.parameters["custom:office"]]
+        token.adminOfficeIds = [user.parameters["custom:office"]]
     }
 
     return token
@@ -73,7 +73,7 @@ else {
     }
 
     if (Roles.isOfficeAdmin(user)) {
-        token.adminOffices = [user.parameters["custom:office"]]
+        token.adminOfficeIds = [user.parameters["custom:office"]]
     }
 
     return token
