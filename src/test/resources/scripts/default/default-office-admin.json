@@ -5,6 +5,7 @@
   "roles": [
     "role1",
     "role2",
+    "Office-admin",
     "Supervisor"
   ],
   "staffId": "q1p",
@@ -19,5 +20,9 @@
   ],
   "authorityCodes": [
     "S"
+  ],
+  "userName": "testUserName",
+  "adminOfficeIds": [
+    "15"
   ]
 }

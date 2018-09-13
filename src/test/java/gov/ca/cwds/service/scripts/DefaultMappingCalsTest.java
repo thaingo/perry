@@ -18,6 +18,7 @@ public class DefaultMappingCalsTest extends ScriptTestBase {
     universalUserToken.setParameter("family_name", "last");
     universalUserToken.setParameter("email", "e-mail");
     universalUserToken.setParameter("userName", "testUserName");
+    universalUserToken.setParameter("custom:office", "15");
     return universalUserToken;
   }
 

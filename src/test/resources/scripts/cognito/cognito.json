@@ -25,6 +25,10 @@
       "Value": "first-role :second-role:third-role"
     },
     {
+      "Name": "custom:Office",
+      "Value": "17"
+    },
+    {
       "Name": "custom:Permission",
       "Value": "first-permission :second-permission:third-permission"
     }
