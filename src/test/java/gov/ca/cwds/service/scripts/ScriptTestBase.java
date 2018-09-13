@@ -9,12 +9,13 @@ import io.dropwizard.jackson.Jackson;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import org.junit.Assert;
+import org.skyscreamer.jsonassert.JSONAssert;
+import org.skyscreamer.jsonassert.JSONCompareMode;
 
 /**
  * Created by dmitry.rudenko on 8/16/2017.
  */
-public class BaseScriptTest {
+public class ScriptTestBase {
   private static final ObjectMapper MAPPER = Jackson.newObjectMapper();
   public void test(String script, String json, String userAuthorization) throws Exception {
     IdentityMappingScript identityMappingScript = loadScript(script);
@@ -28,8 +29,7 @@ public class BaseScriptTest {
     String result = identityMappingScript.map(user);
     System.out.println(result);
     String expectedResult = readResource(json);
-    Assert.assertEquals(expectedResult, result);
-
+    JSONAssert.assertEquals(expectedResult, result, JSONCompareMode.STRICT);
   }
 
   protected UniversalUserToken createUniversalUserToken() {
@@ -45,6 +45,6 @@ public class BaseScriptTest {
   }
 
   private static Path getPath(String resource) throws Exception {
-    return Paths.get(BaseScriptTest.class.getResource(resource).toURI());
+    return Paths.get(ScriptTestBase.class.getResource(resource).toURI());
   }
 }

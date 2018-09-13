@@ -1,4 +1,5 @@
 import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType
+import gov.ca.cwds.config.api.idm.Roles
 
 def authorization = user.authorization
 
@@ -28,17 +29,17 @@ if (authorization) {
 
     def token=
             [user           : authorization.userId,
-            first_name     : authorization.staffPerson?.firstName,
-            last_name      : authorization.staffPerson?.lastName,
-            roles          : user.roles + [supervisor ? "Supervisor" : "SocialWorker"],
-            staffId        : authorization.staffPerson?.id,
-            county_name    : governmentEntityType.description,
-            county_code    : governmentEntityType.countyCd,
-            county_cws_code: governmentEntityType.sysId,
-            privileges     : privileges + user.permissions,
-            authorityCodes : authorityCodes]
+             first_name     : authorization.staffPerson?.firstName,
+             last_name      : authorization.staffPerson?.lastName,
+             roles          : user.roles + [supervisor ? "Supervisor" : "SocialWorker"],
+             staffId        : authorization.staffPerson?.id,
+             county_name    : governmentEntityType.description,
+             county_code    : governmentEntityType.countyCd,
+             county_cws_code: governmentEntityType.sysId,
+             privileges     : privileges + user.permissions,
+             authorityCodes : authorityCodes]
 
-    if (user.roles?.contains("CWS-admin")) {
+    if (Roles.isAdmin(user)) {
         token.userName = user.parameters["userName"]
     }
 
@@ -59,12 +60,11 @@ else {
                  county_name    : countyName,
                  privileges     : user.permissions]
 
-    //NON-RACFID CALS USER
-    if (user.roles?.contains("CALS-external-worker")) {
+    if (Roles.isNonRacfIdCalsUser(user)) {
         token.privileges += ["CWS Case Management System", "Resource Management"]
     }
 
-    if (user.roles?.contains("CWS-admin")) {
+    if (Roles.isAdmin(user)) {
         token.userName = user.parameters["userName"]
     }
 
