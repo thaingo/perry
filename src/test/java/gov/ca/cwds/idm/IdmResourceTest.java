@@ -977,7 +977,7 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     MvcResult result =
         mockMvc
             .perform(
-                MockMvcRequestBuilders.get("/idm/users/verify?email=test@test.com&racfid=SMITHBO"))
+                MockMvcRequestBuilders.get("/idm/users/verify?email=test@test.com&racfid=SMITHB3"))
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
             .andReturn();
