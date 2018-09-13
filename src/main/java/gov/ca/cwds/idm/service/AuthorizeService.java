@@ -3,6 +3,8 @@ package gov.ca.cwds.idm.service;
 import static gov.ca.cwds.config.api.idm.Roles.isMostlyCountyAdmin;
 import static gov.ca.cwds.config.api.idm.Roles.isMostlyOfficeAdmin;
 import static gov.ca.cwds.config.api.idm.Roles.isMostlyStateAdmin;
+import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCountyName;
+import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 
 import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.dto.User;
@@ -13,16 +15,18 @@ import org.springframework.stereotype.Service;
 @Profile("idm")
 public class AuthorizeService {
 
-  public static final String COUNTY_NAME = "county_name";
+  public boolean byUser(User user) {
+    UniversalUserToken admin = getCurrentUser();
+    return byUserAndAdmin(user, admin);
+  }
 
-  public static boolean findUser(User user, UniversalUserToken admin) {
-
+   boolean byUserAndAdmin(User user, UniversalUserToken admin) {
     if(isMostlyStateAdmin(admin)) {
       return true;
 
     } else if(isMostlyCountyAdmin(admin)) {
       String userCountyName = user.getCountyName();
-      String adminCountyName = getAdminCountyName(admin);
+      String adminCountyName = getCountyName(admin);
       return areNotNullAndEquals(userCountyName, adminCountyName);
 
     } else if(isMostlyOfficeAdmin(admin)){
@@ -31,10 +35,6 @@ public class AuthorizeService {
       return areNotNullAndEquals(userOfficeName, adminOfficeId);
     }
     return false;
-  }
-
-  private static String getAdminCountyName(UniversalUserToken admin) {
-    return (String)admin.getParameter(COUNTY_NAME);
   }
 
   private static String getAdminOfficeId(UniversalUserToken admin) {

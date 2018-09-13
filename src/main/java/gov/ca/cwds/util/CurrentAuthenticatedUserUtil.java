@@ -9,12 +9,20 @@ import org.springframework.security.core.context.SecurityContextHolder;
 public class CurrentAuthenticatedUserUtil {
   private CurrentAuthenticatedUserUtil() {}
 
-  private static final String COUNTY_NAME_PARAM = "county_name";
+  public static final String COUNTY_NAME_PARAM = "county_name";
+
+  public static UniversalUserToken getCurrentUser() {
+    Authentication authentication = getAuthentication();
+    return(UniversalUserToken) authentication.getPrincipal();
+  }
+
+  public static String getCountyName(UniversalUserToken currentUser) {
+    return (String) currentUser.getParameter(COUNTY_NAME_PARAM);
+  }
 
   public static String getCurrentUserCountyName() {
-    Authentication authentication = getAuthentication();
-    UniversalUserToken userToken = (UniversalUserToken) authentication.getPrincipal();
-    return (String) userToken.getParameter(COUNTY_NAME_PARAM);
+    UniversalUserToken userToken = getCurrentUser();
+    return getCountyName(userToken);
   }
 
   public static String getSsoToken() {
