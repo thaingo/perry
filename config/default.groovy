@@ -2,6 +2,7 @@ import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType
 import gov.ca.cwds.config.api.idm.Roles
 
 def authorization = user.authorization
+def token
 
 //RACFID USER
 if (authorization) {
@@ -27,7 +28,7 @@ if (authorization) {
 
     def governmentEntityType = GovernmentEntityType.findBySysId(authorization.cwsOffice?.governmentEntityType)
 
-    def token=
+    token =
             [user           : authorization.userId,
             first_name     : authorization.staffPerson?.firstName,
             last_name      : authorization.staffPerson?.lastName,
@@ -40,22 +41,13 @@ if (authorization) {
             privileges     : privileges + user.permissions,
             authorityCodes : authorityCodes]
 
-    if (Roles.isAdmin(user)) {
-        token.userName = user.parameters["userName"]
-    }
-
-    if (Roles.isOfficeAdmin(user)) {
-        token.adminOfficeIds = [user.parameters["custom:office"]]
-    }
-
-    return token
 }
 //NON-RACFID USER
 else {
     def countyName = user.parameters["custom:county"]
     def cwsCounty = countyName ? GovernmentEntityType.findByDescription(countyName) : null
 
-    def token = [user           : user.userId,
+    token = [user           : user.userId,
                  roles          : user.roles,
                  first_name     : user.parameters["given_name"],
                  last_name      : user.parameters["family_name"],
@@ -69,13 +61,15 @@ else {
         token.privileges += ["CWS Case Management System", "Resource Management"]
     }
 
-    if (Roles.isAdmin(user)) {
-        token.userName = user.parameters["userName"]
-    }
-
-    if (Roles.isOfficeAdmin(user)) {
-        token.adminOfficeIds = [user.parameters["custom:office"]]
-    }
-
-    return token
 }
+
+//COMMON
+if (Roles.isAdmin(user)) {
+    token.userName = user.parameters["userName"]
+}
+
+if (Roles.isOfficeAdmin(user)) {
+    token.adminOfficeIds = [user.parameters["custom:office"]]
+}
+
+return token
