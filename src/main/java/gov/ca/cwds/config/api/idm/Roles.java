@@ -6,10 +6,7 @@ import gov.ca.cwds.UniversalUserToken;
 import java.util.Collections;
 import java.util.Set;
 
-public class Roles {
-
-  private Roles() {
-  }
+public final class Roles {
 
   public static final String CWS_WORKER = "CWS-worker";
   public static final String CALS_EXTERNAL_WORKER = "CALS-external-worker";
@@ -17,6 +14,9 @@ public class Roles {
   public static final String COUNTY_ADMIN = "County-admin";
   public static final String STATE_ADMIN = "State-admin";
   public static final String OFFICE_ADMIN = "Office-admin";
+
+  private Roles() {
+  }
 
   public static boolean isAdmin(UniversalUserToken user) {
     Set<String> adminRoles = getAdminRoles();
