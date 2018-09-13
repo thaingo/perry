@@ -33,26 +33,26 @@ public class AuthorizeServiceTest {
   }
 
   @Test
-  public void findUserStateAdminSameCounty() {
+  public void testByUserAndAdmin_StateAdminSameCounty() {
     User user = user("Yolo");
     assertTrue(service.byUserAndAdmin(user, admin(toSet(STATE_ADMIN), "Yolo")));
   }
 
   @Test
-  public void findUserStateAdminDifferentCounty() {
+  public void testByUserAndAdmin_StateAdminDifferentCounty() {
     User user = user("Madera");
     assertTrue(service.byUserAndAdmin(user, admin(toSet(STATE_ADMIN), "Yolo")));
   }
 
   @Test
-  public void findUserCountyAdminSameCounty() {
+  public void testByUserAndAdmin_CountyAdminSameCounty() {
     User user = user("Yolo");
     UniversalUserToken admin = admin(toSet(COUNTY_ADMIN),"Yolo");
     assertTrue(service.byUserAndAdmin(user, admin));
   }
 
   @Test
-  public void findUserCountyAdminDifferentCounty() {
+  public void testByUserAndAdmin_CountyAdminDifferentCounty() {
     User user = user("Yolo");
     UniversalUserToken admin = admin(toSet(COUNTY_ADMIN),"Madera");
     assertFalse(service.byUserAndAdmin(user, admin));

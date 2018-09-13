@@ -72,6 +72,7 @@ import gov.ca.cwds.idm.persistence.UserLogRepository;
 import gov.ca.cwds.idm.persistence.model.OperationType;
 import gov.ca.cwds.idm.persistence.model.UserLog;
 import gov.ca.cwds.idm.service.IdmServiceImpl;
+import gov.ca.cwds.idm.service.MappingService;
 import gov.ca.cwds.idm.service.SearchRestSender;
 import gov.ca.cwds.idm.service.SearchService;
 import gov.ca.cwds.idm.service.cognito.CognitoProperties;
@@ -182,6 +183,8 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   @Autowired private SearchRestSender searchRestSender;
 
   @Autowired private SearchProperties searchProperties;
+
+//  @Autowired private MappingService mappingService;
 
   private SearchService spySearchService;
 
@@ -774,34 +777,6 @@ public class IdmResourceTest extends BaseLiquibaseTest {
 
   @Test
   @WithMockCustomUser
-  public void testUpdateUserNoChanges() throws Exception {
-
-    UserUpdate userUpdate = new UserUpdate();
-    userUpdate.setEnabled(Boolean.TRUE);
-    userUpdate.setPermissions(toSet("RFA-rollout", "Snapshot-rollout"));
-
-    AdminUpdateUserAttributesRequest updateAttributesRequest =
-        setUpdateUserAttributesRequestAndResult(
-            USER_NO_RACFID_ID, attr(PERMISSIONS.getName(), "RFA-rollout:Snapshot-rollout"));
-
-    AdminEnableUserRequest enableUserRequest = setEnableUserRequestAndResult(USER_NO_RACFID_ID);
-
-    mockMvc
-        .perform(
-            MockMvcRequestBuilders.patch("/idm/users/" + USER_NO_RACFID_ID)
-                .contentType(JSON_CONTENT_TYPE)
-                .content(asJsonString(userUpdate)))
-        .andExpect(MockMvcResultMatchers.status().isNoContent())
-        .andReturn();
-
-    verify(cognito, times(0)).adminUpdateUserAttributes(updateAttributesRequest);
-    verify(cognito, times(0)).adminEnableUser(enableUserRequest);
-    verify(spySearchService, times(0)).createUser(any(User.class));
-    verifyDoraCalls(0);
-  }
-
-  @Test
-  @WithMockCustomUser
   public void testUpdateUserNoPermissions() throws Exception {
 
     UserUpdate userUpdate = new UserUpdate();
@@ -834,9 +809,40 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   }
 
   @Test
-  @WithMockCustomUser(roles = {STATE_ADMIN})
+  @WithMockCustomUser
+  public void testUpdateUserNoChanges() throws Exception {
+    assertUpdateNoChangesSuccess();
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {STATE_ADMIN}, county = "Madera")
   public void testUpdateUserStateAdmin() throws Exception {
-    assertUpdateUserUnauthorized();
+    assertUpdateNoChangesSuccess();
+  }
+
+  private void assertUpdateNoChangesSuccess() throws Exception {
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setEnabled(Boolean.TRUE);
+    userUpdate.setPermissions(toSet("RFA-rollout", "Snapshot-rollout"));
+
+    AdminUpdateUserAttributesRequest updateAttributesRequest =
+        setUpdateUserAttributesRequestAndResult(
+            USER_NO_RACFID_ID, attr(PERMISSIONS.getName(), "RFA-rollout:Snapshot-rollout"));
+
+    AdminEnableUserRequest enableUserRequest = setEnableUserRequestAndResult(USER_NO_RACFID_ID);
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.patch("/idm/users/" + USER_NO_RACFID_ID)
+                .contentType(JSON_CONTENT_TYPE)
+                .content(asJsonString(userUpdate)))
+        .andExpect(MockMvcResultMatchers.status().isNoContent())
+        .andReturn();
+
+    verify(cognito, times(0)).adminUpdateUserAttributes(updateAttributesRequest);
+    verify(cognito, times(0)).adminEnableUser(enableUserRequest);
+    verify(spySearchService, times(0)).createUser(any(User.class));
+    verifyDoraCalls(0);
   }
 
   @Test

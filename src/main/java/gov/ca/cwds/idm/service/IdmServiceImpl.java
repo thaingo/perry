@@ -11,7 +11,6 @@ import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUti
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getRACFId;
 import static gov.ca.cwds.service.messages.MessageCode.DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_UPDATE_USER_ENABLED_STATUS;
-import static gov.ca.cwds.service.messages.MessageCode.IDM_MAPPING_SCRIPT_ERROR;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY;
 import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID_IN_CWSCMS;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_CREATE_IDM_USER_IN_ES;
@@ -52,13 +51,11 @@ import gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil;
 import gov.ca.cwds.idm.service.execution.OptionalExecution;
 import gov.ca.cwds.idm.service.execution.PutInSearchExecution;
 import gov.ca.cwds.rest.api.domain.PartialSuccessException;
-import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType;
 import gov.ca.cwds.service.CwsUserInfoService;
 import gov.ca.cwds.service.dto.CwsUserInfo;
 import gov.ca.cwds.service.messages.MessageCode;
 import gov.ca.cwds.service.messages.MessagesService;
-import gov.ca.cwds.service.scripts.IdmMappingScript;
 import gov.ca.cwds.util.Utils;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -71,7 +68,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import javax.script.ScriptException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,6 +98,8 @@ public class IdmServiceImpl implements IdmService {
 
   @Autowired private AuthorizeService authorizeService;
 
+  @Autowired private MappingService mappingService;
+
   @Override
   public User findUser(String id) {
     UserType cognitoUser = cognitoServiceFacade.getCognitoUserById(id);
@@ -109,7 +107,7 @@ public class IdmServiceImpl implements IdmService {
   }
 
   @Override
-  @PreAuthorize("@cognitoServiceFacade.getCountyName(#userId) == principal.getParameter('county_name')")
+  @PreAuthorize("@authorize.updateUser(#userId)")
   public void updateUser(String userId, UserUpdate updateUserDto) {
 
     UserType existedCognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
@@ -368,7 +366,7 @@ public class IdmServiceImpl implements IdmService {
     }
     User user = composeUser(cwsUser, email);
 
-    if(!authorizeService.byUser(user)){
+    if(!authorizeService.verifyUser(user)){
       return composeNegativeResultWithMessage(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY);
     }
 
@@ -401,15 +399,11 @@ public class IdmServiceImpl implements IdmService {
               LOGGER.warn(messages.get(DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS, user1.getRacfId()));
               return user1;
             }));
-    IdmMappingScript mapping = configuration.getIdentityManager().getIdmMapping();
     return cognitoUsers
         .stream()
-        .map( e -> { try {
-          return mapping.map(e, idToCmsUser.get(userNameToRacfId.get(e.getUsername())));
-        } catch (ScriptException ex) {
-          LOGGER.error(messages.get(IDM_MAPPING_SCRIPT_ERROR));
-          throw new PerryException(ex.getMessage(), ex);
-        }}).collect(Collectors.toList());
+        .map(e -> {
+          return mappingService.toUser(e, idToCmsUser.get(userNameToRacfId.get(e.getUsername())));
+        }).collect(Collectors.toList());
   }
 
   private PutInSearchExecution<String> updateUserInSearch(String id) {
@@ -487,12 +481,7 @@ public class IdmServiceImpl implements IdmService {
   private User enrichCognitoUser(UserType cognitoUser) {
     String racfId = getRACFId(cognitoUser);
     CwsUserInfo cwsUser = getCwsUserByRacfId(racfId);
-    try {
-      return configuration.getIdentityManager().getIdmMapping().map(cognitoUser, cwsUser);
-    } catch (ScriptException e) {
-      LOGGER.error(messages.get(IDM_MAPPING_SCRIPT_ERROR));
-      throw new PerryException(e.getMessage(), e);
-    }
+    return mappingService.toUser(cognitoUser, cwsUser);
   }
 
   private CwsUserInfo getCwsUserByRacfId(String racfId) {
@@ -530,5 +519,9 @@ public class IdmServiceImpl implements IdmService {
 
   public void setAuthorizeService(AuthorizeService authorizeService) {
     this.authorizeService = authorizeService;
+  }
+
+  public void setMappingService(MappingService mappingService) {
+    this.mappingService = mappingService;
   }
 }

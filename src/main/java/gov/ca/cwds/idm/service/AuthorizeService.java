@@ -3,11 +3,14 @@ package gov.ca.cwds.idm.service;
 import static gov.ca.cwds.config.api.idm.Roles.isMostlyCountyAdmin;
 import static gov.ca.cwds.config.api.idm.Roles.isMostlyOfficeAdmin;
 import static gov.ca.cwds.config.api.idm.Roles.isMostlyStateAdmin;
-import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCountyName;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 
+import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
+import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +18,27 @@ import org.springframework.stereotype.Service;
 @Profile("idm")
 public class AuthorizeService {
 
-  public boolean byUser(User user) {
+  @Autowired
+  private CognitoServiceFacade cognitoServiceFacade;
+
+  @Autowired
+  private MappingService mappingService;
+
+  public boolean findUser(User user) {
+    return byUser(user);
+  }
+
+  public boolean verifyUser(User user) {
+    return byUser(user);
+  }
+
+  public boolean updateUser(String userId) {
+    UserType cognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
+    User user = mappingService.toUserWithoutCwsData(cognitoUser);
+    return byUser(user);
+  }
+
+  private boolean byUser(User user) {
     UniversalUserToken admin = getCurrentUser();
     return byUserAndAdmin(user, admin);
   }
@@ -26,15 +49,29 @@ public class AuthorizeService {
 
     } else if (isMostlyCountyAdmin(admin)) {
       String userCountyName = user.getCountyName();
-      String adminCountyName = getCountyName(admin);
+      String adminCountyName = CurrentAuthenticatedUserUtil.getCountyName(admin);
       return areNotNullAndEquals(userCountyName, adminCountyName);
 
     } else if (isMostlyOfficeAdmin(admin)) {
-      String userOfficeName = user.getOffice();
+      String userOfficeId = getOfficeId(user);
       String adminOfficeId = getAdminOfficeId(admin);
-      return areNotNullAndEquals(userOfficeName, adminOfficeId);
+      return areNotNullAndEquals(userOfficeId, adminOfficeId);
     }
     return false;
+  }
+
+  private String getCountyName(String userId) {
+    return cognitoServiceFacade.getCountyName(userId);
+  }
+
+  private static String getOfficeId(User user) {
+    //todo: implement
+    return "";
+  }
+
+  private static String getOfficeId(String userId) {
+    //todo: implement
+    return "";
   }
 
   private static String getAdminOfficeId(UniversalUserToken admin) {
@@ -43,5 +80,14 @@ public class AuthorizeService {
 
   static boolean areNotNullAndEquals(String str1, String str2) {
     return str1 != null && str2 != null && str1.equals(str2);
+  }
+
+  public void setCognitoServiceFacade(
+      CognitoServiceFacade cognitoServiceFacade) {
+    this.cognitoServiceFacade = cognitoServiceFacade;
+  }
+
+  public void setMappingService(MappingService mappingService) {
+    this.mappingService = mappingService;
   }
 }

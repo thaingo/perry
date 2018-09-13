@@ -13,7 +13,7 @@ import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface IdmService {
-  @PostAuthorize("@authorize.byUser(returnObject)")
+  @PostAuthorize("@authorize.findUser(returnObject)")
   User findUser(String id);
 
   void updateUser(String id, UserUpdate updateUserDto);
