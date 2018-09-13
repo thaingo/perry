@@ -168,10 +168,10 @@ dependencies {
     compile project(':jwt-security')
 
     compile group: 'javax.interceptor', name: 'javax.interceptor-api', version: '1.2'
-    testCompile(group: 'org.springframework.boot', name: 'spring-boot-starter-test', version:'1.5.2.RELEASE') {
+    testCompile(group: 'org.springframework.boot', name: 'spring-boot-starter-test', version:springVersion) {
             exclude(module: 'commons-logging')
     }
-    testCompile 'org.springframework:spring-test:4.3.0.RELEASE'
+
     testCompile 'org.springframework.security:spring-security-test:4.2.6.RELEASE'
     testCompile 'org.mockito:mockito-core:2.8.9'
     testCompile group: 'org.hamcrest', name: 'hamcrest-junit', version: '2.0.0.0'
