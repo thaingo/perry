@@ -21,10 +21,8 @@ public class MappingService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MappingService.class);
 
-  @Autowired
   private PerryProperties configuration;
 
-  @Autowired
   private MessagesService messages;
 
   public User toUser(UserType cognitoUser, CwsUserInfo cwsUser) {
@@ -40,10 +38,12 @@ public class MappingService {
     return toUser(cognitoUser, null);
   }
 
+  @Autowired
   public void setConfiguration(PerryProperties configuration) {
     this.configuration = configuration;
   }
 
+  @Autowired
   public void setMessages(MessagesService messages) {
     this.messages = messages;
   }

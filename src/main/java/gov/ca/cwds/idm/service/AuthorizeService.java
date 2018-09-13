@@ -17,11 +17,8 @@ import org.springframework.stereotype.Service;
 @Service(value = "authorize")
 @Profile("idm")
 public class AuthorizeService {
-
-  @Autowired
   private CognitoServiceFacade cognitoServiceFacade;
 
-  @Autowired
   private MappingService mappingService;
 
   public boolean findUser(User user) {
@@ -60,16 +57,7 @@ public class AuthorizeService {
     return false;
   }
 
-  private String getCountyName(String userId) {
-    return cognitoServiceFacade.getCountyName(userId);
-  }
-
   private static String getOfficeId(User user) {
-    //todo: implement
-    return "";
-  }
-
-  private static String getOfficeId(String userId) {
     //todo: implement
     return "";
   }
@@ -82,11 +70,13 @@ public class AuthorizeService {
     return str1 != null && str2 != null && str1.equals(str2);
   }
 
+  @Autowired
   public void setCognitoServiceFacade(
       CognitoServiceFacade cognitoServiceFacade) {
     this.cognitoServiceFacade = cognitoServiceFacade;
   }
 
+  @Autowired
   public void setMappingService(MappingService mappingService) {
     this.mappingService = mappingService;
   }
