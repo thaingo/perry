@@ -11,6 +11,7 @@
   "county_name": "Marin",
   "county_code": "21",
   "county_cws_code": 1088,
+  "email": null,
   "privileges": [
     "Countywide Read",
     "permission1",
