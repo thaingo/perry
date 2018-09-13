@@ -23,6 +23,10 @@ public class Roles {
     return !Collections.disjoint(user.getRoles(), adminRoles);
   }
 
+  public static boolean isOfficeAdmin(UniversalUserToken user) {
+    return user.getRoles().contains(OFFICE_ADMIN);
+  }
+
   public static boolean isNonRacfIdCalsUser(UniversalUserToken user) {
     return user.getRoles().contains(CALS_EXTERNAL_WORKER);
   }

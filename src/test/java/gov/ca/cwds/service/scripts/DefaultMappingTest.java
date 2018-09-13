@@ -1,6 +1,7 @@
 package gov.ca.cwds.service.scripts;
 
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 
 import java.util.Arrays;
 import java.util.List;
@@ -20,6 +21,7 @@ public class DefaultMappingTest extends ScriptTestBase {
     result.setUserId("userId");
     result.getRoles().addAll(roles);
     result.setParameter("userName", "testUserName");
+    result.setParameter("custom:office", "15");
     result.getPermissions().addAll(Arrays.asList("permission1", "permission2"));
     return result;
   }
@@ -37,14 +39,26 @@ public class DefaultMappingTest extends ScriptTestBase {
   }
 
   @Test
-  public void testGroovyMappingCWSAdmin() throws Exception {
+  public void testGroovyMappingCountyAdmin() throws Exception {
     roles = Arrays.asList("role1", "role2", COUNTY_ADMIN);
     test("/scripts/default/default.groovy", "/scripts/default/default-admin.json", "scripts/default/authz.json");
   }
 
   @Test
-  public void testGroovyMappingNonRacfIdCWSAdmin() throws Exception {
+  public void testGroovyMappingNonRacfIdCountyAdmin() throws Exception {
     roles = Arrays.asList("role1", "role2", COUNTY_ADMIN);
     test("/scripts/default/default.groovy", "/scripts/default/default-nonracf-admin.json", null);
+  }
+
+  @Test
+  public void testGroovyMappingOfficeAdmin() throws Exception {
+    roles = Arrays.asList("role1", "role2", OFFICE_ADMIN);
+    test("/scripts/default/default.groovy", "/scripts/default/default-office-admin.json", "scripts/default/authz.json");
+  }
+
+  @Test
+  public void testGroovyMappingNonRacfIdOfficeAdmin() throws Exception {
+    roles = Arrays.asList("role1", "role2", OFFICE_ADMIN);
+    test("/scripts/default/default.groovy", "/scripts/default/default-nonracf-office-admin.json", null);
   }
 }

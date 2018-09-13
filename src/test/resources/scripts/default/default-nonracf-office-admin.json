@@ -1,0 +1,22 @@
+{
+  "user": "userId",
+  "roles": [
+    "role1",
+    "role2",
+    "Office-admin"
+  ],
+  "first_name": null,
+  "last_name": null,
+  "email": null,
+  "county_code": null,
+  "county_cws_code": null,
+  "county_name": null,
+  "privileges": [
+    "permission1",
+    "permission2"
+  ],
+  "userName": "testUserName",
+  "adminOfficeIds": [
+    "15"
+  ]
+}
