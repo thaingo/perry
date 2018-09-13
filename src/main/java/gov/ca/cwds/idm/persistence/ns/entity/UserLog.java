@@ -1,5 +1,6 @@
-package gov.ca.cwds.idm.persistence.model;
+package gov.ca.cwds.idm.persistence.ns.entity;
 
+import gov.ca.cwds.idm.persistence.ns.OperationType;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import javax.persistence.Column;

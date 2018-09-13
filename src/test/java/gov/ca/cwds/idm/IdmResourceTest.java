@@ -1,13 +1,15 @@
 package gov.ca.cwds.idm;
 
+import static gov.ca.cwds.Constants.CMS_STORE_URL;
+import static gov.ca.cwds.Constants.IDM_BASIC_AUTH_PASS;
+import static gov.ca.cwds.Constants.IDM_BASIC_AUTH_USER;
+import static gov.ca.cwds.Constants.TOKEN_STORE_URL;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
-import static gov.ca.cwds.idm.BaseLiquibaseTest.CMS_STORE_URL;
-import static gov.ca.cwds.idm.BaseLiquibaseTest.TOKEN_STORE_URL;
 import static gov.ca.cwds.idm.IdmResource.DATETIME_FORMAT_PATTERN;
 import static gov.ca.cwds.idm.IdmResourceTest.DORA_WS_MAX_ATTEMPTS;
-import static gov.ca.cwds.idm.persistence.model.OperationType.CREATE;
-import static gov.ca.cwds.idm.persistence.model.OperationType.UPDATE;
+import static gov.ca.cwds.idm.persistence.ns.OperationType.CREATE;
+import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.COUNTY;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PERMISSIONS;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.RACFID_CUSTOM;
@@ -22,6 +24,7 @@ import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUti
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertStrict;
+import static gov.ca.cwds.util.LiquibaseUtils.runLiquibaseScript;
 import static gov.ca.cwds.util.Utils.toSet;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
@@ -37,7 +40,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 
 import ch.qos.logback.classic.Logger;
@@ -64,13 +66,15 @@ import com.amazonaws.services.cognitoidp.model.UserType;
 import com.amazonaws.services.cognitoidp.model.UsernameExistsException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Iterables;
+import gov.ca.cwds.BaseIntegrationTest;
+import gov.ca.cwds.Constants;
 import gov.ca.cwds.config.LoggingRequestIdFilter;
 import gov.ca.cwds.config.LoggingUserIdFilter;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
-import gov.ca.cwds.idm.persistence.UserLogRepository;
-import gov.ca.cwds.idm.persistence.model.OperationType;
-import gov.ca.cwds.idm.persistence.model.UserLog;
+import gov.ca.cwds.idm.persistence.ns.repository.UserLogRepository;
+import gov.ca.cwds.idm.persistence.ns.OperationType;
+import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
 import gov.ca.cwds.idm.service.IdmServiceImpl;
 import gov.ca.cwds.idm.service.SearchRestSender;
 import gov.ca.cwds.idm.service.SearchService;
@@ -93,15 +97,13 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import liquibase.util.StringUtils;
 import org.apache.commons.codec.binary.Base64;
-
-
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InOrder;
-
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -114,20 +116,19 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.context.WebApplicationContext;
 
+@RunWith(SpringRunner.class)
 @ActiveProfiles({"dev", "idm"})
 @SpringBootTest(
     properties = {
-        "perry.identityManager.idmBasicAuthUser=" + IdmResourceTest.IDM_BASIC_AUTH_USER,
-        "perry.identityManager.idmBasicAuthPass=" + IdmResourceTest.IDM_BASIC_AUTH_PASS,
+        "perry.identityManager.idmBasicAuthUser=" + Constants.IDM_BASIC_AUTH_USER,
+        "perry.identityManager.idmBasicAuthPass=" + Constants.IDM_BASIC_AUTH_PASS,
         "perry.identityManager.idmMapping=config/idm.groovy",
         "spring.jpa.hibernate.ddl-auto=none",
         "perry.tokenStore.datasource.url=" + TOKEN_STORE_URL,
@@ -136,7 +137,7 @@ import org.springframework.web.context.WebApplicationContext;
         "perry.doraWsRetryDelayMs=500"
     }
 )
-public class IdmResourceTest extends BaseLiquibaseTest {
+public class IdmResourceTest extends BaseIntegrationTest {
 
   private static final String USER_NO_RACFID_ID = "2be3221f-8c2f-4386-8a95-a68f0282efb0";
   private static final String USER_WITH_RACFID_ID = "24051d54-9321-4dd2-a92f-6425d6c455be";
@@ -155,9 +156,6 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   private static final String USERPOOL = "userpool";
   private static final String SOME_PAGINATION_TOKEN = "somePaginationToken";
 
-  static public final String IDM_BASIC_AUTH_USER = "user";
-  static public final String IDM_BASIC_AUTH_PASS = "pass";
-
   private static final String BASIC_AUTH_HEADER = prepareBasicAuthHeader();
 
   private static final MediaType JSON_CONTENT_TYPE =
@@ -167,8 +165,6 @@ public class IdmResourceTest extends BaseLiquibaseTest {
           Charset.forName("utf8"));
 
   public static final int DORA_WS_MAX_ATTEMPTS = 3;
-
-  @Autowired private WebApplicationContext webApplicationContext;
 
   @Autowired private CognitoServiceFacade cognitoServiceFacade;
 
@@ -187,8 +183,6 @@ public class IdmResourceTest extends BaseLiquibaseTest {
   private SearchService spySearchService;
 
   private RestTemplate mockRestTemplate = mock(RestTemplate.class);
-
-  private MockMvc mockMvc;
 
   private AWSCognitoIdentityProvider cognito;
 
@@ -213,8 +207,6 @@ public class IdmResourceTest extends BaseLiquibaseTest {
     spySearchService = spy(searchService);
 
     idmService.setSearchService(spySearchService);
-    this.mockMvc =
-        MockMvcBuilders.webAppContextSetup(webApplicationContext).apply(springSecurity()).build();
     cognito = cognitoServiceFacade.getIdentityProvider();
 
     Logger rootLogger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);

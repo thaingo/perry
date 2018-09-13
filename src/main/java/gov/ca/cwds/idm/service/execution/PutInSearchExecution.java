@@ -1,6 +1,6 @@
 package gov.ca.cwds.idm.service.execution;
 
-import gov.ca.cwds.idm.persistence.model.UserLog;
+import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
 import org.springframework.http.ResponseEntity;
 
 public abstract class PutInSearchExecution<T> extends

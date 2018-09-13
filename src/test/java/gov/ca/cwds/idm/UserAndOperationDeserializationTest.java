@@ -6,16 +6,11 @@ import static org.junit.Assert.assertTrue;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import gov.ca.cwds.idm.dto.UserAndOperation;
-import gov.ca.cwds.idm.persistence.model.OperationType;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.util.Date;
+import gov.ca.cwds.idm.persistence.ns.OperationType;
 import java.util.List;
 
-import org.joda.time.DateTime;
 import org.junit.Test;
 
 public class UserAndOperationDeserializationTest {

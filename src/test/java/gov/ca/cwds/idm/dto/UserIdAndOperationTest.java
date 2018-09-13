@@ -3,7 +3,7 @@ package gov.ca.cwds.idm.dto;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import gov.ca.cwds.idm.persistence.model.OperationType;
+import gov.ca.cwds.idm.persistence.ns.OperationType;
 import org.junit.Test;
 
 public class UserIdAndOperationTest {

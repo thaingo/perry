@@ -14,7 +14,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 
 import gov.ca.cwds.PerryProperties;
 import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.persistence.model.OperationType;
+import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.service.cognito.SearchProperties;
 import gov.ca.cwds.idm.service.retry.SearchRetryConfiguration;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
