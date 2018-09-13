@@ -44,6 +44,10 @@ if (authorization) {
         token.userName = user.parameters["userName"]
     }
 
+    if (Roles.isOfficeAdmin(user)) {
+        token.adminOffices = [user.parameters["custom:office"]]
+    }
+
     return token
 }
 //NON-RACFID USER
@@ -67,6 +71,10 @@ else {
 
     if (Roles.isAdmin(user)) {
         token.userName = user.parameters["userName"]
+    }
+
+    if (Roles.isOfficeAdmin(user)) {
+        token.adminOffices = [user.parameters["custom:office"]]
     }
 
     return token

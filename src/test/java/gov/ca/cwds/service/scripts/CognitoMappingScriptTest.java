@@ -32,6 +32,8 @@ public class CognitoMappingScriptTest {
         "second-permission",
         "third-permission")), userToken.getPermissions());
     Assert.assertTrue(userToken.getParameter("custom:permission") instanceof Set);
+    Assert.assertEquals("perry", userToken.getParameter("userName"));
+    Assert.assertEquals("17", userToken.getParameter("custom:office"));
   }
 
   @Test
@@ -44,5 +46,7 @@ public class CognitoMappingScriptTest {
     UniversalUserToken userToken = idpMappingScript.map(userInfo);
     Assert.assertEquals("RACFID", userToken.getUserId());
     Assert.assertTrue(userToken.getRoles().isEmpty());
+    Assert.assertEquals("perry", userToken.getParameter("userName"));
+    Assert.assertEquals(null, userToken.getParameter("custom:office"));
   }
 }
