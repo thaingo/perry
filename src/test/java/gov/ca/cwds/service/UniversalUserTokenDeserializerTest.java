@@ -4,6 +4,7 @@ import static gov.ca.cwds.config.api.idm.Roles.CALS_EXTERNAL_WORKER;
 
 import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.service.scripts.ScriptTestBase;
+import java.util.Set;
 import org.junit.Test;
 
 public class UniversalUserTokenDeserializerTest {
@@ -25,6 +26,18 @@ public class UniversalUserTokenDeserializerTest {
     assert universalUserToken.getUserId().equals("uuid");
     assert universalUserToken.getRoles().size() == 0;
     assert universalUserToken.getParameter("county_name") == null;
+  }
+
+  @Test
+  public void testOfficeIdsForOfficeAdmin() throws Exception {
+    String json = ScriptTestBase.readResource("/scripts/default/default-office-admin.json");
+    UniversalUserToken universalUserToken = UniversalUserToken.fromJson(json);
+    assert universalUserToken.getUserId().equals("userabc");
+    assert universalUserToken.getRoles().size() == 4;
+    Object adminOfficeObj = universalUserToken.getParameter("admin_office_ids");
+    assert adminOfficeObj != null;
+    assert ((Set<String>) adminOfficeObj).size() == 1;
+    assert ((Set<String>) adminOfficeObj).iterator().next().equals("15");
   }
 
 }

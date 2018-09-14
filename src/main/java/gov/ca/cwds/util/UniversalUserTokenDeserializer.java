@@ -22,6 +22,9 @@ public class UniversalUserTokenDeserializer extends JsonDeserializer<UniversalUs
     JsonNode node = jp.getCodec().readTree(jp);
     String userId = Optional.ofNullable(node.get("user")).map(JsonNode::asText).orElse(null);
     String countyName =
+        Optional.ofNullable(node.get("county_name")).map(JsonNode::asText).orElse(null);
+    Set<String> roles = parseArrayToStringSet(node.get("roles"));
+    Set<String> adminOffices = parseArrayToStringSet(node.get("admin_office_ids"));
         Optional.ofNullable(node.get(COUNTY_NAME_PARAM)).map(JsonNode::asText).orElse(null);
     Set<String> roles = new HashSet<>();
 
@@ -35,7 +38,17 @@ public class UniversalUserTokenDeserializer extends JsonDeserializer<UniversalUs
     UniversalUserToken result = new UniversalUserToken();
     result.setUserId(userId);
     result.getRoles().addAll(roles);
-    result.setParameter(COUNTY_NAME_PARAM, countyName);
+    result.setParameter("county_name", countyName);
+    result.setParameter("admin_office_ids", adminOffices);
+    return result;
+  }
+
+  private Set<String> parseArrayToStringSet(JsonNode node) {
+    Set<String> result = new HashSet<>();
+    if (node != null && node.isArray()) {
+      StreamSupport.stream(node.spliterator(), false)
+          .forEach(r -> result.add(r.asText()));
+    }
     return result;
   }
 }
