@@ -1,27 +1,26 @@
 package gov.ca.cwds.web;
 
-import static gov.ca.cwds.idm.BaseLiquibaseTest.CMS_STORE_URL;
-import static gov.ca.cwds.idm.BaseLiquibaseTest.TOKEN_STORE_URL;
+import static gov.ca.cwds.Constants.CMS_STORE_URL;
+import static gov.ca.cwds.Constants.TOKEN_STORE_URL;
+import static gov.ca.cwds.util.LiquibaseUtils.runLiquibaseScript;
 import static gov.ca.cwds.web.MockOAuth2Service.EXPECTED_SSO_TOKEN;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
+import gov.ca.cwds.BaseIntegrationTest;
 import gov.ca.cwds.PerryApplication;
 import gov.ca.cwds.UniversalUserToken;
-import gov.ca.cwds.idm.BaseLiquibaseTest;
 import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.service.sso.OAuth2Service;
 import io.dropwizard.testing.FixtureHelpers;
-import java.util.Arrays;
 import java.util.Collections;
 import javax.servlet.http.HttpSession;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,15 +34,14 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 @ActiveProfiles({"cognito, prod, nostate, mfa, test"})
+@RunWith(SpringRunner.class)
 @SpringBootTest(properties = {
     "spring.jpa.hibernate.ddl-auto=none",
     "perry.identityManager.idmMapping=config/idm.groovy",
@@ -62,7 +60,7 @@ import org.springframework.web.context.WebApplicationContext;
     "idpValidateInterval=2"
 }, classes = {PerryLoginTestConfiguration.class, PerryApplication.class})
 
-public class PerryMFALoginTest extends BaseLiquibaseTest {
+public class PerryMFALoginTest extends BaseIntegrationTest {
 
   public static final String SECURED_RESOURCE_URL = "/authn/login?callback=/demo-sp.html";
   public static final String MFA_LOGIN_URL = "http://localhost/mfa-login.html";
@@ -83,21 +81,9 @@ public class PerryMFALoginTest extends BaseLiquibaseTest {
   @Autowired
   private OAuth2Service oAuth2Service;
 
-  @Autowired
-  private WebApplicationContext webApplicationContext;
-
-  private MockMvc mockMvc;
-
   @BeforeClass
   public static void beforeClass() throws Exception {
     runLiquibaseScript(CMS_STORE_URL, "liquibase/cms-data.xml");
-  }
-
-  @Before
-  public void before() {
-    this.mockMvc =
-        MockMvcBuilders.webAppContextSetup(webApplicationContext)
-            .apply(springSecurity()).build();
   }
 
   @Test

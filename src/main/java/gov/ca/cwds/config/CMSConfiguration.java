@@ -2,6 +2,7 @@ package gov.ca.cwds.config;
 
 import gov.ca.cwds.data.auth.UserIdDao;
 import gov.ca.cwds.data.persistence.auth.AssignmentUnit;
+import gov.ca.cwds.idm.persistence.cwscms.repository.OfficeRepository;
 import javax.sql.DataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -21,7 +22,7 @@ import org.springframework.transaction.PlatformTransactionManager;
  * Created by TPT2 on 10/27/2017.
  */
 @Configuration
-@EnableJpaRepositories(basePackageClasses = UserIdDao.class)
+@EnableJpaRepositories(basePackageClasses = {UserIdDao.class, OfficeRepository.class})
 @EntityScan(basePackageClasses = AssignmentUnit.class)
 public class CMSConfiguration {
 
@@ -60,7 +61,8 @@ public class CMSConfiguration {
     LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
     em.setDataSource(dataSource);
     em.setJpaPropertyMap(jpaProperties().getHibernateProperties(dataSource));
-    em.setPackagesToScan("gov.ca.cwds.data.persistence.auth", "gov.ca.cwds.data.auth");
+    em.setPackagesToScan("gov.ca.cwds.data.persistence.auth", "gov.ca.cwds.data.auth",
+        "gov.ca.cwds.idm.persistence.cwscms.entity");
     em.setPersistenceUnitName("default");
     em.setJpaVendorAdapter(jpaVendorAdapter());
     return em;

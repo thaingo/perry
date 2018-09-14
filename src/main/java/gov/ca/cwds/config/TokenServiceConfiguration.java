@@ -4,8 +4,8 @@ import static gov.ca.cwds.config.TokenServiceConfiguration.TOKEN_TRANSACTION_MAN
 
 import gov.ca.cwds.data.reissue.TokenRepository;
 import gov.ca.cwds.data.reissue.model.PerryTokenEntity;
-import gov.ca.cwds.idm.persistence.PermissionRepository;
-import gov.ca.cwds.idm.persistence.UserLogRepository;
+import gov.ca.cwds.idm.persistence.ns.repository.PermissionRepository;
+import gov.ca.cwds.idm.persistence.ns.repository.UserLogRepository;
 import javax.sql.DataSource;
 import liquibase.integration.spring.SpringLiquibase;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -26,8 +26,10 @@ import org.springframework.transaction.PlatformTransactionManager;
  * Created by TPT2 on 10/24/2017.
  */
 @Configuration
-@EnableJpaRepositories(entityManagerFactoryRef = "tokenEntityManagerFactory", transactionManagerRef = TOKEN_TRANSACTION_MANAGER,
-    basePackageClasses = {TokenRepository.class, PermissionRepository.class, UserLogRepository.class})
+@EnableJpaRepositories(entityManagerFactoryRef = "tokenEntityManagerFactory",
+    transactionManagerRef = TOKEN_TRANSACTION_MANAGER,
+    basePackageClasses = {TokenRepository.class, PermissionRepository.class,
+        UserLogRepository.class})
 @EntityScan(basePackageClasses = PerryTokenEntity.class)
 public class TokenServiceConfiguration {
 
@@ -84,7 +86,8 @@ public class TokenServiceConfiguration {
     LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
     em.setDataSource(tokenDataSource());
     em.setJpaPropertyMap(tokenJpaProperties().getHibernateProperties(tokenDataSource()));
-    em.setPackagesToScan("gov.ca.cwds.data.reissue.model", "gov.ca.cwds.idm.persistence.model");
+    em.setPackagesToScan("gov.ca.cwds.data.reissue.model",
+        "gov.ca.cwds.idm.persistence.ns");
     em.setPersistenceUnitName("token");
     em.setJpaVendorAdapter(tokenJpaVendorAdapter());
     return em;
@@ -93,9 +96,9 @@ public class TokenServiceConfiguration {
   @Bean
   public PlatformTransactionManager tokenTransactionManager() {
     JpaTransactionManager transactionManager
-            = new JpaTransactionManager();
+        = new JpaTransactionManager();
     transactionManager.setEntityManagerFactory(
-            tokenEntityManagerFactory().getObject());
+        tokenEntityManagerFactory().getObject());
     return transactionManager;
   }
 }

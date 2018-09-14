@@ -1,4 +1,4 @@
-package gov.ca.cwds.idm.persistence.model;
+package gov.ca.cwds.idm.persistence.ns.entity;
 
 import java.util.Objects;
 import javax.persistence.Cacheable;

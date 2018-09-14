@@ -1,5 +1,7 @@
 package gov.ca.cwds.idm.service;
 
+import static gov.ca.cwds.Constants.IDM_BASIC_AUTH_PASS;
+import static gov.ca.cwds.Constants.IDM_BASIC_AUTH_USER;
 import static gov.ca.cwds.idm.service.IdmServiceImpl.transformSearchValues;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.FIRST_NAME;
@@ -20,13 +22,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.amazonaws.services.cognitoidp.model.UserType;
-import gov.ca.cwds.idm.IdmResourceTest;
 import gov.ca.cwds.idm.WithMockCustomUser;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserEnableStatusRequest;
 import gov.ca.cwds.idm.dto.UserUpdate;
-import gov.ca.cwds.idm.persistence.UserLogTransactionalRepository;
-import gov.ca.cwds.idm.persistence.model.UserLog;
+import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
 import gov.ca.cwds.rest.api.domain.PartialSuccessException;
@@ -43,8 +43,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 @RunWith(SpringRunner.class)
 @ActiveProfiles({"dev", "idm"})
 @SpringBootTest(properties = {
-    "perry.identityManager.idmBasicAuthUser=" + IdmResourceTest.IDM_BASIC_AUTH_USER,
-    "perry.identityManager.idmBasicAuthPass=" + IdmResourceTest.IDM_BASIC_AUTH_PASS,
+    "perry.identityManager.idmBasicAuthUser=" + IDM_BASIC_AUTH_USER,
+    "perry.identityManager.idmBasicAuthPass=" + IDM_BASIC_AUTH_PASS,
     "perry.identityManager.idmMapping=config/idm.groovy",
     "spring.jpa.hibernate.ddl-auto=none"
 })
@@ -59,8 +59,8 @@ public class IdmServiceImplTest {
 
   private CognitoServiceFacade cognitoServiceFacadeMock = mock(CognitoServiceFacade.class);
   private CwsUserInfoService cwsUserInfoServiceMock = mock(CwsUserInfoService.class);
-  private UserLogTransactionalRepository userLogTransactionalRepositoryMock =
-      mock(UserLogTransactionalRepository.class);
+  private UserLogTransactionalService userLogTransactionalServiceMock =
+      mock(UserLogTransactionalService.class);
   private SearchService searchServiceMock = mock(SearchService.class);
 
   @Before
@@ -69,7 +69,7 @@ public class IdmServiceImplTest {
     service.setCwsUserInfoService(cwsUserInfoServiceMock);
     service.setSearchService(searchServiceMock);
 
-    userLogService.setUserLogTransactionalRepository(userLogTransactionalRepositoryMock);
+    userLogService.setUserLogTransactionalService(userLogTransactionalServiceMock);
   }
 
   @Test
@@ -114,7 +114,7 @@ public class IdmServiceImplTest {
     when(searchServiceMock.createUser(any(User.class))).thenThrow(doraError);
 
     Exception dbError = new RuntimeException("DB error");
-    when(userLogTransactionalRepositoryMock.save(any(UserLog.class))).thenThrow(dbError);
+    when(userLogTransactionalServiceMock.save(any(UserLog.class))).thenThrow(dbError);
 
     try {
       service.createUser(user);
@@ -147,7 +147,7 @@ public class IdmServiceImplTest {
     when(searchServiceMock.updateUser(any(User.class))).thenThrow(doraError);
 
     Exception dbError = new RuntimeException("DB error");
-    when(userLogTransactionalRepositoryMock.save(any(UserLog.class))).thenThrow(dbError);
+    when(userLogTransactionalServiceMock.save(any(UserLog.class))).thenThrow(dbError);
 
     try {
       service.updateUser(USER_ID, userUpdate);
@@ -248,7 +248,7 @@ public class IdmServiceImplTest {
     when(searchServiceMock.updateUser(any(User.class))).thenThrow(doraError);
 
     Exception dbError = new RuntimeException("DB error");
-    when(userLogTransactionalRepositoryMock.save(any(UserLog.class))).thenThrow(dbError);
+    when(userLogTransactionalServiceMock.save(any(UserLog.class))).thenThrow(dbError);
 
     try {
       service.updateUser(USER_ID, userUpdate);

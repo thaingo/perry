@@ -3,7 +3,7 @@ package gov.ca.cwds.idm.service;
 import static gov.ca.cwds.util.Utils.toLowerCase;
 
 import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.persistence.model.OperationType;
+import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.service.cognito.SearchProperties;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import java.util.HashMap;

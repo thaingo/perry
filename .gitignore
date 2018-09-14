@@ -6,3 +6,4 @@ build/
 .classpath
 .project
 bin/
+config/perry-cognito-local.yml
