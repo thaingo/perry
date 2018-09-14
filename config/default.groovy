@@ -68,8 +68,9 @@ if (Roles.isAdmin(user)) {
     token.userName = user.parameters["userName"]
 }
 
+//for this moment we set admin's office as his own office only
 if (Roles.isOfficeAdmin(user)) {
-    token.adminOfficeIds = [user.parameters["custom:office"]]
+    token.admin_office_ids = [user.parameters["custom:office"]]
 }
 
 return token
