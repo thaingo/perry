@@ -8,7 +8,9 @@ import static gov.ca.cwds.idm.service.ExecutionStatus.WAS_NOT_EXECUTED;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByEmail;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByRacfId;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getRACFId;
+import static gov.ca.cwds.service.messages.MessageCode.ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_UPDATE_USER_ENABLED_STATUS;
 import static gov.ca.cwds.service.messages.MessageCode.IDM_MAPPING_SCRIPT_ERROR;
@@ -362,17 +364,35 @@ public class IdmServiceImpl implements IdmService {
     }
     Collection<UserType> cognitoUsers =
         cognitoServiceFacade.searchPage(composeToGetFirstPageByEmail(email)).getUsers();
-
     if (!CollectionUtils.isEmpty(cognitoUsers)) {
       return composeNegativeResultWithMessage(USER_WITH_EMAIL_EXISTS_IN_IDM, email);
     }
+
+    if (isActiveRacfIdPresent(racfId)) {
+      return composeNegativeResultWithMessage(ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM, racfId);
+    }
+
     User user = composeUser(cwsUser, email);
     if (!Objects.equals(CurrentAuthenticatedUserUtil.getCurrentUserCountyName(), user.getCountyName())) {
       return composeNegativeResultWithMessage(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY);
     }
+
     return UserVerificationResult.Builder.anUserVerificationResult()
         .withUser(user)
         .withVerificationPassed().build();
+  }
+
+  private boolean isActiveRacfIdPresent(String racfId) {
+    Collection<UserType> cognitoUsersByRacfId =
+        cognitoServiceFacade.searchAllPages(composeToGetFirstPageByRacfId(toUpperCase(racfId)));
+    return !CollectionUtils.isEmpty(cognitoUsersByRacfId)
+                          && isActiveUserPresent(cognitoUsersByRacfId);
+  }
+
+  private static boolean isActiveUserPresent(Collection<UserType> cognitoUsers) {
+    return cognitoUsers
+        .stream()
+        .anyMatch(userType -> Objects.equals(userType.getEnabled(), Boolean.TRUE));
   }
 
   static Set<String> transformSearchValues(Set<String> values, StandardUserAttribute searchAttr) {

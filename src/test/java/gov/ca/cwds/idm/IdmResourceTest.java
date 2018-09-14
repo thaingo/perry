@@ -145,6 +145,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
       "d740ec1d-80ae-4d84-a8c4-9bed7a942f5b";
   private static final String USER_WITH_NO_PHONE_EXTENSION = "d740ec1d-66ae-4d84-a8c4-8bed7a942f5b";
   private static final String NEW_USER_SUCCESS_ID = "17067e4e-270f-4623-b86c-b4d4fa527a34";
+  private static final String USER_WITH_INACTIVE_STATUS_COGNITO = "17067e4e-270f-4623-b86c-b4d4fa527a22";
   private static final String ABSENT_USER_ID = "absentUserId";
   private static final String ERROR_USER_ID = "errorUserId";
   private static final String NEW_USER_ES_FAIL_ID = "08e14c57-6e5e-48dd-8172-e8949c2a7f76";
@@ -857,7 +858,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
     MvcResult result =
         mockMvc
             .perform(
-                MockMvcRequestBuilders.get("/idm/users/verify?email=test@test.com&racfid=SMITHBO"))
+                MockMvcRequestBuilders.get("/idm/users/verify?email=test@test.com&racfid=SMITHB3"))
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
             .andReturn();
@@ -867,11 +868,25 @@ public class IdmResourceTest extends BaseIntegrationTest {
 
   @Test
   @WithMockCustomUser
+  public void testVerifyErrorMessageForUserWithActiveStatusInCognito() throws Exception {
+    MvcResult result =
+        mockMvc
+            .perform(
+                MockMvcRequestBuilders.get("/idm/users/verify?email=test@test.com&racfid=SMITHBO"))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
+            .andReturn();
+
+    assertNonStrict(result, "fixtures/idm/verify-user/verify-active-racfid-already-in-cognito-message.json");
+  }
+
+  @Test
+  @WithMockCustomUser
   public void testVerifyUsersRacfidInLowerCase() throws Exception {
     MvcResult result =
         mockMvc
             .perform(
-                MockMvcRequestBuilders.get("/idm/users/verify?email=test@test.com&racfid=smithbo"))
+                MockMvcRequestBuilders.get("/idm/users/verify?email=test@test.com&racfid=smithb3"))
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
             .andReturn();
@@ -885,7 +900,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
     MvcResult result =
         mockMvc
             .perform(
-                MockMvcRequestBuilders.get("/idm/users/verify?email=Test@Test.com&racfid=SMITHBO"))
+                MockMvcRequestBuilders.get("/idm/users/verify?email=Test@Test.com&racfid=SMITHB3"))
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
             .andReturn();
@@ -954,7 +969,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
     MvcResult result =
         mockMvc
             .perform(
-                MockMvcRequestBuilders.get("/idm/users/verify?email=test@test.com&racfid=SMITHBO"))
+                MockMvcRequestBuilders.get("/idm/users/verify?email=test@test.com&racfid=SMITHB3"))
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
             .andReturn();
@@ -1245,6 +1260,21 @@ public class IdmResourceTest extends BaseIntegrationTest {
               null,
               "SMITHB2");
 
+      TestUser userWithEnableStatusInactiveInCognito =
+          testUser(
+              USER_WITH_INACTIVE_STATUS_COGNITO,
+              Boolean.FALSE,
+              "CONFIRMED",
+              date(2018, 5, 3),
+              date(2018, 5, 31),
+              "smith3rd@gmail.com",
+              "Smith",
+              "Third",
+              WithMockCustomUser.COUNTY,
+              "test",
+              null,
+              "SMITHB3");
+
       TestUser newSuccessUser =
           testUser(
               NEW_USER_SUCCESS_ID,
@@ -1290,6 +1320,8 @@ public class IdmResourceTest extends BaseIntegrationTest {
       setSearchByRacfidRequestAndResult(userWithRacfidAndDbData);
 
       setSearchByRacfidRequestAndResult(userWithNoPhoneExtension);
+
+      setSearchByRacfidRequestAndResult(userWithEnableStatusInactiveInCognito);
     }
 
     private void setListUsersRequestAndResult(String paginationToken, TestUser... testUsers) {
