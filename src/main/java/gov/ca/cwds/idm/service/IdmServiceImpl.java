@@ -384,9 +384,7 @@ public class IdmServiceImpl implements IdmService {
 
   private boolean isActiveRacfIdPresent(String racfId) {
     Collection<UserType> cognitoUsersByRacfId =
-        cognitoServiceFacade
-            .searchPage(composeToGetFirstPageByRacfId(toUpperCase(racfId)))
-            .getUsers();
+        cognitoServiceFacade.searchAllPages(composeToGetFirstPageByRacfId(toUpperCase(racfId)));
     return !CollectionUtils.isEmpty(cognitoUsersByRacfId)
                           && isActiveUserPresent(cognitoUsersByRacfId);
   }
