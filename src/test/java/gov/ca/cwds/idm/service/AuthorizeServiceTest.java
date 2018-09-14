@@ -1,8 +1,11 @@
 package gov.ca.cwds.idm.service;
 
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
+import static gov.ca.cwds.idm.service.AuthorizeService.areNotNullAndContains;
 import static gov.ca.cwds.idm.service.AuthorizeService.areNotNullAndEquals;
+import static gov.ca.cwds.util.UniversalUserTokenDeserializer.ADMIN_OFFICE_IDS_PARAM;
 import static gov.ca.cwds.util.UniversalUserTokenDeserializer.COUNTY_NAME_PARAM;
 import static gov.ca.cwds.util.Utils.toSet;
 import static org.junit.Assert.assertFalse;
@@ -33,41 +36,85 @@ public class AuthorizeServiceTest {
   }
 
   @Test
+  public void testAreNotNullAndContains() {
+    assertTrue(areNotNullAndContains(toSet("abc", "prst"), "abc"));
+    assertFalse(areNotNullAndContains(toSet("abc", "klmn"), "prst"));
+    assertFalse(areNotNullAndContains(toSet("abc", null), null));
+    assertFalse(areNotNullAndContains(null, "abc"));
+    assertFalse(areNotNullAndContains(null, null));
+  }
+
+  @Test
   public void testByUserAndAdmin_StateAdminSameCounty() {
-    User user = user("Yolo");
-    assertTrue(service.byUserAndAdmin(user, admin(toSet(STATE_ADMIN), "Yolo")));
+    User user = user("Yolo", "Yolo_1");
+    assertTrue(service
+        .byUserAndAdmin(user, admin(toSet(STATE_ADMIN, OFFICE_ADMIN), "Yolo", toSet("Yolo_2"))));
   }
 
   @Test
   public void testByUserAndAdmin_StateAdminDifferentCounty() {
-    User user = user("Madera");
-    assertTrue(service.byUserAndAdmin(user, admin(toSet(STATE_ADMIN), "Yolo")));
+    User user = user("Madera", "Madera_1");
+    assertTrue(service.byUserAndAdmin(user, admin(toSet(STATE_ADMIN), "Yolo", null)));
+  }
+
+  @Test
+  public void testByUserAndAdmin_StateAdminNoCounty() {
+    User user = user("Madera", "Madera_1");
+    assertTrue(service.byUserAndAdmin(user, admin(toSet(STATE_ADMIN), null, null)));
   }
 
   @Test
   public void testByUserAndAdmin_CountyAdminSameCounty() {
-    User user = user("Yolo");
-    UniversalUserToken admin = admin(toSet(COUNTY_ADMIN),"Yolo");
+    User user = user("Yolo", "Yolo_1");
+    UniversalUserToken admin = admin(toSet(COUNTY_ADMIN, OFFICE_ADMIN), "Yolo", toSet("Yolo_2"));
+    assertTrue(service.byUserAndAdmin(user, admin));
+  }
+
+  @Test
+  public void testByUserAndAdmin_CountyAdminSameCountyNoOffice() {
+    User user = user("Yolo", "Yolo_1");
+    UniversalUserToken admin = admin(toSet(COUNTY_ADMIN), "Yolo", null);
     assertTrue(service.byUserAndAdmin(user, admin));
   }
 
   @Test
   public void testByUserAndAdmin_CountyAdminDifferentCounty() {
-    User user = user("Yolo");
-    UniversalUserToken admin = admin(toSet(COUNTY_ADMIN),"Madera");
+    User user = user("Yolo", "Yolo_1");
+    UniversalUserToken admin = admin(toSet(COUNTY_ADMIN), "Madera", null);
     assertFalse(service.byUserAndAdmin(user, admin));
   }
 
-  private User user(String countyName) {
+  @Test
+  public void testByUserAndAdmin_OfficeAdminSameOffice() {
+    User user = user("Yolo", "Yolo_1");
+    assertTrue(service.byUserAndAdmin(user, admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_1"))));
+  }
+
+  @Test
+  public void testByUserAndAdmin_OfficeAdminDifferentOffice() {
+    User user = user("Yolo", "Yolo_1");
+    assertFalse(service.byUserAndAdmin(user, admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_2"))));
+  }
+
+  @Test
+  public void testByUserAndAdmin_OfficeAdmin_UserNoOffice() {
+    User user = user("Yolo", null);
+    assertFalse(service.byUserAndAdmin(user, admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_2"))));
+  }
+
+  private User user(String countyName, String officeId) {
     User user = new User();
     user.setCountyName(countyName);
+    user.setOfficeId(officeId);
     return user;
   }
 
-  private UniversalUserToken admin(Set<String> roles, String countyName) {
+  private UniversalUserToken admin(Set<String> roles, String countyName,
+      Set<String> adminOfficeIds) {
     UniversalUserToken admin = new UniversalUserToken();
     admin.setRoles(roles);
     admin.setParameter(COUNTY_NAME_PARAM, countyName);
+    admin.setParameter(ADMIN_OFFICE_IDS_PARAM, adminOfficeIds);
     return admin;
   }
 }
