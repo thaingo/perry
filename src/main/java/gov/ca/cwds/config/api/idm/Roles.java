@@ -12,9 +12,6 @@ import org.springframework.stereotype.Service;
 @Profile("idm")
 public class Roles {
 
-  private Roles() {
-  }
-
   public static final String CWS_WORKER = "CWS-worker";
   public static final String CALS_EXTERNAL_WORKER = "CALS-external-worker";
   public static final String IDM_JOB = "IDM-job";
