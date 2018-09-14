@@ -22,7 +22,7 @@
     "S"
   ],
   "userName": "testUserName",
-  "adminOfficeIds": [
+  "admin_office_ids": [
     "15"
   ]
 }
