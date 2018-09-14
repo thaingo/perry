@@ -1,29 +1,31 @@
 package gov.ca.cwds.idm;
 
+import static gov.ca.cwds.Constants.ABSENT_USER_ID;
 import static gov.ca.cwds.Constants.CMS_STORE_URL;
+import static gov.ca.cwds.Constants.ERROR_USER_ID;
+import static gov.ca.cwds.Constants.ES_ERROR_CREATE_USER_EMAIL;
 import static gov.ca.cwds.Constants.IDM_BASIC_AUTH_PASS;
 import static gov.ca.cwds.Constants.IDM_BASIC_AUTH_USER;
+import static gov.ca.cwds.Constants.NEW_USER_ES_FAIL_ID;
+import static gov.ca.cwds.Constants.NEW_USER_SUCCESS_ID;
+import static gov.ca.cwds.Constants.SOME_PAGINATION_TOKEN;
 import static gov.ca.cwds.Constants.TOKEN_STORE_URL;
+import static gov.ca.cwds.Constants.USERPOOL;
+import static gov.ca.cwds.Constants.USER_NO_RACFID_ID;
+import static gov.ca.cwds.Constants.USER_WITH_NO_PHONE_EXTENSION;
+import static gov.ca.cwds.Constants.USER_WITH_RACFID_AND_DB_DATA_ID;
+import static gov.ca.cwds.Constants.USER_WITH_RACFID_ID;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.idm.IdmResource.DATETIME_FORMAT_PATTERN;
 import static gov.ca.cwds.idm.IdmResourceTest.DORA_WS_MAX_ATTEMPTS;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.CREATE;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
-import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.COUNTY;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PERMISSIONS;
-import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.RACFID_CUSTOM;
-import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.RACFID_CUSTOM_2;
-import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.ROLES;
-import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
-import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.FIRST_NAME;
-import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.LAST_NAME;
-import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
-import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.DEFAULT_PAGESIZE;
-import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByAttribute;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertStrict;
+import static gov.ca.cwds.idm.util.TestUtils.attr;
 import static gov.ca.cwds.util.LiquibaseUtils.runLiquibaseScript;
 import static gov.ca.cwds.util.Utils.toSet;
 import static org.hamcrest.CoreMatchers.containsString;
@@ -52,16 +54,10 @@ import com.amazonaws.services.cognitoidp.model.AdminDisableUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminDisableUserResult;
 import com.amazonaws.services.cognitoidp.model.AdminEnableUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminEnableUserResult;
-import com.amazonaws.services.cognitoidp.model.AdminGetUserRequest;
-import com.amazonaws.services.cognitoidp.model.AdminGetUserResult;
 import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesRequest;
 import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesResult;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
-import com.amazonaws.services.cognitoidp.model.InternalErrorException;
 import com.amazonaws.services.cognitoidp.model.InvalidParameterException;
-import com.amazonaws.services.cognitoidp.model.ListUsersRequest;
-import com.amazonaws.services.cognitoidp.model.ListUsersResult;
-import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import com.amazonaws.services.cognitoidp.model.UsernameExistsException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -72,30 +68,21 @@ import gov.ca.cwds.config.LoggingRequestIdFilter;
 import gov.ca.cwds.config.LoggingUserIdFilter;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
-import gov.ca.cwds.idm.persistence.ns.repository.UserLogRepository;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
+import gov.ca.cwds.idm.persistence.ns.repository.UserLogRepository;
 import gov.ca.cwds.idm.service.IdmServiceImpl;
 import gov.ca.cwds.idm.service.SearchRestSender;
 import gov.ca.cwds.idm.service.SearchService;
-import gov.ca.cwds.idm.service.cognito.CognitoProperties;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.SearchProperties;
+import gov.ca.cwds.idm.service.cognito.TestCognitoServiceFacade;
 import gov.ca.cwds.service.messages.MessagesService;
 import java.nio.charset.Charset;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import javax.annotation.PostConstruct;
-import liquibase.util.StringUtils;
 import org.apache.commons.codec.binary.Base64;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -139,22 +126,7 @@ import org.springframework.web.client.RestTemplate;
 )
 public class IdmResourceTest extends BaseIntegrationTest {
 
-  private static final String USER_NO_RACFID_ID = "2be3221f-8c2f-4386-8a95-a68f0282efb0";
-  private static final String USER_WITH_RACFID_ID = "24051d54-9321-4dd2-a92f-6425d6c455be";
-  private static final String USER_WITH_RACFID_AND_DB_DATA_ID =
-      "d740ec1d-80ae-4d84-a8c4-9bed7a942f5b";
-  private static final String USER_WITH_NO_PHONE_EXTENSION = "d740ec1d-66ae-4d84-a8c4-8bed7a942f5b";
-  private static final String NEW_USER_SUCCESS_ID = "17067e4e-270f-4623-b86c-b4d4fa527a34";
-  private static final String USER_WITH_INACTIVE_STATUS_COGNITO = "17067e4e-270f-4623-b86c-b4d4fa527a22";
-  private static final String ABSENT_USER_ID = "absentUserId";
-  private static final String ERROR_USER_ID = "errorUserId";
-  private static final String NEW_USER_ES_FAIL_ID = "08e14c57-6e5e-48dd-8172-e8949c2a7f76";
-  private static final String ES_ERROR_CREATE_USER_EMAIL = "es.error@create.com";
-
   private static final String SSO_TOKEN = "b02aa833-f8b2-4d28-8796-3abe059313d1";
-
-  private static final String USERPOOL = "userpool";
-  private static final String SOME_PAGINATION_TOKEN = "somePaginationToken";
 
   private static final String BASIC_AUTH_HEADER = prepareBasicAuthHeader();
 
@@ -199,7 +171,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @Before
   public void before() {
 
-    cognitoServiceFacade.setMessagesService(messagesService);
+    ((TestCognitoServiceFacade)cognitoServiceFacade).setMessagesService(messagesService);
 
     searchRestSender.setRestTemplate(mockRestTemplate);
     searchService.setRestSender(searchRestSender);
@@ -207,7 +179,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
     spySearchService = spy(searchService);
 
     idmService.setSearchService(spySearchService);
-    cognito = cognitoServiceFacade.getIdentityProvider();
+    cognito = ((TestCognitoServiceFacade)cognitoServiceFacade).getIdentityProvider();
 
     Logger rootLogger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
     rootLogger.addAppender(mockAppender);
@@ -1179,418 +1151,6 @@ public class IdmResourceTest extends BaseIntegrationTest {
     public Object postProcessAfterInitialization(Object bean, String beanName)
         throws BeansException {
       return bean;
-    }
-  }
-
-  public static class TestCognitoServiceFacade extends CognitoServiceFacade {
-
-    private AWSCognitoIdentityProvider cognito;
-
-    @PostConstruct
-    @Override
-    public void init() {
-      cognito = mock(AWSCognitoIdentityProvider.class);
-
-      CognitoProperties properties = new CognitoProperties();
-      properties.setIamAccessKeyId("iamAccessKeyId");
-      properties.setIamSecretKey("iamSecretKey");
-      properties.setUserpool(USERPOOL);
-      properties.setRegion("us-east-2");
-
-      setProperties(properties);
-      setIdentityProvider(cognito);
-
-      TestUser userWithoutRacfid =
-          testUser(
-              USER_NO_RACFID_ID,
-              Boolean.TRUE,
-              "FORCE_CHANGE_PASSWORD",
-              date(2018, 5, 4),
-              date(2018, 5, 30),
-              "donzano@gmail.com",
-              "Don",
-              "Manzano",
-              WithMockCustomUser.COUNTY,
-              "RFA-rollout:Snapshot-rollout:",
-              "CWS-worker:County-admin",
-              null);
-
-      TestUser userWithRacfid =
-          testUser(
-              USER_WITH_RACFID_ID,
-              Boolean.TRUE,
-              "CONFIRMED",
-              date(2018, 5, 4),
-              date(2018, 5, 29),
-              "julio@gmail.com",
-              "Julio",
-              "Iglecias",
-              WithMockCustomUser.COUNTY,
-              "Hotline-rollout",
-              "CWS-worker:County-admin",
-              "YOLOD");
-
-      TestUser userWithRacfidAndDbData =
-          testUser(
-              USER_WITH_RACFID_AND_DB_DATA_ID,
-              Boolean.TRUE,
-              "CONFIRMED",
-              date(2018, 5, 3),
-              date(2018, 5, 31),
-              "garcia@gmail.com",
-              "Garcia",
-              "Gonzales",
-              WithMockCustomUser.COUNTY,
-              "test",
-              null,
-              "SMITHBO");
-
-      TestUser userWithNoPhoneExtension =
-          testUser(
-              USER_WITH_NO_PHONE_EXTENSION,
-              Boolean.TRUE,
-              "CONFIRMED",
-              date(2018, 5, 3),
-              date(2018, 5, 31),
-              "gabriel@gmail.com",
-              "Gabriel",
-              "Huanito",
-              WithMockCustomUser.COUNTY,
-              "test",
-              null,
-              "SMITHB2");
-
-      TestUser userWithEnableStatusInactiveInCognito =
-          testUser(
-              USER_WITH_INACTIVE_STATUS_COGNITO,
-              Boolean.FALSE,
-              "CONFIRMED",
-              date(2018, 5, 3),
-              date(2018, 5, 31),
-              "smith3rd@gmail.com",
-              "Smith",
-              "Third",
-              WithMockCustomUser.COUNTY,
-              "test",
-              null,
-              "SMITHB3");
-
-      TestUser newSuccessUser =
-          testUser(
-              NEW_USER_SUCCESS_ID,
-              Boolean.TRUE,
-              "FORCE_CHANGE_PASSWORD",
-              date(2018, 5, 4),
-              date(2018, 5, 30),
-              "gonzales@gmail.com",
-              "Garcia",
-              "Gonzales",
-              WithMockCustomUser.COUNTY,
-              null,
-              null,
-              null);
-
-      TestUser doraFailUser =
-          testUser(
-              NEW_USER_ES_FAIL_ID,
-              Boolean.TRUE,
-              "FORCE_CHANGE_PASSWORD",
-              date(2018, 5, 4),
-              date(2018, 5, 30),
-              ES_ERROR_CREATE_USER_EMAIL,
-              "Garcia",
-              "Gonzales",
-              WithMockCustomUser.COUNTY,
-              null,
-              null,
-              null);
-
-      setUpGetAbsentUserRequestAndResult();
-
-      setUpGetErrorUserRequestAndResult();
-
-      setListUsersRequestAndResult("", userWithoutRacfid, userWithRacfid, userWithRacfidAndDbData);
-
-      setListUsersRequestAndResult(SOME_PAGINATION_TOKEN, userWithoutRacfid);
-
-      setSearchUsersByEmailRequestAndResult("julio@gmail.com", "test@test.com", userWithRacfid);
-
-      setSearchByRacfidRequestAndResult(userWithRacfid);
-
-      setSearchByRacfidRequestAndResult(userWithRacfidAndDbData);
-
-      setSearchByRacfidRequestAndResult(userWithNoPhoneExtension);
-
-      setSearchByRacfidRequestAndResult(userWithEnableStatusInactiveInCognito);
-    }
-
-    private void setListUsersRequestAndResult(String paginationToken, TestUser... testUsers) {
-      ListUsersRequest request =
-          new ListUsersRequest().withUserPoolId(USERPOOL).withLimit(DEFAULT_PAGESIZE);
-
-      if (StringUtils.isNotEmpty(paginationToken)) {
-        request.withPaginationToken(paginationToken);
-      }
-
-      List<UserType> userTypes =
-          Arrays.stream(testUsers)
-              .map(TestCognitoServiceFacade::userType)
-              .collect(Collectors.toList());
-
-      ListUsersResult result = new ListUsersResult().withUsers(userTypes);
-
-      when(cognito.listUsers(request)).thenReturn(result);
-    }
-
-    private TestUser testUser(
-        String id,
-        Boolean enabled,
-        String status,
-        Date userCreateDate,
-        Date lastModifiedDate,
-        String email,
-        String firstName,
-        String lastName,
-        String county,
-        String permissions,
-        String roles,
-        String racfId) {
-
-      TestUser testUser =
-          new TestUser(
-              id,
-              enabled,
-              status,
-              userCreateDate,
-              lastModifiedDate,
-              email,
-              firstName,
-              lastName,
-              county,
-              permissions,
-              roles,
-              racfId);
-
-      setUpGetUserRequestAndResult(testUser);
-
-      return testUser;
-    }
-
-    private static Collection<AttributeType> attrs(TestUser testUser) {
-      Collection<AttributeType> attrs = new ArrayList<>();
-
-      if (testUser.getEmail() != null) {
-        attrs.add(attr(EMAIL.getName(), testUser.getEmail()));
-      }
-      if (testUser.getFirstName() != null) {
-        attrs.add(attr(FIRST_NAME.getName(), testUser.getFirstName()));
-      }
-      if (testUser.getLastName() != null) {
-        attrs.add(attr(LAST_NAME.getName(), testUser.getLastName()));
-      }
-      if (testUser.getCounty() != null) {
-        attrs.add(attr(COUNTY.getName(), testUser.getCounty()));
-      }
-      if (testUser.getPermissions() != null) {
-        attrs.add(attr(PERMISSIONS.getName(), testUser.getPermissions()));
-      }
-      if (testUser.getRoles() != null) {
-        attrs.add(attr(ROLES.getName(), testUser.getRoles()));
-      }
-      if (testUser.getRacfId() != null) {
-        attrs.add(attr(RACFID_CUSTOM.getName(), testUser.getRacfId()));
-        attrs.add(attr(RACFID_STANDARD.getName(), testUser.getRacfId()));
-        attrs.add(attr(RACFID_CUSTOM_2.getName(), testUser.getRacfId()));
-      }
-      return attrs;
-    }
-
-    private static UserType userType(TestUser testUser) {
-      UserType userType =
-          new UserType()
-              .withUsername(testUser.getId())
-              .withEnabled(testUser.getEnabled())
-              .withUserCreateDate(testUser.getUserCreateDate())
-              .withUserLastModifiedDate(testUser.getLastModifiedDate())
-              .withUserStatus(testUser.getStatus());
-
-      userType.withAttributes(attrs(testUser));
-      return userType;
-    }
-
-    private void setSearchUsersByEmailRequestAndResult(
-        String email_correct, String email_wrong, TestUser... testUsers) {
-      ListUsersRequest request_correct =
-          new ListUsersRequest()
-              .withUserPoolId(USERPOOL)
-              .withLimit(DEFAULT_PAGESIZE)
-              .withFilter("email = \"" + email_correct + "\"");
-
-      ListUsersRequest request_wrong =
-          new ListUsersRequest()
-              .withUserPoolId(USERPOOL)
-              .withLimit(DEFAULT_PAGESIZE)
-              .withFilter("email = \"" + email_wrong + "\"");
-
-      List<UserType> userTypes =
-          Arrays.stream(testUsers)
-              .map(TestCognitoServiceFacade::userType)
-              .collect(Collectors.toList());
-
-      ListUsersResult result = new ListUsersResult().withUsers(userTypes);
-      ListUsersResult result_empty = new ListUsersResult();
-
-      when(cognito.listUsers(request_correct)).thenReturn(result);
-      when(cognito.listUsers(request_wrong)).thenReturn(result_empty);
-    }
-
-    private void setUpGetUserRequestAndResult(TestUser testUser) {
-
-      AdminGetUserRequest getUserRequest =
-          new AdminGetUserRequest().withUsername(testUser.getId()).withUserPoolId(USERPOOL);
-
-      AdminGetUserResult getUserResult = new AdminGetUserResult();
-      getUserResult.setUsername(testUser.getId());
-      getUserResult.setEnabled(testUser.getEnabled());
-      getUserResult.setUserStatus(testUser.getStatus());
-      getUserResult.setUserCreateDate(testUser.getUserCreateDate());
-      getUserResult.setUserLastModifiedDate(testUser.getLastModifiedDate());
-
-      getUserResult.withUserAttributes(attrs(testUser));
-
-      when(cognito.adminGetUser(getUserRequest)).thenReturn(getUserResult);
-    }
-
-    private void setUpGetAbsentUserRequestAndResult() {
-
-      AdminGetUserRequest getUserRequest =
-          new AdminGetUserRequest().withUsername(ABSENT_USER_ID).withUserPoolId(USERPOOL);
-
-      when(cognito.adminGetUser(getUserRequest))
-          .thenThrow(new UserNotFoundException("user not found"));
-    }
-
-    private void setUpGetErrorUserRequestAndResult() {
-
-      AdminGetUserRequest getUserRequest =
-          new AdminGetUserRequest().withUsername(ERROR_USER_ID).withUserPoolId(USERPOOL);
-
-      when(cognito.adminGetUser(getUserRequest))
-          .thenThrow(new InternalErrorException("internal error"));
-    }
-
-    ListUsersRequest setSearchByRacfidRequestAndResult(TestUser testUser){
-
-      ListUsersRequest request =
-          composeListUsersRequest(composeToGetFirstPageByAttribute(RACFID_STANDARD, testUser.getRacfId()));
-
-      ListUsersResult result = new ListUsersResult().withUsers(userType(testUser));
-
-      when(cognito.listUsers(request)).thenReturn(result);
-
-      return request;
-    }
-  }
-
-  private static AttributeType attr(String name, String value) {
-    AttributeType attr = new AttributeType();
-    attr.setName(name);
-    attr.setValue(value);
-    return attr;
-  }
-
-  private static Date date(int year, int month, int dayOfMonth) {
-    return java.sql.Date.valueOf((LocalDate.of(year, month, dayOfMonth)));
-  }
-
-  static class TestUser {
-
-    private String id;
-    private Boolean enabled;
-    private String status;
-    private Date userCreateDate;
-    private Date lastModifiedDate;
-    private String email;
-    private String firstName;
-    private String lastName;
-    private String county;
-    private String permissions;
-    private String roles;
-    private String racfId;
-
-    TestUser(
-        String id,
-        Boolean enabled,
-        String status,
-        Date userCreateDate,
-        Date lastModifiedDate,
-        String email,
-        String firstName,
-        String lastName,
-        String county,
-        String permissions,
-        String roles,
-        String racfId) {
-      this.id = id;
-      this.enabled = enabled;
-      this.status = status;
-      this.userCreateDate = userCreateDate;
-      this.lastModifiedDate = lastModifiedDate;
-      this.email = email;
-      this.firstName = firstName;
-      this.lastName = lastName;
-      this.county = county;
-      this.permissions = permissions;
-      this.roles = roles;
-      this.racfId = racfId;
-    }
-
-    public String getId() {
-      return id;
-    }
-
-    public Boolean getEnabled() {
-      return enabled;
-    }
-
-    public String getStatus() {
-      return status;
-    }
-
-    public Date getUserCreateDate() {
-      return userCreateDate;
-    }
-
-    public Date getLastModifiedDate() {
-      return lastModifiedDate;
-    }
-
-    public String getEmail() {
-      return email;
-    }
-
-    public String getFirstName() {
-      return firstName;
-    }
-
-    public String getLastName() {
-      return lastName;
-    }
-
-    public String getCounty() {
-      return county;
-    }
-
-    public String getPermissions() {
-      return permissions;
-    }
-
-    public String getRoles() {
-      return roles;
-    }
-
-    public String getRacfId() {
-      return racfId;
     }
   }
 

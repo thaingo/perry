@@ -53,7 +53,7 @@ import org.mockito.InOrder;
 
 public class CognitoServiceFacadeTest {
 
-  private CognitoServiceFacade facade;
+  private CognitoServiceFacadeImpl facade;
 
   private AWSCognitoIdentityProvider identityProvider = mock(AWSCognitoIdentityProvider.class);
 
@@ -67,7 +67,7 @@ public class CognitoServiceFacadeTest {
     properties.setUserpool("userpool");
     properties.setRegion("us-east-2");
 
-    facade = new CognitoServiceFacade();
+    facade = new CognitoServiceFacadeImpl();
     facade.setProperties(properties);
     facade.setIdentityProvider(identityProvider);
     facade.setMessagesService(messagesService);
