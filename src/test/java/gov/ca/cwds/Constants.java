@@ -32,10 +32,9 @@ public final class Constants {
       "d740ec1d-80ae-4d84-a8c4-9bed7a942f5b";
   public static final String USER_WITH_NO_PHONE_EXTENSION = "d740ec1d-66ae-4d84-a8c4-8bed7a942f5b";
   public static final String NEW_USER_SUCCESS_ID = "17067e4e-270f-4623-b86c-b4d4fa527a34";
+  public static final String NEW_USER_SUCCESS_ID_2 = "17067e4e-270f-4623-b86c-b4d4fa527a35";
   public static final String NEW_USER_ES_FAIL_ID = "08e14c57-6e5e-48dd-8172-e8949c2a7f76";
   public static final String USER_WITH_INACTIVE_STATUS_COGNITO = "17067e4e-270f-4623-b86c-b4d4fa527a22";
   public static final String ES_ERROR_CREATE_USER_EMAIL = "es.error@create.com";
   public static final String SOME_PAGINATION_TOKEN = "somePaginationToken";
-
-
 }

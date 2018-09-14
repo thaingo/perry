@@ -8,6 +8,7 @@ import static gov.ca.cwds.Constants.IDM_BASIC_AUTH_PASS;
 import static gov.ca.cwds.Constants.IDM_BASIC_AUTH_USER;
 import static gov.ca.cwds.Constants.NEW_USER_ES_FAIL_ID;
 import static gov.ca.cwds.Constants.NEW_USER_SUCCESS_ID;
+import static gov.ca.cwds.Constants.NEW_USER_SUCCESS_ID_2;
 import static gov.ca.cwds.Constants.SOME_PAGINATION_TOKEN;
 import static gov.ca.cwds.Constants.TOKEN_STORE_URL;
 import static gov.ca.cwds.Constants.USERPOOL;
