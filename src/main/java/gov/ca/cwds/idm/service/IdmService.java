@@ -16,13 +16,14 @@ public interface IdmService {
   @PostAuthorize("@authorize.findUser(returnObject)")
   User findUser(String id);
 
+  @PreAuthorize("@authorize.updateUser(#userId)")
   void updateUser(String id, UserUpdate updateUserDto);
 
   UserVerificationResult verifyUser(String racfId, String email);
 
   UsersPage getUserPage(String paginationToken);
 
-  @PreAuthorize("#user.countyName == principal.getParameter('county_name')")
+  @PreAuthorize("@authorize.createUser(#user)")
   String createUser(@P("user") User user);
 
   List<User> searchUsers(UsersSearchCriteria usersSearchCriteria);

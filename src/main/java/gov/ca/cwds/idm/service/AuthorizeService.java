@@ -29,6 +29,10 @@ public class AuthorizeService {
     return byUser(user);
   }
 
+  public boolean createUser(User user) {
+    return byUser(user);
+  }
+
   public boolean updateUser(String userId) {
     UserType cognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
     User user = mappingService.toUserWithoutCwsData(cognitoUser);

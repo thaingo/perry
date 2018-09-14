@@ -220,7 +220,7 @@ public class IdmResource {
               + "email, first_name, last_name, county_name, RACFID, permissions, office, phone_number.\n "
               + "Other properties values will be set by the system automatically.\n"
               + "Required properties are: email, first_name, last_name, county_name.")
-  @PreAuthorize("hasAnyAuthority(T(gov.ca.cwds.config.api.idm.Roles).COUNTY_ADMIN)")
+  @PreAuthorize("hasAnyAuthority(T(gov.ca.cwds.config.api.idm.Roles).STATE_ADMIN, T(gov.ca.cwds.config.api.idm.Roles).COUNTY_ADMIN)")
   public ResponseEntity createUser(
       @ApiParam(required = true, name = "User", value = "The User create data")
           @NotNull

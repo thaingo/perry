@@ -146,6 +146,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
       "d740ec1d-80ae-4d84-a8c4-9bed7a942f5b";
   private static final String USER_WITH_NO_PHONE_EXTENSION = "d740ec1d-66ae-4d84-a8c4-8bed7a942f5b";
   private static final String NEW_USER_SUCCESS_ID = "17067e4e-270f-4623-b86c-b4d4fa527a34";
+  private static final String NEW_USER_SUCCESS_ID_2 = "17067e4e-270f-4623-b86c-b4d4fa527a35";
   private static final String ABSENT_USER_ID = "absentUserId";
   private static final String ERROR_USER_ID = "errorUserId";
   private static final String NEW_USER_ES_FAIL_ID = "08e14c57-6e5e-48dd-8172-e8949c2a7f76";
@@ -179,8 +180,6 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @Autowired private SearchRestSender searchRestSender;
 
   @Autowired private SearchProperties searchProperties;
-
-//  @Autowired private MappingService mappingService;
 
   private SearchService spySearchService;
 
@@ -435,9 +434,19 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @Test
   @WithMockCustomUser
   public void testCreateUserSuccess() throws Exception {
-    User user = user();
+    assertCreateUserSuccess("gonzales@gmail.com", NEW_USER_SUCCESS_ID);
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {STATE_ADMIN}, county = "Madera")
+  public void testCreateUserStateAdmin() throws Exception {
+    assertCreateUserSuccess("gonzales2@gmail.com", NEW_USER_SUCCESS_ID_2);
+  }
+
+  private void assertCreateUserSuccess(String email, String newUserId) throws Exception {
+    User user = user(email);
     AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
-    setCreateUserResult(request, NEW_USER_SUCCESS_ID);
+    setCreateUserResult(request, newUserId);
 
     setDoraSuccess();
 
@@ -447,18 +456,12 @@ public class IdmResourceTest extends BaseIntegrationTest {
                 .contentType(JSON_CONTENT_TYPE)
                 .content(asJsonString(user)))
         .andExpect(MockMvcResultMatchers.status().isCreated())
-        .andExpect(header().string("location", "http://localhost/idm/users/" + NEW_USER_SUCCESS_ID))
+        .andExpect(header().string("location", "http://localhost/idm/users/" + newUserId))
         .andReturn();
 
     verify(cognito, times(1)).adminCreateUser(request);
     verify(spySearchService, times(1)).createUser(any(User.class));
     verifyDoraCalls(1);
-  }
-
-  @Test
-  @WithMockCustomUser(roles = {STATE_ADMIN})
-  public void testCreateUserStateAdmin() throws Exception {
-    assertCreateUserUnauthorized();
   }
 
   @Test
@@ -1126,8 +1129,12 @@ public class IdmResourceTest extends BaseIntegrationTest {
   }
 
   private static User user() {
+    return user("gonzales@gmail.com");
+  }
+
+  private static User user(String email) {
     User user = new User();
-    user.setEmail("gonzales@gmail.com");
+    user.setEmail(email);
     user.setFirstName("Garcia");
     user.setLastName("Gonzales");
     user.setCountyName(WithMockCustomUser.COUNTY);

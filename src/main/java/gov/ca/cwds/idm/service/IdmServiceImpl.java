@@ -107,7 +107,6 @@ public class IdmServiceImpl implements IdmService {
   }
 
   @Override
-  @PreAuthorize("@authorize.updateUser(#userId)")
   public void updateUser(String userId, UserUpdate updateUserDto) {
 
     UserType existedCognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
