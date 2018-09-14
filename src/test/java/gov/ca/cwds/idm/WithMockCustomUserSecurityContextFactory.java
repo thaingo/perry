@@ -1,5 +1,7 @@
 package gov.ca.cwds.idm;
 
+import static gov.ca.cwds.util.UniversalUserTokenDeserializer.COUNTY_NAME_PARAM;
+
 import gov.ca.cwds.UniversalUserToken;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -16,8 +18,9 @@ public class WithMockCustomUserSecurityContextFactory implements
     SecurityContext context = SecurityContextHolder.createEmptyContext();
 
     UniversalUserToken userToken = new UniversalUserToken();
-    userToken.setParameter("county_name", annotation.county());
+    userToken.setParameter(COUNTY_NAME_PARAM, annotation.county());
     userToken.setRoles(new HashSet<>(Arrays.asList(annotation.roles())));
+    userToken.setAdminOfficeIds(new HashSet<>(Arrays.asList(annotation.adminOfficeIds())));
     userToken.setUserId("userId");
 
     TestingAuthenticationToken testingAuthenticationToken = new TestingAuthenticationToken(

@@ -14,23 +14,28 @@ import java.util.stream.StreamSupport;
 
 public class UniversalUserTokenDeserializer extends JsonDeserializer<UniversalUserToken> {
 
+  public static final String COUNTY_NAME_PARAM = "county_name";
+
   @Override
   public UniversalUserToken deserialize(JsonParser jp, DeserializationContext ctxt)
       throws IOException {
     JsonNode node = jp.getCodec().readTree(jp);
     String userId = Optional.ofNullable(node.get("user")).map(JsonNode::asText).orElse(null);
     String countyName =
-        Optional.ofNullable(node.get("county_name")).map(JsonNode::asText).orElse(null);
+        Optional.ofNullable(node.get(COUNTY_NAME_PARAM)).map(JsonNode::asText).orElse(null);
     Set<String> roles = new HashSet<>();
+
     JsonNode rolesNode = node.get("roles");
     if (rolesNode != null && rolesNode.isArray()) {
       StreamSupport.stream(rolesNode.spliterator(), false)
           .forEach(r -> roles.add(r.asText()));
     }
+
+
     UniversalUserToken result = new UniversalUserToken();
     result.setUserId(userId);
     result.getRoles().addAll(roles);
-    result.setParameter("county_name", countyName);
+    result.setParameter(COUNTY_NAME_PARAM, countyName);
     return result;
   }
 }

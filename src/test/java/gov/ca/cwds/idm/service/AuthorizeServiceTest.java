@@ -3,7 +3,7 @@ package gov.ca.cwds.idm.service;
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.idm.service.AuthorizeService.areNotNullAndEquals;
-import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.COUNTY_NAME_PARAM;
+import static gov.ca.cwds.util.UniversalUserTokenDeserializer.COUNTY_NAME_PARAM;
 import static gov.ca.cwds.util.Utils.toSet;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

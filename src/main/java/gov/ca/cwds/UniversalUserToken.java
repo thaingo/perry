@@ -1,21 +1,17 @@
 package gov.ca.cwds;
 
-
 import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.rest.api.domain.auth.UserAuthorization;
 import gov.ca.cwds.util.UniversalUserTokenDeserializer;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.annotate.JsonDeserialize;
-import org.codehaus.jackson.map.module.SimpleModule;
-
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import org.codehaus.jackson.annotate.JsonProperty;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.annotate.JsonDeserialize;
 
 /**
  * Created by dmitry.rudenko on 7/28/2017.
@@ -26,6 +22,7 @@ public class UniversalUserToken implements Serializable {
   private String userId;
   private Set<String> roles = new LinkedHashSet<>();
   private Set<String> permissions = new LinkedHashSet<>();
+  private Set<String> adminOfficeIds = new LinkedHashSet<>();
   private String token;
   private Map<String, Object> parameters = new HashMap<>();
   private UserAuthorization authorization;
@@ -88,6 +85,14 @@ public class UniversalUserToken implements Serializable {
 
   public void setPermissions(Set<String> permissions) {
     this.permissions = permissions;
+  }
+
+  public Set<String> getAdminOfficeIds() {
+    return adminOfficeIds;
+  }
+
+  public void setAdminOfficeIds(Set<String> adminOfficeIds) {
+    this.adminOfficeIds = adminOfficeIds;
   }
 
   public static UniversalUserToken fromJson(String json)  {

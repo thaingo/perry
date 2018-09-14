@@ -1,5 +1,7 @@
 package gov.ca.cwds.util;
 
+import static gov.ca.cwds.util.UniversalUserTokenDeserializer.COUNTY_NAME_PARAM;
+
 import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.data.reissue.model.PerryTokenEntity;
 import java.util.Optional;
@@ -8,8 +10,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 public class CurrentAuthenticatedUserUtil {
   private CurrentAuthenticatedUserUtil() {}
-
-  public static final String COUNTY_NAME_PARAM = "county_name";
 
   public static UniversalUserToken getCurrentUser() {
     Authentication authentication = getAuthentication();
