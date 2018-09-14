@@ -31,10 +31,10 @@ public class UniversalUserTokenDeserializer extends JsonDeserializer<UniversalUs
     return result;
   }
 
-  private Set<String> parseArrayToStringSet(JsonNode rolesNode) {
+  private Set<String> parseArrayToStringSet(JsonNode node) {
     Set<String> result = new HashSet<>();
-    if (rolesNode != null && rolesNode.isArray()) {
-      StreamSupport.stream(rolesNode.spliterator(), false)
+    if (node != null && node.isArray()) {
+      StreamSupport.stream(node.spliterator(), false)
           .forEach(r -> result.add(r.asText()));
     }
     return result;
