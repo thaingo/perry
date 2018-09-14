@@ -43,7 +43,7 @@ public class User implements Serializable {
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_FORMAT)
   private LocalDate endDate;
 
-  private String office;
+  private String officeId;
 
   private String phoneNumber;
 
@@ -154,12 +154,12 @@ public class User implements Serializable {
     this.endDate = endDate;
   }
 
-  public String getOffice() {
-    return office;
+  public String getOfficeId() {
+    return officeId;
   }
 
-  public void setOffice(String office) {
-    this.office = office;
+  public void setOfficeId(String officeId) {
+    this.officeId = officeId;
   }
 
   public String getPhoneNumber() {

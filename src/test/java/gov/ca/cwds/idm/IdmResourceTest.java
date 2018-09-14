@@ -575,7 +575,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @WithMockCustomUser
   public void testCreateUserCognitoValidationError() throws Exception {
     User user = user();
-    user.setOffice("too long string");
+    user.setOfficeId("long_string_invalid_id");
     AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
     when(cognito.adminCreateUser(request))
         .thenThrow(new InvalidParameterException("invalid parameter"));

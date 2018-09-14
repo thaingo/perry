@@ -154,7 +154,7 @@ public class CognitoServiceFacadeTest {
     assertAttr(attrMap, FIRST_NAME, "Garcia");
     assertAttr(attrMap, LAST_NAME, "Gonzales");
     assertAttr(attrMap, COUNTY, "Madera");
-    assertAttr(attrMap, OFFICE, "River Office");
+    assertAttr(attrMap, OFFICE, "Office07IJ");
     assertAttr(attrMap, PHONE_NUMBER, "+19161111111");
     assertAttr(attrMap, RACFID_CUSTOM, "RUBBLBA");
     assertAttr(attrMap, RACFID_STANDARD, "RUBBLBA");
@@ -245,7 +245,7 @@ public class CognitoServiceFacadeTest {
     user.setLastName("Gonzales");
     user.setCountyName("Madera");
     user.setRacfid("RUBBLBA ");
-    user.setOffice("River Office");
+    user.setOfficeId("Office07IJ");
     user.setPhoneNumber("+19161111111");
     user.setPermissions(toSet("RFA-rollout", "Hotline-rollout"));
     user.setRoles(toSet(COUNTY_ADMIN, CWS_WORKER));

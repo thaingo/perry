@@ -486,7 +486,7 @@ public class IdmServiceImpl implements IdmService {
 
   private void enrichDataFromCwsOffice(CwsOffice office, final User user) {
     if (office != null) {
-      user.setOffice(office.getCwsOfficeName());
+      user.setOfficeId(office.getOfficeId());
       Optional.ofNullable(office.getPrimaryPhoneNumber())
           .ifPresent(e -> user.setPhoneNumber(e.toString()));
       Optional.ofNullable(office.getPrimaryPhoneExtensionNumber())

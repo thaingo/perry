@@ -106,7 +106,7 @@ public class CognitoUtils {
             .addAttribute(FIRST_NAME, user.getFirstName())
             .addAttribute(LAST_NAME, user.getLastName())
             .addAttribute(COUNTY, user.getCountyName())
-            .addAttribute(OFFICE, user.getOffice())
+            .addAttribute(OFFICE, user.getOfficeId())
             .addAttribute(PHONE_NUMBER, user.getPhoneNumber())
             .addAttribute(RACFID_CUSTOM, racfid)
             .addAttribute(RACFID_CUSTOM_2, racfid)
