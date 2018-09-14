@@ -16,7 +16,7 @@ result.roles = attribute("custom:role")?.split('\\s*:\\s*') as HashSet
 
 result.startDate = cwsUser?.staffPerson?.startDate
 result.endDate = cwsUser?.staffPerson?.endDate
-result.office = cwsUser?.cwsOffice?.officeId
+result.officeId = cwsUser?.cwsOffice?.officeId
 result.phoneExtensionNumber = cwsUser?.cwsOffice?.primaryPhoneExtensionNumber
 result.phoneNumber = cwsUser?.cwsOffice?.primaryPhoneNumber
 
