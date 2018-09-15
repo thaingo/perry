@@ -1,7 +1,7 @@
 package gov.ca.cwds.web;
 
-import static gov.ca.cwds.Constants.CMS_STORE_URL;
-import static gov.ca.cwds.Constants.TOKEN_STORE_URL;
+import static gov.ca.cwds.util.LiquibaseUtils.CMS_STORE_URL;
+import static gov.ca.cwds.util.LiquibaseUtils.TOKEN_STORE_URL;
 import static gov.ca.cwds.util.LiquibaseUtils.runLiquibaseScript;
 import static gov.ca.cwds.web.MockOAuth2Service.EXPECTED_SSO_TOKEN;
 import static org.hamcrest.CoreMatchers.containsString;

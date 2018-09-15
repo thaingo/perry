@@ -1,12 +1,13 @@
 package gov.ca.cwds.idm;
 
-import static gov.ca.cwds.Constants.CMS_STORE_URL;
-import static gov.ca.cwds.Constants.TOKEN_STORE_URL;
+import static gov.ca.cwds.BaseIntegrationTest.IDM_BASIC_AUTH_PASS;
+import static gov.ca.cwds.BaseIntegrationTest.IDM_BASIC_AUTH_USER;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertStrict;
+import static gov.ca.cwds.util.LiquibaseUtils.CMS_STORE_URL;
+import static gov.ca.cwds.util.LiquibaseUtils.TOKEN_STORE_URL;
 import static gov.ca.cwds.util.LiquibaseUtils.runLiquibaseScript;
 
 import gov.ca.cwds.BaseIntegrationTest;
-import gov.ca.cwds.Constants;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,8 +21,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 @RunWith(SpringRunner.class)
 @ActiveProfiles({"dev", "idm"})
 @SpringBootTest(properties = {
-    "perry.identityManager.idmBasicAuthUser=" + Constants.IDM_BASIC_AUTH_USER,
-    "perry.identityManager.idmBasicAuthPass=" + Constants.IDM_BASIC_AUTH_PASS,
+    "perry.identityManager.idmBasicAuthUser=" + IDM_BASIC_AUTH_USER,
+    "perry.identityManager.idmBasicAuthPass=" + IDM_BASIC_AUTH_PASS,
     "perry.identityManager.idmMapping=config/idm.groovy",
     "spring.jpa.hibernate.ddl-auto=none",
     "perry.tokenStore.datasource.url=" + TOKEN_STORE_URL,

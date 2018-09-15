@@ -1,7 +1,7 @@
 package gov.ca.cwds.idm.service;
 
-import static gov.ca.cwds.Constants.IDM_BASIC_AUTH_PASS;
-import static gov.ca.cwds.Constants.IDM_BASIC_AUTH_USER;
+import static gov.ca.cwds.BaseIntegrationTest.IDM_BASIC_AUTH_PASS;
+import static gov.ca.cwds.BaseIntegrationTest.IDM_BASIC_AUTH_USER;
 import static gov.ca.cwds.idm.service.IdmServiceImpl.transformSearchValues;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.FIRST_NAME;

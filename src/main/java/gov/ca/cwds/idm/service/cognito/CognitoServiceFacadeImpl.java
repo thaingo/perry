@@ -64,7 +64,7 @@ import org.springframework.stereotype.Service;
 @Service(value = "cognitoServiceFacade")
 @Profile("idm")
 @SuppressWarnings({"fb-contrib:EXS_EXCEPTION_SOFTENING_NO_CONSTRAINTS"})
-class CognitoServiceFacadeImpl implements CognitoServiceFacade {
+public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CognitoServiceFacadeImpl.class);
 
