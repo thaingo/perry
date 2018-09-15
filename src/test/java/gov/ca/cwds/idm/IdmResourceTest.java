@@ -243,6 +243,18 @@ public class IdmResourceTest extends BaseIntegrationTest {
   }
 
   @Test
+  @WithMockCustomUser(roles = {OFFICE_ADMIN})
+  public void testGetUserOfficeAdmin() throws Exception {
+    testGetValidYoloUser(USER_WITH_RACFID_AND_DB_DATA_ID, "fixtures/idm/get-user/with-racfid-and-db-data-valid.json");
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {OFFICE_ADMIN}, adminOfficeIds = {"otherOfficeId"})
+  public void testGetUserOfficeAdminDifferentOffice() throws Exception {
+    assertGetUserUnauthorized(USER_WITH_RACFID_AND_DB_DATA_ID);
+  }
+
+  @Test
   @WithMockCustomUser
   public void testGetUserWithRacfId() throws Exception {
     testGetValidYoloUser(USER_WITH_RACFID_ID, "fixtures/idm/get-user/with-racfid-valid.json");
@@ -296,12 +308,6 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @WithMockCustomUser(roles = {STATE_ADMIN}, county = "Madera")
   public void testGetUserStateAdminDifferentCounty() throws Exception {
     testGetValidYoloUser(USER_WITH_RACFID_ID, "fixtures/idm/get-user/with-racfid-valid.json");
-  }
-
-  @Test
-  @WithMockCustomUser(roles = {OFFICE_ADMIN})
-  public void testGetUserOfficeAdmin() throws Exception {
-    assertGetUserUnauthorized(USER_NO_RACFID_ID);
   }
 
   private void assertGetUserUnauthorized(String userId) throws Exception {

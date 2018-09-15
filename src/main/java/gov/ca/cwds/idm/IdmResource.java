@@ -148,7 +148,7 @@ public class IdmResource {
       @ApiResponse(code = 404, message = "Not found")
     }
   )
-  @PreAuthorize("hasAnyAuthority(T(gov.ca.cwds.config.api.idm.Roles).STATE_ADMIN, T(gov.ca.cwds.config.api.idm.Roles).COUNTY_ADMIN)")
+  @PreAuthorize("@roles.isAdmin(principal)")
   public ResponseEntity<User> getUser(
       @ApiParam(required = true, value = "The unique user ID", example = "userId1")
           @PathVariable
