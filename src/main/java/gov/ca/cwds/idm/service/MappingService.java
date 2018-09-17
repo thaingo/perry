@@ -23,6 +23,7 @@ import org.springframework.util.CollectionUtils;
 
 @Service
 @Profile("idm")
+@SuppressWarnings({"fb-contrib:EXS_EXCEPTION_SOFTENING_NO_CONSTRAINTS"})
 public class MappingService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MappingService.class);

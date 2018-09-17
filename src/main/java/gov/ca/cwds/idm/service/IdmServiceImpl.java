@@ -423,9 +423,8 @@ public class IdmServiceImpl implements IdmService {
             }));
     return cognitoUsers
         .stream()
-        .map(e -> {
-          return mappingService.toUser(e, idToCmsUser.get(userNameToRacfId.get(e.getUsername())));
-        }).collect(Collectors.toList());
+        .map(e -> mappingService.toUser(e, idToCmsUser.get(userNameToRacfId.get(e.getUsername())))
+        ).collect(Collectors.toList());
   }
 
   private PutInSearchExecution<String> updateUserInSearch(String id) {
