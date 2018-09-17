@@ -151,6 +151,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
   private static final String USER_WITH_NO_PHONE_EXTENSION = "d740ec1d-66ae-4d84-a8c4-8bed7a942f5b";
   private static final String NEW_USER_SUCCESS_ID = "17067e4e-270f-4623-b86c-b4d4fa527a34";
   private static final String NEW_USER_SUCCESS_ID_2 = "17067e4e-270f-4623-b86c-b4d4fa527a35";
+  private static final String NEW_USER_SUCCESS_ID_3 = "17067e4e-270f-4623-b86c-b4d4fa527a36";
   private static final String NEW_USER_ES_FAIL_ID = "08e14c57-6e5e-48dd-8172-e8949c2a7f76";
   private static final String USER_WITH_INACTIVE_STATUS_COGNITO = "17067e4e-270f-4623-b86c-b4d4fa527a22";
   private static final String ES_ERROR_CREATE_USER_EMAIL = "es.error@create.com";
@@ -474,21 +475,13 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @Test
   @WithMockCustomUser(roles = {OFFICE_ADMIN})
   public void testCreateUserOfficeAdmin() throws Exception {
-    assertCreateUserUnauthorized();
+    assertCreateUserSuccess("gonzales3@gmail.com", NEW_USER_SUCCESS_ID_3);
   }
 
-  private void assertCreateUserUnauthorized() throws Exception {
-    User user = user();
-    AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
-    setCreateUserResult(request, NEW_USER_SUCCESS_ID);
-
-    mockMvc
-        .perform(
-            MockMvcRequestBuilders.post("/idm/users")
-                .contentType(JSON_CONTENT_TYPE)
-                .content(asJsonString(user)))
-        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
-        .andReturn();
+  @Test
+  @WithMockCustomUser(roles = {OFFICE_ADMIN}, adminOfficeIds = {"otherOfficeId"})
+  public void testCreateUserOfficeAdminOtherOffice() throws Exception {
+    assertCreateUserUnauthorized();
   }
 
   @Test
@@ -554,10 +547,14 @@ public class IdmResourceTest extends BaseIntegrationTest {
   }
 
   @Test
-  @WithMockCustomUser
+  @WithMockCustomUser(county = "OtherCounty")
   public void testCreateUserInOtherCounty() throws Exception {
+    assertCreateUserUnauthorized();
+  }
+
+  private void assertCreateUserUnauthorized() throws Exception {
     User user = user();
-    user.setCountyName("OtherCounty");
+    user.setEmail("unauthorized@gmail.com");
 
     AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
 
@@ -1173,6 +1170,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
     user.setFirstName("Garcia");
     user.setLastName("Gonzales");
     user.setCountyName(WithMockCustomUser.COUNTY);
+    user.setOfficeId(WithMockCustomUser.OFFICE_ID);
     return user;
   }
 
