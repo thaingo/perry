@@ -1,6 +1,7 @@
 package gov.ca.cwds.service;
 
 import static gov.ca.cwds.util.Utils.formatDate;
+import static gov.ca.cwds.util.Utils.toUpperCase;
 
 import gov.ca.cwds.data.auth.UserIdDao;
 import gov.ca.cwds.data.persistence.auth.CwsOffice;
@@ -43,6 +44,18 @@ public class CwsUserInfoService {
     }
     UserId user = userId.get();
     return getCwsUserInfo(user);
+  }
+
+  public CwsUserInfo getCwsUserByRacfId(String racfId) {
+    CwsUserInfo cwsUser = null;
+    if (racfId != null) {
+      List<CwsUserInfo> users =
+          findUsers(Collections.singletonList(toUpperCase(racfId)));
+      if (!CollectionUtils.isEmpty(users)) {
+        cwsUser = users.get(0);
+      }
+    }
+    return cwsUser;
   }
 
   // just because of codeclimate 25 lines of code allowed rule

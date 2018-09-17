@@ -355,7 +355,7 @@ public class IdmServiceImpl implements IdmService {
   public UserVerificationResult verifyUser(String racfId, String email) {
     email = toLowerCase(email);
 
-    CwsUserInfo cwsUser = getCwsUserByRacfId(racfId);
+    CwsUserInfo cwsUser = cwsUserInfoService.getCwsUserByRacfId(racfId);
     if (cwsUser == null) {
       return composeNegativeResultWithMessage(NO_USER_WITH_RACFID_IN_CWSCMS, racfId);
     }
@@ -497,18 +497,6 @@ public class IdmServiceImpl implements IdmService {
           .ifPresent(
               x -> user.setCountyName((GovernmentEntityType.findBySysId(x)).getDescription()));
     }
-  }
-
-  private CwsUserInfo getCwsUserByRacfId(String racfId) {
-    CwsUserInfo cwsUser = null;
-    if (racfId != null) {
-      List<CwsUserInfo> users =
-          cwsUserInfoService.findUsers(Collections.singletonList(toUpperCase(racfId)));
-      if (!CollectionUtils.isEmpty(users)) {
-        cwsUser = users.get(0);
-      }
-    }
-    return cwsUser;
   }
 
   public void setSearchService(SearchService searchService) {
