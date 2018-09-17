@@ -284,7 +284,7 @@ public class IdmResource {
   @RequestMapping(method = RequestMethod.GET, value = "users/verify", produces = "application/json")
   @ApiOperation(value = "Check if user can be created by racfId and email", response = UserVerificationResult.class)
   @ApiResponses(value = {@ApiResponse(code = 401, message = "Not Authorized")})
-  @PreAuthorize("hasAnyAuthority(T(gov.ca.cwds.config.api.idm.Roles).STATE_ADMIN, T(gov.ca.cwds.config.api.idm.Roles).COUNTY_ADMIN)")
+  @PreAuthorize("@roles.isAdmin(principal)")
   public ResponseEntity<UserVerificationResult> verifyUser(
       @ApiParam(required = true, name = "racfid", value = "The RACFID to verify user by in CWS/CMS")
           @NotNull

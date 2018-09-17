@@ -278,7 +278,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
 
   @Test
   @WithMockCustomUser(roles = {OFFICE_ADMIN}, adminOfficeIds = {"otherOfficeId"})
-  public void testGetUserOfficeAdminDifferentOffice() throws Exception {
+  public void testGetUserOfficeAdminOtherOffice() throws Exception {
     assertGetUserUnauthorized(USER_WITH_RACFID_AND_DB_DATA_ID);
   }
 
@@ -935,6 +935,26 @@ public class IdmResourceTest extends BaseIntegrationTest {
     assertVerufyUserSuccess();
   }
 
+  @Test
+  @WithMockCustomUser(roles = {OFFICE_ADMIN})
+  public void testVerifyUserOfficeAdmin() throws Exception {
+    assertVerufyUserSuccess();
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {OFFICE_ADMIN}, adminOfficeIds = {"otherOfficeId"})
+  public void testVerifyUserOfficeAdminOtherOffice() throws Exception {
+    MvcResult result =
+        mockMvc
+            .perform(
+                MockMvcRequestBuilders.get("/idm/users/verify?email=test@test.com&racfid=SMITHB3"))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
+            .andReturn();
+
+    assertNonStrict(result, "fixtures/idm/verify-user/verify-other-office.json");
+  }
+
   private void assertVerufyUserSuccess() throws Exception {
     MvcResult result =
         mockMvc
@@ -965,12 +985,6 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @Test
   @WithMockCustomUser(roles = {"OtherRole"})
   public void testVerifyUserWithOtherRole() throws Exception {
-    assertVerifyUserUnauthorized();
-  }
-
-  @Test
-  @WithMockCustomUser(roles = {OFFICE_ADMIN})
-  public void testVerifyUserOfficeAdmin() throws Exception {
     assertVerifyUserUnauthorized();
   }
 
