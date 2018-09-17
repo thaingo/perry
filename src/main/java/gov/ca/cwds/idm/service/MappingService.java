@@ -1,19 +1,25 @@
 package gov.ca.cwds.idm.service;
 
+import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getRACFId;
 import static gov.ca.cwds.service.messages.MessageCode.IDM_MAPPING_SCRIPT_ERROR;
+import static gov.ca.cwds.util.Utils.toUpperCase;
 
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.PerryProperties;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.rest.api.domain.PerryException;
+import gov.ca.cwds.service.CwsUserInfoService;
 import gov.ca.cwds.service.dto.CwsUserInfo;
 import gov.ca.cwds.service.messages.MessagesService;
+import java.util.Collections;
+import java.util.List;
 import javax.script.ScriptException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Service
 @Profile("idm")
@@ -24,6 +30,14 @@ public class MappingService {
   private PerryProperties configuration;
 
   private MessagesService messages;
+
+  private CwsUserInfoService cwsUserInfoService;
+
+  public User toUser(UserType cognitoUser) {
+    String racfId = getRACFId(cognitoUser);
+    CwsUserInfo cwsUser = getCwsUserByRacfId(racfId);
+    return toUser(cognitoUser, cwsUser);
+  }
 
   public User toUser(UserType cognitoUser, CwsUserInfo cwsUser) {
     try {
@@ -38,6 +52,18 @@ public class MappingService {
     return toUser(cognitoUser, null);
   }
 
+  private CwsUserInfo getCwsUserByRacfId(String racfId) {
+    CwsUserInfo cwsUser = null;
+    if (racfId != null) {
+      List<CwsUserInfo> users =
+          cwsUserInfoService.findUsers(Collections.singletonList(toUpperCase(racfId)));
+      if (!CollectionUtils.isEmpty(users)) {
+        cwsUser = users.get(0);
+      }
+    }
+    return cwsUser;
+  }
+
   @Autowired
   public void setConfiguration(PerryProperties configuration) {
     this.configuration = configuration;
@@ -46,5 +72,10 @@ public class MappingService {
   @Autowired
   public void setMessages(MessagesService messages) {
     this.messages = messages;
+  }
+
+  @Autowired
+  public void setCwsUserInfoService(CwsUserInfoService cwsUserInfoService) {
+    this.cwsUserInfoService = cwsUserInfoService;
   }
 }

@@ -37,7 +37,14 @@ public class AuthorizeService {
 
   public boolean updateUser(String userId) {
     UserType cognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
-    User user = mappingService.toUserWithoutCwsData(cognitoUser);
+    UniversalUserToken admin = getCurrentUser();
+    User user;
+
+    if(isMostlyOfficeAdmin(admin)){
+      user = mappingService.toUser(cognitoUser);
+    } else {
+      user = mappingService.toUserWithoutCwsData(cognitoUser);
+    }
     return byUser(user);
   }
 

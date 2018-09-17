@@ -105,7 +105,7 @@ public class IdmServiceImpl implements IdmService {
   @Override
   public User findUser(String id) {
     UserType cognitoUser = cognitoServiceFacade.getCognitoUserById(id);
-    return enrichCognitoUser(cognitoUser);
+    return mappingService.toUser(cognitoUser);
   }
 
   @Override
@@ -448,7 +448,7 @@ public class IdmServiceImpl implements IdmService {
     return new PutInSearchExecution<UserType>(userType){
       @Override
       protected ResponseEntity<String> tryMethod(UserType userType) {
-        User user = enrichCognitoUser(userType);
+        User user = mappingService.toUser(userType);
         return searchService.createUser(user);
       }
       @Override
@@ -498,12 +498,6 @@ public class IdmServiceImpl implements IdmService {
           .ifPresent(
               x -> user.setCountyName((GovernmentEntityType.findBySysId(x)).getDescription()));
     }
-  }
-
-  private User enrichCognitoUser(UserType cognitoUser) {
-    String racfId = getRACFId(cognitoUser);
-    CwsUserInfo cwsUser = getCwsUserByRacfId(racfId);
-    return mappingService.toUser(cognitoUser, cwsUser);
   }
 
   private CwsUserInfo getCwsUserByRacfId(String racfId) {

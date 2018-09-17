@@ -177,7 +177,7 @@ public class IdmResource {
     }
   )
   @ApiOperation(value = "Update User")
-  @PreAuthorize("hasAnyAuthority(T(gov.ca.cwds.config.api.idm.Roles).STATE_ADMIN, T(gov.ca.cwds.config.api.idm.Roles).COUNTY_ADMIN)")
+  @PreAuthorize("@roles.isAdmin(principal)")
   public ResponseEntity updateUser(
       @ApiParam(required = true, value = "The unique user ID", example = "userId1")
           @PathVariable

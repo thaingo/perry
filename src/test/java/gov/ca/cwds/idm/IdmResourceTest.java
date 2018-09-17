@@ -9,6 +9,7 @@ import static gov.ca.cwds.idm.IdmResourceTest.IDM_BASIC_AUTH_USER;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.CREATE;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.COUNTY;
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.OFFICE;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PERMISSIONS;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.RACFID_CUSTOM;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.RACFID_CUSTOM_2;
@@ -815,24 +816,37 @@ public class IdmResourceTest extends BaseIntegrationTest {
 
   @Test
   @WithMockCustomUser(roles = {STATE_ADMIN}, county = "Madera")
-  public void testUpdateUserStateAdmin() throws Exception {
+  public void testUpdateUserStateAdminIsAuthorized() throws Exception {
     assertUpdateNoChangesSuccess();
   }
 
+  @Test
+  @WithMockCustomUser(roles = {OFFICE_ADMIN})
+  public void testUpdateUserOfficeAdminIsAuthorized() throws Exception {
+    assertUpdateNoChangesSuccess();
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {OFFICE_ADMIN}, adminOfficeIds = {"otherOfficeId"})
+  public void testUpdateUserOfficeOtherOffice() throws Exception {
+    assertUpdateUserUnauthorized();
+  }
+
   private void assertUpdateNoChangesSuccess() throws Exception {
+    String userId = USER_WITH_RACFID_AND_DB_DATA_ID;
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setEnabled(Boolean.TRUE);
-    userUpdate.setPermissions(toSet("RFA-rollout", "Snapshot-rollout"));
+    userUpdate.setPermissions(toSet("test"));
 
     AdminUpdateUserAttributesRequest updateAttributesRequest =
         setUpdateUserAttributesRequestAndResult(
-            USER_NO_RACFID_ID, attr(PERMISSIONS.getName(), "RFA-rollout:Snapshot-rollout"));
+            userId, attr(PERMISSIONS.getName(), "test"));
 
-    AdminEnableUserRequest enableUserRequest = setEnableUserRequestAndResult(USER_NO_RACFID_ID);
+    AdminEnableUserRequest enableUserRequest = setEnableUserRequestAndResult(userId);
 
     mockMvc
         .perform(
-            MockMvcRequestBuilders.patch("/idm/users/" + USER_NO_RACFID_ID)
+            MockMvcRequestBuilders.patch("/idm/users/" + userId)
                 .contentType(JSON_CONTENT_TYPE)
                 .content(asJsonString(userUpdate)))
         .andExpect(MockMvcResultMatchers.status().isNoContent())
@@ -844,12 +858,6 @@ public class IdmResourceTest extends BaseIntegrationTest {
     verifyDoraCalls(0);
   }
 
-  @Test
-  @WithMockCustomUser(roles = {OFFICE_ADMIN})
-  public void testUpdateUserOfficeAdmin() throws Exception {
-    assertUpdateUserUnauthorized();
-  }
-
   private void assertUpdateUserUnauthorized() throws Exception {
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setEnabled(Boolean.FALSE);
@@ -857,7 +865,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
 
     mockMvc
         .perform(
-            MockMvcRequestBuilders.patch("/idm/users/" + USER_NO_RACFID_ID)
+            MockMvcRequestBuilders.patch("/idm/users/" + USER_WITH_RACFID_AND_DB_DATA_ID)
                 .contentType(JSON_CONTENT_TYPE)
                 .content(asJsonString(userUpdate)))
         .andExpect(MockMvcResultMatchers.status().isUnauthorized())
@@ -1280,6 +1288,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
                 WithMockCustomUser.COUNTY,
                 "RFA-rollout:Snapshot-rollout:",
                 "CWS-worker:County-admin",
+                null,
                 null);
 
         TestUser userWithRacfid =
@@ -1295,7 +1304,8 @@ public class IdmResourceTest extends BaseIntegrationTest {
                 WithMockCustomUser.COUNTY,
                 "Hotline-rollout",
                 "CWS-worker:County-admin",
-                "YOLOD");
+                "YOLOD",
+                null);
 
         TestUser userWithRacfidAndDbData =
             testUser(
@@ -1310,7 +1320,8 @@ public class IdmResourceTest extends BaseIntegrationTest {
                 WithMockCustomUser.COUNTY,
                 "test",
                 null,
-                "SMITHBO");
+                "SMITHBO",
+                WithMockCustomUser.OFFICE_ID);
 
         TestUser userWithNoPhoneExtension =
             testUser(
@@ -1325,7 +1336,8 @@ public class IdmResourceTest extends BaseIntegrationTest {
                 WithMockCustomUser.COUNTY,
                 "test",
                 null,
-                "SMITHB2");
+                "SMITHB2",
+                null);
 
         TestUser userWithEnableStatusInactiveInCognito =
             testUser(
@@ -1340,7 +1352,8 @@ public class IdmResourceTest extends BaseIntegrationTest {
                 WithMockCustomUser.COUNTY,
                 "test",
                 null,
-                "SMITHB3");
+                "SMITHB3",
+                null);
 
         TestUser newSuccessUser =
             testUser(
@@ -1353,6 +1366,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
                 "Garcia",
                 "Gonzales",
                 WithMockCustomUser.COUNTY,
+                null,
                 null,
                 null,
                 null);
@@ -1368,6 +1382,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
                 "Garcia",
                 "Gonzales",
                 WithMockCustomUser.COUNTY,
+                null,
                 null,
                 null,
                 null);
@@ -1421,7 +1436,8 @@ public class IdmResourceTest extends BaseIntegrationTest {
           String county,
           String permissions,
           String roles,
-          String racfId) {
+          String racfId,
+          String officeId) {
 
         TestUser testUser =
             new TestUser(
@@ -1436,7 +1452,8 @@ public class IdmResourceTest extends BaseIntegrationTest {
                 county,
                 permissions,
                 roles,
-                racfId);
+                racfId,
+                officeId);
 
         setUpGetUserRequestAndResult(testUser);
 
@@ -1468,6 +1485,9 @@ public class IdmResourceTest extends BaseIntegrationTest {
           attrs.add(attr(RACFID_CUSTOM.getName(), testUser.getRacfId()));
           attrs.add(attr(RACFID_STANDARD.getName(), testUser.getRacfId()));
           attrs.add(attr(RACFID_CUSTOM_2.getName(), testUser.getRacfId()));
+        }
+        if (testUser.getOfficeId() != null) {
+          attrs.add(attr(OFFICE.getName(), testUser.getOfficeId()));
         }
         return attrs;
       }
@@ -1572,6 +1592,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
       private String permissions;
       private String roles;
       private String racfId;
+      private String officeId;
 
       TestUser(
           String id,
@@ -1585,7 +1606,8 @@ public class IdmResourceTest extends BaseIntegrationTest {
           String county,
           String permissions,
           String roles,
-          String racfId) {
+          String racfId,
+          String officeId) {
         this.id = id;
         this.enabled = enabled;
         this.status = status;
@@ -1598,6 +1620,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
         this.permissions = permissions;
         this.roles = roles;
         this.racfId = racfId;
+        this.officeId = officeId;
       }
 
       public String getId() {
@@ -1647,6 +1670,10 @@ public class IdmResourceTest extends BaseIntegrationTest {
       public String getRacfId() {
         return racfId;
       }
+
+      public String getOfficeId() {
+        return officeId;
+      }
     }
-    }
+  }
 }
