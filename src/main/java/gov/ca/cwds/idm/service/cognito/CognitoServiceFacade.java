@@ -9,6 +9,7 @@ import gov.ca.cwds.idm.dto.UserEnableStatusRequest;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
+import gov.ca.cwds.service.messages.MessagesService;
 import java.util.List;
 import org.springframework.context.annotation.Profile;
 
@@ -47,5 +48,9 @@ public interface CognitoServiceFacade {
    @return true if Cognito operations were really executed, false otherwise
    */
   boolean changeUserEnabledStatus(UserEnableStatusRequest request);
+
+  void setMessagesService(MessagesService messages);
+
+  void setProperties(CognitoProperties properties);
 
 }

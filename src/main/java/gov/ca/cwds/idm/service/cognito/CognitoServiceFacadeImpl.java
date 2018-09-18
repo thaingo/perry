@@ -68,10 +68,9 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CognitoServiceFacadeImpl.class);
 
-  @Autowired
+
   private CognitoProperties properties;
 
-  @Autowired
   private MessagesService messages;
 
   private AWSCognitoIdentityProvider identityProvider;
@@ -298,6 +297,8 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
     return request;
   }
 
+  @Autowired
+  @Override
   public void setProperties(CognitoProperties properties) {
     this.properties = properties;
   }
@@ -310,6 +311,12 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
     this.identityProvider = identityProvider;
   }
 
+  public void setMessages(MessagesService messages) {
+    this.messages = messages;
+  }
+
+  @Autowired
+  @Override
   public void setMessagesService(MessagesService messages) {
     this.messages = messages;
   }
