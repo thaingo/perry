@@ -1,9 +1,5 @@
 package gov.ca.cwds.util;
 
-import static gov.ca.cwds.Constants.CMS_STORE_SCHEMA;
-import static gov.ca.cwds.Constants.DATABASE_URL;
-import static gov.ca.cwds.Constants.TOKEN_STORE_SCHEMA;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -25,6 +21,17 @@ public final class LiquibaseUtils {
 
   public static final String CREATE_SCHEMA = "INIT=create schema if not exists ";
   public static final String SET_SCHEMA = ";set schema ";
+
+  public static final String TOKEN_STORE_SCHEMA = "perry";
+  public static final String CMS_STORE_SCHEMA = "cwscms";
+
+  public static final String DATABASE_URL =
+      "jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;";
+
+  private static final String SCHEMA_EQUALS = "schema=";
+
+  public static final String TOKEN_STORE_URL = DATABASE_URL + SCHEMA_EQUALS + TOKEN_STORE_SCHEMA;
+  public static final String CMS_STORE_URL = DATABASE_URL + SCHEMA_EQUALS + CMS_STORE_SCHEMA;
 
   private LiquibaseUtils() {
   }
