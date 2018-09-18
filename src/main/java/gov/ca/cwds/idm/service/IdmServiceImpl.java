@@ -64,7 +64,6 @@ import gov.ca.cwds.util.Utils;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -370,18 +369,15 @@ public class IdmServiceImpl implements IdmService {
     }
 
     User user = composeUser(cwsUser, email);
+    Optional<MessageCode> authorizationError = authorizeService.verifyUser(user);
 
-    if(!authorizeService.verifyUser(user)) {
-      if (isMostlyCountyAdmin()) {
-        return composeNegativeResultWithMessage(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY);
-      } else if(isMostlyOfficeAdmin()) {
-        return composeNegativeResultWithMessage(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_OFFICE);
-      }
+    if(authorizationError.isPresent()) {
+      return composeNegativeResultWithMessage(authorizationError.get());
+    } else {
+      return UserVerificationResult.Builder.anUserVerificationResult()
+          .withUser(user)
+          .withVerificationPassed().build();
     }
-
-    return UserVerificationResult.Builder.anUserVerificationResult()
-        .withUser(user)
-        .withVerificationPassed().build();
   }
 
   private boolean isActiveRacfIdPresent(String racfId) {

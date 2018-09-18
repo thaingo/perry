@@ -3,6 +3,8 @@ package gov.ca.cwds.idm.service;
 import static gov.ca.cwds.config.api.idm.Roles.isMostlyCountyAdmin;
 import static gov.ca.cwds.config.api.idm.Roles.isMostlyOfficeAdmin;
 import static gov.ca.cwds.config.api.idm.Roles.isMostlyStateAdmin;
+import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY;
+import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_OFFICE;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getAdminOfficeIds;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCountyName;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
@@ -11,6 +13,9 @@ import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
+import gov.ca.cwds.service.messages.MessageCode;
+import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
+import java.util.Optional;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
@@ -24,15 +29,22 @@ public class AuthorizeService {
   private MappingService mappingService;
 
   public boolean findUser(User user) {
-    return byUser(user);
+    return authorizeByUser(user);
   }
 
-  public boolean verifyUser(User user) {
-    return byUser(user);
+  public Optional<MessageCode> verifyUser(User user) {
+    if(!authorizeByUser(user)) {
+      if (CurrentAuthenticatedUserUtil.isMostlyCountyAdmin()) {
+        return Optional.of(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY);
+      } else if(CurrentAuthenticatedUserUtil.isMostlyOfficeAdmin()) {
+        return Optional.of(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_OFFICE);
+      }
+    }
+    return Optional.empty();
   }
 
   public boolean createUser(User user) {
-    return byUser(user);
+    return authorizeByUser(user);
   }
 
   public boolean updateUser(String userId) {
@@ -45,10 +57,10 @@ public class AuthorizeService {
     } else {
       user = mappingService.toUserWithoutCwsData(cognitoUser);
     }
-    return byUser(user);
+    return authorizeByUser(user);
   }
 
-  private boolean byUser(User user) {
+  private boolean authorizeByUser(User user) {
     UniversalUserToken admin = getCurrentUser();
     return byUserAndAdmin(user, admin);
   }
