@@ -27,11 +27,6 @@ public class CurrentAuthenticatedUserUtil {
     return (Set<String>) currentUser.getParameter(ADMIN_OFFICE_IDS_PARAM);
   }
 
-  public static String getCurrentUserCountyName() {
-    UniversalUserToken userToken = getCurrentUser();
-    return getCountyName(userToken);
-  }
-
   public static String getSsoToken() {
     Authentication authentication = getAuthentication();
     return ((PerryTokenEntity) authentication.getDetails()).getToken();
