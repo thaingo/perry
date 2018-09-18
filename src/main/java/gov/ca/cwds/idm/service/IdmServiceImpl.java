@@ -370,14 +370,13 @@ public class IdmServiceImpl implements IdmService {
 
     User user = composeUser(cwsUser, email);
     Optional<MessageCode> authorizationError = authorizeService.verifyUser(user);
-
     if(authorizationError.isPresent()) {
       return composeNegativeResultWithMessage(authorizationError.get());
-    } else {
-      return UserVerificationResult.Builder.anUserVerificationResult()
-          .withUser(user)
-          .withVerificationPassed().build();
     }
+
+    return UserVerificationResult.Builder.anUserVerificationResult()
+        .withUser(user)
+        .withVerificationPassed().build();
   }
 
   private boolean isActiveRacfIdPresent(String racfId) {
