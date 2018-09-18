@@ -16,8 +16,8 @@ public interface IdmService {
   @PostAuthorize("@authorize.findUser(returnObject)")
   User findUser(String id);
 
-  @PreAuthorize("@authorize.updateUser(#userId)")
-  void updateUser(String id, UserUpdate updateUserDto);
+  @PreAuthorize("@authorize.updateUser(#id)")
+  void updateUser(@P("id")String id, UserUpdate updateUserDto);
 
   UserVerificationResult verifyUser(String racfId, String email);
 
