@@ -92,8 +92,7 @@ public class AuthorizeService {
   }
 
   @Autowired
-  public void setCognitoServiceFacade(
-      CognitoServiceFacade cognitoServiceFacade) {
+  public void setCognitoServiceFacade(CognitoServiceFacade cognitoServiceFacade) {
     this.cognitoServiceFacade = cognitoServiceFacade;
   }
 

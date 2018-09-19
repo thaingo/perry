@@ -15,8 +15,6 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import org.hibernate.validator.constraints.NotBlank;
 
-
-
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 @SuppressWarnings("squid:S3437")

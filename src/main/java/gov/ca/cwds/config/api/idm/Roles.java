@@ -19,8 +19,7 @@ public class Roles {
   public static final String STATE_ADMIN = "State-admin";
   public static final String OFFICE_ADMIN = "Office-admin";
 
-  private Roles() {
-  }
+  private Roles() {}
 
   public static boolean isAdmin(UniversalUserToken user) {
     Set<String> adminRoles = getAdminRoles();
