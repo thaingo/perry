@@ -1026,9 +1026,15 @@ public class IdmResourceTest extends BaseIntegrationTest {
     assertVerifyUserUnauthorized();
   }
 
-  @Test
-  @WithMockCustomUser(roles = {"OtherRole"})
-  public void testResendInvitationEmailWithOtherRole() throws Exception {
+  private AdminCreateUserRequest getAdminCreateUserRequestForResendEmail() {
+    return new AdminCreateUserRequest()
+        .withUsername(USER_WITH_RACFID_ID)
+        .withUserPoolId("userpool")
+        .withDesiredDeliveryMediums(CognitoUtils.EMAIL_DELIVERY)
+        .withMessageAction(MessageActionType.RESEND);
+  }
+
+  private void assertResendEmailUnauthorized(AdminCreateUserRequest request) throws Exception {
     mockMvc
         .perform(MockMvcRequestBuilders.get("/idm/users/resend/" + USER_WITH_RACFID_ID))
         .andExpect(MockMvcResultMatchers.status().isUnauthorized())
@@ -1036,14 +1042,30 @@ public class IdmResourceTest extends BaseIntegrationTest {
   }
 
   @Test
+  @WithMockCustomUser(county = "OtherCounty")
+  public void testResendInvitationEmailWithDifferentCounty() throws Exception {
+    AdminCreateUserRequest request = getAdminCreateUserRequestForResendEmail();
+    assertResendEmailUnauthorized(request);
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {"OtherRole"})
+  public void testResendInvitationEmailWithOtherRole() throws Exception {
+    AdminCreateUserRequest request = getAdminCreateUserRequestForResendEmail();
+    assertResendEmailUnauthorized(request);
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {OFFICE_ADMIN}, adminOfficeIds = {"otherOfficeId"})
+  public void testResendInvitationEmailWithOfficeRole() throws Exception {
+    AdminCreateUserRequest request = getAdminCreateUserRequestForResendEmail();
+    assertResendEmailUnauthorized(request);
+  }
+
+  @Test
   @WithMockCustomUser(roles = {STATE_ADMIN}, county = "Madera")
   public void testResendInvitationEmailWithStateAdmin() throws Exception {
-    AdminCreateUserRequest request =
-        new AdminCreateUserRequest()
-            .withUsername(USER_WITH_RACFID_ID)
-            .withUserPoolId("userpool")
-            .withDesiredDeliveryMediums(CognitoUtils.EMAIL_DELIVERY)
-            .withMessageAction(MessageActionType.RESEND);
+    AdminCreateUserRequest request = getAdminCreateUserRequestForResendEmail();
 
     UserType user = new UserType();
     user.setUsername(USER_WITH_RACFID_ID);
@@ -1057,6 +1079,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
         .perform(MockMvcRequestBuilders.get("/idm/users/resend/" + USER_WITH_RACFID_ID))
         .andExpect(MockMvcResultMatchers.status().isOk())
         .andReturn();
+    verify(cognito, times(1)).adminCreateUser(request);
   }
 
   @Test

@@ -303,7 +303,12 @@ public class IdmResource {
           "Resend the invitation message to a user that already exists and reset the expiration\n "
               + "limit on the user's account by admin.",
       response = ResponseEntity.class)
-  @ApiResponses(value = {@ApiResponse(code = 401, message = "Not Authorized")})
+  @ApiResponses(
+      value = {
+          @ApiResponse(code = 401, message = "Not Authorized"),
+          @ApiResponse(code = 404, message = "Not found")
+      }
+  )
   @PreAuthorize("@roles.isAdmin(principal)")
   public ResponseEntity resendInvitationEmail(
       @ApiParam(required = true, value = "The unique user ID", example = "userId1")

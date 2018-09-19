@@ -51,18 +51,15 @@ public class AuthorizeService {
   }
 
   public boolean updateUser(String userId) {
-    UserType cognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
-    User user = getUserFromUserType(cognitoUser);
-    return authorizeByUser(user);
+    return authorizeByUser(getUserFromUserId(userId));
   }
 
   public boolean resendInvitationMessage(String userId) {
-    UserType cognitoUser = cognitoServiceFacade.resendInvitationMessage(userId);
-    User user = getUserFromUserType(cognitoUser);
-    return authorizeByUser(user);
+    return authorizeByUser(getUserFromUserId(userId));
   }
 
-  private User getUserFromUserType(UserType cognitoUser) {
+  private User getUserFromUserId(String userId) {
+    UserType cognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
     UniversalUserToken admin = getCurrentUser();
     User user;
 
