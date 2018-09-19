@@ -29,4 +29,6 @@ public interface IdmService {
   List<User> searchUsers(UsersSearchCriteria usersSearchCriteria);
 
   List<UserAndOperation> getFailedOperations(LocalDateTime lastJobTime);
+
+  void resendInvitationMessage(String userId);
 }

@@ -34,6 +34,7 @@ import com.amazonaws.services.cognitoidp.model.DescribeUserPoolRequest;
 import com.amazonaws.services.cognitoidp.model.InvalidParameterException;
 import com.amazonaws.services.cognitoidp.model.ListUsersRequest;
 import com.amazonaws.services.cognitoidp.model.ListUsersResult;
+import com.amazonaws.services.cognitoidp.model.MessageActionType;
 import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import com.amazonaws.services.cognitoidp.model.UsernameExistsException;
@@ -276,6 +277,17 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
       }
     }
     return executed;
+  }
+
+  @Override
+  public UserType resendInvitationMessage(String userId) {
+    AdminCreateUserRequest request =
+        new AdminCreateUserRequest()
+            .withUsername(userId)
+            .withUserPoolId(properties.getUserpool())
+            .withDesiredDeliveryMediums(EMAIL_DELIVERY)
+            .withMessageAction(MessageActionType.RESEND);
+    return identityProvider.adminCreateUser(request).getUser();
   }
 
   /**

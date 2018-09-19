@@ -29,15 +29,18 @@ import static org.mockito.Mockito.when;
 
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
 import com.amazonaws.services.cognitoidp.model.AdminCreateUserRequest;
+import com.amazonaws.services.cognitoidp.model.AdminCreateUserResult;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserResult;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.ListUsersRequest;
 import com.amazonaws.services.cognitoidp.model.ListUsersResult;
+import com.amazonaws.services.cognitoidp.model.MessageActionType;
 import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
+import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
 import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.rest.api.domain.UserNotFoundPerryException;
 import gov.ca.cwds.service.messages.MessagesService;
@@ -223,6 +226,27 @@ public class CognitoServiceFacadeTest {
     criteria.setSearchAttr(RACFID_STANDARD, "ABC");
     ListUsersRequest request = facade.composeListUsersRequest(criteria);
     assertThat(request.getFilter(), is(RACFID_STANDARD.getName() + " = \"ABC\""));
+  }
+
+  @Test
+  public void testCreateAdminResendInvitationMessage() {
+    AdminCreateUserResult mockResult = new AdminCreateUserResult();
+    String userId = "amzon-id-user-1";
+    UserType userType = userType(userId);
+    mockResult.setUser(userType);
+
+    AdminCreateUserRequest expectedRequest =
+        new AdminCreateUserRequest()
+            .withUsername(userId)
+            .withUserPoolId("userpool")
+            .withDesiredDeliveryMediums(CognitoUtils.EMAIL_DELIVERY)
+            .withMessageAction(MessageActionType.RESEND);
+
+    when(identityProvider.adminCreateUser(expectedRequest)).thenReturn(mockResult);
+
+    UserType UserType = facade.resendInvitationMessage(userId);
+    verify(identityProvider, times(1)).adminCreateUser(expectedRequest);
+    assertThat(UserType.getUsername(), is(userId));
   }
 
   private ListUsersRequest setListUsersRequestAndResponse(
