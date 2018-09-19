@@ -1,6 +1,5 @@
 package gov.ca.cwds.event;
 
-import java.time.LocalDateTime;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
 /**
@@ -9,11 +8,9 @@ import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 public class UserLoggedInEvent {
 
   private String userId;
-  private LocalDateTime eventTimestamp;
 
-  public UserLoggedInEvent(String userId, LocalDateTime eventTimestamp) {
+  public UserLoggedInEvent(String userId) {
     this.userId = userId;
-    this.eventTimestamp = eventTimestamp;
   }
 
   public String getUserId() {
@@ -22,14 +19,6 @@ public class UserLoggedInEvent {
 
   public void setUserId(String userId) {
     this.userId = userId;
-  }
-
-  public LocalDateTime getEventTimestamp() {
-    return eventTimestamp;
-  }
-
-  public void setEventTimestamp(LocalDateTime eventTimestamp) {
-    this.eventTimestamp = eventTimestamp;
   }
 
   @Override
