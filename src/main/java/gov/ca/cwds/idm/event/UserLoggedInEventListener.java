@@ -29,13 +29,13 @@ public class UserLoggedInEventListener {
   @EventListener
   public void handleUserLoggedInEvent(UserLoggedInEvent event) {
     try {
-      LOGGER.info("Handling user logged in event for {}", event.getUserId());
+      LOGGER.debug("Handling user logged in event for {}", event.getUserId());
       User user = idmService.findUser(event.getUserId());
-      LOGGER.info("Last login timestamps for user {} is {}", event.getUserId(),
+      LOGGER.debug("Last login timestamps for user {} is {}", event.getUserId(),
           user.getLastLoginDateTime());
       searchService.updateUser(user);
     } catch (Exception e) {
-      LOGGER.error("Can't refresh user is users index", e);
+      LOGGER.error("Can't refresh user in users index", e);
     }
   }
 

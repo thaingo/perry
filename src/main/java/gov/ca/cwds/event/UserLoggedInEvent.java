@@ -5,7 +5,7 @@ import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 /**
  * Created by Alexander Serbin on 9/14/2018
  */
-public class UserLoggedInEvent {
+public final class UserLoggedInEvent {
 
   private String userId;
 
@@ -15,10 +15,6 @@ public class UserLoggedInEvent {
 
   public String getUserId() {
     return userId;
-  }
-
-  public void setUserId(String userId) {
-    this.userId = userId;
   }
 
   @Override
