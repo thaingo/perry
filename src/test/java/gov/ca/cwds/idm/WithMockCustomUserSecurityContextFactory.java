@@ -24,7 +24,7 @@ public class WithMockCustomUserSecurityContextFactory implements
 
     Set<String> roles = toSet(annotation.roles());
     userToken.setRoles(roles);
-    if(roles.contains(Roles.OFFICE_ADMIN)) {
+    if (roles.contains(Roles.OFFICE_ADMIN)) {
       userToken.setParameter(ADMIN_OFFICE_IDS_PARAM, toSet(annotation.adminOfficeIds()));
     }
 

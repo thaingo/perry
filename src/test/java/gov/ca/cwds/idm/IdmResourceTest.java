@@ -266,7 +266,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @Test
   @WithMockCustomUser(roles = {CALS_ADMIN})
   public void testGetUserCalsAdmin() throws Exception {
-    testGetValidUser(USER_CALS_EXTERNAL, "fixtures/idm/get-user/with-cals-externa-user-role.json");
+    testGetValidUser(USER_CALS_EXTERNAL, "fixtures/idm/get-user/with-cals-externa-worker-role.json");
   }
 
   @Test

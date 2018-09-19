@@ -13,6 +13,8 @@ public @interface WithMockCustomUser {
   String OFFICE_ID = "JzoGSkE05I";
 
   String[] roles() default COUNTY_ADMIN;
+
   String county() default COUNTY;
+
   String[] adminOfficeIds() default OFFICE_ID;
 }

@@ -14,6 +14,8 @@ import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUti
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByAttribute;
 import static gov.ca.cwds.idm.util.TestUtils.attr;
 import static gov.ca.cwds.idm.util.TestUtils.date;
+import static io.dropwizard.testing.FixtureHelpers.fixture;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -22,6 +24,8 @@ import com.amazonaws.services.cognitoidp.model.AdminCreateUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminCreateUserResult;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserResult;
+import com.amazonaws.services.cognitoidp.model.AdminListDevicesRequest;
+import com.amazonaws.services.cognitoidp.model.AdminListDevicesResult;
 import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesRequest;
 import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesResult;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
@@ -30,8 +34,10 @@ import com.amazonaws.services.cognitoidp.model.ListUsersRequest;
 import com.amazonaws.services.cognitoidp.model.ListUsersResult;
 import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
 import com.amazonaws.services.cognitoidp.model.UserType;
+import gov.ca.cwds.idm.service.cognito.CognitoObjectMapperHolder;
 import gov.ca.cwds.idm.service.cognito.CognitoProperties;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacadeImpl;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -220,6 +226,20 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
     setSearchByRacfidRequestAndResult(userWithNoPhoneExtension);
 
     setSearchByRacfidRequestAndResult(userWithEnableStatusInactiveInCognito);
+
+    mockAdminListDevices();
+  }
+
+  private void mockAdminListDevices() {
+    AdminListDevicesResult result = null;
+    try {
+      result = CognitoObjectMapperHolder.OBJECT_MAPPER
+          .readValue(fixture("fixtures/idm/devices/two_devices.json"),
+              AdminListDevicesResult.class);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+    when(cognito.adminListDevices(any(AdminListDevicesRequest.class))).thenReturn(result);
   }
 
   private void setListUsersRequestAndResult(String paginationToken, TestUser... testUsers) {
@@ -394,7 +414,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
     return request;
   }
 
-   AdminCreateUserRequest setCreateUserResult(AdminCreateUserRequest request, String newId) {
+  AdminCreateUserRequest setCreateUserResult(AdminCreateUserRequest request, String newId) {
 
     UserType newUser = new UserType();
     newUser.setUsername(newId);
@@ -407,10 +427,11 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
     return request;
   }
 
-  ListUsersRequest setSearchByRacfidRequestAndResult(TestUser testUser){
+  ListUsersRequest setSearchByRacfidRequestAndResult(TestUser testUser) {
 
     ListUsersRequest request =
-        composeListUsersRequest(composeToGetFirstPageByAttribute(RACFID_STANDARD, testUser.getRacfId()));
+        composeListUsersRequest(
+            composeToGetFirstPageByAttribute(RACFID_STANDARD, testUser.getRacfId()));
 
     ListUsersResult result = new ListUsersResult().withUsers(userType(testUser));
 

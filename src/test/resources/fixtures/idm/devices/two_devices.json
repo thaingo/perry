@@ -1,0 +1,29 @@
+{
+  "Devices": [
+    {
+      "DeviceAttributes": [
+        {
+          "Name": "A1",
+          "Value": "A1_value"
+        }
+      ],
+      "DeviceCreateDate": "2018-09-09 01:02:50",
+      "DeviceKey": "DeviceKey1",
+      "DeviceLastAuthenticatedDate": "2018-09-17 05:01:12",
+      "DeviceLastModifiedDate": "2018-09-16 04:12:25"
+    },
+    {
+      "DeviceAttributes": [
+        {
+          "Name": "A1",
+          "Value": "A2_value"
+        }
+      ],
+      "DeviceCreateDate": "2015-10-01 05:12:23",
+      "DeviceKey": "DeviceKey1",
+      "DeviceLastAuthenticatedDate": "2018-09-17 03:05:00",
+      "DeviceLastModifiedDate": "2016-03-05 11:11:20"
+    }
+  ],
+  "PaginationToken": "string"
+}

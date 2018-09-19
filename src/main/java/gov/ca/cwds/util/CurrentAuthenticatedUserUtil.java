@@ -16,7 +16,7 @@ public class CurrentAuthenticatedUserUtil {
 
   public static UniversalUserToken getCurrentUser() {
     Authentication authentication = getAuthentication();
-    return(UniversalUserToken) authentication.getPrincipal();
+    return (UniversalUserToken) authentication.getPrincipal();
   }
 
   public static String getCountyName(UniversalUserToken currentUser) {
@@ -42,11 +42,11 @@ public class CurrentAuthenticatedUserUtil {
     }
   }
 
-  public static boolean isMostlyCountyAdmin(){
+  public static boolean isMostlyCountyAdmin() {
     return Roles.isMostlyCountyAdmin(getCurrentUser());
   }
 
-  public static boolean isMostlyOfficeAdmin(){
+  public static boolean isMostlyOfficeAdmin() {
     return Roles.isMostlyOfficeAdmin(getCurrentUser());
   }
 
