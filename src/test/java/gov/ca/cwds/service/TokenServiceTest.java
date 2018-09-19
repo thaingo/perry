@@ -4,6 +4,7 @@ import gov.ca.cwds.PerryProperties;
 import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.data.reissue.TokenRepository;
 import gov.ca.cwds.data.reissue.model.PerryTokenEntity;
+import gov.ca.cwds.idm.event.UserLoggedInEventListener;
 import gov.ca.cwds.security.jwt.JwtConfiguration;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,12 +28,14 @@ import org.springframework.transaction.TransactionSystemException;
   excludeAutoConfiguration = {FlywayAutoConfiguration.class, LiquibaseAutoConfiguration.class}
 )
 @DirtiesContext
-@ActiveProfiles("dev")
+@ActiveProfiles("dev,idm")
 public class TokenServiceTest {
 
   @Autowired private TokenService tokenService;
   @Autowired private PerryProperties properties;
   @Autowired TokenRepository tokenRepository;
+  @Autowired
+  UserLoggedInEventListener userLoggedInEventListener;
 
   @MockBean private HealthEndpoint healthEndpoint;
 

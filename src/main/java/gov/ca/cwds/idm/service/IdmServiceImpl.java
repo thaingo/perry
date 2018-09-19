@@ -92,17 +92,23 @@ public class IdmServiceImpl implements IdmService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(IdmServiceImpl.class);
 
-  @Autowired private CognitoServiceFacade cognitoServiceFacade;
+  @Autowired
+  private CognitoServiceFacade cognitoServiceFacade;
 
-  @Autowired private CwsUserInfoService cwsUserInfoService;
+  @Autowired
+  private CwsUserInfoService cwsUserInfoService;
 
-  @Autowired private PerryProperties configuration;
+  @Autowired
+  private PerryProperties configuration;
 
-  @Autowired private MessagesService messages;
+  @Autowired
+  private MessagesService messages;
 
-  @Autowired private UserLogService userLogService;
+  @Autowired
+  private UserLogService userLogService;
 
-  @Autowired private SearchService searchService;
+  @Autowired
+  private SearchService searchService;
 
   @Override
   public User findUser(String id) {
@@ -122,12 +128,14 @@ public class IdmServiceImpl implements IdmService {
     OptionalExecution<UserEnableStatusRequest, Boolean> updateUserEnabledExecution =
         executeUpdateEnableStatusOptionally(userId, updateUserDto, existedCognitoUser);
 
-    if (updateAttributesStatus == WAS_NOT_EXECUTED && updateUserEnabledExecution.getExecutionStatus() == FAIL) {
-      throw (RuntimeException)updateUserEnabledExecution.getException();
+    if (updateAttributesStatus == WAS_NOT_EXECUTED
+        && updateUserEnabledExecution.getExecutionStatus() == FAIL) {
+      throw (RuntimeException) updateUserEnabledExecution.getException();
     }
 
     PutInSearchExecution<String> doraExecution = null;
-    if(updateAttributesStatus == SUCCESS || updateUserEnabledExecution.getExecutionStatus() == SUCCESS) {
+    if (updateAttributesStatus == SUCCESS
+        || updateUserEnabledExecution.getExecutionStatus() == SUCCESS) {
       doraExecution = updateUserInSearch(userId);
     } else {
       LOGGER.info(messages.get(USER_NOTHING_UPDATED, userId));
@@ -140,10 +148,11 @@ public class IdmServiceImpl implements IdmService {
         doraExecution);
   }
 
-  private ExecutionStatus updateUserAttributes(String userId, UserUpdate updateUserDto, UserType existedCognitoUser) {
+  private ExecutionStatus updateUserAttributes(String userId, UserUpdate updateUserDto,
+      UserType existedCognitoUser) {
     ExecutionStatus updateAttributesStatus = WAS_NOT_EXECUTED;
 
-    if(cognitoServiceFacade.updateUserAttributes(userId, existedCognitoUser, updateUserDto)) {
+    if (cognitoServiceFacade.updateUserAttributes(userId, existedCognitoUser, updateUserDto)) {
       updateAttributesStatus = SUCCESS;
     }
     return updateAttributesStatus;
@@ -163,12 +172,12 @@ public class IdmServiceImpl implements IdmService {
     ExecutionStatus logDbStatus = WAS_NOT_EXECUTED;
     Exception logDbException = null;
 
-    if(doraExecution != null) {
+    if (doraExecution != null) {
       doraStatus = doraExecution.getExecutionStatus();
       doraException = doraExecution.getException();
 
       OptionalExecution<String, UserLog> userLogExecution = doraExecution.getUserLogExecution();
-      if(userLogExecution != null) {
+      if (userLogExecution != null) {
         logDbStatus = userLogExecution.getExecutionStatus();
         logDbException = userLogExecution.getException();
       }
@@ -237,13 +246,15 @@ public class IdmServiceImpl implements IdmService {
       protected Boolean tryMethod(UserEnableStatusRequest userEnableStatusRequest) {
         return cognitoServiceFacade.changeUserEnabledStatus(userEnableStatusRequest);
       }
+
       @Override
       protected void catchMethod(Exception e) {
         LOGGER.error(messages.get(ERROR_UPDATE_USER_ENABLED_STATUS, userId), e);
       }
     };
 
-    if (updateUserEnabledExecution.getExecutionStatus() == SUCCESS && !updateUserEnabledExecution.getResult()) {
+    if (updateUserEnabledExecution.getExecutionStatus() == SUCCESS && !updateUserEnabledExecution
+        .getResult()) {
       updateUserEnabledExecution.setExecutionStatus(WAS_NOT_EXECUTED);
     }
     return updateUserEnabledExecution;
@@ -269,7 +280,7 @@ public class IdmServiceImpl implements IdmService {
             userId, msg, errorCode, doraExecution.getException());
       } else {//logging in db failed
         MessageCode errorCode = USER_CREATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
-            String msg = messages.get(errorCode, userId);
+        String msg = messages.get(errorCode, userId);
         throw new PartialSuccessException(
             userId,
             msg,
@@ -282,8 +293,9 @@ public class IdmServiceImpl implements IdmService {
 
   @Override
   public UsersPage getUserPage(String paginationToken) {
-    CognitoUserPage userPage = cognitoServiceFacade.searchPage(CognitoUsersSearchCriteriaUtil.composeToGetPage(paginationToken));
-    List<User> users = enrichCognitoUsersByCws(userPage.getUsers());
+    CognitoUserPage userPage = cognitoServiceFacade
+        .searchPage(CognitoUsersSearchCriteriaUtil.composeToGetPage(paginationToken));
+    List<User> users = enrichCognitoUsers(userPage.getUsers());
     return new UsersPage(users, userPage.getPaginationToken());
   }
 
@@ -294,12 +306,12 @@ public class IdmServiceImpl implements IdmService {
 
     List<UserType> cognitoUsers = new ArrayList<>();
 
-    for(String value : values) {
+    for (String value : values) {
       CognitoUsersSearchCriteria cognitoSearchCriteria =
           CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByAttribute(searchAttr, value);
       cognitoUsers.addAll(cognitoServiceFacade.searchAllPages(cognitoSearchCriteria));
     }
-    return enrichCognitoUsersByCws(cognitoUsers);
+    return enrichCognitoUsers(cognitoUsers);
   }
 
   @Override
@@ -335,7 +347,8 @@ public class IdmServiceImpl implements IdmService {
     throw e;
   }
 
-  private static List<UserIdAndOperation> filterIdAndOperationList(List<UserIdAndOperation> inputList) {
+  private static List<UserIdAndOperation> filterIdAndOperationList(
+      List<UserIdAndOperation> inputList) {
     Map<String, OperationType> idAndOperationMap = new HashMap<>();
 
     for (UserIdAndOperation userIdAndOperation : inputList) {
@@ -373,7 +386,8 @@ public class IdmServiceImpl implements IdmService {
     }
 
     User user = composeUser(cwsUser, email);
-    if (!Objects.equals(CurrentAuthenticatedUserUtil.getCurrentUserCountyName(), user.getCountyName())) {
+    if (!Objects
+        .equals(CurrentAuthenticatedUserUtil.getCurrentUserCountyName(), user.getCountyName())) {
       return composeNegativeResultWithMessage(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY);
     }
 
@@ -386,7 +400,7 @@ public class IdmServiceImpl implements IdmService {
     Collection<UserType> cognitoUsersByRacfId =
         cognitoServiceFacade.searchAllPages(composeToGetFirstPageByRacfId(toUpperCase(racfId)));
     return !CollectionUtils.isEmpty(cognitoUsersByRacfId)
-                          && isActiveUserPresent(cognitoUsersByRacfId);
+        && isActiveUserPresent(cognitoUsersByRacfId);
   }
 
   private static boolean isActiveUserPresent(Collection<UserType> cognitoUsers) {
@@ -396,7 +410,7 @@ public class IdmServiceImpl implements IdmService {
   }
 
   static Set<String> transformSearchValues(Set<String> values, StandardUserAttribute searchAttr) {
-    if(searchAttr == RACFID_STANDARD) {
+    if (searchAttr == RACFID_STANDARD) {
       values = applyFunctionToValues(values, Utils::toUpperCase);
     } else if (searchAttr == EMAIL) {
       values = applyFunctionToValues(values, Utils::toLowerCase);
@@ -404,11 +418,12 @@ public class IdmServiceImpl implements IdmService {
     return values;
   }
 
-  private static Set<String> applyFunctionToValues(Set<String> values, Function<String, String> function) {
+  private static Set<String> applyFunctionToValues(Set<String> values,
+      Function<String, String> function) {
     return values.stream().map(function).collect(toSet());
   }
 
-  private List<User> enrichCognitoUsersByCws(Collection<UserType> cognitoUsers) {
+  private List<User> enrichCognitoUsers(Collection<UserType> cognitoUsers) {
     Map<String, String> userNameToRacfId = new HashMap<>(cognitoUsers.size());
     for (UserType user : cognitoUsers) {
       userNameToRacfId.put(user.getUsername(), getRACFId(user));
@@ -422,21 +437,27 @@ public class IdmServiceImpl implements IdmService {
     IdmMappingScript mapping = configuration.getIdentityManager().getIdmMapping();
     return cognitoUsers
         .stream()
-        .map( e -> { try {
-          return mapping.map(e, idToCmsUser.get(userNameToRacfId.get(e.getUsername())));
-        } catch (ScriptException ex) {
-          LOGGER.error(messages.get(IDM_MAPPING_SCRIPT_ERROR));
-          throw new PerryException(ex.getMessage(), ex);
-        }}).collect(Collectors.toList());
+        .map(e -> {
+          try {
+            User user = mapping.map(e, idToCmsUser.get(userNameToRacfId.get(e.getUsername())));
+            //Below possible bottleneck introduced O(n)
+            enrichUserByLastLoginDateTime(user);
+            return user;
+          } catch (ScriptException ex) {
+            LOGGER.error(messages.get(IDM_MAPPING_SCRIPT_ERROR));
+            throw new PerryException(ex.getMessage(), ex);
+          }
+        }).collect(Collectors.toList());
   }
 
   private PutInSearchExecution<String> updateUserInSearch(String id) {
-    return new PutInSearchExecution<String>(id){
+    return new PutInSearchExecution<String>(id) {
       @Override
       protected ResponseEntity<String> tryMethod(String id) {
         User updatedUser = findUser(id);
         return searchService.updateUser(updatedUser);
       }
+
       @Override
       protected void catchMethod(Exception e) {
         String msg = messages.get(UNABLE_UPDATE_IDM_USER_IN_ES, id);
@@ -447,12 +468,13 @@ public class IdmServiceImpl implements IdmService {
   }
 
   private PutInSearchExecution createUserInSearch(UserType userType) {
-    return new PutInSearchExecution<UserType>(userType){
+    return new PutInSearchExecution<UserType>(userType) {
       @Override
       protected ResponseEntity<String> tryMethod(UserType userType) {
         User user = enrichCognitoUser(userType);
         return searchService.createUser(user);
       }
+
       @Override
       protected void catchMethod(Exception e) {
         String msg = messages.get(UNABLE_CREATE_IDM_USER_IN_ES, userType.getUsername());
@@ -506,11 +528,18 @@ public class IdmServiceImpl implements IdmService {
     String racfId = getRACFId(cognitoUser);
     CwsUserInfo cwsUser = getCwsUserByRacfId(racfId);
     try {
-      return configuration.getIdentityManager().getIdmMapping().map(cognitoUser, cwsUser);
+      User user = configuration.getIdentityManager().getIdmMapping().map(cognitoUser, cwsUser);
+      enrichUserByLastLoginDateTime(user);
+      return user;
     } catch (ScriptException e) {
       LOGGER.error(messages.get(IDM_MAPPING_SCRIPT_ERROR));
       throw new PerryException(e.getMessage(), e);
     }
+  }
+
+  private void enrichUserByLastLoginDateTime(User user) {
+    cognitoServiceFacade.getLastAuthenticatedTimestamp(user.getId())
+        .ifPresent(user::setLastLoginDateTime);
   }
 
   private CwsUserInfo getCwsUserByRacfId(String racfId) {

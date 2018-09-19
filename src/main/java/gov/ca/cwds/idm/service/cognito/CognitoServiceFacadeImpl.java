@@ -2,6 +2,7 @@ package gov.ca.cwds.idm.service.cognito;
 
 import static gov.ca.cwds.idm.persistence.ns.OperationType.GET;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
+import static gov.ca.cwds.idm.service.cognito.UserLastAuthenticatedTimestampExtractor.extractUserLastAuthenticatedTimestamp;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.EMAIL_DELIVERY;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.buildCreateUserAttributes;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.createPermissionsAttribute;
@@ -28,6 +29,7 @@ import com.amazonaws.services.cognitoidp.model.AdminDisableUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminEnableUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserResult;
+import com.amazonaws.services.cognitoidp.model.AdminListDevicesRequest;
 import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesRequest;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.DescribeUserPoolRequest;
@@ -49,8 +51,10 @@ import gov.ca.cwds.rest.api.domain.UserAlreadyExistsException;
 import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
 import gov.ca.cwds.rest.api.domain.UserNotFoundPerryException;
 import gov.ca.cwds.service.messages.MessagesService;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import javax.annotation.PostConstruct;
@@ -114,6 +118,7 @@ class CognitoServiceFacadeImpl implements CognitoServiceFacade {
   }
 
   //method is used in annotation, don't remove it
+
   /**
    * {@inheritDoc}
    */
@@ -283,7 +288,17 @@ class CognitoServiceFacadeImpl implements CognitoServiceFacade {
    * {@inheritDoc}
    */
   @Override
-  public ListUsersRequest composeListUsersRequest(CognitoUsersSearchCriteria criteria) {
+  public Optional<LocalDateTime> getLastAuthenticatedTimestamp(String userId) {
+    AdminListDevicesRequest request = composeAdminListDevicesRequest(userId);
+    return extractUserLastAuthenticatedTimestamp(identityProvider.adminListDevices(request));
+  }
+
+  AdminListDevicesRequest composeAdminListDevicesRequest(String userId) {
+    return new AdminListDevicesRequest().withUsername(userId)
+        .withUserPoolId(properties.getUserpool());
+  }
+
+  ListUsersRequest composeListUsersRequest(CognitoUsersSearchCriteria criteria) {
     ListUsersRequest request = new ListUsersRequest().withUserPoolId(properties.getUserpool());
     if (criteria.getPageSize() != null) {
       request = request.withLimit(criteria.getPageSize());
@@ -335,4 +350,5 @@ class CognitoServiceFacadeImpl implements CognitoServiceFacade {
       throw new PerryException(msg, e);
     }
   }
+
 }
