@@ -44,6 +44,7 @@ import liquibase.util.StringUtils;
 public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
 
   static final String USER_NO_RACFID_ID = "2be3221f-8c2f-4386-8a95-a68f0282efb0";
+  static final String USER_CALS_EXTERNAL = "2be3551f-8c9w-4386-8a95-a68f0777efb0";
   static final String USER_WITH_RACFID_ID = "24051d54-9321-4dd2-a92f-6425d6c455be";
   static final String USER_WITH_RACFID_AND_DB_DATA_ID =
       "d740ec1d-80ae-4d84-a8c4-9bed7a942f5b";
@@ -87,6 +88,22 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
             WithMockCustomUser.COUNTY,
             "RFA-rollout:Snapshot-rollout:",
             "CWS-worker:County-admin",
+            null,
+            null);
+
+    TestUser userWithCalsExternalUserRole =
+        testUser(
+            USER_CALS_EXTERNAL,
+            Boolean.TRUE,
+            "FORCE_CHANGE_PASSWORD",
+            date(2018, 5, 4),
+            date(2018, 5, 30),
+            "donzano@gmail.com",
+            "Don",
+            "Manzano",
+            WithMockCustomUser.COUNTY,
+            "RFA-rollout:Snapshot-rollout:",
+            "CALS-external-worker",
             null,
             null);
 

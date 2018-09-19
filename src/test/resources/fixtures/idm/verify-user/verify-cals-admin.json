@@ -1,0 +1,5 @@
+  {
+    "verification_passed": false,
+    "verification_message": "This operation is not supported for your user",
+    "error_code": "CAP-030"
+  }
