@@ -19,7 +19,6 @@ public class Roles {
   public static final String STATE_ADMIN = "State-admin";
   public static final String OFFICE_ADMIN = "Office-admin";
   public static final String CALS_ADMIN = "CALS-admin";
-  public static final String CALS_EXTERNAL_USER = "CALS-external-user";
 
   private Roles() {}
 

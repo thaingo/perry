@@ -1,7 +1,6 @@
 package gov.ca.cwds.config.api.idm;
 
 import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
-import static gov.ca.cwds.config.api.idm.Roles.CALS_EXTERNAL_USER;
 import static gov.ca.cwds.config.api.idm.Roles.CALS_EXTERNAL_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;

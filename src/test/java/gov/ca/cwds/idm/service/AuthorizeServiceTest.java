@@ -105,14 +105,14 @@ public class AuthorizeServiceTest {
 
   @Test
   public void testCalsAdminCanView() {
-    User user = withRole(Roles.CALS_EXTERNAL_USER);
-    assertTrue(service.calsAdminCanView(user));
+    User user = withRole(Roles.CALS_EXTERNAL_WORKER);
+    assertTrue(service.isCalsExternalWorker(user));
   }
 
   @Test
   public void testCalsAdminCanNotView() {
     User user = withRole(Roles.CWS_WORKER);
-    assertFalse(service.calsAdminCanView(user));
+    assertFalse(service.isCalsExternalWorker(user));
   }
 
   private User user(String countyName, String officeId) {

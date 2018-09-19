@@ -67,8 +67,8 @@ public class AuthorizeService {
     return byUserAndAdmin(user, admin);
   }
 
-  boolean calsAdminCanView(User user) {
-    return user.getRoles().contains(Roles.CALS_EXTERNAL_USER);
+  boolean isCalsExternalWorker(User user) {
+    return user.getRoles().contains(Roles.CALS_EXTERNAL_WORKER);
   }
 
   boolean byUserAndAdmin(User user, UniversalUserToken admin) {
@@ -88,7 +88,7 @@ public class AuthorizeService {
   }
 
   private boolean isAuthorizedAsCalsAdmin(User user, UniversalUserToken admin) {
-    return isCalsAdmin(admin) && calsAdminCanView(user);
+    return isCalsAdmin(admin) && isCalsExternalWorker(user);
   }
 
   static boolean areNotNullAndEquals(String str1, String str2) {
