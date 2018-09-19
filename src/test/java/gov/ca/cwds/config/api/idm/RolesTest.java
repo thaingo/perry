@@ -11,6 +11,7 @@ import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.getAdminRoles;
 import static gov.ca.cwds.config.api.idm.Roles.getStrongestAdminRole;
 import static gov.ca.cwds.config.api.idm.Roles.isAdmin;
+import static gov.ca.cwds.config.api.idm.Roles.isCalsAdmin;
 import static gov.ca.cwds.config.api.idm.Roles.isMostlyCountyAdmin;
 import static gov.ca.cwds.config.api.idm.Roles.isMostlyOfficeAdmin;
 import static gov.ca.cwds.config.api.idm.Roles.isMostlyStateAdmin;
@@ -32,11 +33,10 @@ public class RolesTest {
   @Test
   public void testGetAdminRoles() {
     Set<String> adminRoles = getAdminRoles();
-    assertThat(adminRoles, hasSize(4));
+    assertThat(adminRoles, hasSize(3));
     assertTrue(adminRoles.contains(COUNTY_ADMIN));
     assertTrue(adminRoles.contains(STATE_ADMIN));
     assertTrue(adminRoles.contains(OFFICE_ADMIN));
-    assertTrue(adminRoles.contains(CALS_ADMIN));
   }
 
   @Test
@@ -48,9 +48,6 @@ public class RolesTest {
     assertTrue(isAdmin(userToken(CWS_WORKER, COUNTY_ADMIN)));
     assertTrue(isAdmin(userToken(STATE_ADMIN, OFFICE_ADMIN)));
     assertTrue(isAdmin(userToken(OFFICE_ADMIN)));
-    assertTrue(isAdmin(userToken(CALS_ADMIN)));
-    assertTrue(isAdmin(userToken(CALS_ADMIN, CWS_WORKER)));
-    assertTrue(isAdmin(userToken(CALS_ADMIN, CALS_EXTERNAL_USER)));
   }
 
   @Test
@@ -103,6 +100,16 @@ public class RolesTest {
     assertFalse(isMostlyOfficeAdmin(userToken(IDM_JOB)));
     assertFalse(isMostlyOfficeAdmin(userToken(CALS_ADMIN)));
     assertFalse(isMostlyOfficeAdmin(userToken()));
+  }
+
+  @Test
+  public void testIsCalsAdmin() {
+    assertTrue(isCalsAdmin(userToken(CALS_ADMIN)));
+    assertTrue(isCalsAdmin(userToken(CALS_ADMIN, OFFICE_ADMIN)));
+    assertTrue(isCalsAdmin(userToken(STATE_ADMIN, CALS_ADMIN)));
+    assertFalse(isCalsAdmin(userToken(IDM_JOB)));
+    assertFalse(isCalsAdmin(userToken(OFFICE_ADMIN, COUNTY_ADMIN)));
+    assertFalse(isCalsAdmin(userToken()));
   }
 
   static private UniversalUserToken userToken(String... roles) {

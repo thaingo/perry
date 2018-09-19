@@ -68,6 +68,6 @@ public class Roles {
   }
 
   static Set<String> getAdminRoles() {
-    return toSet(COUNTY_ADMIN, STATE_ADMIN, OFFICE_ADMIN, CALS_ADMIN);
+    return toSet(COUNTY_ADMIN, STATE_ADMIN, OFFICE_ADMIN);
   }
 }

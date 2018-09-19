@@ -223,7 +223,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @Test
   @WithMockCustomUser(roles = {CALS_ADMIN})
   public void testGetPermissionsCalsAdmin() throws Exception {
-    assertGetPermissionsSuccess();
+    assertGetPermissionsUnauthorized();
   }
 
   @Test
@@ -1021,15 +1021,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @Test
   @WithMockCustomUser(roles = {CALS_ADMIN})
   public void testVerifyUsersCalsAdmin() throws Exception {
-    MvcResult result =
-        mockMvc
-            .perform(
-                MockMvcRequestBuilders.get("/idm/users/verify?email=test@test.com&racfid=SMITHB3"))
-            .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
-            .andReturn();
-
-    assertNonStrict(result, "fixtures/idm/verify-user/verify-cals-admin.json");
+    assertVerifyUserUnauthorized();
   }
 
   @Test

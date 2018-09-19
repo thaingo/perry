@@ -1,11 +1,11 @@
 package gov.ca.cwds.idm.service;
 
+import static gov.ca.cwds.config.api.idm.Roles.isCalsAdmin;
 import static gov.ca.cwds.config.api.idm.Roles.isMostlyCountyAdmin;
 import static gov.ca.cwds.config.api.idm.Roles.isMostlyOfficeAdmin;
 import static gov.ca.cwds.config.api.idm.Roles.isMostlyStateAdmin;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_OFFICE;
-import static gov.ca.cwds.service.messages.MessageCode.OPERATION_NOT_SUPPORTED;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getAdminOfficeIds;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCountyName;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
@@ -31,20 +31,14 @@ public class AuthorizeService {
   private MappingService mappingService;
 
   public boolean findUser(User user) {
-    if (isCalsAdmin()) {
-      return calsAdminCanView(user);
-    }
     return authorizeByUser(user);
   }
 
   public Optional<MessageCode> verifyUser(User user) {
-    if (isCalsAdmin()) {
-      return Optional.of(OPERATION_NOT_SUPPORTED);
-    }
-    if(!authorizeByUser(user)) {
+    if (!authorizeByUser(user)) {
       if (CurrentAuthenticatedUserUtil.isMostlyCountyAdmin()) {
         return Optional.of(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY);
-      } else if(CurrentAuthenticatedUserUtil.isMostlyOfficeAdmin()) {
+      } else if (CurrentAuthenticatedUserUtil.isMostlyOfficeAdmin()) {
         return Optional.of(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_OFFICE);
       }
     }
@@ -52,21 +46,15 @@ public class AuthorizeService {
   }
 
   public boolean createUser(User user) {
-    if(isCalsAdmin()) {
-      return false;
-    }
     return authorizeByUser(user);
   }
 
   public boolean updateUser(String userId) {
-    if(isCalsAdmin()) {
-      return false;
-    }
     UserType cognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
     UniversalUserToken admin = getCurrentUser();
     User user;
 
-    if(isMostlyOfficeAdmin(admin)){
+    if (isMostlyOfficeAdmin(admin)) {
       user = mappingService.toUser(cognitoUser);
     } else {
       user = mappingService.toUserWithoutCwsData(cognitoUser);
@@ -84,9 +72,8 @@ public class AuthorizeService {
   }
 
   boolean byUserAndAdmin(User user, UniversalUserToken admin) {
-    if (isMostlyStateAdmin(admin)) {
+    if (isMostlyStateAdmin(admin)  || isAuthorizedAsCalsAdmin(user, admin)) {
       return true;
-
     } else if (isMostlyCountyAdmin(admin)) {
       String userCountyName = user.getCountyName();
       String adminCountyName = getCountyName(admin);
@@ -100,12 +87,12 @@ public class AuthorizeService {
     return false;
   }
 
-  private boolean isCalsAdmin() {
-    return Roles.isCalsAdmin(getCurrentUser());
+  private boolean isAuthorizedAsCalsAdmin(User user, UniversalUserToken admin) {
+    return isCalsAdmin(admin) && calsAdminCanView(user);
   }
 
   static boolean areNotNullAndEquals(String str1, String str2) {
-    return str1 != null && str2 != null && str1.equals(str2);
+    return str1 != null && str1.equals(str2);
   }
 
   static boolean areNotNullAndContains(Set<String> set, String str) {
@@ -113,8 +100,7 @@ public class AuthorizeService {
   }
 
   @Autowired
-  public void setCognitoServiceFacade(
-      CognitoServiceFacade cognitoServiceFacade) {
+  public void setCognitoServiceFacade(CognitoServiceFacade cognitoServiceFacade) {
     this.cognitoServiceFacade = cognitoServiceFacade;
   }
 
