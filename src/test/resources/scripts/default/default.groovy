@@ -1,5 +1,5 @@
-import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType
 import gov.ca.cwds.config.api.idm.Roles
+import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType
 
 def authorization = user.authorization
 def token

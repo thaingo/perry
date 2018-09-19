@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 @Service(value = "authorize")
 @Profile("idm")
 public class AuthorizeService {
+
   private CognitoServiceFacade cognitoServiceFacade;
 
   private MappingService mappingService;
