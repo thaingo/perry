@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 @Service(value = "authorize")
 @Profile("idm")
 public class AuthorizeService {
+
   private CognitoServiceFacade cognitoServiceFacade;
 
   private MappingService mappingService;
@@ -33,10 +34,10 @@ public class AuthorizeService {
   }
 
   public Optional<MessageCode> verifyUser(User user) {
-    if(!authorizeByUser(user)) {
+    if (!authorizeByUser(user)) {
       if (CurrentAuthenticatedUserUtil.isMostlyCountyAdmin()) {
         return Optional.of(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY);
-      } else if(CurrentAuthenticatedUserUtil.isMostlyOfficeAdmin()) {
+      } else if (CurrentAuthenticatedUserUtil.isMostlyOfficeAdmin()) {
         return Optional.of(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_OFFICE);
       }
     }
@@ -52,7 +53,7 @@ public class AuthorizeService {
     UniversalUserToken admin = getCurrentUser();
     User user;
 
-    if(isMostlyOfficeAdmin(admin)){
+    if (isMostlyOfficeAdmin(admin)) {
       user = mappingService.toUser(cognitoUser);
     } else {
       user = mappingService.toUserWithoutCwsData(cognitoUser);

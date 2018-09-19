@@ -1,22 +1,22 @@
 package gov.ca.cwds.idm;
 
+import static gov.ca.cwds.Constants.ABSENT_USER_ID;
+import static gov.ca.cwds.Constants.ERROR_USER_ID;
+import static gov.ca.cwds.Constants.ES_ERROR_CREATE_USER_EMAIL;
+import static gov.ca.cwds.Constants.NEW_USER_ES_FAIL_ID;
+import static gov.ca.cwds.Constants.NEW_USER_SUCCESS_ID;
+import static gov.ca.cwds.Constants.SOME_PAGINATION_TOKEN;
+import static gov.ca.cwds.Constants.USERPOOL;
+import static gov.ca.cwds.Constants.USER_NO_RACFID_ID;
+import static gov.ca.cwds.Constants.USER_WITH_NO_PHONE_EXTENSION;
+import static gov.ca.cwds.Constants.USER_WITH_RACFID_AND_DB_DATA_ID;
+import static gov.ca.cwds.Constants.USER_WITH_RACFID_ID;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.idm.IdmResource.DATETIME_FORMAT_PATTERN;
 import static gov.ca.cwds.idm.IdmResourceTest.DORA_WS_MAX_ATTEMPTS;
 import static gov.ca.cwds.idm.IdmResourceTest.IDM_BASIC_AUTH_PASS;
 import static gov.ca.cwds.idm.IdmResourceTest.IDM_BASIC_AUTH_USER;
-import static gov.ca.cwds.idm.TestCognitoServiceFacade.ABSENT_USER_ID;
-import static gov.ca.cwds.idm.TestCognitoServiceFacade.ERROR_USER_ID;
-import static gov.ca.cwds.idm.TestCognitoServiceFacade.ES_ERROR_CREATE_USER_EMAIL;
-import static gov.ca.cwds.idm.TestCognitoServiceFacade.NEW_USER_ES_FAIL_ID;
-import static gov.ca.cwds.idm.TestCognitoServiceFacade.NEW_USER_SUCCESS_ID;
-import static gov.ca.cwds.idm.TestCognitoServiceFacade.SOME_PAGINATION_TOKEN;
-import static gov.ca.cwds.idm.TestCognitoServiceFacade.USERPOOL;
-import static gov.ca.cwds.idm.TestCognitoServiceFacade.USER_NO_RACFID_ID;
-import static gov.ca.cwds.idm.TestCognitoServiceFacade.USER_WITH_NO_PHONE_EXTENSION;
-import static gov.ca.cwds.idm.TestCognitoServiceFacade.USER_WITH_RACFID_AND_DB_DATA_ID;
-import static gov.ca.cwds.idm.TestCognitoServiceFacade.USER_WITH_RACFID_ID;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.CREATE;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PERMISSIONS;
@@ -75,6 +75,7 @@ import gov.ca.cwds.idm.service.SearchRestSender;
 import gov.ca.cwds.idm.service.SearchService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.SearchProperties;
+import gov.ca.cwds.idm.service.cognito.TestCognitoServiceFacade;
 import gov.ca.cwds.service.messages.MessagesService;
 import java.nio.charset.Charset;
 import java.time.LocalDateTime;
@@ -240,7 +241,8 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @Test
   @WithMockCustomUser(roles = {OFFICE_ADMIN})
   public void testGetUserOfficeAdmin() throws Exception {
-    testGetValidYoloUser(USER_WITH_RACFID_AND_DB_DATA_ID, "fixtures/idm/get-user/with-racfid-and-db-data-valid.json");
+    testGetValidYoloUser(USER_WITH_RACFID_AND_DB_DATA_ID,
+        "fixtures/idm/get-user/with-racfid-and-db-data-valid.json");
   }
 
   @Test
@@ -602,7 +604,8 @@ public class IdmResourceTest extends BaseIntegrationTest {
 
     setDoraSuccess();
 
-    AdminDisableUserRequest disableUserRequest = setDisableUserRequestAndResult(USER_NO_RACFID_ID);
+    AdminDisableUserRequest disableUserRequest = setDisableUserRequestAndResult(
+        USER_NO_RACFID_ID);
 
     mockMvc
         .perform(

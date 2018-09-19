@@ -1,16 +1,15 @@
 package gov.ca.cwds.util;
 
 import gov.ca.cwds.UniversalUserToken;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.map.DeserializationContext;
-import org.codehaus.jackson.map.JsonDeserializer;
-
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.StreamSupport;
+import org.codehaus.jackson.JsonNode;
+import org.codehaus.jackson.JsonParser;
+import org.codehaus.jackson.map.DeserializationContext;
+import org.codehaus.jackson.map.JsonDeserializer;
 
 public class UniversalUserTokenDeserializer extends JsonDeserializer<UniversalUserToken> {
 

@@ -35,27 +35,27 @@ public class Roles {
     return user.getRoles().contains(CALS_EXTERNAL_WORKER);
   }
 
-  public static boolean isMostlyStateAdmin(UniversalUserToken user){
+  public static boolean isMostlyStateAdmin(UniversalUserToken user) {
     return STATE_ADMIN.equals(getStrongestAdminRole(user));
   }
 
-  public static boolean isMostlyCountyAdmin(UniversalUserToken user){
+  public static boolean isMostlyCountyAdmin(UniversalUserToken user) {
     return COUNTY_ADMIN.equals(getStrongestAdminRole(user));
   }
 
-  public static boolean isMostlyOfficeAdmin(UniversalUserToken user){
+  public static boolean isMostlyOfficeAdmin(UniversalUserToken user) {
     return OFFICE_ADMIN.equals(getStrongestAdminRole(user));
   }
 
   static String getStrongestAdminRole(UniversalUserToken user) {
 
-    if(isAdmin(user)) {
+    if (isAdmin(user)) {
       Set<String> roles = user.getRoles();
-      if(roles.contains(STATE_ADMIN)){
+      if (roles.contains(STATE_ADMIN)) {
         return STATE_ADMIN;
-      } else if(roles.contains(COUNTY_ADMIN)) {
+      } else if (roles.contains(COUNTY_ADMIN)) {
         return COUNTY_ADMIN;
-      } else if(roles.contains(OFFICE_ADMIN)){
+      } else if (roles.contains(OFFICE_ADMIN)) {
         return OFFICE_ADMIN;
       }
     }

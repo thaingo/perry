@@ -313,7 +313,6 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
   }
 
   @Autowired
-  @Override
   public void setProperties(CognitoProperties properties) {
     this.properties = properties;
   }
@@ -331,7 +330,6 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
   }
 
   @Autowired
-  @Override
   public void setMessagesService(MessagesService messages) {
     this.messages = messages;
   }

@@ -89,7 +89,8 @@ public class IdmServiceImpl implements IdmService {
   @Autowired
   private CwsUserInfoService cwsUserInfoService;
 
-  @Autowired private MessagesService messages;
+  @Autowired
+  private MessagesService messages;
 
   @Autowired
   private UserLogService userLogService;
@@ -97,14 +98,16 @@ public class IdmServiceImpl implements IdmService {
   @Autowired
   private SearchService searchService;
 
-  @Autowired private AuthorizeService authorizeService;
+  @Autowired
+  private AuthorizeService authorizeService;
 
-  @Autowired private MappingService mappingService;
+  @Autowired
+  private MappingService mappingService;
 
   @Override
   public User findUser(String id) {
     UserType cognitoUser = cognitoServiceFacade.getCognitoUserById(id);
-    return mappingService.toUser(cognitoUser);
+    return enrichUserByLastLoginDateTime(mappingService.toUser(cognitoUser));
   }
 
   @Override
@@ -377,7 +380,7 @@ public class IdmServiceImpl implements IdmService {
 
     User user = composeUser(cwsUser, email);
     Optional<MessageCode> authorizationError = authorizeService.verifyUser(user);
-    if(authorizationError.isPresent()) {
+    if (authorizationError.isPresent()) {
       return composeNegativeResultWithMessage(authorizationError.get());
     }
 
@@ -427,11 +430,17 @@ public class IdmServiceImpl implements IdmService {
     return cognitoUsers
         .stream()
         .map(e -> {
-            User user = mappingService.toUser(e, idToCmsUser.get(userNameToRacfId.get(e.getUsername())))
-            enrichUserByLastLoginDateTime(user);
-            return user;
-          }
+              User user = mappingService
+                  .toUser(e, idToCmsUser.get(userNameToRacfId.get(e.getUsername())));
+              return enrichUserByLastLoginDateTime(user);
+            }
         ).collect(Collectors.toList());
+  }
+
+  private User enrichUserByLastLoginDateTime(User user) {
+    cognitoServiceFacade.getLastAuthenticatedTimestamp(user.getId())
+        .ifPresent(user::setLastLoginDateTime);
+    return user;
   }
 
   private PutInSearchExecution<String> updateUserInSearch(String id) {
