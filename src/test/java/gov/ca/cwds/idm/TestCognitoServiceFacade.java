@@ -1,17 +1,5 @@
-package gov.ca.cwds.idm.service.cognito;
+package gov.ca.cwds.idm;
 
-import static gov.ca.cwds.Constants.ABSENT_USER_ID;
-import static gov.ca.cwds.Constants.ERROR_USER_ID;
-import static gov.ca.cwds.Constants.ES_ERROR_CREATE_USER_EMAIL;
-import static gov.ca.cwds.Constants.NEW_USER_ES_FAIL_ID;
-import static gov.ca.cwds.Constants.NEW_USER_SUCCESS_ID;
-import static gov.ca.cwds.Constants.SOME_PAGINATION_TOKEN;
-import static gov.ca.cwds.Constants.USERPOOL;
-import static gov.ca.cwds.Constants.USER_NO_RACFID_ID;
-import static gov.ca.cwds.Constants.USER_WITH_INACTIVE_STATUS_COGNITO;
-import static gov.ca.cwds.Constants.USER_WITH_NO_PHONE_EXTENSION;
-import static gov.ca.cwds.Constants.USER_WITH_RACFID_AND_DB_DATA_ID;
-import static gov.ca.cwds.Constants.USER_WITH_RACFID_ID;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.COUNTY;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.OFFICE;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PERMISSIONS;
@@ -46,7 +34,9 @@ import com.amazonaws.services.cognitoidp.model.ListUsersRequest;
 import com.amazonaws.services.cognitoidp.model.ListUsersResult;
 import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
 import com.amazonaws.services.cognitoidp.model.UserType;
-import gov.ca.cwds.idm.WithMockCustomUser;
+import gov.ca.cwds.idm.service.cognito.CognitoObjectMapperHolder;
+import gov.ca.cwds.idm.service.cognito.CognitoProperties;
+import gov.ca.cwds.idm.service.cognito.CognitoServiceFacadeImpl;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -58,6 +48,21 @@ import javax.annotation.PostConstruct;
 import liquibase.util.StringUtils;
 
 public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
+
+  static final String USER_NO_RACFID_ID = "2be3221f-8c2f-4386-8a95-a68f0282efb0";
+  static final String USER_WITH_RACFID_ID = "24051d54-9321-4dd2-a92f-6425d6c455be";
+  static final String USER_WITH_RACFID_AND_DB_DATA_ID =
+      "d740ec1d-80ae-4d84-a8c4-9bed7a942f5b";
+  static final String USER_WITH_NO_PHONE_EXTENSION = "d740ec1d-66ae-4d84-a8c4-8bed7a942f5b";
+  static final String NEW_USER_SUCCESS_ID = "17067e4e-270f-4623-b86c-b4d4fa527a34";
+  static final String NEW_USER_ES_FAIL_ID = "08e14c57-6e5e-48dd-8172-e8949c2a7f76";
+  static final String ES_ERROR_CREATE_USER_EMAIL = "es.error@create.com";
+  static final String SOME_PAGINATION_TOKEN = "somePaginationToken";
+  static final String ABSENT_USER_ID = "absentUserId";
+  static final String ERROR_USER_ID = "errorUserId";
+  static final String USER_WITH_INACTIVE_STATUS_COGNITO =
+      "17067e4e-270f-4623-b86c-b4d4fa527a22";
+  static final String USERPOOL = "userpool";
 
   private AWSCognitoIdentityProvider cognito;
 

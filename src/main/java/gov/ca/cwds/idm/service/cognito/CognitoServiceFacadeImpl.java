@@ -30,6 +30,7 @@ import com.amazonaws.services.cognitoidp.model.AdminEnableUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserResult;
 import com.amazonaws.services.cognitoidp.model.AdminListDevicesRequest;
+import com.amazonaws.services.cognitoidp.model.AdminListDevicesResult;
 import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesRequest;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.DescribeUserPoolRequest;
@@ -71,7 +72,6 @@ import org.springframework.stereotype.Service;
 public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CognitoServiceFacadeImpl.class);
-
 
   private CognitoProperties properties;
 
@@ -289,7 +289,8 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
   @Override
   public Optional<LocalDateTime> getLastAuthenticatedTimestamp(String userId) {
     AdminListDevicesRequest request = composeAdminListDevicesRequest(userId);
-    return extractUserLastAuthenticatedTimestamp(identityProvider.adminListDevices(request));
+    AdminListDevicesResult response = identityProvider.adminListDevices(request);
+    return extractUserLastAuthenticatedTimestamp(response);
   }
 
   AdminListDevicesRequest composeAdminListDevicesRequest(String userId) {
@@ -297,7 +298,7 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
         .withUserPoolId(properties.getUserpool());
   }
 
-  ListUsersRequest composeListUsersRequest(CognitoUsersSearchCriteria criteria) {
+  public ListUsersRequest composeListUsersRequest(CognitoUsersSearchCriteria criteria) {
     ListUsersRequest request = new ListUsersRequest().withUserPoolId(properties.getUserpool());
     if (criteria.getPageSize() != null) {
       request = request.withLimit(criteria.getPageSize());
