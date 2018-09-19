@@ -38,11 +38,9 @@ public class AuthorizeService {
   }
 
   public Optional<MessageCode> verifyUser(User user) {
-    if(isCalsAdmin()) {
+    if (isCalsAdmin()) {
       return Optional.of(OPERATION_NOT_SUPPORTED);
     }
-
-  public Optional<MessageCode> verifyUser(User user) {
     if(!authorizeByUser(user)) {
       if (CurrentAuthenticatedUserUtil.isMostlyCountyAdmin()) {
         return Optional.of(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY);
