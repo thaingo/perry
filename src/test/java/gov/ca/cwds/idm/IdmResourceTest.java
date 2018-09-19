@@ -60,6 +60,7 @@ import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesRequest;
 import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesResult;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.InvalidParameterException;
+import com.amazonaws.services.cognitoidp.model.MessageActionType;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import com.amazonaws.services.cognitoidp.model.UsernameExistsException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -77,6 +78,7 @@ import gov.ca.cwds.idm.service.SearchRestSender;
 import gov.ca.cwds.idm.service.SearchService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.SearchProperties;
+import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
 import gov.ca.cwds.service.messages.MessagesService;
 import java.nio.charset.Charset;
 import java.time.LocalDateTime;
@@ -1022,6 +1024,39 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @WithMockCustomUser(roles = {CALS_ADMIN})
   public void testVerifyUsersCalsAdmin() throws Exception {
     assertVerifyUserUnauthorized();
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {"OtherRole"})
+  public void testResendInvitationEmailWithOtherRole() throws Exception {
+    mockMvc
+        .perform(MockMvcRequestBuilders.get("/idm/users/resend/" + USER_WITH_RACFID_ID))
+        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+        .andReturn();
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {STATE_ADMIN}, county = "Madera")
+  public void testResendInvitationEmailWithStateAdmin() throws Exception {
+    AdminCreateUserRequest request =
+        new AdminCreateUserRequest()
+            .withUsername(USER_WITH_RACFID_ID)
+            .withUserPoolId("userpool")
+            .withDesiredDeliveryMediums(CognitoUtils.EMAIL_DELIVERY)
+            .withMessageAction(MessageActionType.RESEND);
+
+    UserType user = new UserType();
+    user.setUsername(USER_WITH_RACFID_ID);
+    user.setEnabled(true);
+    user.setUserStatus("FORCE_CHANGE_PASSWORD");
+
+    AdminCreateUserResult result = new AdminCreateUserResult().withUser(user);
+    when(cognito.adminCreateUser(request)).thenReturn(result);
+
+    mockMvc
+        .perform(MockMvcRequestBuilders.get("/idm/users/resend/" + USER_WITH_RACFID_ID))
+        .andExpect(MockMvcResultMatchers.status().isOk())
+        .andReturn();
   }
 
   @Test
