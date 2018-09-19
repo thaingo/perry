@@ -107,7 +107,7 @@ public class IdmServiceImpl implements IdmService {
   @Override
   public User findUser(String id) {
     UserType cognitoUser = cognitoServiceFacade.getCognitoUserById(id);
-    return enrichUserByLastLoginDateTime(mappingService.toUser(cognitoUser));
+    return enrichUserWithLastLoginDateTime(mappingService.toUser(cognitoUser));
   }
 
   @Override
@@ -432,12 +432,12 @@ public class IdmServiceImpl implements IdmService {
         .map(e -> {
               User user = mappingService
                   .toUser(e, idToCmsUser.get(userNameToRacfId.get(e.getUsername())));
-              return enrichUserByLastLoginDateTime(user);
+          return enrichUserWithLastLoginDateTime(user);
             }
         ).collect(Collectors.toList());
   }
 
-  private User enrichUserByLastLoginDateTime(User user) {
+  private User enrichUserWithLastLoginDateTime(User user) {
     cognitoServiceFacade.getLastAuthenticatedTimestamp(user.getId())
         .ifPresent(user::setLastLoginDateTime);
     return user;
