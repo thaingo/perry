@@ -12,6 +12,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import gov.ca.cwds.UniversalUserToken;
+import gov.ca.cwds.config.api.idm.Roles;
 import gov.ca.cwds.idm.dto.User;
 import java.util.Set;
 import org.junit.Before;
@@ -102,10 +103,28 @@ public class AuthorizeServiceTest {
     assertFalse(service.byUserAndAdmin(user, admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_2"))));
   }
 
+  @Test
+  public void testCalsAdminCanView() {
+    User user = withRole(Roles.CALS_EXTERNAL_USER);
+    assertTrue(service.calsAdminCanView(user));
+  }
+
+  @Test
+  public void testCalsAdminCanNotView() {
+    User user = withRole(Roles.CWS_WORKER);
+    assertFalse(service.calsAdminCanView(user));
+  }
+
   private User user(String countyName, String officeId) {
     User user = new User();
     user.setCountyName(countyName);
     user.setOfficeId(officeId);
+    return user;
+  }
+
+  private User withRole(String role) {
+    User user = new User();
+    user.getRoles().add(role);
     return user;
   }
 

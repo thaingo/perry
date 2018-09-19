@@ -19,9 +19,9 @@ public class Roles {
   public static final String STATE_ADMIN = "State-admin";
   public static final String OFFICE_ADMIN = "Office-admin";
   public static final String CALS_ADMIN = "CALS-admin";
+  public static final String CALS_EXTERNAL_USER = "CALS-external-user";
 
-  private Roles() {
-  }
+  private Roles() {}
 
   public static boolean isAdmin(UniversalUserToken user) {
     Set<String> adminRoles = getAdminRoles();
@@ -36,27 +36,31 @@ public class Roles {
     return user.getRoles().contains(CALS_EXTERNAL_WORKER);
   }
 
-  public static boolean isMostlyStateAdmin(UniversalUserToken user){
+  public static boolean isMostlyStateAdmin(UniversalUserToken user) {
     return STATE_ADMIN.equals(getStrongestAdminRole(user));
   }
 
-  public static boolean isMostlyCountyAdmin(UniversalUserToken user){
+  public static boolean isMostlyCountyAdmin(UniversalUserToken user) {
     return COUNTY_ADMIN.equals(getStrongestAdminRole(user));
   }
 
-  public static boolean isMostlyOfficeAdmin(UniversalUserToken user){
+  public static boolean isMostlyOfficeAdmin(UniversalUserToken user) {
     return OFFICE_ADMIN.equals(getStrongestAdminRole(user));
+  }
+
+  public static boolean isCalsAdmin(UniversalUserToken user) {
+    return user.getRoles().contains(CALS_ADMIN);
   }
 
   static String getStrongestAdminRole(UniversalUserToken user) {
 
-    if(isAdmin(user)) {
+    if (isAdmin(user)) {
       Set<String> roles = user.getRoles();
-      if(roles.contains(STATE_ADMIN)){
+      if (roles.contains(STATE_ADMIN)) {
         return STATE_ADMIN;
-      } else if(roles.contains(COUNTY_ADMIN)) {
+      } else if (roles.contains(COUNTY_ADMIN)) {
         return COUNTY_ADMIN;
-      } else if(roles.contains(OFFICE_ADMIN)){
+      } else if (roles.contains(OFFICE_ADMIN)) {
         return OFFICE_ADMIN;
       }
     }
@@ -64,6 +68,6 @@ public class Roles {
   }
 
   static Set<String> getAdminRoles() {
-    return toSet(COUNTY_ADMIN, STATE_ADMIN, OFFICE_ADMIN);
+    return toSet(COUNTY_ADMIN, STATE_ADMIN, OFFICE_ADMIN, CALS_ADMIN);
   }
 }

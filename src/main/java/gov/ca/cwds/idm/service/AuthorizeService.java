@@ -5,12 +5,14 @@ import static gov.ca.cwds.config.api.idm.Roles.isMostlyOfficeAdmin;
 import static gov.ca.cwds.config.api.idm.Roles.isMostlyStateAdmin;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_OFFICE;
+import static gov.ca.cwds.service.messages.MessageCode.OPERATION_NOT_SUPPORTED;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getAdminOfficeIds;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCountyName;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.UniversalUserToken;
+import gov.ca.cwds.config.api.idm.Roles;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.service.messages.MessageCode;
@@ -29,8 +31,16 @@ public class AuthorizeService {
   private MappingService mappingService;
 
   public boolean findUser(User user) {
+    if (isCalsAdmin()) {
+      return calsAdminCanView(user);
+    }
     return authorizeByUser(user);
   }
+
+  public Optional<MessageCode> verifyUser(User user) {
+    if(isCalsAdmin()) {
+      return Optional.of(OPERATION_NOT_SUPPORTED);
+    }
 
   public Optional<MessageCode> verifyUser(User user) {
     if(!authorizeByUser(user)) {
@@ -44,10 +54,16 @@ public class AuthorizeService {
   }
 
   public boolean createUser(User user) {
+    if(isCalsAdmin()) {
+      return false;
+    }
     return authorizeByUser(user);
   }
 
   public boolean updateUser(String userId) {
+    if(isCalsAdmin()) {
+      return false;
+    }
     UserType cognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
     UniversalUserToken admin = getCurrentUser();
     User user;
@@ -65,6 +81,10 @@ public class AuthorizeService {
     return byUserAndAdmin(user, admin);
   }
 
+  boolean calsAdminCanView(User user) {
+    return user.getRoles().contains(Roles.CALS_EXTERNAL_USER);
+  }
+
   boolean byUserAndAdmin(User user, UniversalUserToken admin) {
     if (isMostlyStateAdmin(admin)) {
       return true;
@@ -80,6 +100,10 @@ public class AuthorizeService {
       return areNotNullAndContains(adminOfficeIds, userOfficeId);
     }
     return false;
+  }
+
+  private boolean isCalsAdmin() {
+    return Roles.isCalsAdmin(getCurrentUser());
   }
 
   static boolean areNotNullAndEquals(String str1, String str2) {

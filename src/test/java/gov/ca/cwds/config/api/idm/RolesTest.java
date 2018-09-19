@@ -1,5 +1,7 @@
 package gov.ca.cwds.config.api.idm;
 
+import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.CALS_EXTERNAL_USER;
 import static gov.ca.cwds.config.api.idm.Roles.CALS_EXTERNAL_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
@@ -30,10 +32,11 @@ public class RolesTest {
   @Test
   public void testGetAdminRoles() {
     Set<String> adminRoles = getAdminRoles();
-    assertThat(adminRoles, hasSize(3));
+    assertThat(adminRoles, hasSize(4));
     assertTrue(adminRoles.contains(COUNTY_ADMIN));
     assertTrue(adminRoles.contains(STATE_ADMIN));
     assertTrue(adminRoles.contains(OFFICE_ADMIN));
+    assertTrue(adminRoles.contains(CALS_ADMIN));
   }
 
   @Test
@@ -45,6 +48,9 @@ public class RolesTest {
     assertTrue(isAdmin(userToken(CWS_WORKER, COUNTY_ADMIN)));
     assertTrue(isAdmin(userToken(STATE_ADMIN, OFFICE_ADMIN)));
     assertTrue(isAdmin(userToken(OFFICE_ADMIN)));
+    assertTrue(isAdmin(userToken(CALS_ADMIN)));
+    assertTrue(isAdmin(userToken(CALS_ADMIN, CWS_WORKER)));
+    assertTrue(isAdmin(userToken(CALS_ADMIN, CALS_EXTERNAL_USER)));
   }
 
   @Test
@@ -77,6 +83,7 @@ public class RolesTest {
     assertTrue(isMostlyStateAdmin(userToken(STATE_ADMIN)));
     assertFalse(isMostlyStateAdmin(userToken(COUNTY_ADMIN, OFFICE_ADMIN)));
     assertFalse(isMostlyStateAdmin(userToken(IDM_JOB)));
+    assertFalse(isMostlyStateAdmin(userToken(CALS_ADMIN)));
     assertFalse(isMostlyStateAdmin(userToken()));
   }
 
@@ -86,6 +93,7 @@ public class RolesTest {
     assertTrue(isMostlyCountyAdmin(userToken(COUNTY_ADMIN)));
     assertFalse(isMostlyCountyAdmin(userToken(OFFICE_ADMIN)));
     assertFalse(isMostlyCountyAdmin(userToken(IDM_JOB)));
+    assertFalse(isMostlyCountyAdmin(userToken(CALS_ADMIN)));
     assertFalse(isMostlyCountyAdmin(userToken()));
   }
 
@@ -93,6 +101,7 @@ public class RolesTest {
   public void testIsMostlyOfficeAdmin() {
     assertTrue(isMostlyOfficeAdmin(userToken(OFFICE_ADMIN)));
     assertFalse(isMostlyOfficeAdmin(userToken(IDM_JOB)));
+    assertFalse(isMostlyOfficeAdmin(userToken(CALS_ADMIN)));
     assertFalse(isMostlyOfficeAdmin(userToken()));
   }
 
