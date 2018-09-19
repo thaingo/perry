@@ -10,6 +10,9 @@ import org.springframework.security.test.context.support.WithSecurityContext;
 @WithSecurityContext(factory = WithMockCustomUserSecurityContextFactory.class)
 public @interface WithMockCustomUser {
   String COUNTY = "Yolo";
-  String county() default COUNTY;
+  String OFFICE_ID = "JzoGSkE05I";
+
   String[] roles() default COUNTY_ADMIN;
+  String county() default COUNTY;
+  String[] adminOfficeIds() default OFFICE_ID;
 }

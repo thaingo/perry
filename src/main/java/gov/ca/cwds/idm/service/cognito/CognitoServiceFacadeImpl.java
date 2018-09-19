@@ -68,14 +68,13 @@ import org.springframework.stereotype.Service;
 @Service(value = "cognitoServiceFacade")
 @Profile("idm")
 @SuppressWarnings({"fb-contrib:EXS_EXCEPTION_SOFTENING_NO_CONSTRAINTS"})
-class CognitoServiceFacadeImpl implements CognitoServiceFacade {
+public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CognitoServiceFacadeImpl.class);
 
-  @Autowired
+
   private CognitoProperties properties;
 
-  @Autowired
   private MessagesService messages;
 
   private AWSCognitoIdentityProvider identityProvider;
@@ -313,6 +312,8 @@ class CognitoServiceFacadeImpl implements CognitoServiceFacade {
     return request;
   }
 
+  @Autowired
+  @Override
   public void setProperties(CognitoProperties properties) {
     this.properties = properties;
   }
@@ -325,6 +326,12 @@ class CognitoServiceFacadeImpl implements CognitoServiceFacade {
     this.identityProvider = identityProvider;
   }
 
+  public void setMessages(MessagesService messages) {
+    this.messages = messages;
+  }
+
+  @Autowired
+  @Override
   public void setMessagesService(MessagesService messages) {
     this.messages = messages;
   }

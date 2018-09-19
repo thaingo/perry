@@ -13,16 +13,17 @@ import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface IdmService {
-  @PostAuthorize("returnObject.countyName == principal.getParameter('county_name')")
+  @PostAuthorize("@authorize.findUser(returnObject)")
   User findUser(String id);
 
-  void updateUser(String id, UserUpdate updateUserDto);
+  @PreAuthorize("@authorize.updateUser(#id)")
+  void updateUser(@P("id")String id, UserUpdate updateUserDto);
 
   UserVerificationResult verifyUser(String racfId, String email);
 
   UsersPage getUserPage(String paginationToken);
 
-  @PreAuthorize("#user.countyName == principal.getParameter('county_name')")
+  @PreAuthorize("@authorize.createUser(#user)")
   String createUser(@P("user") User user);
 
   List<User> searchUsers(UsersSearchCriteria usersSearchCriteria);

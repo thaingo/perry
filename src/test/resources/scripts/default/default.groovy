@@ -69,7 +69,7 @@ if (Roles.isAdmin(user)) {
 }
 
 if (Roles.isOfficeAdmin(user)) {
-    token.adminOfficeIds = [user.parameters["custom:office"]]
+    token.admin_office_ids = [user.parameters["custom:office"]]
 }
 
 return token

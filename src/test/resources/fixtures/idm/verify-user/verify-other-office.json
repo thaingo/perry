@@ -1,0 +1,5 @@
+  {
+    "verification_passed": false,
+    "verification_message": "You are not authorized to add user from Office other than yours",
+    "error_code": "CAP-029"
+  }
