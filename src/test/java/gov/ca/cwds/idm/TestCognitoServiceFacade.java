@@ -103,7 +103,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
             "Manzano",
             WithMockCustomUser.COUNTY,
             "RFA-rollout:Snapshot-rollout:",
-            "CALS-external-user",
+            "CALS-external-worker",
             null,
             null);
 

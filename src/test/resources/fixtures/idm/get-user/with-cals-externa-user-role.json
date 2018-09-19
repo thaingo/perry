@@ -13,6 +13,6 @@
     "RFA-rollout"
   ],
   "roles": [
-    "CALS-external-user"
+    "CALS-external-worker"
   ]
 }
