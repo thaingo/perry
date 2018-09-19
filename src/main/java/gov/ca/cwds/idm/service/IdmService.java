@@ -17,7 +17,7 @@ public interface IdmService {
   @PostAuthorize("@authorize.findUser(returnObject)")
   User findUser(String id);
 
-  @PreAuthorize("@authorize.updateUser(#id)")
+  @PreAuthorize("@authorize.authorizeByUserId(#id)")
   void updateUser(@P("id") String id, UserUpdate updateUserDto);
 
   UserVerificationResult verifyUser(String racfId, String email);
@@ -31,6 +31,6 @@ public interface IdmService {
 
   List<UserAndOperation> getFailedOperations(LocalDateTime lastJobTime);
 
-  @PreAuthorize("@authorize.resendInvitationMessage(#id)")
+  @PreAuthorize("@authorize.authorizeByUserId(#id)")
   void resendInvitationMessage(@P("id") String id);
 }
