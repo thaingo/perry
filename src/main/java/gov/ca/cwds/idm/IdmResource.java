@@ -148,7 +148,7 @@ public class IdmResource {
       @ApiResponse(code = 404, message = "Not found")
     }
   )
-  @PreAuthorize("@roles.isAdmin(principal)")
+  @PreAuthorize("@roles.isAdmin(principal) || @roles.isCalsAdmin(principal)")
   public ResponseEntity<User> getUser(
       @ApiParam(required = true, value = "The unique user ID", example = "userId1")
           @PathVariable
