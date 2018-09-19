@@ -1,5 +1,6 @@
 package gov.ca.cwds.idm;
 
+import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.idm.IdmResource.DATETIME_FORMAT_PATTERN;
@@ -13,6 +14,7 @@ import static gov.ca.cwds.idm.TestCognitoServiceFacade.NEW_USER_ES_FAIL_ID;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.NEW_USER_SUCCESS_ID;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.SOME_PAGINATION_TOKEN;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.USERPOOL;
+import static gov.ca.cwds.idm.TestCognitoServiceFacade.USER_CALS_EXTERNAL;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.USER_NO_RACFID_ID;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.USER_WITH_NO_PHONE_EXTENSION;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.USER_WITH_RACFID_AND_DB_DATA_ID;
@@ -219,6 +221,12 @@ public class IdmResourceTest extends BaseIntegrationTest {
   }
 
   @Test
+  @WithMockCustomUser(roles = {CALS_ADMIN})
+  public void testGetPermissionsCalsAdmin() throws Exception {
+    assertGetPermissionsUnauthorized();
+  }
+
+  @Test
   @WithMockCustomUser(roles = {OFFICE_ADMIN})
   public void testGetPermissionsOfficeAdmin() throws Exception {
     assertGetPermissionsSuccess();
@@ -234,14 +242,13 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @Test
   @WithMockCustomUser
   public void testGetUserNoRacfId() throws Exception {
-    testGetValidYoloUser(USER_NO_RACFID_ID, "fixtures/idm/get-user/no-racfid-valid.json");
+    testGetValidUser(USER_NO_RACFID_ID, "fixtures/idm/get-user/no-racfid-valid.json");
   }
 
   @Test
   @WithMockCustomUser(roles = {OFFICE_ADMIN})
   public void testGetUserOfficeAdmin() throws Exception {
-    testGetValidYoloUser(USER_WITH_RACFID_AND_DB_DATA_ID,
-        "fixtures/idm/get-user/with-racfid-and-db-data-valid.json");
+    testGetValidUser(USER_WITH_RACFID_AND_DB_DATA_ID, "fixtures/idm/get-user/with-racfid-and-db-data-valid.json");
   }
 
   @Test
@@ -251,15 +258,27 @@ public class IdmResourceTest extends BaseIntegrationTest {
   }
 
   @Test
+  @WithMockCustomUser(roles = {CALS_ADMIN})
+  public void testGetUserCalsAdminUnauthorized() throws Exception {
+    assertGetUserUnauthorized(USER_NO_RACFID_ID);
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {CALS_ADMIN})
+  public void testGetUserCalsAdmin() throws Exception {
+    testGetValidUser(USER_CALS_EXTERNAL, "fixtures/idm/get-user/with-cals-externa-user-role.json");
+  }
+
+  @Test
   @WithMockCustomUser
   public void testGetUserWithRacfId() throws Exception {
-    testGetValidYoloUser(USER_WITH_RACFID_ID, "fixtures/idm/get-user/with-racfid-valid.json");
+    testGetValidUser(USER_WITH_RACFID_ID, "fixtures/idm/get-user/with-racfid-valid.json");
   }
 
   @Test
   @WithMockCustomUser
   public void testGetUserWithRacfIdAndDbData() throws Exception {
-    testGetValidYoloUser(
+    testGetValidUser(
         USER_WITH_RACFID_AND_DB_DATA_ID,
         "fixtures/idm/get-user/with-racfid-and-db-data-valid.json");
   }
@@ -267,7 +286,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @Test
   @WithMockCustomUser
   public void testGetUserWithNoPhoneExtension() throws Exception {
-    testGetValidYoloUser(
+    testGetValidUser(
         USER_WITH_NO_PHONE_EXTENSION,
         "fixtures/idm/get-user/with-racfid-and-no-phone-extension.json");
   }
@@ -303,7 +322,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @Test
   @WithMockCustomUser(roles = {STATE_ADMIN}, county = "Madera")
   public void testGetUserStateAdminDifferentCounty() throws Exception {
-    testGetValidYoloUser(USER_WITH_RACFID_ID, "fixtures/idm/get-user/with-racfid-valid.json");
+    testGetValidUser(USER_WITH_RACFID_ID, "fixtures/idm/get-user/with-racfid-valid.json");
   }
 
   private void assertGetUserUnauthorized(String userId) throws Exception {
@@ -390,6 +409,12 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @Test
   @WithMockCustomUser(roles = {STATE_ADMIN})
   public void testGetUsersWithStateAdmin() throws Exception {
+    assertGetUsersUnauthorized();
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {CALS_ADMIN})
+  public void testGetUsersWithCalsAdmin() throws Exception {
     assertGetUsersUnauthorized();
   }
 
@@ -519,6 +544,12 @@ public class IdmResourceTest extends BaseIntegrationTest {
     assertCreateUserUnauthorized();
   }
 
+  @Test
+  @WithMockCustomUser(roles = {CALS_ADMIN})
+  public void testCreateUserCalsAdmin() throws Exception {
+    assertCreateUserUnauthorized();
+  }
+
   private void assertCreateUserUnauthorized() throws Exception {
     User user = user();
     user.setEmail("unauthorized@gmail.com");
@@ -603,8 +634,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
 
     setDoraSuccess();
 
-    AdminDisableUserRequest disableUserRequest = setDisableUserRequestAndResult(
-        USER_NO_RACFID_ID);
+    AdminDisableUserRequest disableUserRequest = setDisableUserRequestAndResult(USER_NO_RACFID_ID);
 
     mockMvc
         .perform(
@@ -766,6 +796,12 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @Test
   @WithMockCustomUser(county = "Madera")
   public void testUpdateUserByOtherCountyAdmin() throws Exception {
+    assertUpdateUserUnauthorized();
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {CALS_ADMIN})
+  public void testUpdateUserCalsAdmin() throws Exception {
     assertUpdateUserUnauthorized();
   }
 
@@ -983,6 +1019,12 @@ public class IdmResourceTest extends BaseIntegrationTest {
   }
 
   @Test
+  @WithMockCustomUser(roles = {CALS_ADMIN})
+  public void testVerifyUsersCalsAdmin() throws Exception {
+    assertVerifyUserUnauthorized();
+  }
+
+  @Test
   public void testGetFailedOperations() throws Exception {
     userLogRepository.deleteAll();
     LocalDateTime log1time = LocalDateTime.of(2018, 1, 1, 12, 00, 15);
@@ -1072,7 +1114,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
     return date.format(formatter);
   }
 
-  private void testGetValidYoloUser(String userId, String fixtureFilePath) throws Exception {
+  private void testGetValidUser(String userId, String fixtureFilePath) throws Exception {
 
     MvcResult result =
         mockMvc
