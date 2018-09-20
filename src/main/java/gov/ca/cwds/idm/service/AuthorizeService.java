@@ -51,6 +51,16 @@ public class AuthorizeService {
   }
 
   public boolean updateUser(String userId) {
+    return authorizeByUserId(userId);
+  }
+  public boolean resendInvitationMessage(String userId) {
+    return authorizeByUserId(userId);
+  }
+  private boolean authorizeByUserId(String userId) {
+    return authorizeByUser(getUserFromUserId(userId));
+  }
+
+  private User getUserFromUserId(String userId) {
     UserType cognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
     UniversalUserToken admin = getCurrentUser();
     User user;
@@ -60,7 +70,7 @@ public class AuthorizeService {
     } else {
       user = mappingService.toUserWithoutCwsData(cognitoUser);
     }
-    return authorizeByUser(user);
+    return user;
   }
 
   private boolean authorizeByUser(User user) {

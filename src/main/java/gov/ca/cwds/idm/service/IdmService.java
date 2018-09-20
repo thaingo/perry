@@ -30,4 +30,7 @@ public interface IdmService {
   List<User> searchUsers(UsersSearchCriteria usersSearchCriteria);
 
   List<UserAndOperation> getFailedOperations(LocalDateTime lastJobTime);
+
+  @PreAuthorize("@authorize.resendInvitationMessage(#id)")
+  void resendInvitationMessage(@P("id") String id);
 }

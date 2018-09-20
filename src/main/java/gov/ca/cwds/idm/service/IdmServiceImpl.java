@@ -307,6 +307,11 @@ public class IdmServiceImpl implements IdmService {
         .collect(Collectors.toList());
   }
 
+  @Override
+  public void resendInvitationMessage(String userId) {
+    cognitoServiceFacade.resendInvitationMessage(userId);
+  }
+
   private void deleteProcessedLogs(LocalDateTime lastJobTime) {
     int deletedCount = 0;
     try {
