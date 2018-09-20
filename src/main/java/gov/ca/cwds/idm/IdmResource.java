@@ -297,6 +297,32 @@ public class IdmResource {
     return ResponseEntity.ok().body(idmService.verifyUser(racfId, email));
   }
 
+  @RequestMapping(method = RequestMethod.GET, value = "users/resend/{id}", produces = "application/json")
+  @ApiOperation(
+      value =
+          "Resend the invitation message to a user that already exists and reset the expiration\n "
+              + "limit on the user's account by admin.",
+      response = ResponseEntity.class)
+  @ApiResponses(
+      value = {
+          @ApiResponse(code = 401, message = "Not Authorized"),
+          @ApiResponse(code = 404, message = "Not found")
+      }
+  )
+  @PreAuthorize("@roles.isAdmin(principal)")
+  public ResponseEntity resendInvitationEmail(
+      @ApiParam(required = true, value = "The unique user ID", example = "userId1")
+      @PathVariable
+      @NotNull
+          String id) {
+    try {
+      idmService.resendInvitationMessage(id);
+      return ResponseEntity.ok().build();
+    } catch (UserNotFoundPerryException e) {
+      return ResponseEntity.notFound().build();
+    }
+  }
+
   private static ResponseEntity<IdmApiCustomError> createCustomResponseEntity(
       HttpStatus httpStatus, MessageCode errorCode, String msg) {
     return new ResponseEntity<>(
