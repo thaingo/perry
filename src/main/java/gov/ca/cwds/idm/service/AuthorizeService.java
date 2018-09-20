@@ -50,7 +50,13 @@ public class AuthorizeService {
     return authorizeByUser(user);
   }
 
-  public boolean authorizeByUserId(String userId) {
+  public boolean updateUser(String userId) {
+    return authorizeByUserId(userId);
+  }
+  public boolean resendInvitationMessage(String userId) {
+    return authorizeByUserId(userId);
+  }
+  private boolean authorizeByUserId(String userId) {
     return authorizeByUser(getUserFromUserId(userId));
   }
 
