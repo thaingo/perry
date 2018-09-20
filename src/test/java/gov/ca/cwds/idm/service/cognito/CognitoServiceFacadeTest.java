@@ -235,12 +235,7 @@ public class CognitoServiceFacadeTest {
     UserType userType = userType(userId);
     mockResult.setUser(userType);
 
-    AdminCreateUserRequest expectedRequest =
-        new AdminCreateUserRequest()
-            .withUsername(userId)
-            .withUserPoolId("userpool")
-            .withDesiredDeliveryMediums(CognitoUtils.EMAIL_DELIVERY)
-            .withMessageAction(MessageActionType.RESEND);
+    AdminCreateUserRequest expectedRequest = facade.createResendEmailRequest(userId);
 
     when(identityProvider.adminCreateUser(expectedRequest)).thenReturn(mockResult);
 
