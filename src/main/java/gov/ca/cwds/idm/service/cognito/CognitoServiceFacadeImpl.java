@@ -295,7 +295,6 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
     return new AdminCreateUserRequest()
         .withUsername(userId)
         .withUserPoolId(properties.getUserpool())
-        .withDesiredDeliveryMediums(EMAIL_DELIVERY)
         .withMessageAction(MessageActionType.RESEND);
   }
 
