@@ -58,7 +58,8 @@
       "racfid": "SMITHBO",
       "permissions": [
         "test"
-      ]
+      ],
+      "roles":[]
     }
   ]
 }

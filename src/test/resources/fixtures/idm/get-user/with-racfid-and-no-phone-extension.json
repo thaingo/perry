@@ -15,5 +15,6 @@
   "racfid": "SMITHB2",
   "permissions": [
     "test"
-  ]
+  ],
+  "roles":[]
 }

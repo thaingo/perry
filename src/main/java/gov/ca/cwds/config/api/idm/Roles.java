@@ -3,6 +3,7 @@ package gov.ca.cwds.config.api.idm;
 import static gov.ca.cwds.util.Utils.toSet;
 
 import gov.ca.cwds.UniversalUserToken;
+import gov.ca.cwds.idm.dto.User;
 import java.util.Collections;
 import java.util.Set;
 import org.springframework.context.annotation.Profile;
@@ -49,6 +50,14 @@ public class Roles {
 
   public static boolean isCalsAdmin(UniversalUserToken user) {
     return user.getRoles().contains(CALS_ADMIN);
+  }
+
+  public static boolean isStateAdmin(User user) {
+    return user.getRoles().contains(STATE_ADMIN);
+  }
+
+  public static boolean isCountyAdmin(User user) {
+    return user.getRoles().contains(COUNTY_ADMIN);
   }
 
   static String getStrongestAdminRole(UniversalUserToken user) {
