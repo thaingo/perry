@@ -32,11 +32,11 @@ public class AuthorizeService {
   private MappingService mappingService;
 
   public boolean findUser(User user) {
-    return authorizeByUser(user);
+    return defaultAauthorizeByUser(user);
   }
 
   public Optional<MessageCode> verifyUser(User user) {
-    if (!authorizeByUser(user)) {
+    if (!defaultAauthorizeByUser(user)) {
       if (CurrentAuthenticatedUserUtil.isMostlyCountyAdmin()) {
         return Optional.of(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY);
       } else if (CurrentAuthenticatedUserUtil.isMostlyOfficeAdmin()) {
@@ -47,17 +47,17 @@ public class AuthorizeService {
   }
 
   public boolean createUser(User user) {
-    return authorizeByUser(user);
+    return defaultAauthorizeByUser(user);
   }
 
   public boolean updateUser(String userId) {
-    return authorizeByUserId(userId);
+    return defaultAuthorizeByUserId(userId);
   }
   public boolean resendInvitationMessage(String userId) {
-    return authorizeByUserId(userId);
+    return defaultAuthorizeByUserId(userId);
   }
-  private boolean authorizeByUserId(String userId) {
-    return authorizeByUser(getUserFromUserId(userId));
+  private boolean defaultAuthorizeByUserId(String userId) {
+    return defaultAauthorizeByUser(getUserFromUserId(userId));
   }
 
   private User getUserFromUserId(String userId) {
@@ -73,29 +73,38 @@ public class AuthorizeService {
     return user;
   }
 
-  private boolean authorizeByUser(User user) {
+  private boolean defaultAauthorizeByUser(User user) {
     UniversalUserToken admin = getCurrentUser();
-    return byUserAndAdmin(user, admin);
+    return defaultAutorizeByUserAndAdmin(user, admin);
   }
 
   boolean isCalsExternalWorker(User user) {
     return user.getRoles().contains(Roles.CALS_EXTERNAL_WORKER);
   }
 
-  boolean byUserAndAdmin(User user, UniversalUserToken admin) {
+  boolean defaultAutorizeByUserAndAdmin(User user, UniversalUserToken admin) {
     if (isMostlyStateAdmin(admin)  || isAuthorizedAsCalsAdmin(user, admin)) {
       return true;
-    } else if (isMostlyCountyAdmin(admin)) {
-      String userCountyName = user.getCountyName();
-      String adminCountyName = getCountyName(admin);
-      return areNotNullAndEquals(userCountyName, adminCountyName);
+
+    } if (isMostlyCountyAdmin(admin)) {
+      return areInSameCounty(user, admin);
 
     } else if (isMostlyOfficeAdmin(admin)) {
-      String userOfficeId = user.getOfficeId();
-      Set<String> adminOfficeIds = getAdminOfficeIds(admin);
-      return areNotNullAndContains(adminOfficeIds, userOfficeId);
+      return areInSameOffice(user, admin);
     }
     return false;
+  }
+
+  private boolean areInSameCounty(User user, UniversalUserToken admin) {
+    String userCountyName = user.getCountyName();
+    String adminCountyName = getCountyName(admin);
+    return areNotNullAndEquals(userCountyName, adminCountyName);
+  }
+
+  private boolean areInSameOffice(User user, UniversalUserToken admin) {
+    String userOfficeId = user.getOfficeId();
+    Set<String> adminOfficeIds = getAdminOfficeIds(admin);
+    return areNotNullAndContains(adminOfficeIds, userOfficeId);
   }
 
   private boolean isAuthorizedAsCalsAdmin(User user, UniversalUserToken admin) {
