@@ -308,7 +308,7 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
     try {
       response = identityProvider.adminListDevices(request);
     } catch (Exception e) {
-      LOGGER.error(String.format("Can't get list of login devices for user %s", userId), e);
+      LOGGER.info(String.format("Can't get list of login devices for user %s", userId), e);
       return Optional.empty();
     }
     return extractUserLastAuthenticatedTimestamp(response);
