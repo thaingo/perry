@@ -102,10 +102,6 @@ public class AuthorizeService {
     return user.getRoles().contains(Roles.CALS_EXTERNAL_WORKER);
   }
 
-  boolean defaultAuthorizeByUserAndAdmin(User user, UniversalUserToken admin) {
-    return authorizeByUserAndAdmin(user, admin, this::getDefaultOfficeAdminStrategy);
-  }
-
   private boolean authorizeByUserAndAdmin(User user, UniversalUserToken admin,
       BiPredicate<User, UniversalUserToken> officeAdminStrategy) {
 
@@ -119,6 +115,10 @@ public class AuthorizeService {
       return officeAdminStrategy.test(user, admin);
     }
     return false;
+  }
+
+  boolean defaultAuthorizeByUserAndAdmin(User user, UniversalUserToken admin) {
+    return authorizeByUserAndAdmin(user, admin, this::getDefaultOfficeAdminStrategy);
   }
 
   private boolean getDefaultOfficeAdminStrategy(User user, UniversalUserToken admin) {
