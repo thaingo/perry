@@ -83,26 +83,19 @@ public class IdmServiceImpl implements IdmService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(IdmServiceImpl.class);
 
-  @Autowired
-  private CognitoServiceFacade cognitoServiceFacade;
+  @Autowired private CognitoServiceFacade cognitoServiceFacade;
 
-  @Autowired
-  private CwsUserInfoService cwsUserInfoService;
+  @Autowired private CwsUserInfoService cwsUserInfoService;
 
-  @Autowired
-  private MessagesService messages;
+  @Autowired private MessagesService messages;
 
-  @Autowired
-  private UserLogService userLogService;
+  @Autowired private UserLogService userLogService;
 
-  @Autowired
-  private SearchService searchService;
+  @Autowired private SearchService searchService;
 
-  @Autowired
-  private AuthorizeService authorizeService;
+  @Autowired private AuthorizeService authorizeService;
 
-  @Autowired
-  private MappingService mappingService;
+  @Autowired private MappingService mappingService;
 
   @Override
   public User findUser(String id) {
@@ -135,14 +128,11 @@ public class IdmServiceImpl implements IdmService {
     }
 
     handleUpdatePartialSuccess(
-        userId,
-        updateAttributesStatus,
-        updateUserEnabledExecution,
-        doraExecution);
+        userId, updateAttributesStatus, updateUserEnabledExecution, doraExecution);
   }
 
-  private ExecutionStatus updateUserAttributes(String userId, UserUpdate updateUserDto,
-      UserType existedCognitoUser) {
+  private ExecutionStatus updateUserAttributes(
+      String userId, UserUpdate updateUserDto, UserType existedCognitoUser) {
     ExecutionStatus updateAttributesStatus = WAS_NOT_EXECUTED;
 
     if (cognitoServiceFacade.updateUserAttributes(userId, existedCognitoUser, updateUserDto)) {
@@ -176,10 +166,10 @@ public class IdmServiceImpl implements IdmService {
       }
     }
 
-    if (updateAttributesStatus == SUCCESS && updateEnableStatus == FAIL) {//partial Cognito update
+    if (updateAttributesStatus == SUCCESS && updateEnableStatus == FAIL) { // partial Cognito update
       handleUpdatePartialSuccessWithCognitoFail(
           userId, updateEnableException, doraStatus, doraException, logDbStatus, logDbException);
-    } else {//no Cognito partial update
+    } else { // no Cognito partial update
       handleUpdatePartialSuccessNoCognitoFail(
           userId, doraStatus, doraException, logDbStatus, logDbException);
     }
@@ -232,22 +222,23 @@ public class IdmServiceImpl implements IdmService {
   private OptionalExecution<UserEnableStatusRequest, Boolean> executeUpdateEnableStatusOptionally(
       String userId, UserUpdate updateUserDto, UserType existedCognitoUser) {
 
-    OptionalExecution<UserEnableStatusRequest, Boolean> updateUserEnabledExecution = new OptionalExecution<UserEnableStatusRequest, Boolean>(
-        new UserEnableStatusRequest(
-            userId, existedCognitoUser.getEnabled(), updateUserDto.getEnabled())) {
-      @Override
-      protected Boolean tryMethod(UserEnableStatusRequest userEnableStatusRequest) {
-        return cognitoServiceFacade.changeUserEnabledStatus(userEnableStatusRequest);
-      }
+    OptionalExecution<UserEnableStatusRequest, Boolean> updateUserEnabledExecution =
+        new OptionalExecution<UserEnableStatusRequest, Boolean>(
+            new UserEnableStatusRequest(
+                userId, existedCognitoUser.getEnabled(), updateUserDto.getEnabled())) {
+          @Override
+          protected Boolean tryMethod(UserEnableStatusRequest userEnableStatusRequest) {
+            return cognitoServiceFacade.changeUserEnabledStatus(userEnableStatusRequest);
+          }
 
-      @Override
-      protected void catchMethod(Exception e) {
-        LOGGER.error(messages.get(ERROR_UPDATE_USER_ENABLED_STATUS, userId), e);
-      }
-    };
+          @Override
+          protected void catchMethod(Exception e) {
+            LOGGER.error(messages.get(ERROR_UPDATE_USER_ENABLED_STATUS, userId), e);
+          }
+        };
 
-    if (updateUserEnabledExecution.getExecutionStatus() == SUCCESS && !updateUserEnabledExecution
-        .getResult()) {
+    if (updateUserEnabledExecution.getExecutionStatus() == SUCCESS
+        && !updateUserEnabledExecution.getResult()) {
       updateUserEnabledExecution.setExecutionStatus(WAS_NOT_EXECUTED);
     }
     return updateUserEnabledExecution;
@@ -269,25 +260,21 @@ public class IdmServiceImpl implements IdmService {
       if (dbLogExecution.getExecutionStatus() == SUCCESS) {
         MessageCode errorCode = USER_CREATE_SAVE_TO_SEARCH_ERROR;
         String msg = messages.get(errorCode, userId);
-        throw new PartialSuccessException(
-            userId, msg, errorCode, doraExecution.getException());
-      } else {//logging in db failed
+        throw new PartialSuccessException(userId, msg, errorCode, doraExecution.getException());
+      } else { // logging in db failed
         MessageCode errorCode = USER_CREATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
         String msg = messages.get(errorCode, userId);
         throw new PartialSuccessException(
-            userId,
-            msg,
-            errorCode,
-            doraExecution.getException(),
-            dbLogExecution.getException());
+            userId, msg, errorCode, doraExecution.getException(), dbLogExecution.getException());
       }
     }
   }
 
   @Override
   public UsersPage getUserPage(String paginationToken) {
-    CognitoUserPage userPage = cognitoServiceFacade
-        .searchPage(CognitoUsersSearchCriteriaUtil.composeToGetPage(paginationToken));
+    CognitoUserPage userPage =
+        cognitoServiceFacade.searchPage(
+            CognitoUsersSearchCriteriaUtil.composeToGetPage(paginationToken));
     List<User> users = enrichCognitoUsers(userPage.getUsers());
     return new UsersPage(users, userPage.getPaginationToken());
   }
@@ -318,6 +305,11 @@ public class IdmServiceImpl implements IdmService {
         .stream()
         .map(e -> new UserAndOperation(findUser(e.getId()), e.getOperation()))
         .collect(Collectors.toList());
+  }
+
+  @Override
+  public void resendInvitationMessage(String userId) {
+    cognitoServiceFacade.resendInvitationMessage(userId);
   }
 
   private void deleteProcessedLogs(LocalDateTime lastJobTime) {
@@ -354,7 +346,8 @@ public class IdmServiceImpl implements IdmService {
       }
     }
 
-    return idAndOperationMap.entrySet()
+    return idAndOperationMap
+        .entrySet()
         .stream()
         .map(e -> new UserIdAndOperation(e.getKey(), e.getValue()))
         .collect(Collectors.toList());
@@ -429,12 +422,9 @@ public class IdmServiceImpl implements IdmService {
             }));
     return cognitoUsers
         .stream()
-        .map(e -> {
-              User user = mappingService
-                  .toUser(e, idToCmsUser.get(userNameToRacfId.get(e.getUsername())));
-          return enrichUserWithLastLoginDateTime(user);
-            }
-        ).collect(Collectors.toList());
+        .map(e -> mappingService.toUser(e, idToCmsUser.get(userNameToRacfId.get(e.getUsername()))))
+        .map(this::enrichUserWithLastLoginDateTime)
+        .collect(Collectors.toList());
   }
 
   private User enrichUserWithLastLoginDateTime(User user) {

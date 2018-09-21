@@ -1,5 +1,9 @@
 [
   {
+    "name": "CANS-rollout",
+    "description": "CANS"
+  },
+  {
     "name": "Facility-search-rollout",
     "description": "Facility Search & Profile"
   },

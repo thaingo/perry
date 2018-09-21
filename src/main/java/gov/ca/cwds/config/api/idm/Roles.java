@@ -18,9 +18,9 @@ public class Roles {
   public static final String COUNTY_ADMIN = "County-admin";
   public static final String STATE_ADMIN = "State-admin";
   public static final String OFFICE_ADMIN = "Office-admin";
+  public static final String CALS_ADMIN = "CALS-admin";
 
-  private Roles() {
-  }
+  private Roles() {}
 
   public static boolean isAdmin(UniversalUserToken user) {
     Set<String> adminRoles = getAdminRoles();
@@ -45,6 +45,10 @@ public class Roles {
 
   public static boolean isMostlyOfficeAdmin(UniversalUserToken user) {
     return OFFICE_ADMIN.equals(getStrongestAdminRole(user));
+  }
+
+  public static boolean isCalsAdmin(UniversalUserToken user) {
+    return user.getRoles().contains(CALS_ADMIN);
   }
 
   static String getStrongestAdminRole(UniversalUserToken user) {

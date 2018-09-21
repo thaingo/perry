@@ -56,4 +56,18 @@ public interface CognitoServiceFacade {
    */
   boolean changeUserEnabledStatus(UserEnableStatusRequest request);
 
-}
+  /**
+   * Resend the invitation message to a user that already exists and reset the expiration limit
+   * on the user's account by admin.
+   * @param userId user ID.
+   */
+  UserType resendInvitationMessage(String userId);
+
+  /**
+   * Creates the request for resending email.
+   * @param userId user ID.
+   * @return
+   */
+  AdminCreateUserRequest createResendEmailRequest(String userId);
+
+  }
