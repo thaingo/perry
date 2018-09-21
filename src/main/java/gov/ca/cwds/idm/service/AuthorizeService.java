@@ -21,6 +21,7 @@ import gov.ca.cwds.service.messages.MessageCode;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiPredicate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -35,26 +36,20 @@ public class AuthorizeService {
 
   public boolean findUser(User user) {
     UniversalUserToken admin = getCurrentUser();
-
-    if (isMostlyStateAdmin(admin)  || isAuthorizedAsCalsAdmin(user, admin)) {
-      return true;
-
-    } if (isMostlyCountyAdmin(admin)) {
-      return areInSameCounty(user, admin);
-
-    } else if (isMostlyOfficeAdmin(admin)) {
-      return areInSameCounty(user, admin)
-          && !userIsStateAdminFromOtherOffice(user, admin)
-          && !userIsCountyAdminFromOtherOffice(user, admin);
-    }
-    return false;
+    return authorizeByUserAndAdmin(user, admin, this::getFindUserOfficeAdminStrategy);
   }
 
-  private boolean userIsStateAdminFromOtherOffice(User user, UniversalUserToken admin) {
+  private boolean getFindUserOfficeAdminStrategy(User user, UniversalUserToken admin) {
+    return areInSameCounty(user, admin)
+        && !userIsStateAdminFromOtherOffice(user, admin)
+        && !userIsCountyAdminFromOtherOffice(user, admin);
+  }
+
+  private static boolean userIsStateAdminFromOtherOffice(User user, UniversalUserToken admin) {
     return isStateAdmin(user) && !areInSameOffice(user, admin);
   }
 
-  private boolean userIsCountyAdminFromOtherOffice(User user, UniversalUserToken admin) {
+  private static boolean userIsCountyAdminFromOtherOffice(User user, UniversalUserToken admin) {
     return isCountyAdmin(user) && !areInSameOffice(user, admin);
   }
 
@@ -76,9 +71,11 @@ public class AuthorizeService {
   public boolean updateUser(String userId) {
     return defaultAuthorizeByUserId(userId);
   }
+
   public boolean resendInvitationMessage(String userId) {
     return defaultAuthorizeByUserId(userId);
   }
+
   private boolean defaultAuthorizeByUserId(String userId) {
     return defaultAuthorizeByUser(getUserFromUserId(userId));
   }
@@ -101,21 +98,31 @@ public class AuthorizeService {
     return defaultAuthorizeByUserAndAdmin(user, admin);
   }
 
-  boolean isCalsExternalWorker(User user) {
+  static boolean isCalsExternalWorker(User user) {
     return user.getRoles().contains(Roles.CALS_EXTERNAL_WORKER);
   }
 
   boolean defaultAuthorizeByUserAndAdmin(User user, UniversalUserToken admin) {
-    if (isMostlyStateAdmin(admin)  || isAuthorizedAsCalsAdmin(user, admin)) {
+    return authorizeByUserAndAdmin(user, admin, this::getDefaultOfficeAdminStrategy);
+  }
+
+  private boolean authorizeByUserAndAdmin(User user, UniversalUserToken admin,
+      BiPredicate<User, UniversalUserToken> officeAdminStrategy) {
+
+    if (isMostlyStateAdmin(admin) || isAuthorizedAsCalsAdmin(user, admin)) {
       return true;
 
     } if (isMostlyCountyAdmin(admin)) {
       return areInSameCounty(user, admin);
 
     } else if (isMostlyOfficeAdmin(admin)) {
-      return areInSameOffice(user, admin);
+      return officeAdminStrategy.test(user, admin);
     }
     return false;
+  }
+
+  private boolean getDefaultOfficeAdminStrategy(User user, UniversalUserToken admin) {
+    return areInSameOffice(user, admin);
   }
 
   private boolean areInSameCounty(User user, UniversalUserToken admin) {
@@ -124,7 +131,7 @@ public class AuthorizeService {
     return areNotNullAndEquals(userCountyName, adminCountyName);
   }
 
-  private boolean areInSameOffice(User user, UniversalUserToken admin) {
+  private static boolean areInSameOffice(User user, UniversalUserToken admin) {
     String userOfficeId = user.getOfficeId();
     Set<String> adminOfficeIds = getAdminOfficeIds(admin);
     return areNotNullAndContains(adminOfficeIds, userOfficeId);
