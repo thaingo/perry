@@ -1,6 +1,7 @@
 package gov.ca.cwds.idm.service;
 
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.idm.service.AuthorizeService.areNotNullAndContains;
@@ -111,14 +112,47 @@ public class AuthorizeServiceTest {
 
   @Test
   public void testCalsAdminCanNotView() {
-    User user = withRole(Roles.CWS_WORKER);
+    User user = withRole(CWS_WORKER);
     assertFalse(service.isCalsExternalWorker(user));
+  }
+
+  @Test
+  public void testFindUser_OfficeAdmin() {
+    assertTrue(service.findUser(
+        user(toSet(CWS_WORKER), "Yolo", "Yolo_1"),
+        admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_1", "Yolo_2"))));
+
+    assertTrue(service.findUser(
+        user(toSet(CWS_WORKER), "Yolo", "Yolo_3"),
+        admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_1", "Yolo_2"))));
+
+    assertTrue(service.findUser(
+        user(toSet(STATE_ADMIN), "Yolo", "Yolo_1"),
+        admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_1", "Yolo_2"))));
+
+    assertTrue(service.findUser(
+        user(toSet(COUNTY_ADMIN), "Yolo", "Yolo_1"),
+        admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_1", "Yolo_2"))));
+
+    assertFalse(service.findUser(
+        user(toSet(STATE_ADMIN), "Yolo", "Yolo_3"),
+        admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_1", "Yolo_2"))));
+
+    assertFalse(service.findUser(
+        user(toSet(COUNTY_ADMIN), "Yolo", "Yolo_3"),
+        admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_1", "Yolo_2"))));
   }
 
   private User user(String countyName, String officeId) {
     User user = new User();
     user.setCountyName(countyName);
     user.setOfficeId(officeId);
+    return user;
+  }
+
+  private User user(Set<String> roles, String countyName, String officeId) {
+    User user = user(countyName, officeId);
+    user.setRoles(roles);
     return user;
   }
 

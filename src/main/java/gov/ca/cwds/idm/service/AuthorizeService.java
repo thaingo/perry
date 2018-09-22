@@ -35,7 +35,10 @@ public class AuthorizeService {
   private MappingService mappingService;
 
   public boolean findUser(User user) {
-    UniversalUserToken admin = getCurrentUser();
+    return findUser(user, getCurrentUser());
+  }
+
+  boolean findUser(User user, UniversalUserToken admin) {
     return authorizeByUserAndAdmin(user, admin, this::getFindUserOfficeAdminStrategy);
   }
 
