@@ -1,20 +1,23 @@
 {
-  "id": "24051d54-9321-4dd2-a92f-6425d6c455be",
-  "first_name": "Julio",
-  "last_name": "Iglecias",
-  "county_name": "Yolo",
-  "email": "julio@gmail.com",
-  "user_create_date": "2018-05-04",
-  "user_last_modified_date": "2018-05-29",
-  "last_login_date_time": "2018-09-17 05:01:12",
-  "enabled": true,
-  "status": "CONFIRMED",
-  "racfid": "YOLOD",
-  "permissions": [
-    "Hotline-rollout"
-  ],
-  "roles": [
-    "CWS-worker",
-    "County-admin"
-  ]
+  "user": {
+    "id": "24051d54-9321-4dd2-a92f-6425d6c455be",
+    "first_name": "Julio",
+    "last_name": "Iglecias",
+    "county_name": "Yolo",
+    "email": "julio@gmail.com",
+    "user_create_date": "2018-05-04",
+    "user_last_modified_date": "2018-05-29",
+    "last_login_date_time": "2018-09-17 05:01:12",
+    "enabled": true,
+    "status": "CONFIRMED",
+    "racfid": "YOLOD",
+    "permissions": [
+      "Hotline-rollout"
+    ],
+    "roles": [
+      "CWS-worker",
+      "County-admin"
+    ]
+  },
+  "editable": true
 }

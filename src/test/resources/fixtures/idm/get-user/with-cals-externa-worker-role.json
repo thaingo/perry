@@ -1,19 +1,22 @@
 {
-  "id": "2be3551f-8c9w-4386-8a95-a68f0777efb0",
-  "first_name": "Don",
-  "last_name": "Manzano",
-  "county_name": "Yolo",
-  "email": "donzano@gmail.com",
-  "user_create_date": "2018-05-04",
-  "user_last_modified_date": "2018-05-30",
-  "enabled": true,
-  "status": "FORCE_CHANGE_PASSWORD",
-  "last_login_date_time": "2018-09-17 05:01:12",
-  "permissions": [
-    "Snapshot-rollout",
-    "RFA-rollout"
-  ],
-  "roles": [
-    "CALS-external-worker"
-  ]
+  "user": {
+    "id": "2be3551f-8c9w-4386-8a95-a68f0777efb0",
+    "first_name": "Don",
+    "last_name": "Manzano",
+    "county_name": "Yolo",
+    "email": "donzano@gmail.com",
+    "user_create_date": "2018-05-04",
+    "user_last_modified_date": "2018-05-30",
+    "enabled": true,
+    "status": "FORCE_CHANGE_PASSWORD",
+    "last_login_date_time": "2018-09-17 05:01:12",
+    "permissions": [
+      "Snapshot-rollout",
+      "RFA-rollout"
+    ],
+    "roles": [
+      "CALS-external-worker"
+    ]
+  },
+  "editable": true
 }
