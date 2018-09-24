@@ -8,11 +8,13 @@ import static gov.ca.cwds.idm.IdmResourceTest.DORA_WS_MAX_ATTEMPTS;
 import static gov.ca.cwds.idm.IdmResourceTest.IDM_BASIC_AUTH_PASS;
 import static gov.ca.cwds.idm.IdmResourceTest.IDM_BASIC_AUTH_USER;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.ABSENT_USER_ID;
+import static gov.ca.cwds.idm.TestCognitoServiceFacade.COUNTY_ADMIN_ID;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.ERROR_USER_ID;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.ES_ERROR_CREATE_USER_EMAIL;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.NEW_USER_ES_FAIL_ID;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.NEW_USER_SUCCESS_ID;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.SOME_PAGINATION_TOKEN;
+import static gov.ca.cwds.idm.TestCognitoServiceFacade.STATE_ADMIN_ID;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.USERPOOL;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.USER_CALS_EXTERNAL;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.USER_NO_RACFID_ID;
@@ -60,7 +62,6 @@ import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesRequest;
 import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesResult;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.InvalidParameterException;
-import com.amazonaws.services.cognitoidp.model.MessageActionType;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import com.amazonaws.services.cognitoidp.model.UsernameExistsException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -78,7 +79,6 @@ import gov.ca.cwds.idm.service.SearchRestSender;
 import gov.ca.cwds.idm.service.SearchService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.SearchProperties;
-import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
 import gov.ca.cwds.service.messages.MessagesService;
 import java.nio.charset.Charset;
 import java.time.LocalDateTime;
@@ -320,6 +320,18 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @WithMockCustomUser(roles = {"OtherRole"})
   public void testGetUserWithOtherRole() throws Exception {
     assertGetUserUnauthorized(USER_NO_RACFID_ID);
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {OFFICE_ADMIN}, adminOfficeIds = {"OtherOfficeId"})
+  public void testGetOtherOfficeCountyAdminByOfficeAdmin() throws Exception {
+    assertGetUserUnauthorized(COUNTY_ADMIN_ID);
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {OFFICE_ADMIN}, adminOfficeIds = {"OtherOfficeId"})
+  public void testGetOtherOfficeStateAdminByOfficeAdmin() throws Exception {
+    assertGetUserUnauthorized(STATE_ADMIN_ID);
   }
 
   @Test
