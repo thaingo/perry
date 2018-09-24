@@ -304,7 +304,13 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
   @Override
   public Optional<LocalDateTime> getLastAuthenticatedTimestamp(String userId) {
     AdminListDevicesRequest request = composeAdminListDevicesRequest(userId);
-    AdminListDevicesResult response = identityProvider.adminListDevices(request);
+    AdminListDevicesResult response;
+    try {
+      response = identityProvider.adminListDevices(request);
+    } catch (Exception e) {
+      LOGGER.info(String.format("Can't get list of login devices for user %s", userId), e);
+      return Optional.empty();
+    }
     return extractUserLastAuthenticatedTimestamp(response);
   }
 
