@@ -17,5 +17,7 @@
   "permissions": [
     "test"
   ],
-  "roles": []
+  "roles": [
+    "CWS-worker"
+  ]
 }
