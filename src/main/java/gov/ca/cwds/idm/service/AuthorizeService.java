@@ -39,10 +39,10 @@ public class AuthorizeService {
   }
 
   boolean findUser(User user, UniversalUserToken admin) {
-    return authorizeByUserAndAdmin(user, admin, this::getFindUserOfficeAdminStrategy);
+    return authorizeByUserAndAdmin(user, admin, AuthorizeService::authorizeFindUserByOfficeAdmin);
   }
 
-  private boolean getFindUserOfficeAdminStrategy(User user, UniversalUserToken admin) {
+  private static boolean authorizeFindUserByOfficeAdmin(User user, UniversalUserToken admin) {
     return areInSameCounty(user, admin)
         && !userIsStateAdminFromOtherOffice(user, admin)
         && !userIsCountyAdminFromOtherOffice(user, admin);
@@ -121,14 +121,14 @@ public class AuthorizeService {
   }
 
   boolean defaultAuthorizeByUserAndAdmin(User user, UniversalUserToken admin) {
-    return authorizeByUserAndAdmin(user, admin, this::getDefaultOfficeAdminStrategy);
+    return authorizeByUserAndAdmin(user, admin, AuthorizeService::defaultAuthorizeByOfficeAdmin);
   }
 
-  private boolean getDefaultOfficeAdminStrategy(User user, UniversalUserToken admin) {
+  private static boolean defaultAuthorizeByOfficeAdmin(User user, UniversalUserToken admin) {
     return areInSameOffice(user, admin);
   }
 
-  private boolean areInSameCounty(User user, UniversalUserToken admin) {
+  private static boolean areInSameCounty(User user, UniversalUserToken admin) {
     String userCountyName = user.getCountyName();
     String adminCountyName = getCountyName(admin);
     return areNotNullAndEquals(userCountyName, adminCountyName);
