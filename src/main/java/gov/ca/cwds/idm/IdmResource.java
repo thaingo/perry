@@ -9,6 +9,7 @@ import static java.util.stream.Collectors.toList;
 import gov.ca.cwds.idm.dto.IdmApiCustomError;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserAndOperation;
+import gov.ca.cwds.idm.dto.UserByIdResponse;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.UserVerificationResult;
 import gov.ca.cwds.idm.dto.UsersPage;
@@ -141,7 +142,7 @@ public class IdmResource {
   }
 
   @RequestMapping(method = RequestMethod.GET, value = "/users/{id}", produces = "application/json")
-  @ApiOperation(value = "Find User by ID", response = User.class)
+  @ApiOperation(value = "Find User by ID", response = UserByIdResponse.class)
   @ApiResponses(
     value = {
       @ApiResponse(code = 401, message = "Not Authorized"),
@@ -149,7 +150,7 @@ public class IdmResource {
     }
   )
   @PreAuthorize("@roles.isAdmin(principal) || @roles.isCalsAdmin(principal)")
-  public ResponseEntity<User> getUser(
+  public ResponseEntity<UserByIdResponse> getUser(
       @ApiParam(required = true, value = "The unique user ID", example = "userId1")
           @PathVariable
           @NotNull
@@ -157,7 +158,12 @@ public class IdmResource {
 
     try {
       User user = idmService.findUser(id);
-      return ResponseEntity.ok().body(user);
+      UserByIdResponse response =
+          UserByIdResponse.UserByIdResponseBuilder.anUserByIdResponse()
+              .withUser(user)
+              .withEditable(true)
+              .build();
+      return ResponseEntity.ok().body(response);
     } catch (UserNotFoundPerryException e) {
       return ResponseEntity.notFound().build();
     }

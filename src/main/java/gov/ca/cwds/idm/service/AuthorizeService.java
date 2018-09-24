@@ -14,6 +14,7 @@ import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.config.api.idm.Roles;
 import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.idm.dto.UserByIdResponse;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.service.messages.MessageCode;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;

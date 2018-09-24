@@ -35,6 +35,7 @@ import gov.ca.cwds.data.persistence.auth.CwsOffice;
 import gov.ca.cwds.data.persistence.auth.StaffPerson;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserAndOperation;
+import gov.ca.cwds.idm.dto.UserByIdResponse;
 import gov.ca.cwds.idm.dto.UserEnableStatusRequest;
 import gov.ca.cwds.idm.dto.UserIdAndOperation;
 import gov.ca.cwds.idm.dto.UserUpdate;
@@ -129,6 +130,90 @@ public class IdmServiceImpl implements IdmService {
 
     handleUpdatePartialSuccess(
         userId, updateAttributesStatus, updateUserEnabledExecution, doraExecution);
+  }
+
+  @Override
+  public String createUser(User user) {
+    UserType userType = cognitoServiceFacade.createUser(user);
+    String userId = userType.getUsername();
+    PutInSearchExecution doraExecution = createUserInSearch(userType);
+    handleCreatePartialSuccess(userId, doraExecution);
+    return userId;
+  }
+
+  @Override
+  public UsersPage getUserPage(String paginationToken) {
+    CognitoUserPage userPage =
+        cognitoServiceFacade.searchPage(
+            CognitoUsersSearchCriteriaUtil.composeToGetPage(paginationToken));
+    List<User> users = enrichCognitoUsers(userPage.getUsers());
+    return new UsersPage(users, userPage.getPaginationToken());
+  }
+
+  @Override
+  public List<User> searchUsers(UsersSearchCriteria criteria) {
+    StandardUserAttribute searchAttr = criteria.getSearchAttr();
+    Set<String> values = transformSearchValues(criteria.getValues(), searchAttr);
+
+    List<UserType> cognitoUsers = new ArrayList<>();
+
+    for (String value : values) {
+      CognitoUsersSearchCriteria cognitoSearchCriteria =
+          CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByAttribute(searchAttr, value);
+      cognitoUsers.addAll(cognitoServiceFacade.searchAllPages(cognitoSearchCriteria));
+    }
+    return enrichCognitoUsers(cognitoUsers);
+  }
+
+  @Override
+  public List<UserAndOperation> getFailedOperations(LocalDateTime lastJobTime) {
+
+    deleteProcessedLogs(lastJobTime);
+
+    List<UserIdAndOperation> dbList = userLogService.getUserIdAndOperations(lastJobTime);
+
+    return filterIdAndOperationList(dbList)
+        .stream()
+        .map(e -> new UserAndOperation(findUser(e.getId()), e.getOperation()))
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public void resendInvitationMessage(String userId) {
+    cognitoServiceFacade.resendInvitationMessage(userId);
+  }
+
+  @Override
+  public UserVerificationResult verifyUser(String racfId, String email) {
+    email = toLowerCase(email);
+
+    CwsUserInfo cwsUser = cwsUserInfoService.getCwsUserByRacfId(racfId);
+    if (cwsUser == null) {
+      return composeNegativeResultWithMessage(NO_USER_WITH_RACFID_IN_CWSCMS, racfId);
+    }
+    if (checkIfUserWithEmailExistsInCognito(email)){
+      return composeNegativeResultWithMessage(USER_WITH_EMAIL_EXISTS_IN_IDM, email);
+    }
+
+    if (isActiveRacfIdPresent(racfId)) {
+      return composeNegativeResultWithMessage(ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM, racfId);
+    }
+
+    User user = composeUser(cwsUser, email);
+    Optional<MessageCode> authorizationError = authorizeService.verifyUser(user);
+    if (authorizationError.isPresent()) {
+      return composeNegativeResultWithMessage(authorizationError.get());
+    }
+
+    return UserVerificationResult.Builder.anUserVerificationResult()
+        .withUser(user)
+        .withVerificationPassed().build();
+  }
+
+  private boolean checkIfUserWithEmailExistsInCognito(String email) {
+    Collection<UserType> cognitoUsers =
+        cognitoServiceFacade.searchPage(composeToGetFirstPageByEmail(email)).getUsers();
+    return !CollectionUtils.isEmpty(cognitoUsers);
   }
 
   private ExecutionStatus updateUserAttributes(
@@ -244,14 +329,6 @@ public class IdmServiceImpl implements IdmService {
     return updateUserEnabledExecution;
   }
 
-  @Override
-  public String createUser(User user) {
-    UserType userType = cognitoServiceFacade.createUser(user);
-    String userId = userType.getUsername();
-    PutInSearchExecution doraExecution = createUserInSearch(userType);
-    handleCreatePartialSuccess(userId, doraExecution);
-    return userId;
-  }
 
   private void handleCreatePartialSuccess(String userId, PutInSearchExecution doraExecution) {
     if (doraExecution.getExecutionStatus() == FAIL) {
@@ -270,47 +347,7 @@ public class IdmServiceImpl implements IdmService {
     }
   }
 
-  @Override
-  public UsersPage getUserPage(String paginationToken) {
-    CognitoUserPage userPage =
-        cognitoServiceFacade.searchPage(
-            CognitoUsersSearchCriteriaUtil.composeToGetPage(paginationToken));
-    List<User> users = enrichCognitoUsers(userPage.getUsers());
-    return new UsersPage(users, userPage.getPaginationToken());
-  }
 
-  @Override
-  public List<User> searchUsers(UsersSearchCriteria criteria) {
-    StandardUserAttribute searchAttr = criteria.getSearchAttr();
-    Set<String> values = transformSearchValues(criteria.getValues(), searchAttr);
-
-    List<UserType> cognitoUsers = new ArrayList<>();
-
-    for (String value : values) {
-      CognitoUsersSearchCriteria cognitoSearchCriteria =
-          CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByAttribute(searchAttr, value);
-      cognitoUsers.addAll(cognitoServiceFacade.searchAllPages(cognitoSearchCriteria));
-    }
-    return enrichCognitoUsers(cognitoUsers);
-  }
-
-  @Override
-  public List<UserAndOperation> getFailedOperations(LocalDateTime lastJobTime) {
-
-    deleteProcessedLogs(lastJobTime);
-
-    List<UserIdAndOperation> dbList = userLogService.getUserIdAndOperations(lastJobTime);
-
-    return filterIdAndOperationList(dbList)
-        .stream()
-        .map(e -> new UserAndOperation(findUser(e.getId()), e.getOperation()))
-        .collect(Collectors.toList());
-  }
-
-  @Override
-  public void resendInvitationMessage(String userId) {
-    cognitoServiceFacade.resendInvitationMessage(userId);
-  }
 
   private void deleteProcessedLogs(LocalDateTime lastJobTime) {
     int deletedCount = 0;
@@ -351,35 +388,6 @@ public class IdmServiceImpl implements IdmService {
         .stream()
         .map(e -> new UserIdAndOperation(e.getKey(), e.getValue()))
         .collect(Collectors.toList());
-  }
-
-  @Override
-  public UserVerificationResult verifyUser(String racfId, String email) {
-    email = toLowerCase(email);
-
-    CwsUserInfo cwsUser = cwsUserInfoService.getCwsUserByRacfId(racfId);
-    if (cwsUser == null) {
-      return composeNegativeResultWithMessage(NO_USER_WITH_RACFID_IN_CWSCMS, racfId);
-    }
-    Collection<UserType> cognitoUsers =
-        cognitoServiceFacade.searchPage(composeToGetFirstPageByEmail(email)).getUsers();
-    if (!CollectionUtils.isEmpty(cognitoUsers)) {
-      return composeNegativeResultWithMessage(USER_WITH_EMAIL_EXISTS_IN_IDM, email);
-    }
-
-    if (isActiveRacfIdPresent(racfId)) {
-      return composeNegativeResultWithMessage(ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM, racfId);
-    }
-
-    User user = composeUser(cwsUser, email);
-    Optional<MessageCode> authorizationError = authorizeService.verifyUser(user);
-    if (authorizationError.isPresent()) {
-      return composeNegativeResultWithMessage(authorizationError.get());
-    }
-
-    return UserVerificationResult.Builder.anUserVerificationResult()
-        .withUser(user)
-        .withVerificationPassed().build();
   }
 
   private boolean isActiveRacfIdPresent(String racfId) {
