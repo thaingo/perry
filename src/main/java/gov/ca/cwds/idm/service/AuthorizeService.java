@@ -111,7 +111,7 @@ public class AuthorizeService {
     if (isMostlyStateAdmin(admin) || isAuthorizedAsCalsAdmin(user, admin)) {
       return true;
 
-    } if (isMostlyCountyAdmin(admin)) {
+    } else if (isMostlyCountyAdmin(admin)) {
       return areInSameCounty(user, admin);
 
     } else if (isMostlyOfficeAdmin(admin)) {
