@@ -60,7 +60,6 @@ import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesRequest;
 import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesResult;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.InvalidParameterException;
-import com.amazonaws.services.cognitoidp.model.MessageActionType;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import com.amazonaws.services.cognitoidp.model.UsernameExistsException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -78,7 +77,6 @@ import gov.ca.cwds.idm.service.SearchRestSender;
 import gov.ca.cwds.idm.service.SearchService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.SearchProperties;
-import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
 import gov.ca.cwds.service.messages.MessagesService;
 import java.nio.charset.Charset;
 import java.time.LocalDateTime;
@@ -1140,6 +1138,39 @@ public class IdmResourceTest extends BaseIntegrationTest {
             .andExpect(MockMvcResultMatchers.status().isBadRequest())
             .andReturn();
     assertExtensible(result, "fixtures/idm/failed-operations/failed-operations-invalid-date.json");
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {STATE_ADMIN})
+  public void testGetAdminOfficesStateAdmin() throws Exception {
+    MvcResult result =
+        mockMvc
+            .perform(MockMvcRequestBuilders.get("/idm/admin-offices"))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andReturn();
+    assertStrict(result, "fixtures/idm/admin-offices/all-offices.json");
+  }
+
+  @Test
+  @WithMockCustomUser
+  public void testGetAdminOfficesCountyAdmin() throws Exception {
+    MvcResult result =
+        mockMvc
+            .perform(MockMvcRequestBuilders.get("/idm/admin-offices"))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andReturn();
+    assertStrict(result, "fixtures/idm/admin-offices/county-offices.json");
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {OFFICE_ADMIN})
+  public void testGetAdminOfficesOfficeAdmin() throws Exception {
+    MvcResult result =
+        mockMvc
+            .perform(MockMvcRequestBuilders.get("/idm/admin-offices"))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andReturn();
+    assertStrict(result, "fixtures/idm/admin-offices/county-offices.json");
   }
 
   private UserLog userLog(String userName, OperationType operation,  LocalDateTime dateTime) {

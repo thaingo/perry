@@ -16,17 +16,5 @@
     "county_id": 1124,
     "county_name": "Yolo",
     "office_name": "Tolo Office"
-  },
-  {
-    "office_id": "BgUwJ2Uaat",
-    "county_id": 1084,
-    "county_name": "Lake",
-    "office_name": "Stan's CWDS Office"
-  },
-  {
-    "office_id": "TG7O51q0Ki",
-    "county_id": 1095,
-    "county_name": "Napa",
-    "office_name": "Yee's Office"
   }
 ]
