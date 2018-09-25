@@ -86,9 +86,9 @@ task dockerPerryPublish(dependsOn: [dockerCreateImage, dockerPushTaggedVersion, 
     dockerPushLatestVersion.mustRunAfter(dockerCreateImage)
 }
 
-task dockerPerryPublishLatest(dependsOn: [dockerCreateImage]) {
+task dockerPerryPublishLatest(dependsOn: [dockerCreateImage, dockerPushLatestVersion]) {
     doLast {
-        println "\nPerry $projectVersion is published"
+        println "\nPerry latest is published"
     }
     dockerPushLatestVersion.mustRunAfter(dockerCreateImage)
 }
