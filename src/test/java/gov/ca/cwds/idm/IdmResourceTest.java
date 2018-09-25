@@ -1173,6 +1173,15 @@ public class IdmResourceTest extends BaseIntegrationTest {
     assertStrict(result, "fixtures/idm/admin-offices/county-offices.json");
   }
 
+  @Test
+  @WithMockCustomUser(roles = {CALS_ADMIN})
+  public void testGetAdminOfficesCalsAdmin() throws Exception {
+    mockMvc
+        .perform(MockMvcRequestBuilders.get("/idm/admin-offices"))
+        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+        .andReturn();
+  }
+
   private UserLog userLog(String userName, OperationType operation,  LocalDateTime dateTime) {
     UserLog log = new UserLog();
     log.setUsername(userName);
