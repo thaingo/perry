@@ -250,6 +250,12 @@ task publishDocker(dependsOn: ':docker-perry:dockerPerryPublish') {
     }
 }
 
+task publishLatestDocker(dependsOn: ':docker-perry:dockerPerryPublishLatest') {
+    doLast {
+        println 'Docker published'
+    }
+}
+
 task buildDocker(dependsOn: ':docker-perry:dockerCreateImage') {
     doLast {
         println 'Docker built'
