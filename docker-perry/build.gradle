@@ -78,7 +78,7 @@ task dockerPushLatestVersion(type: Exec, dependsOn: project.parent.checkDockerSe
     }
 }
 
-task dockerPerryPublish(dependsOn: [dockerCreateImage, dockerPushTaggedVersion]) {
+task dockerPerryPublish(dependsOn: [dockerCreateImage, dockerPushTaggedVersion, dockerPushLatestVersion]) {
     doLast {
         println "\nPerry $projectVersion is published"
     }
