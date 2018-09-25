@@ -55,11 +55,23 @@ public class FullyImplementedAuthorizerTestServiceImpl implements
   }
 
   @Override
+  @Authorize("case:full:caseObject")
+  public Case testAuthorizeReturnByNullObject() {
+    return null;
+  }
+
+  @Override
   @Authorize("case:full:caseDTO.caseObject")
   public CaseDTO testAuthorizeReturnByNestedObject() {
     CaseDTO caseDTO = new CaseDTO();
     caseDTO.setCaseObject(new Case(2L, "valid"));
     return caseDTO;
+  }
+
+  @Override
+  @Authorize("case:full:caseDTO.caseObject")
+  public CaseDTO testAuthorizeReturnByNullAndNestedObject() {
+    return null;
   }
 
   @Override
