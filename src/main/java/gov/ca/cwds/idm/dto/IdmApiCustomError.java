@@ -29,7 +29,10 @@ public class IdmApiCustomError  implements Serializable {
   private HttpStatus status;
 
   @JsonProperty
-  private String message;
+  private String technicalMessage;
+
+  @JsonProperty
+  private String userMessage;
 
   @JsonProperty
   private String errorCode;
@@ -50,18 +53,18 @@ public class IdmApiCustomError  implements Serializable {
     this.incidentId = MDC.get(REQUEST_ID);
   }
 
-  public IdmApiCustomError(HttpStatus status, String message) {
+  public IdmApiCustomError(HttpStatus status, String technical_message) {
     this(status);
-    this.message = message;
+    this.technicalMessage = technical_message;
   }
 
-  public IdmApiCustomError(HttpStatus status, MessageCode errorCode, String message) {
-    this(status, message);
+  public IdmApiCustomError(HttpStatus status, MessageCode errorCode, String technical_message) {
+    this(status, technical_message);
     this.errorCode = errorCode.getValue();
   }
 
-  public IdmApiCustomError(HttpStatus status, MessageCode errorCode, String message, List<String> causes) {
-    this(status, errorCode, message);
+  public IdmApiCustomError(HttpStatus status, MessageCode errorCode, String technical_message, List<String> causes) {
+    this(status, errorCode, technical_message);
     this.causes = causes;
   }
 
@@ -73,12 +76,16 @@ public class IdmApiCustomError  implements Serializable {
     return status;
   }
 
-  public String getMessage() {
-    return message;
+  public String getTechnicalMessage() {
+    return technicalMessage;
   }
 
   public String getErrorCode() {
     return errorCode;
+  }
+
+  public String getUserMessage() {
+    return userMessage;
   }
 
   public String getIncidentId() {
