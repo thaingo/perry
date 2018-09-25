@@ -11,18 +11,19 @@ import org.springframework.stereotype.Repository;
 
 @Profile("idm")
 @Repository
+@SuppressWarnings({"squid:S1214"})//implementation details are queries and they are put here by Spring Data design
 public interface OfficeRepository extends ReadOnlyRepository<CwsOffice, String> {
 
   String COUNTY_NAME = "countyName";
 
-  @Query("select new gov.ca.cwds.idm.dto.Office(office.officeId, trim(office.cwsOfficeName),"
+  String GET_ALL_OFFICES_QUERY =
+      "select new gov.ca.cwds.idm.dto.Office(office.officeId, trim(office.cwsOfficeName),"
       + " office.governmentEntityType, trim(county.shortDescription)) from CwsOffice office,"
-      + " County county where office.governmentEntityType = county.systemId ")
+      + " County county where office.governmentEntityType = county.systemId";
+
+  @Query(GET_ALL_OFFICES_QUERY)
   List<Office> findOffices();
 
-  @Query("select new gov.ca.cwds.idm.dto.Office(office.officeId, trim(office.cwsOfficeName),"
-      + " office.governmentEntityType, trim(county.shortDescription)) from CwsOffice office,"
-      + " County county where office.governmentEntityType = county.systemId "
-      + "and county.shortDescription = :" + COUNTY_NAME)
+  @Query(GET_ALL_OFFICES_QUERY + " and county.shortDescription = :" + COUNTY_NAME)
   List<Office> findCountyOffices(@Param(COUNTY_NAME) String countyName);
 }
