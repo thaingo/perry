@@ -24,7 +24,11 @@ public interface FullyImplementedAuthorizerTestService {
 
   Case testAuthorizeReturnByObject();
 
+  Case testAuthorizeReturnByNullObject();
+
   CaseDTO testAuthorizeReturnByNestedObject();
+
+  CaseDTO testAuthorizeReturnByNullAndNestedObject();
 
   List<Case> testReturnFiltered();
 

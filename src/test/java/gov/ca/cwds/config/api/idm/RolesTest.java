@@ -123,13 +123,23 @@ public class RolesTest {
   }
 
   @Test
-  public void testIsCountyAdmin() {
+  public void testUserIsCountyAdmin() {
     assertTrue(isCountyAdmin(user(COUNTY_ADMIN)));
     assertTrue(isCountyAdmin(user(COUNTY_ADMIN, OFFICE_ADMIN)));
     assertTrue(isCountyAdmin(user(STATE_ADMIN, COUNTY_ADMIN)));
     assertFalse(isCountyAdmin(user(STATE_ADMIN)));
     assertFalse(isCountyAdmin(user(OFFICE_ADMIN)));
     assertFalse(isCountyAdmin(user()));
+  }
+
+  @Test
+  public void testAdminIsCountyAdmin() {
+    assertTrue(isCountyAdmin(userToken(COUNTY_ADMIN)));
+    assertTrue(isCountyAdmin(userToken(COUNTY_ADMIN, OFFICE_ADMIN)));
+    assertTrue(isCountyAdmin(userToken(STATE_ADMIN, COUNTY_ADMIN)));
+    assertFalse(isCountyAdmin(userToken(IDM_JOB)));
+    assertFalse(isCountyAdmin(userToken(OFFICE_ADMIN, CALS_ADMIN)));
+    assertFalse(isCountyAdmin(userToken()));
   }
 
   static private UniversalUserToken userToken(String... roles) {

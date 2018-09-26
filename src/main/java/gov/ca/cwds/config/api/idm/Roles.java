@@ -32,6 +32,10 @@ public class Roles {
     return user.getRoles().contains(OFFICE_ADMIN);
   }
 
+  public static boolean isCountyAdmin(UniversalUserToken user) {
+    return user.getRoles().contains(COUNTY_ADMIN);
+  }
+
   public static boolean isNonRacfIdCalsUser(UniversalUserToken user) {
     return user.getRoles().contains(CALS_EXTERNAL_WORKER);
   }
