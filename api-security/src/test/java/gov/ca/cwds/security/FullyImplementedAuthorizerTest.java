@@ -79,12 +79,28 @@ public class FullyImplementedAuthorizerTest extends AbstractApiSecurityTest {
   }
 
   @Test
+  public void testAuthorizeReturnByNullObject() {
+    clearCallsCounts();
+    Case caseObject = testService.testAuthorizeReturnByNullObject();
+    assertCallsCounts(0, 0, 0, 0);
+    assert caseObject == null;
+  }
+
+  @Test
   public void testAuthorizeReturnByNestedObject() {
     clearCallsCounts();
     CaseDTO caseDTO = testService.testAuthorizeReturnByNestedObject();
     assertCallsCounts(0, 1, 0, 0);
     assert caseDTO != null && caseDTO.getCaseObject() != null;
     assert caseDTO.getCaseObject().getId() == 2;
+  }
+
+  @Test
+  public void testAuthorizeReturnByNullAndNestedObject() {
+    clearCallsCounts();
+    CaseDTO caseDTO = testService.testAuthorizeReturnByNullAndNestedObject();
+    assertCallsCounts(0, 0, 0, 0);
+    assert caseDTO == null;
   }
 
   @Test

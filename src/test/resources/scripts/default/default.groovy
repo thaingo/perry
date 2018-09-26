@@ -64,10 +64,8 @@ else {
 }
 
 //COMMON
-if (Roles.isAdmin(user)) {
-    token.userName = user.parameters["userName"]
-}
 
+//for this moment we set only admin's own office to the office ids list
 if (Roles.isOfficeAdmin(user)) {
     token.admin_office_ids = [user.parameters["custom:office"]]
 }
