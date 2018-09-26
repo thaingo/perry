@@ -3,10 +3,9 @@ package gov.ca.cwds.service.scripts;
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 
+import gov.ca.cwds.UniversalUserToken;
 import java.util.Arrays;
 import java.util.List;
-
-import gov.ca.cwds.UniversalUserToken;
 import org.junit.Test;
 
 /**
@@ -20,6 +19,7 @@ public class DefaultMappingTest extends ScriptTestBase {
     UniversalUserToken result = new UniversalUserToken();
     result.setUserId("userId");
     result.getRoles().addAll(roles);
+    result.setParameter("userName", "testUserName");
     result.setParameter("custom:office", "15");
     result.getPermissions().addAll(Arrays.asList("permission1", "permission2"));
     return result;

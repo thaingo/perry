@@ -14,5 +14,6 @@
   "privileges": [
     "permission1",
     "permission2"
-  ]
+  ],
+  "userName": "testUserName"
 }
