@@ -16,6 +16,9 @@
     "racfid": "SMITHB2",
     "permissions": [
       "test"
+    ],
+    "roles": [
+      "CWS-worker"
     ]
   },
   "editable": true

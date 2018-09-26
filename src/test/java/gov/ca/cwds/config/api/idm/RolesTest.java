@@ -11,11 +11,13 @@ import static gov.ca.cwds.config.api.idm.Roles.getAdminRoles;
 import static gov.ca.cwds.config.api.idm.Roles.getStrongestAdminRole;
 import static gov.ca.cwds.config.api.idm.Roles.isAdmin;
 import static gov.ca.cwds.config.api.idm.Roles.isCalsAdmin;
+import static gov.ca.cwds.config.api.idm.Roles.isCalsExternalWorker;
 import static gov.ca.cwds.config.api.idm.Roles.isCountyAdmin;
 import static gov.ca.cwds.config.api.idm.Roles.isMostlyCountyAdmin;
 import static gov.ca.cwds.config.api.idm.Roles.isMostlyOfficeAdmin;
 import static gov.ca.cwds.config.api.idm.Roles.isMostlyStateAdmin;
 import static gov.ca.cwds.config.api.idm.Roles.isNonRacfIdCalsUser;
+import static gov.ca.cwds.config.api.idm.Roles.isStateAdmin;
 import static gov.ca.cwds.util.Utils.toSet;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
@@ -25,6 +27,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import gov.ca.cwds.UniversalUserToken;
+import gov.ca.cwds.idm.dto.User;
 import java.util.Set;
 import org.junit.Test;
 
@@ -113,7 +116,25 @@ public class RolesTest {
   }
 
   @Test
-  public void testIsCountyAdmin() {
+  public void testIsStateAdmin() {
+    assertTrue(isStateAdmin(user(STATE_ADMIN)));
+    assertTrue(isStateAdmin(user(STATE_ADMIN, COUNTY_ADMIN)));
+    assertFalse(isStateAdmin(user(COUNTY_ADMIN)));
+    assertFalse(isStateAdmin(user()));
+  }
+
+  @Test
+  public void testUserIsCountyAdmin() {
+    assertTrue(isCountyAdmin(user(COUNTY_ADMIN)));
+    assertTrue(isCountyAdmin(user(COUNTY_ADMIN, OFFICE_ADMIN)));
+    assertTrue(isCountyAdmin(user(STATE_ADMIN, COUNTY_ADMIN)));
+    assertFalse(isCountyAdmin(user(STATE_ADMIN)));
+    assertFalse(isCountyAdmin(user(OFFICE_ADMIN)));
+    assertFalse(isCountyAdmin(user()));
+  }
+
+  @Test
+  public void testAdminIsCountyAdmin() {
     assertTrue(isCountyAdmin(userToken(COUNTY_ADMIN)));
     assertTrue(isCountyAdmin(userToken(COUNTY_ADMIN, OFFICE_ADMIN)));
     assertTrue(isCountyAdmin(userToken(STATE_ADMIN, COUNTY_ADMIN)));
@@ -122,9 +143,27 @@ public class RolesTest {
     assertFalse(isCountyAdmin(userToken()));
   }
 
+  @Test
+  public void testCalsAdminCanView() {
+    User user = user(CALS_EXTERNAL_WORKER);
+    assertTrue(isCalsExternalWorker(user));
+  }
+
+  @Test
+  public void testCalsAdminCanNotView() {
+    User user = user(CWS_WORKER);
+    assertFalse(isCalsExternalWorker(user));
+  }
+
   static private UniversalUserToken userToken(String... roles) {
     UniversalUserToken token = new UniversalUserToken();
     token.setRoles(toSet(roles));
     return token;
+  }
+
+  static private User user(String... roles) {
+    User user = new User();
+    user.setRoles(toSet(roles));
+    return user;
   }
 }

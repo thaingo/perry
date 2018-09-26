@@ -1,6 +1,7 @@
 package gov.ca.cwds.idm.service;
 
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.idm.service.AuthorizeService.areNotNullAndContains;
@@ -20,7 +21,7 @@ import org.junit.Test;
 
 public class AuthorizeServiceTest {
 
-  AuthorizeService service;
+  private AuthorizeService service;
 
   @Before
   public void before() {
@@ -49,76 +50,97 @@ public class AuthorizeServiceTest {
   public void testByUserAndAdmin_StateAdminSameCounty() {
     User user = user("Yolo", "Yolo_1");
     assertTrue(service
-        .byUserAndAdmin(user, admin(toSet(STATE_ADMIN, OFFICE_ADMIN), "Yolo", toSet("Yolo_2"))));
+        .authorizeByUserAndAdmin(user, admin(toSet(STATE_ADMIN, OFFICE_ADMIN), "Yolo", toSet("Yolo_2"))));
   }
 
   @Test
   public void testByUserAndAdmin_StateAdminDifferentCounty() {
     User user = user("Madera", "Madera_1");
-    assertTrue(service.byUserAndAdmin(user, admin(toSet(STATE_ADMIN), "Yolo", null)));
+    assertTrue(service.authorizeByUserAndAdmin(user, admin(toSet(STATE_ADMIN), "Yolo", null)));
   }
 
   @Test
   public void testByUserAndAdmin_StateAdminNoCounty() {
     User user = user("Madera", "Madera_1");
-    assertTrue(service.byUserAndAdmin(user, admin(toSet(STATE_ADMIN), null, null)));
+    assertTrue(service.authorizeByUserAndAdmin(user, admin(toSet(STATE_ADMIN), null, null)));
   }
 
   @Test
   public void testByUserAndAdmin_CountyAdminSameCounty() {
     User user = user("Yolo", "Yolo_1");
     UniversalUserToken admin = admin(toSet(COUNTY_ADMIN, OFFICE_ADMIN), "Yolo", toSet("Yolo_2"));
-    assertTrue(service.byUserAndAdmin(user, admin));
+    assertTrue(service.authorizeByUserAndAdmin(user, admin));
   }
 
   @Test
   public void testByUserAndAdmin_CountyAdminSameCountyNoOffice() {
     User user = user("Yolo", "Yolo_1");
     UniversalUserToken admin = admin(toSet(COUNTY_ADMIN), "Yolo", null);
-    assertTrue(service.byUserAndAdmin(user, admin));
+    assertTrue(service.authorizeByUserAndAdmin(user, admin));
   }
 
   @Test
   public void testByUserAndAdmin_CountyAdminDifferentCounty() {
     User user = user("Yolo", "Yolo_1");
     UniversalUserToken admin = admin(toSet(COUNTY_ADMIN), "Madera", null);
-    assertFalse(service.byUserAndAdmin(user, admin));
+    assertFalse(service.authorizeByUserAndAdmin(user, admin));
   }
 
   @Test
   public void testByUserAndAdmin_OfficeAdminSameOffice() {
     User user = user("Yolo", "Yolo_1");
-    assertTrue(service.byUserAndAdmin(user, admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_1"))));
+    assertTrue(service.authorizeByUserAndAdmin(user, admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_1"))));
   }
 
   @Test
   public void testByUserAndAdmin_OfficeAdminDifferentOffice() {
     User user = user("Yolo", "Yolo_1");
-    assertFalse(service.byUserAndAdmin(user, admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_2"))));
+    assertFalse(service.authorizeByUserAndAdmin(user, admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_2"))));
   }
 
   @Test
   public void testByUserAndAdmin_OfficeAdmin_UserNoOffice() {
     User user = user("Yolo", null);
-    assertFalse(service.byUserAndAdmin(user, admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_2"))));
+    assertFalse(service.authorizeByUserAndAdmin(user, admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_2"))));
   }
 
   @Test
-  public void testCalsAdminCanView() {
-    User user = withRole(Roles.CALS_EXTERNAL_WORKER);
-    assertTrue(service.isCalsExternalWorker(user));
-  }
+  public void testFindUser_OfficeAdmin() {
+    assertTrue(service.findUser(
+        user(toSet(CWS_WORKER), "Yolo", "Yolo_1"),
+        admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_1", "Yolo_2"))));
 
-  @Test
-  public void testCalsAdminCanNotView() {
-    User user = withRole(Roles.CWS_WORKER);
-    assertFalse(service.isCalsExternalWorker(user));
+    assertTrue(service.findUser(
+        user(toSet(CWS_WORKER), "Yolo", "Yolo_3"),
+        admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_1", "Yolo_2"))));
+
+    assertTrue(service.findUser(
+        user(toSet(STATE_ADMIN), "Yolo", "Yolo_1"),
+        admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_1", "Yolo_2"))));
+
+    assertTrue(service.findUser(
+        user(toSet(COUNTY_ADMIN), "Yolo", "Yolo_1"),
+        admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_1", "Yolo_2"))));
+
+    assertFalse(service.findUser(
+        user(toSet(STATE_ADMIN), "Yolo", "Yolo_3"),
+        admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_1", "Yolo_2"))));
+
+    assertFalse(service.findUser(
+        user(toSet(COUNTY_ADMIN), "Yolo", "Yolo_3"),
+        admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_1", "Yolo_2"))));
   }
 
   private User user(String countyName, String officeId) {
     User user = new User();
     user.setCountyName(countyName);
     user.setOfficeId(officeId);
+    return user;
+  }
+
+  private User user(Set<String> roles, String countyName, String officeId) {
+    User user = user(countyName, officeId);
+    user.setRoles(roles);
     return user;
   }
 

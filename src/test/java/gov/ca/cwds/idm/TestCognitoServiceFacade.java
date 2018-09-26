@@ -63,6 +63,9 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
   static final String ERROR_USER_ID = "errorUserId";
   static final String USER_WITH_INACTIVE_STATUS_COGNITO =
       "17067e4e-270f-4623-b86c-b4d4fa527a22";
+  static final String STATE_ADMIN_ID = "2d9369b4-5855-4a2c-95f7-3617fab1496a";
+  static final String COUNTY_ADMIN_ID = "c3702f4c113f1d2415447c8bfe8321d8df2d5151";
+
   static final String USERPOOL = "userpool";
 
   private AWSCognitoIdentityProvider cognito;
@@ -141,7 +144,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
             "Gonzales",
             WithMockCustomUser.COUNTY,
             "test",
-            null,
+            "CWS-worker",
             "SMITHBO",
             WithMockCustomUser.OFFICE_ID);
 
@@ -157,9 +160,41 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
             "Huanito",
             WithMockCustomUser.COUNTY,
             "test",
-            null,
+            "CWS-worker",
             "SMITHB2",
             null);
+
+    //countyAdminUser =
+        testUser(
+            COUNTY_ADMIN_ID,
+            Boolean.TRUE,
+            "CONFIRMED",
+            date(2018, 5, 3),
+            date(2018, 5, 31),
+            "jkuser@gmail.com",
+            "Reddy",
+            "Jkuser",
+            WithMockCustomUser.COUNTY,
+            "test",
+            "County-admin",
+            "MCALLUM",
+            WithMockCustomUser.OFFICE_ID);
+
+    //stateAdminUser =
+        testUser(
+            STATE_ADMIN_ID,
+            Boolean.TRUE,
+            "CONFIRMED",
+            date(2018, 5, 3),
+            date(2018, 5, 31),
+            "yull@gmail.com",
+            "Christina",
+            "Yull",
+            WithMockCustomUser.COUNTY,
+            "test",
+            "State-admin",
+            "YULLC",
+            WithMockCustomUser.OFFICE_ID);
 
     TestUser userWithEnableStatusInactiveInCognito =
         testUser(
