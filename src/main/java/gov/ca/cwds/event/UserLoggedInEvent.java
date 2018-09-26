@@ -1,5 +1,6 @@
 package gov.ca.cwds.event;
 
+import gov.ca.cwds.UniversalUserToken;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 
 /**
@@ -7,14 +8,14 @@ import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
  */
 public final class UserLoggedInEvent {
 
-  private String userId;
+  private UniversalUserToken userToken;
 
-  public UserLoggedInEvent(String userId) {
-    this.userId = userId;
+  public UserLoggedInEvent(UniversalUserToken userToken) {
+    this.userToken = userToken;
   }
 
   public String getUserId() {
-    return userId;
+    return (String) userToken.getParameters().get("userName");
   }
 
   @Override

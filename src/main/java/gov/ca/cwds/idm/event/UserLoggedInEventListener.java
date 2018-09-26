@@ -1,9 +1,7 @@
 package gov.ca.cwds.idm.event;
 
 import gov.ca.cwds.event.UserLoggedInEvent;
-import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.service.IdmService;
-import gov.ca.cwds.idm.service.SearchService;
+import gov.ca.cwds.idm.service.UserLogService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,22 +19,12 @@ public class UserLoggedInEventListener {
   private static final Logger LOGGER = LoggerFactory.getLogger(UserLoggedInEventListener.class);
 
   @Autowired
-  private SearchService searchService;
-
-  @Autowired
-  private IdmService idmService;
+  private UserLogService userLogService;
 
   @EventListener
   public void handleUserLoggedInEvent(UserLoggedInEvent event) {
-    try {
-      LOGGER.debug("Handling user logged in event for {}", event.getUserId());
-      User user = idmService.findUser(event.getUserId());
-      LOGGER.debug("Last login timestamps for user {} is {}", event.getUserId(),
-          user.getLastLoginDateTime());
-      searchService.updateUser(user);
-    } catch (Exception e) {
-      LOGGER.error("Can't refresh user in users index", e);
-    }
+    LOGGER.debug("Handling \"user logged in\" event for user {}", event.getUserId());
+    userLogService.logUpdate(event.getUserId());
   }
 
 }
