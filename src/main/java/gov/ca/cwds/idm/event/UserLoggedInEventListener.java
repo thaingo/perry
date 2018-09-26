@@ -23,8 +23,9 @@ public class UserLoggedInEventListener {
 
   @EventListener
   public void handleUserLoggedInEvent(UserLoggedInEvent event) {
-    LOGGER.debug("Handling \"user logged in\" event for user {}", event.getUserId());
-    userLogService.logUpdate(event.getUserId());
+    final String userId = event.getUserId();
+    LOGGER.debug("Handling \"user logged in\" event for user {}", userId);
+    userLogService.logUpdate(userId);
   }
 
 }
