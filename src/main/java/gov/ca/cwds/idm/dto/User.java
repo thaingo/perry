@@ -196,7 +196,10 @@ public class User implements Serializable {
   }
 
   public void setRoles(Set<String> roles) {
-    this.roles = roles;
+    this.roles.clear();
+    if(roles != null) {
+      this.roles.addAll(roles);
+    }
   }
 
   public String getPhoneExtensionNumber() {

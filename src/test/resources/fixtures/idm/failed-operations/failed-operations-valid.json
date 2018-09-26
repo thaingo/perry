@@ -18,6 +18,9 @@
       "status": "CONFIRMED",
       "permissions": [
         "test"
+      ],
+      "roles": [
+        "CWS-worker"
       ]
     },
     "operation": "UPDATE"
