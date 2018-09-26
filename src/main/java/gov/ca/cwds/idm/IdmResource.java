@@ -354,18 +354,40 @@ public class IdmResource {
   private static ResponseEntity<IdmApiCustomError> createCustomResponseEntity(
       HttpStatus httpStatus, MessageCode errorCode, String msg) {
     return new ResponseEntity<>(
-        new IdmApiCustomError(httpStatus, errorCode, msg), httpStatus);
+        IdmApiCustomError.IdmApiCustomErrorBuilder.anIdmApiCustomError()
+            .withStatus(httpStatus)
+            .withErrorCode(errorCode)
+            .withTechnicalMessage(msg)
+            .build(),
+        httpStatus);
   }
 
   private static ResponseEntity<IdmApiCustomError> createCustomResponseEntity(
       HttpStatus httpStatus, MessageCode errorCode, String msg, List<String> causes) {
     return new ResponseEntity<>(
-        new IdmApiCustomError(httpStatus, errorCode, msg, causes), httpStatus);
+        IdmApiCustomError.IdmApiCustomErrorBuilder.anIdmApiCustomError()
+            .withStatus(httpStatus)
+            .withErrorCode(errorCode)
+            .withTechnicalMessage(msg)
+            .withCauses(causes)
+            .build(),
+        httpStatus);
   }
 
   private static ResponseEntity<IdmApiCustomError> createCustomResponseEntity(
-      HttpStatus httpStatus, MessageCode errorCode, String msg, MultiValueMap<String, String> headers, List<String> causes) {
+      HttpStatus httpStatus,
+      MessageCode errorCode,
+      String msg,
+      MultiValueMap<String, String> headers,
+      List<String> causes) {
     return new ResponseEntity<>(
-        new IdmApiCustomError(httpStatus, errorCode, msg, causes), headers, httpStatus);
+        IdmApiCustomError.IdmApiCustomErrorBuilder.anIdmApiCustomError()
+            .withStatus(httpStatus)
+            .withErrorCode(errorCode)
+            .withTechnicalMessage(msg)
+            .withCauses(causes)
+            .build(),
+        headers,
+        httpStatus);
   }
 }
