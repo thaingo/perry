@@ -11,6 +11,7 @@ import static gov.ca.cwds.config.api.idm.Roles.getAdminRoles;
 import static gov.ca.cwds.config.api.idm.Roles.getStrongestAdminRole;
 import static gov.ca.cwds.config.api.idm.Roles.isAdmin;
 import static gov.ca.cwds.config.api.idm.Roles.isCalsAdmin;
+import static gov.ca.cwds.config.api.idm.Roles.isCountyAdmin;
 import static gov.ca.cwds.config.api.idm.Roles.isMostlyCountyAdmin;
 import static gov.ca.cwds.config.api.idm.Roles.isMostlyOfficeAdmin;
 import static gov.ca.cwds.config.api.idm.Roles.isMostlyStateAdmin;
@@ -109,6 +110,16 @@ public class RolesTest {
     assertFalse(isCalsAdmin(userToken(IDM_JOB)));
     assertFalse(isCalsAdmin(userToken(OFFICE_ADMIN, COUNTY_ADMIN)));
     assertFalse(isCalsAdmin(userToken()));
+  }
+
+  @Test
+  public void testIsCountyAdmin() {
+    assertTrue(isCountyAdmin(userToken(COUNTY_ADMIN)));
+    assertTrue(isCountyAdmin(userToken(COUNTY_ADMIN, OFFICE_ADMIN)));
+    assertTrue(isCountyAdmin(userToken(STATE_ADMIN, COUNTY_ADMIN)));
+    assertFalse(isCountyAdmin(userToken(IDM_JOB)));
+    assertFalse(isCountyAdmin(userToken(OFFICE_ADMIN, CALS_ADMIN)));
+    assertFalse(isCountyAdmin(userToken()));
   }
 
   static private UniversalUserToken userToken(String... roles) {
