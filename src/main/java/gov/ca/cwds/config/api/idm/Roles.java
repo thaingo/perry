@@ -32,8 +32,20 @@ public class Roles {
     return user.getRoles().contains(OFFICE_ADMIN);
   }
 
-  public static boolean isCountyAdmin(UniversalUserToken user) {
-    return user.getRoles().contains(COUNTY_ADMIN);
+  public static boolean isStateAdmin(User user) {
+    return user.getRoles().contains(STATE_ADMIN);
+  }
+
+  public static boolean isCountyAdmin(User user) {
+    return isCountyAdmin(user.getRoles());
+  }
+
+  public static boolean isCountyAdmin(UniversalUserToken admin) {
+    return isCountyAdmin(admin.getRoles());
+  }
+
+  private static boolean isCountyAdmin(Set<String> roles) {
+    return roles.contains(COUNTY_ADMIN);
   }
 
   public static boolean isNonRacfIdCalsUser(UniversalUserToken user) {
@@ -54,14 +66,6 @@ public class Roles {
 
   public static boolean isCalsAdmin(UniversalUserToken user) {
     return user.getRoles().contains(CALS_ADMIN);
-  }
-
-  public static boolean isStateAdmin(User user) {
-    return user.getRoles().contains(STATE_ADMIN);
-  }
-
-  public static boolean isCountyAdmin(User user) {
-    return user.getRoles().contains(COUNTY_ADMIN);
   }
 
   static String getStrongestAdminRole(UniversalUserToken user) {
