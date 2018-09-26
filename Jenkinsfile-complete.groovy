@@ -46,9 +46,9 @@ node('dora-slave') {
         stage('Build Docker') {
             withDockerRegistry([credentialsId: '6ba8d05c-ca13-4818-8329-15d41a089ec0']) {
                 if (params.RELEASE_PROJECT) {
-                    buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'dockerPerryPublish -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
+                    buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'publishLatestDocker -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
                 } else {
-                    buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'dockerPerryPublish -DRelease=false -DBuildNumber=$BUILD_NUMBER'
+                    buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'publishLatestDocker -DRelease=false -DBuildNumber=$BUILD_NUMBER'
                 }
             }
         }
