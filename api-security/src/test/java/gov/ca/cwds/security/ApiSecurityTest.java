@@ -48,6 +48,11 @@ public class ApiSecurityTest extends AbstractApiSecurityTest {
     testService.testCompositeObject(caseDTO);
   }
 
+  @Test
+  public void testArgAuthorizedNullCompositeObject() {
+    testService.testCompositeObject(null);
+  }
+
   @Test(expected = UnauthorizedException.class)
   public void testArgUnauthorizedCompositeObject() {
     CaseDTO caseDTO = new CaseDTO();
