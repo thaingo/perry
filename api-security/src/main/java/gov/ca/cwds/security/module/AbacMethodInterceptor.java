@@ -46,7 +46,7 @@ public class AbacMethodInterceptor implements MethodInterceptor {
   private Object checkResultPermissions(Object result, MethodInvocation methodInvocation)
       throws ScriptException {
     Authorize authorize = methodInvocation.getMethod().getAnnotation(Authorize.class);
-    if (authorize != null) {
+    if (authorize != null && result != null) {
       checkPermissions(authorize, result);
     }
     return result;
@@ -58,7 +58,7 @@ public class AbacMethodInterceptor implements MethodInterceptor {
     Object[] args = methodInvocation.getArguments();
     for (int i = 0; i < parameters.length; i++) {
       Authorize authorize = parameters[i].getAnnotation(Authorize.class);
-      if (authorize != null) {
+      if (authorize != null && args[i] != null) {
         checkPermissions(authorize, args[i]);
       }
     }
