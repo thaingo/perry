@@ -11,6 +11,7 @@ import static gov.ca.cwds.config.api.idm.Roles.getAdminRoles;
 import static gov.ca.cwds.config.api.idm.Roles.getStrongestAdminRole;
 import static gov.ca.cwds.config.api.idm.Roles.isAdmin;
 import static gov.ca.cwds.config.api.idm.Roles.isCalsAdmin;
+import static gov.ca.cwds.config.api.idm.Roles.isCalsExternalWorker;
 import static gov.ca.cwds.config.api.idm.Roles.isCountyAdmin;
 import static gov.ca.cwds.config.api.idm.Roles.isMostlyCountyAdmin;
 import static gov.ca.cwds.config.api.idm.Roles.isMostlyOfficeAdmin;
@@ -140,6 +141,18 @@ public class RolesTest {
     assertFalse(isCountyAdmin(userToken(IDM_JOB)));
     assertFalse(isCountyAdmin(userToken(OFFICE_ADMIN, CALS_ADMIN)));
     assertFalse(isCountyAdmin(userToken()));
+  }
+
+  @Test
+  public void testCalsAdminCanView() {
+    User user = user(CALS_EXTERNAL_WORKER);
+    assertTrue(isCalsExternalWorker(user));
+  }
+
+  @Test
+  public void testCalsAdminCanNotView() {
+    User user = user(CWS_WORKER);
+    assertFalse(isCalsExternalWorker(user));
   }
 
   static private UniversalUserToken userToken(String... roles) {

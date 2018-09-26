@@ -48,8 +48,16 @@ public class Roles {
     return roles.contains(COUNTY_ADMIN);
   }
 
-  public static boolean isNonRacfIdCalsUser(UniversalUserToken user) {
-    return user.getRoles().contains(CALS_EXTERNAL_WORKER);
+  public static boolean isNonRacfIdCalsUser(UniversalUserToken admin) {
+    return isCalsExternalWorker(admin.getRoles());
+  }
+
+  public static boolean isCalsExternalWorker(User user) {
+    return isCalsExternalWorker(user.getRoles());
+  }
+
+  private static boolean isCalsExternalWorker(Set<String> roles) {
+    return roles.contains(CALS_EXTERNAL_WORKER);
   }
 
   public static boolean isMostlyStateAdmin(UniversalUserToken user) {

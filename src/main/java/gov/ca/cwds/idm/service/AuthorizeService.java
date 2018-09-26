@@ -1,6 +1,7 @@
 package gov.ca.cwds.idm.service;
 
 import static gov.ca.cwds.config.api.idm.Roles.isCalsAdmin;
+import static gov.ca.cwds.config.api.idm.Roles.isCalsExternalWorker;
 import static gov.ca.cwds.config.api.idm.Roles.isCountyAdmin;
 import static gov.ca.cwds.config.api.idm.Roles.isMostlyCountyAdmin;
 import static gov.ca.cwds.config.api.idm.Roles.isMostlyOfficeAdmin;
@@ -14,9 +15,7 @@ import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.UniversalUserToken;
-import gov.ca.cwds.config.api.idm.Roles;
 import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.dto.UserByIdResponse;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.service.messages.MessageCode;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
@@ -58,7 +57,7 @@ public class AuthorizeService {
   }
 
   public Optional<MessageCode> verifyUser(User user) {
-    if (!defaultAuthorizeByUser(user)) {
+    if (!authorizeByUser(user)) {
       if (CurrentAuthenticatedUserUtil.isMostlyCountyAdmin()) {
         return Optional.of(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY);
       } else if (CurrentAuthenticatedUserUtil.isMostlyOfficeAdmin()) {
@@ -69,19 +68,19 @@ public class AuthorizeService {
   }
 
   public boolean createUser(User user) {
-    return defaultAuthorizeByUser(user);
+    return authorizeByUser(user);
   }
 
   public boolean updateUser(String userId) {
-    return defaultAuthorizeByUserId(userId);
+    return authorizeByUserId(userId);
   }
 
   public boolean resendInvitationMessage(String userId) {
-    return defaultAuthorizeByUserId(userId);
+    return authorizeByUserId(userId);
   }
 
-  private boolean defaultAuthorizeByUserId(String userId) {
-    return defaultAuthorizeByUser(getUserFromUserId(userId));
+  private boolean authorizeByUserId(String userId) {
+    return authorizeByUser(getUserFromUserId(userId));
   }
 
   private User getUserFromUserId(String userId) {
@@ -97,13 +96,9 @@ public class AuthorizeService {
     return user;
   }
 
-  private boolean defaultAuthorizeByUser(User user) {
+  private boolean authorizeByUser(User user) {
     UniversalUserToken admin = getCurrentUser();
-    return defaultAuthorizeByUserAndAdmin(user, admin);
-  }
-
-  static boolean isCalsExternalWorker(User user) {
-    return user.getRoles().contains(Roles.CALS_EXTERNAL_WORKER);
+    return authorizeByUserAndAdmin(user, admin);
   }
 
   private boolean authorizeByUserAndAdmin(User user, UniversalUserToken admin,
@@ -121,11 +116,11 @@ public class AuthorizeService {
     return false;
   }
 
-  boolean defaultAuthorizeByUserAndAdmin(User user, UniversalUserToken admin) {
-    return authorizeByUserAndAdmin(user, admin, AuthorizeService::defaultAuthorizeByOfficeAdmin);
+  boolean authorizeByUserAndAdmin(User user, UniversalUserToken admin) {
+    return authorizeByUserAndAdmin(user, admin, AuthorizeService::authorizeByOfficeAdmin);
   }
 
-  private static boolean defaultAuthorizeByOfficeAdmin(User user, UniversalUserToken admin) {
+  private static boolean authorizeByOfficeAdmin(User user, UniversalUserToken admin) {
     return areInSameOffice(user, admin);
   }
 
