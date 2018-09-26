@@ -1,6 +1,7 @@
 package gov.ca.cwds.idm;
 
 import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.idm.IdmResource.DATETIME_FORMAT_PATTERN;
@@ -60,7 +61,6 @@ import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesRequest;
 import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesResult;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.InvalidParameterException;
-import com.amazonaws.services.cognitoidp.model.MessageActionType;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import com.amazonaws.services.cognitoidp.model.UsernameExistsException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -78,7 +78,6 @@ import gov.ca.cwds.idm.service.SearchRestSender;
 import gov.ca.cwds.idm.service.SearchService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.SearchProperties;
-import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
 import gov.ca.cwds.service.messages.MessagesService;
 import java.nio.charset.Charset;
 import java.time.LocalDateTime;
@@ -1140,6 +1139,62 @@ public class IdmResourceTest extends BaseIntegrationTest {
             .andExpect(MockMvcResultMatchers.status().isBadRequest())
             .andReturn();
     assertExtensible(result, "fixtures/idm/failed-operations/failed-operations-invalid-date.json");
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {STATE_ADMIN})
+  public void testGetAdminOfficesStateAdmin() throws Exception {
+    assertAllAdminOffices();
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {STATE_ADMIN, COUNTY_ADMIN})
+  public void testGetAdminOfficesStateAndCountyAdmin() throws Exception {
+    assertAllAdminOffices();
+  }
+
+  @Test
+  @WithMockCustomUser
+  public void testGetAdminOfficesCountyAdmin() throws Exception {
+    assertCountyAdminOffices();
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {OFFICE_ADMIN})
+  public void testGetAdminOfficesOfficeAdmin() throws Exception {
+    assertCountyAdminOffices();
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {COUNTY_ADMIN, OFFICE_ADMIN})
+  public void testGetAdminOfficesCountyAndOfficeAdmin() throws Exception {
+    assertCountyAdminOffices();
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {CALS_ADMIN})
+  public void testGetAdminOfficesCalsAdmin() throws Exception {
+    mockMvc
+        .perform(MockMvcRequestBuilders.get("/idm/admin-offices"))
+        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+        .andReturn();
+  }
+
+  private void assertAllAdminOffices() throws Exception {
+    assertAdminOffices("all-offices.json");
+  }
+
+  private void assertCountyAdminOffices() throws Exception {
+    assertAdminOffices("county-offices.json");
+  }
+
+  private void assertAdminOffices(String fixtureName) throws Exception {
+    MvcResult result =
+        mockMvc
+            .perform(MockMvcRequestBuilders.get("/idm/admin-offices"))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andReturn();
+    assertStrict(result, "fixtures/idm/admin-offices/" + fixtureName);
   }
 
   private UserLog userLog(String userName, OperationType operation,  LocalDateTime dateTime) {
