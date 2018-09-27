@@ -36,6 +36,8 @@ public interface FullyImplementedAuthorizerTestService {
 
   List<CaseDTO> testReturnFilteredByNestedObject();
 
+  List<CaseDTO> testReturnFilteredByNestedSoleObject();
+
   List<Case> testFilterArgument(List<Case> caseList);
 
   List<CaseDTO> testFilterArgumentByNestedId(List<CaseDTO> caseDTOList);
