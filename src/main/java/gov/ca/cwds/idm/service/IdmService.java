@@ -14,13 +14,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface IdmService {
 
-  @PostAuthorize("@authorize.canFindUser(returnObject)")
+  @PostAuthorize("@authorize.canViewUser(returnObject)")
   User findUser(String id);
 
   @PreAuthorize("@authorize.canUpdateUser(#id)")
   void updateUser(@P("id") String id, UserUpdate updateUserDto);
 
-  UserVerificationResult verifyUser(String racfId, String email);
+  UserVerificationResult verifyIfUserCanBeCreated(String racfId, String email);
 
   UsersPage getUserPage(String paginationToken);
 

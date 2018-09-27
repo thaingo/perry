@@ -4,8 +4,8 @@ import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
-import static gov.ca.cwds.idm.service.AuthorizeService.areNotNullAndContains;
-import static gov.ca.cwds.idm.service.AuthorizeService.areNotNullAndEquals;
+import static gov.ca.cwds.idm.service.AuthorizeServiceImpl.areNotNullAndContains;
+import static gov.ca.cwds.idm.service.AuthorizeServiceImpl.areNotNullAndEquals;
 import static gov.ca.cwds.util.UniversalUserTokenDeserializer.ADMIN_OFFICE_IDS_PARAM;
 import static gov.ca.cwds.util.UniversalUserTokenDeserializer.COUNTY_NAME_PARAM;
 import static gov.ca.cwds.util.Utils.toSet;
@@ -20,11 +20,11 @@ import org.junit.Test;
 
 public class AuthorizeServiceTest {
 
-  private AuthorizeService service;
+  private AuthorizeServiceImpl service;
 
   @Before
   public void before() {
-    service = new AuthorizeService();
+    service = new AuthorizeServiceImpl();
   }
 
   @Test
