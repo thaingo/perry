@@ -87,12 +87,15 @@ public class FullyImplementedAuthorizerTestServiceImpl implements
   @Authorize("case:full:caseDTO.caseObject.id")
   public Set<CaseDTO> testReturnFilteredByNestedId() {
     Set<CaseDTO> result = new HashSet<>();
-    CaseDTO caseDTO = new CaseDTO();
-    caseDTO.setCaseObject(new Case(1L, "invalid"));
-    result.add(caseDTO);
-    caseDTO = new CaseDTO();
-    caseDTO.setCaseObject(new Case(2L, "valid"));
-    result.add(caseDTO);
+    CaseDTO case0 = new CaseDTO();
+    case0.setCaseObject(new Case(1L, "invalid"));
+    result.add(case0);
+    CaseDTO case1 = new CaseDTO();
+    case1.setCaseObject(new Case(2L, "valid"));
+    result.add(case1);
+    CaseDTO case2 = new CaseDTO();
+    case2.setCaseObject(new Case(3L, "valid"));
+    result.add(case2);
     return result;
   }
 
@@ -100,12 +103,32 @@ public class FullyImplementedAuthorizerTestServiceImpl implements
   @Authorize("case:full:caseDTO.caseObject")
   public List<CaseDTO> testReturnFilteredByNestedObject() {
     List<CaseDTO> result = new ArrayList<>();
-    CaseDTO caseDTO = new CaseDTO();
-    caseDTO.setCaseObject(new Case(1L, "invalid"));
-    result.add(caseDTO);
-    caseDTO = new CaseDTO();
-    caseDTO.setCaseObject(new Case(2L, "valid"));
-    result.add(caseDTO);
+    CaseDTO case0 = new CaseDTO();
+    case0.setCaseObject(new Case(1L, "invalid"));
+    result.add(case0);
+    CaseDTO case1 = new CaseDTO();
+    case1.setCaseObject(new Case(2L, "valid"));
+    result.add(case1);
+    CaseDTO case2 = new CaseDTO();
+    case2.setCaseObject(new Case(3L, "valid"));
+    result.add(case2);
+    return result;
+  }
+
+  @Override
+  @Authorize("case:full:caseDTO.caseObject")
+  public List<CaseDTO> testReturnFilteredByNestedSoleObject() {
+    List<CaseDTO> result = new ArrayList<>();
+    CaseDTO case0 = new CaseDTO();
+    case0.setCaseObject(new Case(1L, "invalid"));
+    result.add(case0);
+    CaseDTO case1 = new CaseDTO();
+    final Case validCase = new Case(2L, "valid");
+    case1.setCaseObject(validCase);
+    result.add(case1);
+    CaseDTO case2 = new CaseDTO();
+    case2.setCaseObject(validCase);
+    result.add(case2);
     return result;
   }
 

@@ -8,6 +8,7 @@ import gov.ca.cwds.testapp.domain.CaseDTO;
 import gov.ca.cwds.testapp.service.FullyImplementedAuthorizerTestService;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import org.junit.Test;
@@ -117,8 +118,10 @@ public class FullyImplementedAuthorizerTest extends AbstractApiSecurityTest {
     clearCallsCounts();
     Set<CaseDTO> result = testService.testReturnFilteredByNestedId();
     assertCallsCounts(0, 0, 1, 0);
-    assert result.size() == 1;
-    assert result.iterator().next().getCaseObject().getName().equals("valid");
+    assert result.size() == 2;
+    final Iterator<CaseDTO> iterator = result.iterator();
+    assert iterator.next().getCaseObject().getName().equals("valid");
+    assert iterator.next().getCaseObject().getName().equals("valid");
   }
 
   @Test
@@ -126,8 +129,22 @@ public class FullyImplementedAuthorizerTest extends AbstractApiSecurityTest {
     clearCallsCounts();
     List<CaseDTO> result = testService.testReturnFilteredByNestedObject();
     assertCallsCounts(0, 0, 0, 1);
-    assert result.size() == 1;
-    assert result.iterator().next().getCaseObject().getName().equals("valid");
+    assert result.size() == 2;
+    final Iterator<CaseDTO> iterator = result.iterator();
+    assert iterator.next().getCaseObject().getName().equals("valid");
+    assert iterator.next().getCaseObject().getName().equals("valid");
+  }
+
+  @Test
+  public void testReturnFilteredByNestedSoleObject() {
+    clearCallsCounts();
+    List<CaseDTO> result = testService.testReturnFilteredByNestedSoleObject();
+    assertCallsCounts(0, 0, 0, 1);
+    assert result.size() == 2;
+    final Iterator<CaseDTO> iterator = result.iterator();
+    final Case caseObject0 = iterator.next().getCaseObject();
+    final Case caseObject1 = iterator.next().getCaseObject();
+    assert caseObject0 == caseObject1;
   }
 
   @Test
