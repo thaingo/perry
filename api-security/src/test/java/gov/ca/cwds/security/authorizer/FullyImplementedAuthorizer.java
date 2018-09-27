@@ -21,7 +21,7 @@ public class FullyImplementedAuthorizer extends BaseAuthorizer<Case, Long> {
   }
 
   private boolean isAuthorized(Long id) {
-    return id == 2L;
+    return id == 2L || id == 3L;
   }
 
   @Override
