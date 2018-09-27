@@ -33,3 +33,5 @@ universalUserToken.permissions = attribute("custom:permission")
 idpToken.UserAttributes?.each {
     universalUserToken.parameters[it.Name.toLowerCase()] = getValue(it.Name, it.Value)
 }
+
+universalUserToken.parameters["userName"] = idpToken.Username
