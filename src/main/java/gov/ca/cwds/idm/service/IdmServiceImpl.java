@@ -128,7 +128,7 @@ public class IdmServiceImpl implements IdmService {
         || updateUserEnabledExecution.getExecutionStatus() == SUCCESS) {
       doraExecution = updateUserInSearch(userId);
     } else {
-      LOGGER.info(messages.get(USER_NOTHING_UPDATED, userId));
+      LOGGER.info(messages.getTech(USER_NOTHING_UPDATED, userId));
     }
 
     handleUpdatePartialSuccess(
@@ -330,7 +330,7 @@ public class IdmServiceImpl implements IdmService {
 
           @Override
           protected void catchMethod(Exception e) {
-            LOGGER.error(messages.get(ERROR_UPDATE_USER_ENABLED_STATUS, userId), e);
+            LOGGER.error(messages.getTech(ERROR_UPDATE_USER_ENABLED_STATUS, userId), e);
           }
         };
 
@@ -348,11 +348,11 @@ public class IdmServiceImpl implements IdmService {
 
       if (dbLogExecution.getExecutionStatus() == SUCCESS) {
         MessageCode errorCode = USER_CREATE_SAVE_TO_SEARCH_ERROR;
-        String msg = messages.get(errorCode, userId);
+        String msg = messages.getTech(errorCode, userId);
         throw new PartialSuccessException(userId, msg, errorCode, doraExecution.getException());
       } else { // logging in db failed
         MessageCode errorCode = USER_CREATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
-        String msg = messages.get(errorCode, userId);
+        String msg = messages.getTech(errorCode, userId);
         throw new PartialSuccessException(
             userId, msg, errorCode, doraExecution.getException(), dbLogExecution.getException());
       }
@@ -366,7 +366,7 @@ public class IdmServiceImpl implements IdmService {
     try {
       deletedCount = userLogService.deleteProcessedLogs(lastJobTime);
     } catch (Exception e) {
-      LOGGER.error(messages.get(UNABLE_TO_PURGE_PROCESSED_USER_LOGS, lastJobTime), e);
+      LOGGER.error(messages.getTech(UNABLE_TO_PURGE_PROCESSED_USER_LOGS, lastJobTime), e);
     }
     if (deletedCount > 0) {
       LOGGER.info("{} processed user log records are deleted", deletedCount);
@@ -375,7 +375,7 @@ public class IdmServiceImpl implements IdmService {
 
   private void throwPartialSuccessException(
       String userId, MessageCode errorCode, Exception... causes) {
-    String msg = messages.get(errorCode, userId);
+    String msg = messages.getTech(errorCode, userId);
     PartialSuccessException e = new PartialSuccessException(userId, msg, errorCode, causes);
     LOGGER.error(msg, e);
     throw e;
@@ -437,7 +437,7 @@ public class IdmServiceImpl implements IdmService {
     Map<String, CwsUserInfo> idToCmsUser = cwsUserInfoService.findUsers(userNameToRacfId.values())
         .stream().collect(
             Collectors.toMap(CwsUserInfo::getRacfId, e -> e, (user1, user2) -> {
-              LOGGER.warn(messages.get(DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS, user1.getRacfId()));
+              LOGGER.warn(messages.getTech(DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS, user1.getRacfId()));
               return user1;
             }));
     return cognitoUsers
@@ -463,7 +463,7 @@ public class IdmServiceImpl implements IdmService {
 
       @Override
       protected void catchMethod(Exception e) {
-        String msg = messages.get(UNABLE_UPDATE_IDM_USER_IN_ES, id);
+        String msg = messages.getTech(UNABLE_UPDATE_IDM_USER_IN_ES, id);
         LOGGER.error(msg, e);
         setUserLogExecution(userLogService.logUpdate(id));
       }
@@ -480,7 +480,7 @@ public class IdmServiceImpl implements IdmService {
 
       @Override
       protected void catchMethod(Exception e) {
-        String msg = messages.get(UNABLE_CREATE_IDM_USER_IN_ES, userType.getUsername());
+        String msg = messages.getTech(UNABLE_CREATE_IDM_USER_IN_ES, userType.getUsername());
         LOGGER.error(msg, e);
         setUserLogExecution(userLogService.logCreate(userType.getUsername()));
       }
@@ -489,7 +489,7 @@ public class IdmServiceImpl implements IdmService {
 
   private UserVerificationResult composeNegativeResultWithMessage(
       MessageCode errorCode, Object... params) {
-    String message = messages.get(errorCode, params);
+    String message = messages.getTech(errorCode, params);
     LOGGER.info(message);
     return UserVerificationResult.Builder.anUserVerificationResult()
         .withVerificationFailed(errorCode.getValue(), message)

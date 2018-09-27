@@ -138,7 +138,7 @@ public class IdmResource {
       DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATETIME_FORMAT_PATTERN);
       lastJobTime = LocalDateTime.parse(lastJobDateStr, formatter);
     } catch (DateTimeParseException e) {
-      String msg = messages.get(INVALID_DATE_FORMAT, DATETIME_FORMAT_PATTERN);
+      String msg = messages.getTech(INVALID_DATE_FORMAT, DATETIME_FORMAT_PATTERN);
       LOGGER.error(msg, e);
       return createCustomResponseEntity(HttpStatus.BAD_REQUEST, INVALID_DATE_FORMAT, msg);
     }

@@ -4,6 +4,7 @@ import static gov.ca.cwds.config.Constants.DEFAULT_LOCALE;
 
 import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 public class MessagesService {
 
   @Autowired
+  @Qualifier("tech")
   private MessageSource messageSource;
 
   private MessageSourceAccessor accessor;
@@ -21,7 +23,7 @@ public class MessagesService {
     accessor = new MessageSourceAccessor(messageSource, DEFAULT_LOCALE);
   }
 
-  public String get(MessageCode messageCode, Object... args) {
+  public String getTech(MessageCode messageCode, Object... args) {
     return accessor.getMessage(messageCode.getValue(), args);
   }
 
