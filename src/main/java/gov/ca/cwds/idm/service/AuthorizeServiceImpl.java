@@ -31,10 +31,10 @@ public class AuthorizeServiceImpl implements AuthorizeService {
 
   @Override
   public boolean canViewUser(User user) {
-    return canFindUser(user, getCurrentUser());
+    return canViewUser(user, getCurrentUser());
   }
 
-  boolean canFindUser(User user, UniversalUserToken admin) {
+  boolean canViewUser(User user, UniversalUserToken admin) {
     return authorizeByUserAndAdmin(user, admin,
         AuthorizeServiceImpl::authorizeFindUserByOfficeAdmin);
   }

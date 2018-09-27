@@ -105,27 +105,27 @@ public class AuthorizeServiceTest {
 
   @Test
   public void testFindUser_OfficeAdmin() {
-    assertTrue(service.canFindUser(
+    assertTrue(service.canViewUser(
         user(toSet(CWS_WORKER), "Yolo", "Yolo_1"),
         admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_1", "Yolo_2"))));
 
-    assertTrue(service.canFindUser(
+    assertTrue(service.canViewUser(
         user(toSet(CWS_WORKER), "Yolo", "Yolo_3"),
         admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_1", "Yolo_2"))));
 
-    assertTrue(service.canFindUser(
+    assertTrue(service.canViewUser(
         user(toSet(STATE_ADMIN), "Yolo", "Yolo_1"),
         admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_1", "Yolo_2"))));
 
-    assertTrue(service.canFindUser(
+    assertTrue(service.canViewUser(
         user(toSet(COUNTY_ADMIN), "Yolo", "Yolo_1"),
         admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_1", "Yolo_2"))));
 
-    assertFalse(service.canFindUser(
+    assertFalse(service.canViewUser(
         user(toSet(STATE_ADMIN), "Yolo", "Yolo_3"),
         admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_1", "Yolo_2"))));
 
-    assertFalse(service.canFindUser(
+    assertFalse(service.canViewUser(
         user(toSet(COUNTY_ADMIN), "Yolo", "Yolo_3"),
         admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_1", "Yolo_2"))));
   }
