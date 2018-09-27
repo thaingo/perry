@@ -34,11 +34,11 @@ public class AuthorizeService {
 
   private MappingService mappingService;
 
-  public boolean findUser(User user) {
-    return findUser(user, getCurrentUser());
+  public boolean canFindUser(User user) {
+    return canFindUser(user, getCurrentUser());
   }
 
-  boolean findUser(User user, UniversalUserToken admin) {
+  boolean canFindUser(User user, UniversalUserToken admin) {
     return authorizeByUserAndAdmin(user, admin, AuthorizeService::authorizeFindUserByOfficeAdmin);
   }
 
@@ -67,15 +67,15 @@ public class AuthorizeService {
     return Optional.empty();
   }
 
-  public boolean createUser(User user) {
+  public boolean canCreateUser(User user) {
     return authorizeByUser(user);
   }
 
-  public boolean updateUser(String userId) {
+  public boolean canUpdateUser(String userId) {
     return authorizeByUserId(userId);
   }
 
-  public boolean resendInvitationMessage(String userId) {
+  public boolean canResendInvitationMessage(String userId) {
     return authorizeByUserId(userId);
   }
 

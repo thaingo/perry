@@ -2,7 +2,6 @@ package gov.ca.cwds.idm.service;
 
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserAndOperation;
-import gov.ca.cwds.idm.dto.UserByIdResponse;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.UserVerificationResult;
 import gov.ca.cwds.idm.dto.UsersPage;
@@ -15,23 +14,23 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface IdmService {
 
-  @PostAuthorize("@authorize.findUser(returnObject)")
+  @PostAuthorize("@authorize.canFindUser(returnObject)")
   User findUser(String id);
 
-  @PreAuthorize("@authorize.updateUser(#id)")
+  @PreAuthorize("@authorize.canUpdateUser(#id)")
   void updateUser(@P("id") String id, UserUpdate updateUserDto);
 
   UserVerificationResult verifyUser(String racfId, String email);
 
   UsersPage getUserPage(String paginationToken);
 
-  @PreAuthorize("@authorize.createUser(#user)")
+  @PreAuthorize("@authorize.canCreateUser(#user)")
   String createUser(@P("user") User user);
 
   List<User> searchUsers(UsersSearchCriteria usersSearchCriteria);
 
   List<UserAndOperation> getFailedOperations(LocalDateTime lastJobTime);
 
-  @PreAuthorize("@authorize.resendInvitationMessage(#id)")
+  @PreAuthorize("@authorize.canResendInvitationMessage(#id)")
   void resendInvitationMessage(@P("id") String id);
 }

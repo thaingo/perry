@@ -13,7 +13,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import gov.ca.cwds.UniversalUserToken;
-import gov.ca.cwds.config.api.idm.Roles;
 import gov.ca.cwds.idm.dto.User;
 import java.util.Set;
 import org.junit.Before;
@@ -106,27 +105,27 @@ public class AuthorizeServiceTest {
 
   @Test
   public void testFindUser_OfficeAdmin() {
-    assertTrue(service.findUser(
+    assertTrue(service.canFindUser(
         user(toSet(CWS_WORKER), "Yolo", "Yolo_1"),
         admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_1", "Yolo_2"))));
 
-    assertTrue(service.findUser(
+    assertTrue(service.canFindUser(
         user(toSet(CWS_WORKER), "Yolo", "Yolo_3"),
         admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_1", "Yolo_2"))));
 
-    assertTrue(service.findUser(
+    assertTrue(service.canFindUser(
         user(toSet(STATE_ADMIN), "Yolo", "Yolo_1"),
         admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_1", "Yolo_2"))));
 
-    assertTrue(service.findUser(
+    assertTrue(service.canFindUser(
         user(toSet(COUNTY_ADMIN), "Yolo", "Yolo_1"),
         admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_1", "Yolo_2"))));
 
-    assertFalse(service.findUser(
+    assertFalse(service.canFindUser(
         user(toSet(STATE_ADMIN), "Yolo", "Yolo_3"),
         admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_1", "Yolo_2"))));
 
-    assertFalse(service.findUser(
+    assertFalse(service.canFindUser(
         user(toSet(COUNTY_ADMIN), "Yolo", "Yolo_3"),
         admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_1", "Yolo_2"))));
   }
