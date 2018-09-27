@@ -8,7 +8,7 @@ import static gov.ca.cwds.idm.service.ExecutionStatus.WAS_NOT_EXECUTED;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByEmail;
-import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByRacfId;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.canChangeToEnableActiveStatus;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getRACFId;
 import static gov.ca.cwds.service.messages.MessageCode.ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS;
@@ -27,7 +27,6 @@ import static gov.ca.cwds.service.messages.MessageCode.USER_UPDATE_SAVE_TO_SEARC
 import static gov.ca.cwds.service.messages.MessageCode.USER_UPDATE_SAVE_TO_SEARCH_ERROR;
 import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
 import static gov.ca.cwds.util.Utils.toLowerCase;
-import static gov.ca.cwds.util.Utils.toUpperCase;
 import static java.util.stream.Collectors.toSet;
 
 import com.amazonaws.services.cognitoidp.model.UserType;
@@ -35,7 +34,6 @@ import gov.ca.cwds.data.persistence.auth.CwsOffice;
 import gov.ca.cwds.data.persistence.auth.StaffPerson;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserAndOperation;
-import gov.ca.cwds.idm.dto.UserByIdResponse;
 import gov.ca.cwds.idm.dto.UserEnableStatusRequest;
 import gov.ca.cwds.idm.dto.UserIdAndOperation;
 import gov.ca.cwds.idm.dto.UserUpdate;
@@ -49,8 +47,10 @@ import gov.ca.cwds.idm.service.cognito.StandardUserAttribute;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil;
+import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
 import gov.ca.cwds.idm.service.execution.OptionalExecution;
 import gov.ca.cwds.idm.service.execution.PutInSearchExecution;
+import gov.ca.cwds.idm.service.validate.UserActivationRule;
 import gov.ca.cwds.rest.api.domain.PartialSuccessException;
 import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType;
 import gov.ca.cwds.service.CwsUserInfoService;
@@ -64,7 +64,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -98,6 +97,8 @@ public class IdmServiceImpl implements IdmService {
 
   @Autowired private MappingService mappingService;
 
+  @Autowired private UserActivationRule userActivationRule;
+
   @Override
   public User findUser(String id) {
     UserType cognitoUser = cognitoServiceFacade.getCognitoUserById(id);
@@ -111,6 +112,11 @@ public class IdmServiceImpl implements IdmService {
 
     ExecutionStatus updateAttributesStatus =
         updateUserAttributes(userId, updateUserDto, existedCognitoUser);
+
+    if (canChangeToEnableActiveStatus(updateUserDto.getEnabled(), existedCognitoUser.getEnabled())) {
+      String racfId = CognitoUtils.getRACFId(existedCognitoUser);
+      userActivationRule.performValidation(racfId);
+    }
 
     OptionalExecution<UserEnableStatusRequest, Boolean> updateUserEnabledExecution =
         executeUpdateEnableStatusOptionally(userId, updateUserDto, existedCognitoUser);
@@ -195,7 +201,7 @@ public class IdmServiceImpl implements IdmService {
       return composeNegativeResultWithMessage(USER_WITH_EMAIL_EXISTS_IN_IDM, email);
     }
 
-    if (isActiveRacfIdPresent(racfId)) {
+    if (cognitoServiceFacade.isActiveRacfIdPresent(racfId)) {
       return composeNegativeResultWithMessage(ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM, racfId);
     }
 
@@ -388,19 +394,6 @@ public class IdmServiceImpl implements IdmService {
         .stream()
         .map(e -> new UserIdAndOperation(e.getKey(), e.getValue()))
         .collect(Collectors.toList());
-  }
-
-  private boolean isActiveRacfIdPresent(String racfId) {
-    Collection<UserType> cognitoUsersByRacfId =
-        cognitoServiceFacade.searchAllPages(composeToGetFirstPageByRacfId(toUpperCase(racfId)));
-    return !CollectionUtils.isEmpty(cognitoUsersByRacfId)
-        && isActiveUserPresent(cognitoUsersByRacfId);
-  }
-
-  private static boolean isActiveUserPresent(Collection<UserType> cognitoUsers) {
-    return cognitoUsers
-        .stream()
-        .anyMatch(userType -> Objects.equals(userType.getEnabled(), Boolean.TRUE));
   }
 
   static Set<String> transformSearchValues(Set<String> values, StandardUserAttribute searchAttr) {

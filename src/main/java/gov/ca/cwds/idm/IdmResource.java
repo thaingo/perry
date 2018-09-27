@@ -202,7 +202,12 @@ public class IdmResource {
       return ResponseEntity.noContent().build();
     } catch (UserNotFoundPerryException e) {
       return ResponseEntity.notFound().build();
-    } catch (PartialSuccessException e) {
+    } catch (UserIdmValidationException e) {
+      return createCustomResponseEntity(
+          HttpStatus.BAD_REQUEST,
+          e.getErrorCode(),
+          e.getMessage());
+    }catch (PartialSuccessException e) {
       return createCustomResponseEntity(
           HttpStatus.INTERNAL_SERVER_ERROR,
           e.getErrorCode(),

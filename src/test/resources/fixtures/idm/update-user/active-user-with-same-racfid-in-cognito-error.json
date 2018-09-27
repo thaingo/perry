@@ -1,0 +1,5 @@
+{
+  "status": "BAD_REQUEST",
+  "message": "Active User with RACFID: SMITHBO exists in Cognito",
+  "error_code": "CAP-028"
+}

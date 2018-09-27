@@ -12,6 +12,8 @@ import static gov.ca.cwds.idm.TestCognitoServiceFacade.ABSENT_USER_ID;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.COUNTY_ADMIN_ID;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.ERROR_USER_ID;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.ES_ERROR_CREATE_USER_EMAIL;
+import static gov.ca.cwds.idm.TestCognitoServiceFacade.INACTIVE_USER_WITH_ACTIVE_RACFID_IN_CMS;
+import static gov.ca.cwds.idm.TestCognitoServiceFacade.INACTIVE_USER_WITH_NO_ACTIVE_RACFID_IN_CMS;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.NEW_USER_ES_FAIL_ID;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.NEW_USER_SUCCESS_ID;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.SOME_PAGINATION_TOKEN;
@@ -668,6 +670,52 @@ public class IdmResourceTest extends BaseIntegrationTest {
     inOrder.verify(cognito).adminUpdateUserAttributes(updateAttributesRequest);
     inOrder.verify(cognito).adminDisableUser(disableUserRequest);
     verifyDoraCalls(1);
+  }
+
+  @Test
+  @WithMockCustomUser
+  public void testValidationUpdateUserChangeInactiveToActive_throwsNoRacfIdInCWS() throws Exception {
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setEnabled(Boolean.TRUE);
+    AdminEnableUserRequest enableUserRequest = setEnableUserRequestAndResult(INACTIVE_USER_WITH_NO_ACTIVE_RACFID_IN_CMS);
+    setDoraSuccess();
+
+    MvcResult result =
+        mockMvc
+            .perform(
+                MockMvcRequestBuilders.patch("/idm/users/" + INACTIVE_USER_WITH_NO_ACTIVE_RACFID_IN_CMS)
+                    .contentType(JSON_CONTENT_TYPE)
+                    .content(asJsonString(userUpdate)))
+            .andExpect(MockMvcResultMatchers.status().isBadRequest())
+            .andReturn();
+    assertExtensible(result, "fixtures/idm/update-user/no-active-cws-user-error.json");
+
+    verify(spySearchService, times(0)).updateUser(any(User.class));
+    verify(cognito, times(0)).adminEnableUser(enableUserRequest);
+    verifyDoraCalls(0);
+  }
+
+  @Test
+  @WithMockCustomUser
+  public void testValidationUpdateUserChangeInactiveToActive_throwsActiveRacfIdAlreadyInCognito() throws Exception {
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setEnabled(Boolean.TRUE);
+    AdminEnableUserRequest enableUserRequest = setEnableUserRequestAndResult(INACTIVE_USER_WITH_ACTIVE_RACFID_IN_CMS);
+    setDoraSuccess();
+
+    MvcResult result =
+        mockMvc
+            .perform(
+                MockMvcRequestBuilders.patch("/idm/users/" + INACTIVE_USER_WITH_ACTIVE_RACFID_IN_CMS)
+                    .contentType(JSON_CONTENT_TYPE)
+                    .content(asJsonString(userUpdate)))
+            .andExpect(MockMvcResultMatchers.status().isBadRequest())
+            .andReturn();
+    assertExtensible(result, "fixtures/idm/update-user/active-user-with-same-racfid-in-cognito-error.json");
+
+    verify(spySearchService, times(0)).updateUser(any(User.class));
+    verify(cognito, times(0)).adminEnableUser(enableUserRequest);
+    verifyDoraCalls(0);
   }
 
   @Test

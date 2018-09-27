@@ -1,0 +1,5 @@
+{
+  "status": "BAD_REQUEST",
+  "message": "No user with RACFID: NOIDCMS found in CWSCMS",
+  "error_code": "CAP-003"
+}

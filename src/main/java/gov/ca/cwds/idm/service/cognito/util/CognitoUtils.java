@@ -120,4 +120,8 @@ public class CognitoUtils {
   public static String getRACFId(UserType user) {
     return CognitoUtils.getAttributeValue(user, RACFID_CUSTOM.getName());
   }
+
+  public static boolean canChangeToEnableActiveStatus(Boolean newEnabled, Boolean currentEnabled) {
+    return newEnabled != null && !newEnabled.equals(currentEnabled) && newEnabled;
+  }
 }
