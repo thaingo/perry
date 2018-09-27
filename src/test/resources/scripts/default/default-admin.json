@@ -13,6 +13,7 @@
   "county_code": "21",
   "county_cws_code": 1088,
   "email": null,
+  "userName": "testUserName",
   "privileges": [
     "Countywide Read",
     "permission1",
@@ -20,5 +21,6 @@
   ],
   "authorityCodes": [
     "S"
-  ]
+  ],
+  "userName": "testUserName"
 }

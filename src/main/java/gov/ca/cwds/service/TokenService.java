@@ -44,7 +44,7 @@ public class TokenService {
     perryTokenEntity.setSecurityContext(SerializationUtils.serialize(securityContext));
     deleteExpiredRecords();
     tokenRepository.save(perryTokenEntity);
-    eventPublisher.publishEvent(new UserLoggedInEvent(userToken.getUserId()));
+    eventPublisher.publishEvent(new UserLoggedInEvent(userToken));
     return accessCode;
   }
 

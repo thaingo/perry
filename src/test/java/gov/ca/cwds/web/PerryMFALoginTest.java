@@ -22,6 +22,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import org.skyscreamer.jsonassert.JSONAssert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,7 +101,7 @@ public class PerryMFALoginTest extends BaseIntegrationTest {
     result = validateToken(token, MockMvcResultMatchers.status().isOk(), AUTH_JSON);
     String perryJson = result.getResponse().getContentAsString();
     LOGGER.info("Perry JSON: {}", perryJson);
-    Assert.assertEquals(FixtureHelpers.fixture(AUTH_JSON), perryJson);
+    JSONAssert.assertEquals(FixtureHelpers.fixture(AUTH_JSON), perryJson, false);
     setLogoutHandlerSecurityContext(token, result.getRequest().getSession());
     logout(result);
     validateToken(token, MockMvcResultMatchers.status().is4xxClientError(), AUTH_JSON);
@@ -157,7 +158,7 @@ public class PerryMFALoginTest extends BaseIntegrationTest {
     result = validateToken(token, MockMvcResultMatchers.status().isOk(), authJson);
     String perryJson = result.getResponse().getContentAsString();
     LOGGER.info("Perry JSON: {}", perryJson);
-    Assert.assertEquals(FixtureHelpers.fixture(authJson), perryJson);
+    JSONAssert.assertEquals(FixtureHelpers.fixture(authJson), perryJson, false);
     return result;
   }
 
