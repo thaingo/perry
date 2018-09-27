@@ -3,6 +3,7 @@ package gov.ca.cwds.config.api.idm;
 import static gov.ca.cwds.util.Utils.toSet;
 
 import gov.ca.cwds.UniversalUserToken;
+import gov.ca.cwds.idm.dto.User;
 import java.util.Collections;
 import java.util.Set;
 import org.springframework.context.annotation.Profile;
@@ -31,12 +32,32 @@ public class Roles {
     return user.getRoles().contains(OFFICE_ADMIN);
   }
 
-  public static boolean isCountyAdmin(UniversalUserToken user) {
-    return user.getRoles().contains(COUNTY_ADMIN);
+  public static boolean isStateAdmin(User user) {
+    return user.getRoles().contains(STATE_ADMIN);
   }
 
-  public static boolean isNonRacfIdCalsUser(UniversalUserToken user) {
-    return user.getRoles().contains(CALS_EXTERNAL_WORKER);
+  public static boolean isCountyAdmin(User user) {
+    return isCountyAdmin(user.getRoles());
+  }
+
+  public static boolean isCountyAdmin(UniversalUserToken admin) {
+    return isCountyAdmin(admin.getRoles());
+  }
+
+  private static boolean isCountyAdmin(Set<String> roles) {
+    return roles.contains(COUNTY_ADMIN);
+  }
+
+  public static boolean isNonRacfIdCalsUser(UniversalUserToken admin) {
+    return isCalsExternalWorker(admin.getRoles());
+  }
+
+  public static boolean isCalsExternalWorker(User user) {
+    return isCalsExternalWorker(user.getRoles());
+  }
+
+  private static boolean isCalsExternalWorker(Set<String> roles) {
+    return roles.contains(CALS_EXTERNAL_WORKER);
   }
 
   public static boolean isMostlyStateAdmin(UniversalUserToken user) {

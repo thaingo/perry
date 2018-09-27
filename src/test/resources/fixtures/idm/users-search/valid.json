@@ -37,6 +37,9 @@
     "racfid": "SMITHBO",
     "permissions": [
       "test"
+    ],
+    "roles":[
+      "CWS-worker"
     ]
   }
 ]

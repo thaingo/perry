@@ -9,11 +9,13 @@ import static gov.ca.cwds.idm.IdmResourceTest.DORA_WS_MAX_ATTEMPTS;
 import static gov.ca.cwds.idm.IdmResourceTest.IDM_BASIC_AUTH_PASS;
 import static gov.ca.cwds.idm.IdmResourceTest.IDM_BASIC_AUTH_USER;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.ABSENT_USER_ID;
+import static gov.ca.cwds.idm.TestCognitoServiceFacade.COUNTY_ADMIN_ID;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.ERROR_USER_ID;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.ES_ERROR_CREATE_USER_EMAIL;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.NEW_USER_ES_FAIL_ID;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.NEW_USER_SUCCESS_ID;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.SOME_PAGINATION_TOKEN;
+import static gov.ca.cwds.idm.TestCognitoServiceFacade.STATE_ADMIN_ID;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.USERPOOL;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.USER_CALS_EXTERNAL;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.USER_NO_RACFID_ID;
@@ -136,7 +138,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
           MediaType.APPLICATION_JSON.getType(),
           MediaType.APPLICATION_JSON.getSubtype(),
           Charset.forName("utf8"));
-  public static final int DORA_WS_MAX_ATTEMPTS = 3;
+  static final int DORA_WS_MAX_ATTEMPTS = 3;
 
   @Autowired private CognitoServiceFacade cognitoServiceFacade;
 
@@ -255,7 +257,8 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @Test
   @WithMockCustomUser(roles = {OFFICE_ADMIN}, adminOfficeIds = {"otherOfficeId"})
   public void testGetUserOfficeAdminOtherOffice() throws Exception {
-    assertGetUserUnauthorized(USER_WITH_RACFID_AND_DB_DATA_ID);
+    testGetValidUser(USER_WITH_RACFID_AND_DB_DATA_ID,
+        "fixtures/idm/get-user/with-racfid-and-db-data-valid.json");
   }
 
   @Test
@@ -318,6 +321,18 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @WithMockCustomUser(roles = {"OtherRole"})
   public void testGetUserWithOtherRole() throws Exception {
     assertGetUserUnauthorized(USER_NO_RACFID_ID);
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {OFFICE_ADMIN}, adminOfficeIds = {"OtherOfficeId"})
+  public void testGetOtherOfficeCountyAdminByOfficeAdmin() throws Exception {
+    assertGetUserUnauthorized(COUNTY_ADMIN_ID);
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {OFFICE_ADMIN}, adminOfficeIds = {"OtherOfficeId"})
+  public void testGetOtherOfficeStateAdminByOfficeAdmin() throws Exception {
+    assertGetUserUnauthorized(STATE_ADMIN_ID);
   }
 
   @Test
@@ -1080,7 +1095,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @Test
   public void testGetFailedOperations() throws Exception {
     userLogRepository.deleteAll();
-    LocalDateTime log1time = LocalDateTime.of(2018, 1, 1, 12, 00, 15);
+    LocalDateTime log1time = LocalDateTime.of(2018, 1, 1, 12, 0, 15);
     LocalDateTime log0time = log1time.minusHours(4).plusMinutes(13);
     LocalDateTime log2time = log1time.plusMinutes(10);
     LocalDateTime log3time = log2time.plusMinutes(10).minusSeconds(15);
