@@ -4,6 +4,7 @@ import static gov.ca.cwds.config.Constants.DEFAULT_LOCALE;
 
 import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.stereotype.Service;
@@ -12,20 +13,29 @@ import org.springframework.stereotype.Service;
 public class MessagesService {
 
   @Autowired
-  private MessageSource messageSource;
+  @Qualifier("tech")
+  private MessageSource techMessageSource;
 
-  private MessageSourceAccessor accessor;
+  @Autowired
+  @Qualifier("user")
+  private MessageSource userMessageSource;
+
+  private MessageSourceAccessor techMessagesAccessor;
+
+  private MessageSourceAccessor userMessagesAccessor;
 
   @PostConstruct
   private void init() {
-    accessor = new MessageSourceAccessor(messageSource, DEFAULT_LOCALE);
+    techMessagesAccessor = new MessageSourceAccessor(techMessageSource, DEFAULT_LOCALE);
+    userMessagesAccessor = new MessageSourceAccessor(userMessageSource, DEFAULT_LOCALE);
   }
 
-  public String get(MessageCode messageCode, Object... args) {
-    return accessor.getMessage(messageCode.getValue(), args);
+  public String getTechMessage(MessageCode messageCode, Object... args) {
+    return techMessagesAccessor.getMessage(messageCode.getValue(), args);
   }
 
-  public void setMessageSource(MessageSource messageSource) {
-    this.messageSource = messageSource;
+  public String getUserMessage(MessageCode messageCode, Object... args) {
+    return userMessagesAccessor.getMessage(messageCode.getValue(), args);
   }
+
 }

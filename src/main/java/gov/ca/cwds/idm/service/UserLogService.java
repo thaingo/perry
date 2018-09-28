@@ -78,11 +78,11 @@ public class UserLogService {
   private String getErrorMessage(String username, OperationType operationType) {
     String msg;
     if (operationType == OperationType.CREATE) {
-      msg = messages.get(UNABLE_LOG_IDM_USER_CREATE, username);
+      msg = messages.getTechMessage(UNABLE_LOG_IDM_USER_CREATE, username);
     } else if (operationType == OperationType.UPDATE) {
-      msg = messages.get(UNABLE_LOG_IDM_USER_UPDATE, username);
+      msg = messages.getTechMessage(UNABLE_LOG_IDM_USER_UPDATE, username);
     } else {
-      msg = messages.get(UNABLE_LOG_IDM_USER, operationType.toString(), username);
+      msg = messages.getTechMessage(UNABLE_LOG_IDM_USER, operationType.toString(), username);
     }
     return msg;
   }

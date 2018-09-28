@@ -29,7 +29,10 @@ public class IdmApiCustomError  implements Serializable {
   private HttpStatus status;
 
   @JsonProperty
-  private String message;
+  private String technicalMessage;
+
+  @JsonProperty
+  private String userMessage;
 
   @JsonProperty
   private String errorCode;
@@ -44,27 +47,6 @@ public class IdmApiCustomError  implements Serializable {
     timestamp = LocalDateTime.now();
   }
 
-  public IdmApiCustomError(HttpStatus status) {
-    this();
-    this.status = status;
-    this.incidentId = MDC.get(REQUEST_ID);
-  }
-
-  public IdmApiCustomError(HttpStatus status, String message) {
-    this(status);
-    this.message = message;
-  }
-
-  public IdmApiCustomError(HttpStatus status, MessageCode errorCode, String message) {
-    this(status, message);
-    this.errorCode = errorCode.getValue();
-  }
-
-  public IdmApiCustomError(HttpStatus status, MessageCode errorCode, String message, List<String> causes) {
-    this(status, errorCode, message);
-    this.causes = causes;
-  }
-
   public LocalDateTime getTimestamp() {
     return timestamp;
   }
@@ -73,12 +55,16 @@ public class IdmApiCustomError  implements Serializable {
     return status;
   }
 
-  public String getMessage() {
-    return message;
+  public String getTechnicalMessage() {
+    return technicalMessage;
   }
 
   public String getErrorCode() {
     return errorCode;
+  }
+
+  public String getUserMessage() {
+    return userMessage;
   }
 
   public String getIncidentId() {
@@ -87,5 +73,58 @@ public class IdmApiCustomError  implements Serializable {
 
   public List<String> getCauses() {
     return causes;
+  }
+
+
+  public static final class IdmApiCustomErrorBuilder {
+
+    private HttpStatus status;
+    private String technicalMessage;
+    private String userMessage;
+    private String errorCode;
+    private List<String> causes = new ArrayList<>();
+
+    private IdmApiCustomErrorBuilder() {
+    }
+
+    public static IdmApiCustomErrorBuilder anIdmApiCustomError() {
+      return new IdmApiCustomErrorBuilder();
+    }
+
+    public IdmApiCustomErrorBuilder withStatus(HttpStatus status) {
+      this.status = status;
+      return this;
+    }
+
+    public IdmApiCustomErrorBuilder withTechnicalMessage(String technicalMessage) {
+      this.technicalMessage = technicalMessage;
+      return this;
+    }
+
+    public IdmApiCustomErrorBuilder withUserMessage(String userMessage) {
+      this.userMessage = userMessage;
+      return this;
+    }
+
+    public IdmApiCustomErrorBuilder withErrorCode(MessageCode errorCode) {
+      this.errorCode = errorCode.getValue();
+      return this;
+    }
+
+    public IdmApiCustomErrorBuilder withCauses(List<String> causes) {
+      this.causes = causes;
+      return this;
+    }
+
+    public IdmApiCustomError build() {
+      IdmApiCustomError idmApiCustomError = new IdmApiCustomError();
+      idmApiCustomError.incidentId = MDC.get(REQUEST_ID);
+      idmApiCustomError.status = this.status;
+      idmApiCustomError.errorCode = this.errorCode;
+      idmApiCustomError.technicalMessage = this.technicalMessage;
+      idmApiCustomError.userMessage = this.userMessage;
+      idmApiCustomError.causes = this.causes;
+      return idmApiCustomError;
+    }
   }
 }

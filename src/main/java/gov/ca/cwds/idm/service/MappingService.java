@@ -40,7 +40,7 @@ public class MappingService {
     try {
       return configuration.getIdentityManager().getIdmMapping().map(cognitoUser, cwsUser);
     } catch (ScriptException e) {
-      LOGGER.error(messages.get(IDM_MAPPING_SCRIPT_ERROR));
+      LOGGER.error(messages.getTechMessage(IDM_MAPPING_SCRIPT_ERROR));
       throw new PerryException(e.getMessage(), e);
     }
   }

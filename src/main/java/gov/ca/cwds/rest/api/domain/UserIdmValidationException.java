@@ -1,14 +1,18 @@
 package gov.ca.cwds.rest.api.domain;
 
-public class UserIdmValidationException extends RuntimeException {
+import gov.ca.cwds.service.messages.MessageCode;
 
-  private static final long serialVersionUID = 3122648071078983603L;
+public class UserIdmValidationException extends IdmException {
 
-  public UserIdmValidationException(String message) {
-    super(message);
+  private static final long serialVersionUID = -3815312326377563095L;
+
+  public UserIdmValidationException(
+      String message, String userMessage, MessageCode errorCode, Throwable e) {
+    super(message, userMessage, errorCode, e);
   }
 
-  public UserIdmValidationException(String message, Throwable e) {
-    super(message, e);
+  public UserIdmValidationException(
+      String message, MessageCode errorCode, Throwable e) {
+    super(message, message, errorCode, e);
   }
 }
