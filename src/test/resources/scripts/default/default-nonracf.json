@@ -10,6 +10,7 @@
   "county_code": null,
   "county_cws_code": null,
   "county_name": null,
+  "userName": "testUserName",
   "privileges": [
     "permission1",
     "permission2"

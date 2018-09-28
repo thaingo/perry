@@ -5,8 +5,6 @@ import gov.ca.cwds.security.configuration.SecurityConfiguration;
 import gov.ca.cwds.security.permission.AbacPermission;
 import java.lang.reflect.Parameter;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
 import javax.inject.Inject;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
@@ -80,32 +78,28 @@ public class AbacMethodInterceptor implements MethodInterceptor {
     scriptContext.setAttribute(identifier, arg, ScriptContext.ENGINE_SCOPE);
 
     if (arg instanceof Collection) {
-      applyPermissionToCollection(abacPermission, (Collection) arg, scriptContext, identifier);
+      applyPermissionToCollection(abacPermission, scriptContext, identifier);
     } else {
       applyPermissionToScalar(abacPermission, scriptContext);
     }
   }
 
-  private void applyPermissionToCollection(AbacPermission abacPermission, Collection<Object> arg,
-      ScriptContext scriptContext, String identifier)
+  private void applyPermissionToCollection(AbacPermission abacPermission, ScriptContext scriptContext, String identifier)
       throws ScriptException {
     String selector = abacPermission.getSecuredObject().toString();
     selector = "it" + selector.substring(identifier.length());
-
-    // key: securedObject like caseDTO.case.id, value: argument element like caseDTO
+    final String collectSecuredObjectsScripts = String.format("(%s.collect{%s}).toSet()", identifier, selector);
     @SuppressWarnings("unchecked")
-    Map<Object, Object> securedObjectsMap = (Map<Object, Object>) scriptEngine
-        .eval(identifier + ".collectEntries{[" + selector + ", it]}", scriptContext);
+    Collection<Object> securedObjects = (Collection<Object>) scriptEngine.eval(collectSecuredObjectsScripts, scriptContext);
+    final int sizeBefore = securedObjects.size();
 
-    Collection<Object> securedObjects = new HashSet<>(securedObjectsMap.keySet());
     abacPermission.setSecuredObject(securedObjects);
     SecurityUtils.getSubject().checkPermission(abacPermission);
 
-    if (securedObjects.size() != arg.size()) {
-      arg.clear();
-      for (Object o : securedObjects) {
-        arg.add(securedObjectsMap.get(o));
-      }
+    if (sizeBefore != securedObjects.size()) {
+      scriptContext.setAttribute("securedObjects", securedObjects, ScriptContext.ENGINE_SCOPE);
+      final String filterArgsScripts = String.format("%s.removeIf{!securedObjects.contains(%s)}", identifier, selector);
+      scriptEngine.eval(filterArgsScripts, scriptContext);
     }
   }
 

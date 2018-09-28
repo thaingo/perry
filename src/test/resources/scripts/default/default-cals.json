@@ -9,6 +9,7 @@
   "county_code": "99",
   "county_cws_code": 1126,
   "county_name": "State of California",
+  "userName": "testUserName",
   "privileges": [
     "CWS Case Management System",
     "Resource Management"

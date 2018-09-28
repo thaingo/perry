@@ -64,6 +64,7 @@ else {
 }
 
 //COMMON
+token.userName = user.parameters["userName"]
 
 //for this moment we set only admin's own office to the office ids list
 if (Roles.isOfficeAdmin(user)) {

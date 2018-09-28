@@ -1,14 +1,14 @@
 package gov.ca.cwds.service.scripts;
 
-import java.nio.file.Paths;
-import java.util.*;
 import gov.ca.cwds.UniversalUserToken;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Test;
-
-
-import static org.junit.Assert.assertEquals;
 
 /**
  * Created by dmitry.rudenko on 7/28/2017.
@@ -32,6 +32,7 @@ public class CognitoMappingScriptTest {
         "second-permission",
         "third-permission")), userToken.getPermissions());
     Assert.assertTrue(userToken.getParameter("custom:permission") instanceof Set);
+    Assert.assertEquals("perry", userToken.getParameter("userName"));
     Assert.assertEquals("17", userToken.getParameter("custom:office"));
   }
 
@@ -45,6 +46,7 @@ public class CognitoMappingScriptTest {
     UniversalUserToken userToken = idpMappingScript.map(userInfo);
     Assert.assertEquals("RACFID", userToken.getUserId());
     Assert.assertTrue(userToken.getRoles().isEmpty());
+    Assert.assertEquals("perry", userToken.getParameter("userName"));
     Assert.assertNull(userToken.getParameter("custom:office"));
   }
 }
