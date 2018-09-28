@@ -10,11 +10,11 @@ public class PartialSuccessException extends IdmException {
 
   private String userId;
 
-  private List<Exception> causes;
+
 
   public PartialSuccessException (String userId, String techMessage, String userMessage, MessageCode errorCode, Exception... causes) {
     super(techMessage, userMessage, errorCode);
-    this.causes = Arrays.asList(causes);
+    this.setCauses(Arrays.asList(causes));
     this.userId = userId;
   }
 
@@ -26,7 +26,4 @@ public class PartialSuccessException extends IdmException {
     return userId;
   }
 
-  public List<Exception> getCauses() {
-    return causes;
-  }
 }
