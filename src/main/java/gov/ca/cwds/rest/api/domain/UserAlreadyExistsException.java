@@ -1,14 +1,16 @@
 package gov.ca.cwds.rest.api.domain;
 
-public class UserAlreadyExistsException extends RuntimeException {
+import gov.ca.cwds.service.messages.MessageCode;
 
-  private static final long serialVersionUID = 234671130524693850L;
+public class UserAlreadyExistsException extends IdmException {
 
-  public UserAlreadyExistsException(String message) {
-    super(message);
+  private static final long serialVersionUID = 1812390924134780612L;
+
+  public UserAlreadyExistsException(String message, String userMessage, MessageCode errorCode, Throwable e) {
+    super(message, userMessage, errorCode,  e);
   }
 
-  public UserAlreadyExistsException(String message, Throwable e) {
-    super(message, e);
+  public UserAlreadyExistsException(String message, MessageCode errorCode, Throwable e) {
+    super(message, message, errorCode,  e);
   }
 }

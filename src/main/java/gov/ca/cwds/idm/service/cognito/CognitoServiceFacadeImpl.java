@@ -107,13 +107,15 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
     } catch (UsernameExistsException e) {
       String causeMsg = messages.getTech(USER_WITH_EMAIL_EXISTS_IN_IDM, user.getEmail());
       String msg = messages.getTech(UNABLE_CREATE_NEW_IDM_USER, causeMsg);
+      String userMsg = messages.getUserFriendly(USER_WITH_EMAIL_EXISTS_IN_IDM, user.getEmail());
       LOGGER.error(msg, e);
-      throw new UserAlreadyExistsException(causeMsg, e);
+      throw new UserAlreadyExistsException(causeMsg, userMsg, USER_WITH_EMAIL_EXISTS_IN_IDM, e);
 
     } catch (InvalidParameterException e) {
       String msg = messages.getTech(IDM_USER_VALIDATION_FAILED);
+      String userMsg = messages.getUserFriendly(IDM_USER_VALIDATION_FAILED);
       LOGGER.error(msg, e);
-      throw new UserIdmValidationException(msg, e);
+      throw new UserIdmValidationException(msg, userMsg, IDM_USER_VALIDATION_FAILED, e);
     }
   }
 
@@ -367,8 +369,9 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
       return function.apply(request);
     } catch (UserNotFoundException e) {
       String msg = messages.getTech(USER_NOT_FOUND_BY_ID_IN_IDM, userId);
+      String userMsg = messages.getUserFriendly(USER_NOT_FOUND_BY_ID_IN_IDM, userId);
       LOGGER.error(msg, e);
-      throw new UserNotFoundPerryException(msg, e);
+      throw new UserNotFoundPerryException(msg, userMsg, USER_NOT_FOUND_BY_ID_IN_IDM, e);
 
     } catch (Exception e) {
       String msg = "";

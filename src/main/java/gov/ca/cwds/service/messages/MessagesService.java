@@ -14,20 +14,28 @@ public class MessagesService {
 
   @Autowired
   @Qualifier("tech")
-  private MessageSource messageSource;
+  private MessageSource techMessageSource;
 
-  private MessageSourceAccessor accessor;
+  @Autowired
+  @Qualifier("user")
+  private MessageSource userMessageSource;
+
+  private MessageSourceAccessor techMessagesAccessor;
+
+  private MessageSourceAccessor userMessagesAccessor;
 
   @PostConstruct
   private void init() {
-    accessor = new MessageSourceAccessor(messageSource, DEFAULT_LOCALE);
+    techMessagesAccessor = new MessageSourceAccessor(techMessageSource, DEFAULT_LOCALE);
+    userMessagesAccessor = new MessageSourceAccessor(userMessageSource, DEFAULT_LOCALE);
   }
 
   public String getTech(MessageCode messageCode, Object... args) {
-    return accessor.getMessage(messageCode.getValue(), args);
+    return techMessagesAccessor.getMessage(messageCode.getValue(), args);
   }
 
-  public void setMessageSource(MessageSource messageSource) {
-    this.messageSource = messageSource;
+  public String getUserFriendly(MessageCode messageCode, Object... args) {
+    return userMessagesAccessor.getMessage(messageCode.getValue(), args);
   }
+
 }

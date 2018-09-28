@@ -23,7 +23,6 @@ import gov.ca.cwds.rest.api.domain.PartialSuccessException;
 import gov.ca.cwds.rest.api.domain.UserAlreadyExistsException;
 import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
 import gov.ca.cwds.rest.api.domain.UserNotFoundPerryException;
-import gov.ca.cwds.service.messages.MessageCode;
 import gov.ca.cwds.service.messages.MessagesService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -46,7 +45,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -139,8 +137,17 @@ public class IdmResource {
       lastJobTime = LocalDateTime.parse(lastJobDateStr, formatter);
     } catch (DateTimeParseException e) {
       String msg = messages.getTech(INVALID_DATE_FORMAT, DATETIME_FORMAT_PATTERN);
+      String userMessage = messages.getUserFriendly(INVALID_DATE_FORMAT, DATETIME_FORMAT_PATTERN);
       LOGGER.error(msg, e);
-      return createCustomResponseEntity(HttpStatus.BAD_REQUEST, INVALID_DATE_FORMAT, msg);
+      IdmApiCustomError apiError =
+          IdmApiCustomError.IdmApiCustomErrorBuilder.anIdmApiCustomError()
+              .withStatus(HttpStatus.BAD_REQUEST)
+              .withErrorCode(INVALID_DATE_FORMAT)
+              .withTechnicalMessage(msg)
+              .withUserMessage(userMessage)
+              .build();
+
+      return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
     }
     return ResponseEntity.ok().body(idmService.getFailedOperations(lastJobTime));
   }
@@ -203,11 +210,17 @@ public class IdmResource {
     } catch (UserNotFoundPerryException e) {
       return ResponseEntity.notFound().build();
     } catch (PartialSuccessException e) {
-      return createCustomResponseEntity(
-          HttpStatus.INTERNAL_SERVER_ERROR,
-          e.getErrorCode(),
-          e.getMessage(),
-          e.getCauses().stream().map(Exception::getMessage).collect(toList()));
+
+      IdmApiCustomError apiError =
+          IdmApiCustomError.IdmApiCustomErrorBuilder.anIdmApiCustomError()
+              .withStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+              .withErrorCode(e.getErrorCode())
+              .withTechnicalMessage(e.getMessage())
+              .withUserMessage(e.getUserMessage())
+              .withCauses(e.getCauses().stream().map(Exception::getMessage).collect(toList()))
+              .build();
+
+      return new ResponseEntity<>(apiError, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -243,27 +256,43 @@ public class IdmResource {
       return ResponseEntity.created(locationUri).build();
 
     } catch (UserAlreadyExistsException e) {
-      return createCustomResponseEntity(
-          HttpStatus.CONFLICT, USER_WITH_EMAIL_EXISTS_IN_IDM, e.getMessage());
+      IdmApiCustomError apiError =
+          IdmApiCustomError.IdmApiCustomErrorBuilder.anIdmApiCustomError()
+              .withStatus(HttpStatus.CONFLICT)
+              .withErrorCode(USER_WITH_EMAIL_EXISTS_IN_IDM)
+              .withTechnicalMessage(e.getMessage())
+              .withUserMessage(e.getUserMessage())
+              .build();
+
+      return new ResponseEntity<>(apiError, HttpStatus.CONFLICT);
 
     } catch (UserIdmValidationException e) {
-      return createCustomResponseEntity(
-          HttpStatus.BAD_REQUEST,
-          IDM_USER_VALIDATION_FAILED,
-          e.getMessage(),
-          Collections.singletonList(e.getCause().getMessage()));
+      IdmApiCustomError apiError =
+          IdmApiCustomError.IdmApiCustomErrorBuilder.anIdmApiCustomError()
+              .withStatus(HttpStatus.BAD_REQUEST)
+              .withErrorCode(IDM_USER_VALIDATION_FAILED)
+              .withTechnicalMessage(e.getMessage())
+              .withUserMessage(e.getUserMessage())
+              .withCauses(Collections.singletonList(e.getCause().getMessage()))
+              .build();
+
+      return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
 
     } catch (PartialSuccessException e) {
       URI locationUri = getNewUserLocationUri(e.getUserId());
       HttpHeaders headers = new HttpHeaders();
       headers.setLocation(locationUri);
 
-      return createCustomResponseEntity(
-          HttpStatus.INTERNAL_SERVER_ERROR,
-          e.getErrorCode(),
-          e.getMessage(),
-          headers,
-          e.getCauses().stream().map(Exception::getMessage).collect(toList()));
+      IdmApiCustomError apiError =
+          IdmApiCustomError.IdmApiCustomErrorBuilder.anIdmApiCustomError()
+              .withStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+              .withErrorCode(e.getErrorCode())
+              .withTechnicalMessage(e.getMessage())
+              .withUserMessage(e.getUserMessage())
+              .withCauses(e.getCauses().stream().map(Exception::getMessage).collect(toList()))
+              .build();
+      return new ResponseEntity<>(apiError, headers, HttpStatus.INTERNAL_SERVER_ERROR);
+
     }
   }
 
@@ -349,45 +378,5 @@ public class IdmResource {
   @PreAuthorize("@roles.isAdmin(principal)")
   public ResponseEntity getAdminOffices() {
     return ResponseEntity.ok().body(officeService.getOfficesByAdmin());
-  }
-
-  private static ResponseEntity<IdmApiCustomError> createCustomResponseEntity(
-      HttpStatus httpStatus, MessageCode errorCode, String msg) {
-    return new ResponseEntity<>(
-        IdmApiCustomError.IdmApiCustomErrorBuilder.anIdmApiCustomError()
-            .withStatus(httpStatus)
-            .withErrorCode(errorCode)
-            .withTechnicalMessage(msg)
-            .build(),
-        httpStatus);
-  }
-
-  private static ResponseEntity<IdmApiCustomError> createCustomResponseEntity(
-      HttpStatus httpStatus, MessageCode errorCode, String msg, List<String> causes) {
-    return new ResponseEntity<>(
-        IdmApiCustomError.IdmApiCustomErrorBuilder.anIdmApiCustomError()
-            .withStatus(httpStatus)
-            .withErrorCode(errorCode)
-            .withTechnicalMessage(msg)
-            .withCauses(causes)
-            .build(),
-        httpStatus);
-  }
-
-  private static ResponseEntity<IdmApiCustomError> createCustomResponseEntity(
-      HttpStatus httpStatus,
-      MessageCode errorCode,
-      String msg,
-      MultiValueMap<String, String> headers,
-      List<String> causes) {
-    return new ResponseEntity<>(
-        IdmApiCustomError.IdmApiCustomErrorBuilder.anIdmApiCustomError()
-            .withStatus(httpStatus)
-            .withErrorCode(errorCode)
-            .withTechnicalMessage(msg)
-            .withCauses(causes)
-            .build(),
-        headers,
-        httpStatus);
   }
 }

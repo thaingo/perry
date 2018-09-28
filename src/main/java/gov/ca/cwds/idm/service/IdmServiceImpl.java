@@ -349,12 +349,14 @@ public class IdmServiceImpl implements IdmService {
       if (dbLogExecution.getExecutionStatus() == SUCCESS) {
         MessageCode errorCode = USER_CREATE_SAVE_TO_SEARCH_ERROR;
         String msg = messages.getTech(errorCode, userId);
-        throw new PartialSuccessException(userId, msg, errorCode, doraExecution.getException());
+        String userMsg = messages.getUserFriendly(errorCode, userId);
+        throw new PartialSuccessException(userId, msg, userMsg, errorCode, doraExecution.getException());
       } else { // logging in db failed
         MessageCode errorCode = USER_CREATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
         String msg = messages.getTech(errorCode, userId);
+        String userMsg = messages.getUserFriendly(errorCode, userId);
         throw new PartialSuccessException(
-            userId, msg, errorCode, doraExecution.getException(), dbLogExecution.getException());
+            userId, msg, userMsg, errorCode, doraExecution.getException(), dbLogExecution.getException());
       }
     }
   }
@@ -376,7 +378,8 @@ public class IdmServiceImpl implements IdmService {
   private void throwPartialSuccessException(
       String userId, MessageCode errorCode, Exception... causes) {
     String msg = messages.getTech(errorCode, userId);
-    PartialSuccessException e = new PartialSuccessException(userId, msg, errorCode, causes);
+    String userMsg = messages.getUserFriendly(errorCode, userId);
+    PartialSuccessException e = new PartialSuccessException(userId, msg, userMsg, errorCode, causes);
     LOGGER.error(msg, e);
     throw e;
   }
