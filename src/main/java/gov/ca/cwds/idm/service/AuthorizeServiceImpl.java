@@ -7,8 +7,6 @@ import static gov.ca.cwds.config.api.idm.Roles.isMostlyCountyAdmin;
 import static gov.ca.cwds.config.api.idm.Roles.isMostlyOfficeAdmin;
 import static gov.ca.cwds.config.api.idm.Roles.isMostlyStateAdmin;
 import static gov.ca.cwds.config.api.idm.Roles.isStateAdmin;
-import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY;
-import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_OFFICE;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getAdminOfficeIds;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCountyName;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
@@ -16,10 +14,8 @@ import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.idm.service.cognito.AuthorizeService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
-import gov.ca.cwds.service.messages.MessageCode;
-import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiPredicate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,18 +24,19 @@ import org.springframework.stereotype.Service;
 
 @Service(value = "authorize")
 @Profile("idm")
-public class AuthorizeService {
-
+public class AuthorizeServiceImpl implements AuthorizeService {
   private CognitoServiceFacade cognitoServiceFacade;
 
   private MappingService mappingService;
 
-  public boolean findUser(User user) {
-    return findUser(user, getCurrentUser());
+  @Override
+  public boolean canFindUser(User user) {
+    return canViewUser(user, getCurrentUser());
   }
 
-  boolean findUser(User user, UniversalUserToken admin) {
-    return authorizeByUserAndAdmin(user, admin, AuthorizeService::authorizeFindUserByOfficeAdmin);
+  boolean canViewUser(User user, UniversalUserToken admin) {
+    return authorizeByUserAndAdmin(user, admin,
+        AuthorizeServiceImpl::authorizeFindUserByOfficeAdmin);
   }
 
   private static boolean authorizeFindUserByOfficeAdmin(User user, UniversalUserToken admin) {
@@ -56,26 +53,18 @@ public class AuthorizeService {
     return isCountyAdmin(user) && !areInSameOffice(user, admin);
   }
 
-  public Optional<MessageCode> verifyUser(User user) {
-    if (!authorizeByUser(user)) {
-      if (CurrentAuthenticatedUserUtil.isMostlyCountyAdmin()) {
-        return Optional.of(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY);
-      } else if (CurrentAuthenticatedUserUtil.isMostlyOfficeAdmin()) {
-        return Optional.of(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_OFFICE);
-      }
-    }
-    return Optional.empty();
-  }
-
-  public boolean createUser(User user) {
+  @Override
+  public boolean canCreateUser(User user) {
     return authorizeByUser(user);
   }
 
-  public boolean updateUser(String userId) {
+  @Override
+  public boolean canUpdateUser(String userId) {
     return authorizeByUserId(userId);
   }
 
-  public boolean resendInvitationMessage(String userId) {
+  @Override
+  public boolean canResendInvitationMessage(String userId) {
     return authorizeByUserId(userId);
   }
 
@@ -117,7 +106,7 @@ public class AuthorizeService {
   }
 
   boolean authorizeByUserAndAdmin(User user, UniversalUserToken admin) {
-    return authorizeByUserAndAdmin(user, admin, AuthorizeService::authorizeByOfficeAdmin);
+    return authorizeByUserAndAdmin(user, admin, AuthorizeServiceImpl::authorizeByOfficeAdmin);
   }
 
   private static boolean authorizeByOfficeAdmin(User user, UniversalUserToken admin) {

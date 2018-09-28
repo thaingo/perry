@@ -4,8 +4,8 @@ import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
-import static gov.ca.cwds.idm.service.AuthorizeService.areNotNullAndContains;
-import static gov.ca.cwds.idm.service.AuthorizeService.areNotNullAndEquals;
+import static gov.ca.cwds.idm.service.AuthorizeServiceImpl.areNotNullAndContains;
+import static gov.ca.cwds.idm.service.AuthorizeServiceImpl.areNotNullAndEquals;
 import static gov.ca.cwds.util.UniversalUserTokenDeserializer.ADMIN_OFFICE_IDS_PARAM;
 import static gov.ca.cwds.util.UniversalUserTokenDeserializer.COUNTY_NAME_PARAM;
 import static gov.ca.cwds.util.Utils.toSet;
@@ -13,7 +13,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import gov.ca.cwds.UniversalUserToken;
-import gov.ca.cwds.config.api.idm.Roles;
 import gov.ca.cwds.idm.dto.User;
 import java.util.Set;
 import org.junit.Before;
@@ -21,11 +20,11 @@ import org.junit.Test;
 
 public class AuthorizeServiceTest {
 
-  private AuthorizeService service;
+  private AuthorizeServiceImpl service;
 
   @Before
   public void before() {
-    service = new AuthorizeService();
+    service = new AuthorizeServiceImpl();
   }
 
   @Test
@@ -106,27 +105,27 @@ public class AuthorizeServiceTest {
 
   @Test
   public void testFindUser_OfficeAdmin() {
-    assertTrue(service.findUser(
+    assertTrue(service.canViewUser(
         user(toSet(CWS_WORKER), "Yolo", "Yolo_1"),
         admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_1", "Yolo_2"))));
 
-    assertTrue(service.findUser(
+    assertTrue(service.canViewUser(
         user(toSet(CWS_WORKER), "Yolo", "Yolo_3"),
         admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_1", "Yolo_2"))));
 
-    assertTrue(service.findUser(
+    assertTrue(service.canViewUser(
         user(toSet(STATE_ADMIN), "Yolo", "Yolo_1"),
         admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_1", "Yolo_2"))));
 
-    assertTrue(service.findUser(
+    assertTrue(service.canViewUser(
         user(toSet(COUNTY_ADMIN), "Yolo", "Yolo_1"),
         admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_1", "Yolo_2"))));
 
-    assertFalse(service.findUser(
+    assertFalse(service.canViewUser(
         user(toSet(STATE_ADMIN), "Yolo", "Yolo_3"),
         admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_1", "Yolo_2"))));
 
-    assertFalse(service.findUser(
+    assertFalse(service.canViewUser(
         user(toSet(COUNTY_ADMIN), "Yolo", "Yolo_3"),
         admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_1", "Yolo_2"))));
   }

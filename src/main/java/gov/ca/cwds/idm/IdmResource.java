@@ -304,7 +304,7 @@ public class IdmResource {
           @NotNull
           @RequestParam("email")
           String email) {
-    return ResponseEntity.ok().body(idmService.verifyUser(racfId, email));
+    return ResponseEntity.ok().body(idmService.verifyIfUserCanBeCreated(racfId, email));
   }
 
   @RequestMapping(method = RequestMethod.GET, value = "users/resend/{id}", produces = "application/json")

@@ -13,6 +13,8 @@ import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getRACFId;
 import static gov.ca.cwds.service.messages.MessageCode.ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_UPDATE_USER_ENABLED_STATUS;
+import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY;
+import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_OFFICE;
 import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID_IN_CWSCMS;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_CREATE_IDM_USER_IN_ES;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_PURGE_PROCESSED_USER_LOGS;
@@ -35,7 +37,6 @@ import gov.ca.cwds.data.persistence.auth.CwsOffice;
 import gov.ca.cwds.data.persistence.auth.StaffPerson;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserAndOperation;
-import gov.ca.cwds.idm.dto.UserByIdResponse;
 import gov.ca.cwds.idm.dto.UserEnableStatusRequest;
 import gov.ca.cwds.idm.dto.UserIdAndOperation;
 import gov.ca.cwds.idm.dto.UserUpdate;
@@ -44,6 +45,7 @@ import gov.ca.cwds.idm.dto.UsersPage;
 import gov.ca.cwds.idm.dto.UsersSearchCriteria;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
+import gov.ca.cwds.idm.service.cognito.AuthorizeService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.StandardUserAttribute;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
@@ -57,6 +59,7 @@ import gov.ca.cwds.service.CwsUserInfoService;
 import gov.ca.cwds.service.dto.CwsUserInfo;
 import gov.ca.cwds.service.messages.MessageCode;
 import gov.ca.cwds.service.messages.MessagesService;
+import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import gov.ca.cwds.util.Utils;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -184,7 +187,7 @@ public class IdmServiceImpl implements IdmService {
   }
 
   @Override
-  public UserVerificationResult verifyUser(String racfId, String email) {
+  public UserVerificationResult verifyIfUserCanBeCreated(String racfId, String email) {
     email = toLowerCase(email);
 
     CwsUserInfo cwsUser = cwsUserInfoService.getCwsUserByRacfId(racfId);
@@ -200,14 +203,23 @@ public class IdmServiceImpl implements IdmService {
     }
 
     User user = composeUser(cwsUser, email);
-    Optional<MessageCode> authorizationError = authorizeService.verifyUser(user);
-    if (authorizationError.isPresent()) {
+    Optional<MessageCode> authorizationError = buildAuthorizationError();
+    if (!authorizeService.canCreateUser(user) && authorizationError.isPresent()) {
       return composeNegativeResultWithMessage(authorizationError.get());
     }
 
     return UserVerificationResult.Builder.anUserVerificationResult()
         .withUser(user)
         .withVerificationPassed().build();
+  }
+
+  private Optional<MessageCode> buildAuthorizationError() {
+    if (CurrentAuthenticatedUserUtil.isMostlyCountyAdmin()) {
+      return Optional.of(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY);
+    } else if (CurrentAuthenticatedUserUtil.isMostlyOfficeAdmin()) {
+      return Optional.of(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_OFFICE);
+    }
+    return Optional.empty();
   }
 
   private boolean checkIfUserWithEmailExistsInCognito(String email) {

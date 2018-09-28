@@ -140,19 +140,26 @@ public class IdmResourceTest extends BaseIntegrationTest {
           Charset.forName("utf8"));
   static final int DORA_WS_MAX_ATTEMPTS = 3;
 
-  @Autowired private CognitoServiceFacade cognitoServiceFacade;
+  @Autowired
+  private CognitoServiceFacade cognitoServiceFacade;
 
-  @Autowired private MessagesService messagesService;
+  @Autowired
+  private MessagesService messagesService;
 
-  @Autowired  private IdmServiceImpl idmService;
+  @Autowired
+  private IdmServiceImpl idmService;
 
-  @Autowired private UserLogRepository userLogRepository;
+  @Autowired
+  private UserLogRepository userLogRepository;
 
-  @Autowired private SearchService searchService;
+  @Autowired
+  private SearchService searchService;
 
-  @Autowired private SearchRestSender searchRestSender;
+  @Autowired
+  private SearchRestSender searchRestSender;
 
-  @Autowired private SearchProperties searchProperties;
+  @Autowired
+  private SearchProperties searchProperties;
 
   private SearchService spySearchService;
 
@@ -173,7 +180,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @Before
   public void before() {
 
-    ((TestCognitoServiceFacade)cognitoServiceFacade).setMessagesService(messagesService);
+    ((TestCognitoServiceFacade) cognitoServiceFacade).setMessagesService(messagesService);
 
     searchRestSender.setRestTemplate(mockRestTemplate);
     searchService.setRestSender(searchRestSender);
@@ -181,7 +188,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
     spySearchService = spy(searchService);
 
     idmService.setSearchService(spySearchService);
-    cognito = ((TestCognitoServiceFacade)cognitoServiceFacade).getIdentityProvider();
+    cognito = ((TestCognitoServiceFacade) cognitoServiceFacade).getIdentityProvider();
 
     Logger rootLogger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
     rootLogger.addAppender(mockAppender);
@@ -251,7 +258,8 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @Test
   @WithMockCustomUser(roles = {OFFICE_ADMIN})
   public void testGetUserOfficeAdmin() throws Exception {
-    testGetValidUser(USER_WITH_RACFID_AND_DB_DATA_ID, "fixtures/idm/get-user/with-racfid-and-db-data-valid.json");
+    testGetValidUser(USER_WITH_RACFID_AND_DB_DATA_ID,
+        "fixtures/idm/get-user/with-racfid-and-db-data-valid.json");
   }
 
   @Test
@@ -270,7 +278,8 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @Test
   @WithMockCustomUser(roles = {CALS_ADMIN})
   public void testGetUserCalsAdmin() throws Exception {
-    testGetValidUser(USER_CALS_EXTERNAL, "fixtures/idm/get-user/with-cals-externa-worker-role.json");
+    testGetValidUser(USER_CALS_EXTERNAL,
+        "fixtures/idm/get-user/with-cals-externa-worker-role.json");
   }
 
   @Test
@@ -686,7 +695,8 @@ public class IdmResourceTest extends BaseIntegrationTest {
         setUpdateUserAttributesRequestAndResult(
             USER_WITH_RACFID_ID, attr(PERMISSIONS.getName(), "RFA-rollout:Hotline-rollout"));
 
-    AdminDisableUserRequest disableUserRequest = setDisableUserRequestAndResult(USER_WITH_RACFID_ID);
+    AdminDisableUserRequest disableUserRequest = setDisableUserRequestAndResult(
+        USER_WITH_RACFID_ID);
 
     MvcResult result =
         mockMvc
@@ -729,11 +739,13 @@ public class IdmResourceTest extends BaseIntegrationTest {
 
     AdminUpdateUserAttributesRequest updateAttributesRequest =
         setUpdateUserAttributesRequestAndResult(
-            USER_WITH_RACFID_AND_DB_DATA_ID, attr(PERMISSIONS.getName(), "RFA-rollout:Hotline-rollout"));
+            USER_WITH_RACFID_AND_DB_DATA_ID,
+            attr(PERMISSIONS.getName(), "RFA-rollout:Hotline-rollout"));
 
     setDoraSuccess();
 
-    AdminDisableUserRequest disableUserRequest = setDisableUserRequestAndFail(USER_WITH_RACFID_AND_DB_DATA_ID);
+    AdminDisableUserRequest disableUserRequest = setDisableUserRequestAndFail(
+        USER_WITH_RACFID_AND_DB_DATA_ID);
 
     MvcResult result =
         mockMvc
@@ -757,7 +769,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
     Iterable<UserLog> userLogs = userLogRepository.findAll();
     int newUserLogsSize = Iterables.size(userLogs);
     assertTrue(newUserLogsSize == oldUserLogsSize);
-}
+  }
 
   @Test
   @WithMockCustomUser
@@ -916,7 +928,8 @@ public class IdmResourceTest extends BaseIntegrationTest {
             .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
             .andReturn();
 
-    assertNonStrict(result, "fixtures/idm/verify-user/verify-active-racfid-already-in-cognito-message.json");
+    assertNonStrict(result,
+        "fixtures/idm/verify-user/verify-active-racfid-already-in-cognito-message.json");
   }
 
   @Test
@@ -1051,7 +1064,8 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @WithMockCustomUser(county = "OtherCounty")
   public void testResendInvitationEmailWithDifferentCounty() throws Exception {
     AdminCreateUserRequest request =
-        cognitoServiceFacade.createResendEmailRequest(USER_WITH_RACFID_ID);
+        ((TestCognitoServiceFacade) cognitoServiceFacade)
+            .createResendEmailRequest(USER_WITH_RACFID_ID);
     assertResendEmailUnauthorized(request);
   }
 
@@ -1059,7 +1073,8 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @WithMockCustomUser(roles = {"OtherRole"})
   public void testResendInvitationEmailWithOtherRole() throws Exception {
     AdminCreateUserRequest request =
-        cognitoServiceFacade.createResendEmailRequest(USER_WITH_RACFID_ID);
+        ((TestCognitoServiceFacade) cognitoServiceFacade)
+            .createResendEmailRequest(USER_WITH_RACFID_ID);
     assertResendEmailUnauthorized(request);
   }
 
@@ -1067,7 +1082,8 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @WithMockCustomUser(roles = {OFFICE_ADMIN}, adminOfficeIds = {"otherOfficeId"})
   public void testResendInvitationEmailWithOfficeRole() throws Exception {
     AdminCreateUserRequest request =
-        cognitoServiceFacade.createResendEmailRequest(USER_WITH_RACFID_ID);
+        ((TestCognitoServiceFacade) cognitoServiceFacade)
+            .createResendEmailRequest(USER_WITH_RACFID_ID);
     assertResendEmailUnauthorized(request);
   }
 
@@ -1075,7 +1091,8 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @WithMockCustomUser(roles = {STATE_ADMIN}, county = "Madera")
   public void testResendInvitationEmailWithStateAdmin() throws Exception {
     AdminCreateUserRequest request =
-        cognitoServiceFacade.createResendEmailRequest(USER_WITH_RACFID_ID);
+        ((TestCognitoServiceFacade) cognitoServiceFacade)
+            .createResendEmailRequest(USER_WITH_RACFID_ID);
 
     UserType user = new UserType();
     user.setUsername(USER_WITH_RACFID_ID);
@@ -1212,7 +1229,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
     assertStrict(result, "fixtures/idm/admin-offices/" + fixtureName);
   }
 
-  private UserLog userLog(String userName, OperationType operation,  LocalDateTime dateTime) {
+  private UserLog userLog(String userName, OperationType operation, LocalDateTime dateTime) {
     UserLog log = new UserLog();
     log.setUsername(userName);
     log.setOperationType(operation);
@@ -1228,7 +1245,8 @@ public class IdmResourceTest extends BaseIntegrationTest {
   }
 
   private void assertUserLog(
-      Iterator<UserLog> iterator, String username, OperationType operationType, LocalDateTime time) {
+      Iterator<UserLog> iterator, String username, OperationType operationType,
+      LocalDateTime time) {
     UserLog userLog = iterator.next();
     assertUserLog(userLog, username, operationType, time);
   }
@@ -1289,7 +1307,8 @@ public class IdmResourceTest extends BaseIntegrationTest {
   private AdminDisableUserRequest setDisableUserRequestAndFail(String id) {
     AdminDisableUserRequest request =
         new AdminDisableUserRequest().withUsername(id).withUserPoolId(USERPOOL);
-    when(cognito.adminDisableUser(request)).thenThrow(new RuntimeException("Update enable status error"));
+    when(cognito.adminDisableUser(request))
+        .thenThrow(new RuntimeException("Update enable status error"));
     return request;
   }
 
@@ -1344,7 +1363,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
         throws BeansException {
       if (beanName.equals("cognitoServiceFacade")) {
         return new TestCognitoServiceFacade();
-      } else if(beanName.equals("searchService")) {
+      } else if (beanName.equals("searchService")) {
         return new TestSearchService();
       } else {
         return bean;
@@ -1359,6 +1378,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
   }
 
   public static class TestSearchService extends SearchService {
+
     @Override
     protected String getSsoToken() {
       return SSO_TOKEN;
