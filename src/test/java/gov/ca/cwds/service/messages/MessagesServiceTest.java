@@ -22,9 +22,9 @@ public class MessagesServiceTest {
   @Test
   public void testGet() {
     assertThat(
-        messagesService.getTech(IDM_MAPPING_SCRIPT_ERROR), is("Error while running the IdmMappingScript"));
+        messagesService.getTechMessage(IDM_MAPPING_SCRIPT_ERROR), is("Error while running the IdmMappingScript"));
     assertThat(
-        messagesService.getTech(NO_USER_WITH_RACFID_IN_CWSCMS, "ABCDEF"),
+        messagesService.getTechMessage(NO_USER_WITH_RACFID_IN_CWSCMS, "ABCDEF"),
         is("No user with RACFID: ABCDEF found in CWSCMS"));
   }
 }

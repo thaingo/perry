@@ -1,9 +1,7 @@
 package gov.ca.cwds.idm;
 
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
-import static gov.ca.cwds.service.messages.MessageCode.IDM_USER_VALIDATION_FAILED;
 import static gov.ca.cwds.service.messages.MessageCode.INVALID_DATE_FORMAT;
-import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
 import static java.util.stream.Collectors.toList;
 
 import gov.ca.cwds.data.persistence.auth.CwsOffice;
@@ -33,7 +31,6 @@ import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import javax.validation.Valid;
@@ -137,8 +134,8 @@ public class IdmResource {
       DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATETIME_FORMAT_PATTERN);
       lastJobTime = LocalDateTime.parse(lastJobDateStr, formatter);
     } catch (DateTimeParseException e) {
-      String msg = messages.getTech(INVALID_DATE_FORMAT, DATETIME_FORMAT_PATTERN);
-      String userMessage = messages.getUserFriendly(INVALID_DATE_FORMAT, DATETIME_FORMAT_PATTERN);
+      String msg = messages.getTechMessage(INVALID_DATE_FORMAT, DATETIME_FORMAT_PATTERN);
+      String userMessage = messages.getUserMessage(INVALID_DATE_FORMAT, DATETIME_FORMAT_PATTERN);
       LOGGER.error(msg, e);
       HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
       IdmApiCustomError apiError =

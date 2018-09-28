@@ -30,11 +30,11 @@ public class MessagesService {
     userMessagesAccessor = new MessageSourceAccessor(userMessageSource, DEFAULT_LOCALE);
   }
 
-  public String getTech(MessageCode messageCode, Object... args) {
+  public String getTechMessage(MessageCode messageCode, Object... args) {
     return techMessagesAccessor.getMessage(messageCode.getValue(), args);
   }
 
-  public String getUserFriendly(MessageCode messageCode, Object... args) {
+  public String getUserMessage(MessageCode messageCode, Object... args) {
     return userMessagesAccessor.getMessage(messageCode.getValue(), args);
   }
 

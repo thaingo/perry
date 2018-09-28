@@ -48,7 +48,7 @@ public class OfficeService {
 
     } else {
       String msg = messagesService
-          .getTech(NOT_AUTHORIZED_TO_GET_MANAGED_OFFICES_LIST, admin.getUserId(), admin.getRoles());
+          .getTechMessage(NOT_AUTHORIZED_TO_GET_MANAGED_OFFICES_LIST, admin.getUserId(), admin.getRoles());
       LOGGER.error(msg);
       throw new AccessDeniedException(msg);
     }

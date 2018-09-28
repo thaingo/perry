@@ -128,7 +128,7 @@ public class IdmServiceImpl implements IdmService {
         || updateUserEnabledExecution.getExecutionStatus() == SUCCESS) {
       doraExecution = updateUserInSearch(userId);
     } else {
-      LOGGER.info(messages.getTech(USER_NOTHING_UPDATED, userId));
+      LOGGER.info(messages.getTechMessage(USER_NOTHING_UPDATED, userId));
     }
 
     handleUpdatePartialSuccess(
@@ -330,7 +330,7 @@ public class IdmServiceImpl implements IdmService {
 
           @Override
           protected void catchMethod(Exception e) {
-            LOGGER.error(messages.getTech(ERROR_UPDATE_USER_ENABLED_STATUS, userId), e);
+            LOGGER.error(messages.getTechMessage(ERROR_UPDATE_USER_ENABLED_STATUS, userId), e);
           }
         };
 
@@ -348,13 +348,13 @@ public class IdmServiceImpl implements IdmService {
 
       if (dbLogExecution.getExecutionStatus() == SUCCESS) {
         MessageCode errorCode = USER_CREATE_SAVE_TO_SEARCH_ERROR;
-        String msg = messages.getTech(errorCode, userId);
-        String userMsg = messages.getUserFriendly(errorCode, userId);
+        String msg = messages.getTechMessage(errorCode, userId);
+        String userMsg = messages.getUserMessage(errorCode, userId);
         throw new PartialSuccessException(userId, msg, userMsg, errorCode, doraExecution.getException());
       } else { // logging in db failed
         MessageCode errorCode = USER_CREATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
-        String msg = messages.getTech(errorCode, userId);
-        String userMsg = messages.getUserFriendly(errorCode, userId);
+        String msg = messages.getTechMessage(errorCode, userId);
+        String userMsg = messages.getUserMessage(errorCode, userId);
         throw new PartialSuccessException(
             userId, msg, userMsg, errorCode, doraExecution.getException(), dbLogExecution.getException());
       }
@@ -368,7 +368,7 @@ public class IdmServiceImpl implements IdmService {
     try {
       deletedCount = userLogService.deleteProcessedLogs(lastJobTime);
     } catch (Exception e) {
-      LOGGER.error(messages.getTech(UNABLE_TO_PURGE_PROCESSED_USER_LOGS, lastJobTime), e);
+      LOGGER.error(messages.getTechMessage(UNABLE_TO_PURGE_PROCESSED_USER_LOGS, lastJobTime), e);
     }
     if (deletedCount > 0) {
       LOGGER.info("{} processed user log records are deleted", deletedCount);
@@ -377,8 +377,8 @@ public class IdmServiceImpl implements IdmService {
 
   private void throwPartialSuccessException(
       String userId, MessageCode errorCode, Exception... causes) {
-    String msg = messages.getTech(errorCode, userId);
-    String userMsg = messages.getUserFriendly(errorCode, userId);
+    String msg = messages.getTechMessage(errorCode, userId);
+    String userMsg = messages.getUserMessage(errorCode, userId);
     PartialSuccessException e = new PartialSuccessException(userId, msg, userMsg, errorCode, causes);
     LOGGER.error(msg, e);
     throw e;
@@ -440,7 +440,7 @@ public class IdmServiceImpl implements IdmService {
     Map<String, CwsUserInfo> idToCmsUser = cwsUserInfoService.findUsers(userNameToRacfId.values())
         .stream().collect(
             Collectors.toMap(CwsUserInfo::getRacfId, e -> e, (user1, user2) -> {
-              LOGGER.warn(messages.getTech(DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS, user1.getRacfId()));
+              LOGGER.warn(messages.getTechMessage(DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS, user1.getRacfId()));
               return user1;
             }));
     return cognitoUsers
@@ -466,7 +466,7 @@ public class IdmServiceImpl implements IdmService {
 
       @Override
       protected void catchMethod(Exception e) {
-        String msg = messages.getTech(UNABLE_UPDATE_IDM_USER_IN_ES, id);
+        String msg = messages.getTechMessage(UNABLE_UPDATE_IDM_USER_IN_ES, id);
         LOGGER.error(msg, e);
         setUserLogExecution(userLogService.logUpdate(id));
       }
@@ -483,7 +483,7 @@ public class IdmServiceImpl implements IdmService {
 
       @Override
       protected void catchMethod(Exception e) {
-        String msg = messages.getTech(UNABLE_CREATE_IDM_USER_IN_ES, userType.getUsername());
+        String msg = messages.getTechMessage(UNABLE_CREATE_IDM_USER_IN_ES, userType.getUsername());
         LOGGER.error(msg, e);
         setUserLogExecution(userLogService.logCreate(userType.getUsername()));
       }
@@ -492,7 +492,7 @@ public class IdmServiceImpl implements IdmService {
 
   private UserVerificationResult composeNegativeResultWithMessage(
       MessageCode errorCode, Object... params) {
-    String message = messages.getUserFriendly(errorCode, params);
+    String message = messages.getUserMessage(errorCode, params);
     LOGGER.info(message);
     return UserVerificationResult.Builder.anUserVerificationResult()
         .withVerificationFailed(errorCode.getValue(), message)
