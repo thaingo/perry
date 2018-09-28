@@ -1,5 +1,6 @@
 {
   "error_code":"CAP-017",
   "technical_message":"Invalid Date format. Please use: yyyy-MM-dd-HH.mm.ss.SSS",
+  "user_message":"Invalid Date format. Please use: yyyy-MM-dd-HH.mm.ss.SSS",
   "status":"BAD_REQUEST"
 }

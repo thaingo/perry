@@ -1,5 +1,5 @@
   {
     "verification_passed": false,
-    "verification_message": "No user with RACFID: SMITHB1 found in CWSCMS",
+    "verification_message": "No active user with Login ID SMITHB1 was found in CWS/CMS.",
     "error_code": "CAP-003"
   }

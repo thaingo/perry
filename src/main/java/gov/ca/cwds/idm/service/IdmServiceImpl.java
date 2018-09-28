@@ -205,7 +205,7 @@ public class IdmServiceImpl implements IdmService {
     User user = composeUser(cwsUser, email);
     Optional<MessageCode> authorizationError = buildAuthorizationError();
     if (!authorizeService.canCreateUser(user) && authorizationError.isPresent()) {
-      return composeNegativeResultWithMessage(authorizationError.get());
+      return composeNegativeResultWithMessage(authorizationError.get(), user.getCountyName());
     }
 
     return UserVerificationResult.Builder.anUserVerificationResult()
@@ -492,7 +492,7 @@ public class IdmServiceImpl implements IdmService {
 
   private UserVerificationResult composeNegativeResultWithMessage(
       MessageCode errorCode, Object... params) {
-    String message = messages.getTech(errorCode, params);
+    String message = messages.getUserFriendly(errorCode, params);
     LOGGER.info(message);
     return UserVerificationResult.Builder.anUserVerificationResult()
         .withVerificationFailed(errorCode.getValue(), message)
