@@ -62,12 +62,4 @@ public interface CognitoServiceFacade {
    * @param userId user ID.
    */
   UserType resendInvitationMessage(String userId);
-
-  /**
-   * Creates the request for resending email.
-   * @param userId user ID.
-   * @return
-   */
-  AdminCreateUserRequest createResendEmailRequest(String userId);
-
   }

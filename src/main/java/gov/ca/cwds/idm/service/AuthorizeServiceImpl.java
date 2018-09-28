@@ -30,7 +30,7 @@ public class AuthorizeServiceImpl implements AuthorizeService {
   private MappingService mappingService;
 
   @Override
-  public boolean canViewUser(User user) {
+  public boolean canFindUser(User user) {
     return canViewUser(user, getCurrentUser());
   }
 

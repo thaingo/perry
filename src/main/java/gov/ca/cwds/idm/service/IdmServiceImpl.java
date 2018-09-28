@@ -203,8 +203,9 @@ public class IdmServiceImpl implements IdmService {
     }
 
     User user = composeUser(cwsUser, email);
-    if (!authorizeService.canCreateUser(user) && buildAuthorizationError().isPresent()) {
-      return composeNegativeResultWithMessage(buildAuthorizationError().get());
+    Optional<MessageCode> authorizationError = buildAuthorizationError();
+    if (!authorizeService.canCreateUser(user) && authorizationError.isPresent()) {
+      return composeNegativeResultWithMessage(authorizationError.get());
     }
 
     return UserVerificationResult.Builder.anUserVerificationResult()
