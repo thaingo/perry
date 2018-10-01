@@ -1,15 +1,15 @@
 package gov.ca.cwds.idm.service;
 
-import static gov.ca.cwds.config.api.idm.Roles.isCountyAdmin;
-import static gov.ca.cwds.config.api.idm.Roles.isMostlyStateAdmin;
-import static gov.ca.cwds.config.api.idm.Roles.isOfficeAdmin;
+import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_GET_MANAGED_OFFICES_LIST;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCountyName;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 
-import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.dto.Office;
 import gov.ca.cwds.idm.persistence.cwscms.repository.OfficeRepository;
+import gov.ca.cwds.idm.service.authorization.UserRolesService;
 import gov.ca.cwds.service.messages.MessagesService;
 import java.util.List;
 import org.slf4j.Logger;
@@ -37,20 +37,18 @@ public class OfficeService {
 
   @Transactional(value = "transactionManager")
   public List<Office> getOfficesByAdmin() {
-    UniversalUserToken admin = getCurrentUser();
-
-    if (isMostlyStateAdmin(admin)) {
-      return officeRepository.findOffices();
-
-    } else if (isOfficeAdmin(admin) || isCountyAdmin(admin)) {
-      String adminCountyName = getCountyName(admin);
-      return officeRepository.findCountyOffices(adminCountyName);
-
-    } else {
-      String msg = messagesService
-          .get(NOT_AUTHORIZED_TO_GET_MANAGED_OFFICES_LIST, admin.getUserId(), admin.getRoles());
-      LOGGER.error(msg);
-      throw new AccessDeniedException(msg);
+    switch (UserRolesService.getStrongestAdminRole(getCurrentUser())) {
+      case STATE_ADMIN:
+        return officeRepository.findOffices();
+      case OFFICE_ADMIN:
+      case COUNTY_ADMIN:
+        return officeRepository.findCountyOffices(getCountyName(getCurrentUser()));
+      default:
+        String msg = messagesService
+            .get(NOT_AUTHORIZED_TO_GET_MANAGED_OFFICES_LIST,
+                getCurrentUser().getUserId(), getCurrentUser().getRoles());
+        LOGGER.error(msg);
+        throw new AccessDeniedException(msg);
     }
   }
 

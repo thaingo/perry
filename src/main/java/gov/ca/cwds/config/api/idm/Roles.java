@@ -2,9 +2,6 @@ package gov.ca.cwds.config.api.idm;
 
 import static gov.ca.cwds.util.Utils.toSet;
 
-import gov.ca.cwds.UniversalUserToken;
-import gov.ca.cwds.idm.dto.User;
-import java.util.Collections;
 import java.util.Set;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -23,75 +20,8 @@ public class Roles {
 
   private Roles() {}
 
-  public static boolean isAdmin(UniversalUserToken user) {
-    Set<String> adminRoles = getAdminRoles();
-    return !Collections.disjoint(user.getRoles(), adminRoles);
+  public static Set<String> getAdminRoles() {
+    return toSet(COUNTY_ADMIN, STATE_ADMIN, OFFICE_ADMIN, CALS_ADMIN);
   }
 
-  public static boolean isOfficeAdmin(UniversalUserToken user) {
-    return user.getRoles().contains(OFFICE_ADMIN);
-  }
-
-  public static boolean isStateAdmin(User user) {
-    return user.getRoles().contains(STATE_ADMIN);
-  }
-
-  public static boolean isCountyAdmin(User user) {
-    return isCountyAdmin(user.getRoles());
-  }
-
-  public static boolean isCountyAdmin(UniversalUserToken admin) {
-    return isCountyAdmin(admin.getRoles());
-  }
-
-  private static boolean isCountyAdmin(Set<String> roles) {
-    return roles.contains(COUNTY_ADMIN);
-  }
-
-  public static boolean isNonRacfIdCalsUser(UniversalUserToken admin) {
-    return isCalsExternalWorker(admin.getRoles());
-  }
-
-  public static boolean isCalsExternalWorker(User user) {
-    return isCalsExternalWorker(user.getRoles());
-  }
-
-  private static boolean isCalsExternalWorker(Set<String> roles) {
-    return roles.contains(CALS_EXTERNAL_WORKER);
-  }
-
-  public static boolean isMostlyStateAdmin(UniversalUserToken user) {
-    return STATE_ADMIN.equals(getStrongestAdminRole(user));
-  }
-
-  public static boolean isMostlyCountyAdmin(UniversalUserToken user) {
-    return COUNTY_ADMIN.equals(getStrongestAdminRole(user));
-  }
-
-  public static boolean isMostlyOfficeAdmin(UniversalUserToken user) {
-    return OFFICE_ADMIN.equals(getStrongestAdminRole(user));
-  }
-
-  public static boolean isCalsAdmin(UniversalUserToken user) {
-    return user.getRoles().contains(CALS_ADMIN);
-  }
-
-  static String getStrongestAdminRole(UniversalUserToken user) {
-
-    if (isAdmin(user)) {
-      Set<String> roles = user.getRoles();
-      if (roles.contains(STATE_ADMIN)) {
-        return STATE_ADMIN;
-      } else if (roles.contains(COUNTY_ADMIN)) {
-        return COUNTY_ADMIN;
-      } else if (roles.contains(OFFICE_ADMIN)) {
-        return OFFICE_ADMIN;
-      }
-    }
-    return null;
-  }
-
-  static Set<String> getAdminRoles() {
-    return toSet(COUNTY_ADMIN, STATE_ADMIN, OFFICE_ADMIN);
-  }
 }

@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import gov.ca.cwds.RolesHolder;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -18,7 +19,7 @@ import org.hibernate.validator.constraints.NotBlank;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 @SuppressWarnings("squid:S3437")
-public class User implements Serializable {
+public class User implements RolesHolder, Serializable {
 
   private static final long serialVersionUID = -5958790384369574754L;
 
@@ -191,6 +192,7 @@ public class User implements Serializable {
     this.permissions = permissions;
   }
 
+  @Override
   public Set<String> getRoles() {
     return roles;
   }
@@ -209,4 +211,5 @@ public class User implements Serializable {
   public void setPhoneExtensionNumber(String phoneExtensionNumber) {
     this.phoneExtensionNumber = phoneExtensionNumber;
   }
+
 }

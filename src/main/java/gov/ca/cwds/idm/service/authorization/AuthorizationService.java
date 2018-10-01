@@ -1,11 +1,8 @@
-package gov.ca.cwds.idm.service.cognito;
+package gov.ca.cwds.idm.service.authorization;
 
 import gov.ca.cwds.idm.dto.User;
 
-/**
- * Created by Alexander Serbin on 9/26/2018
- */
-public interface AuthorizeService {
+public interface AuthorizationService {
 
   boolean canFindUser(User user);
 
