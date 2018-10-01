@@ -1,0 +1,7 @@
+{
+  "status": "BAD_REQUEST",
+  "user_message":"Active User with Login ID SMITHBO exists in CWS CARES.",
+  "error_code": "CAP-028",
+  "causes": [
+  ]
+}

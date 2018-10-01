@@ -1,0 +1,7 @@
+{
+  "status": "BAD_REQUEST",
+  "user_message":"No active user with Login ID NOIDCMS was found in CWS/CMS.",
+  "error_code": "CAP-003",
+  "causes": [
+  ]
+}

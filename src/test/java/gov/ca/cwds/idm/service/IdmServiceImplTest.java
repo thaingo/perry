@@ -30,10 +30,14 @@ import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
 import gov.ca.cwds.rest.api.domain.PartialSuccessException;
+import gov.ca.cwds.rest.api.domain.ValidationException;
 import gov.ca.cwds.service.CwsUserInfoService;
+import gov.ca.cwds.service.dto.CwsUserInfo;
 import java.util.List;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -74,6 +78,9 @@ public class IdmServiceImplTest {
 
     userLogService.setUserLogTransactionalService(userLogTransactionalServiceMock);
   }
+
+  @Rule
+  public ExpectedException exception = ExpectedException.none();
 
   @Test
   @WithMockCustomUser
@@ -289,6 +296,29 @@ public class IdmServiceImplTest {
     } catch (RuntimeException e) {
       assertThat(e, is(enableStatusError));
     }
+  }
+
+  @Test
+  public void performValidation_throwsNoRacfIdInCWS() {
+    final String NO_ACTIVE_USER_WITH_RACFID_IN_CMS_ERROR_MSG =
+        "No active user with Login ID NOIDCMS was found in CWS/CMS.";
+    final String racfId = "NOIDCMS";
+    when(cwsUserInfoServiceMock.getCwsUserByRacfId(racfId)).thenReturn(null);
+    exception.expect(ValidationException.class);
+    exception.expectMessage(NO_ACTIVE_USER_WITH_RACFID_IN_CMS_ERROR_MSG);
+    service.validateActivateUserRule(racfId);
+  }
+
+  @Test
+  public void performValidation_throwsActiveRacfIdAlreadyInCognito() {
+    final String ACTIVE_USER_WITH_RACFID_EXISTS_IN_COGNITO_ERROR_MSG =
+        "Active User with Login ID SMITHBO exists in CWS CARES.";
+    final String racfId = "SMITHBO";
+    when(cwsUserInfoServiceMock.getCwsUserByRacfId(racfId)).thenReturn(new CwsUserInfo());
+    when(cognitoServiceFacadeMock.isActiveRacfIdPresent(racfId)).thenReturn(true);
+    exception.expect(ValidationException.class);
+    exception.expectMessage(ACTIVE_USER_WITH_RACFID_EXISTS_IN_COGNITO_ERROR_MSG);
+    service.validateActivateUserRule(racfId);
   }
 
   @Test
