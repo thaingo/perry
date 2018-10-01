@@ -55,7 +55,7 @@ import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
 import gov.ca.cwds.idm.service.execution.OptionalExecution;
 import gov.ca.cwds.idm.service.execution.PutInSearchExecution;
 import gov.ca.cwds.rest.api.domain.PartialSuccessException;
-import gov.ca.cwds.rest.api.domain.ValidationException;
+import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
 import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType;
 import gov.ca.cwds.service.CwsUserInfoService;
 import gov.ca.cwds.service.dto.CwsUserInfo;
@@ -115,7 +115,7 @@ public class IdmServiceImpl implements IdmService {
     UserType existedCognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
 
     if (canChangeToEnableActiveStatus(updateUserDto.getEnabled(), existedCognitoUser.getEnabled())) {
-      validateActivateUserRule(CognitoUtils.getRACFId(existedCognitoUser));
+      validateActivateUser(CognitoUtils.getRACFId(existedCognitoUser));
     }
 
     ExecutionStatus updateAttributesStatus =
@@ -124,12 +124,13 @@ public class IdmServiceImpl implements IdmService {
     OptionalExecution<UserEnableStatusRequest, Boolean> updateUserEnabledExecution =
         executeUpdateEnableStatusOptionally(userId, updateUserDto, existedCognitoUser);
 
-    if (isUpdateFail(updateAttributesStatus, updateUserEnabledExecution)) {
+    if (updateAttributesStatus == WAS_NOT_EXECUTED
+        && updateUserEnabledExecution.getExecutionStatus() == FAIL) {
       throw (RuntimeException) updateUserEnabledExecution.getException();
     }
 
     PutInSearchExecution<String> doraExecution = null;
-    if (isUpdateSuccess(updateAttributesStatus, updateUserEnabledExecution)) {
+    if (doesElasticSearchNeedUpdate(updateAttributesStatus, updateUserEnabledExecution)) {
       doraExecution = updateUserInSearch(userId);
     } else {
       LOGGER.info(messages.getTechMessage(USER_NOTHING_UPDATED, userId));
@@ -139,34 +140,30 @@ public class IdmServiceImpl implements IdmService {
         userId, updateAttributesStatus, updateUserEnabledExecution, doraExecution);
   }
 
-  private boolean isUpdateFail(ExecutionStatus updateAttributesStatus,
-      OptionalExecution<UserEnableStatusRequest, Boolean> updateUserEnabledExecution) {
-    return updateAttributesStatus == WAS_NOT_EXECUTED
-        && updateUserEnabledExecution.getExecutionStatus() == FAIL;
-  }
-
-  private boolean isUpdateSuccess(ExecutionStatus updateAttributesStatus,
+  private boolean doesElasticSearchNeedUpdate(ExecutionStatus updateAttributesStatus,
       OptionalExecution<UserEnableStatusRequest, Boolean> updateUserEnabledExecution) {
     return updateAttributesStatus == SUCCESS
         || updateUserEnabledExecution.getExecutionStatus() == SUCCESS;
   }
 
-  public static boolean canChangeToEnableActiveStatus(Boolean newEnabled, Boolean currentEnabled) {
+  private static boolean canChangeToEnableActiveStatus(Boolean newEnabled, Boolean currentEnabled) {
     return newEnabled != null && !newEnabled.equals(currentEnabled) && newEnabled;
   }
 
-  protected void validateActivateUserRule(String racfId) {
+  void validateActivateUser(String racfId) {
     CwsUserInfo cwsUser = cwsUserInfoService.getCwsUserByRacfId(racfId);
     // validates users not active in CWS cannot be set to Active in CWS CARES
     if (cwsUser == null) {
-      String msg = messages.getUserMessage(NO_USER_WITH_RACFID_IN_CWSCMS, racfId);
-      throw new ValidationException(NO_USER_WITH_RACFID_IN_CWSCMS, msg);
+      String msg = messages.getTechMessage(NO_USER_WITH_RACFID_IN_CWSCMS, racfId);
+      String userMsg = messages.getUserMessage(NO_USER_WITH_RACFID_IN_CWSCMS, racfId);
+      throw new UserIdmValidationException(msg, userMsg, NO_USER_WITH_RACFID_IN_CWSCMS);
     }
 
     // validates no other Active users with same RACFID in CWS CARES exist
-    if (cognitoServiceFacade.isActiveRacfIdPresent(racfId)) {
-      String msg = messages.getUserMessage(ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM, racfId);
-      throw new ValidationException(ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM, msg);
+    if (isActiveRacfIdPresent(racfId)) {
+      String msg = messages.getTechMessage(ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM, racfId);
+      String userMsg = messages.getUserMessage(ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM, racfId);
+      throw new UserIdmValidationException(msg, userMsg, ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM);
     }
   }
 

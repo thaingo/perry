@@ -22,7 +22,6 @@ import gov.ca.cwds.rest.api.domain.PartialSuccessException;
 import gov.ca.cwds.rest.api.domain.UserAlreadyExistsException;
 import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
 import gov.ca.cwds.rest.api.domain.UserNotFoundPerryException;
-import gov.ca.cwds.rest.api.domain.ValidationException;
 import gov.ca.cwds.service.messages.MessagesService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -208,14 +207,9 @@ public class IdmResource {
       return ResponseEntity.noContent().build();
     } catch (UserNotFoundPerryException e) {
       return ResponseEntity.notFound().build();
-    } catch (ValidationException e) {
+    } catch (UserIdmValidationException e) {
       HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
-      IdmApiCustomError apiError =
-          IdmApiCustomError.IdmApiCustomErrorBuilder.anIdmApiCustomError()
-              .withStatus(httpStatus)
-              .withErrorCode(e.getErrorCode())
-              .withUserMessage(e.getMessage())
-              .build();
+      IdmApiCustomError apiError = buildApiCustomError(e, httpStatus);
       return new ResponseEntity<>(apiError, httpStatus);
     } catch (PartialSuccessException e) {
       HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;

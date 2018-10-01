@@ -1,5 +1,6 @@
 {
   "status": "BAD_REQUEST",
+  "technical_message":"No user with RACFID: NOIDCMS found in CWSCMS",
   "user_message":"No active user with Login ID NOIDCMS was found in CWS/CMS.",
   "error_code": "CAP-003",
   "causes": [
