@@ -105,15 +105,17 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
       return result.getUser();
 
     } catch (UsernameExistsException e) {
-      String causeMsg = messages.get(USER_WITH_EMAIL_EXISTS_IN_IDM, user.getEmail());
-      String msg = messages.get(UNABLE_CREATE_NEW_IDM_USER, causeMsg);
+      String causeMsg = messages.getTechMessage(USER_WITH_EMAIL_EXISTS_IN_IDM, user.getEmail());
+      String msg = messages.getTechMessage(UNABLE_CREATE_NEW_IDM_USER, causeMsg);
+      String userMsg = messages.getUserMessage(USER_WITH_EMAIL_EXISTS_IN_IDM, user.getEmail());
       LOGGER.error(msg, e);
-      throw new UserAlreadyExistsException(causeMsg, e);
+      throw new UserAlreadyExistsException(causeMsg, userMsg, USER_WITH_EMAIL_EXISTS_IN_IDM, e);
 
     } catch (InvalidParameterException e) {
-      String msg = messages.get(IDM_USER_VALIDATION_FAILED);
+      String msg = messages.getTechMessage(IDM_USER_VALIDATION_FAILED);
+      String userMsg = messages.getUserMessage(IDM_USER_VALIDATION_FAILED);
       LOGGER.error(msg, e);
-      throw new UserIdmValidationException(msg, e);
+      throw new UserIdmValidationException(msg, userMsg, IDM_USER_VALIDATION_FAILED, e);
     }
   }
 
@@ -153,7 +155,7 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
       ListUsersResult result = identityProvider.listUsers(request);
       return new CognitoUserPage(result.getUsers(), result.getPaginationToken());
     } catch (Exception e) {
-      throw new PerryException(messages.get(ERROR_CONNECT_TO_IDM), e);
+      throw new PerryException(messages.getTechMessage(ERROR_CONNECT_TO_IDM), e);
     }
   }
 
@@ -366,16 +368,17 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
     try {
       return function.apply(request);
     } catch (UserNotFoundException e) {
-      String msg = messages.get(USER_NOT_FOUND_BY_ID_IN_IDM, userId);
+      String msg = messages.getTechMessage(USER_NOT_FOUND_BY_ID_IN_IDM, userId);
+      String userMsg = messages.getUserMessage(USER_NOT_FOUND_BY_ID_IN_IDM, userId);
       LOGGER.error(msg, e);
-      throw new UserNotFoundPerryException(msg, e);
+      throw new UserNotFoundPerryException(msg, userMsg, USER_NOT_FOUND_BY_ID_IN_IDM, e);
 
     } catch (Exception e) {
       String msg = "";
       if (operation == UPDATE) {
-        msg = messages.get(ERROR_UPDATE_USER_IN_IDM);
+        msg = messages.getTechMessage(ERROR_UPDATE_USER_IN_IDM);
       } else if (operation == GET) {
-        msg = messages.get(ERROR_GET_USER_FROM_IDM);
+        msg = messages.getTechMessage(ERROR_GET_USER_FROM_IDM);
       }
       LOGGER.error(msg, e);
       throw new PerryException(msg, e);

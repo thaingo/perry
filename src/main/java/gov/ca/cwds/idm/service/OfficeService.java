@@ -45,8 +45,7 @@ public class OfficeService {
         return officeRepository.findCountyOffices(getCountyName(getCurrentUser()));
       default:
         String msg = messagesService
-            .get(NOT_AUTHORIZED_TO_GET_MANAGED_OFFICES_LIST,
-                getCurrentUser().getUserId(), getCurrentUser().getRoles());
+            .getTechMessage(NOT_AUTHORIZED_TO_GET_MANAGED_OFFICES_LIST, getCurrentUser().getUserId(), getCurrentUser().getRoles());
         LOGGER.error(msg);
         throw new AccessDeniedException(msg);
     }
