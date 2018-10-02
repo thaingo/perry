@@ -44,7 +44,7 @@ public class OfficeService {
         return officeRepository.findOffices();
       case OFFICE_ADMIN:
       case COUNTY_ADMIN:
-        return officeRepository.findCountyOffices(getCountyName(getCurrentUser()));
+        return officeRepository.findCountyOffices(getCountyName(currentUser));
       default:
         String msg = messagesService
             .getTechMessage(NOT_AUTHORIZED_TO_GET_MANAGED_OFFICES_LIST,
