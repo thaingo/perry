@@ -7,6 +7,7 @@ import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_GET_MAN
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCountyName;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 
+import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.dto.Office;
 import gov.ca.cwds.idm.persistence.cwscms.repository.OfficeRepository;
 import gov.ca.cwds.idm.service.authorization.UserRolesService;
@@ -37,7 +38,8 @@ public class OfficeService {
 
   @Transactional(value = "transactionManager")
   public List<Office> getOfficesByAdmin() {
-    switch (UserRolesService.getStrongestAdminRole(getCurrentUser())) {
+    UniversalUserToken currentUser = getCurrentUser();
+    switch (UserRolesService.getStrongestAdminRole(currentUser)) {
       case STATE_ADMIN:
         return officeRepository.findOffices();
       case OFFICE_ADMIN:
@@ -46,7 +48,7 @@ public class OfficeService {
       default:
         String msg = messagesService
             .getTechMessage(NOT_AUTHORIZED_TO_GET_MANAGED_OFFICES_LIST,
-                getCurrentUser().getUserId(), getCurrentUser().getRoles());
+                currentUser.getUserId(), currentUser.getRoles());
         LOGGER.error(msg);
         throw new AccessDeniedException(msg);
     }
