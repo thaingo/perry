@@ -323,7 +323,43 @@
       <column name="FKCWSADDRT" value="PeQHipI0Wz"/>
       <column name="EMAIL_ADDR"/>
     </insert>
+  </changeSet>
 
+  <changeSet id="data_for_cms_db_6" author="Pradip.Karki">
+    <insert tableName="USERID_T">
+      <column name="IDENTIFIER" value="AakC6Jm08I"/>
+      <column name="LOGON_ID" value="NOIDCMS"/>
+      <column name="END_DT" valueDate="2100-11-06"/>
+      <column name="END_TM"/>
+      <column name="LST_UPD_ID" value="q54"/>
+      <column name="LST_UPD_TS" valueDate="2018-05-18 17:10:43.010371"/>
+      <column name="FKFPSTFPRT"/>
+      <column name="FKSTFPERST" value="09M"/>
+      <column name="SYS_DMC" valueNumeric="5394"/>
+    </insert>
+    <insert tableName="STFPERST">
+      <column name="IDENTIFIER" value="09M"/>
+      <column name="END_DT"/>
+      <column name="FIRST_NM" value="Tim                 "/>
+      <column name="JOB_TL_DSC" value="Tim JobTitle                  "/>
+      <column name="LAST_NM" value="Young                    "/>
+      <column name="MID_INI_NM" value=" "/>
+      <column name="NMPRFX_DSC" value="Tim   "/>
+      <column name="PHONE_NO" valueNumeric="7186888777"/>
+      <column name="TEL_EXT_NO" valueNumeric="7"/>
+      <column name="START_DT" valueDate="1980-08-08"/>
+      <column name="SUFX_TLDSC" value="    "/>
+      <column name="TLCMTR_IND" value="Y"/>
+      <column name="LST_UPD_ID" value="00E"/>
+      <column name="LST_UPD_TS" valueDate="2018-01-06 12:47:12.570402"/>
+      <column name="FKCWS_OFFT" value="JzoGSkE07I"/>
+      <column name="AVLOC_DSC" value="Availability / Location Description                                                                                                                             "/>
+      <column name="SSRS_WKRID" value="1594"/>
+      <column name="CNTY_SPFCD" value="57"/>
+      <column name="DTYWKR_IND" value="N"/>
+      <column name="FKCWSADDRT" value="QW16FeOq48"/>
+      <column name="EMAIL_ADDR"/>
+    </insert>
   </changeSet>
 
 </databaseChangeLog>

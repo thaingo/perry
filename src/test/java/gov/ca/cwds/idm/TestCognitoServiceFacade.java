@@ -61,6 +61,10 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
   static final String SOME_PAGINATION_TOKEN = "somePaginationToken";
   static final String ABSENT_USER_ID = "absentUserId";
   static final String ERROR_USER_ID = "errorUserId";
+  static final String INACTIVE_USER_WITH_NO_ACTIVE_RACFID_IN_CMS =
+      "17067e4e-270f-4623-b86c-b4d4fa527z79";
+  static final String INACTIVE_USER_WITH_ACTIVE_RACFID_IN_CMS =
+      "17067e4e-270f-4623-b86c-b4d4fa524f38";
   static final String USER_WITH_INACTIVE_STATUS_COGNITO =
       "17067e4e-270f-4623-b86c-b4d4fa527a22";
   static final String STATE_ADMIN_ID = "2d9369b4-5855-4a2c-95f7-3617fab1496a";
@@ -212,6 +216,38 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
             "SMITHB3",
             null);
 
+    TestUser userWithNoActiveRacfIdInCms =
+        testUser(
+            INACTIVE_USER_WITH_NO_ACTIVE_RACFID_IN_CMS,
+            Boolean.FALSE,
+            "CONFIRMED",
+            date(2018, 5, 3),
+            date(2018, 5, 31),
+            "smith4th@gmail.com",
+            "Smith",
+            "Forth",
+            WithMockCustomUser.COUNTY,
+            "test",
+            null,
+            "NOIDCMS",
+            null);
+
+    TestUser userWithActiveRacfIdAInCms =
+        testUser(
+            INACTIVE_USER_WITH_ACTIVE_RACFID_IN_CMS,
+            Boolean.FALSE,
+            "CONFIRMED",
+            date(2018, 5, 3),
+            date(2018, 5, 31),
+            "smith5th@gmail.com",
+            "Smith",
+            "Fifth",
+            WithMockCustomUser.COUNTY,
+            "test",
+            null,
+            "SMITHBO",
+            null);
+
     TestUser newSuccessUser =
         testUser(
             NEW_USER_SUCCESS_ID,
@@ -261,6 +297,10 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
     setSearchByRacfidRequestAndResult(userWithNoPhoneExtension);
 
     setSearchByRacfidRequestAndResult(userWithEnableStatusInactiveInCognito);
+
+    setSearchByRacfidRequestAndResult(userWithNoActiveRacfIdInCms);
+
+    setSearchByRacfidRequestAndReturnResults(userWithActiveRacfIdAInCms, userWithRacfidAndDbData);
 
     mockAdminListDevices();
   }
@@ -469,6 +509,19 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
             composeToGetFirstPageByAttribute(RACFID_STANDARD, testUser.getRacfId()));
 
     ListUsersResult result = new ListUsersResult().withUsers(userType(testUser));
+
+    when(cognito.listUsers(request)).thenReturn(result);
+
+    return request;
+  }
+
+  ListUsersRequest setSearchByRacfidRequestAndReturnResults(TestUser testUser1, TestUser testUser2) {
+
+    ListUsersRequest request =
+        composeListUsersRequest(
+            composeToGetFirstPageByAttribute(RACFID_STANDARD, testUser1.getRacfId()));
+
+    ListUsersResult result = new ListUsersResult().withUsers(userType(testUser1), userType(testUser2));
 
     when(cognito.listUsers(request)).thenReturn(result);
 
