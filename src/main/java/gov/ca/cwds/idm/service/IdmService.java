@@ -14,23 +14,23 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface IdmService {
 
-  @PostAuthorize("@authorize.canFindUser(returnObject)")
+  @PostAuthorize("@authorizationService.canFindUser(returnObject)")
   User findUser(String id);
 
-  @PreAuthorize("@authorize.canUpdateUser(#id)")
+  @PreAuthorize("@authorizationService.canUpdateUser(#id)")
   void updateUser(@P("id") String id, UserUpdate updateUserDto);
 
   UserVerificationResult verifyIfUserCanBeCreated(String racfId, String email);
 
   UsersPage getUserPage(String paginationToken);
 
-  @PreAuthorize("@authorize.canCreateUser(#user)")
+  @PreAuthorize("@authorizationService.canCreateUser(#user)")
   String createUser(@P("user") User user);
 
   List<User> searchUsers(UsersSearchCriteria usersSearchCriteria);
 
   List<UserAndOperation> getFailedOperations(LocalDateTime lastJobTime);
 
-  @PreAuthorize("@authorize.canResendInvitationMessage(#id)")
+  @PreAuthorize("@authorizationService.canResendInvitationMessage(#id)")
   void resendInvitationMessage(@P("id") String id);
 }

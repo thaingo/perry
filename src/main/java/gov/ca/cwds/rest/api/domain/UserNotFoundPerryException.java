@@ -6,7 +6,8 @@ public class UserNotFoundPerryException extends IdmException {
 
   private static final long serialVersionUID = -2786549062239961277L;
 
-  public UserNotFoundPerryException(String message, String userMessage, MessageCode errorCode, Throwable e) {
+  public UserNotFoundPerryException(String message, String userMessage, MessageCode errorCode,
+      Throwable e) {
     super(message, userMessage, errorCode, e);
   }
 

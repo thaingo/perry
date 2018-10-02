@@ -158,7 +158,7 @@ public class IdmResource {
       @ApiResponse(code = 404, message = "Not found")
     }
   )
-  @PreAuthorize("@roles.isAdmin(principal) || @roles.isCalsAdmin(principal)")
+  @PreAuthorize("@userRoleService.isAdmin(principal)")
   public ResponseEntity<UserByIdResponse> getUser(
       @ApiParam(required = true, value = "The unique user ID", example = "userId1")
           @PathVariable
@@ -192,7 +192,8 @@ public class IdmResource {
     }
   )
   @ApiOperation(value = "Update User")
-  @PreAuthorize("@roles.isAdmin(principal)")
+  @PreAuthorize("@userRoleService.isAdmin(principal) &&  " +
+      " !@userRoleService.isCalsAdminStrongestRole(principal)")
   public ResponseEntity updateUser(
       @ApiParam(required = true, value = "The unique user ID", example = "userId1")
           @PathVariable
@@ -210,7 +211,8 @@ public class IdmResource {
     } catch (PartialSuccessException e) {
       HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
       IdmApiCustomError apiError = buildApiCustomError(e, httpStatus);
-      apiError.getCauses().addAll(e.getCauses().stream().map(Exception::getMessage).collect(toList()));
+      apiError.getCauses()
+          .addAll(e.getCauses().stream().map(Exception::getMessage).collect(toList()));
       return new ResponseEntity<>(apiError, httpStatus);
     }
   }
@@ -234,7 +236,8 @@ public class IdmResource {
               + "email, first_name, last_name, county_name, RACFID, permissions, office, phone_number.\n "
               + "Other properties values will be set by the system automatically.\n"
               + "Required properties are: email, first_name, last_name, county_name.")
-  @PreAuthorize("@roles.isAdmin(principal)")
+  @PreAuthorize("@userRoleService.isAdmin(principal) &&  " +
+      " !@userRoleService.isCalsAdminStrongestRole(principal)")
   public ResponseEntity createUser(
       @ApiParam(required = true, name = "User", value = "The User create data")
           @NotNull
@@ -261,7 +264,8 @@ public class IdmResource {
       headers.setLocation(locationUri);
       HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
       IdmApiCustomError apiError = buildApiCustomError(e, httpStatus);
-      apiError.getCauses().addAll(e.getCauses().stream().map(Exception::getMessage).collect(toList()));
+      apiError.getCauses()
+          .addAll(e.getCauses().stream().map(Exception::getMessage).collect(toList()));
       return new ResponseEntity<>(apiError, headers, httpStatus);
     }
   }
@@ -285,7 +289,8 @@ public class IdmResource {
     response = Permission.class,
     responseContainer = "List"
   )
-  @PreAuthorize("@roles.isAdmin(principal)")
+  @PreAuthorize("@userRoleService.isAdmin(principal) && "
+      + "!@userRoleService.isCalsAdminStrongestRole(principal)")
   public List<Permission> getPermissions() {
     return  dictionaryProvider.getPermissions();
   }
@@ -293,8 +298,9 @@ public class IdmResource {
   @RequestMapping(method = RequestMethod.GET, value = "users/verify", produces = "application/json")
   @ApiOperation(value = "Check if user can be created by racfId and email", response = UserVerificationResult.class)
   @ApiResponses(value = {@ApiResponse(code = 401, message = "Not Authorized")})
-  @PreAuthorize("@roles.isAdmin(principal)")
-  public ResponseEntity<UserVerificationResult> verifyUser(
+  @PreAuthorize("@userRoleService.isAdmin(principal) && "
+      + "!@userRoleService.isCalsAdminStrongestRole(principal)")
+  public ResponseEntity<UserVerificationResult> verifyIfUserCanBeCreated(
       @ApiParam(required = true, name = "racfid", value = "The RACFID to verify user by in CWS/CMS")
           @NotNull
           @RequestParam("racfid")
@@ -318,7 +324,8 @@ public class IdmResource {
           @ApiResponse(code = 404, message = "Not found")
       }
   )
-  @PreAuthorize("@roles.isAdmin(principal)")
+  @PreAuthorize("@userRoleService.isAdmin(principal) &&  " +
+      " !@userRoleService.isCalsAdminStrongestRole(principal)")
   public ResponseEntity resendInvitationEmail(
       @ApiParam(required = true, value = "The unique user ID", example = "userId1")
       @PathVariable
@@ -345,7 +352,8 @@ public class IdmResource {
       response = CwsOffice.class,
       responseContainer = "List"
   )
-  @PreAuthorize("@roles.isAdmin(principal)")
+  @PreAuthorize("@userRoleService.isAdmin(principal) &&  " +
+      " !@userRoleService.isCalsAdminStrongestRole(principal)")
   public ResponseEntity getAdminOffices() {
     return ResponseEntity.ok().body(officeService.getOfficesByAdmin());
   }
