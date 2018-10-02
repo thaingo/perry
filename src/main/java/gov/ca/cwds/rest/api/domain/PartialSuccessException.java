@@ -2,7 +2,6 @@ package gov.ca.cwds.rest.api.domain;
 
 import gov.ca.cwds.service.messages.MessageCode;
 import java.util.Arrays;
-import java.util.List;
 
 public class PartialSuccessException extends IdmException {
 
@@ -11,14 +10,15 @@ public class PartialSuccessException extends IdmException {
   private String userId;
 
 
-
-  public PartialSuccessException (String userId, String techMessage, String userMessage, MessageCode errorCode, Exception... causes) {
+  public PartialSuccessException(String userId, String techMessage, String userMessage,
+      MessageCode errorCode, Exception... causes) {
     super(techMessage, userMessage, errorCode);
     this.setCauses(Arrays.asList(causes));
     this.userId = userId;
   }
 
-  public PartialSuccessException (String userId, String techMessage, MessageCode errorCode, Exception... causes) {
+  public PartialSuccessException(String userId, String techMessage, MessageCode errorCode,
+      Exception... causes) {
     this(userId, techMessage, techMessage, errorCode, causes);
   }
 

@@ -4,17 +4,23 @@ import static gov.ca.cwds.util.UniversalUserTokenDeserializer.ADMIN_OFFICE_IDS_P
 import static gov.ca.cwds.util.UniversalUserTokenDeserializer.COUNTY_NAME_PARAM;
 
 import gov.ca.cwds.UniversalUserToken;
-import gov.ca.cwds.config.api.idm.Roles;
 import gov.ca.cwds.data.reissue.model.PerryTokenEntity;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 public class CurrentAuthenticatedUserUtil {
+
+  private static Supplier<UniversalUserToken> adminSupplier;
+
   private CurrentAuthenticatedUserUtil() {}
 
   public static UniversalUserToken getCurrentUser() {
+    if (adminSupplier != null) {
+      return adminSupplier.get();
+    }
     Authentication authentication = getAuthentication();
     return (UniversalUserToken) authentication.getPrincipal();
   }
@@ -42,15 +48,17 @@ public class CurrentAuthenticatedUserUtil {
     }
   }
 
-  public static boolean isMostlyCountyAdmin() {
-    return Roles.isMostlyCountyAdmin(getCurrentUser());
-  }
-
-  public static boolean isMostlyOfficeAdmin() {
-    return Roles.isMostlyOfficeAdmin(getCurrentUser());
-  }
-
   private static Authentication getAuthentication() {
     return SecurityContextHolder.getContext().getAuthentication();
   }
+
+  public static void setAdminSupplier(
+      Supplier<UniversalUserToken> adminSupplier) {
+    CurrentAuthenticatedUserUtil.adminSupplier = adminSupplier;
+  }
+
+  public static void resetAdminSupplier() {
+    adminSupplier = null;
+  }
+
 }

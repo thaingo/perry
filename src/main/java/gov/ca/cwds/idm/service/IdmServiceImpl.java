@@ -1,10 +1,13 @@
 package gov.ca.cwds.idm.service;
 
+import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.CREATE;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
 import static gov.ca.cwds.idm.service.ExecutionStatus.FAIL;
 import static gov.ca.cwds.idm.service.ExecutionStatus.SUCCESS;
 import static gov.ca.cwds.idm.service.ExecutionStatus.WAS_NOT_EXECUTED;
+import static gov.ca.cwds.idm.service.authorization.UserRolesService.getStrongestAdminRole;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByEmail;
@@ -28,6 +31,7 @@ import static gov.ca.cwds.service.messages.MessageCode.USER_PARTIAL_UPDATE_AND_S
 import static gov.ca.cwds.service.messages.MessageCode.USER_UPDATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_UPDATE_SAVE_TO_SEARCH_ERROR;
 import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
+import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.Utils.toLowerCase;
 import static gov.ca.cwds.util.Utils.toUpperCase;
 import static java.util.stream.Collectors.toSet;
@@ -45,7 +49,7 @@ import gov.ca.cwds.idm.dto.UsersPage;
 import gov.ca.cwds.idm.dto.UsersSearchCriteria;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
-import gov.ca.cwds.idm.service.cognito.AuthorizeService;
+import gov.ca.cwds.idm.service.authorization.AuthorizationService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.StandardUserAttribute;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
@@ -61,7 +65,6 @@ import gov.ca.cwds.service.CwsUserInfoService;
 import gov.ca.cwds.service.dto.CwsUserInfo;
 import gov.ca.cwds.service.messages.MessageCode;
 import gov.ca.cwds.service.messages.MessagesService;
-import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import gov.ca.cwds.util.Utils;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -89,19 +92,26 @@ public class IdmServiceImpl implements IdmService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(IdmServiceImpl.class);
 
-  @Autowired private CognitoServiceFacade cognitoServiceFacade;
+  @Autowired
+  private CognitoServiceFacade cognitoServiceFacade;
 
-  @Autowired private CwsUserInfoService cwsUserInfoService;
+  @Autowired
+  private CwsUserInfoService cwsUserInfoService;
 
-  @Autowired private MessagesService messages;
+  @Autowired
+  private MessagesService messages;
 
-  @Autowired private UserLogService userLogService;
+  @Autowired
+  private UserLogService userLogService;
 
-  @Autowired private SearchService searchService;
+  @Autowired
+  private SearchService searchService;
 
-  @Autowired private AuthorizeService authorizeService;
+  @Autowired
+  private AuthorizationService authorizeService;
 
-  @Autowired private MappingService mappingService;
+  @Autowired
+  private MappingService mappingService;
 
   @Override
   public User findUser(String id) {
@@ -226,7 +236,7 @@ public class IdmServiceImpl implements IdmService {
     if (cwsUser == null) {
       return composeNegativeResultWithMessage(NO_USER_WITH_RACFID_IN_CWSCMS, racfId);
     }
-    if (checkIfUserWithEmailExistsInCognito(email)){
+    if (checkIfUserWithEmailExistsInCognito(email)) {
       return composeNegativeResultWithMessage(USER_WITH_EMAIL_EXISTS_IN_IDM, email);
     }
 
@@ -246,12 +256,14 @@ public class IdmServiceImpl implements IdmService {
   }
 
   private Optional<MessageCode> buildAuthorizationError() {
-    if (CurrentAuthenticatedUserUtil.isMostlyCountyAdmin()) {
-      return Optional.of(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY);
-    } else if (CurrentAuthenticatedUserUtil.isMostlyOfficeAdmin()) {
-      return Optional.of(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_OFFICE);
+    switch (getStrongestAdminRole(getCurrentUser())) {
+      case COUNTY_ADMIN:
+        return Optional.of(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY);
+      case OFFICE_ADMIN:
+        return Optional.of(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_OFFICE);
+      default:
+        return Optional.empty();
     }
-    return Optional.empty();
   }
 
   private boolean checkIfUserWithEmailExistsInCognito(String email) {
@@ -382,17 +394,18 @@ public class IdmServiceImpl implements IdmService {
         MessageCode errorCode = USER_CREATE_SAVE_TO_SEARCH_ERROR;
         String msg = messages.getTechMessage(errorCode, userId);
         String userMsg = messages.getUserMessage(errorCode, userId);
-        throw new PartialSuccessException(userId, msg, userMsg, errorCode, doraExecution.getException());
+        throw new PartialSuccessException(userId, msg, userMsg, errorCode,
+            doraExecution.getException());
       } else { // logging in db failed
         MessageCode errorCode = USER_CREATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
         String msg = messages.getTechMessage(errorCode, userId);
         String userMsg = messages.getUserMessage(errorCode, userId);
         throw new PartialSuccessException(
-            userId, msg, userMsg, errorCode, doraExecution.getException(), dbLogExecution.getException());
+            userId, msg, userMsg, errorCode, doraExecution.getException(),
+            dbLogExecution.getException());
       }
     }
   }
-
 
 
   private void deleteProcessedLogs(LocalDateTime lastJobTime) {
@@ -411,7 +424,8 @@ public class IdmServiceImpl implements IdmService {
       String userId, MessageCode errorCode, Exception... causes) {
     String msg = messages.getTechMessage(errorCode, userId);
     String userMsg = messages.getUserMessage(errorCode, userId);
-    PartialSuccessException e = new PartialSuccessException(userId, msg, userMsg, errorCode, causes);
+    PartialSuccessException e = new PartialSuccessException(userId, msg, userMsg, errorCode,
+        causes);
     LOGGER.error(msg, e);
     throw e;
   }
@@ -472,7 +486,8 @@ public class IdmServiceImpl implements IdmService {
     Map<String, CwsUserInfo> idToCmsUser = cwsUserInfoService.findUsers(userNameToRacfId.values())
         .stream().collect(
             Collectors.toMap(CwsUserInfo::getRacfId, e -> e, (user1, user2) -> {
-              LOGGER.warn(messages.getTechMessage(DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS, user1.getRacfId()));
+              LOGGER.warn(messages
+                  .getTechMessage(DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS, user1.getRacfId()));
               return user1;
             }));
     return cognitoUsers
@@ -583,7 +598,7 @@ public class IdmServiceImpl implements IdmService {
     this.messages = messages;
   }
 
-  public void setAuthorizeService(AuthorizeService authorizeService) {
+  public void setAuthorizeService(AuthorizationService authorizeService) {
     this.authorizeService = authorizeService;
   }
 
