@@ -25,24 +25,24 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
   @Override
   public boolean canFindUser(User user) {
-    return createAdminForUserAuthorizer(user).canFindUser();
+    return createAdminActionsAuthorizer(user).canFindUser();
   }
 
   @Override
   public boolean canCreateUser(User user) {
-    return createAdminForUserAuthorizer(user).canCreateUser();
+    return createAdminActionsAuthorizer(user).canCreateUser();
   }
 
   @Override
   public boolean canUpdateUser(String userId) {
     User user = getUserFromUserId(userId);
-    return createAdminForUserAuthorizer(user).canUpdateUser();
+    return createAdminActionsAuthorizer(user).canUpdateUser();
   }
 
   @Override
   public boolean canResendInvitationMessage(String userId) {
     User user = getUserFromUserId(userId);
-    return createAdminForUserAuthorizer(user).canResendInvitationMessage();
+    return createAdminActionsAuthorizer(user).canResendInvitationMessage();
   }
 
   private User getUserFromUserId(String userId) {
@@ -62,7 +62,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     return UserRolesService.getStrongestAdminRole(admin);
   }
 
-  private ActionsAuthorizer createAdminForUserAuthorizer(User user) {
+  private AdminActionsAuthorizer createAdminActionsAuthorizer(User user) {
     switch (getAdminStrongestRole()) {
       case STATE_ADMIN:
         return StateAdminAuthorizer.INSTANCE;

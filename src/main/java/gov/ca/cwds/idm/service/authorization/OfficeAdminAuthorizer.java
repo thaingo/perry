@@ -1,6 +1,6 @@
 package gov.ca.cwds.idm.service.authorization;
 
-import static gov.ca.cwds.idm.service.authorization.AuthorizationUtils.principalInTheSameCountyWith;
+import static gov.ca.cwds.idm.service.authorization.AuthorizationUtils.isPrincipalInTheSameCountyWith;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isCountyAdmin;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isStateAdmin;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getAdminOfficeIds;
@@ -10,7 +10,7 @@ import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.dto.User;
 import java.util.Set;
 
-class OfficeAdminAuthorizer implements ActionsAuthorizer {
+class OfficeAdminAuthorizer implements AdminActionsAuthorizer {
 
   private final User user;
 
@@ -20,7 +20,7 @@ class OfficeAdminAuthorizer implements ActionsAuthorizer {
 
   @Override
   public boolean canFindUser() {
-    return principalInTheSameCountyWith(user)
+    return isPrincipalInTheSameCountyWith(user)
         && !userIsStateAdminFromOtherOffice()
         && !userIsCountyAdminFromOtherOffice();
   }

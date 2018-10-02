@@ -11,7 +11,7 @@ final class AuthorizationUtils {
   private AuthorizationUtils() {
   }
 
-  static boolean principalInTheSameCountyWith(User user) {
+  static boolean isPrincipalInTheSameCountyWith(User user) {
     UniversalUserToken admin = getCurrentUser();
     String userCountyName = user.getCountyName();
     String adminCountyName = getCountyName(admin);

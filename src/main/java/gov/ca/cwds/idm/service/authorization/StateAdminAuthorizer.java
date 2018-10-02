@@ -1,6 +1,6 @@
 package gov.ca.cwds.idm.service.authorization;
 
-class StateAdminAuthorizer implements ActionsAuthorizer {
+class StateAdminAuthorizer implements AdminActionsAuthorizer {
 
   public static final StateAdminAuthorizer INSTANCE = new StateAdminAuthorizer();
 

@@ -2,7 +2,7 @@ package gov.ca.cwds.idm.service.authorization;
 
 import gov.ca.cwds.idm.dto.User;
 
-class CalsAdminAuthorizer implements ActionsAuthorizer {
+class CalsAdminAuthorizer implements AdminActionsAuthorizer {
 
   private User user;
 

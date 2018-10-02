@@ -1,7 +1,7 @@
 {
   "status": "INTERNAL_SERVER_ERROR",
   "technical_message": "Partial success of the \"User update\" operation: User with username: 24051d54-9321-4dd2-a92f-6425d6c455be was successfully updated in Cognito but was not updated in the search system. The operation was logged and the search index should be updated soon.",
-  "user_message":"User with username 24051d54-9321-4dd2-a92f-6425d6c455be was successfully updated in CWS CARES, please allow a few minutes for the user to be updated in the directory.",
+  "user_message": "User with username 24051d54-9321-4dd2-a92f-6425d6c455be was successfully updated in CWS CARES, please allow a few minutes for the user to be updated in the directory.",
   "error_code": "CAP-020",
   "causes": [
     "Elastic Search error"

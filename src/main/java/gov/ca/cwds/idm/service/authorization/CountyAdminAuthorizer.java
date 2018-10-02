@@ -1,10 +1,10 @@
 package gov.ca.cwds.idm.service.authorization;
 
-import static gov.ca.cwds.idm.service.authorization.AuthorizationUtils.principalInTheSameCountyWith;
+import static gov.ca.cwds.idm.service.authorization.AuthorizationUtils.isPrincipalInTheSameCountyWith;
 
 import gov.ca.cwds.idm.dto.User;
 
-class CountyAdminAuthorizer implements ActionsAuthorizer {
+class CountyAdminAuthorizer implements AdminActionsAuthorizer {
 
   private final User user;
 
@@ -14,22 +14,22 @@ class CountyAdminAuthorizer implements ActionsAuthorizer {
 
   @Override
   public boolean canFindUser() {
-    return principalInTheSameCountyWith(user);
+    return isPrincipalInTheSameCountyWith(user);
   }
 
   @Override
   public boolean canCreateUser() {
-    return principalInTheSameCountyWith(user);
+    return isPrincipalInTheSameCountyWith(user);
   }
 
   @Override
   public boolean canUpdateUser() {
-    return principalInTheSameCountyWith(user);
+    return isPrincipalInTheSameCountyWith(user);
   }
 
   @Override
   public boolean canResendInvitationMessage() {
-    return principalInTheSameCountyWith(user);
+    return isPrincipalInTheSameCountyWith(user);
   }
 
 }

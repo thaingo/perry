@@ -1,6 +1,6 @@
 package gov.ca.cwds.idm.service.authorization;
 
-interface ActionsAuthorizer {
+interface AdminActionsAuthorizer {
 
   boolean canFindUser();
 

@@ -362,13 +362,15 @@ public class IdmServiceImpl implements IdmService {
         MessageCode errorCode = USER_CREATE_SAVE_TO_SEARCH_ERROR;
         String msg = messages.getTechMessage(errorCode, userId);
         String userMsg = messages.getUserMessage(errorCode, userId);
-        throw new PartialSuccessException(userId, msg, userMsg, errorCode, doraExecution.getException());
+        throw new PartialSuccessException(userId, msg, userMsg, errorCode,
+            doraExecution.getException());
       } else { // logging in db failed
         MessageCode errorCode = USER_CREATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
         String msg = messages.getTechMessage(errorCode, userId);
         String userMsg = messages.getUserMessage(errorCode, userId);
         throw new PartialSuccessException(
-            userId, msg, userMsg, errorCode, doraExecution.getException(), dbLogExecution.getException());
+            userId, msg, userMsg, errorCode, doraExecution.getException(),
+            dbLogExecution.getException());
       }
     }
   }
@@ -390,7 +392,8 @@ public class IdmServiceImpl implements IdmService {
       String userId, MessageCode errorCode, Exception... causes) {
     String msg = messages.getTechMessage(errorCode, userId);
     String userMsg = messages.getUserMessage(errorCode, userId);
-    PartialSuccessException e = new PartialSuccessException(userId, msg, userMsg, errorCode, causes);
+    PartialSuccessException e = new PartialSuccessException(userId, msg, userMsg, errorCode,
+        causes);
     LOGGER.error(msg, e);
     throw e;
   }
@@ -451,7 +454,8 @@ public class IdmServiceImpl implements IdmService {
     Map<String, CwsUserInfo> idToCmsUser = cwsUserInfoService.findUsers(userNameToRacfId.values())
         .stream().collect(
             Collectors.toMap(CwsUserInfo::getRacfId, e -> e, (user1, user2) -> {
-              LOGGER.warn(messages.getTechMessage(DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS, user1.getRacfId()));
+              LOGGER.warn(messages
+                  .getTechMessage(DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS, user1.getRacfId()));
               return user1;
             }));
     return cognitoUsers

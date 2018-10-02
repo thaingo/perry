@@ -211,7 +211,8 @@ public class IdmResource {
     } catch (PartialSuccessException e) {
       HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
       IdmApiCustomError apiError = buildApiCustomError(e, httpStatus);
-      apiError.getCauses().addAll(e.getCauses().stream().map(Exception::getMessage).collect(toList()));
+      apiError.getCauses()
+          .addAll(e.getCauses().stream().map(Exception::getMessage).collect(toList()));
       return new ResponseEntity<>(apiError, httpStatus);
     }
   }
@@ -262,7 +263,8 @@ public class IdmResource {
       headers.setLocation(locationUri);
       HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
       IdmApiCustomError apiError = buildApiCustomError(e, httpStatus);
-      apiError.getCauses().addAll(e.getCauses().stream().map(Exception::getMessage).collect(toList()));
+      apiError.getCauses()
+          .addAll(e.getCauses().stream().map(Exception::getMessage).collect(toList()));
       return new ResponseEntity<>(apiError, headers, httpStatus);
     }
   }
