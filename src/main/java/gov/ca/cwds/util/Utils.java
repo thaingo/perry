@@ -3,10 +3,8 @@ package gov.ca.cwds.util;
 import static gov.ca.cwds.config.Constants.DEFAULT_LOCALE;
 
 import java.sql.Timestamp;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Date;
@@ -61,7 +59,7 @@ public class Utils {
   }
 
   @SuppressWarnings({"squid:S1319"})//need HashSet in tests
-  public static HashSet<String> toSet(String... values) {
+  public static <T> HashSet<T> toSet(T... values) {
     return new HashSet<>(Arrays.asList(values));
   }
 

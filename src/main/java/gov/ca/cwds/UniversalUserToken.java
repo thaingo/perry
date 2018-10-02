@@ -17,7 +17,8 @@ import org.codehaus.jackson.map.annotate.JsonDeserialize;
  * Created by dmitry.rudenko on 7/28/2017.
  */
 @JsonDeserialize(using = UniversalUserTokenDeserializer.class)
-public class UniversalUserToken implements Serializable {
+public class UniversalUserToken implements RolesHolder, Serializable {
+
   @JsonProperty("user")
   private String userId;
   private Set<String> roles = new LinkedHashSet<>();
@@ -50,6 +51,7 @@ public class UniversalUserToken implements Serializable {
     this.userId = userId;
   }
 
+  @Override
   public Set<String> getRoles() {
     return roles;
   }

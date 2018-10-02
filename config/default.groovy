@@ -1,4 +1,3 @@
-import gov.ca.cwds.config.api.idm.Roles
 import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType
 
 def authorization = user.authorization
@@ -57,7 +56,7 @@ else {
              county_name    : countyName,
              privileges     : user.permissions]
 
-    if (Roles.isNonRacfIdCalsUser(user)) {
+    if (user.roles.contains("CALS-external-worker")) {
         token.privileges += ["CWS Case Management System", "Resource Management"]
     }
 
@@ -67,7 +66,7 @@ else {
 token.userName = user.parameters["userName"]
 
 //for this moment we set only admin's own office to the office ids list
-if (Roles.isOfficeAdmin(user)) {
+if (user.roles.contains("Office-admin")) {
     token.admin_office_ids = [user.parameters["custom:office"]]
 }
 
