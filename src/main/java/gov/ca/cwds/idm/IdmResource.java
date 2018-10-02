@@ -158,8 +158,7 @@ public class IdmResource {
       @ApiResponse(code = 404, message = "Not found")
     }
   )
-  @PreAuthorize("@userRoleService.isAdmin(principal) || "
-      + "@userRoleService.isCalsAdmin(principal)")
+  @PreAuthorize("@userRoleService.isAdmin(principal)")
   public ResponseEntity<UserByIdResponse> getUser(
       @ApiParam(required = true, value = "The unique user ID", example = "userId1")
           @PathVariable
@@ -193,7 +192,8 @@ public class IdmResource {
     }
   )
   @ApiOperation(value = "Update User")
-  @PreAuthorize("@userRoleService.isAdmin(principal)")
+  @PreAuthorize("@userRoleService.isAdmin(principal) &&  " +
+      " !@userRoleService.isCalsAdminStrongestRole(principal)")
   public ResponseEntity updateUser(
       @ApiParam(required = true, value = "The unique user ID", example = "userId1")
           @PathVariable
@@ -236,7 +236,8 @@ public class IdmResource {
               + "email, first_name, last_name, county_name, RACFID, permissions, office, phone_number.\n "
               + "Other properties values will be set by the system automatically.\n"
               + "Required properties are: email, first_name, last_name, county_name.")
-  @PreAuthorize("@userRoleService.isAdmin(principal)")
+  @PreAuthorize("@userRoleService.isAdmin(principal) &&  " +
+      " !@userRoleService.isCalsAdminStrongestRole(principal)")
   public ResponseEntity createUser(
       @ApiParam(required = true, name = "User", value = "The User create data")
           @NotNull
@@ -323,7 +324,8 @@ public class IdmResource {
           @ApiResponse(code = 404, message = "Not found")
       }
   )
-  @PreAuthorize("@userRoleService.isAdmin(principal)")
+  @PreAuthorize("@userRoleService.isAdmin(principal) &&  " +
+      " !@userRoleService.isCalsAdminStrongestRole(principal)")
   public ResponseEntity resendInvitationEmail(
       @ApiParam(required = true, value = "The unique user ID", example = "userId1")
       @PathVariable
@@ -350,7 +352,8 @@ public class IdmResource {
       response = CwsOffice.class,
       responseContainer = "List"
   )
-  @PreAuthorize("@userRoleService.isAdmin(principal)")
+  @PreAuthorize("@userRoleService.isAdmin(principal) &&  " +
+      " !@userRoleService.isCalsAdminStrongestRole(principal)")
   public ResponseEntity getAdminOffices() {
     return ResponseEntity.ok().body(officeService.getOfficesByAdmin());
   }
