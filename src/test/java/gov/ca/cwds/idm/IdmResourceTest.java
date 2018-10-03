@@ -269,7 +269,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @WithMockCustomUser(roles = {OFFICE_ADMIN}, adminOfficeIds = {"otherOfficeId"})
   public void testGetUserOfficeAdminOtherOffice() throws Exception {
     testGetValidUser(USER_WITH_RACFID_AND_DB_DATA_ID,
-        "fixtures/idm/get-user/with-racfid-and-db-data-valid.json");
+        "fixtures/idm/get-user/with-racfid-and-db-data-valid-non-editable.json");
   }
 
   @Test
