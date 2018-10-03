@@ -17,6 +17,7 @@ import gov.ca.cwds.idm.persistence.ns.entity.Permission;
 import gov.ca.cwds.idm.service.DictionaryProvider;
 import gov.ca.cwds.idm.service.IdmService;
 import gov.ca.cwds.idm.service.OfficeService;
+import gov.ca.cwds.idm.service.authorization.AuthorizationService;
 import gov.ca.cwds.rest.api.domain.IdmException;
 import gov.ca.cwds.rest.api.domain.PartialSuccessException;
 import gov.ca.cwds.rest.api.domain.UserAlreadyExistsException;
@@ -69,6 +70,9 @@ public class IdmResource {
   @Autowired private MessagesService messages;
 
   @Autowired private OfficeService officeService;
+
+  @Autowired
+  private AuthorizationService authorizationService;
 
   @RequestMapping(method = RequestMethod.GET, value = "/users", produces = "application/json")
   @ApiOperation(
@@ -170,7 +174,7 @@ public class IdmResource {
       UserByIdResponse response =
           UserByIdResponse.UserByIdResponseBuilder.anUserByIdResponse()
               .withUser(user)
-              .withEditable(true)
+              .withEditable(authorizationService.canUpdateUser(id))
               .build();
       return ResponseEntity.ok().body(response);
     } catch (UserNotFoundPerryException e) {
