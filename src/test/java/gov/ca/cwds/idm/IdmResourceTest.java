@@ -14,6 +14,7 @@ import static gov.ca.cwds.idm.TestCognitoServiceFacade.ERROR_USER_ID;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.ES_ERROR_CREATE_USER_EMAIL;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.INACTIVE_USER_WITH_ACTIVE_RACFID_IN_CMS;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.INACTIVE_USER_WITH_NO_ACTIVE_RACFID_IN_CMS;
+import static gov.ca.cwds.idm.TestCognitoServiceFacade.INACTIVE_USER_WITH_NO_RACFID;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.NEW_USER_ES_FAIL_ID;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.NEW_USER_SUCCESS_ID;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.SOME_PAGINATION_TOKEN;
@@ -702,6 +703,28 @@ public class IdmResourceTest extends BaseIntegrationTest {
     verify(spySearchService, times(0)).updateUser(any(User.class));
     verify(cognito, times(0)).adminEnableUser(enableUserRequest);
     verifyDoraCalls(0);
+  }
+
+  @Test
+  @WithMockCustomUser
+  public void testValidationUpdateUserChangeInactiveToActive_withNoRacfIdForUser() throws Exception {
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setEnabled(Boolean.TRUE);
+    AdminEnableUserRequest enableUserRequest = setEnableUserRequestAndResult(INACTIVE_USER_WITH_NO_RACFID);
+    setDoraSuccess();
+
+    MvcResult result =
+        mockMvc
+            .perform(
+                MockMvcRequestBuilders.patch("/idm/users/" + INACTIVE_USER_WITH_NO_RACFID)
+                    .contentType(JSON_CONTENT_TYPE)
+                    .content(asJsonString(userUpdate)))
+            .andExpect(MockMvcResultMatchers.status().isNoContent())
+            .andReturn();
+
+    verify(spySearchService, times(1)).updateUser(any(User.class));
+    verify(cognito, times(1)).adminEnableUser(enableUserRequest);
+    verifyDoraCalls(1);
   }
 
   @Test
