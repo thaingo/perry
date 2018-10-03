@@ -2,6 +2,7 @@ package gov.ca.cwds.idm.service.authorization;
 
 import static gov.ca.cwds.idm.service.authorization.AuthorizationUtils.isPrincipalInTheSameCountyWith;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isCountyAdmin;
+import static gov.ca.cwds.idm.service.authorization.UserRolesService.isOfficeAdmin;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isStateAdmin;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getAdminOfficeIds;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
@@ -32,7 +33,10 @@ class OfficeAdminAuthorizer implements AdminActionsAuthorizer {
 
   @Override
   public boolean canUpdateUser() {
-    return isAdminInTheSameOfficeAsUser();
+    return isAdminInTheSameOfficeAsUser() &&
+        !isStateAdmin(user) &&
+        !isCountyAdmin(user) &&
+        !isOfficeAdmin(user);
   }
 
   @Override
