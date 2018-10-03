@@ -55,9 +55,11 @@ import gov.ca.cwds.idm.service.cognito.StandardUserAttribute;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil;
+import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
 import gov.ca.cwds.idm.service.execution.OptionalExecution;
 import gov.ca.cwds.idm.service.execution.PutInSearchExecution;
 import gov.ca.cwds.rest.api.domain.PartialSuccessException;
+import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
 import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType;
 import gov.ca.cwds.service.CwsUserInfoService;
 import gov.ca.cwds.service.dto.CwsUserInfo;
@@ -122,6 +124,10 @@ public class IdmServiceImpl implements IdmService {
 
     UserType existedCognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
 
+    if (canChangeToEnableActiveStatus(updateUserDto.getEnabled(), existedCognitoUser.getEnabled())) {
+      validateActivateUser(CognitoUtils.getRACFId(existedCognitoUser));
+    }
+
     ExecutionStatus updateAttributesStatus =
         updateUserAttributes(userId, updateUserDto, existedCognitoUser);
 
@@ -134,8 +140,7 @@ public class IdmServiceImpl implements IdmService {
     }
 
     PutInSearchExecution<String> doraExecution = null;
-    if (updateAttributesStatus == SUCCESS
-        || updateUserEnabledExecution.getExecutionStatus() == SUCCESS) {
+    if (doesElasticSearchNeedUpdate(updateAttributesStatus, updateUserEnabledExecution)) {
       doraExecution = updateUserInSearch(userId);
     } else {
       LOGGER.info(messages.getTechMessage(USER_NOTHING_UPDATED, userId));
@@ -143,6 +148,33 @@ public class IdmServiceImpl implements IdmService {
 
     handleUpdatePartialSuccess(
         userId, updateAttributesStatus, updateUserEnabledExecution, doraExecution);
+  }
+
+  private boolean doesElasticSearchNeedUpdate(ExecutionStatus updateAttributesStatus,
+      OptionalExecution<UserEnableStatusRequest, Boolean> updateUserEnabledExecution) {
+    return updateAttributesStatus == SUCCESS
+        || updateUserEnabledExecution.getExecutionStatus() == SUCCESS;
+  }
+
+  private static boolean canChangeToEnableActiveStatus(Boolean newEnabled, Boolean currentEnabled) {
+    return newEnabled != null && !newEnabled.equals(currentEnabled) && newEnabled;
+  }
+
+  void validateActivateUser(String racfId) {
+    CwsUserInfo cwsUser = cwsUserInfoService.getCwsUserByRacfId(racfId);
+    // validates users not active in CWS cannot be set to Active in CWS CARES
+    if (cwsUser == null) {
+      String msg = messages.getTechMessage(NO_USER_WITH_RACFID_IN_CWSCMS, racfId);
+      String userMsg = messages.getUserMessage(NO_USER_WITH_RACFID_IN_CWSCMS, racfId);
+      throw new UserIdmValidationException(msg, userMsg, NO_USER_WITH_RACFID_IN_CWSCMS);
+    }
+
+    // validates no other Active users with same RACFID in CWS CARES exist
+    if (isActiveRacfIdPresent(racfId)) {
+      String msg = messages.getTechMessage(ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM, racfId);
+      String userMsg = messages.getUserMessage(ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM, racfId);
+      throw new UserIdmValidationException(msg, userMsg, ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM);
+    }
   }
 
   @Override

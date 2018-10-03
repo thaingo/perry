@@ -208,6 +208,10 @@ public class IdmResource {
       return ResponseEntity.noContent().build();
     } catch (UserNotFoundPerryException e) {
       return ResponseEntity.notFound().build();
+    } catch (UserIdmValidationException e) {
+      HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
+      IdmApiCustomError apiError = buildApiCustomError(e, httpStatus);
+      return new ResponseEntity<>(apiError, httpStatus);
     } catch (PartialSuccessException e) {
       HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
       IdmApiCustomError apiError = buildApiCustomError(e, httpStatus);
