@@ -84,6 +84,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 @Service
 @Profile("idm")
@@ -125,7 +126,10 @@ public class IdmServiceImpl implements IdmService {
     UserType existedCognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
 
     if (canChangeToEnableActiveStatus(updateUserDto.getEnabled(), existedCognitoUser.getEnabled())) {
-      validateActivateUser(CognitoUtils.getRACFId(existedCognitoUser));
+      String racfId = CognitoUtils.getRACFId(existedCognitoUser);
+      if (! StringUtils.isEmpty(racfId)) {
+        validateActivateUser(racfId);
+      }
     }
 
     ExecutionStatus updateAttributesStatus =

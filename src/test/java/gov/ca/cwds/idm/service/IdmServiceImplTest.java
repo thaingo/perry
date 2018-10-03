@@ -300,7 +300,7 @@ public class IdmServiceImplTest {
   }
 
   @Test
-  public void performValidation_throwsNoRacfIdInCWS() {
+  public void testPerformValidation_throwsNoRacfIdInCWS() {
     final String NO_ACTIVE_USER_WITH_RACFID_IN_CMS_ERROR_MSG =
         "No user with RACFID: NOIDCMS found in CWSCMS";
     final String racfId = "NOIDCMS";
@@ -311,7 +311,7 @@ public class IdmServiceImplTest {
   }
 
   @Test
-  public void performValidation_throwsActiveRacfIdAlreadyInCognito() {
+  public void testPerformValidation_throwsActiveRacfIdAlreadyInCognito() {
     final String ACTIVE_USER_WITH_RACFID_EXISTS_IN_COGNITO_ERROR_MSG =
         "Active User with RACFID: SMITHBO exists in Cognito";
     final String racfId = "SMITHBO";

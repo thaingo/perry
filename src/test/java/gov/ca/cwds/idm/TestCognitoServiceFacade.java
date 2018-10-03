@@ -67,6 +67,8 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
       "17067e4e-270f-4623-b86c-b4d4fa524f38";
   static final String USER_WITH_INACTIVE_STATUS_COGNITO =
       "17067e4e-270f-4623-b86c-b4d4fa527a22";
+  static final String INACTIVE_USER_WITH_NO_RACFID =
+      "17067e4e-270f-4623-b86c-b4d4fa525d68";
   static final String STATE_ADMIN_ID = "2d9369b4-5855-4a2c-95f7-3617fab1496a";
   static final String COUNTY_ADMIN_ID = "c3702f4c113f1d2415447c8bfe8321d8df2d5151";
 
@@ -248,6 +250,22 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
             "SMITHBO",
             null);
 
+    TestUser inactiveUserWithNoRacfId =
+        testUser(
+            INACTIVE_USER_WITH_NO_RACFID,
+            Boolean.FALSE,
+            "CONFIRMED",
+            date(2018, 5, 3),
+            date(2018, 5, 31),
+            "smith6th@gmail.com",
+            "Smith",
+            "Sixth",
+            WithMockCustomUser.COUNTY,
+            "test",
+            null,
+            null,
+            null);
+
     TestUser newSuccessUser =
         testUser(
             NEW_USER_SUCCESS_ID,
@@ -299,6 +317,8 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
     setSearchByRacfidRequestAndResult(userWithEnableStatusInactiveInCognito);
 
     setSearchByRacfidRequestAndResult(userWithNoActiveRacfIdInCms);
+
+    setSearchByRacfidRequestAndResult(inactiveUserWithNoRacfId);
 
     setSearchByRacfidRequestAndReturnResults(userWithActiveRacfIdAInCms, userWithRacfidAndDbData);
 
