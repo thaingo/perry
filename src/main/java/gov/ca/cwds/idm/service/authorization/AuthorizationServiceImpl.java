@@ -5,6 +5,7 @@ import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
+import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getUserName;
 
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.UniversalUserToken;
@@ -36,7 +37,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
   @Override
   public boolean canUpdateUser(String userId) {
     //admin can't update himself
-    if (userId.equals(getCurrentUser().getUserId())) {
+    if (userId.equals(getUserName(getCurrentUser()))) {
       return false;
     }
     User user = getUserFromUserId(userId);
