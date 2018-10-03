@@ -15,6 +15,7 @@ public class UniversalUserTokenDeserializer extends JsonDeserializer<UniversalUs
 
   public static final String COUNTY_NAME_PARAM = "county_name";
   public static final String ADMIN_OFFICE_IDS_PARAM = "admin_office_ids";
+  public static final String USER_NAME = "userName";
 
   @Override
   public UniversalUserToken deserialize(JsonParser jp, DeserializationContext ctxt)
@@ -23,6 +24,7 @@ public class UniversalUserTokenDeserializer extends JsonDeserializer<UniversalUs
     String userId = Optional.ofNullable(node.get("user")).map(JsonNode::asText).orElse(null);
     String countyName =
         Optional.ofNullable(node.get(COUNTY_NAME_PARAM)).map(JsonNode::asText).orElse(null);
+    String userName = Optional.ofNullable(node.get(USER_NAME)).map(JsonNode::asText).orElse(null);
     Set<String> roles = parseArrayToStringSet(node.get("roles"));
     Set<String> adminOffices = parseArrayToStringSet(node.get(ADMIN_OFFICE_IDS_PARAM));
     UniversalUserToken result = new UniversalUserToken();
@@ -30,6 +32,7 @@ public class UniversalUserTokenDeserializer extends JsonDeserializer<UniversalUs
     result.getRoles().addAll(roles);
     result.setParameter(COUNTY_NAME_PARAM, countyName);
     result.setParameter(ADMIN_OFFICE_IDS_PARAM, adminOffices);
+    result.setParameter(USER_NAME, userName);
     return result;
   }
 

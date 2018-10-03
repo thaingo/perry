@@ -14,6 +14,7 @@ import static org.junit.Assert.assertTrue;
 import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
+import gov.ca.cwds.util.UniversalUserTokenDeserializer;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,6 +36,7 @@ public class AuthorizationServiceImplTest {
     setAdminSupplier(() -> {
       UniversalUserToken admin = new UniversalUserToken();
       admin.setUserId(adminId);
+      admin.setParameter(UniversalUserTokenDeserializer.USER_NAME, adminId);
       return admin;
     });
     assertFalse(service.canUpdateUser(adminId));
