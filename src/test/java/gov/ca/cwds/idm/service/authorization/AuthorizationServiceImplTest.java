@@ -4,9 +4,9 @@ import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
+import static gov.ca.cwds.idm.service.authorization.AuthorizationTestHelper.admin;
+import static gov.ca.cwds.idm.service.authorization.AuthorizationTestHelper.user;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.setAdminSupplier;
-import static gov.ca.cwds.util.UniversalUserTokenDeserializer.ADMIN_OFFICE_IDS_PARAM;
-import static gov.ca.cwds.util.UniversalUserTokenDeserializer.COUNTY_NAME_PARAM;
 import static gov.ca.cwds.util.Utils.toSet;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -14,18 +14,30 @@ import static org.junit.Assert.assertTrue;
 import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
-import java.util.Set;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
-public class AuthorizationServiceTest {
+public class AuthorizationServiceImplTest {
 
   private AuthorizationServiceImpl service;
 
   @Before
   public void before() {
     service = new AuthorizationServiceImpl();
+  }
+
+  @Test
+  public void testAdminCantUpdateHimself() {
+    String adminId = "someId";
+    User user = user("Yolo", "Yolo_2");
+    user.setId(adminId);
+    setAdminSupplier(() -> {
+      UniversalUserToken admin = new UniversalUserToken();
+      admin.setUserId(adminId);
+      return admin;
+    });
+    assertFalse(service.canUpdateUser(adminId));
   }
 
   @Test
@@ -119,34 +131,6 @@ public class AuthorizationServiceTest {
     setAdminSupplier(() -> admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_1", "Yolo_2")));
     assertFalse(service.canFindUser(
         user(toSet(COUNTY_ADMIN), "Yolo", "Yolo_3")));
-  }
-
-  private User user(String countyName, String officeId) {
-    User user = new User();
-    user.setCountyName(countyName);
-    user.setOfficeId(officeId);
-    return user;
-  }
-
-  private User user(Set<String> roles, String countyName, String officeId) {
-    User user = user(countyName, officeId);
-    user.setRoles(roles);
-    return user;
-  }
-
-  private User withRole(String role) {
-    User user = new User();
-    user.getRoles().add(role);
-    return user;
-  }
-
-  private UniversalUserToken admin(Set<String> roles, String countyName,
-      Set<String> adminOfficeIds) {
-    UniversalUserToken admin = new UniversalUserToken();
-    admin.setRoles(roles);
-    admin.setParameter(COUNTY_NAME_PARAM, countyName);
-    admin.setParameter(ADMIN_OFFICE_IDS_PARAM, adminOfficeIds);
-    return admin;
   }
 
   @AfterClass

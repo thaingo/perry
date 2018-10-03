@@ -4,13 +4,13 @@ import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
+import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.MappingService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
-import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -35,6 +35,10 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
   @Override
   public boolean canUpdateUser(String userId) {
+    //admin can't update himself
+    if (userId.equals(getCurrentUser().getUserId())) {
+      return false;
+    }
     User user = getUserFromUserId(userId);
     return createAdminActionsAuthorizer(user).canUpdateUser();
   }
@@ -58,7 +62,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
   }
 
   private String getAdminStrongestRole() {
-    UniversalUserToken admin = CurrentAuthenticatedUserUtil.getCurrentUser();
+    UniversalUserToken admin = getCurrentUser();
     return UserRolesService.getStrongestAdminRole(admin);
   }
 
