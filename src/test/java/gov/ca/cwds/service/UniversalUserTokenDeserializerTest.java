@@ -37,7 +37,7 @@ public class UniversalUserTokenDeserializerTest {
     Object adminOfficeObj = universalUserToken.getParameter("admin_office_ids");
     assert adminOfficeObj != null;
     assert ((Set<String>) adminOfficeObj).size() == 1;
-    assert ((Set<String>) adminOfficeObj).iterator().next().equals("15");
+    assert ((Set<String>) adminOfficeObj).iterator().next().equals("ABcDmKx00E");
   }
 
 }
