@@ -40,6 +40,11 @@ if (authorization) {
              privileges     : privileges + user.permissions,
              authorityCodes : authorityCodes]
 
+    //for this moment we set only admin's own office to the office ids list
+    if (user.roles.contains("Office-admin")) {
+        token.admin_office_ids = [authorization.cwsOffice?.officeId]
+    }
+
 }
 //NON-RACFID USER
 else {
@@ -64,10 +69,5 @@ else {
 
 //COMMON
 token.userName = user.parameters["userName"]
-
-//for this moment we set only admin's own office to the office ids list
-if (user.roles.contains("Office-admin")) {
-    token.admin_office_ids = [user.parameters["custom:office"]]
-}
 
 return token
