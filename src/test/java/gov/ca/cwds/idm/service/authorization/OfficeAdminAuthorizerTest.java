@@ -13,16 +13,24 @@ import static org.junit.Assert.assertTrue;
 
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.Test;
 
 public class OfficeAdminAuthorizerTest {
+
+  AuthorizationServiceImpl authorizationService;
+
+  @Before
+  public void before() {
+    authorizationService = new AuthorizationServiceImpl();
+  }
 
   @Test
   public void canEditCwsWorkerTest() {
     setAdminSupplier(() -> admin(toSet(OFFICE_ADMIN),
         "Yolo", toSet("Yolo_2")));
-    assertTrue(new OfficeAdminAuthorizer(user(toSet(CWS_WORKER),
-        "Yolo", "Yolo_2")).canUpdateUser());
+    assertTrue(authorizationService.canUpdateUser(user(toSet(CWS_WORKER),
+        "Yolo", "Yolo_2")));
   }
 
   @Test
@@ -30,8 +38,8 @@ public class OfficeAdminAuthorizerTest {
     setAdminSupplier(() -> admin(toSet(OFFICE_ADMIN),
         "Yolo", toSet("Yolo_2")));
     assertFalse(
-        new OfficeAdminAuthorizer(user(toSet(STATE_ADMIN),
-            "Yolo", "Yolo_2")).canUpdateUser());
+        authorizationService.canUpdateUser(user(toSet(STATE_ADMIN),
+            "Yolo", "Yolo_2")));
   }
 
   @Test
@@ -39,8 +47,8 @@ public class OfficeAdminAuthorizerTest {
     setAdminSupplier(() -> admin(toSet(OFFICE_ADMIN),
         "Yolo", toSet("Yolo_2")));
     assertFalse(
-        new OfficeAdminAuthorizer(user(toSet(COUNTY_ADMIN),
-            "Yolo", "Yolo_2")).canUpdateUser());
+        authorizationService.canUpdateUser(user(toSet(COUNTY_ADMIN),
+            "Yolo", "Yolo_2")));
   }
 
   @Test
@@ -48,8 +56,8 @@ public class OfficeAdminAuthorizerTest {
     setAdminSupplier(() -> admin(toSet(OFFICE_ADMIN),
         "Yolo", toSet("Yolo_2")));
     assertFalse(
-        new OfficeAdminAuthorizer(user(toSet(OFFICE_ADMIN),
-            "Yolo", "Yolo_2")).canUpdateUser());
+        authorizationService.canUpdateUser(user(toSet(OFFICE_ADMIN),
+            "Yolo", "Yolo_2")));
   }
 
   @AfterClass

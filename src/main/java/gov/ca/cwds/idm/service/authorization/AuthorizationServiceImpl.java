@@ -53,7 +53,15 @@ public class AuthorizationServiceImpl implements AuthorizationService {
       return false;
     }
     User user = getUserFromUserId(userId);
-    return userIsInAdminManagedArea(user);
+    return canUpdateUser(user);
+  }
+
+  boolean canUpdateUser(User user) {
+    UniversalUserToken admin = getCurrentUser();
+
+    return
+        !isOfficeAdmin(admin) && userIsInAdminManagedArea(user) ||
+        isOfficeAdmin(admin) && userIsInAdminManagedArea(user) && !userIsStrongerAdmin(user) && !userIsTheSameStrengthAsAdmin(user);
   }
 
   @Override
@@ -148,6 +156,22 @@ public class AuthorizationServiceImpl implements AuthorizationService {
       default:
         return false;
     }
+  }
+
+  static boolean userIsTheSameStrengthAsAdmin(User user) {
+    UniversalUserToken admin = getCurrentUser();
+    return userHasTheSameStrengthAsAdmin(admin, user);
+  }
+
+  static boolean userHasTheSameStrengthAsAdmin(UniversalUserToken admin, User user) {
+    if(!isAdmin(user)) {
+      return false;
+    }
+
+    String adminRole = getStrongestAdminRole(admin);
+    String userRole = getStrongestAdminRole(user);
+
+    return adminRole.equals(userRole);
   }
 
   @Autowired
