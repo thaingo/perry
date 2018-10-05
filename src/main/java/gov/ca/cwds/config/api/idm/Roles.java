@@ -10,13 +10,13 @@ import org.springframework.stereotype.Service;
 @Profile("idm")
 public class Roles {
 
+  public static final String STATE_ADMIN = "State-admin";
+  public static final String COUNTY_ADMIN = "County-admin";
+  public static final String OFFICE_ADMIN = "Office-admin";
   public static final String CWS_WORKER = "CWS-worker";
+  public static final String CALS_ADMIN = "CALS-admin";
   public static final String CALS_EXTERNAL_WORKER = "CALS-external-worker";
   public static final String IDM_JOB = "IDM-job";
-  public static final String COUNTY_ADMIN = "County-admin";
-  public static final String STATE_ADMIN = "State-admin";
-  public static final String OFFICE_ADMIN = "Office-admin";
-  public static final String CALS_ADMIN = "CALS-admin";
 
   private Roles() {}
 

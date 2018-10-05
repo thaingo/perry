@@ -4,6 +4,13 @@ import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
+import static gov.ca.cwds.idm.service.authorization.UserRolesService.getStrongestAdminRole;
+import static gov.ca.cwds.idm.service.authorization.UserRolesService.isAdmin;
+import static gov.ca.cwds.idm.service.authorization.UserRolesService.isCalsAdmin;
+import static gov.ca.cwds.idm.service.authorization.UserRolesService.isCalsExternalWorker;
+import static gov.ca.cwds.idm.service.authorization.UserRolesService.isOfficeAdmin;
+import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getAdminOfficeIds;
+import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCountyName;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getUserName;
 
@@ -12,6 +19,7 @@ import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.MappingService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
+import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -26,12 +34,16 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
   @Override
   public boolean canFindUser(User user) {
-    return createAdminActionsAuthorizer(user).canFindUser();
+    UniversalUserToken admin = getCurrentUser();
+
+    return userIsInAdminManagedArea(user) ||
+        isCalsAdmin(admin) && isCalsExternalWorker(user) ||
+        isOfficeAdmin(admin) && areInTheSameCounty(admin, user) && !areInTheSameOffice(admin, user) && !userIsStrongerAdmin(user);
   }
 
   @Override
   public boolean canCreateUser(User user) {
-    return createAdminActionsAuthorizer(user).canCreateUser();
+    return userIsInAdminManagedArea(user);
   }
 
   @Override
@@ -41,13 +53,13 @@ public class AuthorizationServiceImpl implements AuthorizationService {
       return false;
     }
     User user = getUserFromUserId(userId);
-    return createAdminActionsAuthorizer(user).canUpdateUser();
+    return userIsInAdminManagedArea(user);
   }
 
   @Override
   public boolean canResendInvitationMessage(String userId) {
     User user = getUserFromUserId(userId);
-    return createAdminActionsAuthorizer(user).canResendInvitationMessage();
+    return userIsInAdminManagedArea(user);
   }
 
   private User getUserFromUserId(String userId) {
@@ -64,21 +76,77 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
   private String getAdminStrongestRole() {
     UniversalUserToken admin = getCurrentUser();
-    return UserRolesService.getStrongestAdminRole(admin);
+    return getStrongestAdminRole(admin);
   }
 
-  private AdminActionsAuthorizer createAdminActionsAuthorizer(User user) {
-    switch (getAdminStrongestRole()) {
+  static boolean userIsInAdminManagedArea(User user) {
+    UniversalUserToken admin = getCurrentUser();
+    return userIsInAdminManagedArea(admin, user);
+  }
+
+  static boolean userIsInAdminManagedArea(UniversalUserToken admin, User user) {
+    switch (getStrongestAdminRole(admin)) {
       case STATE_ADMIN:
-        return StateAdminAuthorizer.INSTANCE;
+        return true;
       case COUNTY_ADMIN:
-        return new CountyAdminAuthorizer(user);
+        return isAdminInTheSameCountyAsUser(user);
       case OFFICE_ADMIN:
-        return new OfficeAdminAuthorizer(user);
+        return isAdminInTheSameOfficeAs(user);
       case CALS_ADMIN:
-        return new CalsAdminAuthorizer(user);
+        return false;
       default:
-        throw new IllegalStateException();
+        return false;
+    }
+  }
+
+  private static boolean isAdminInTheSameOfficeAs(User user) {
+    UniversalUserToken admin = getCurrentUser();
+    String userOfficeId = user.getOfficeId();
+    Set<String> adminOfficeIds = getAdminOfficeIds(admin);
+    return userOfficeId != null && adminOfficeIds != null && adminOfficeIds.contains(userOfficeId);
+  }
+
+  private static boolean areInTheSameOffice(UniversalUserToken admin, User user) {
+    String userOfficeId = user.getOfficeId();
+    Set<String> adminOfficeIds = getAdminOfficeIds(admin);
+    return userOfficeId != null && adminOfficeIds != null && adminOfficeIds.contains(userOfficeId);
+  }
+
+  static boolean isAdminInTheSameCountyAsUser(User user) {
+    UniversalUserToken admin = getCurrentUser();
+    return areInTheSameCounty(admin, user);
+  }
+
+  static boolean areInTheSameCounty(UniversalUserToken admin, User user) {
+    String userCountyName = user.getCountyName();
+    String adminCountyName = getCountyName(admin);
+    return userCountyName != null && userCountyName.equals(adminCountyName);
+  }
+
+  static boolean userIsStrongerAdmin(User user) {
+    UniversalUserToken admin = getCurrentUser();
+    return userIsStrongerAdmin(admin, user);
+  }
+
+  static boolean userIsStrongerAdmin(UniversalUserToken admin, User user) {
+    if(!isAdmin(user)) {
+      return false;
+    }
+
+    String adminRole = getStrongestAdminRole(admin);
+    String userRole = getStrongestAdminRole(user);
+
+    switch (userRole) {
+      case STATE_ADMIN:
+        return !STATE_ADMIN.equals(adminRole);
+      case COUNTY_ADMIN:
+        return OFFICE_ADMIN.equals(adminRole);
+      case OFFICE_ADMIN:
+        return false;
+      case CALS_ADMIN:
+        return false;
+      default:
+        return false;
     }
   }
 
