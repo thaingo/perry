@@ -61,7 +61,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
     return
         !isOfficeAdmin(admin) && userIsInAdminManagedArea(user) ||
-        isOfficeAdmin(admin) && userIsInAdminManagedArea(user) && !userIsStrongerAdmin(user) && !userIsTheSameStrengthAsAdmin(user);
+        isOfficeAdmin(admin) && userIsInAdminManagedArea(user) && userIsMoreWeakThenAdmin(user);
   }
 
   @Override
@@ -172,6 +172,10 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     String userRole = getStrongestAdminRole(user);
 
     return adminRole.equals(userRole);
+  }
+
+  static boolean userIsMoreWeakThenAdmin(User user) {
+    return !userIsStrongerAdmin(user) && !userIsTheSameStrengthAsAdmin(user);
   }
 
   @Autowired
