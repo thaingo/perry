@@ -1,5 +1,5 @@
   {
     "verification_passed": false,
-    "verification_message": "Active User with Login ID SMITHBO exists in CWS CARES.",
+    "verification_message": "Active User with CWS Login SMITHBO exists in CWS CARES.",
     "error_code": "CAP-028"
   }

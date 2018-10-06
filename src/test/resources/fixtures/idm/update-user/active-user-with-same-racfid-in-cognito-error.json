@@ -1,7 +1,7 @@
 {
   "status": "BAD_REQUEST",
   "technical_message":"Active User with RACFID: SMITHBO exists in Cognito",
-  "user_message":"Active User with Login ID SMITHBO exists in CWS CARES.",
+  "user_message":"Active User with CWS Login SMITHBO exists in CWS CARES.",
   "error_code": "CAP-028",
   "causes": [
   ]
