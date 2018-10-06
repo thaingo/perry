@@ -84,7 +84,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     return !userIsStrongerAdmin(admin, user);
   }
 
-  static boolean userIsStrongerAdmin(UniversalUserToken admin, User user) {
+  private static boolean userIsStrongerAdmin(UniversalUserToken admin, User user) {
     if(!isAdmin(user)) {
       return false;
     }
@@ -160,23 +160,23 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     return userOfficeId != null && adminOfficeIds != null && adminOfficeIds.contains(userOfficeId);
   }
 
-  static boolean isAdminInTheSameCountyAsUser(User user) {
+  private static boolean isAdminInTheSameCountyAsUser(User user) {
     UniversalUserToken admin = getCurrentUser();
     return areInTheSameCounty(admin, user);
   }
 
-  static boolean areInTheSameCounty(UniversalUserToken admin, User user) {
+  private static boolean areInTheSameCounty(UniversalUserToken admin, User user) {
     String userCountyName = user.getCountyName();
     String adminCountyName = getCountyName(admin);
     return userCountyName != null && userCountyName.equals(adminCountyName);
   }
 
-  static boolean userIsTheSameStrengthAsAdmin(User user) {
+  private static boolean userIsTheSameStrengthAsAdmin(User user) {
     UniversalUserToken admin = getCurrentUser();
     return userHasTheSameStrengthAsAdmin(admin, user);
   }
 
-  static boolean userHasTheSameStrengthAsAdmin(UniversalUserToken admin, User user) {
+  private static boolean userHasTheSameStrengthAsAdmin(UniversalUserToken admin, User user) {
     if(!isAdmin(user)) {
       return false;
     }
@@ -187,7 +187,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     return adminRole.equals(userRole);
   }
 
-  static boolean userIsMoreWeakThenAdmin(User user) {
+  private static boolean userIsMoreWeakThenAdmin(User user) {
     return userIsNotAStrongerAdmin(user) && !userIsTheSameStrengthAsAdmin(user);
   }
 
@@ -200,5 +200,4 @@ public class AuthorizationServiceImpl implements AuthorizationService {
   public void setMappingService(MappingService mappingService) {
     this.mappingService = mappingService;
   }
-
 }
