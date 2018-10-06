@@ -13,7 +13,7 @@ class CountyAdminAuthorizer implements AdminActionsAuthorizer {
   }
 
   @Override
-  public boolean canFindUser() {
+  public boolean canViewUser() {
     return isPrincipalInTheSameCountyWith(user);
   }
 

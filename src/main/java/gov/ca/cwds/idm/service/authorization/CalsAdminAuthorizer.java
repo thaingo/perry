@@ -11,7 +11,7 @@ class CalsAdminAuthorizer implements AdminActionsAuthorizer {
   }
 
   @Override
-  public boolean canFindUser() {
+  public boolean canViewUser() {
     return UserRolesService.isCalsExternalWorker(user);
   }
 

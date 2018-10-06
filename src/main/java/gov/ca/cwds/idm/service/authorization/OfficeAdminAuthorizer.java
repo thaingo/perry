@@ -1,13 +1,11 @@
 package gov.ca.cwds.idm.service.authorization;
 
 import static gov.ca.cwds.idm.service.authorization.AuthorizationUtils.isPrincipalInTheSameCountyWith;
+import static gov.ca.cwds.idm.service.authorization.UserRolesService.isAdmin;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isCountyAdmin;
-import static gov.ca.cwds.idm.service.authorization.UserRolesService.isOfficeAdmin;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isStateAdmin;
-import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getAdminOfficeIds;
-import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
+import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserOfficeIds;
 
-import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.dto.User;
 import java.util.Set;
 
@@ -20,7 +18,7 @@ class OfficeAdminAuthorizer implements AdminActionsAuthorizer {
   }
 
   @Override
-  public boolean canFindUser() {
+  public boolean canViewUser() {
     return isPrincipalInTheSameCountyWith(user)
         && !userIsStateAdminFromOtherOffice()
         && !userIsCountyAdminFromOtherOffice();
@@ -33,10 +31,7 @@ class OfficeAdminAuthorizer implements AdminActionsAuthorizer {
 
   @Override
   public boolean canUpdateUser() {
-    return isAdminInTheSameOfficeAsUser() &&
-        !isStateAdmin(user) &&
-        !isCountyAdmin(user) &&
-        !isOfficeAdmin(user);
+    return isAdminInTheSameOfficeAsUser() && !isAdmin(user);
   }
 
   @Override
@@ -53,9 +48,8 @@ class OfficeAdminAuthorizer implements AdminActionsAuthorizer {
   }
 
   private boolean isAdminInTheSameOfficeAsUser() {
-    UniversalUserToken admin = getCurrentUser();
     String userOfficeId = user.getOfficeId();
-    Set<String> adminOfficeIds = getAdminOfficeIds(admin);
+    Set<String> adminOfficeIds = getCurrentUserOfficeIds();
     return userOfficeId != null && adminOfficeIds != null && adminOfficeIds.contains(userOfficeId);
   }
 

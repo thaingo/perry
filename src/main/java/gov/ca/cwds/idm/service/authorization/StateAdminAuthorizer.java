@@ -8,7 +8,7 @@ class StateAdminAuthorizer implements AdminActionsAuthorizer {
   }
 
   @Override
-  public boolean canFindUser() {
+  public boolean canViewUser() {
     return true;
   }
 

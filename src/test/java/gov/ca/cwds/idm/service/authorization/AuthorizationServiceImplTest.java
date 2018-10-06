@@ -6,19 +6,24 @@ import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.idm.service.authorization.AuthorizationTestHelper.admin;
 import static gov.ca.cwds.idm.service.authorization.AuthorizationTestHelper.user;
-import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.setAdminSupplier;
+import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
+import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserCountyName;
+import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserOfficeIds;
 import static gov.ca.cwds.util.Utils.toSet;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.powermock.api.mockito.PowerMockito.when;
 
-import gov.ca.cwds.UniversalUserToken;
-import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
-import gov.ca.cwds.util.UniversalUserTokenDeserializer;
-import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(fullyQualifiedNames = "gov.ca.cwds.util.CurrentAuthenticatedUserUtil")
 public class AuthorizationServiceImplTest {
 
   private AuthorizationServiceImpl service;
@@ -26,118 +31,106 @@ public class AuthorizationServiceImplTest {
   @Before
   public void before() {
     service = new AuthorizationServiceImpl();
+    mockStatic(CurrentAuthenticatedUserUtil.class);
   }
 
   @Test
   public void testAdminCantUpdateHimself() {
     String adminId = "someId";
-    User user = user("Yolo", "Yolo_2");
-    user.setId(adminId);
-    setAdminSupplier(() -> {
-      UniversalUserToken admin = new UniversalUserToken();
-      admin.setUserId(adminId);
-      admin.setParameter(UniversalUserTokenDeserializer.USER_NAME, adminId);
-      return admin;
-    });
+    when(CurrentAuthenticatedUserUtil.getCurrentUserName()).thenReturn(adminId);
     assertFalse(service.canUpdateUser(adminId));
   }
 
+
   @Test
   public void testByUserAndAdmin_StateAdminSameCounty() {
-    User user = user("Yolo", "Yolo_1");
-    setAdminSupplier(() -> admin(toSet(STATE_ADMIN, OFFICE_ADMIN), "Yolo", toSet("Yolo_2")));
-    assertTrue(service.canFindUser(user));
+    when(getCurrentUser()).thenReturn(
+        admin(toSet(STATE_ADMIN, OFFICE_ADMIN), "Yolo", toSet("Yolo_2")));
+    assertTrue(service.canViewUser(user("Yolo", "Yolo_1")));
   }
 
   @Test
   public void testByUserAndAdmin_StateAdminDifferentCounty() {
-    User user = user("Madera", "Madera_1");
-    setAdminSupplier(() -> admin(toSet(STATE_ADMIN), "Yolo", null));
-    assertTrue(service.canFindUser(user));
+    when(getCurrentUser())
+        .thenReturn(admin(toSet(STATE_ADMIN), "Yolo", null));
+    assertTrue(service.canViewUser(user("Madera", "Madera_1")));
   }
 
   @Test
   public void testByUserAndAdmin_StateAdminNoCounty() {
-    User user = user("Madera", "Madera_1");
-    setAdminSupplier(() -> admin(toSet(STATE_ADMIN), null, null));
-    assertTrue(service.canFindUser(user));
+    when(getCurrentUser())
+        .thenReturn(admin(toSet(STATE_ADMIN), null, null));
+    assertTrue(service.canViewUser(user("Madera", "Madera_1")));
   }
 
   @Test
   public void testByUserAndAdmin_CountyAdminSameCounty() {
-    User user = user("Yolo", "Yolo_1");
-    setAdminSupplier(() -> admin(toSet(COUNTY_ADMIN, OFFICE_ADMIN),
-        "Yolo", toSet("Yolo_2")));
-    assertTrue(service.canFindUser(user));
+    when(getCurrentUser())
+        .thenReturn(admin(toSet(COUNTY_ADMIN, OFFICE_ADMIN),
+            "Yolo", toSet("Yolo_2")));
+    when(getCurrentUserCountyName()).thenReturn("Yolo");
+    assertTrue(service.canViewUser(user("Yolo", "Yolo_1")));
   }
 
   @Test
   public void testByUserAndAdmin_CountyAdminSameCountyNoOffice() {
-    User user = user("Yolo", "Yolo_1");
-    setAdminSupplier(() -> admin(toSet(COUNTY_ADMIN), "Yolo", null));
-    assertTrue(service.canFindUser(user));
+    when(getCurrentUser())
+        .thenReturn(admin(toSet(COUNTY_ADMIN), "Yolo", null));
+    when(getCurrentUserCountyName())
+        .thenReturn("Yolo");
+    assertTrue(service.canViewUser(user("Yolo", "Yolo_1")));
   }
 
   @Test
   public void testByUserAndAdmin_CountyAdminDifferentCounty() {
-    User user = user("Yolo", "Yolo_1");
-    setAdminSupplier(() -> admin(toSet(COUNTY_ADMIN), "Madera", null));
-    assertFalse(service.canFindUser(user));
+    when(getCurrentUser())
+        .thenReturn(admin(toSet(COUNTY_ADMIN), "Madera", null));
+    assertFalse(service.canViewUser(user("Yolo", "Yolo_1")));
   }
 
   @Test
   public void testByUserAndAdmin_OfficeAdminSameOffice() {
-    User user = user("Yolo", "Yolo_1");
-    setAdminSupplier(() -> admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_1")));
-    assertTrue(
-        service.canFindUser(user));
+    when(getCurrentUser())
+        .thenReturn(admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_1")));
+    when(getCurrentUserCountyName()).thenReturn("Yolo");
+    when(getCurrentUserOfficeIds()).thenReturn(toSet("Yolo_1"));
+    assertTrue(service.canViewUser(user("Yolo", "Yolo_1")));
   }
 
   @Test
   public void testByUserAndAdmin_OfficeAdminDifferentOffice() {
-    User user = user("Yolo", "Yolo_1");
-    setAdminSupplier(() -> admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_2")));
+    when(getCurrentUser())
+        .thenReturn(admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_2")));
     assertFalse(
-        service.canCreateUser(user));
+        service.canCreateUser(user("Yolo", "Yolo_1")));
   }
 
   @Test
   public void testByUserAndAdmin_OfficeAdmin_UserNoOffice() {
-    User user = user("Yolo", null);
-    setAdminSupplier(() -> admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_2")));
+    when(getCurrentUser())
+        .thenReturn(admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_2")));
     assertFalse(
-        service.canCreateUser(user));
+        service.canCreateUser(user("Yolo", null)));
   }
 
   @Test
-  public void testFindUser_OfficeAdmin() {
-    setAdminSupplier(() -> admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_1", "Yolo_2")));
-    assertTrue(service.canFindUser(user(toSet(CWS_WORKER), "Yolo", "Yolo_1")));
+  public void testCanViewUser_OfficeAdmin() {
+    when(getCurrentUser())
+        .thenReturn(admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_1", "Yolo_2")));
+    when(getCurrentUserOfficeIds()).thenReturn(toSet("Yolo_1", "Yolo_2"));
+    when(getCurrentUserCountyName()).thenReturn("Yolo");
 
-    setAdminSupplier(() -> admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_1", "Yolo_2")));
-    assertTrue(service.canFindUser(
+    assertTrue(service.canViewUser(user(toSet(CWS_WORKER), "Yolo", "Yolo_1")));
+    assertTrue(service.canViewUser(
         user(toSet(CWS_WORKER), "Yolo", "Yolo_3")));
-
-    setAdminSupplier(() -> admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_1", "Yolo_2")));
-    assertTrue(service.canFindUser(
+    assertTrue(service.canViewUser(
         user(toSet(STATE_ADMIN), "Yolo", "Yolo_1")));
-
-    setAdminSupplier(() -> admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_1", "Yolo_2")));
-    assertTrue(service.canFindUser(
+    assertTrue(service.canViewUser(
         user(toSet(COUNTY_ADMIN), "Yolo", "Yolo_1")));
-
-    setAdminSupplier(() -> admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_1", "Yolo_2")));
-    assertFalse(service.canFindUser(
+    assertFalse(service.canViewUser(
         user(toSet(STATE_ADMIN), "Yolo", "Yolo_3")));
-
-    setAdminSupplier(() -> admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_1", "Yolo_2")));
-    assertFalse(service.canFindUser(
+    assertFalse(service.canViewUser(
         user(toSet(COUNTY_ADMIN), "Yolo", "Yolo_3")));
-  }
-
-  @AfterClass
-  public static void resetAdminSupplier() {
-    CurrentAuthenticatedUserUtil.resetAdminSupplier();
   }
 
 }
