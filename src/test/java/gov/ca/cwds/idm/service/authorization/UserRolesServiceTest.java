@@ -8,6 +8,7 @@ import static gov.ca.cwds.config.api.idm.Roles.IDM_JOB;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.getAdminRoles;
+import static gov.ca.cwds.idm.service.authorization.UserRolesService.NULL_STRONGEST_ROLE;
 import static gov.ca.cwds.util.Utils.toSet;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
@@ -53,14 +54,14 @@ public class UserRolesServiceTest {
     assertTrue(UserRolesService.isNonRacfIdCalsUser(userToken(CALS_EXTERNAL_WORKER, CWS_WORKER)));
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test
   public void testGetStrongestAdminRoleForIdmJob() {
-    UserRolesService.getStrongestAdminRole(userToken(IDM_JOB));
+    assertThat(UserRolesService.getStrongestAdminRole(userToken(IDM_JOB)), is(NULL_STRONGEST_ROLE));
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test
   public void testGetStrongestAdminRoleForNotAdmin() {
-    UserRolesService.getStrongestAdminRole(userToken());
+    assertThat(UserRolesService.getStrongestAdminRole(userToken()), is(NULL_STRONGEST_ROLE));
   }
 
   @Test
@@ -68,7 +69,7 @@ public class UserRolesServiceTest {
     assertThat(UserRolesService.getStrongestAdminRole(userToken(STATE_ADMIN)), is(STATE_ADMIN));
     assertThat(UserRolesService.getStrongestAdminRole(userToken(COUNTY_ADMIN)), is(COUNTY_ADMIN));
     assertThat(UserRolesService.getStrongestAdminRole(userToken(OFFICE_ADMIN)), is(OFFICE_ADMIN));
-    assertThat(UserRolesService.getStrongestAdminRole(userToken(CALS_ADMIN)), is(CALS_ADMIN));
+    assertThat(UserRolesService.getStrongestAdminRole(userToken(CALS_ADMIN)), is(NULL_STRONGEST_ROLE));
     assertThat(UserRolesService.getStrongestAdminRole(userToken(STATE_ADMIN, COUNTY_ADMIN)),
         is(STATE_ADMIN));
     assertThat(UserRolesService.getStrongestAdminRole(userToken(OFFICE_ADMIN, COUNTY_ADMIN)),

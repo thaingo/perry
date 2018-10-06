@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 @Service("userRoleService")
 public class UserRolesService {
 
+  public static final String NULL_STRONGEST_ROLE = "NULL";
+
   private UserRolesService() {
   }
 
@@ -46,9 +48,6 @@ public class UserRolesService {
   }
 
   public static <T extends RolesHolder> String getStrongestAdminRole(T user) {
-    if (!isAdmin(user)) {
-      throw new IllegalStateException("Unexpected user role. Admin is expected");
-    }
     if (user.getRoles().contains(STATE_ADMIN)) {
       return STATE_ADMIN;
     } else if (user.getRoles().contains(COUNTY_ADMIN)) {
@@ -56,12 +55,11 @@ public class UserRolesService {
     } else if (user.getRoles().contains(OFFICE_ADMIN)) {
       return OFFICE_ADMIN;
     } else {
-      return CALS_ADMIN;
+      return NULL_STRONGEST_ROLE;
     }
   }
 
-  public static <T extends RolesHolder> boolean isCalsAdminStrongestRole(T user) {
-    return CALS_ADMIN.equals(getStrongestAdminRole(user));
+  public static <T extends RolesHolder> boolean isNullStrongestRole(T user) {
+    return NULL_STRONGEST_ROLE.equals(getStrongestAdminRole(user));
   }
-
 }
