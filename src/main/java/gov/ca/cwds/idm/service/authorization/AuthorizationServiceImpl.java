@@ -36,9 +36,10 @@ public class AuthorizationServiceImpl implements AuthorizationService {
   public boolean canFindUser(User user) {
     UniversalUserToken admin = getCurrentUser();
 
-    return userIsInAdminManagedArea(user) ||
-        isCalsAdmin(admin) && isCalsExternalWorker(user) ||
-        isOfficeAdmin(admin) && areInTheSameCounty(admin, user) && !areInTheSameOffice(admin, user) && !userIsStrongerAdmin(user);
+    return
+        userIsInAdminManagedArea(user) ||
+        isOfficeAdmin(admin) && areInDifferentOfficesOfTheSameCounty(user, admin) && userIsNotAStrongerAdmin(user) ||
+        areCalsAdminAndUser(admin, user);
   }
 
   @Override
@@ -49,7 +50,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
   @Override
   public boolean canUpdateUser(String userId) {
     //admin can't update himself
-    if (userId.equals(getUserName(getCurrentUser()))) {
+    if (adminAndUserAreTheSamePerson(userId)) {
       return false;
     }
     User user = getUserFromUserId(userId);
@@ -68,6 +69,45 @@ public class AuthorizationServiceImpl implements AuthorizationService {
   public boolean canResendInvitationMessage(String userId) {
     User user = getUserFromUserId(userId);
     return userIsInAdminManagedArea(user);
+  }
+
+  private boolean adminAndUserAreTheSamePerson(String userId) {
+    return userId.equals(getUserName(getCurrentUser()));
+  }
+
+  private boolean areCalsAdminAndUser(UniversalUserToken admin, User user) {
+    return isCalsAdmin(admin) && isCalsExternalWorker(user);
+  }
+
+  private static boolean userIsNotAStrongerAdmin(User user) {
+    UniversalUserToken admin = getCurrentUser();
+    return !userIsStrongerAdmin(admin, user);
+  }
+
+  static boolean userIsStrongerAdmin(UniversalUserToken admin, User user) {
+    if(!isAdmin(user)) {
+      return false;
+    }
+
+    String adminRole = getStrongestAdminRole(admin);
+    String userRole = getStrongestAdminRole(user);
+
+    switch (userRole) {
+      case STATE_ADMIN:
+        return !STATE_ADMIN.equals(adminRole);
+      case COUNTY_ADMIN:
+        return OFFICE_ADMIN.equals(adminRole);
+      case OFFICE_ADMIN:
+        return false;
+      case CALS_ADMIN:
+        return false;
+      default:
+        return false;
+    }
+  }
+
+  private boolean areInDifferentOfficesOfTheSameCounty(User user, UniversalUserToken admin) {
+    return areInTheSameCounty(admin, user) && !areInTheSameOffice(admin, user);
   }
 
   private User getUserFromUserId(String userId) {
@@ -131,33 +171,6 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     return userCountyName != null && userCountyName.equals(adminCountyName);
   }
 
-  static boolean userIsStrongerAdmin(User user) {
-    UniversalUserToken admin = getCurrentUser();
-    return userIsStrongerAdmin(admin, user);
-  }
-
-  static boolean userIsStrongerAdmin(UniversalUserToken admin, User user) {
-    if(!isAdmin(user)) {
-      return false;
-    }
-
-    String adminRole = getStrongestAdminRole(admin);
-    String userRole = getStrongestAdminRole(user);
-
-    switch (userRole) {
-      case STATE_ADMIN:
-        return !STATE_ADMIN.equals(adminRole);
-      case COUNTY_ADMIN:
-        return OFFICE_ADMIN.equals(adminRole);
-      case OFFICE_ADMIN:
-        return false;
-      case CALS_ADMIN:
-        return false;
-      default:
-        return false;
-    }
-  }
-
   static boolean userIsTheSameStrengthAsAdmin(User user) {
     UniversalUserToken admin = getCurrentUser();
     return userHasTheSameStrengthAsAdmin(admin, user);
@@ -175,7 +188,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
   }
 
   static boolean userIsMoreWeakThenAdmin(User user) {
-    return !userIsStrongerAdmin(user) && !userIsTheSameStrengthAsAdmin(user);
+    return userIsNotAStrongerAdmin(user) && !userIsTheSameStrengthAsAdmin(user);
   }
 
   @Autowired
