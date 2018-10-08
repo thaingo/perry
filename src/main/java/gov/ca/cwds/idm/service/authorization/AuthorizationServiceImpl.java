@@ -38,7 +38,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
     return
         userIsInAdminManagedArea(admin, user) ||
-        isOfficeAdmin(admin) && areInDifferentOfficesOfTheSameCounty(user, admin) && userIsNotAStrongerAdmin(admin, user) ||
+        isOfficeAdmin(admin) && areInDifferentOfficesOfTheSameCounty(admin, user) && userIsNotAStrongerAdmin(admin, user) ||
         areCalsAdminAndUser(admin, user);
   }
 
@@ -110,7 +110,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     }
   }
 
-  private boolean areInDifferentOfficesOfTheSameCounty(User user, UniversalUserToken admin) {
+  private boolean areInDifferentOfficesOfTheSameCounty(UniversalUserToken admin, User user) {
     return areInTheSameCounty(admin, user) && !areInTheSameOffice(admin, user);
   }
 
