@@ -6,38 +6,58 @@ import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.idm.service.authorization.AuthorizationTestHelper.admin;
 import static gov.ca.cwds.idm.service.authorization.AuthorizationTestHelper.user;
-import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.setAdminSupplier;
+import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
+import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserCountyName;
+import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserOfficeIds;
 import static gov.ca.cwds.util.Utils.toSet;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
-import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(fullyQualifiedNames = "gov.ca.cwds.util.CurrentAuthenticatedUserUtil")
 public class OfficeAdminAuthorizerTest {
 
-  @Test
-  public void canEditCwsWorkerTest() {
-    setAdminSupplier(() -> admin(toSet(OFFICE_ADMIN),
-        "Yolo", toSet("Yolo_2")));
-    assertTrue(new OfficeAdminAuthorizer(user(toSet(CWS_WORKER),
-        "Yolo", "Yolo_2")).canUpdateUser());
+  @Before
+  public void before() {
+    mockStatic(CurrentAuthenticatedUserUtil.class);
   }
 
   @Test
   public void canNotEditStateAdminTest() {
-    setAdminSupplier(() -> admin(toSet(OFFICE_ADMIN),
-        "Yolo", toSet("Yolo_2")));
+    when(getCurrentUser())
+        .thenReturn(admin(toSet(OFFICE_ADMIN),
+            "Yolo", toSet("Yolo_2")));
+    when(getCurrentUserCountyName()).thenReturn("Yolo");
     assertFalse(
         new OfficeAdminAuthorizer(user(toSet(STATE_ADMIN),
             "Yolo", "Yolo_2")).canUpdateUser());
   }
 
   @Test
+  public void canEditCwsWorkerTest() {
+    when(getCurrentUser())
+        .thenReturn(admin(toSet(OFFICE_ADMIN),
+            "Yolo", toSet("Yolo_2")));
+    when(getCurrentUserOfficeIds()).thenReturn(toSet("Yolo_2"));
+    assertTrue(new OfficeAdminAuthorizer(user(toSet(CWS_WORKER),
+        "Yolo", "Yolo_2")).canUpdateUser());
+  }
+
+  @Test
   public void cantEditCountyAdminTest() {
-    setAdminSupplier(() -> admin(toSet(OFFICE_ADMIN),
-        "Yolo", toSet("Yolo_2")));
+    when(getCurrentUser())
+        .thenReturn(admin(toSet(OFFICE_ADMIN),
+            "Yolo", toSet("Yolo_2")));
+    when(getCurrentUserOfficeIds()).thenReturn(toSet("Yolo_2"));
     assertFalse(
         new OfficeAdminAuthorizer(user(toSet(COUNTY_ADMIN),
             "Yolo", "Yolo_2")).canUpdateUser());
@@ -45,16 +65,14 @@ public class OfficeAdminAuthorizerTest {
 
   @Test
   public void cantEditOfficeAdminTest() {
-    setAdminSupplier(() -> admin(toSet(OFFICE_ADMIN),
-        "Yolo", toSet("Yolo_2")));
+    when(getCurrentUser())
+        .thenReturn(admin(toSet(OFFICE_ADMIN),
+            "Yolo", toSet("Yolo_2")));
+    when(getCurrentUserOfficeIds()).thenReturn(toSet("Yolo_2"));
+    when(getCurrentUserCountyName()).thenReturn("Yolo");
     assertFalse(
         new OfficeAdminAuthorizer(user(toSet(OFFICE_ADMIN),
             "Yolo", "Yolo_2")).canUpdateUser());
-  }
-
-  @AfterClass
-  public static void resetAdminSupplier() {
-    CurrentAuthenticatedUserUtil.resetAdminSupplier();
   }
 
 }

@@ -1,9 +1,7 @@
 package gov.ca.cwds.idm.service.authorization;
 
-import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCountyName;
-import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
+import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserCountyName;
 
-import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.dto.User;
 
 final class AuthorizationUtils {
@@ -12,9 +10,8 @@ final class AuthorizationUtils {
   }
 
   static boolean isPrincipalInTheSameCountyWith(User user) {
-    UniversalUserToken admin = getCurrentUser();
     String userCountyName = user.getCountyName();
-    String adminCountyName = getCountyName(admin);
+    String adminCountyName = getCurrentUserCountyName();
     return userCountyName != null && userCountyName.equals(adminCountyName);
   }
 

@@ -2,7 +2,7 @@ package gov.ca.cwds.idm.service.authorization;
 
 interface AdminActionsAuthorizer {
 
-  boolean canFindUser();
+  boolean canViewUser();
 
   boolean canCreateUser();
 

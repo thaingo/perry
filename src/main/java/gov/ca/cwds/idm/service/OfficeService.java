@@ -4,8 +4,8 @@ import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_GET_MANAGED_OFFICES_LIST;
-import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCountyName;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
+import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserCountyName;
 
 import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.dto.Office;
@@ -44,7 +44,7 @@ public class OfficeService {
         return officeRepository.findOffices();
       case OFFICE_ADMIN:
       case COUNTY_ADMIN:
-        return officeRepository.findCountyOffices(getCountyName(currentUser));
+        return officeRepository.findCountyOffices(getCurrentUserCountyName());
       default:
         String msg = messagesService
             .getTechMessage(NOT_AUTHORIZED_TO_GET_MANAGED_OFFICES_LIST,

@@ -8,34 +8,28 @@ import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.data.reissue.model.PerryTokenEntity;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Supplier;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 public class CurrentAuthenticatedUserUtil {
 
-  private static Supplier<UniversalUserToken> adminSupplier;
-
   private CurrentAuthenticatedUserUtil() {}
 
   public static UniversalUserToken getCurrentUser() {
-    if (adminSupplier != null) {
-      return adminSupplier.get();
-    }
     Authentication authentication = getAuthentication();
     return (UniversalUserToken) authentication.getPrincipal();
   }
 
-  public static String getCountyName(UniversalUserToken currentUser) {
-    return (String) currentUser.getParameter(COUNTY_NAME_PARAM);
+  public static String getCurrentUserCountyName() {
+    return (String) getCurrentUser().getParameter(COUNTY_NAME_PARAM);
   }
 
-  public static Set<String> getAdminOfficeIds(UniversalUserToken currentUser) {
-    return (Set<String>) currentUser.getParameter(ADMIN_OFFICE_IDS_PARAM);
+  public static Set<String> getCurrentUserOfficeIds() {
+    return (Set<String>) getCurrentUser().getParameter(ADMIN_OFFICE_IDS_PARAM);
   }
 
-  public static String getUserName(UniversalUserToken currentUser) {
-    return (String) currentUser.getParameter(USER_NAME);
+  public static String getCurrentUserName() {
+    return (String) getCurrentUser().getParameter(USER_NAME);
   }
 
   public static String getSsoToken() {
@@ -55,15 +49,6 @@ public class CurrentAuthenticatedUserUtil {
 
   private static Authentication getAuthentication() {
     return SecurityContextHolder.getContext().getAuthentication();
-  }
-
-  public static void setAdminSupplier(
-      Supplier<UniversalUserToken> adminSupplier) {
-    CurrentAuthenticatedUserUtil.adminSupplier = adminSupplier;
-  }
-
-  public static void resetAdminSupplier() {
-    adminSupplier = null;
   }
 
 }

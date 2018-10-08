@@ -14,7 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface IdmService {
 
-  @PostAuthorize("@authorizationService.canFindUser(returnObject)")
+  @PostAuthorize("@authorizationService.canViewUser(returnObject)")
   User findUser(String id);
 
   @PreAuthorize("@authorizationService.canUpdateUser(#id)")
