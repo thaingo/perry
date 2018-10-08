@@ -2,6 +2,7 @@ package gov.ca.cwds.config.api.idm;
 
 import static gov.ca.cwds.util.Utils.toSet;
 
+import java.util.HashSet;
 import java.util.Set;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -21,7 +22,14 @@ public class Roles {
   private Roles() {}
 
   public static Set<String> getAdminRoles() {
-    return toSet(COUNTY_ADMIN, STATE_ADMIN, OFFICE_ADMIN, CALS_ADMIN);
+    Set<String> result = new HashSet<>(getCwsAdminRoles());
+    result.add(CALS_ADMIN);
+    return result;
   }
+
+  public static Set<String> getCwsAdminRoles() {
+    return toSet(COUNTY_ADMIN, STATE_ADMIN, OFFICE_ADMIN);
+  }
+
 
 }

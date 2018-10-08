@@ -43,11 +43,15 @@ public class UserRolesService {
     return !Collections.disjoint(user.getRoles(), Roles.getAdminRoles());
   }
 
+  public static <T extends RolesHolder> boolean isCwsAdmin(T user) {
+    return !Collections.disjoint(user.getRoles(), Roles.getCwsAdminRoles());
+  }
+
   public static <T extends RolesHolder> boolean isNonRacfIdCalsUser(T user) {
     return isCalsExternalWorker(user);
   }
 
-  public static <T extends RolesHolder> String getStrongestAdminRole(T user) {
+  public static <T extends RolesHolder> String getStrongestCwsAdminRole(T user) {
     if (user.getRoles().contains(STATE_ADMIN)) {
       return STATE_ADMIN;
     } else if (user.getRoles().contains(COUNTY_ADMIN)) {
@@ -57,9 +61,5 @@ public class UserRolesService {
     } else {
       return NULL_STRONGEST_ROLE;
     }
-  }
-
-  public static <T extends RolesHolder> boolean isNullStrongestRole(T user) {
-    return NULL_STRONGEST_ROLE.equals(getStrongestAdminRole(user));
   }
 }

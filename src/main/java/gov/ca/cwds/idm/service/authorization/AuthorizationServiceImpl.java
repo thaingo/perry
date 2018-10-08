@@ -4,7 +4,7 @@ import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
-import static gov.ca.cwds.idm.service.authorization.UserRolesService.getStrongestAdminRole;
+import static gov.ca.cwds.idm.service.authorization.UserRolesService.getStrongestCwsAdminRole;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isAdmin;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isCalsAdmin;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isCalsExternalWorker;
@@ -89,8 +89,8 @@ public class AuthorizationServiceImpl implements AuthorizationService {
       return false;
     }
 
-    String adminRole = getStrongestAdminRole(admin);
-    String userRole = getStrongestAdminRole(user);
+    String adminRole = getStrongestCwsAdminRole(admin);
+    String userRole = getStrongestCwsAdminRole(user);
 
     switch (userRole) {
       case STATE_ADMIN:
@@ -124,7 +124,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
   private String getAdminStrongestRole() {
     UniversalUserToken admin = getCurrentUser();
-    return getStrongestAdminRole(admin);
+    return getStrongestCwsAdminRole(admin);
   }
 
   static boolean userIsInAdminManagedArea(User user) {
@@ -133,7 +133,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
   }
 
   static boolean userIsInAdminManagedArea(UniversalUserToken admin, User user) {
-    switch (getStrongestAdminRole(admin)) {
+    switch (getStrongestCwsAdminRole(admin)) {
       case STATE_ADMIN:
         return true;
       case COUNTY_ADMIN:
@@ -181,8 +181,8 @@ public class AuthorizationServiceImpl implements AuthorizationService {
       return false;
     }
 
-    String adminRole = getStrongestAdminRole(admin);
-    String userRole = getStrongestAdminRole(user);
+    String adminRole = getStrongestCwsAdminRole(admin);
+    String userRole = getStrongestCwsAdminRole(user);
 
     return adminRole.equals(userRole);
   }

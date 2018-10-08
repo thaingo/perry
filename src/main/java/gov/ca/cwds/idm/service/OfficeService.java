@@ -39,7 +39,7 @@ public class OfficeService {
   @Transactional(value = "transactionManager")
   public List<Office> getOfficesByAdmin() {
     UniversalUserToken currentUser = getCurrentUser();
-    switch (UserRolesService.getStrongestAdminRole(currentUser)) {
+    switch (UserRolesService.getStrongestCwsAdminRole(currentUser)) {
       case STATE_ADMIN:
         return officeRepository.findOffices();
       case OFFICE_ADMIN:

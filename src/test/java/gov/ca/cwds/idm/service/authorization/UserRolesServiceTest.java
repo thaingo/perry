@@ -56,27 +56,27 @@ public class UserRolesServiceTest {
 
   @Test
   public void testGetStrongestAdminRoleForIdmJob() {
-    assertThat(UserRolesService.getStrongestAdminRole(userToken(IDM_JOB)), is(NULL_STRONGEST_ROLE));
+    assertThat(UserRolesService.getStrongestCwsAdminRole(userToken(IDM_JOB)), is(NULL_STRONGEST_ROLE));
   }
 
   @Test
   public void testGetStrongestAdminRoleForNotAdmin() {
-    assertThat(UserRolesService.getStrongestAdminRole(userToken()), is(NULL_STRONGEST_ROLE));
+    assertThat(UserRolesService.getStrongestCwsAdminRole(userToken()), is(NULL_STRONGEST_ROLE));
   }
 
   @Test
   public void testGetStrongestAdminRole() {
-    assertThat(UserRolesService.getStrongestAdminRole(userToken(STATE_ADMIN)), is(STATE_ADMIN));
-    assertThat(UserRolesService.getStrongestAdminRole(userToken(COUNTY_ADMIN)), is(COUNTY_ADMIN));
-    assertThat(UserRolesService.getStrongestAdminRole(userToken(OFFICE_ADMIN)), is(OFFICE_ADMIN));
-    assertThat(UserRolesService.getStrongestAdminRole(userToken(CALS_ADMIN)), is(NULL_STRONGEST_ROLE));
-    assertThat(UserRolesService.getStrongestAdminRole(userToken(STATE_ADMIN, COUNTY_ADMIN)),
+    assertThat(UserRolesService.getStrongestCwsAdminRole(userToken(STATE_ADMIN)), is(STATE_ADMIN));
+    assertThat(UserRolesService.getStrongestCwsAdminRole(userToken(COUNTY_ADMIN)), is(COUNTY_ADMIN));
+    assertThat(UserRolesService.getStrongestCwsAdminRole(userToken(OFFICE_ADMIN)), is(OFFICE_ADMIN));
+    assertThat(UserRolesService.getStrongestCwsAdminRole(userToken(CALS_ADMIN)), is(NULL_STRONGEST_ROLE));
+    assertThat(UserRolesService.getStrongestCwsAdminRole(userToken(STATE_ADMIN, COUNTY_ADMIN)),
         is(STATE_ADMIN));
-    assertThat(UserRolesService.getStrongestAdminRole(userToken(OFFICE_ADMIN, COUNTY_ADMIN)),
+    assertThat(UserRolesService.getStrongestCwsAdminRole(userToken(OFFICE_ADMIN, COUNTY_ADMIN)),
         is(COUNTY_ADMIN));
-    assertThat(UserRolesService.getStrongestAdminRole(userToken(OFFICE_ADMIN, STATE_ADMIN)),
+    assertThat(UserRolesService.getStrongestCwsAdminRole(userToken(OFFICE_ADMIN, STATE_ADMIN)),
         is(STATE_ADMIN));
-    assertThat(UserRolesService.getStrongestAdminRole(userToken(OFFICE_ADMIN, CALS_ADMIN)),
+    assertThat(UserRolesService.getStrongestCwsAdminRole(userToken(OFFICE_ADMIN, CALS_ADMIN)),
         is(OFFICE_ADMIN));
   }
 
