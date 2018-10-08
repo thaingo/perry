@@ -3,6 +3,7 @@ package gov.ca.cwds.idm.service;
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
+import static gov.ca.cwds.idm.service.authorization.UserRolesService.isCwsAdmin;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_GET_MANAGED_OFFICES_LIST;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCountyName;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
@@ -13,6 +14,7 @@ import gov.ca.cwds.idm.persistence.cwscms.repository.OfficeRepository;
 import gov.ca.cwds.idm.service.authorization.UserRolesService;
 import gov.ca.cwds.service.messages.MessagesService;
 import java.util.List;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,20 +40,26 @@ public class OfficeService {
 
   @Transactional(value = "transactionManager")
   public List<Office> getOfficesByAdmin() {
-    UniversalUserToken currentUser = getCurrentUser();
-    switch (UserRolesService.getStrongestCwsAdminRole(currentUser)) {
-      case STATE_ADMIN:
-        return officeRepository.findOffices();
-      case OFFICE_ADMIN:
-      case COUNTY_ADMIN:
-        return officeRepository.findCountyOffices(getCountyName(currentUser));
-      default:
-        String msg = messagesService
-            .getTechMessage(NOT_AUTHORIZED_TO_GET_MANAGED_OFFICES_LIST,
-                currentUser.getUserId(), currentUser.getRoles());
-        LOGGER.error(msg);
-        throw new AccessDeniedException(msg);
+    UniversalUserToken admin = getCurrentUser();
+    Optional<String> optionalStrongestCwsRole = UserRolesService.getStrongestCwsRole(admin);
+
+    if(optionalStrongestCwsRole.isPresent()) {
+      switch (optionalStrongestCwsRole.get()) {
+        case STATE_ADMIN:
+          return officeRepository.findOffices();
+        case OFFICE_ADMIN:
+        case COUNTY_ADMIN:
+          return officeRepository.findCountyOffices(getCountyName(admin));
+        default:
+          break;
+      }
     }
+
+    String msg = messagesService
+        .getTechMessage(NOT_AUTHORIZED_TO_GET_MANAGED_OFFICES_LIST,
+            admin.getUserId(), admin.getRoles());
+    LOGGER.error(msg);
+    throw new AccessDeniedException(msg);
   }
 
   @Autowired

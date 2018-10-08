@@ -7,7 +7,7 @@ import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
 import static gov.ca.cwds.idm.service.ExecutionStatus.FAIL;
 import static gov.ca.cwds.idm.service.ExecutionStatus.SUCCESS;
 import static gov.ca.cwds.idm.service.ExecutionStatus.WAS_NOT_EXECUTED;
-import static gov.ca.cwds.idm.service.authorization.UserRolesService.getStrongestCwsAdminRole;
+import static gov.ca.cwds.idm.service.authorization.UserRolesService.getStrongestCwsRole;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByEmail;
@@ -260,7 +260,7 @@ public class IdmServiceImpl implements IdmService {
   }
 
   private Optional<MessageCode> buildAuthorizationError() {
-    switch (getStrongestCwsAdminRole(getCurrentUser())) {
+    switch (getStrongestCwsRole(getCurrentUser()).get()) {
       case COUNTY_ADMIN:
         return Optional.of(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY);
       case OFFICE_ADMIN:

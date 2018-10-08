@@ -3,18 +3,18 @@ package gov.ca.cwds.idm.service.authorization;
 import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CALS_EXTERNAL_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 
 import gov.ca.cwds.RolesHolder;
 import gov.ca.cwds.config.api.idm.Roles;
 import java.util.Collections;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 @Service("userRoleService")
 public class UserRolesService {
-
-  public static final String NULL_STRONGEST_ROLE = "NULL";
 
   private UserRolesService() {
   }
@@ -51,15 +51,17 @@ public class UserRolesService {
     return isCalsExternalWorker(user);
   }
 
-  public static <T extends RolesHolder> String getStrongestCwsAdminRole(T user) {
+  public static <T extends RolesHolder> Optional<String> getStrongestCwsRole(T user) {
     if (user.getRoles().contains(STATE_ADMIN)) {
-      return STATE_ADMIN;
+      return Optional.of(STATE_ADMIN);
     } else if (user.getRoles().contains(COUNTY_ADMIN)) {
-      return COUNTY_ADMIN;
+      return Optional.of(COUNTY_ADMIN);
     } else if (user.getRoles().contains(OFFICE_ADMIN)) {
-      return OFFICE_ADMIN;
+      return Optional.of(OFFICE_ADMIN);
+    } else if (user.getRoles().contains(CWS_WORKER)) {
+      return Optional.of(CWS_WORKER);
     } else {
-      return NULL_STRONGEST_ROLE;
+      return Optional.empty();
     }
   }
 }

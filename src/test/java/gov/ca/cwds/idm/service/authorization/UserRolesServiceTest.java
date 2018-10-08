@@ -8,7 +8,6 @@ import static gov.ca.cwds.config.api.idm.Roles.IDM_JOB;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.getAdminRoles;
-import static gov.ca.cwds.idm.service.authorization.UserRolesService.NULL_STRONGEST_ROLE;
 import static gov.ca.cwds.util.Utils.toSet;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
@@ -18,6 +17,7 @@ import static org.junit.Assert.assertTrue;
 
 import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.dto.User;
+import java.util.Optional;
 import java.util.Set;
 import org.junit.Test;
 
@@ -45,6 +45,18 @@ public class UserRolesServiceTest {
   }
 
   @Test
+  public void testIsCwsAdmin() {
+    assertFalse(UserRolesService.isCwsAdmin(userToken()));
+    assertFalse(UserRolesService.isCwsAdmin(userToken(CWS_WORKER)));
+    assertFalse(UserRolesService.isCwsAdmin(userToken(IDM_JOB)));
+    assertFalse(UserRolesService.isCwsAdmin(userToken(CALS_EXTERNAL_WORKER, CWS_WORKER)));
+    assertTrue(UserRolesService.isCwsAdmin(userToken(CWS_WORKER, COUNTY_ADMIN)));
+    assertTrue(UserRolesService.isCwsAdmin(userToken(STATE_ADMIN, OFFICE_ADMIN)));
+    assertTrue(UserRolesService.isCwsAdmin(userToken(OFFICE_ADMIN)));
+    assertFalse(UserRolesService.isCwsAdmin(userToken(CALS_ADMIN)));
+  }
+
+  @Test
   public void testIsNonRacfIdCalsUser() {
     assertFalse(UserRolesService.isNonRacfIdCalsUser(userToken()));
     assertFalse(UserRolesService.isNonRacfIdCalsUser((userToken(CWS_WORKER))));
@@ -56,28 +68,28 @@ public class UserRolesServiceTest {
 
   @Test
   public void testGetStrongestAdminRoleForIdmJob() {
-    assertThat(UserRolesService.getStrongestCwsAdminRole(userToken(IDM_JOB)), is(NULL_STRONGEST_ROLE));
+    assertThat(UserRolesService.getStrongestCwsRole(userToken(IDM_JOB)), is(Optional.empty()));
   }
 
   @Test
   public void testGetStrongestAdminRoleForNotAdmin() {
-    assertThat(UserRolesService.getStrongestCwsAdminRole(userToken()), is(NULL_STRONGEST_ROLE));
+    assertThat(UserRolesService.getStrongestCwsRole(userToken()), is(Optional.empty()));
   }
 
   @Test
-  public void testGetStrongestAdminRole() {
-    assertThat(UserRolesService.getStrongestCwsAdminRole(userToken(STATE_ADMIN)), is(STATE_ADMIN));
-    assertThat(UserRolesService.getStrongestCwsAdminRole(userToken(COUNTY_ADMIN)), is(COUNTY_ADMIN));
-    assertThat(UserRolesService.getStrongestCwsAdminRole(userToken(OFFICE_ADMIN)), is(OFFICE_ADMIN));
-    assertThat(UserRolesService.getStrongestCwsAdminRole(userToken(CALS_ADMIN)), is(NULL_STRONGEST_ROLE));
-    assertThat(UserRolesService.getStrongestCwsAdminRole(userToken(STATE_ADMIN, COUNTY_ADMIN)),
-        is(STATE_ADMIN));
-    assertThat(UserRolesService.getStrongestCwsAdminRole(userToken(OFFICE_ADMIN, COUNTY_ADMIN)),
-        is(COUNTY_ADMIN));
-    assertThat(UserRolesService.getStrongestCwsAdminRole(userToken(OFFICE_ADMIN, STATE_ADMIN)),
-        is(STATE_ADMIN));
-    assertThat(UserRolesService.getStrongestCwsAdminRole(userToken(OFFICE_ADMIN, CALS_ADMIN)),
-        is(OFFICE_ADMIN));
+  public void testGetStrongestCwsRole() {
+    assertThat(UserRolesService.getStrongestCwsRole(userToken(STATE_ADMIN)), is(Optional.of(STATE_ADMIN)));
+    assertThat(UserRolesService.getStrongestCwsRole(userToken(COUNTY_ADMIN)), is(Optional.of(COUNTY_ADMIN)));
+    assertThat(UserRolesService.getStrongestCwsRole(userToken(OFFICE_ADMIN)), is(Optional.of(OFFICE_ADMIN)));
+    assertThat(UserRolesService.getStrongestCwsRole(userToken(CALS_ADMIN)), is(Optional.empty()));
+    assertThat(UserRolesService.getStrongestCwsRole(userToken(STATE_ADMIN, COUNTY_ADMIN)),
+        is(Optional.of(STATE_ADMIN)));
+    assertThat(UserRolesService.getStrongestCwsRole(userToken(OFFICE_ADMIN, COUNTY_ADMIN)),
+        is(Optional.of(COUNTY_ADMIN)));
+    assertThat(UserRolesService.getStrongestCwsRole(userToken(OFFICE_ADMIN, STATE_ADMIN)),
+        is(Optional.of(STATE_ADMIN)));
+    assertThat(UserRolesService.getStrongestCwsRole(userToken(OFFICE_ADMIN, CALS_ADMIN)),
+        is(Optional.of(OFFICE_ADMIN)));
   }
 
   @Test
