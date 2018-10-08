@@ -27,19 +27,11 @@ public class OfficeAdminAuthorizerTest {
 
   @Test
   public void canEditCwsWorkerTest() {
-    setAdminSupplier(() -> admin(toSet(OFFICE_ADMIN),
-        "Yolo", toSet("Yolo_2")));
-    assertTrue(authorizationService.canUpdateUser(user(toSet(CWS_WORKER),
+    assertTrue(authorizationService.canUpdateUser(
+        admin(toSet(OFFICE_ADMIN),
+        "Yolo", toSet("Yolo_2")),
+        user(toSet(CWS_WORKER),
         "Yolo", "Yolo_2")));
-  }
-
-  @Test
-  public void canNotEditStateAdminTest() {
-    setAdminSupplier(() -> admin(toSet(OFFICE_ADMIN),
-        "Yolo", toSet("Yolo_2")));
-    assertFalse(
-        authorizationService.canUpdateUser(user(toSet(STATE_ADMIN),
-            "Yolo", "Yolo_2")));
   }
 
   @Test
@@ -47,16 +39,19 @@ public class OfficeAdminAuthorizerTest {
     setAdminSupplier(() -> admin(toSet(OFFICE_ADMIN),
         "Yolo", toSet("Yolo_2")));
     assertFalse(
-        authorizationService.canUpdateUser(user(toSet(COUNTY_ADMIN),
+        authorizationService.canUpdateUser(admin(toSet(OFFICE_ADMIN),
+            "Yolo", toSet("Yolo_2")),
+            user(toSet(COUNTY_ADMIN),
             "Yolo", "Yolo_2")));
   }
 
   @Test
   public void cantEditOfficeAdminTest() {
-    setAdminSupplier(() -> admin(toSet(OFFICE_ADMIN),
-        "Yolo", toSet("Yolo_2")));
     assertFalse(
-        authorizationService.canUpdateUser(user(toSet(OFFICE_ADMIN),
+        authorizationService.canUpdateUser(
+            admin(toSet(OFFICE_ADMIN),
+            "Yolo", toSet("Yolo_2")),
+            user(toSet(OFFICE_ADMIN),
             "Yolo", "Yolo_2")));
   }
 

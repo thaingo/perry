@@ -1,13 +1,12 @@
 package gov.ca.cwds.idm.service.authorization;
 
-import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.getStrongestCwsRole;
-import static gov.ca.cwds.idm.service.authorization.UserRolesService.isCwsAdmin;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isCalsAdmin;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isCalsExternalWorker;
+import static gov.ca.cwds.idm.service.authorization.UserRolesService.isCwsAdmin;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isOfficeAdmin;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getAdminOfficeIds;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCountyName;
@@ -38,50 +37,50 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     UniversalUserToken admin = getCurrentUser();
 
     return
-        userIsInAdminManagedArea(user) ||
-        isOfficeAdmin(admin) && areInDifferentOfficesOfTheSameCounty(user, admin) && userIsNotAStrongerAdmin(user) ||
+        userIsInAdminManagedArea(admin, user) ||
+        isOfficeAdmin(admin) && areInDifferentOfficesOfTheSameCounty(user, admin) && userIsNotAStrongerAdmin(admin, user) ||
         areCalsAdminAndUser(admin, user);
   }
 
   @Override
   public boolean canCreateUser(User user) {
-    return userIsInAdminManagedArea(user);
+    return userIsInAdminManagedArea(getCurrentUser(), user);
   }
 
   @Override
   public boolean canUpdateUser(String userId) {
+    UniversalUserToken admin = getCurrentUser();
     //admin can't update himself
-    if (adminAndUserAreTheSamePerson(userId)) {
+    if (adminAndUserAreTheSamePerson(admin, userId)) {
       return false;
     }
+
     User user = getUserFromUserId(userId);
-    return canUpdateUser(user);
+
+    return canUpdateUser(admin, user);
   }
 
-  boolean canUpdateUser(User user) {
-    UniversalUserToken admin = getCurrentUser();
-
+  boolean canUpdateUser(UniversalUserToken admin, User user) {
     return
-        !isOfficeAdmin(admin) && userIsInAdminManagedArea(user) ||
-        isOfficeAdmin(admin) && userIsInAdminManagedArea(user) && userIsMoreWeakThenAdmin(user);
+        !isOfficeAdmin(admin) && userIsInAdminManagedArea(admin, user) ||
+        isOfficeAdmin(admin) && userIsInAdminManagedArea(admin, user) && userIsMoreWeakThenAdmin(admin, user);
   }
 
   @Override
   public boolean canResendInvitationMessage(String userId) {
     User user = getUserFromUserId(userId);
-    return userIsInAdminManagedArea(user);
+    return userIsInAdminManagedArea(getCurrentUser(), user);
   }
 
-  private boolean adminAndUserAreTheSamePerson(String userId) {
-    return userId.equals(getUserName(getCurrentUser()));
+  private boolean adminAndUserAreTheSamePerson(UniversalUserToken admin, String userId) {
+    return userId.equals(getUserName(admin));
   }
 
   private boolean areCalsAdminAndUser(UniversalUserToken admin, User user) {
     return isCalsAdmin(admin) && isCalsExternalWorker(user);
   }
 
-  private static boolean userIsNotAStrongerAdmin(User user) {
-    UniversalUserToken admin = getCurrentUser();
+  private static boolean userIsNotAStrongerAdmin(UniversalUserToken admin, User user) {
     return !userHasStrongerCwsRole(admin, user);
   }
 
@@ -118,11 +117,6 @@ public class AuthorizationServiceImpl implements AuthorizationService {
   private User getUserFromUserId(String userId) {
     UserType cognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
     return mappingService.toUser(cognitoUser);
-  }
-
-  static boolean userIsInAdminManagedArea(User user) {
-    UniversalUserToken admin = getCurrentUser();
-    return userIsInAdminManagedArea(admin, user);
   }
 
   static boolean userIsInAdminManagedArea(UniversalUserToken admin, User user) {
@@ -166,11 +160,6 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     return userCountyName != null && userCountyName.equals(adminCountyName);
   }
 
-  private static boolean userIsTheSameStrengthAsAdmin(User user) {
-    UniversalUserToken admin = getCurrentUser();
-    return userHasTheSameCwsStrengthAsAdmin(admin, user);
-  }
-
   private static boolean userHasTheSameCwsStrengthAsAdmin(UniversalUserToken admin, User user) {
     if(!isCwsAdmin(user)) {
       return false;
@@ -190,8 +179,8 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     return adminRole.equals(userRole);
   }
 
-  private static boolean userIsMoreWeakThenAdmin(User user) {
-    return userIsNotAStrongerAdmin(user) && !userIsTheSameStrengthAsAdmin(user);
+  private static boolean userIsMoreWeakThenAdmin(UniversalUserToken admin, User user) {
+    return userIsNotAStrongerAdmin(admin, user) && !userHasTheSameCwsStrengthAsAdmin(admin, user);
   }
 
   @Autowired
