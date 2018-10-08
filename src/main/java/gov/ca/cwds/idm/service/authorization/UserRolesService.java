@@ -9,9 +9,11 @@ import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import gov.ca.cwds.RolesHolder;
 import gov.ca.cwds.config.api.idm.Roles;
 import java.util.Collections;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 @Service("userRoleService")
+@Profile("idm")
 public class UserRolesService {
 
   private UserRolesService() {

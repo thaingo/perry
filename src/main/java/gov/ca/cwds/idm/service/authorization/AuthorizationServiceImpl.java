@@ -5,10 +5,9 @@ import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
-import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getUserName;
+import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserName;
 
 import com.amazonaws.services.cognitoidp.model.UserType;
-import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.MappingService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
@@ -25,8 +24,8 @@ public class AuthorizationServiceImpl implements AuthorizationService {
   private MappingService mappingService;
 
   @Override
-  public boolean canFindUser(User user) {
-    return createAdminActionsAuthorizer(user).canFindUser();
+  public boolean canViewUser(User user) {
+    return createAdminActionsAuthorizer(user).canViewUser();
   }
 
   @Override
@@ -37,7 +36,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
   @Override
   public boolean canUpdateUser(String userId) {
     //admin can't update himself
-    if (userId.equals(getUserName(getCurrentUser()))) {
+    if (userId.equals(getCurrentUserName())) {
       return false;
     }
     User user = getUserFromUserId(userId);
@@ -63,8 +62,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
   }
 
   private String getAdminStrongestRole() {
-    UniversalUserToken admin = getCurrentUser();
-    return UserRolesService.getStrongestAdminRole(admin);
+    return UserRolesService.getStrongestAdminRole(getCurrentUser());
   }
 
   private AdminActionsAuthorizer createAdminActionsAuthorizer(User user) {

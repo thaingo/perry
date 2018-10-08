@@ -4,7 +4,7 @@ import gov.ca.cwds.idm.dto.User;
 
 public interface AuthorizationService {
 
-  boolean canFindUser(User user);
+  boolean canViewUser(User user);
 
   boolean canCreateUser(User user);
 
