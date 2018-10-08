@@ -106,10 +106,6 @@ public class AuthorizationServiceImpl implements AuthorizationService {
         return !STATE_ADMIN.equals(adminRole);
       case COUNTY_ADMIN:
         return OFFICE_ADMIN.equals(adminRole);
-      case OFFICE_ADMIN:
-        return false;
-      case CALS_ADMIN:
-        return false;
       default:
         return false;
     }
