@@ -97,9 +97,9 @@
     <insert tableName="STFPERST">
       <column name="IDENTIFIER" value="07M"/>
       <column name="END_DT"/>
-      <column name="FIRST_NM" value="Win                 "/>
+      <column name="FIRST_NM" value="Carl                "/>
       <column name="JOB_TL_DSC" value="Win JobTitle                  "/>
-      <column name="LAST_NM" value="Staff                    "/>
+      <column name="LAST_NM" value="Truecam                  "/>
       <column name="MID_INI_NM" value=" "/>
       <column name="NMPRFX_DSC" value="Win   "/>
       <column name="PHONE_NO" valueNumeric="4646888777"/>
@@ -161,9 +161,9 @@
     <insert tableName="STFPERST">
       <column name="IDENTIFIER" value="08M"/>
       <column name="END_DT"/>
-      <column name="FIRST_NM" value="Win                 "/>
+      <column name="FIRST_NM" value="John                "/>
       <column name="JOB_TL_DSC" value="Win JobTitle                  "/>
-      <column name="LAST_NM" value="Staff                    "/>
+      <column name="LAST_NM" value="Travolta                 "/>
       <column name="MID_INI_NM" value=" "/>
       <column name="NMPRFX_DSC" value="Win   "/>
       <column name="PHONE_NO" valueNumeric="4646888777"/>
