@@ -1,10 +1,13 @@
 package gov.ca.cwds.idm.service.authorization;
 
+import gov.ca.cwds.idm.dto.User;
+
 class StateAdminAuthorizer implements AdminActionsAuthorizer {
 
-  public static final StateAdminAuthorizer INSTANCE = new StateAdminAuthorizer();
+  private final User user;
 
-  private StateAdminAuthorizer() {
+  public StateAdminAuthorizer(User user) {
+    this.user = user;
   }
 
   @Override

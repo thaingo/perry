@@ -86,7 +86,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
   private AdminActionsAuthorizer createAdminActionsAuthorizer(User user) {
     switch (getAdminStrongestRole()) {
       case STATE_ADMIN:
-        return StateAdminAuthorizer.INSTANCE;
+        return new StateAdminAuthorizer(user);
       case COUNTY_ADMIN:
         return new CountyAdminAuthorizer(user);
       case OFFICE_ADMIN:
