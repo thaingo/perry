@@ -38,9 +38,8 @@ public class AuthorizationServiceImplTest {
   public void testAdminCantUpdateHimself() {
     String adminId = "someId";
     when(CurrentAuthenticatedUserUtil.getCurrentUserName()).thenReturn(adminId);
-    assertFalse(service.canUpdateUser(adminId));
+    assertFalse(service.canUpdateUser(adminId, null));
   }
-
 
   @Test
   public void testByUserAndAdmin_StateAdminSameCounty() {
