@@ -33,6 +33,7 @@ import com.amazonaws.services.cognitoidp.model.AdminListDevicesRequest;
 import com.amazonaws.services.cognitoidp.model.AdminListDevicesResult;
 import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesRequest;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
+import com.amazonaws.services.cognitoidp.model.DeliveryMediumType;
 import com.amazonaws.services.cognitoidp.model.DescribeUserPoolRequest;
 import com.amazonaws.services.cognitoidp.model.InvalidParameterException;
 import com.amazonaws.services.cognitoidp.model.ListUsersRequest;
@@ -301,7 +302,8 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
     return new AdminCreateUserRequest()
         .withUsername(userId)
         .withUserPoolId(properties.getUserpool())
-        .withMessageAction(MessageActionType.RESEND);
+        .withMessageAction(MessageActionType.RESEND)
+        .withDesiredDeliveryMediums(DeliveryMediumType.EMAIL);
   }
 
   /**
