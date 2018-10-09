@@ -19,6 +19,7 @@ import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.cognito.AttributesBuilder;
+import gov.ca.cwds.idm.service.cognito.UserAttribute;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -56,21 +57,28 @@ public class CognitoUtils {
   }
 
   public static Set<String> getPermissions(UserType cognitoUser) {
+    return getDelimitedAttributeValue(cognitoUser, PERMISSIONS);
+  }
 
-    Optional<AttributeType> permissionsAttrOpt = getAttribute(cognitoUser, PERMISSIONS.getName());
+  public static Set<String> getRoles(UserType cognitoUser) {
+    return getDelimitedAttributeValue(cognitoUser, ROLES);
+  }
 
-    if (!permissionsAttrOpt.isPresent()) {
+  public static Set<String> getDelimitedAttributeValue(UserType cognitoUser, UserAttribute userAttribute) {
+    Optional<AttributeType> attrOpt = getAttribute(cognitoUser, userAttribute.getName());
+
+    if (!attrOpt.isPresent()) {
       return new HashSet<>();
     }
 
-    AttributeType permissionsAttr = permissionsAttrOpt.get();
-    String permissionsStr = permissionsAttr.getValue();
+    AttributeType attr = attrOpt.get();
+    String attrStrValue = attr.getValue();
 
-    if (StringUtils.isEmpty(permissionsStr)) {
+    if (StringUtils.isEmpty(attrStrValue)) {
       return new HashSet<>();
     }
 
-    return toSet(permissionsStr.split(COGNITO_LIST_DELIMITER));
+    return toSet(attrStrValue.split(COGNITO_LIST_DELIMITER));
   }
 
   public static AttributeType attribute(String name, String value) {
@@ -80,7 +88,7 @@ public class CognitoUtils {
     return permissionsAttr;
   }
 
-  public static String getCustomDelimeteredListAttributeValue(Set<String> setOfValues) {
+  public static String getCustomDelimetedListAttributeValue(Set<String> setOfValues) {
     if (!CollectionUtils.isEmpty(setOfValues)) {
       return String.join(COGNITO_LIST_DELIMITER, setOfValues);
     } else {
@@ -89,11 +97,16 @@ public class CognitoUtils {
   }
 
   public static AttributeType createPermissionsAttribute(Set<String> permissions) {
-    return attribute(PERMISSIONS.getName(), getCustomDelimeteredListAttributeValue(permissions));
+    return createDelimitedAttribute(PERMISSIONS, permissions);
   }
 
   public static AttributeType createRolesAttribute(Set<String> roles) {
-    return attribute(ROLES.getName(), getCustomDelimeteredListAttributeValue(roles));
+    return createDelimitedAttribute(ROLES, roles);
+  }
+
+  public static AttributeType createDelimitedAttribute(UserAttribute userAttribute,
+      Set<String> values) {
+    return attribute(userAttribute.getName(), getCustomDelimetedListAttributeValue(values));
   }
 
   public static List<AttributeType> buildCreateUserAttributes(User user) {

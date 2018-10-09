@@ -13,7 +13,7 @@ import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.attribute;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.createPermissionsAttribute;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getAttribute;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getCountyName;
-import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getCustomDelimeteredListAttributeValue;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getCustomDelimetedListAttributeValue;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getPermissions;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.COUNTY;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PERMISSIONS;
@@ -145,13 +145,13 @@ public class CognitoUtilsTest {
 
   @Test
   public void testGetPermissionsAttributeValueNull() {
-    assertThat(getCustomDelimeteredListAttributeValue(null), is(""));
+    assertThat(getCustomDelimetedListAttributeValue(null), is(""));
   }
 
   @Test
   public void testGetPermissionsAttributeValueEmpty() {
     Set<String> permissions = new HashSet<>();
-    assertThat(getCustomDelimeteredListAttributeValue(permissions), is(""));
+    assertThat(getCustomDelimetedListAttributeValue(permissions), is(""));
   }
 
   @Test
@@ -159,7 +159,7 @@ public class CognitoUtilsTest {
     Set<String> permissions = new HashSet<>();
     permissions.add("one");
     permissions.add("two");
-    assertThat(getCustomDelimeteredListAttributeValue(permissions), is("one:two"));
+    assertThat(getCustomDelimetedListAttributeValue(permissions), is("one:two"));
   }
 
   @Test
