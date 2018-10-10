@@ -88,7 +88,7 @@ public class CognitoUtils {
     return permissionsAttr;
   }
 
-  public static String getCustomDelimetedListAttributeValue(Set<String> setOfValues) {
+  public static String getCustomDelimitedListAttributeValue(Set<String> setOfValues) {
     if (!CollectionUtils.isEmpty(setOfValues)) {
       return String.join(COGNITO_LIST_DELIMITER, setOfValues);
     } else {
@@ -106,7 +106,7 @@ public class CognitoUtils {
 
   public static AttributeType createDelimitedAttribute(UserAttribute userAttribute,
       Set<String> values) {
-    return attribute(userAttribute.getName(), getCustomDelimetedListAttributeValue(values));
+    return attribute(userAttribute.getName(), getCustomDelimitedListAttributeValue(values));
   }
 
   public static List<AttributeType> buildCreateUserAttributes(User user) {
