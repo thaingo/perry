@@ -9,7 +9,6 @@ import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserName;
 
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.service.MappingService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,30 +34,13 @@ public class AuthorizationServiceImpl implements AuthorizationService {
   }
 
   @Override
-  public boolean canUpdateUser(String userId, UserUpdate userUpdate) {
+  public boolean canUpdateUser(String userId) {
     //admin can't update himself
     if (userId.equals(getCurrentUserName())) {
       return false;
     }
     User user = getUserFromUserId(userId);
-
-    if(userUpdate != null) {
-      enrichUserByUpdatedProperties(user, userUpdate);
-    }
-
     return createAdminActionsAuthorizer(user).canUpdateUser();
-  }
-
-  private void enrichUserByUpdatedProperties(User user, UserUpdate userUpdate) {
-    if (userUpdate.getEnabled() != null) {
-      user.setEnabled(userUpdate.getEnabled());
-    }
-    if (userUpdate.getPermissions() != null) {
-      user.setPermissions(userUpdate.getPermissions());
-    }
-    if (userUpdate.getRoles() != null) {
-      user.setRoles(userUpdate.getRoles());
-    }
   }
 
   @Override
@@ -86,7 +68,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
   private AdminActionsAuthorizer createAdminActionsAuthorizer(User user) {
     switch (getAdminStrongestRole()) {
       case STATE_ADMIN:
-        return new StateAdminAuthorizer(user);
+        return StateAdminAuthorizer.INSTANCE;
       case COUNTY_ADMIN:
         return new CountyAdminAuthorizer(user);
       case OFFICE_ADMIN:

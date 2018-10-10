@@ -17,8 +17,8 @@ public interface IdmService {
   @PostAuthorize("@authorizationService.canViewUser(returnObject)")
   User findUser(String id);
 
-  @PreAuthorize("@authorizationService.canUpdateUser(#id, #userUpdate)")
-  void updateUser(@P("id") String id, @P("userUpdate") UserUpdate userUpdate);
+  @PreAuthorize("@authorizationService.canUpdateUser(#id)")
+  void updateUser(@P("id") String id, UserUpdate updateUserDto);
 
   UserVerificationResult verifyIfUserCanBeCreated(String racfId, String email);
 

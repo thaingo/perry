@@ -174,7 +174,7 @@ public class IdmResource {
       UserByIdResponse response =
           UserByIdResponse.UserByIdResponseBuilder.anUserByIdResponse()
               .withUser(user)
-              .withEditable(authorizationService.canUpdateUser(id, null))
+              .withEditable(authorizationService.canUpdateUser(id))
               .build();
       return ResponseEntity.ok().body(response);
     } catch (UserNotFoundPerryException e) {

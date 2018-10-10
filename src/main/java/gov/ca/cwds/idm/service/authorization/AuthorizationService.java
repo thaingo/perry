@@ -1,7 +1,6 @@
 package gov.ca.cwds.idm.service.authorization;
 
 import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.dto.UserUpdate;
 
 public interface AuthorizationService {
 
@@ -9,7 +8,7 @@ public interface AuthorizationService {
 
   boolean canCreateUser(User user);
 
-  boolean canUpdateUser(String userId, UserUpdate userUpdate);
+  boolean canUpdateUser(String userId);
 
   boolean canResendInvitationMessage(String userId);
 
