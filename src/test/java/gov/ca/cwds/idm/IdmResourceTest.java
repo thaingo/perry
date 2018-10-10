@@ -28,6 +28,7 @@ import static gov.ca.cwds.idm.TestCognitoServiceFacade.USER_WITH_RACFID_ID;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.CREATE;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PERMISSIONS;
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.ROLES;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertStrict;
@@ -655,10 +656,14 @@ public class IdmResourceTest extends BaseIntegrationTest {
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setEnabled(Boolean.FALSE);
     userUpdate.setPermissions(toSet("RFA-rollout", "Hotline-rollout"));
+    userUpdate.setRoles(toSet("Office-admin", "CWS-worker"));
 
     AdminUpdateUserAttributesRequest updateAttributesRequest =
         setUpdateUserAttributesRequestAndResult(
-            USER_NO_RACFID_ID, attr(PERMISSIONS.getName(), "RFA-rollout:Hotline-rollout"));
+            USER_NO_RACFID_ID,
+            attr(PERMISSIONS.getName(), "RFA-rollout:Hotline-rollout"),
+            attr(ROLES.getName(), "Office-admin:CWS-worker")
+        );
 
     setDoraSuccess();
 
@@ -939,10 +944,14 @@ public class IdmResourceTest extends BaseIntegrationTest {
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setEnabled(Boolean.TRUE);
     userUpdate.setPermissions(toSet("test"));
+    userUpdate.setRoles(toSet("CWS-worker"));
 
     AdminUpdateUserAttributesRequest updateAttributesRequest =
         setUpdateUserAttributesRequestAndResult(
-            userId, attr(PERMISSIONS.getName(), "test"));
+            userId,
+            attr(PERMISSIONS.getName(), "test"),
+            attr(ROLES.getName(), "CWS-worker")
+        );
 
     AdminEnableUserRequest enableUserRequest = setEnableUserRequestAndResult(userId);
 
