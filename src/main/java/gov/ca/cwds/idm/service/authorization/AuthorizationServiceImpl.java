@@ -9,7 +9,7 @@ import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.MappingService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
-import gov.ca.cwds.idm.service.role.implementor.RoleImplementorFactory;
+import gov.ca.cwds.idm.service.role.implementor.AdminRoleImplementorFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -22,16 +22,16 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
   private MappingService mappingService;
 
-  private RoleImplementorFactory roleImplementorFactory;
+  private AdminRoleImplementorFactory adminRoleImplementorFactory;
 
   @Override
   public boolean canViewUser(User user) {
-    return roleImplementorFactory.getAdminActionsAuthorizer(user).canViewUser();
+    return adminRoleImplementorFactory.getAdminActionsAuthorizer(user).canViewUser();
   }
 
   @Override
   public boolean canCreateUser(User user) {
-    return roleImplementorFactory.getAdminActionsAuthorizer(user).canCreateUser();
+    return adminRoleImplementorFactory.getAdminActionsAuthorizer(user).canCreateUser();
   }
 
   @Override
@@ -41,13 +41,13 @@ public class AuthorizationServiceImpl implements AuthorizationService {
       return false;
     }
     User user = getUserFromUserId(userId);
-    return roleImplementorFactory.getAdminActionsAuthorizer(user).canUpdateUser();
+    return adminRoleImplementorFactory.getAdminActionsAuthorizer(user).canUpdateUser();
   }
 
   @Override
   public boolean canResendInvitationMessage(String userId) {
     User user = getUserFromUserId(userId);
-    return roleImplementorFactory.getAdminActionsAuthorizer(user).canResendInvitationMessage();
+    return adminRoleImplementorFactory.getAdminActionsAuthorizer(user).canResendInvitationMessage();
   }
 
   private User getUserFromUserId(String userId) {
@@ -73,9 +73,9 @@ public class AuthorizationServiceImpl implements AuthorizationService {
   }
 
   @Autowired
-  public void setRoleImplementorFactory(
-      RoleImplementorFactory roleImplementorFactory) {
-    this.roleImplementorFactory = roleImplementorFactory;
+  public void setAdminRoleImplementorFactory(
+      AdminRoleImplementorFactory adminRoleImplementorFactory) {
+    this.adminRoleImplementorFactory = adminRoleImplementorFactory;
   }
 
 }

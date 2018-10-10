@@ -10,7 +10,8 @@ import java.util.List;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class UserByIdResponse implements Serializable {
 
-  private static final long serialVersionUID = 786532350090095256L;
+  private static final long serialVersionUID = 2528332054070849802L;
+
   private boolean editable;
   private User user;
   private List<String> possibleRoles;

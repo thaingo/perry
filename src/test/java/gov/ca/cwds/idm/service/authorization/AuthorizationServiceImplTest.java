@@ -15,7 +15,7 @@ import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-import gov.ca.cwds.idm.service.role.implementor.RoleImplementorFactory;
+import gov.ca.cwds.idm.service.role.implementor.AdminRoleImplementorFactory;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,7 +32,7 @@ public class AuthorizationServiceImplTest {
   @Before
   public void before() {
     service = new AuthorizationServiceImpl();
-    service.setRoleImplementorFactory(new RoleImplementorFactory());
+    service.setAdminRoleImplementorFactory(new AdminRoleImplementorFactory());
     mockStatic(CurrentAuthenticatedUserUtil.class);
   }
 

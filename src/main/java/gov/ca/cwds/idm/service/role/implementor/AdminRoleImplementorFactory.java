@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @Profile("idm")
-public class RoleImplementorFactory implements AdminRoleImplementor {
+public class AdminRoleImplementorFactory {
 
   public AdminRoleImplementor createAdminRoleImplementor() {
     switch (UserRolesService.getStrongestAdminRole(getCurrentUser())) {
@@ -35,12 +35,10 @@ public class RoleImplementorFactory implements AdminRoleImplementor {
     }
   }
 
-  @Override
   public AdminActionsAuthorizer getAdminActionsAuthorizer(User user) {
     return createAdminRoleImplementor().getAdminActionsAuthorizer(user);
   }
 
-  @Override
   public List<String> getPossibleUserRoles() {
     return createAdminRoleImplementor().getPossibleUserRoles();
   }

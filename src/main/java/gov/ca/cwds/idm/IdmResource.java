@@ -18,7 +18,7 @@ import gov.ca.cwds.idm.service.DictionaryProvider;
 import gov.ca.cwds.idm.service.IdmService;
 import gov.ca.cwds.idm.service.OfficeService;
 import gov.ca.cwds.idm.service.authorization.AuthorizationService;
-import gov.ca.cwds.idm.service.role.implementor.RoleImplementorFactory;
+import gov.ca.cwds.idm.service.role.implementor.AdminRoleImplementorFactory;
 import gov.ca.cwds.rest.api.domain.IdmException;
 import gov.ca.cwds.rest.api.domain.PartialSuccessException;
 import gov.ca.cwds.rest.api.domain.UserAlreadyExistsException;
@@ -77,7 +77,7 @@ public class IdmResource {
   private OfficeService officeService;
 
   @Autowired
-  private RoleImplementorFactory roleImplementorFactory;
+  private AdminRoleImplementorFactory adminRoleImplementorFactory;
 
   @Autowired
   private AuthorizationService authorizationService;
@@ -183,7 +183,7 @@ public class IdmResource {
           UserByIdResponse.UserByIdResponseBuilder.anUserByIdResponse()
               .withUser(user)
               .withEditable(authorizationService.canUpdateUser(id))
-              .withPossibleRoles(roleImplementorFactory.getPossibleUserRoles())
+              .withPossibleRoles(adminRoleImplementorFactory.getPossibleUserRoles())
               .build();
       return ResponseEntity.ok().body(response);
     } catch (UserNotFoundPerryException e) {
