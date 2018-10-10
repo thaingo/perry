@@ -18,5 +18,6 @@
       "CALS-external-worker"
     ]
   },
-  "editable": false
+  "editable": false,
+  "possible_roles": []
 }

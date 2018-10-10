@@ -1,4 +1,4 @@
-package gov.ca.cwds.idm.service.authorization;
+package gov.ca.cwds.idm.service.role.implementor;
 
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserCountyName;
 
