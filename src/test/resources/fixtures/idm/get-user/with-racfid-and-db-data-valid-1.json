@@ -22,5 +22,9 @@
       "CWS-worker"
     ]
   },
-  "editable": false
+  "editable": true,
+  "possible_roles": [
+    "CWS-worker",
+    "Office-admin"
+  ]
 }

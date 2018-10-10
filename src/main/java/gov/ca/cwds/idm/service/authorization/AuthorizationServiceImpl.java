@@ -1,9 +1,7 @@
 package gov.ca.cwds.idm.service.authorization;
 
-import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
-import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
-import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
+import static gov.ca.cwds.idm.service.authorization.UserRolesService.getStrongestAdminRole;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserName;
 
@@ -11,6 +9,7 @@ import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.MappingService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
+import gov.ca.cwds.idm.service.role.implementor.RoleImplementorFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -23,14 +22,16 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
   private MappingService mappingService;
 
+  private RoleImplementorFactory roleImplementorFactory;
+
   @Override
   public boolean canViewUser(User user) {
-    return createAdminActionsAuthorizer(user).canViewUser();
+    return roleImplementorFactory.getAdminActionsAuthorizer(user).canViewUser();
   }
 
   @Override
   public boolean canCreateUser(User user) {
-    return createAdminActionsAuthorizer(user).canCreateUser();
+    return roleImplementorFactory.getAdminActionsAuthorizer(user).canCreateUser();
   }
 
   @Override
@@ -40,44 +41,25 @@ public class AuthorizationServiceImpl implements AuthorizationService {
       return false;
     }
     User user = getUserFromUserId(userId);
-    return createAdminActionsAuthorizer(user).canUpdateUser();
+    return roleImplementorFactory.getAdminActionsAuthorizer(user).canUpdateUser();
   }
 
   @Override
   public boolean canResendInvitationMessage(String userId) {
     User user = getUserFromUserId(userId);
-    return createAdminActionsAuthorizer(user).canResendInvitationMessage();
+    return roleImplementorFactory.getAdminActionsAuthorizer(user).canResendInvitationMessage();
   }
 
   private User getUserFromUserId(String userId) {
     UserType cognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
 
     User user;
-    if (OFFICE_ADMIN.equals(getAdminStrongestRole())) {
+    if (OFFICE_ADMIN.equals(getStrongestAdminRole(getCurrentUser()))) {
       user = mappingService.toUser(cognitoUser);
     } else {
       user = mappingService.toUserWithoutCwsData(cognitoUser);
     }
     return user;
-  }
-
-  private String getAdminStrongestRole() {
-    return UserRolesService.getStrongestAdminRole(getCurrentUser());
-  }
-
-  private AdminActionsAuthorizer createAdminActionsAuthorizer(User user) {
-    switch (getAdminStrongestRole()) {
-      case STATE_ADMIN:
-        return StateAdminAuthorizer.INSTANCE;
-      case COUNTY_ADMIN:
-        return new CountyAdminAuthorizer(user);
-      case OFFICE_ADMIN:
-        return new OfficeAdminAuthorizer(user);
-      case CALS_ADMIN:
-        return new CalsAdminAuthorizer(user);
-      default:
-        throw new IllegalStateException();
-    }
   }
 
   @Autowired
@@ -88,6 +70,12 @@ public class AuthorizationServiceImpl implements AuthorizationService {
   @Autowired
   public void setMappingService(MappingService mappingService) {
     this.mappingService = mappingService;
+  }
+
+  @Autowired
+  public void setRoleImplementorFactory(
+      RoleImplementorFactory roleImplementorFactory) {
+    this.roleImplementorFactory = roleImplementorFactory;
   }
 
 }

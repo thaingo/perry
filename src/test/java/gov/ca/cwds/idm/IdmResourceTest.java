@@ -262,14 +262,14 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @WithMockCustomUser(roles = {OFFICE_ADMIN})
   public void testGetUserOfficeAdmin() throws Exception {
     testGetValidUser(USER_WITH_RACFID_AND_DB_DATA_ID,
-        "fixtures/idm/get-user/with-racfid-and-db-data-valid.json");
+        "fixtures/idm/get-user/with-racfid-and-db-data-valid-3.json");
   }
 
   @Test
   @WithMockCustomUser(roles = {OFFICE_ADMIN}, adminOfficeIds = {"otherOfficeId"})
   public void testGetUserOfficeAdminOtherOffice() throws Exception {
     testGetValidUser(USER_WITH_RACFID_AND_DB_DATA_ID,
-        "fixtures/idm/get-user/with-racfid-and-db-data-valid-non-editable.json");
+        "fixtures/idm/get-user/with-racfid-and-db-data-valid-2.json");
   }
 
   @Test
@@ -288,7 +288,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @Test
   @WithMockCustomUser
   public void testGetUserWithRacfId() throws Exception {
-    testGetValidUser(USER_WITH_RACFID_ID, "fixtures/idm/get-user/with-racfid-valid.json");
+    testGetValidUser(USER_WITH_RACFID_ID, "fixtures/idm/get-user/with-racfid-valid-1.json");
   }
 
   @Test
@@ -296,7 +296,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
   public void testGetUserWithRacfIdAndDbData() throws Exception {
     testGetValidUser(
         USER_WITH_RACFID_AND_DB_DATA_ID,
-        "fixtures/idm/get-user/with-racfid-and-db-data-valid.json");
+        "fixtures/idm/get-user/with-racfid-and-db-data-valid-1.json");
   }
 
   @Test
@@ -350,7 +350,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @Test
   @WithMockCustomUser(roles = {STATE_ADMIN}, county = "Madera")
   public void testGetUserStateAdminDifferentCounty() throws Exception {
-    testGetValidUser(USER_WITH_RACFID_ID, "fixtures/idm/get-user/with-racfid-valid.json");
+    testGetValidUser(USER_WITH_RACFID_ID, "fixtures/idm/get-user/with-racfid-valid-2.json");
   }
 
   private void assertGetUserUnauthorized(String userId) throws Exception {

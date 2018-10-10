@@ -1,14 +1,15 @@
-package gov.ca.cwds.idm.service.authorization;
+package gov.ca.cwds.idm.service.role.implementor;
 
-import static gov.ca.cwds.idm.service.authorization.AuthorizationUtils.isPrincipalInTheSameCountyWith;
+import static gov.ca.cwds.idm.service.role.implementor.AuthorizationUtils.isPrincipalInTheSameCountyWith;
 
 import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.idm.service.authorization.AdminActionsAuthorizer;
 
 class CountyAdminAuthorizer implements AdminActionsAuthorizer {
 
   private final User user;
 
-  public CountyAdminAuthorizer(User user) {
+  CountyAdminAuthorizer(User user) {
     this.user = user;
   }
 

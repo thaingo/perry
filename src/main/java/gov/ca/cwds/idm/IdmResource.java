@@ -18,6 +18,7 @@ import gov.ca.cwds.idm.service.DictionaryProvider;
 import gov.ca.cwds.idm.service.IdmService;
 import gov.ca.cwds.idm.service.OfficeService;
 import gov.ca.cwds.idm.service.authorization.AuthorizationService;
+import gov.ca.cwds.idm.service.role.implementor.RoleImplementorFactory;
 import gov.ca.cwds.rest.api.domain.IdmException;
 import gov.ca.cwds.rest.api.domain.PartialSuccessException;
 import gov.ca.cwds.rest.api.domain.UserAlreadyExistsException;
@@ -63,47 +64,54 @@ public class IdmResource {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(IdmResource.class);
 
-  @Autowired private IdmService idmService;
+  @Autowired
+  private IdmService idmService;
 
-  @Autowired private DictionaryProvider dictionaryProvider;
+  @Autowired
+  private DictionaryProvider dictionaryProvider;
 
-  @Autowired private MessagesService messages;
+  @Autowired
+  private MessagesService messages;
 
-  @Autowired private OfficeService officeService;
+  @Autowired
+  private OfficeService officeService;
+
+  @Autowired
+  private RoleImplementorFactory roleImplementorFactory;
 
   @Autowired
   private AuthorizationService authorizationService;
 
   @RequestMapping(method = RequestMethod.GET, value = "/users", produces = "application/json")
   @ApiOperation(
-    value = "Users page",
-    response = UsersPage.class,
-    notes =
-        "This service is used by batch job to build the ES index. The client of this service should have 'IDM-job' role."
-            + "Once there is more items than a default page size (60) in the datasource you will get a paginationToken "
-            + "in a responce. Use it as a parameter to get a next page."
+      value = "Users page",
+      response = UsersPage.class,
+      notes =
+          "This service is used by batch job to build the ES index. The client of this service should have 'IDM-job' role."
+              + "Once there is more items than a default page size (60) in the datasource you will get a paginationToken "
+              + "in a responce. Use it as a parameter to get a next page."
   )
   @ApiResponses(value = {@ApiResponse(code = 401, message = "Not Authorized")})
   @PreAuthorize("hasAuthority(T(gov.ca.cwds.config.api.idm.Roles).IDM_JOB)")
   public UsersPage getUsers(
       @ApiParam(name = "paginationToken", value = "paginationToken for the next page")
-          @RequestParam(name = "paginationToken", required = false)
+      @RequestParam(name = "paginationToken", required = false)
           String paginationToken) {
     return idmService.getUserPage(paginationToken);
   }
 
   @RequestMapping(
-    method = RequestMethod.POST,
-    value = "/users/search",
-    consumes = "application/json",
-    produces = "application/json"
+      method = RequestMethod.POST,
+      value = "/users/search",
+      consumes = "application/json",
+      produces = "application/json"
   )
   @ApiResponses(value = {@ApiResponse(code = 401, message = "Not Authorized")})
   @ApiOperation(
-    value = "Search users with given RACFIDs list",
-    response = User.class,
-    responseContainer = "List",
-    notes = "This service is used by batch job to build the ES index. The client of this service should have 'IDM-job' role."
+      value = "Search users with given RACFIDs list",
+      response = User.class,
+      responseContainer = "List",
+      notes = "This service is used by batch job to build the ES index. The client of this service should have 'IDM-job' role."
   )
   @PreAuthorize("hasAuthority(T(gov.ca.cwds.config.api.idm.Roles).IDM_JOB)")
   public List<User> searchUsersByRacfid(
@@ -157,16 +165,16 @@ public class IdmResource {
   @RequestMapping(method = RequestMethod.GET, value = "/users/{id}", produces = "application/json")
   @ApiOperation(value = "Find User by ID", response = UserByIdResponse.class)
   @ApiResponses(
-    value = {
-      @ApiResponse(code = 401, message = "Not Authorized"),
-      @ApiResponse(code = 404, message = "Not found")
-    }
+      value = {
+          @ApiResponse(code = 401, message = "Not Authorized"),
+          @ApiResponse(code = 404, message = "Not found")
+      }
   )
   @PreAuthorize("@userRoleService.isAdmin(principal)")
   public ResponseEntity<UserByIdResponse> getUser(
       @ApiParam(required = true, value = "The unique user ID", example = "userId1")
-          @PathVariable
-          @NotNull
+      @PathVariable
+      @NotNull
           String id) {
 
     try {
@@ -175,6 +183,7 @@ public class IdmResource {
           UserByIdResponse.UserByIdResponseBuilder.anUserByIdResponse()
               .withUser(user)
               .withEditable(authorizationService.canUpdateUser(id))
+              .withPossibleRoles(roleImplementorFactory.getPossibleUserRoles())
               .build();
       return ResponseEntity.ok().body(response);
     } catch (UserNotFoundPerryException e) {
@@ -183,29 +192,29 @@ public class IdmResource {
   }
 
   @RequestMapping(
-    method = RequestMethod.PATCH,
-    value = "/users/{id}",
-    consumes = "application/json"
+      method = RequestMethod.PATCH,
+      value = "/users/{id}",
+      consumes = "application/json"
   )
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @ApiResponses(
-    value = {
-      @ApiResponse(code = 204, message = "No Content"),
-      @ApiResponse(code = 401, message = "Not Authorized"),
-      @ApiResponse(code = 404, message = "Not found")
-    }
+      value = {
+          @ApiResponse(code = 204, message = "No Content"),
+          @ApiResponse(code = 401, message = "Not Authorized"),
+          @ApiResponse(code = 404, message = "Not found")
+      }
   )
   @ApiOperation(value = "Update User")
   @PreAuthorize("@userRoleService.isAdmin(principal) &&  " +
       " !@userRoleService.isCalsAdminStrongestRole(principal)")
   public ResponseEntity updateUser(
       @ApiParam(required = true, value = "The unique user ID", example = "userId1")
-          @PathVariable
-          @NotNull
+      @PathVariable
+      @NotNull
           String id,
       @ApiParam(required = true, name = "userUpdateData", value = "The User update data")
-          @NotNull
-          @RequestBody
+      @NotNull
+      @RequestBody
           UserUpdate updateUserDto) {
     try {
       idmService.updateUser(id, updateUserDto);
@@ -229,13 +238,13 @@ public class IdmResource {
   @ResponseStatus(HttpStatus.CREATED)
   @ApiResponses(
       value = {
-        @ApiResponse(code = 201, message = "New User is created successfully"),
-        @ApiResponse(code = 400, message = "Bad Request. Provided JSON has invalid data"),
-        @ApiResponse(
-            code = 401,
-            message =
-                "Not Authorized. For example county_name differs from the county admin belongs to."),
-        @ApiResponse(code = 409, message = "Conflict. User with the same email already exists")
+          @ApiResponse(code = 201, message = "New User is created successfully"),
+          @ApiResponse(code = 400, message = "Bad Request. Provided JSON has invalid data"),
+          @ApiResponse(
+              code = 401,
+              message =
+                  "Not Authorized. For example county_name differs from the county admin belongs to."),
+          @ApiResponse(code = 409, message = "Conflict. User with the same email already exists")
       })
   @ApiOperation(
       value = "Create new User",
@@ -248,9 +257,9 @@ public class IdmResource {
       " !@userRoleService.isCalsAdminStrongestRole(principal)")
   public ResponseEntity createUser(
       @ApiParam(required = true, name = "User", value = "The User create data")
-          @NotNull
-          @Valid
-          @RequestBody
+      @NotNull
+      @Valid
+      @RequestBody
           User user) {
     try {
       String newUserId = idmService.createUser(user);
@@ -278,8 +287,8 @@ public class IdmResource {
     }
   }
 
-  private URI getNewUserLocationUri(String newUserId){
-    return  ServletUriComponentsBuilder.fromCurrentRequest()
+  private URI getNewUserLocationUri(String newUserId) {
+    return ServletUriComponentsBuilder.fromCurrentRequest()
         .path("/{id}")
         .buildAndExpand(newUserId)
         .toUri();
@@ -287,20 +296,20 @@ public class IdmResource {
 
   @RequestMapping(method = RequestMethod.GET, value = "/permissions", produces = "application/json")
   @ApiResponses(
-    value = {
-      @ApiResponse(code = 401, message = "Not Authorized"),
-      @ApiResponse(code = 404, message = "Not found")
-    }
+      value = {
+          @ApiResponse(code = 401, message = "Not Authorized"),
+          @ApiResponse(code = 404, message = "Not found")
+      }
   )
   @ApiOperation(
-    value = "Get List of possible permissions",
-    response = Permission.class,
-    responseContainer = "List"
+      value = "Get List of possible permissions",
+      response = Permission.class,
+      responseContainer = "List"
   )
   @PreAuthorize("@userRoleService.isAdmin(principal) && "
       + "!@userRoleService.isCalsAdminStrongestRole(principal)")
   public List<Permission> getPermissions() {
-    return  dictionaryProvider.getPermissions();
+    return dictionaryProvider.getPermissions();
   }
 
   @RequestMapping(method = RequestMethod.GET, value = "users/verify", produces = "application/json")
@@ -310,12 +319,12 @@ public class IdmResource {
       + "!@userRoleService.isCalsAdminStrongestRole(principal)")
   public ResponseEntity<UserVerificationResult> verifyIfUserCanBeCreated(
       @ApiParam(required = true, name = "racfid", value = "The RACFID to verify user by in CWS/CMS")
-          @NotNull
-          @RequestParam("racfid")
+      @NotNull
+      @RequestParam("racfid")
           String racfId,
       @ApiParam(required = true, name = "email", value = "The email to verify user by in Cognito")
-          @NotNull
-          @RequestParam("email")
+      @NotNull
+      @RequestParam("email")
           String email) {
     return ResponseEntity.ok().body(idmService.verifyIfUserCanBeCreated(racfId, email));
   }

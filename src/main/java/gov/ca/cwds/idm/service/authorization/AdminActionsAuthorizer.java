@@ -1,6 +1,6 @@
 package gov.ca.cwds.idm.service.authorization;
 
-interface AdminActionsAuthorizer {
+public interface AdminActionsAuthorizer {
 
   boolean canViewUser();
 

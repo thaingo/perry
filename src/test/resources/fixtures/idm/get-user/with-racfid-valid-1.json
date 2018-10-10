@@ -19,5 +19,9 @@
       "County-admin"
     ]
   },
-  "editable": true
+  "editable": true,
+  "possible_roles": [
+    "CWS-worker",
+    "Office-admin"
+  ]
 }

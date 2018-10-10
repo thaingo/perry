@@ -4,8 +4,8 @@ import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
-import static gov.ca.cwds.idm.service.authorization.AuthorizationTestHelper.admin;
-import static gov.ca.cwds.idm.service.authorization.AuthorizationTestHelper.user;
+import static gov.ca.cwds.idm.service.AuthorizationTestHelper.admin;
+import static gov.ca.cwds.idm.service.AuthorizationTestHelper.user;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserCountyName;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserOfficeIds;
@@ -15,6 +15,7 @@ import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
+import gov.ca.cwds.idm.service.role.implementor.RoleImplementorFactory;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,6 +32,7 @@ public class AuthorizationServiceImplTest {
   @Before
   public void before() {
     service = new AuthorizationServiceImpl();
+    service.setRoleImplementorFactory(new RoleImplementorFactory());
     mockStatic(CurrentAuthenticatedUserUtil.class);
   }
 
