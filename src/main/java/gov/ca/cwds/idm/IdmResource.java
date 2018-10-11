@@ -4,6 +4,7 @@ import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STAND
 import static gov.ca.cwds.service.messages.MessageCode.INVALID_DATE_FORMAT;
 import static java.util.stream.Collectors.toList;
 
+import gov.ca.cwds.config.api.idm.Roles;
 import gov.ca.cwds.data.persistence.auth.CwsOffice;
 import gov.ca.cwds.idm.dto.IdmApiCustomError;
 import gov.ca.cwds.idm.dto.User;
@@ -33,6 +34,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -301,6 +303,23 @@ public class IdmResource {
       + "!@userRoleService.isCalsAdminStrongestRole(principal)")
   public List<Permission> getPermissions() {
     return  dictionaryProvider.getPermissions();
+  }
+
+  @RequestMapping(method = RequestMethod.GET, value = "/roles", produces = "application/json")
+  @ApiResponses(
+    value = {
+      @ApiResponse(code = 401, message = "Not Authorized"),
+      @ApiResponse(code = 404, message = "Not found")
+    }
+  )
+  @ApiOperation(
+    value = "Get List of possible roles",
+    responseContainer = "List"
+  )
+  @PreAuthorize("@userRoleService.isAdmin(principal) && "
+      + "!@userRoleService.isCalsAdminStrongestRole(principal)")
+  public List<Map<String, String>> getRoles() {
+    return Roles.findRoles();
   }
 
   @RequestMapping(method = RequestMethod.GET, value = "users/verify", produces = "application/json")

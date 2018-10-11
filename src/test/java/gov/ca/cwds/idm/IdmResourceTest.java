@@ -254,6 +254,54 @@ public class IdmResourceTest extends BaseIntegrationTest {
 
   @Test
   @WithMockCustomUser
+  public void testGetRoles() throws Exception {
+    assertGetRolesSuccess();
+  }
+
+  private void assertGetRolesSuccess() throws Exception {
+    MvcResult result =
+        mockMvc
+            .perform(MockMvcRequestBuilders.get("/idm/roles"))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
+            .andReturn();
+
+    assertStrict(result, "fixtures/idm/roles/valid.json");
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {"OtherRole"})
+  public void testGetRolesWithOtherRole() throws Exception {
+    assertGetRolesUnauthorized();
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {STATE_ADMIN})
+  public void testGetRolesStateAdmin() throws Exception {
+    assertGetRolesSuccess();
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {CALS_ADMIN})
+  public void testGetRolesCalsAdmin() throws Exception {
+    assertGetRolesUnauthorized();
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {OFFICE_ADMIN})
+  public void testGetRolesOfficeAdmin() throws Exception {
+    assertGetRolesSuccess();
+  }
+
+  private void assertGetRolesUnauthorized() throws Exception {
+    mockMvc
+        .perform(MockMvcRequestBuilders.get("/idm/roles"))
+        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+        .andReturn();
+  }
+
+  @Test
+  @WithMockCustomUser
   public void testGetUserNoRacfId() throws Exception {
     testGetValidUser(USER_NO_RACFID_ID, "fixtures/idm/get-user/no-racfid-valid.json");
   }
