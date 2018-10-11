@@ -1,0 +1,26 @@
+[
+  {
+    "id": "State-admin",
+    "name": "State Administrator"
+  },
+  {
+    "id": "County-admin",
+    "name": "County Administrator"
+  },
+  {
+    "id": "Office-admin",
+    "name": "Office Administrator"
+  },
+  {
+    "id": "CALS-admin",
+    "name": "CALS Administrator"
+  },
+  {
+    "id": "CWS-worker",
+    "name": "CWS Worker"
+  },
+  {
+    "id": "CALS-external-worker",
+    "name": "CALS External Worker"
+  }
+]
