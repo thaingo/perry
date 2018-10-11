@@ -339,7 +339,7 @@ public class IdmResource {
     return ResponseEntity.ok().body(idmService.verifyIfUserCanBeCreated(racfId, email));
   }
 
-  @RequestMapping(method = RequestMethod.GET, value = "users/resend/{id}", produces = "application/json")
+  @RequestMapping(method = RequestMethod.GET, value = "users/resend", produces = "application/json")
   @ApiOperation(
       value =
           "Resend the invitation message to a user that already exists and reset the expiration\n "
@@ -354,12 +354,12 @@ public class IdmResource {
   @PreAuthorize("@userRoleService.isAdmin(principal) &&  " +
       " !@userRoleService.isCalsAdminStrongestRole(principal)")
   public ResponseEntity resendInvitationEmail(
-      @ApiParam(required = true, value = "The unique user ID", example = "userId1")
-      @PathVariable
+      @ApiParam(required = true, name = "email", value = "The unique email ID", example = "email@example.com")
       @NotNull
-          String id) {
+      @RequestParam("email")
+          String email) {
     try {
-      idmService.resendInvitationMessage(id);
+      idmService.resendInvitationMessage(email);
       return ResponseEntity.ok().build();
     } catch (UserNotFoundPerryException e) {
       return ResponseEntity.notFound().build();
