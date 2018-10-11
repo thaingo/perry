@@ -28,6 +28,7 @@ import static gov.ca.cwds.idm.TestCognitoServiceFacade.USER_WITH_RACFID_ID;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.CREATE;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PERMISSIONS;
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.ROLES;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertStrict;
@@ -310,14 +311,14 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @WithMockCustomUser(roles = {OFFICE_ADMIN})
   public void testGetUserOfficeAdmin() throws Exception {
     testGetValidUser(USER_WITH_RACFID_AND_DB_DATA_ID,
-        "fixtures/idm/get-user/with-racfid-and-db-data-valid.json");
+        "fixtures/idm/get-user/with-racfid-and-db-data-valid-3.json");
   }
 
   @Test
   @WithMockCustomUser(roles = {OFFICE_ADMIN}, adminOfficeIds = {"otherOfficeId"})
   public void testGetUserOfficeAdminOtherOffice() throws Exception {
     testGetValidUser(USER_WITH_RACFID_AND_DB_DATA_ID,
-        "fixtures/idm/get-user/with-racfid-and-db-data-valid-non-editable.json");
+        "fixtures/idm/get-user/with-racfid-and-db-data-valid-2.json");
   }
 
   @Test
@@ -336,7 +337,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @Test
   @WithMockCustomUser
   public void testGetUserWithRacfId() throws Exception {
-    testGetValidUser(USER_WITH_RACFID_ID, "fixtures/idm/get-user/with-racfid-valid.json");
+    testGetValidUser(USER_WITH_RACFID_ID, "fixtures/idm/get-user/with-racfid-valid-1.json");
   }
 
   @Test
@@ -344,7 +345,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
   public void testGetUserWithRacfIdAndDbData() throws Exception {
     testGetValidUser(
         USER_WITH_RACFID_AND_DB_DATA_ID,
-        "fixtures/idm/get-user/with-racfid-and-db-data-valid.json");
+        "fixtures/idm/get-user/with-racfid-and-db-data-valid-1.json");
   }
 
   @Test
@@ -398,7 +399,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @Test
   @WithMockCustomUser(roles = {STATE_ADMIN}, county = "Madera")
   public void testGetUserStateAdminDifferentCounty() throws Exception {
-    testGetValidUser(USER_WITH_RACFID_ID, "fixtures/idm/get-user/with-racfid-valid.json");
+    testGetValidUser(USER_WITH_RACFID_ID, "fixtures/idm/get-user/with-racfid-valid-2.json");
   }
 
   private void assertGetUserUnauthorized(String userId) throws Exception {
@@ -703,10 +704,14 @@ public class IdmResourceTest extends BaseIntegrationTest {
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setEnabled(Boolean.FALSE);
     userUpdate.setPermissions(toSet("RFA-rollout", "Hotline-rollout"));
+    userUpdate.setRoles(toSet("Office-admin", "CWS-worker"));
 
     AdminUpdateUserAttributesRequest updateAttributesRequest =
         setUpdateUserAttributesRequestAndResult(
-            USER_NO_RACFID_ID, attr(PERMISSIONS.getName(), "RFA-rollout:Hotline-rollout"));
+            USER_NO_RACFID_ID,
+            attr(PERMISSIONS.getName(), "RFA-rollout:Hotline-rollout"),
+            attr(ROLES.getName(), "Office-admin:CWS-worker")
+        );
 
     setDoraSuccess();
 
@@ -987,10 +992,14 @@ public class IdmResourceTest extends BaseIntegrationTest {
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setEnabled(Boolean.TRUE);
     userUpdate.setPermissions(toSet("test"));
+    userUpdate.setRoles(toSet("CWS-worker"));
 
     AdminUpdateUserAttributesRequest updateAttributesRequest =
         setUpdateUserAttributesRequestAndResult(
-            userId, attr(PERMISSIONS.getName(), "test"));
+            userId,
+            attr(PERMISSIONS.getName(), "test"),
+            attr(ROLES.getName(), "CWS-worker")
+        );
 
     AdminEnableUserRequest enableUserRequest = setEnableUserRequestAndResult(userId);
 

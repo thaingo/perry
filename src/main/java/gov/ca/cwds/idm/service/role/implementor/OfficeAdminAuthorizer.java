@@ -1,19 +1,20 @@
-package gov.ca.cwds.idm.service.authorization;
+package gov.ca.cwds.idm.service.role.implementor;
 
-import static gov.ca.cwds.idm.service.authorization.AuthorizationUtils.isPrincipalInTheSameCountyWith;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isAdmin;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isCountyAdmin;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isStateAdmin;
+import static gov.ca.cwds.idm.service.role.implementor.AuthorizationUtils.isPrincipalInTheSameCountyWith;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserOfficeIds;
 
 import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.idm.service.authorization.AdminActionsAuthorizer;
 import java.util.Set;
 
 class OfficeAdminAuthorizer implements AdminActionsAuthorizer {
 
   private final User user;
 
-  public OfficeAdminAuthorizer(User user) {
+  OfficeAdminAuthorizer(User user) {
     this.user = user;
   }
 
