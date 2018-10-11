@@ -198,10 +198,11 @@ public class IdmServiceImpl implements IdmService {
 
   private User getNewUser(UserType existedCognitoUser, UserUpdate updateUserDto) {
     User user = mappingService.toUser(existedCognitoUser);
-    return enrichUserByUpdateDto(user, updateUserDto);
+    enrichUserByUpdateDto(user, updateUserDto);
+    return user;
   }
 
-  static User enrichUserByUpdateDto(User user, UserUpdate updateUserDto) {
+  static void enrichUserByUpdateDto(User user, UserUpdate updateUserDto) {
     Boolean newEnabled = updateUserDto.getEnabled();
     if(newEnabled != null) {
       user.setEnabled(newEnabled);
@@ -214,7 +215,6 @@ public class IdmServiceImpl implements IdmService {
     if(newRoles != null) {
       user.setRoles(newRoles);
     }
-    return user;
   }
 
   private boolean doesElasticSearchNeedUpdate(ExecutionStatus updateAttributesStatus,
