@@ -689,6 +689,24 @@ public class IdmResourceTest extends BaseIntegrationTest {
 
   @Test
   @WithMockCustomUser
+  public void testUpdateUserNotAllowedRole() throws Exception {
+
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setEnabled(Boolean.FALSE);
+    userUpdate.setRoles(toSet("State-admin"));
+
+    MvcResult result = mockMvc
+        .perform(
+            MockMvcRequestBuilders.patch("/idm/users/" + USER_NO_RACFID_ID)
+                .contentType(JSON_CONTENT_TYPE)
+                .content(asJsonString(userUpdate)))
+        .andExpect(MockMvcResultMatchers.status().isBadRequest())
+        .andReturn();
+    assertExtensible(result, "fixtures/idm/update-user/not-allowed-role-error.json");
+  }
+
+  @Test
+  @WithMockCustomUser
   public void testValidationUpdateUserChangeInactiveToActive_throwsNoRacfIdInCWS() throws Exception {
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setEnabled(Boolean.TRUE);
