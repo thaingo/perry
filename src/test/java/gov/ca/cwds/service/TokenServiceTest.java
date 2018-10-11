@@ -4,7 +4,11 @@ import gov.ca.cwds.PerryProperties;
 import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.data.reissue.TokenRepository;
 import gov.ca.cwds.data.reissue.model.PerryTokenEntity;
+import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.security.jwt.JwtConfiguration;
+import java.util.Date;
+import java.util.function.Supplier;
+import org.apache.commons.lang3.time.DateUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,6 +25,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.TransactionSystemException;
+import org.springframework.transaction.annotation.Transactional;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest(
@@ -96,6 +101,26 @@ public class TokenServiceTest {
     String accessCode2 = issueAccessCode(PERRY_TOKEN + "2");
     assert !accessCode.equals(accessCode2);
     assert tokenRepository.findAll().size() == 1;
+  }
+
+  @Test
+  @Transactional(value = "tokenTransactionManager")
+  public void testPerryTokenIsRefreshed() {
+    properties.setTokenRecordTimeout(1000);
+    Date minLastUsedDate = new Date();
+    String accessCode = issueAccessCode();
+    final String perryToken = tokenService.getPerryTokenByAccessCode(accessCode);
+    validateLastUsedDate(minLastUsedDate, () -> tokenRepository.getOne(perryToken));
+    validateLastUsedDate(new Date(), () -> tokenService.getPerryToken(perryToken));
+  }
+
+  private void validateLastUsedDate(Date minLastUsedDate, Supplier<PerryTokenEntity> perryTokenSupplier) {
+    long minLastUsedDateTime = minLastUsedDate.getTime();
+    PerryTokenEntity perryTokenEntity = perryTokenSupplier.get();
+    long maxLastUsedDateTime = new Date().getTime();
+    long lastUsedDate = perryTokenEntity.getLastUsedDate().getTime();
+    assert lastUsedDate >= minLastUsedDateTime;
+    assert lastUsedDate <= maxLastUsedDateTime;
   }
 
   private String issueAccessCode() {
