@@ -114,6 +114,20 @@ public class TokenServiceTest {
     validateLastUsedDate(new Date(), () -> tokenService.getPerryToken(perryToken));
   }
 
+  @Test(expected = PerryException.class)
+  @Transactional(value = "tokenTransactionManager")
+  public void testExpiredPerryToken() {
+    properties.setTokenRecordTimeout(0);
+    String accessCode = issueAccessCode();
+    String perryToken = tokenService.getPerryTokenByAccessCode(accessCode);
+    try {
+      tokenService.getPerryToken(perryToken);
+    } catch (PerryException e) {
+      assert tokenRepository.findAll().isEmpty();
+      throw e;
+    }
+  }
+
   private void validateLastUsedDate(Date minLastUsedDate, Supplier<PerryTokenEntity> perryTokenSupplier) {
     long minLastUsedDateTime = minLastUsedDate.getTime();
     PerryTokenEntity perryTokenEntity = perryTokenSupplier.get();
