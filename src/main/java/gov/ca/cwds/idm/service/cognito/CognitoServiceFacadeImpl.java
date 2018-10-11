@@ -2,10 +2,13 @@ package gov.ca.cwds.idm.service.cognito;
 
 import static gov.ca.cwds.idm.persistence.ns.OperationType.GET;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PERMISSIONS;
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.ROLES;
 import static gov.ca.cwds.idm.service.cognito.UserLastAuthenticatedTimestampExtractor.extractUserLastAuthenticatedTimestamp;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.EMAIL_DELIVERY;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.buildCreateUserAttributes;
-import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.createPermissionsAttribute;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.createDelimitedAttribute;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getDelimitedAttributeValue;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_CONNECT_TO_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_GET_USER_FROM_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_UPDATE_USER_IN_IDM;
@@ -248,15 +251,22 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
       UserType existedCognitoUser, UserUpdate updateUserDto) {
     List<AttributeType> updateAttributes = new ArrayList<>();
 
-    Set<String> existedUserPermissions = CognitoUtils.getPermissions(existedCognitoUser);
-    Set<String> newUserPermissions = updateUserDto.getPermissions();
-
-    if (newUserPermissions != null && !newUserPermissions.equals(existedUserPermissions)) {
-      AttributeType permissionsAttr = createPermissionsAttribute(newUserPermissions);
-      updateAttributes.add(permissionsAttr);
-    }
+    addDelimitedAttribute(updateAttributes, PERMISSIONS, updateUserDto.getPermissions(),
+        existedCognitoUser);
+    addDelimitedAttribute(updateAttributes, ROLES, updateUserDto.getRoles(), existedCognitoUser);
 
     return updateAttributes;
+  }
+
+  private void addDelimitedAttribute(List<AttributeType> updateAttributes,
+      UserAttribute userAttribute, Set<String> newValues, UserType existedCognitoUser) {
+
+    Set<String> existedValues = getDelimitedAttributeValue(existedCognitoUser, userAttribute);
+
+    if (newValues != null && !newValues.equals(existedValues)) {
+      AttributeType delimitedAttr = createDelimitedAttribute(userAttribute, newValues);
+      updateAttributes.add(delimitedAttr);
+    }
   }
 
   /**
@@ -353,10 +363,6 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
 
   public void setIdentityProvider(AWSCognitoIdentityProvider identityProvider) {
     this.identityProvider = identityProvider;
-  }
-
-  public void setMessages(MessagesService messages) {
-    this.messages = messages;
   }
 
   @Autowired

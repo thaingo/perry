@@ -1,4 +1,4 @@
-package gov.ca.cwds.idm.service.authorization;
+package gov.ca.cwds.idm.service;
 
 import static gov.ca.cwds.util.UniversalUserTokenDeserializer.ADMIN_OFFICE_IDS_PARAM;
 import static gov.ca.cwds.util.UniversalUserTokenDeserializer.COUNTY_NAME_PARAM;
@@ -12,14 +12,14 @@ public final class AuthorizationTestHelper {
   private AuthorizationTestHelper() {
   }
 
-  static User user(String countyName, String officeId) {
+  public static User user(String countyName, String officeId) {
     User user = new User();
     user.setCountyName(countyName);
     user.setOfficeId(officeId);
     return user;
   }
 
-  static User user(Set<String> roles, String countyName, String officeId) {
+  public static User user(Set<String> roles, String countyName, String officeId) {
     User user = user(countyName, officeId);
     user.setRoles(roles);
     return user;
@@ -31,7 +31,7 @@ public final class AuthorizationTestHelper {
     return user;
   }
 
-  static UniversalUserToken admin(Set<String> roles, String countyName,
+  public static UniversalUserToken admin(Set<String> roles, String countyName,
       Set<String> adminOfficeIds) {
     UniversalUserToken admin = new UniversalUserToken();
     admin.setRoles(roles);

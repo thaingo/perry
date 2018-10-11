@@ -22,5 +22,8 @@
       "CWS-worker"
     ]
   },
-  "editable": true
+  "editable": true,
+  "possible_roles": [
+    "CWS-worker"
+  ]
 }

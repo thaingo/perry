@@ -1,18 +1,18 @@
 {
   "user": {
-    "id": "2be3221f-8c2f-4386-8a95-a68f0282efb0",
-    "first_name": "Don",
-    "last_name": "Manzano",
+    "id": "24051d54-9321-4dd2-a92f-6425d6c455be",
+    "first_name": "Julio",
+    "last_name": "Iglecias",
     "county_name": "Yolo",
-    "email": "donzano@gmail.com",
+    "email": "julio@gmail.com",
     "user_create_date": "2018-05-04",
-    "user_last_modified_date": "2018-05-30",
+    "user_last_modified_date": "2018-05-29",
     "last_login_date_time": "2018-09-17 05:01:12",
     "enabled": true,
-    "status": "FORCE_CHANGE_PASSWORD",
+    "status": "CONFIRMED",
+    "racfid": "YOLOD",
     "permissions": [
-      "Snapshot-rollout",
-      "RFA-rollout"
+      "Hotline-rollout"
     ],
     "roles": [
       "CWS-worker",
@@ -22,6 +22,7 @@
   "editable": true,
   "possible_roles": [
     "CWS-worker",
-    "Office-admin"
+    "Office-admin",
+    "County-admin"
   ]
 }
