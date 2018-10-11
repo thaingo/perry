@@ -115,7 +115,7 @@ public class TokenService {
 
   private void validateToken(PerryTokenEntity perryTokenEntity) {
     Date expirationDate =
-        DateUtils.addHours(perryTokenEntity.getLastUsedDate(), properties.getTokenRecordTimeout());
+        DateUtils.addMinutes(perryTokenEntity.getLastUsedDate(), properties.getTokenRecordTimeout());
     if (new Date().after(expirationDate)) {
       tokenRepository.delete(perryTokenEntity);
       throw new PerryException("Token " + perryTokenEntity.getToken() +
