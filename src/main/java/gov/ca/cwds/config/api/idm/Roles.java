@@ -2,6 +2,10 @@ package gov.ca.cwds.config.api.idm;
 
 import static gov.ca.cwds.util.Utils.toSet;
 
+import com.google.common.collect.ImmutableMap;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -17,6 +21,7 @@ public class Roles {
   public static final String STATE_ADMIN = "State-admin";
   public static final String OFFICE_ADMIN = "Office-admin";
   public static final String CALS_ADMIN = "CALS-admin";
+  private static List<Map<String, String>> roleList;
 
   private Roles() {}
 
@@ -24,4 +29,23 @@ public class Roles {
     return toSet(COUNTY_ADMIN, STATE_ADMIN, OFFICE_ADMIN, CALS_ADMIN);
   }
 
+  /**
+   * Static block to initialize roleList to be used as a dictionary service.
+   */
+  static {
+    roleList = new ArrayList<>();
+    roleList.add(ImmutableMap.of("id", STATE_ADMIN, "name", "State Administrator"));
+    roleList.add(ImmutableMap.of("id", COUNTY_ADMIN, "name", "County Administrator"));
+    roleList.add(ImmutableMap.of("id", OFFICE_ADMIN, "name", "Office Administrator"));
+    roleList.add(ImmutableMap.of("id", CALS_ADMIN, "name", "CALS Administrator"));
+    roleList.add(ImmutableMap.of("id", CWS_WORKER, "name", "CWS Worker"));
+    roleList.add(ImmutableMap.of("id", CALS_EXTERNAL_WORKER, "name", "CALS External Worker"));
+  }
+
+  /**
+   * Return list of roleList with id and name to be used as a dictionary service.
+   */
+  public static List<Map<String, String>> findRoles() {
+    return Roles.roleList;
+  }
 }
