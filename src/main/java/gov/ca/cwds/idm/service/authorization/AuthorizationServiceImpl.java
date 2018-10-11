@@ -4,6 +4,7 @@ import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByEmail;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserName;
 
@@ -11,9 +12,12 @@ import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.MappingService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
+import java.util.Collection;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Service("authorizationService")
 @Profile("idm")
@@ -44,14 +48,27 @@ public class AuthorizationServiceImpl implements AuthorizationService {
   }
 
   @Override
-  public boolean canResendInvitationMessage(String userId) {
-    User user = getUserFromUserId(userId);
+  public boolean canResendInvitationMessage(String email) {
+    User user = getUserByEmail(email);
     return createAdminActionsAuthorizer(user).canResendInvitationMessage();
+  }
+
+  private User getUserByEmail(String email) {
+    List<UserType> cognitoUsers =
+        cognitoServiceFacade.searchPage(composeToGetFirstPageByEmail(email)).getUsers();
+    if (!CollectionUtils.isEmpty(cognitoUsers)) {
+      return composeUser(cognitoUsers.get(0));
+    } else {
+      throw new IllegalStateException();
+    }
   }
 
   private User getUserFromUserId(String userId) {
     UserType cognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
+    return composeUser(cognitoUser);
+  }
 
+  private User composeUser(UserType cognitoUser) {
     User user;
     if (OFFICE_ADMIN.equals(getAdminStrongestRole())) {
       user = mappingService.toUser(cognitoUser);

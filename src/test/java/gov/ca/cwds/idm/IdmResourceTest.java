@@ -1131,7 +1131,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
         .andReturn();
   }
 
-/*
+
   @Test
   @WithMockCustomUser(county = "OtherCounty")
   public void testResendInvitationEmailWithDifferentCounty() throws Exception {
@@ -1149,7 +1149,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
             .createResendEmailRequest("julio@gmail.com");
     assertResendEmailUnauthorized(request);
   }
-*/
+
 
   @Test
   @WithMockCustomUser(roles = {"OtherRole"})
