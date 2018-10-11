@@ -288,19 +288,19 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
   }
 
   @Override
-  public UserType resendInvitationMessage(String userId) {
-    AdminCreateUserRequest request = createResendEmailRequest(userId);
+  public UserType resendInvitationMessage(String email) {
+    AdminCreateUserRequest request = createResendEmailRequest(email);
     return identityProvider.adminCreateUser(request).getUser();
   }
 
   /**
    * Creates the request for resending email.
    *
-   * @param userId user ID.
+   * @param email email address of the user.
    */
-  public AdminCreateUserRequest createResendEmailRequest(String userId) {
+  public AdminCreateUserRequest createResendEmailRequest(String email) {
     return new AdminCreateUserRequest()
-        .withUsername(userId)
+        .withUsername(toLowerCase(email))
         .withUserPoolId(properties.getUserpool())
         .withMessageAction(MessageActionType.RESEND)
         .withDesiredDeliveryMediums(DeliveryMediumType.EMAIL);

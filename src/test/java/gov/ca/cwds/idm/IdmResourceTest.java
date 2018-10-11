@@ -1126,26 +1126,18 @@ public class IdmResourceTest extends BaseIntegrationTest {
 
   private void assertResendEmailUnauthorized(AdminCreateUserRequest request) throws Exception {
     mockMvc
-        .perform(MockMvcRequestBuilders.get("/idm/users/resend/" + USER_WITH_RACFID_ID))
+        .perform(MockMvcRequestBuilders.get("/idm/users/resend?email=julio@gmail.com"))
         .andExpect(MockMvcResultMatchers.status().isUnauthorized())
         .andReturn();
   }
 
+/*
   @Test
   @WithMockCustomUser(county = "OtherCounty")
   public void testResendInvitationEmailWithDifferentCounty() throws Exception {
     AdminCreateUserRequest request =
         ((TestCognitoServiceFacade) cognitoServiceFacade)
-            .createResendEmailRequest(USER_WITH_RACFID_ID);
-    assertResendEmailUnauthorized(request);
-  }
-
-  @Test
-  @WithMockCustomUser(roles = {"OtherRole"})
-  public void testResendInvitationEmailWithOtherRole() throws Exception {
-    AdminCreateUserRequest request =
-        ((TestCognitoServiceFacade) cognitoServiceFacade)
-            .createResendEmailRequest(USER_WITH_RACFID_ID);
+            .createResendEmailRequest("julio@gmail.com");
     assertResendEmailUnauthorized(request);
   }
 
@@ -1154,7 +1146,17 @@ public class IdmResourceTest extends BaseIntegrationTest {
   public void testResendInvitationEmailWithOfficeRole() throws Exception {
     AdminCreateUserRequest request =
         ((TestCognitoServiceFacade) cognitoServiceFacade)
-            .createResendEmailRequest(USER_WITH_RACFID_ID);
+            .createResendEmailRequest("julio@gmail.com");
+    assertResendEmailUnauthorized(request);
+  }
+*/
+
+  @Test
+  @WithMockCustomUser(roles = {"OtherRole"})
+  public void testResendInvitationEmailWithOtherRole() throws Exception {
+    AdminCreateUserRequest request =
+        ((TestCognitoServiceFacade) cognitoServiceFacade)
+            .createResendEmailRequest("julio@gmail.com");
     assertResendEmailUnauthorized(request);
   }
 
@@ -1163,10 +1165,10 @@ public class IdmResourceTest extends BaseIntegrationTest {
   public void testResendInvitationEmailWithStateAdmin() throws Exception {
     AdminCreateUserRequest request =
         ((TestCognitoServiceFacade) cognitoServiceFacade)
-            .createResendEmailRequest(USER_WITH_RACFID_ID);
+            .createResendEmailRequest("julio@gmail.com");
 
     UserType user = new UserType();
-    user.setUsername(USER_WITH_RACFID_ID);
+    user.setUsername("julio@gmail.com");
     user.setEnabled(true);
     user.setUserStatus("FORCE_CHANGE_PASSWORD");
 
@@ -1174,7 +1176,9 @@ public class IdmResourceTest extends BaseIntegrationTest {
     when(cognito.adminCreateUser(request)).thenReturn(result);
 
     mockMvc
-        .perform(MockMvcRequestBuilders.get("/idm/users/resend/" + USER_WITH_RACFID_ID))
+        .perform(
+            MockMvcRequestBuilders.get(
+                "/idm/users/resend?email=julio@gmail.com"))
         .andExpect(MockMvcResultMatchers.status().isOk())
         .andReturn();
     verify(cognito, times(1)).adminCreateUser(request);
