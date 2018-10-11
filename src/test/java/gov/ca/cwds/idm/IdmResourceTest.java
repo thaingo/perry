@@ -756,7 +756,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
   }
 
   @Test
-  @WithMockCustomUser
+  @WithMockCustomUser(roles = {STATE_ADMIN})
   public void testUpdateUserDoraFail() throws Exception {
 
     setDoraError();
@@ -877,7 +877,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
   }
 
   @Test
-  @WithMockCustomUser
+  @WithMockCustomUser(roles = {STATE_ADMIN})
   public void testUpdateUserNoPermissions() throws Exception {
 
     UserUpdate userUpdate = new UserUpdate();
