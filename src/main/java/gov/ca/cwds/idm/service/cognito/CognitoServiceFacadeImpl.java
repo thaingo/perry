@@ -306,11 +306,11 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
   /**
    * Creates the request for resending email.
    *
-   * @param email email address of the user ID.
+   * @param email email address of the user.
    */
   public AdminCreateUserRequest createResendEmailRequest(String email) {
     return new AdminCreateUserRequest()
-        .withUsername(email.toLowerCase())
+        .withUsername(toLowerCase(email))
         .withUserPoolId(properties.getUserpool())
         .withMessageAction(MessageActionType.RESEND)
         .withDesiredDeliveryMediums(DeliveryMediumType.EMAIL);

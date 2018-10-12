@@ -47,6 +47,7 @@ import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -136,6 +137,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
   private static final String NEW_USER_SUCCESS_ID_2 = "17067e4e-270f-4623-b86c-b4d4fa527a35";
   private static final String NEW_USER_SUCCESS_ID_3 = "17067e4e-270f-4623-b86c-b4d4fa527a36";
   private static final String SSO_TOKEN = "b02aa833-f8b2-4d28-8796-3abe059313d1";
+  private static final String YOLO_COUNTY_USERS_EMAIL = "julio@gmail.com";
   private static final String BASIC_AUTH_HEADER = prepareBasicAuthHeader();
   private static final MediaType JSON_CONTENT_TYPE =
       new MediaType(
@@ -1181,51 +1183,51 @@ public class IdmResourceTest extends BaseIntegrationTest {
     assertVerifyUserUnauthorized();
   }
 
-  private void assertResendEmailUnauthorized(AdminCreateUserRequest request) throws Exception {
-    mockMvc
-        .perform(MockMvcRequestBuilders.get("/idm/users/resend?email=julio@gmail.com"))
-        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
-        .andReturn();
-  }
 
-/*
   @Test
   @WithMockCustomUser(county = "OtherCounty")
   public void testResendInvitationEmailWithDifferentCounty() throws Exception {
-    AdminCreateUserRequest request =
-        ((TestCognitoServiceFacade) cognitoServiceFacade)
-            .createResendEmailRequest("julio@gmail.com");
-    assertResendEmailUnauthorized(request);
+    assertResendEmailUnauthorized(YOLO_COUNTY_USERS_EMAIL);
   }
 
   @Test
   @WithMockCustomUser(roles = {OFFICE_ADMIN}, adminOfficeIds = {"otherOfficeId"})
   public void testResendInvitationEmailWithOfficeRole() throws Exception {
-    AdminCreateUserRequest request =
-        ((TestCognitoServiceFacade) cognitoServiceFacade)
-            .createResendEmailRequest("julio@gmail.com");
-    assertResendEmailUnauthorized(request);
+    assertResendEmailUnauthorized(YOLO_COUNTY_USERS_EMAIL);
   }
-*/
 
   @Test
   @WithMockCustomUser(roles = {"OtherRole"})
   public void testResendInvitationEmailWithOtherRole() throws Exception {
-    AdminCreateUserRequest request =
-        ((TestCognitoServiceFacade) cognitoServiceFacade)
-            .createResendEmailRequest("julio@gmail.com");
-    assertResendEmailUnauthorized(request);
+    assertResendEmailUnauthorized(YOLO_COUNTY_USERS_EMAIL);
+  }
+
+  private void assertResendEmailUnauthorized(String email) throws Exception {
+    mockMvc
+        .perform(MockMvcRequestBuilders.get("/idm/users/resend?email=" + email))
+        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+        .andReturn();
   }
 
   @Test
   @WithMockCustomUser(roles = {STATE_ADMIN}, county = "Madera")
   public void testResendInvitationEmailWithStateAdmin() throws Exception {
+    assertResendEmailWorksFine();
+  }
+
+  @Test
+  @WithMockCustomUser()
+  public void testResendInvitationEmailWithCountyAdmin() throws Exception {
+    assertResendEmailWorksFine();
+  }
+
+  private void assertResendEmailWorksFine() throws Exception {
     AdminCreateUserRequest request =
         ((TestCognitoServiceFacade) cognitoServiceFacade)
-            .createResendEmailRequest("julio@gmail.com");
+            .createResendEmailRequest(YOLO_COUNTY_USERS_EMAIL);
 
     UserType user = new UserType();
-    user.setUsername("julio@gmail.com");
+    user.setUsername(USER_WITH_RACFID_ID);
     user.setEnabled(true);
     user.setUserStatus("FORCE_CHANGE_PASSWORD");
 
@@ -1235,11 +1237,10 @@ public class IdmResourceTest extends BaseIntegrationTest {
     mockMvc
         .perform(
             MockMvcRequestBuilders.get(
-                "/idm/users/resend?email=julio@gmail.com"))
+                "/idm/users/resend?email="+YOLO_COUNTY_USERS_EMAIL))
         .andExpect(MockMvcResultMatchers.status().isOk())
         .andReturn();
-    verify(cognito, times(1)).adminCreateUser(request);
-  }
+   }
 
   @Test
   public void testGetFailedOperations() throws Exception {

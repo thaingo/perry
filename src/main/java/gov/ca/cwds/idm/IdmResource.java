@@ -363,7 +363,7 @@ public class IdmResource {
   @PreAuthorize("@userRoleService.isAdmin(principal) &&  " +
       " !@userRoleService.isCalsAdminStrongestRole(principal)")
   public ResponseEntity resendInvitationEmail(
-      @ApiParam(required = true, name = "email", value = "The unique email ID", example = "email@example.com")
+      @ApiParam(required = true, name = "email", value = "The email of the user", example = "email@example.com")
       @NotNull
       @RequestParam("email")
           String email) {
