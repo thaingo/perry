@@ -130,12 +130,9 @@ public class IdmServiceImpl implements IdmService {
 
   private void filterMainRole(User user) {
     Set<String> roles = user.getRoles();
-    if (roles.isEmpty()) {
-      return;
+    if (!roles.isEmpty()) {
+      user.setRoles(MainRoleFilter.filter(roles));
     }
-
-    Set<String> filteredRoles = MainRoleFilter.filter(roles);
-    user.setRoles(filteredRoles);
   }
 
   @Override
