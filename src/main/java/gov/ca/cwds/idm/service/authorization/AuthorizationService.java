@@ -10,6 +10,6 @@ public interface AuthorizationService {
 
   boolean canUpdateUser(String userId);
 
-  boolean canResendInvitationMessage(String userId);
+  boolean canResendInvitationMessage(String email);
 
 }
