@@ -270,8 +270,8 @@ public class IdmServiceImpl implements IdmService {
   }
 
   @Override
-  public void resendInvitationMessage(String userId) {
-    cognitoServiceFacade.resendInvitationMessage(userId);
+  public void resendInvitationMessage(String email) {
+    cognitoServiceFacade.resendInvitationMessage(email);
   }
 
   @Override

@@ -63,7 +63,7 @@ perry:
     whiteList: ${WHITE_LIST:*}
     homePageUrl: ${HOME_PAGE_URL:/}
     showErrors: ${SHOW_ERRORS:true}
-    tokenRecordTimeout: ${TOKEN_RECORD_TIMEOUT:7} # days
+    tokenRecordTimeout: ${TOKEN_RECORD_TIMEOUT:240} # minutes
     liquibase:
       schema:
         change-log: classpath:/liquibase/perry_schema.xml

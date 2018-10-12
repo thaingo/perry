@@ -21,4 +21,7 @@ public interface TokenRepository extends JpaRepository<PerryTokenEntity, String>
   @Modifying
   long deleteByCreatedDateBefore(Timestamp date);
 
+  @Modifying
+  long deleteByLastUsedDateBeforeOrLastUsedDateIsNull(Timestamp date);
+
 }

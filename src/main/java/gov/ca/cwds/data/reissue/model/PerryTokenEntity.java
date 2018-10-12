@@ -25,6 +25,9 @@ public class PerryTokenEntity implements Serializable {
   @Column(name = "created_date", nullable = false)
   @Temporal(TemporalType.TIMESTAMP)
   private Date createdDate = new Date();
+  @Column(name = "last_used_date")
+  @Temporal(TemporalType.TIMESTAMP)
+  private Date lastUsedDate;
   @Column(name = "security_context", length = 20000, nullable = false)
   private byte[] securityContext;
   @Column(name = "last_idp_validate_time")
@@ -93,5 +96,13 @@ public class PerryTokenEntity implements Serializable {
 
   public void setLastIdpValidateTime(Date lastIdpValidateTime) {
     this.lastIdpValidateTime = lastIdpValidateTime;
+  }
+
+  public Date getLastUsedDate() {
+    return lastUsedDate;
+  }
+
+  public void setLastUsedDate(Date lastUsedDate) {
+    this.lastUsedDate = lastUsedDate;
   }
 }

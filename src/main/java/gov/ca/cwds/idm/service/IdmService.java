@@ -31,6 +31,7 @@ public interface IdmService {
 
   List<UserAndOperation> getFailedOperations(LocalDateTime lastJobTime);
 
-  @PreAuthorize("@authorizationService.canResendInvitationMessage(#id)")
-  void resendInvitationMessage(@P("id") String id);
+
+  @PreAuthorize("@authorizationService.canResendInvitationMessage(#email)")
+  void resendInvitationMessage(@P("email") String email);
 }
