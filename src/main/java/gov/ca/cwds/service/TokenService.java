@@ -42,6 +42,7 @@ public class TokenService {
     perryTokenEntity.setJsonToken(jsonToken);
     perryTokenEntity.setToken(userToken.getToken());
     perryTokenEntity.setSecurityContext(SerializationUtils.serialize(securityContext));
+    perryTokenEntity.setLastUsedDate(perryTokenEntity.getCreatedDate());
     deleteExpiredRecords();
     tokenRepository.save(perryTokenEntity);
     eventPublisher.publishEvent(new UserLoggedInEvent(userToken));
@@ -49,8 +50,9 @@ public class TokenService {
   }
 
   private void deleteExpiredRecords() {
-    Date createdDateTime = DateUtils.addDays(new Date(), -properties.getTokenRecordTimeout());
-    tokenRepository.deleteByCreatedDateBefore(new Timestamp(createdDateTime.getTime()));
+    Date validLastUsedDate = DateUtils.addMinutes(new Date(), -properties.getTokenRecordTimeout());
+    tokenRepository.deleteByLastUsedDateBeforeOrLastUsedDateIsNull(
+        new Timestamp(validLastUsedDate.getTime()));
   }
 
   public String getPerryTokenByAccessCode(String accessCode) {
@@ -87,7 +89,13 @@ public class TokenService {
   }
 
   public PerryTokenEntity getPerryToken(String token) {
-    return tokenRepository.findOne(token);
+    PerryTokenEntity perryTokenEntity = tokenRepository.findOne(token);
+    if(perryTokenEntity == null) {
+      throw new PerryException("token: " + token + " is not found");
+    }
+    validateToken(perryTokenEntity);
+    perryTokenEntity.setLastUsedDate(new Date());
+    return perryTokenEntity;
   }
 
   @Autowired
@@ -103,5 +111,15 @@ public class TokenService {
   @Autowired
   public void setEventPublisher(ApplicationEventPublisher eventPublisher) {
     this.eventPublisher = eventPublisher;
+  }
+
+  private void validateToken(PerryTokenEntity perryTokenEntity) {
+    Date expirationDate =
+        DateUtils.addMinutes(perryTokenEntity.getLastUsedDate(), properties.getTokenRecordTimeout());
+    if (new Date().after(expirationDate)) {
+      tokenRepository.delete(perryTokenEntity);
+      throw new PerryException("Token " + perryTokenEntity.getToken() +
+          " for user:" + perryTokenEntity.getUser() + " is expired");
+    }
   }
 }

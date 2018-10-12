@@ -34,7 +34,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
     "perry.identityProvider.idpMapping=config/cognito.groovy",
     "perry.serviceProviders.default.identityMapping=config/dev.groovy",
     "perry.serviceProviders.mfa.identityMapping=config/default.groovy",
-    "perry.jwt.timeout=10"
+    "perry.jwt.timeout=10",
+    "perry.tokenRecordTimeout=240"
 }, classes = {PerryApplication.class})
 public class PerryDevModeTest extends BaseIntegrationTest {
 
