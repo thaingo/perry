@@ -308,8 +308,7 @@ public class IdmResource {
       response = Permission.class,
       responseContainer = "List"
   )
-  @PreAuthorize("@userRoleService.isAdmin(principal) && "
-      + "!@userRoleService.isCalsAdminStrongestRole(principal)")
+  @PreAuthorize("@userRoleService.isAdmin(principal)")
   public List<Permission> getPermissions() {
     return dictionaryProvider.getPermissions();
   }
@@ -325,10 +324,9 @@ public class IdmResource {
     value = "Get List of possible roles",
     responseContainer = "List"
   )
-  @PreAuthorize("@userRoleService.isAdmin(principal) && "
-      + "!@userRoleService.isCalsAdminStrongestRole(principal)")
+  @PreAuthorize("@userRoleService.isAdmin(principal)")
   public List<Map<String, String>> getRoles() {
-    return Roles.findRoles();
+    return dictionaryProvider.getRoles();
   }
 
   @RequestMapping(method = RequestMethod.GET, value = "users/verify", produces = "application/json")
