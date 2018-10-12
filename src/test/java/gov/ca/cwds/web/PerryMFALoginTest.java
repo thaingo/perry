@@ -58,7 +58,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
     "security.oauth2.resource.logoutTokenUri=http://logout.token.url",
     "perry.idpMaxAttempts=2",
     "idpRetryTimeout=0",
-    "idpValidateInterval=2"
+    "idpValidateInterval=2",
+    "perry.tokenRecordTimeout=240"
 }, classes = {PerryLoginTestConfiguration.class, PerryApplication.class})
 
 public class PerryMFALoginTest extends BaseIntegrationTest {
