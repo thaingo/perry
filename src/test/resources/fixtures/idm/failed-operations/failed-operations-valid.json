@@ -42,8 +42,7 @@
         "Hotline-rollout"
       ],
       "roles": [
-        "County-admin",
-        "CWS-worker"
+        "County-admin"
       ]
     },
     "operation": "UPDATE"
@@ -65,8 +64,7 @@
         "RFA-rollout"
       ],
       "roles": [
-        "County-admin",
-        "CWS-worker"
+        "County-admin"
       ]
     },
     "operation": "CREATE"
