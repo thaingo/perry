@@ -58,6 +58,7 @@ import gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
 import gov.ca.cwds.idm.service.execution.OptionalExecution;
 import gov.ca.cwds.idm.service.execution.PutInSearchExecution;
+import gov.ca.cwds.idm.service.filter.MainRoleFilter;
 import gov.ca.cwds.rest.api.domain.PartialSuccessException;
 import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
 import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType;
@@ -70,6 +71,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -117,7 +119,19 @@ public class IdmServiceImpl implements IdmService {
   @Override
   public User findUser(String id) {
     UserType cognitoUser = cognitoServiceFacade.getCognitoUserById(id);
-    return enrichUserWithLastLoginDateTime(mappingService.toUser(cognitoUser));
+    User user = mappingService.toUser(cognitoUser);
+    filterMainRole(user);
+    return enrichUserWithLastLoginDateTime(user);
+  }
+
+  private void filterMainRole(User user) {
+    Set<String> roles = user.getRoles();
+    if (roles.isEmpty()) {
+      return;
+    }
+
+    Set<String> filteredRoles = MainRoleFilter.filter(roles);
+    user.setRoles(filteredRoles);
   }
 
   @Override
