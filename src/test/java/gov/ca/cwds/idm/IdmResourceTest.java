@@ -239,7 +239,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @Test
   @WithMockCustomUser(roles = {CALS_ADMIN})
   public void testGetPermissionsCalsAdmin() throws Exception {
-    assertGetPermissionsUnauthorized();
+    assertGetPermissionsSuccess();
   }
 
   @Test
@@ -287,7 +287,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @Test
   @WithMockCustomUser(roles = {CALS_ADMIN})
   public void testGetRolesCalsAdmin() throws Exception {
-    assertGetRolesUnauthorized();
+    assertGetRolesSuccess();
   }
 
   @Test
