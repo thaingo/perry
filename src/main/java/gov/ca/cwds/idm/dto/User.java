@@ -198,9 +198,10 @@ public class User implements RolesHolder, Serializable {
   }
 
   public void setRoles(Set<String> roles) {
-    this.roles.clear();
-    if(roles != null) {
-      this.roles.addAll(roles);
+    if(roles == null) {
+      this.roles.clear();
+    } else {
+      this.roles = roles;
     }
   }
 

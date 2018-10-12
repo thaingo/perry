@@ -117,7 +117,15 @@ public class IdmServiceImpl implements IdmService {
   @Override
   public User findUser(String id) {
     UserType cognitoUser = cognitoServiceFacade.getCognitoUserById(id);
-    return enrichUserWithLastLoginDateTime(mappingService.toUser(cognitoUser));
+    User user = mappingService.toUser(cognitoUser);
+    filterMainRole(user);
+    return enrichUserWithLastLoginDateTime(user);
+  }
+
+  private void filterMainRole(User user) {
+    Set<String> roles = user.getRoles();
+    Set<String> filteredRoles = roles;
+    user.setRoles(filteredRoles);
   }
 
   @Override
