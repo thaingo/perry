@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
  * Created by Alexander Serbin on 9/14/2018
  */
 @Component
-@Profile({"idm"})
+@Profile("idm")
 public class UserLoggedInEventListener {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(UserLoggedInEventListener.class);
