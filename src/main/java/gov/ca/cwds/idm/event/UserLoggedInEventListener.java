@@ -23,7 +23,11 @@ public class UserLoggedInEventListener {
 
   @EventListener
   public void handleUserLoggedInEvent(UserLoggedInEvent event) {
-    final String userId = event.getUserId();
+    String userId = event.getUserId();
+    if (userId == null) {
+      LOGGER.warn("userToken doesn't contain the userId, no following actions expected}");
+      return;
+    }
     LOGGER.debug("Handling \"user logged in\" event for user {}", userId);
     userLogService.logUpdate(userId);
   }
