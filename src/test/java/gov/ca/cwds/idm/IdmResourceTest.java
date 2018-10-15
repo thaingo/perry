@@ -2,6 +2,7 @@ package gov.ca.cwds.idm;
 
 import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.idm.IdmResource.DATETIME_FORMAT_PATTERN;
@@ -745,14 +746,20 @@ public class IdmResourceTest extends BaseIntegrationTest {
     userUpdate.setEnabled(Boolean.FALSE);
     userUpdate.setRoles(toSet("State-admin"));
 
-    MvcResult result = mockMvc
-        .perform(
-            MockMvcRequestBuilders.patch("/idm/users/" + USER_NO_RACFID_ID)
-                .contentType(JSON_CONTENT_TYPE)
-                .content(asJsonString(userUpdate)))
-        .andExpect(MockMvcResultMatchers.status().isBadRequest())
-        .andReturn();
-    assertExtensible(result, "fixtures/idm/update-user/not-allowed-role-error.json");
+    assertUpdateBadRequest(USER_NO_RACFID_ID, userUpdate,
+        "fixtures/idm/update-user/not-allowed-role-error.json");
+  }
+
+  @Test
+  @WithMockCustomUser
+  public void testUpdateUserNoRoles() throws Exception {
+
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setEnabled(Boolean.FALSE);
+    userUpdate.setRoles(toSet());
+
+    assertUpdateBadRequest(USER_NO_RACFID_ID, userUpdate,
+        "fixtures/idm/update-user/no-roles-error.json");
   }
 
   @Test
@@ -760,22 +767,28 @@ public class IdmResourceTest extends BaseIntegrationTest {
   public void testValidationUpdateUserChangeInactiveToActive_throwsNoRacfIdInCWS() throws Exception {
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setEnabled(Boolean.TRUE);
+    userUpdate.setRoles(toSet(CWS_WORKER));
+
     AdminEnableUserRequest enableUserRequest = setEnableUserRequestAndResult(INACTIVE_USER_WITH_NO_ACTIVE_RACFID_IN_CMS);
     setDoraSuccess();
 
-    MvcResult result =
-        mockMvc
-            .perform(
-                MockMvcRequestBuilders.patch("/idm/users/" + INACTIVE_USER_WITH_NO_ACTIVE_RACFID_IN_CMS)
-                    .contentType(JSON_CONTENT_TYPE)
-                    .content(asJsonString(userUpdate)))
-            .andExpect(MockMvcResultMatchers.status().isBadRequest())
-            .andReturn();
-    assertExtensible(result, "fixtures/idm/update-user/no-active-cws-user-error.json");
+    assertUpdateBadRequest(INACTIVE_USER_WITH_NO_ACTIVE_RACFID_IN_CMS, userUpdate,
+        "fixtures/idm/update-user/no-active-cws-user-error.json");
 
     verify(spySearchService, times(0)).updateUser(any(User.class));
     verify(cognito, times(0)).adminEnableUser(enableUserRequest);
     verifyDoraCalls(0);
+  }
+
+  private void assertUpdateBadRequest(String userId, UserUpdate userUpdate, String fixture) throws Exception {
+    MvcResult result = mockMvc
+        .perform(
+            MockMvcRequestBuilders.patch("/idm/users/" + userId)
+                .contentType(JSON_CONTENT_TYPE)
+                .content(asJsonString(userUpdate)))
+        .andExpect(MockMvcResultMatchers.status().isBadRequest())
+        .andReturn();
+    assertExtensible(result, fixture);
   }
 
   @Test
@@ -783,6 +796,8 @@ public class IdmResourceTest extends BaseIntegrationTest {
   public void testValidationUpdateUserChangeInactiveToActive_withNoRacfIdForUser() throws Exception {
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setEnabled(Boolean.TRUE);
+    userUpdate.setRoles(toSet(CWS_WORKER));
+
     AdminEnableUserRequest enableUserRequest = setEnableUserRequestAndResult(INACTIVE_USER_WITH_NO_RACFID);
     setDoraSuccess();
 
@@ -805,18 +820,12 @@ public class IdmResourceTest extends BaseIntegrationTest {
   public void testValidationUpdateUserChangeInactiveToActive_throwsActiveRacfIdAlreadyInCognito() throws Exception {
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setEnabled(Boolean.TRUE);
+    userUpdate.setRoles(toSet(CWS_WORKER));
     AdminEnableUserRequest enableUserRequest = setEnableUserRequestAndResult(INACTIVE_USER_WITH_ACTIVE_RACFID_IN_CMS);
     setDoraSuccess();
 
-    MvcResult result =
-        mockMvc
-            .perform(
-                MockMvcRequestBuilders.patch("/idm/users/" + INACTIVE_USER_WITH_ACTIVE_RACFID_IN_CMS)
-                    .contentType(JSON_CONTENT_TYPE)
-                    .content(asJsonString(userUpdate)))
-            .andExpect(MockMvcResultMatchers.status().isBadRequest())
-            .andReturn();
-    assertExtensible(result, "fixtures/idm/update-user/active-user-with-same-racfid-in-cognito-error.json");
+    assertUpdateBadRequest(INACTIVE_USER_WITH_ACTIVE_RACFID_IN_CMS, userUpdate,
+        "fixtures/idm/update-user/active-user-with-same-racfid-in-cognito-error.json");
 
     verify(spySearchService, times(0)).updateUser(any(User.class));
     verify(cognito, times(0)).adminEnableUser(enableUserRequest);
