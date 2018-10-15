@@ -13,7 +13,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
 
 import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.service.AuthorizationTestHelper;
+import gov.ca.cwds.idm.service.TestHelper;
 import gov.ca.cwds.idm.service.role.implementor.AdminRoleImplementorFactory;
 import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
 import gov.ca.cwds.service.messages.MessagesService;
@@ -28,18 +28,18 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(fullyQualifiedNames = "gov.ca.cwds.util.CurrentAuthenticatedUserUtil")
-public class ValidateUpdateUserByAdminRolesServiceTest {
+public class UserByAdminRolesValidatorTest {
 
   @Rule
   private ExpectedException expectedException = ExpectedException.none();
 
-  private ValidateUpdateUserByAdminRolesServiceImpl service;
+  private UserByAdminRolesValidatorImpl service;
   private MessagesService messagesService;
 
   @Before
   public void before() {
     mockStatic(CurrentAuthenticatedUserUtil.class);
-    service = new ValidateUpdateUserByAdminRolesServiceImpl();
+    service = new UserByAdminRolesValidatorImpl();
     service.setAdminRoleImplementorFactory(new AdminRoleImplementorFactory());
     messagesService = mock(MessagesService.class);
     service.setMessagesService(messagesService);
@@ -86,18 +86,18 @@ public class ValidateUpdateUserByAdminRolesServiceTest {
 
   private void validateUpdate(UniversalUserToken admin, User user) {
     when(getCurrentUser()).thenReturn(admin);
-    service.validateUpdateUser(user);
+    service.validate(user);
   }
 
   private static UniversalUserToken admin(String... roles) {
     UniversalUserToken admin =
-        AuthorizationTestHelper.admin(toSet(roles), "Yolo", toSet("Yolo_1"));
+        TestHelper.admin(toSet(roles), "Yolo", toSet("Yolo_1"));
     admin.setUserId("adminId");
     return admin;
   }
 
   private static User user(String... roles) {
-    User user = AuthorizationTestHelper.user(toSet(roles), "Madera", "Madera_1");
+    User user = TestHelper.user(toSet(roles), "Madera", "Madera_1");
     user.setId("userId");
     return user;
   }

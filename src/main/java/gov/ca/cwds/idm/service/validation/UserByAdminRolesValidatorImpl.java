@@ -16,18 +16,18 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Profile("idm")
-public class ValidateUpdateUserByAdminRolesServiceImpl implements
-    ValidateUpdateUserByAdminRolesService {
+public class UserByAdminRolesValidatorImpl implements
+    UserByAdminRolesValidator {
 
   private static final Logger LOGGER = LoggerFactory
-      .getLogger(ValidateUpdateUserByAdminRolesServiceImpl.class);
+      .getLogger(UserByAdminRolesValidatorImpl.class);
 
   private AdminRoleImplementorFactory adminRoleImplementorFactory;
 
   private MessagesService messagesService;
 
   @Override
-  public void validateUpdateUser(User newUser) {
+  public void validate(User newUser) {
     validateByNewUserRoles(newUser);
   }
 

@@ -11,7 +11,6 @@ import static gov.ca.cwds.idm.service.authorization.UserRolesService.getStronges
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByEmail;
-import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByRacfId;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getRACFId;
 import static gov.ca.cwds.service.messages.MessageCode.ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS;
@@ -33,7 +32,6 @@ import static gov.ca.cwds.service.messages.MessageCode.USER_UPDATE_SAVE_TO_SEARC
 import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.Utils.toLowerCase;
-import static gov.ca.cwds.util.Utils.toUpperCase;
 import static java.util.stream.Collectors.toSet;
 
 import com.amazonaws.services.cognitoidp.model.UserType;
@@ -55,13 +53,11 @@ import gov.ca.cwds.idm.service.cognito.StandardUserAttribute;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil;
-import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
 import gov.ca.cwds.idm.service.execution.OptionalExecution;
 import gov.ca.cwds.idm.service.execution.PutInSearchExecution;
-import gov.ca.cwds.idm.service.validation.ValidateUpdateUserByAdminRolesService;
 import gov.ca.cwds.idm.service.filter.MainRoleFilter;
+import gov.ca.cwds.idm.service.validation.ValidationService;
 import gov.ca.cwds.rest.api.domain.PartialSuccessException;
-import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
 import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType;
 import gov.ca.cwds.service.CwsUserInfoService;
 import gov.ca.cwds.service.dto.CwsUserInfo;
@@ -72,10 +68,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -87,7 +81,6 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
 @Service
 @Profile("idm")
@@ -118,7 +111,7 @@ public class IdmServiceImpl implements IdmService {
   private MappingService mappingService;
 
   @Autowired
-  private ValidateUpdateUserByAdminRolesService userValidateUpdateByAdminRolesService;
+  private ValidationService validationService;
 
   @Override
   public User findUser(String id) {
@@ -140,7 +133,7 @@ public class IdmServiceImpl implements IdmService {
 
     UserType existedCognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
 
-    validateUpdateUser(existedCognitoUser, updateUserDto);
+    validationService.validateUpdateUser(getCurrentUser(), existedCognitoUser, updateUserDto);
 
     ExecutionStatus updateAttributesStatus =
         updateUserAttributes(userId, updateUserDto, existedCognitoUser);
@@ -162,70 +155,6 @@ public class IdmServiceImpl implements IdmService {
 
     handleUpdatePartialSuccess(
         userId, updateAttributesStatus, updateUserEnabledExecution, doraExecution);
-  }
-
-  private void validateUpdateUser(UserType existedCognitoUser, UserUpdate updateUserDto) {
-    validateByAdminRoles(existedCognitoUser, updateUserDto);
-    validateActivateUser(existedCognitoUser, updateUserDto);
-  }
-
-  private void validateByAdminRoles(UserType existedCognitoUser, UserUpdate updateUserDto) {
-    User newUser = getNewUser(existedCognitoUser, updateUserDto);
-    userValidateUpdateByAdminRolesService.validateUpdateUser(newUser);
-  }
-
-  private void validateActivateUser(UserType existedCognitoUser, UserUpdate updateUserDto) {
-    if (!canChangeToEnableActiveStatus(updateUserDto.getEnabled(),
-        existedCognitoUser.getEnabled())) {
-      return;
-    }
-    String racfId = CognitoUtils.getRACFId(existedCognitoUser);
-    if (StringUtils.isEmpty(racfId)) {
-      return;
-    }
-    validateActivateUser(racfId);
-  }
-
-  void validateActivateUser(String racfId) {
-    CwsUserInfo cwsUser = cwsUserInfoService.getCwsUserByRacfId(racfId);
-    // validates users not active in CWS cannot be set to Active in CWS CARES
-    if (cwsUser == null) {
-      String msg = messages.getTechMessage(NO_USER_WITH_RACFID_IN_CWSCMS, racfId);
-      String userMsg = messages.getUserMessage(NO_USER_WITH_RACFID_IN_CWSCMS, racfId);
-      throw new UserIdmValidationException(msg, userMsg, NO_USER_WITH_RACFID_IN_CWSCMS);
-    }
-
-    // validates no other Active users with same RACFID in CWS CARES exist
-    if (isActiveRacfIdPresent(racfId)) {
-      String msg = messages.getTechMessage(ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM, racfId);
-      String userMsg = messages.getUserMessage(ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM, racfId);
-      throw new UserIdmValidationException(msg, userMsg, ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM);
-    }
-  }
-
-  private static boolean canChangeToEnableActiveStatus(Boolean newEnabled, Boolean currentEnabled) {
-    return newEnabled != null && !newEnabled.equals(currentEnabled) && newEnabled;
-  }
-
-  private User getNewUser(UserType existedCognitoUser, UserUpdate updateUserDto) {
-    User user = mappingService.toUser(existedCognitoUser);
-    enrichUserByUpdateDto(user, updateUserDto);
-    return user;
-  }
-
-  static void enrichUserByUpdateDto(User user, UserUpdate updateUserDto) {
-    Boolean newEnabled = updateUserDto.getEnabled();
-    if(newEnabled != null) {
-      user.setEnabled(newEnabled);
-    }
-    Set<String> newPermissions = updateUserDto.getPermissions();
-    if(newPermissions != null) {
-      user.setPermissions(newPermissions);
-    }
-    Set<String> newRoles = updateUserDto.getRoles();
-    if(newRoles != null) {
-      user.setRoles(newRoles);
-    }
   }
 
   private boolean doesElasticSearchNeedUpdate(ExecutionStatus updateAttributesStatus,
@@ -297,7 +226,7 @@ public class IdmServiceImpl implements IdmService {
       return composeNegativeResultWithMessage(USER_WITH_EMAIL_EXISTS_IN_IDM, email);
     }
 
-    if (isActiveRacfIdPresent(racfId)) {
+    if (validationService.isActiveRacfIdPresent(racfId)) {
       return composeNegativeResultWithMessage(ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM, racfId);
     }
 
@@ -508,19 +437,6 @@ public class IdmServiceImpl implements IdmService {
         .collect(Collectors.toList());
   }
 
-  private boolean isActiveRacfIdPresent(String racfId) {
-    Collection<UserType> cognitoUsersByRacfId =
-        cognitoServiceFacade.searchAllPages(composeToGetFirstPageByRacfId(toUpperCase(racfId)));
-    return !CollectionUtils.isEmpty(cognitoUsersByRacfId)
-        && isActiveUserPresent(cognitoUsersByRacfId);
-  }
-
-  private static boolean isActiveUserPresent(Collection<UserType> cognitoUsers) {
-    return cognitoUsers
-        .stream()
-        .anyMatch(userType -> Objects.equals(userType.getEnabled(), Boolean.TRUE));
-  }
-
   static Set<String> transformSearchValues(Set<String> values, StandardUserAttribute searchAttr) {
     if (searchAttr == RACFID_STANDARD) {
       values = applyFunctionToValues(values, Utils::toUpperCase);
@@ -663,8 +579,7 @@ public class IdmServiceImpl implements IdmService {
     this.mappingService = mappingService;
   }
 
-  public void setUserValidateUpdateByAdminRolesService(
-      ValidateUpdateUserByAdminRolesService userValidateUpdateByAdminRolesService) {
-    this.userValidateUpdateByAdminRolesService = userValidateUpdateByAdminRolesService;
+  public void setValidationService(ValidationService validationService) {
+    this.validationService = validationService;
   }
 }

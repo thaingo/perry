@@ -4,7 +4,7 @@ import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
-import static gov.ca.cwds.idm.service.AuthorizationTestHelper.admin;
+import static gov.ca.cwds.idm.service.TestHelper.admin;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserCountyName;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserOfficeIds;
@@ -14,7 +14,7 @@ import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-import gov.ca.cwds.idm.service.AuthorizationTestHelper;
+import gov.ca.cwds.idm.service.TestHelper;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,7 +38,7 @@ public class OfficeAdminAuthorizerTest {
             "Yolo", toSet("Yolo_2")));
     when(getCurrentUserCountyName()).thenReturn("Yolo");
     assertFalse(
-        new OfficeAdminAuthorizer(AuthorizationTestHelper.user(toSet(STATE_ADMIN),
+        new OfficeAdminAuthorizer(TestHelper.user(toSet(STATE_ADMIN),
             "Yolo", "Yolo_2")).canUpdateUser());
   }
 
@@ -48,7 +48,7 @@ public class OfficeAdminAuthorizerTest {
         .thenReturn(admin(toSet(OFFICE_ADMIN),
             "Yolo", toSet("Yolo_2")));
     when(getCurrentUserOfficeIds()).thenReturn(toSet("Yolo_2"));
-    assertTrue(new OfficeAdminAuthorizer(AuthorizationTestHelper.user(toSet(CWS_WORKER),
+    assertTrue(new OfficeAdminAuthorizer(TestHelper.user(toSet(CWS_WORKER),
         "Yolo", "Yolo_2")).canUpdateUser());
   }
 
@@ -59,7 +59,7 @@ public class OfficeAdminAuthorizerTest {
             "Yolo", toSet("Yolo_2")));
     when(getCurrentUserOfficeIds()).thenReturn(toSet("Yolo_2"));
     assertFalse(
-        new OfficeAdminAuthorizer(AuthorizationTestHelper.user(toSet(COUNTY_ADMIN),
+        new OfficeAdminAuthorizer(TestHelper.user(toSet(COUNTY_ADMIN),
             "Yolo", "Yolo_2")).canUpdateUser());
   }
 
@@ -71,7 +71,7 @@ public class OfficeAdminAuthorizerTest {
     when(getCurrentUserOfficeIds()).thenReturn(toSet("Yolo_2"));
     when(getCurrentUserCountyName()).thenReturn("Yolo");
     assertFalse(
-        new OfficeAdminAuthorizer(AuthorizationTestHelper.user(toSet(OFFICE_ADMIN),
+        new OfficeAdminAuthorizer(TestHelper.user(toSet(OFFICE_ADMIN),
             "Yolo", "Yolo_2")).canUpdateUser());
   }
 
