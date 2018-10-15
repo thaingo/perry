@@ -1,23 +1,15 @@
 package gov.ca.cwds.idm.service;
 
-import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
-import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.CREATE;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
 import static gov.ca.cwds.idm.service.ExecutionStatus.FAIL;
 import static gov.ca.cwds.idm.service.ExecutionStatus.SUCCESS;
 import static gov.ca.cwds.idm.service.ExecutionStatus.WAS_NOT_EXECUTED;
-import static gov.ca.cwds.idm.service.authorization.UserRolesService.getStrongestAdminRole;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
-import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByEmail;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getRACFId;
-import static gov.ca.cwds.service.messages.MessageCode.ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_UPDATE_USER_ENABLED_STATUS;
-import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY;
-import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_OFFICE;
-import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID_IN_CWSCMS;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_CREATE_IDM_USER_IN_ES;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_PURGE_PROCESSED_USER_LOGS;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_IDM_USER_IN_ES;
@@ -29,14 +21,11 @@ import static gov.ca.cwds.service.messages.MessageCode.USER_PARTIAL_UPDATE_AND_S
 import static gov.ca.cwds.service.messages.MessageCode.USER_PARTIAL_UPDATE_AND_SAVE_TO_SEARCH_ERRORS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_UPDATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_UPDATE_SAVE_TO_SEARCH_ERROR;
-import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.Utils.toLowerCase;
 import static java.util.stream.Collectors.toSet;
 
 import com.amazonaws.services.cognitoidp.model.UserType;
-import gov.ca.cwds.data.persistence.auth.CwsOffice;
-import gov.ca.cwds.data.persistence.auth.StaffPerson;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserAndOperation;
 import gov.ca.cwds.idm.dto.UserEnableStatusRequest;
@@ -58,7 +47,7 @@ import gov.ca.cwds.idm.service.execution.PutInSearchExecution;
 import gov.ca.cwds.idm.service.filter.MainRoleFilter;
 import gov.ca.cwds.idm.service.validation.ValidationService;
 import gov.ca.cwds.rest.api.domain.PartialSuccessException;
-import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType;
+import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
 import gov.ca.cwds.service.CwsUserInfoService;
 import gov.ca.cwds.service.dto.CwsUserInfo;
 import gov.ca.cwds.service.messages.MessageCode;
@@ -70,7 +59,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -80,7 +68,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 @Service
 @Profile("idm")
@@ -216,46 +203,21 @@ public class IdmServiceImpl implements IdmService {
 
   @Override
   public UserVerificationResult verifyIfUserCanBeCreated(String racfId, String email) {
-    email = toLowerCase(email);
+    User user = new User();
+    user.setEmail(toLowerCase(email));
+    user.setRacfid(racfId);
 
-    CwsUserInfo cwsUser = cwsUserInfoService.getCwsUserByRacfId(racfId);
-    if (cwsUser == null) {
-      return composeNegativeResultWithMessage(NO_USER_WITH_RACFID_IN_CWSCMS, racfId);
+    try {
+      User correctedUser = validationService.validateUserCreate(getCurrentUser(), user);
+      return UserVerificationResult.Builder.anUserVerificationResult()
+          .withUser(correctedUser)
+          .withVerificationPassed().build();
+
+    } catch (UserIdmValidationException e) {
+      return UserVerificationResult.Builder.anUserVerificationResult()
+          .withVerificationFailed(e.getErrorCode().getValue(), e.getUserMessage())
+          .build();
     }
-    if (checkIfUserWithEmailExistsInCognito(email)) {
-      return composeNegativeResultWithMessage(USER_WITH_EMAIL_EXISTS_IN_IDM, email);
-    }
-
-    if (validationService.isActiveRacfIdPresent(racfId)) {
-      return composeNegativeResultWithMessage(ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM, racfId);
-    }
-
-    User user = composeUser(cwsUser, email);
-    Optional<MessageCode> authorizationError = buildAuthorizationError();
-    if (!authorizeService.canCreateUser(user) && authorizationError.isPresent()) {
-      return composeNegativeResultWithMessage(authorizationError.get(), user.getCountyName());
-    }
-
-    return UserVerificationResult.Builder.anUserVerificationResult()
-        .withUser(user)
-        .withVerificationPassed().build();
-  }
-
-  private Optional<MessageCode> buildAuthorizationError() {
-    switch (getStrongestAdminRole(getCurrentUser())) {
-      case COUNTY_ADMIN:
-        return Optional.of(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY);
-      case OFFICE_ADMIN:
-        return Optional.of(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_OFFICE);
-      default:
-        return Optional.empty();
-    }
-  }
-
-  private boolean checkIfUserWithEmailExistsInCognito(String email) {
-    Collection<UserType> cognitoUsers =
-        cognitoServiceFacade.searchPage(composeToGetFirstPageByEmail(email)).getUsers();
-    return !CollectionUtils.isEmpty(cognitoUsers);
   }
 
   private ExecutionStatus updateUserAttributes(
@@ -508,46 +470,6 @@ public class IdmServiceImpl implements IdmService {
         setUserLogExecution(userLogService.logCreate(userType.getUsername()));
       }
     };
-  }
-
-  private UserVerificationResult composeNegativeResultWithMessage(
-      MessageCode errorCode, Object... params) {
-    String message = messages.getUserMessage(errorCode, params);
-    LOGGER.info(message);
-    return UserVerificationResult.Builder.anUserVerificationResult()
-        .withVerificationFailed(errorCode.getValue(), message)
-        .build();
-  }
-
-  private User composeUser(CwsUserInfo cwsUser, String email) {
-    User user = new User();
-    user.setEmail(email);
-    user.setRacfid(cwsUser.getRacfId());
-    enrichDataFromCwsOffice(cwsUser.getCwsOffice(), user);
-    enrichDataFromStaffPerson(cwsUser.getStaffPerson(), user);
-    return user;
-  }
-
-  private void enrichDataFromStaffPerson(StaffPerson staffPerson, final User user) {
-    if (staffPerson != null) {
-      user.setFirstName(staffPerson.getFirstName());
-      user.setLastName(staffPerson.getLastName());
-      user.setEndDate(staffPerson.getEndDate());
-      user.setStartDate(staffPerson.getStartDate());
-    }
-  }
-
-  private void enrichDataFromCwsOffice(CwsOffice office, final User user) {
-    if (office != null) {
-      user.setOfficeId(office.getOfficeId());
-      Optional.ofNullable(office.getPrimaryPhoneNumber())
-          .ifPresent(e -> user.setPhoneNumber(e.toString()));
-      Optional.ofNullable(office.getPrimaryPhoneExtensionNumber())
-          .ifPresent(user::setPhoneExtensionNumber);
-      Optional.ofNullable(office.getGovernmentEntityType())
-          .ifPresent(
-              x -> user.setCountyName((GovernmentEntityType.findBySysId(x)).getDescription()));
-    }
   }
 
   public void setSearchService(SearchService searchService) {

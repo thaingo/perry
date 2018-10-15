@@ -7,10 +7,8 @@ import gov.ca.cwds.idm.dto.UserUpdate;
 
 public interface ValidationService {
 
-  void validateUserCreate(UniversalUserToken admin, User user);
+  User validateUserCreate(UniversalUserToken admin, User user);
 
   void validateUpdateUser(UniversalUserToken admin, UserType existedCognitoUser, UserUpdate updateUserDto);
-
-  boolean isActiveRacfIdPresent(String racfId);
 
 }
