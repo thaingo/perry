@@ -2,10 +2,8 @@ package gov.ca.cwds.idm.service;
 
 import static gov.ca.cwds.BaseIntegrationTest.IDM_BASIC_AUTH_PASS;
 import static gov.ca.cwds.BaseIntegrationTest.IDM_BASIC_AUTH_USER;
-import static gov.ca.cwds.idm.service.TestHelper.user;
-import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
-import static gov.ca.cwds.idm.service.IdmServiceImpl.enrichUserByUpdateDto;
 import static gov.ca.cwds.idm.service.IdmServiceImpl.transformSearchValues;
+import static gov.ca.cwds.idm.service.TestHelper.user;
 import static gov.ca.cwds.idm.service.TestHelper.userType;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.FIRST_NAME;
@@ -77,9 +75,6 @@ public class IdmServiceImplTest {
 
     userLogService.setUserLogTransactionalService(userLogTransactionalServiceMock);
   }
-
-  @Rule
-  public ExpectedException exception = ExpectedException.none();
 
   @Test
   @WithMockCustomUser
@@ -298,31 +293,6 @@ public class IdmServiceImplTest {
   }
 
   @Test
-  public void testPerformValidation_throwsNoRacfIdInCWS() {
-    final String NO_ACTIVE_USER_WITH_RACFID_IN_CMS_ERROR_MSG =
-        "No user with RACFID: NOIDCMS found in CWSCMS";
-    final String racfId = "NOIDCMS";
-    when(cwsUserInfoServiceMock.getCwsUserByRacfId(racfId)).thenReturn(null);
-    exception.expect(UserIdmValidationException.class);
-    exception.expectMessage(NO_ACTIVE_USER_WITH_RACFID_IN_CMS_ERROR_MSG);
-    service.validateActivateUser(racfId);
-  }
-
-  @Test
-  public void testPerformValidation_throwsActiveRacfIdAlreadyInCognito() {
-    final String ACTIVE_USER_WITH_RACFID_EXISTS_IN_COGNITO_ERROR_MSG =
-        "Active User with RACFID: SMITHBO exists in Cognito";
-    final String racfId = "SMITHBO";
-    when(cwsUserInfoServiceMock.getCwsUserByRacfId(racfId)).thenReturn(new CwsUserInfo());
-    UserType userType = userType(user(), USER_ID);
-    when(cognitoServiceFacadeMock.searchAllPages(any()))
-        .thenReturn(Collections.singletonList(userType));
-    exception.expect(UserIdmValidationException.class);
-    exception.expectMessage(ACTIVE_USER_WITH_RACFID_EXISTS_IN_COGNITO_ERROR_MSG);
-    service.validateActivateUser(racfId);
-  }
-
-  @Test
   public void testTransformSearchValues() {
     assertThat(
         transformSearchValues(toSet("ROOBLA", "roobla", "Roobla"), RACFID_STANDARD),
@@ -333,67 +303,6 @@ public class IdmServiceImplTest {
     assertThat(
         transformSearchValues(toSet("John", "JOHN", "john"), FIRST_NAME),
         is(toSet("John", "JOHN", "john")));
-  }
-
-  @Test
-  public void enrichUserByUpdateDtoNoChanges() {
-    User user = new User();
-
-    Boolean enabled = Boolean.TRUE;
-    user.setEnabled(enabled);
-
-    Set<String> permissions = toSet("permission");
-    user.setPermissions(permissions);
-
-    Set<String> roles = toSet("role");
-    user.setRoles(roles);
-
-    enrichUserByUpdateDto(user, new UserUpdate());
-
-    assertThat(user.getEnabled(), is(enabled));
-    assertThat(user.getPermissions(), is(permissions));
-    assertThat(user.getRoles(), is(roles));
-  }
-
-  @Test
-  public void enrichUserByUpdateDtoAllChanged() {
-    User user = new User();
-    Boolean enabled = Boolean.TRUE;
-    user.setEnabled(enabled);
-
-    Set<String> permissions = toSet("permission");
-    user.setPermissions(permissions);
-
-    Set<String> roles = toSet("role");
-    user.setRoles(roles);
-
-    UserUpdate updateUserDto = new UserUpdate();
-
-    Boolean newEnabled = Boolean.FALSE;
-    updateUserDto.setEnabled(newEnabled);
-
-    Set<String> newPermissions = toSet("newPermission");
-    updateUserDto.setPermissions(newPermissions);
-
-    Set<String> newRoles = toSet("newRole");
-    updateUserDto.setRoles(newRoles);
-
-    enrichUserByUpdateDto(user, updateUserDto);
-
-    assertThat(user.getEnabled(), is(newEnabled));
-    assertThat(user.getPermissions(), is(newPermissions));
-    assertThat(user.getRoles(), is(newRoles));
-  }
-
-  private static User user() {
-    User user = new User();
-    user.setEmail("gonzales@gmail.com");
-    user.setFirstName("Garcia");
-    user.setLastName("Gonzales");
-    user.setCountyName("Yolo");
-    user.setEnabled(Boolean.TRUE);
-    user.setRoles(toSet(CWS_WORKER));
-    return user;
   }
 
   private void setCreateUserResult(User user, String newId) {

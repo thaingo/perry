@@ -1,7 +1,9 @@
 package gov.ca.cwds.idm.service;
 
+import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.util.UniversalUserTokenDeserializer.ADMIN_OFFICE_IDS_PARAM;
 import static gov.ca.cwds.util.UniversalUserTokenDeserializer.COUNTY_NAME_PARAM;
+import static gov.ca.cwds.util.Utils.toSet;
 
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.UniversalUserToken;
@@ -34,6 +36,7 @@ public final class TestHelper {
     user.setLastName("Gonzales");
     user.setCountyName("Yolo");
     user.setEnabled(Boolean.TRUE);
+    user.setRoles(toSet(CWS_WORKER));
     return user;
   }
 
