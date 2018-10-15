@@ -2,6 +2,7 @@ package gov.ca.cwds.idm;
 
 import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.idm.IdmResource.DATETIME_FORMAT_PATTERN;
@@ -760,6 +761,8 @@ public class IdmResourceTest extends BaseIntegrationTest {
   public void testValidationUpdateUserChangeInactiveToActive_throwsNoRacfIdInCWS() throws Exception {
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setEnabled(Boolean.TRUE);
+    userUpdate.setRoles(toSet(CWS_WORKER));
+
     AdminEnableUserRequest enableUserRequest = setEnableUserRequestAndResult(INACTIVE_USER_WITH_NO_ACTIVE_RACFID_IN_CMS);
     setDoraSuccess();
 
@@ -783,6 +786,8 @@ public class IdmResourceTest extends BaseIntegrationTest {
   public void testValidationUpdateUserChangeInactiveToActive_withNoRacfIdForUser() throws Exception {
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setEnabled(Boolean.TRUE);
+    userUpdate.setRoles(toSet(CWS_WORKER));
+
     AdminEnableUserRequest enableUserRequest = setEnableUserRequestAndResult(INACTIVE_USER_WITH_NO_RACFID);
     setDoraSuccess();
 
@@ -805,6 +810,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
   public void testValidationUpdateUserChangeInactiveToActive_throwsActiveRacfIdAlreadyInCognito() throws Exception {
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setEnabled(Boolean.TRUE);
+    userUpdate.setRoles(toSet(CWS_WORKER));
     AdminEnableUserRequest enableUserRequest = setEnableUserRequestAndResult(INACTIVE_USER_WITH_ACTIVE_RACFID_IN_CMS);
     setDoraSuccess();
 

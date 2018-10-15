@@ -2,6 +2,7 @@ package gov.ca.cwds.idm.service;
 
 import static gov.ca.cwds.BaseIntegrationTest.IDM_BASIC_AUTH_PASS;
 import static gov.ca.cwds.BaseIntegrationTest.IDM_BASIC_AUTH_USER;
+import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.idm.service.IdmServiceImpl.enrichUserByUpdateDto;
 import static gov.ca.cwds.idm.service.IdmServiceImpl.transformSearchValues;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
@@ -396,6 +397,7 @@ public class IdmServiceImplTest {
     user.setLastName("Gonzales");
     user.setCountyName("Yolo");
     user.setEnabled(Boolean.TRUE);
+    user.setRoles(toSet(CWS_WORKER));
     return user;
   }
 

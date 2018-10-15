@@ -1,5 +1,6 @@
 package gov.ca.cwds.idm.service.validation;
 
+import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_REMOVE_ALL_ROLES;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_UNALLOWED_ROLES;
 
 import gov.ca.cwds.idm.dto.User;
@@ -33,8 +34,12 @@ public class ValidateUpdateUserByAdminRolesServiceImpl implements
 
   private void validateByNewUserRoles(User newUser) {
     Collection<String> newUserRoles = newUser.getRoles();
-    Collection<String> allowedRoles = getAllowedRoles();
 
+    if (newUserRoles.isEmpty()) {
+      throwValidationException(UNABLE_TO_REMOVE_ALL_ROLES);
+    }
+
+    Collection<String> allowedRoles = getAllowedRoles();
     if (!allowedRoles.containsAll(newUserRoles)) {
       throwValidationException(UNABLE_UPDATE_UNALLOWED_ROLES, newUserRoles, allowedRoles);
     }
