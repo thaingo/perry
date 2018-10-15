@@ -1,0 +1,8 @@
+{
+  "status": "BAD_REQUEST",
+  "technical_message":"Unable to remove all roles. At least one role should be assigned to the User",
+  "user_message":"A role should be assigned to User",
+  "error_code": "CAP-032",
+  "causes": [
+  ]
+}
