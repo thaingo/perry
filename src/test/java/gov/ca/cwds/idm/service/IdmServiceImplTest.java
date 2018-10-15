@@ -2,6 +2,7 @@ package gov.ca.cwds.idm.service;
 
 import static gov.ca.cwds.BaseIntegrationTest.IDM_BASIC_AUTH_PASS;
 import static gov.ca.cwds.BaseIntegrationTest.IDM_BASIC_AUTH_USER;
+import static gov.ca.cwds.idm.service.IdmServiceImpl.enrichUserByUpdateDto;
 import static gov.ca.cwds.idm.service.IdmServiceImpl.transformSearchValues;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.FIRST_NAME;
@@ -35,6 +36,7 @@ import gov.ca.cwds.service.CwsUserInfoService;
 import gov.ca.cwds.service.dto.CwsUserInfo;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -335,6 +337,56 @@ public class IdmServiceImplTest {
     assertThat(
         transformSearchValues(toSet("John", "JOHN", "john"), FIRST_NAME),
         is(toSet("John", "JOHN", "john")));
+  }
+
+  @Test
+  public void enrichUserByUpdateDtoNoChanges() {
+    User user = new User();
+
+    Boolean enabled = Boolean.TRUE;
+    user.setEnabled(enabled);
+
+    Set<String> permissions = toSet("permission");
+    user.setPermissions(permissions);
+
+    Set<String> roles = toSet("role");
+    user.setRoles(roles);
+
+    enrichUserByUpdateDto(user, new UserUpdate());
+
+    assertThat(user.getEnabled(), is(enabled));
+    assertThat(user.getPermissions(), is(permissions));
+    assertThat(user.getRoles(), is(roles));
+  }
+
+  @Test
+  public void enrichUserByUpdateDtoAllChanged() {
+    User user = new User();
+    Boolean enabled = Boolean.TRUE;
+    user.setEnabled(enabled);
+
+    Set<String> permissions = toSet("permission");
+    user.setPermissions(permissions);
+
+    Set<String> roles = toSet("role");
+    user.setRoles(roles);
+
+    UserUpdate updateUserDto = new UserUpdate();
+
+    Boolean newEnabled = Boolean.FALSE;
+    updateUserDto.setEnabled(newEnabled);
+
+    Set<String> newPermissions = toSet("newPermission");
+    updateUserDto.setPermissions(newPermissions);
+
+    Set<String> newRoles = toSet("newRole");
+    updateUserDto.setRoles(newRoles);
+
+    enrichUserByUpdateDto(user, updateUserDto);
+
+    assertThat(user.getEnabled(), is(newEnabled));
+    assertThat(user.getPermissions(), is(newPermissions));
+    assertThat(user.getRoles(), is(newRoles));
   }
 
   private static User user() {

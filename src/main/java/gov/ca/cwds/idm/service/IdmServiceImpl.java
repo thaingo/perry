@@ -58,6 +58,7 @@ import gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
 import gov.ca.cwds.idm.service.execution.OptionalExecution;
 import gov.ca.cwds.idm.service.execution.PutInSearchExecution;
+import gov.ca.cwds.idm.service.validation.ValidateUpdateUserByAdminRolesService;
 import gov.ca.cwds.idm.service.filter.MainRoleFilter;
 import gov.ca.cwds.rest.api.domain.PartialSuccessException;
 import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
@@ -116,6 +117,9 @@ public class IdmServiceImpl implements IdmService {
   @Autowired
   private MappingService mappingService;
 
+  @Autowired
+  private ValidateUpdateUserByAdminRolesService userValidateUpdateByAdminRolesService;
+
   @Override
   public User findUser(String id) {
     UserType cognitoUser = cognitoServiceFacade.getCognitoUserById(id);
@@ -126,12 +130,9 @@ public class IdmServiceImpl implements IdmService {
 
   private void filterMainRole(User user) {
     Set<String> roles = user.getRoles();
-    if (roles.isEmpty()) {
-      return;
+    if (!roles.isEmpty()) {
+      user.setRoles(MainRoleFilter.filter(roles));
     }
-
-    Set<String> filteredRoles = MainRoleFilter.filter(roles);
-    user.setRoles(filteredRoles);
   }
 
   @Override
@@ -139,12 +140,7 @@ public class IdmServiceImpl implements IdmService {
 
     UserType existedCognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
 
-    if (canChangeToEnableActiveStatus(updateUserDto.getEnabled(), existedCognitoUser.getEnabled())) {
-      String racfId = CognitoUtils.getRACFId(existedCognitoUser);
-      if (! StringUtils.isEmpty(racfId)) {
-        validateActivateUser(racfId);
-      }
-    }
+    validateUpdateUser(existedCognitoUser, updateUserDto);
 
     ExecutionStatus updateAttributesStatus =
         updateUserAttributes(userId, updateUserDto, existedCognitoUser);
@@ -168,14 +164,26 @@ public class IdmServiceImpl implements IdmService {
         userId, updateAttributesStatus, updateUserEnabledExecution, doraExecution);
   }
 
-  private boolean doesElasticSearchNeedUpdate(ExecutionStatus updateAttributesStatus,
-      OptionalExecution<UserEnableStatusRequest, Boolean> updateUserEnabledExecution) {
-    return updateAttributesStatus == SUCCESS
-        || updateUserEnabledExecution.getExecutionStatus() == SUCCESS;
+  private void validateUpdateUser(UserType existedCognitoUser, UserUpdate updateUserDto) {
+    validateByAdminRoles(existedCognitoUser, updateUserDto);
+    validateActivateUser(existedCognitoUser, updateUserDto);
   }
 
-  private static boolean canChangeToEnableActiveStatus(Boolean newEnabled, Boolean currentEnabled) {
-    return newEnabled != null && !newEnabled.equals(currentEnabled) && newEnabled;
+  private void validateByAdminRoles(UserType existedCognitoUser, UserUpdate updateUserDto) {
+    User newUser = getNewUser(existedCognitoUser, updateUserDto);
+    userValidateUpdateByAdminRolesService.validateUpdateUser(newUser);
+  }
+
+  private void validateActivateUser(UserType existedCognitoUser, UserUpdate updateUserDto) {
+    if (!canChangeToEnableActiveStatus(updateUserDto.getEnabled(),
+        existedCognitoUser.getEnabled())) {
+      return;
+    }
+    String racfId = CognitoUtils.getRACFId(existedCognitoUser);
+    if (StringUtils.isEmpty(racfId)) {
+      return;
+    }
+    validateActivateUser(racfId);
   }
 
   void validateActivateUser(String racfId) {
@@ -193,6 +201,37 @@ public class IdmServiceImpl implements IdmService {
       String userMsg = messages.getUserMessage(ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM, racfId);
       throw new UserIdmValidationException(msg, userMsg, ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM);
     }
+  }
+
+  private static boolean canChangeToEnableActiveStatus(Boolean newEnabled, Boolean currentEnabled) {
+    return newEnabled != null && !newEnabled.equals(currentEnabled) && newEnabled;
+  }
+
+  private User getNewUser(UserType existedCognitoUser, UserUpdate updateUserDto) {
+    User user = mappingService.toUser(existedCognitoUser);
+    enrichUserByUpdateDto(user, updateUserDto);
+    return user;
+  }
+
+  static void enrichUserByUpdateDto(User user, UserUpdate updateUserDto) {
+    Boolean newEnabled = updateUserDto.getEnabled();
+    if(newEnabled != null) {
+      user.setEnabled(newEnabled);
+    }
+    Set<String> newPermissions = updateUserDto.getPermissions();
+    if(newPermissions != null) {
+      user.setPermissions(newPermissions);
+    }
+    Set<String> newRoles = updateUserDto.getRoles();
+    if(newRoles != null) {
+      user.setRoles(newRoles);
+    }
+  }
+
+  private boolean doesElasticSearchNeedUpdate(ExecutionStatus updateAttributesStatus,
+      OptionalExecution<UserEnableStatusRequest, Boolean> updateUserEnabledExecution) {
+    return updateAttributesStatus == SUCCESS
+        || updateUserEnabledExecution.getExecutionStatus() == SUCCESS;
   }
 
   @Override
@@ -622,5 +661,10 @@ public class IdmServiceImpl implements IdmService {
 
   public void setMappingService(MappingService mappingService) {
     this.mappingService = mappingService;
+  }
+
+  public void setUserValidateUpdateByAdminRolesService(
+      ValidateUpdateUserByAdminRolesService userValidateUpdateByAdminRolesService) {
+    this.userValidateUpdateByAdminRolesService = userValidateUpdateByAdminRolesService;
   }
 }
