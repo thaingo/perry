@@ -208,9 +208,9 @@ public class IdmServiceImpl implements IdmService {
     user.setRacfid(racfId);
 
     try {
-      User correctedUser = validationService.validateUserCreate(getCurrentUser(), user);
+      User enrichedUser = validationService.validateVerifyIfUserCanBeCreated(getCurrentUser(), racfId, email);
       return UserVerificationResult.Builder.anUserVerificationResult()
-          .withUser(correctedUser)
+          .withUser(enrichedUser)
           .withVerificationPassed().build();
 
     } catch (UserIdmValidationException e) {

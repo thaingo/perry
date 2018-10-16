@@ -9,6 +9,7 @@ public interface ValidationService {
 
   User validateUserCreate(UniversalUserToken admin, User user);
 
-  void validateUpdateUser(UniversalUserToken admin, UserType existedCognitoUser, UserUpdate updateUserDto);
+  User validateVerifyIfUserCanBeCreated(UniversalUserToken admin, String racfId, String email);
 
+  void validateUpdateUser(UniversalUserToken admin, UserType existedCognitoUser, UserUpdate updateUserDto);
 }

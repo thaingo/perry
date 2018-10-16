@@ -12,7 +12,7 @@ import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID_IN_CW
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_REMOVE_ALL_ROLES;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_UNALLOWED_ROLES;
 import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
-import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
+import static gov.ca.cwds.util.Utils.toLowerCase;
 import static gov.ca.cwds.util.Utils.toUpperCase;
 
 import com.amazonaws.services.cognitoidp.model.UserType;
@@ -72,6 +72,17 @@ public class ValidationServiceImpl implements ValidationService {
   }
 
   @Override
+  public User validateVerifyIfUserCanBeCreated(UniversalUserToken admin, String racfId, String email) {
+    User user = new User();
+    user.setEmail(toLowerCase(email));
+    user.setRacfid(racfId);
+
+    User enrichedUser = validateRacfidUserCreate(user);
+    validateByCreateAuthorizationRules(admin, enrichedUser);
+    return enrichedUser;
+  }
+
+  @Override
   public void validateUpdateUser(UniversalUserToken admin, UserType existedCognitoUser, UserUpdate updateUserDto) {
     validateByNewUserRoles(admin, updateUserDto);
     validateActivateUser(existedCognitoUser, updateUserDto);
@@ -85,13 +96,11 @@ public class ValidationServiceImpl implements ValidationService {
     validateRacfidDoesNotExistInCognito(racfId);
 
     enrichUserByCwsData(user, cwsUser);
-
-    validateByCreateAuthorizationRules(user);
     return user;
   }
 
-  private void validateByCreateAuthorizationRules(User user) {
-    Optional<MessageCode> authorizationError = buildAuthorizationError();
+  private void validateByCreateAuthorizationRules(UniversalUserToken admin, User user) {
+    Optional<MessageCode> authorizationError = buildAuthorizationError(admin);
     if (!authorizeService.canCreateUser(user) && authorizationError.isPresent()) {
       throwValidationException(authorizationError.get(), user.getCountyName());
     }
@@ -162,8 +171,8 @@ public class ValidationServiceImpl implements ValidationService {
     }
   }
 
-  private Optional<MessageCode> buildAuthorizationError() {
-    switch (getStrongestAdminRole((getCurrentUser()))) {
+  private Optional<MessageCode> buildAuthorizationError(UniversalUserToken admin) {
+    switch (getStrongestAdminRole(admin)) {
       case COUNTY_ADMIN:
         return Optional.of(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY);
       case OFFICE_ADMIN:
