@@ -63,5 +63,4 @@ public final class TestHelper {
     admin.setParameter(ADMIN_OFFICE_IDS_PARAM, adminOfficeIds);
     return admin;
   }
-
 }

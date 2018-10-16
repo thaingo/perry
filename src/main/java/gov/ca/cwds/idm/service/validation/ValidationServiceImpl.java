@@ -9,6 +9,8 @@ import static gov.ca.cwds.service.messages.MessageCode.ACTIVE_USER_WITH_RAFCID_E
 import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_OFFICE;
 import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID_IN_CWSCMS;
+import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_REMOVE_ALL_ROLES;
+import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_UNALLOWED_ROLES;
 import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.Utils.toUpperCase;
@@ -23,6 +25,7 @@ import gov.ca.cwds.idm.service.MappingService;
 import gov.ca.cwds.idm.service.authorization.AuthorizationService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
+import gov.ca.cwds.idm.service.role.implementor.AdminRoleImplementorFactory;
 import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
 import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType;
 import gov.ca.cwds.service.CwsUserInfoService;
@@ -32,7 +35,6 @@ import gov.ca.cwds.service.messages.MessagesService;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,19 +47,19 @@ import org.springframework.util.CollectionUtils;
 @Profile("idm")
 public class ValidationServiceImpl implements ValidationService {
 
-  private UserByAdminRolesValidator userByAdminRolesValidator;
-
   private static final Logger LOGGER = LoggerFactory.getLogger(ValidationServiceImpl.class);
 
   private MappingService mappingService;
 
   private CwsUserInfoService cwsUserInfoService;
 
-  private MessagesService messages;
+  private MessagesService messagesService;
 
   private CognitoServiceFacade cognitoServiceFacade;
 
   private AuthorizationService authorizeService;
+
+  private AdminRoleImplementorFactory adminRoleImplementorFactory;
 
   @Override
   public User validateUserCreate(UniversalUserToken admin, User user) {
@@ -69,38 +71,67 @@ public class ValidationServiceImpl implements ValidationService {
     }
   }
 
+  @Override
+  public void validateUpdateUser(UniversalUserToken admin, UserType existedCognitoUser, UserUpdate updateUserDto) {
+    validateByNewUserRoles(admin, updateUserDto);
+    validateActivateUser(existedCognitoUser, updateUserDto);
+  }
+
   private User validateRacfidUserCreate(User user) {
     String racfId = user.getRacfid();
-    String email = user.getEmail();
 
-    CwsUserInfo cwsUser = cwsUserInfoService.getCwsUserByRacfId(racfId);
-    if (cwsUser == null) {
-      throwValidationException(NO_USER_WITH_RACFID_IN_CWSCMS, racfId);
-    }
-
-    if (checkIfUserWithEmailExistsInCognito(email)) {
-      throwValidationException(USER_WITH_EMAIL_EXISTS_IN_IDM, email);
-    }
-
-    if (isActiveRacfIdPresent(racfId)) {
-      throwValidationException(ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM, racfId);
-    }
+    CwsUserInfo cwsUser = validateActiveUserExistsInCws(racfId);
+    validateEmailDoesNotExistInCognito(user.getEmail());
+    validateRacfidDoesNotExistInCognito(racfId);
 
     enrichUserByCwsData(user, cwsUser);
 
+    validateByCreateAuthorizationRules(user);
+    return user;
+  }
+
+  private void validateByCreateAuthorizationRules(User user) {
     Optional<MessageCode> authorizationError = buildAuthorizationError();
     if (!authorizeService.canCreateUser(user) && authorizationError.isPresent()) {
       throwValidationException(authorizationError.get(), user.getCountyName());
     }
-    return user;
   }
 
-  @Override
-  public void validateUpdateUser(UniversalUserToken admin, UserType existedCognitoUser, UserUpdate updateUserDto) {
-    User newUser = getNewUser(existedCognitoUser, updateUserDto);
-    userByAdminRolesValidator.validate(newUser);
+  private void validateRacfidDoesNotExistInCognito(String racfId) {
+    if (isActiveRacfIdPresent(racfId)) {
+      throwValidationException(ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM, racfId);
+    }
+  }
 
-    validateActivateUser(existedCognitoUser, updateUserDto);
+  private void validateEmailDoesNotExistInCognito(String email) {
+    if (userWithEmailExistsInCognito(email)) {
+      throwValidationException(USER_WITH_EMAIL_EXISTS_IN_IDM, email);
+    }
+  }
+
+  private CwsUserInfo validateActiveUserExistsInCws(String racfId) {
+    CwsUserInfo cwsUser = cwsUserInfoService.getCwsUserByRacfId(racfId);
+    if (cwsUser == null) {
+      throwValidationException(NO_USER_WITH_RACFID_IN_CWSCMS, racfId);
+    }
+    return cwsUser;
+  }
+
+  private void validateByNewUserRoles(UniversalUserToken admin, UserUpdate updateUserDto) {
+    Collection<String> newUserRoles = updateUserDto.getRoles();
+
+    if (newUserRoles == null) {
+      return;
+    }
+
+    if (newUserRoles.isEmpty()) {
+      throwValidationException(UNABLE_TO_REMOVE_ALL_ROLES);
+    }
+
+    Collection<String> allowedRoles = adminRoleImplementorFactory.getPossibleUserRoles(admin);
+    if (!allowedRoles.containsAll(newUserRoles)) {
+      throwValidationException(UNABLE_UPDATE_UNALLOWED_ROLES, newUserRoles, allowedRoles);
+    }
   }
 
   private void enrichUserByCwsData(User user, CwsUserInfo cwsUser) {
@@ -149,38 +180,17 @@ public class ValidationServiceImpl implements ValidationService {
         && isActiveUserPresent(cognitoUsersByRacfId);
   }
 
-  private boolean checkIfUserWithEmailExistsInCognito(String email) {
+  private boolean userWithEmailExistsInCognito(String email) {
     Collection<UserType> cognitoUsers =
         cognitoServiceFacade.searchPage(composeToGetFirstPageByEmail(email)).getUsers();
     return !CollectionUtils.isEmpty(cognitoUsers);
   }
 
   private void throwValidationException(MessageCode messageCode, Object... args) {
-    String msg = messages.getTechMessage(messageCode, args);
-    String userMsg = messages.getUserMessage(messageCode, args);
+    String msg = messagesService.getTechMessage(messageCode, args);
+    String userMsg = messagesService.getUserMessage(messageCode, args);
     LOGGER.error(msg);
     throw new UserIdmValidationException(msg, userMsg, messageCode);
-  }
-
-  private User getNewUser(UserType existedCognitoUser, UserUpdate updateUserDto) {
-    User user = mappingService.toUser(existedCognitoUser);
-    enrichUserByUpdateDto(user, updateUserDto);
-    return user;
-  }
-
-  static void enrichUserByUpdateDto(User user, UserUpdate updateUserDto) {
-    Boolean newEnabled = updateUserDto.getEnabled();
-    if(newEnabled != null) {
-      user.setEnabled(newEnabled);
-    }
-    Set<String> newPermissions = updateUserDto.getPermissions();
-    if(newPermissions != null) {
-      user.setPermissions(newPermissions);
-    }
-    Set<String> newRoles = updateUserDto.getRoles();
-    if(newRoles != null) {
-      user.setRoles(newRoles);
-    }
   }
 
   private void validateActivateUser(UserType existedCognitoUser, UserUpdate updateUserDto) {
@@ -199,32 +209,14 @@ public class ValidationServiceImpl implements ValidationService {
   }
 
   void validateActivateUser(String racfId) {
-    CwsUserInfo cwsUser = cwsUserInfoService.getCwsUserByRacfId(racfId);
-    // validates users not active in CWS cannot be set to Active in CWS CARES
-    if (cwsUser == null) {
-      String msg = messages.getTechMessage(NO_USER_WITH_RACFID_IN_CWSCMS, racfId);
-      String userMsg = messages.getUserMessage(NO_USER_WITH_RACFID_IN_CWSCMS, racfId);
-      throw new UserIdmValidationException(msg, userMsg, NO_USER_WITH_RACFID_IN_CWSCMS);
-    }
-
-    // validates no other Active users with same RACFID in CWS CARES exist
-    if (isActiveRacfIdPresent(racfId)) {
-      String msg = messages.getTechMessage(ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM, racfId);
-      String userMsg = messages.getUserMessage(ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM, racfId);
-      throw new UserIdmValidationException(msg, userMsg, ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM);
-    }
+    validateActiveUserExistsInCws(racfId);
+    validateRacfidDoesNotExistInCognito(racfId);
   }
 
   private static boolean isActiveUserPresent(Collection<UserType> cognitoUsers) {
     return cognitoUsers
         .stream()
         .anyMatch(userType -> Objects.equals(userType.getEnabled(), Boolean.TRUE));
-  }
-
-  @Autowired
-  public void setUserByAdminRolesValidator(
-      UserByAdminRolesValidator userByAdminRolesValidator) {
-    this.userByAdminRolesValidator = userByAdminRolesValidator;
   }
 
   @Autowired
@@ -238,8 +230,8 @@ public class ValidationServiceImpl implements ValidationService {
   }
 
   @Autowired
-  public void setMessages(MessagesService messages) {
-    this.messages = messages;
+  public void setMessagesService(MessagesService messagesService) {
+    this.messagesService = messagesService;
   }
 
   @Autowired
@@ -252,5 +244,11 @@ public class ValidationServiceImpl implements ValidationService {
   public void setAuthorizeService(
       AuthorizationService authorizeService) {
     this.authorizeService = authorizeService;
+  }
+
+  @Autowired
+  public void setAdminRoleImplementorFactory(
+      AdminRoleImplementorFactory adminRoleImplementorFactory) {
+    this.adminRoleImplementorFactory = adminRoleImplementorFactory;
   }
 }

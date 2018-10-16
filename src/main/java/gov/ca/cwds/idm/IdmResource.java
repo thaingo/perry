@@ -2,6 +2,7 @@ package gov.ca.cwds.idm;
 
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.service.messages.MessageCode.INVALID_DATE_FORMAT;
+import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static java.util.stream.Collectors.toList;
 
 import gov.ca.cwds.config.api.idm.Roles;
@@ -185,7 +186,7 @@ public class IdmResource {
           UserByIdResponse.UserByIdResponseBuilder.anUserByIdResponse()
               .withUser(user)
               .withEditable(authorizationService.canUpdateUser(id))
-              .withPossibleRoles(adminRoleImplementorFactory.getPossibleUserRoles())
+              .withPossibleRoles(adminRoleImplementorFactory.getPossibleUserRoles(getCurrentUser()))
               .build();
       return ResponseEntity.ok().body(response);
     } catch (UserNotFoundPerryException e) {

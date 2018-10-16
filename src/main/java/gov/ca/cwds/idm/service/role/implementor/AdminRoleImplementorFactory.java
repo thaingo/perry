@@ -4,8 +4,8 @@ import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
-import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 
+import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.authorization.AdminActionsAuthorizer;
 import gov.ca.cwds.idm.service.authorization.UserRolesService;
@@ -20,8 +20,8 @@ import org.springframework.stereotype.Service;
 @Profile("idm")
 public class AdminRoleImplementorFactory {
 
-  public AdminRoleImplementor createAdminRoleImplementor() {
-    switch (UserRolesService.getStrongestAdminRole(getCurrentUser())) {
+  public AdminRoleImplementor createAdminRoleImplementor(UniversalUserToken admin) {
+    switch (UserRolesService.getStrongestAdminRole(admin)) {
       case STATE_ADMIN:
         return new StateAdminRoleImplementor();
       case COUNTY_ADMIN:
@@ -35,12 +35,12 @@ public class AdminRoleImplementorFactory {
     }
   }
 
-  public AdminActionsAuthorizer getAdminActionsAuthorizer(User user) {
-    return createAdminRoleImplementor().getAdminActionsAuthorizer(user);
+  public AdminActionsAuthorizer getAdminActionsAuthorizer(UniversalUserToken admin, User user) {
+    return createAdminRoleImplementor(admin).getAdminActionsAuthorizer(user);
   }
 
-  public List<String> getPossibleUserRoles() {
-    return createAdminRoleImplementor().getPossibleUserRoles();
+  public List<String> getPossibleUserRoles(UniversalUserToken admin) {
+    return createAdminRoleImplementor(admin).getPossibleUserRoles();
   }
 
 }
