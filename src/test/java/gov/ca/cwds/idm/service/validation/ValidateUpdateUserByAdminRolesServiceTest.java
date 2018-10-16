@@ -53,7 +53,7 @@ public class ValidateUpdateUserByAdminRolesServiceTest {
     testAdminCanUpdate(admin(STATE_ADMIN), user(COUNTY_ADMIN));
     testAdminCanUpdate(admin(STATE_ADMIN), user(OFFICE_ADMIN));
     testAdminCanUpdate(admin(STATE_ADMIN), user(CWS_WORKER));
-    testAdminCanUpdate(admin(STATE_ADMIN), user());
+    testAdminCanNotUpdate(admin(STATE_ADMIN), user());
   }
 
   @Test
@@ -62,7 +62,7 @@ public class ValidateUpdateUserByAdminRolesServiceTest {
     testAdminCanNotUpdate(admin(COUNTY_ADMIN), user(COUNTY_ADMIN));
     testAdminCanUpdate(admin(COUNTY_ADMIN), user(OFFICE_ADMIN));
     testAdminCanUpdate(admin(COUNTY_ADMIN), user(CWS_WORKER));
-    testAdminCanUpdate(admin(COUNTY_ADMIN), user());
+    testAdminCanNotUpdate(admin(COUNTY_ADMIN), user());
   }
 
   @Test
@@ -71,7 +71,7 @@ public class ValidateUpdateUserByAdminRolesServiceTest {
     testAdminCanNotUpdate(admin(OFFICE_ADMIN), user(COUNTY_ADMIN));
     testAdminCanNotUpdate(admin(OFFICE_ADMIN), user(OFFICE_ADMIN));
     testAdminCanUpdate(admin(OFFICE_ADMIN), user(CWS_WORKER));
-    testAdminCanUpdate(admin(OFFICE_ADMIN), user());
+    testAdminCanNotUpdate(admin(OFFICE_ADMIN), user());
   }
 
   private void testAdminCanUpdate(UniversalUserToken admin, User user) {
