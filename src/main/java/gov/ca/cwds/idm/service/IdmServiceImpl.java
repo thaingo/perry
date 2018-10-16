@@ -58,8 +58,8 @@ import gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
 import gov.ca.cwds.idm.service.execution.OptionalExecution;
 import gov.ca.cwds.idm.service.execution.PutInSearchExecution;
-import gov.ca.cwds.idm.service.validation.ValidateUpdateUserByAdminRolesService;
 import gov.ca.cwds.idm.service.filter.MainRoleFilter;
+import gov.ca.cwds.idm.service.validation.ValidateUpdateUserByAdminRolesService;
 import gov.ca.cwds.rest.api.domain.PartialSuccessException;
 import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
 import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType;
@@ -72,7 +72,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -128,11 +127,12 @@ public class IdmServiceImpl implements IdmService {
     return enrichUserWithLastLoginDateTime(user);
   }
 
-  private void filterMainRole(User user) {
+  private User filterMainRole(User user) {
     Set<String> roles = user.getRoles();
     if (!roles.isEmpty()) {
       user.setRoles(MainRoleFilter.filter(roles));
     }
+    return user;
   }
 
   @Override
@@ -551,6 +551,7 @@ public class IdmServiceImpl implements IdmService {
         .stream()
         .map(e -> mappingService.toUser(e, idToCmsUser.get(userNameToRacfId.get(e.getUsername()))))
         .map(this::enrichUserWithLastLoginDateTime)
+        .map(this::filterMainRole)
         .collect(Collectors.toList());
   }
 
