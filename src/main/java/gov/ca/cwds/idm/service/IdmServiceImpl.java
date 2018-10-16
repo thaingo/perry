@@ -169,6 +169,9 @@ public class IdmServiceImpl implements IdmService {
   }
 
   private void validateByAdminRoles(UserType existedCognitoUser, UserUpdate updateUserDto) {
+    if(updateUserDto.getRoles() == null) {
+      return;
+    }
     User newUser = getNewUser(existedCognitoUser, updateUserDto);
     userValidateUpdateByAdminRolesService.validateUpdateUser(newUser);
   }

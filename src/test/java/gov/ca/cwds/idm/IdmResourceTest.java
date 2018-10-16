@@ -752,7 +752,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
 
   @Test
   @WithMockCustomUser
-  public void testUpdateUserNoRoles() throws Exception {
+  public void testUpdateRemoveAllRoles() throws Exception {
 
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setEnabled(Boolean.FALSE);
@@ -760,6 +760,25 @@ public class IdmResourceTest extends BaseIntegrationTest {
 
     assertUpdateBadRequest(USER_NO_RACFID_ID, userUpdate,
         "fixtures/idm/update-user/no-roles-error.json");
+  }
+
+  @Test
+  @WithMockCustomUser
+  public void testUpdateRolesAreNotChanged() throws Exception {
+
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setEnabled(Boolean.FALSE);
+
+    setDoraSuccess();
+    setDisableUserRequestAndResult(USER_NO_RACFID_ID);
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.patch("/idm/users/" + USER_NO_RACFID_ID)
+                .contentType(JSON_CONTENT_TYPE)
+                .content(asJsonString(userUpdate)))
+        .andExpect(MockMvcResultMatchers.status().isNoContent())
+        .andReturn();
   }
 
   @Test
