@@ -127,11 +127,12 @@ public class IdmServiceImpl implements IdmService {
     return enrichUserWithLastLoginDateTime(user);
   }
 
-  private void filterMainRole(User user) {
+  private User filterMainRole(User user) {
     Set<String> roles = user.getRoles();
     if (!roles.isEmpty()) {
       user.setRoles(MainRoleFilter.filter(roles));
     }
+    return user;
   }
 
   @Override
@@ -553,6 +554,7 @@ public class IdmServiceImpl implements IdmService {
         .stream()
         .map(e -> mappingService.toUser(e, idToCmsUser.get(userNameToRacfId.get(e.getUsername()))))
         .map(this::enrichUserWithLastLoginDateTime)
+        .map(this::filterMainRole)
         .collect(Collectors.toList());
   }
 
