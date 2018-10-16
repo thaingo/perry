@@ -16,7 +16,6 @@
         "RFA-rollout"
       ],
       "roles": [
-        "CWS-worker",
         "County-admin"
       ]
     }
