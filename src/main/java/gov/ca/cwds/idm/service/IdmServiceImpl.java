@@ -123,7 +123,7 @@ public class IdmServiceImpl implements IdmService {
   public User findUser(String id) {
     UserType cognitoUser = cognitoServiceFacade.getCognitoUserById(id);
     User user = mappingService.toUser(cognitoUser);
-    user = filterMainRole(user);
+    filterMainRole(user);
     return enrichUserWithLastLoginDateTime(user);
   }
 
