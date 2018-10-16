@@ -152,7 +152,8 @@ public class IdmServiceImpl implements IdmService {
 
   @Override
   public String createUser(User user) {
-    UserType userType = cognitoServiceFacade.createUser(user);
+    User enrichedUser = validationService.validateUserCreate(getCurrentUser(), user);
+    UserType userType = cognitoServiceFacade.createUser(enrichedUser);
     String userId = userType.getUsername();
     PutInSearchExecution doraExecution = createUserInSearch(userType);
     handleCreatePartialSuccess(userId, doraExecution);

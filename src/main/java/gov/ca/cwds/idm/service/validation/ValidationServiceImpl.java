@@ -64,11 +64,17 @@ public class ValidationServiceImpl implements ValidationService {
   @Override
   public User validateUserCreate(UniversalUserToken admin, User user) {
     String racfId = user.getRacfid();
+
+    User returnedUser;
     if (StringUtils.isNotBlank(racfId)) {
-      return validateRacfidUserCreate(user);
+      returnedUser = validateRacfidUserCreate(user);
     } else {
-        return user;
+      returnedUser = user;
     }
+
+//    validateCreateByUserRoles(admin, returnedUser);
+
+    return returnedUser;
   }
 
   @Override
@@ -84,7 +90,7 @@ public class ValidationServiceImpl implements ValidationService {
 
   @Override
   public void validateUpdateUser(UniversalUserToken admin, UserType existedCognitoUser, UserUpdate updateUserDto) {
-    validateByNewUserRoles(admin, updateUserDto);
+    validateUpdateByNewUserRoles(admin, updateUserDto);
     validateActivateUser(existedCognitoUser, updateUserDto);
   }
 
@@ -126,7 +132,7 @@ public class ValidationServiceImpl implements ValidationService {
     return cwsUser;
   }
 
-  private void validateByNewUserRoles(UniversalUserToken admin, UserUpdate updateUserDto) {
+  private void validateUpdateByNewUserRoles(UniversalUserToken admin, UserUpdate updateUserDto) {
     Collection<String> newUserRoles = updateUserDto.getRoles();
 
     if (newUserRoles == null) {
@@ -137,6 +143,20 @@ public class ValidationServiceImpl implements ValidationService {
       throwValidationException(UNABLE_TO_REMOVE_ALL_ROLES);
     }
 
+    validateByAllowedRoles(admin, newUserRoles);
+  }
+
+  private void validateCreateByUserRoles(UniversalUserToken admin, User user) {
+    Collection<String> roles = user.getRoles();
+
+    if (roles == null ||roles.isEmpty()) {
+      throwValidationException(UNABLE_TO_REMOVE_ALL_ROLES);
+    }
+
+    validateByAllowedRoles(admin, roles);
+  }
+
+  private void validateByAllowedRoles(UniversalUserToken admin, Collection<String> newUserRoles) {
     Collection<String> allowedRoles = adminRoleImplementorFactory.getPossibleUserRoles(admin);
     if (!allowedRoles.containsAll(newUserRoles)) {
       throwValidationException(UNABLE_UPDATE_UNALLOWED_ROLES, newUserRoles, allowedRoles);
