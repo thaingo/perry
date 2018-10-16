@@ -48,7 +48,6 @@ import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -86,6 +85,7 @@ import gov.ca.cwds.idm.service.SearchRestSender;
 import gov.ca.cwds.idm.service.SearchService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.SearchProperties;
+import gov.ca.cwds.idm.service.validation.ValidationService;
 import gov.ca.cwds.service.messages.MessagesService;
 import java.nio.charset.Charset;
 import java.time.LocalDateTime;
@@ -167,6 +167,9 @@ public class IdmResourceTest extends BaseIntegrationTest {
 
   @Autowired
   private SearchProperties searchProperties;
+
+  @Autowired
+  private ValidationService validationService;
 
   private SearchService spySearchService;
 
@@ -1106,6 +1109,29 @@ public class IdmResourceTest extends BaseIntegrationTest {
 
     assertNonStrict(result,
         "fixtures/idm/verify-user/verify-active-racfid-already-in-cognito-message.json");
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {STATE_ADMIN})
+  public void testCreateUserWithActiveStatusInCognito() throws Exception {
+    User user = user();
+    user.setEmail("test@test.com");
+    user.setRacfid("SMITHBO");
+    user.setRoles(toSet(CWS_WORKER));
+
+    AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
+
+    MvcResult result = mockMvc
+        .perform(
+            MockMvcRequestBuilders.post("/idm/users")
+                .contentType(JSON_CONTENT_TYPE)
+                .content(asJsonString(user)))
+        .andExpect(MockMvcResultMatchers.status().isBadRequest())
+        .andReturn();
+
+    assertExtensible(result,
+        "fixtures/idm/create-user/active-user-with-same-racfid-in-cognito-error.json");
+    verify(cognito, times(0)).adminCreateUser(request);
   }
 
   @Test
