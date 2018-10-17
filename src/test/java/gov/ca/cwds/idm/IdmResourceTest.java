@@ -1132,10 +1132,10 @@ public class IdmResourceTest extends BaseIntegrationTest {
     User actuallySendUser = racfIdUser("test@test.com", "ELROYDA", toSet(CWS_WORKER));
     actuallySendUser.setFirstName("Donna");
     actuallySendUser.setLastName("Elroy");
-    actuallySendUser.setCountyName("Santa Clara");
-    actuallySendUser.setOfficeId("0yEAQev001");
+    actuallySendUser.setCountyName("Napa");
+    actuallySendUser.setOfficeId("TG7O51q0Ki");
     actuallySendUser.setStartDate(LocalDate.of(1998, 4, 14));
-    actuallySendUser.setPhoneNumber("4084417778");
+    actuallySendUser.setPhoneNumber("9165551234");
 
     ((TestCognitoServiceFacade) cognitoServiceFacade).setSearchByRacfidRequestAndResult("ELROYDA");
 
