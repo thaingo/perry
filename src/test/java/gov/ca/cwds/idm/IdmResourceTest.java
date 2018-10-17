@@ -30,7 +30,6 @@ import static gov.ca.cwds.idm.persistence.ns.OperationType.CREATE;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PERMISSIONS;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.ROLES;
-import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByRacfId;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertStrict;
@@ -39,7 +38,6 @@ import static gov.ca.cwds.util.LiquibaseUtils.CMS_STORE_URL;
 import static gov.ca.cwds.util.LiquibaseUtils.TOKEN_STORE_URL;
 import static gov.ca.cwds.util.LiquibaseUtils.runLiquibaseScript;
 import static gov.ca.cwds.util.Utils.toSet;
-import static gov.ca.cwds.util.Utils.toUpperCase;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -70,15 +68,11 @@ import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesRequest;
 import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesResult;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.InvalidParameterException;
-import com.amazonaws.services.cognitoidp.model.ListUsersRequest;
-import com.amazonaws.services.cognitoidp.model.ListUsersResult;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import com.amazonaws.services.cognitoidp.model.UsernameExistsException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 //import com.fasterxml.jackson.datatype.joda.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.google.common.collect.Iterables;
 import gov.ca.cwds.BaseIntegrationTest;
 import gov.ca.cwds.config.LoggingRequestIdFilter;
@@ -95,9 +89,7 @@ import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.SearchProperties;
 import gov.ca.cwds.idm.service.validation.ValidationService;
 import gov.ca.cwds.service.messages.MessagesService;
-import gov.ca.cwds.util.Utils;
 import java.nio.charset.Charset;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -545,9 +537,8 @@ public class IdmResourceTest extends BaseIntegrationTest {
   }
 
   private void assertCreateUserSuccess(User user, User actuallySendUser, String newUserId) throws Exception {
-    AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(actuallySendUser);
-    setCreateUserResult(request, newUserId);
 
+    AdminCreateUserRequest request = setCreateRequestAndResult(actuallySendUser, newUserId);
     setDoraSuccess();
 
     mockMvc
@@ -562,6 +553,13 @@ public class IdmResourceTest extends BaseIntegrationTest {
     verify(cognito, times(1)).adminCreateUser(request);
     verify(spySearchService, times(1)).createUser(any(User.class));
     verifyDoraCalls(1);
+  }
+
+  private AdminCreateUserRequest setCreateRequestAndResult(User actuallySendUser,
+      String newUserId) {
+    AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(actuallySendUser);
+    setCreateUserResult(request, newUserId);
+    return request;
   }
 
   @Test
@@ -587,8 +585,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
 
     setDoraError();
 
-    AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
-    setCreateUserResult(request, NEW_USER_ES_FAIL_ID);
+    AdminCreateUserRequest request = setCreateRequestAndResult(user, NEW_USER_ES_FAIL_ID);
 
     MvcResult result =
         mockMvc
@@ -1128,16 +1125,8 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @Test
   @WithMockCustomUser(roles = {STATE_ADMIN})
   public void testCreateRacfidUser() throws Exception {
-    User user = racfIdUser("Test@Test.com", "elroyda", toSet(CWS_WORKER));
-
-    User actuallySendUser = racfIdUser("test@test.com", "ELROYDA", toSet(CWS_WORKER));
-    actuallySendUser.setFirstName("Donna");
-    actuallySendUser.setLastName("Elroy");
-    actuallySendUser.setCountyName("Napa");
-    actuallySendUser.setOfficeId("TG7O51q0Ki");
-    actuallySendUser.setStartDate(LocalDate.of(1998, 4, 14));
-    actuallySendUser.setPhoneNumber("9165551234");
-
+    User user = getElroydaUser();
+    User actuallySendUser = getActuallySendElroydaUser();
     ((TestCognitoServiceFacade) cognitoServiceFacade).setSearchByRacfidRequestAndResult("ELROYDA");
 
     assertCreateUserSuccess(user, actuallySendUser, NEW_USER_SUCCESS_ID_4);
@@ -1146,20 +1135,10 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @Test
   @WithMockCustomUser
   public void testCreateRacfidUserUnautorized() throws Exception {
-    User user = racfIdUser("test@test.com", "ELROYDA", toSet(CWS_WORKER));
-
-    User actuallySendUser = racfIdUser("test@test.com", "ELROYDA", toSet(CWS_WORKER));
-    actuallySendUser.setFirstName("Donna");
-    actuallySendUser.setLastName("Elroy");
-    actuallySendUser.setCountyName("Napa");
-    actuallySendUser.setOfficeId("TG7O51q0Ki");
-    actuallySendUser.setStartDate(LocalDate.of(1998, 4, 14));
-    actuallySendUser.setPhoneNumber("9165551234");
-
+    User user = getElroydaUser();
+    User actuallySendUser = getActuallySendElroydaUser();
+    AdminCreateUserRequest request = setCreateRequestAndResult(actuallySendUser, NEW_USER_SUCCESS_ID_4);
     ((TestCognitoServiceFacade) cognitoServiceFacade).setSearchByRacfidRequestAndResult("ELROYDA");
-
-    AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(actuallySendUser);
-    setCreateUserResult(request, NEW_USER_SUCCESS_ID_4);
 
     mockMvc
         .perform(
@@ -1170,6 +1149,21 @@ public class IdmResourceTest extends BaseIntegrationTest {
         .andReturn();
 
     verify(cognito, times(0)).adminCreateUser(request);
+  }
+
+  private User getElroydaUser() {
+    return racfIdUser("Test@Test.com", "elroyda", toSet(CWS_WORKER));
+  }
+
+  private User getActuallySendElroydaUser() {
+    User actuallySendUser = racfIdUser("test@test.com", "ELROYDA", toSet(CWS_WORKER));
+    actuallySendUser.setFirstName("Donna");
+    actuallySendUser.setLastName("Elroy");
+    actuallySendUser.setCountyName("Napa");
+    actuallySendUser.setOfficeId("TG7O51q0Ki");
+    actuallySendUser.setStartDate(LocalDate.of(1998, 4, 14));
+    actuallySendUser.setPhoneNumber("9165551234");
+    return actuallySendUser;
   }
 
   @Test
