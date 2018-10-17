@@ -150,6 +150,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
 
   private static final String NEW_USER_SUCCESS_ID_2 = "17067e4e-270f-4623-b86c-b4d4fa527a35";
   private static final String NEW_USER_SUCCESS_ID_3 = "17067e4e-270f-4623-b86c-b4d4fa527a36";
+  private static final String NEW_USER_SUCCESS_ID_4 = "17067e4e-270f-4623-b86c-b4d4fa527a37";
   private static final String SSO_TOKEN = "b02aa833-f8b2-4d28-8796-3abe059313d1";
   private static final String YOLO_COUNTY_USERS_EMAIL = "julio@gmail.com";
   private static final String BASIC_AUTH_HEADER = prepareBasicAuthHeader();
@@ -1139,7 +1140,36 @@ public class IdmResourceTest extends BaseIntegrationTest {
 
     ((TestCognitoServiceFacade) cognitoServiceFacade).setSearchByRacfidRequestAndResult("ELROYDA");
 
-    assertCreateUserSuccess(user, actuallySendUser, "newUserId");
+    assertCreateUserSuccess(user, actuallySendUser, NEW_USER_SUCCESS_ID_4);
+  }
+
+  @Test
+  @WithMockCustomUser
+  public void testCreateRacfidUserUnautorized() throws Exception {
+    User user = racfIdUser("test@test.com", "ELROYDA", toSet(CWS_WORKER));
+
+    User actuallySendUser = racfIdUser("test@test.com", "ELROYDA", toSet(CWS_WORKER));
+    actuallySendUser.setFirstName("Donna");
+    actuallySendUser.setLastName("Elroy");
+    actuallySendUser.setCountyName("Napa");
+    actuallySendUser.setOfficeId("TG7O51q0Ki");
+    actuallySendUser.setStartDate(LocalDate.of(1998, 4, 14));
+    actuallySendUser.setPhoneNumber("9165551234");
+
+    ((TestCognitoServiceFacade) cognitoServiceFacade).setSearchByRacfidRequestAndResult("ELROYDA");
+
+    AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(actuallySendUser);
+    setCreateUserResult(request, NEW_USER_SUCCESS_ID_4);
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.post("/idm/users")
+                .contentType(JSON_CONTENT_TYPE)
+                .content(asJsonString(user)))
+        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+        .andReturn();
+
+    verify(cognito, times(0)).adminCreateUser(request);
   }
 
   @Test

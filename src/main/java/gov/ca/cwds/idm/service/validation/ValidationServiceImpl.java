@@ -8,6 +8,7 @@ import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUti
 import static gov.ca.cwds.service.messages.MessageCode.ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_OFFICE;
+import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_CREATE_USER;
 import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID_IN_CWSCMS;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_REMOVE_ALL_ROLES;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_UNALLOWED_ROLES;
@@ -21,7 +22,6 @@ import gov.ca.cwds.data.persistence.auth.CwsOffice;
 import gov.ca.cwds.data.persistence.auth.StaffPerson;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
-import gov.ca.cwds.idm.service.MappingService;
 import gov.ca.cwds.idm.service.authorization.AuthorizationService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
@@ -32,6 +32,7 @@ import gov.ca.cwds.service.CwsUserInfoService;
 import gov.ca.cwds.service.dto.CwsUserInfo;
 import gov.ca.cwds.service.messages.MessageCode;
 import gov.ca.cwds.service.messages.MessagesService;
+
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
@@ -40,6 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -65,16 +67,14 @@ public class ValidationServiceImpl implements ValidationService {
     String racfId = toUpperCase(user.getRacfid());
     user.setRacfid(racfId);
 
-    User returnedUser;
     if (StringUtils.isNotBlank(racfId)) {
-      returnedUser = validateRacfidUserCreate(user);
-    } else {
-      returnedUser = user;
+      validateRacfidUserCreate(user);
+      authorizeCreateUser(user);//need to authorize again since user may be changed
     }
 
 //    validateCreateByUserRoles(admin, returnedUser);
 
-    return returnedUser;
+    return user;
   }
 
   @Override
@@ -94,15 +94,25 @@ public class ValidationServiceImpl implements ValidationService {
     validateActivateUser(existedCognitoUser, updateUserDto);
   }
 
+  private void authorizeCreateUser(User user) {
+    if(!authorizeService.canCreateUser(user)) {
+      String msg = messagesService.getTechMessage(NOT_AUTHORIZED_TO_CREATE_USER);
+      LOGGER.error(msg);
+      throw new AccessDeniedException(msg);
+    }
+  }
+
   private User validateRacfidUserCreate(User user) {
-    String racfId = user.getRacfid();
-
-    CwsUserInfo cwsUser = validateActiveUserExistsInCws(racfId);
+    enrichUserByCwsData(user);
     validateEmailDoesNotExistInCognito(user.getEmail());
-    validateRacfidDoesNotExistInCognito(racfId);
-
-    enrichUserByCwsData(user, cwsUser);
+    validateRacfidDoesNotExistInCognito(user.getRacfid());
     return user;
+  }
+
+  private void enrichUserByCwsData(User user){
+    CwsUserInfo cwsUser = getCwsUserData(user.getRacfid());
+    enrichDataFromCwsOffice(cwsUser.getCwsOffice(), user);
+    enrichDataFromStaffPerson(cwsUser.getStaffPerson(), user);
   }
 
   private void validateByCreateAuthorizationRules(UniversalUserToken admin, User user) {
@@ -124,7 +134,7 @@ public class ValidationServiceImpl implements ValidationService {
     }
   }
 
-  private CwsUserInfo validateActiveUserExistsInCws(String racfId) {
+  private CwsUserInfo getCwsUserData(String racfId) {
     CwsUserInfo cwsUser = cwsUserInfoService.getCwsUserByRacfId(racfId);
     if (cwsUser == null) {
       throwValidationException(NO_USER_WITH_RACFID_IN_CWSCMS, racfId);
@@ -161,12 +171,6 @@ public class ValidationServiceImpl implements ValidationService {
     if (!allowedRoles.containsAll(newUserRoles)) {
       throwValidationException(UNABLE_UPDATE_UNALLOWED_ROLES, newUserRoles, allowedRoles);
     }
-  }
-
-  private void enrichUserByCwsData(User user, CwsUserInfo cwsUser) {
-    user.setRacfid(cwsUser.getRacfId());
-    enrichDataFromCwsOffice(cwsUser.getCwsOffice(), user);
-    enrichDataFromStaffPerson(cwsUser.getStaffPerson(), user);
   }
 
   private void enrichDataFromStaffPerson(StaffPerson staffPerson, final User user) {
@@ -238,7 +242,7 @@ public class ValidationServiceImpl implements ValidationService {
   }
 
   void validateActivateUser(String racfId) {
-    validateActiveUserExistsInCws(racfId);
+    getCwsUserData(racfId);
     validateRacfidDoesNotExistInCognito(racfId);
   }
 
