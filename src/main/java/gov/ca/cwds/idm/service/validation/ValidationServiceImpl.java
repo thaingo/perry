@@ -49,8 +49,6 @@ public class ValidationServiceImpl implements ValidationService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ValidationServiceImpl.class);
 
-  private MappingService mappingService;
-
   private CwsUserInfoService cwsUserInfoService;
 
   private MessagesService messagesService;
@@ -63,7 +61,9 @@ public class ValidationServiceImpl implements ValidationService {
 
   @Override
   public User validateUserCreate(UniversalUserToken admin, User user) {
-    String racfId = user.getRacfid();
+    user.setEmail(toLowerCase(user.getEmail()));
+    String racfId = toUpperCase(user.getRacfid());
+    user.setRacfid(racfId);
 
     User returnedUser;
     if (StringUtils.isNotBlank(racfId)) {
@@ -81,7 +81,7 @@ public class ValidationServiceImpl implements ValidationService {
   public User validateVerifyIfUserCanBeCreated(UniversalUserToken admin, String racfId, String email) {
     User user = new User();
     user.setEmail(toLowerCase(email));
-    user.setRacfid(racfId);
+    user.setRacfid(toUpperCase(racfId));
 
     User enrichedUser = validateRacfidUserCreate(user);
     validateByCreateAuthorizationRules(admin, enrichedUser);
@@ -246,11 +246,6 @@ public class ValidationServiceImpl implements ValidationService {
     return cognitoUsers
         .stream()
         .anyMatch(userType -> Objects.equals(userType.getEnabled(), Boolean.TRUE));
-  }
-
-  @Autowired
-  public void setMappingService(MappingService mappingService) {
-    this.mappingService = mappingService;
   }
 
   @Autowired

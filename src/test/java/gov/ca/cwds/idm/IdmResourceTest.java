@@ -30,6 +30,7 @@ import static gov.ca.cwds.idm.persistence.ns.OperationType.CREATE;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PERMISSIONS;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.ROLES;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByRacfId;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertStrict;
@@ -38,6 +39,7 @@ import static gov.ca.cwds.util.LiquibaseUtils.CMS_STORE_URL;
 import static gov.ca.cwds.util.LiquibaseUtils.TOKEN_STORE_URL;
 import static gov.ca.cwds.util.LiquibaseUtils.runLiquibaseScript;
 import static gov.ca.cwds.util.Utils.toSet;
+import static gov.ca.cwds.util.Utils.toUpperCase;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -68,9 +70,15 @@ import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesRequest;
 import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesResult;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.InvalidParameterException;
+import com.amazonaws.services.cognitoidp.model.ListUsersRequest;
+import com.amazonaws.services.cognitoidp.model.ListUsersResult;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import com.amazonaws.services.cognitoidp.model.UsernameExistsException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+//import com.fasterxml.jackson.datatype.joda.ser.LocalDateSerializer;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.google.common.collect.Iterables;
 import gov.ca.cwds.BaseIntegrationTest;
 import gov.ca.cwds.config.LoggingRequestIdFilter;
@@ -87,12 +95,17 @@ import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.SearchProperties;
 import gov.ca.cwds.idm.service.validation.ValidationService;
 import gov.ca.cwds.service.messages.MessagesService;
+import gov.ca.cwds.util.Utils;
 import java.nio.charset.Charset;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import org.apache.commons.codec.binary.Base64;
+//import org.codehaus.jackson.map.ext.JodaSerializers.LocalDateSerializer;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -517,18 +530,21 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @Test
   @WithMockCustomUser
   public void testCreateUserSuccess() throws Exception {
-    assertCreateUserSuccess("gonzales@gmail.com", NEW_USER_SUCCESS_ID);
+    assertCreateUserSuccess(user("gonzales@gmail.com"), NEW_USER_SUCCESS_ID);
   }
 
   @Test
   @WithMockCustomUser(roles = {STATE_ADMIN}, county = "Madera")
   public void testCreateUserStateAdmin() throws Exception {
-    assertCreateUserSuccess("gonzales2@gmail.com", NEW_USER_SUCCESS_ID_2);
+    assertCreateUserSuccess(user("gonzales2@gmail.com"), NEW_USER_SUCCESS_ID_2);
   }
 
-  private void assertCreateUserSuccess(String email, String newUserId) throws Exception {
-    User user = user(email);
-    AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
+  private void assertCreateUserSuccess(User user, String newUserId) throws Exception {
+    assertCreateUserSuccess(user, user, newUserId);
+  }
+
+  private void assertCreateUserSuccess(User user, User actuallySendUser, String newUserId) throws Exception {
+    AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(actuallySendUser);
     setCreateUserResult(request, newUserId);
 
     setDoraSuccess();
@@ -550,7 +566,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @Test
   @WithMockCustomUser(roles = {OFFICE_ADMIN})
   public void testCreateUserOfficeAdmin() throws Exception {
-    assertCreateUserSuccess("gonzales3@gmail.com", NEW_USER_SUCCESS_ID_3);
+    assertCreateUserSuccess(user("gonzales3@gmail.com"), NEW_USER_SUCCESS_ID_3);
   }
 
   @Test
@@ -1096,14 +1112,9 @@ public class IdmResourceTest extends BaseIntegrationTest {
   }
 
   @Test
-  @WithMockCustomUser(roles = {STATE_ADMIN})
+  @WithMockCustomUser
   public void testCreateUserWithActiveStatusInCognito() throws Exception {
-    User user = user();
-    user.setEmail("test@test.com");
-    user.setRacfid("SMITHBO");
-    user.setRoles(toSet(CWS_WORKER));
-
-    assertCreateUserBadRequest(user,
+    assertCreateUserBadRequest(racfIdUser("test@test.com", "SMITHBO", toSet(CWS_WORKER)),
         "fixtures/idm/create-user/active-user-with-same-racfid-in-cognito-error.json");
   }
 
@@ -1111,6 +1122,24 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @WithMockCustomUser
   public void testVerifyUsersRacfidInLowerCase() throws Exception {
     assertVerify("test@test.com", "smithb3", "fixtures/idm/verify-user/verify-valid.json");
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {STATE_ADMIN})
+  public void testCreateRacfidUser() throws Exception {
+    User user = racfIdUser("Test@Test.com", "elroyda", toSet(CWS_WORKER));
+
+    User actuallySendUser = racfIdUser("test@test.com", "ELROYDA", toSet(CWS_WORKER));
+    actuallySendUser.setFirstName("Donna");
+    actuallySendUser.setLastName("Elroy");
+    actuallySendUser.setCountyName("Santa Clara");
+    actuallySendUser.setOfficeId("0yEAQev001");
+    actuallySendUser.setStartDate(LocalDate.of(1998, 4, 14));
+    actuallySendUser.setPhoneNumber("4084417778");
+
+    ((TestCognitoServiceFacade) cognitoServiceFacade).setSearchByRacfidRequestAndResult("ELROYDA");
+
+    assertCreateUserSuccess(user, actuallySendUser, "newUserId");
   }
 
   @Test
@@ -1479,6 +1508,13 @@ public class IdmResourceTest extends BaseIntegrationTest {
     return user("gonzales@gmail.com");
   }
 
+  private User racfIdUser(String email, String racfId, Set<String> roles) {
+    User user = user(email);
+    user.setRacfid(racfId);
+    user.setRoles(roles);
+    return user;
+  }
+
   private static User user(String email) {
     User user = new User();
     user.setEmail(email);
@@ -1504,7 +1540,10 @@ public class IdmResourceTest extends BaseIntegrationTest {
 
   private static String asJsonString(final Object obj) {
     try {
-      return new ObjectMapper().writeValueAsString(obj);
+      ObjectMapper objectMapper = new ObjectMapper();
+      JavaTimeModule javaTimeModule = new JavaTimeModule();
+      objectMapper.registerModule(javaTimeModule);
+      return objectMapper.writeValueAsString(obj);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
