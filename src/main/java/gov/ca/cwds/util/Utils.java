@@ -2,6 +2,7 @@ package gov.ca.cwds.util;
 
 import static gov.ca.cwds.config.Constants.DEFAULT_LOCALE;
 
+import gov.ca.cwds.idm.dto.User;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -10,6 +11,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import org.apache.commons.lang3.SerializationUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 
@@ -70,5 +72,9 @@ public class Utils {
       return date.format(formatter);
     }
     return null;
+  }
+
+  public static boolean isRacfidUser(User user) {
+    return StringUtils.isNotBlank(user.getRacfid());
   }
 }

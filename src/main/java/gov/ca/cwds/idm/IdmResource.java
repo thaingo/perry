@@ -5,7 +5,6 @@ import static gov.ca.cwds.service.messages.MessageCode.INVALID_DATE_FORMAT;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static java.util.stream.Collectors.toList;
 
-import gov.ca.cwds.config.api.idm.Roles;
 import gov.ca.cwds.data.persistence.auth.CwsOffice;
 import gov.ca.cwds.idm.dto.IdmApiCustomError;
 import gov.ca.cwds.idm.dto.User;

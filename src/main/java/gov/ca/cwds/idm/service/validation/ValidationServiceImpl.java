@@ -13,6 +13,7 @@ import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID_IN_CW
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_REMOVE_ALL_ROLES;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_UNALLOWED_ROLES;
 import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
+import static gov.ca.cwds.util.Utils.isRacfidUser;
 import static gov.ca.cwds.util.Utils.toLowerCase;
 import static gov.ca.cwds.util.Utils.toUpperCase;
 
@@ -67,7 +68,7 @@ public class ValidationServiceImpl implements ValidationService {
     String racfId = toUpperCase(user.getRacfid());
     user.setRacfid(racfId);
 
-    if (StringUtils.isNotBlank(racfId)) {
+    if (isRacfidUser(user)) {
       validateRacfidUserCreate(user);
       authorizeCreateUser(user);//need to authorize again since user may be changed
     }
