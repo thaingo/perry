@@ -1162,7 +1162,6 @@ public class IdmResourceTest extends BaseIntegrationTest {
     actuallySendUser.setCountyName("Napa");
     actuallySendUser.setOfficeId("TG7O51q0Ki");
     actuallySendUser.setStartDate(LocalDate.of(1998, 4, 14));
-    actuallySendUser.setPhoneNumber("9165551234");
     return actuallySendUser;
   }
 

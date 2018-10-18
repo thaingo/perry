@@ -12,7 +12,6 @@ import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL_VERIFIED;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.FIRST_NAME;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.LAST_NAME;
-import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.PHONE_NUMBER;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.util.Utils.toSet;
 import static org.hamcrest.CoreMatchers.is;
@@ -147,7 +146,7 @@ public class CognitoServiceFacadeTest {
 
     List<AttributeType> attrs = request.getUserAttributes();
     assertThat(attrs.isEmpty(), is(false));
-    assertThat(attrs.size(), is(12));
+    assertThat(attrs.size(), is(11));
 
     Map<String, String> attrMap = attrMap(attrs);
 
@@ -156,7 +155,6 @@ public class CognitoServiceFacadeTest {
     assertAttr(attrMap, LAST_NAME, "Gonzales");
     assertAttr(attrMap, COUNTY, "Madera");
     assertAttr(attrMap, OFFICE, "Office07IJ");
-    assertAttr(attrMap, PHONE_NUMBER, "+19161111111");
     assertAttr(attrMap, RACFID_CUSTOM, "RUBBLBA");
     assertAttr(attrMap, RACFID_STANDARD, "RUBBLBA");
     assertAttr(attrMap, RACFID_CUSTOM_2, "RUBBLBA");
