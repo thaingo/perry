@@ -71,9 +71,6 @@ public class ValidationServiceImpl implements ValidationService {
       validateRacfidUserCreate(user);
       authorizeCreateUser(user);//need to authorize again since user may be changed
     }
-
-//    validateCreateByUserRoles(admin, returnedUser);
-
     return user;
   }
 
@@ -154,16 +151,6 @@ public class ValidationServiceImpl implements ValidationService {
     }
 
     validateByAllowedRoles(admin, newUserRoles);
-  }
-
-  private void validateCreateByUserRoles(UniversalUserToken admin, User user) {
-    Collection<String> roles = user.getRoles();
-
-    if (roles == null ||roles.isEmpty()) {
-      throwValidationException(UNABLE_TO_REMOVE_ALL_ROLES);
-    }
-
-    validateByAllowedRoles(admin, roles);
   }
 
   private void validateByAllowedRoles(UniversalUserToken admin, Collection<String> newUserRoles) {
