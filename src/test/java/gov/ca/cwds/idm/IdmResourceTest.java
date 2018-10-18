@@ -1211,6 +1211,13 @@ public class IdmResourceTest extends BaseIntegrationTest {
   }
 
   @Test
+  @WithMockCustomUser
+  public void testCreateUserSameEmailAlreadyPresent() throws Exception {
+    assertCreateUserBadRequest(racfIdUser("julio@gmail.com", "SMITHBO", toSet(CWS_WORKER)),
+        "fixtures/idm/create-user/user-with-same-email-in-cognito-error.json");
+  }
+
+  @Test
   @WithMockCustomUser(roles = {"OtherRole"})
   public void testVerifyUserWithOtherRole() throws Exception {
     assertVerifyUserUnauthorized();
