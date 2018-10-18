@@ -114,9 +114,8 @@ public class ValidationServiceImpl implements ValidationService {
   }
 
   private void validateByCreateAuthorizationRules(UniversalUserToken admin, User user) {
-    Optional<MessageCode> authorizationError = buildAuthorizationError(admin);
-    if (!authorizeService.canCreateUser(user) && authorizationError.isPresent()) {
-      throwValidationException(authorizationError.get(), user.getCountyName());
+    if (!authorizeService.canCreateUser(user)) {
+      buildVerifyAuthorizationError(admin, user);
     }
   }
 
@@ -171,8 +170,7 @@ public class ValidationServiceImpl implements ValidationService {
   }
 
   private void enrichDataFromCwsOffice(CwsOffice office, final User user) {
-    if (office != null) {
-      user.setOfficeId(office.getOfficeId());
+    if (office != null) { user.setOfficeId(office.getOfficeId());
       Optional.ofNullable(office.getPrimaryPhoneNumber())
           .ifPresent(e -> user.setPhoneNumber(e.toString()));
       Optional.ofNullable(office.getPrimaryPhoneExtensionNumber())
@@ -183,14 +181,16 @@ public class ValidationServiceImpl implements ValidationService {
     }
   }
 
-  private Optional<MessageCode> buildAuthorizationError(UniversalUserToken admin) {
+  private void buildVerifyAuthorizationError(UniversalUserToken admin, User user) {
     switch (getStrongestAdminRole(admin)) {
       case COUNTY_ADMIN:
-        return Optional.of(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY);
+        throwValidationException(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY, user.getCountyName());
+        break;
       case OFFICE_ADMIN:
-        return Optional.of(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_OFFICE);
+        throwValidationException(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_OFFICE, user.getCountyName());
+        break;
       default:
-        return Optional.empty();
+        throwValidationException(NOT_AUTHORIZED_TO_CREATE_USER);
     }
   }
 
