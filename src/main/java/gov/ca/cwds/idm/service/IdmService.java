@@ -24,8 +24,7 @@ public interface IdmService {
 
   UsersPage getUserPage(String paginationToken);
 
-  @PreAuthorize("@authorizationService.canCreateUser(#user)")
-  String createUser(@P("user") User user);
+  String createUser(User user);
 
   List<User> searchUsers(UsersSearchCriteria usersSearchCriteria);
 

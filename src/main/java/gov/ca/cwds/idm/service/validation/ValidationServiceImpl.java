@@ -65,13 +65,13 @@ public class ValidationServiceImpl implements ValidationService {
   @Override
   public User validateUserCreate(UniversalUserToken admin, User user) {
     user.setEmail(toLowerCase(user.getEmail()));
-    String racfId = toUpperCase(user.getRacfid());
-    user.setRacfid(racfId);
 
     if (isRacfidUser(user)) {
+      String racfId = toUpperCase(user.getRacfid());
+      user.setRacfid(racfId);
       validateRacfidUserCreate(user);
-      authorizeCreateUser(user);//need to authorize again since user may be changed
     }
+    authorizeCreateUser(user);//move authorization here because user may change for racfid case
     return user;
   }
 
