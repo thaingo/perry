@@ -1174,20 +1174,28 @@ public class IdmResourceTest extends BaseIntegrationTest {
 
   @Test
   @WithMockCustomUser
-  public void testVerifyUsersNoRacfId() throws Exception {
-    assertVerufyUserSuccess();
+  public void testVerifyUsersNoRacfIdInCws() throws Exception {
+    assertVerifyUserNoRacfidInCws();
   }
+
+  @Test
+  @WithMockCustomUser
+  public void testCreateUserNoRacfIdInCws() throws Exception {
+    assertCreateUserBadRequest(racfIdUser("test@test.com", "SMITHB1", toSet(CWS_WORKER)),
+        "fixtures/idm/create-user/no-racfid-in-cws-error.json");
+  }
+
 
   @Test
   @WithMockCustomUser(roles = {STATE_ADMIN}, county = "Madera")
   public void testVerifyUserStateAdmin() throws Exception {
-    assertVerufyUserSuccess();
+    assertVerifyUserNoRacfidInCws();
   }
 
   @Test
   @WithMockCustomUser(roles = {OFFICE_ADMIN})
   public void testVerifyUserOfficeAdmin() throws Exception {
-    assertVerufyUserSuccess();
+    assertVerifyUserNoRacfidInCws();
   }
 
   @Test
@@ -1231,7 +1239,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
 
     assertNonStrict(result, fixturePath);
   }
-  private void assertVerufyUserSuccess() throws Exception {
+  private void assertVerifyUserNoRacfidInCws() throws Exception {
     assertVerify("test@test.com", "SMITHB1", "fixtures/idm/verify-user/verify-no-racfid.json");
   }
 
