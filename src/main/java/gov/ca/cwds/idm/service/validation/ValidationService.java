@@ -4,12 +4,13 @@ import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
+import gov.ca.cwds.service.dto.CwsUserInfo;
 
 public interface ValidationService {
 
-  User validateUserCreate(UniversalUserToken admin, User user);
+  void validateUserCreate(UniversalUserToken admin, User user, CwsUserInfo cwsUser);
 
-  User validateVerifyIfUserCanBeCreated(UniversalUserToken admin, String racfId, String email);
+  void validateVerifyIfUserCanBeCreated(UniversalUserToken admin, User user, CwsUserInfo cwsUser);
 
   void validateUpdateUser(UniversalUserToken admin, UserType existedCognitoUser, UserUpdate updateUserDto);
 }

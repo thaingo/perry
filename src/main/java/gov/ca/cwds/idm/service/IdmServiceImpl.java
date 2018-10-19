@@ -22,10 +22,13 @@ import static gov.ca.cwds.service.messages.MessageCode.USER_PARTIAL_UPDATE_AND_S
 import static gov.ca.cwds.service.messages.MessageCode.USER_UPDATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_UPDATE_SAVE_TO_SEARCH_ERROR;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
+import static gov.ca.cwds.util.Utils.isRacfidUser;
 import static gov.ca.cwds.util.Utils.toLowerCase;
 import static java.util.stream.Collectors.toSet;
 
 import com.amazonaws.services.cognitoidp.model.UserType;
+import gov.ca.cwds.data.persistence.auth.CwsOffice;
+import gov.ca.cwds.data.persistence.auth.StaffPerson;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserAndOperation;
 import gov.ca.cwds.idm.dto.UserEnableStatusRequest;
@@ -48,6 +51,7 @@ import gov.ca.cwds.idm.service.filter.MainRoleFilter;
 import gov.ca.cwds.idm.service.validation.ValidationService;
 import gov.ca.cwds.rest.api.domain.PartialSuccessException;
 import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
+import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType;
 import gov.ca.cwds.service.CwsUserInfoService;
 import gov.ca.cwds.service.dto.CwsUserInfo;
 import gov.ca.cwds.service.messages.MessageCode;
@@ -59,6 +63,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -153,8 +158,10 @@ public class IdmServiceImpl implements IdmService {
 
   @Override
   public String createUser(User user) {
-    User enrichedUser = validationService.validateUserCreate(getCurrentUser(), user);
-    UserType userType = cognitoServiceFacade.createUser(enrichedUser);
+    CwsUserInfo cwsUser = getCwsUserData(user);
+    enrichUserByCwsData(user, cwsUser);
+    validationService.validateUserCreate(getCurrentUser(), user, cwsUser);
+    UserType userType = cognitoServiceFacade.createUser(user);
     String userId = userType.getUsername();
     PutInSearchExecution doraExecution = createUserInSearch(userType);
     handleCreatePartialSuccess(userId, doraExecution);
@@ -209,16 +216,55 @@ public class IdmServiceImpl implements IdmService {
     user.setEmail(toLowerCase(email));
     user.setRacfid(racfId);
 
+    CwsUserInfo cwsUser = getCwsUserData(user);
+    enrichUserByCwsData(user, cwsUser);
+
     try {
-      User enrichedUser = validationService.validateVerifyIfUserCanBeCreated(getCurrentUser(), racfId, email);
+      validationService.validateVerifyIfUserCanBeCreated(getCurrentUser(), user, cwsUser);
       return UserVerificationResult.Builder.anUserVerificationResult()
-          .withUser(enrichedUser)
+          .withUser(user)
           .withVerificationPassed().build();
 
     } catch (UserIdmValidationException e) {
       return UserVerificationResult.Builder.anUserVerificationResult()
           .withVerificationFailed(e.getErrorCode().getValue(), e.getUserMessage())
           .build();
+    }
+  }
+
+  private CwsUserInfo getCwsUserData(User user) {
+    if (isRacfidUser(user)) {
+      return cwsUserInfoService.getCwsUserByRacfId(user.getRacfid());
+    } else {
+      return null;
+    }
+  }
+
+  private void enrichUserByCwsData(User user, CwsUserInfo cwsUser){
+    if(cwsUser != null) {
+      enrichDataFromCwsOffice(cwsUser.getCwsOffice(), user);
+      enrichDataFromStaffPerson(cwsUser.getStaffPerson(), user);
+    }
+  }
+
+  private void enrichDataFromStaffPerson(StaffPerson staffPerson, final User user) {
+    if (staffPerson != null) {
+      user.setFirstName(staffPerson.getFirstName());
+      user.setLastName(staffPerson.getLastName());
+      user.setEndDate(staffPerson.getEndDate());
+      user.setStartDate(staffPerson.getStartDate());
+    }
+  }
+
+  private void enrichDataFromCwsOffice(CwsOffice office, final User user) {
+    if (office != null) { user.setOfficeId(office.getOfficeId());
+      Optional.ofNullable(office.getPrimaryPhoneNumber())
+          .ifPresent(e -> user.setPhoneNumber(e.toString()));
+      Optional.ofNullable(office.getPrimaryPhoneExtensionNumber())
+          .ifPresent(user::setPhoneExtensionNumber);
+      Optional.ofNullable(office.getGovernmentEntityType())
+          .ifPresent(
+              x -> user.setCountyName((GovernmentEntityType.findBySysId(x)).getDescription()));
     }
   }
 

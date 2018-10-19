@@ -19,8 +19,6 @@ import static gov.ca.cwds.util.Utils.toUpperCase;
 
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.UniversalUserToken;
-import gov.ca.cwds.data.persistence.auth.CwsOffice;
-import gov.ca.cwds.data.persistence.auth.StaffPerson;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.service.authorization.AuthorizationService;
@@ -28,15 +26,12 @@ import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
 import gov.ca.cwds.idm.service.role.implementor.AdminRoleImplementorFactory;
 import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
-import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType;
 import gov.ca.cwds.service.CwsUserInfoService;
 import gov.ca.cwds.service.dto.CwsUserInfo;
 import gov.ca.cwds.service.messages.MessageCode;
 import gov.ca.cwds.service.messages.MessagesService;
-
 import java.util.Collection;
 import java.util.Objects;
-import java.util.Optional;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,27 +58,26 @@ public class ValidationServiceImpl implements ValidationService {
   private AdminRoleImplementorFactory adminRoleImplementorFactory;
 
   @Override
-  public User validateUserCreate(UniversalUserToken admin, User user) {
+  public void validateUserCreate(UniversalUserToken admin, User user, CwsUserInfo cwsUser) {
     user.setEmail(toLowerCase(user.getEmail()));
+    String racfId = toUpperCase(user.getRacfid());
+    user.setRacfid(racfId);
+
+    authorizeCreateUser(user);//move authorization here because user may change for racfid case
 
     if (isRacfidUser(user)) {
-      String racfId = toUpperCase(user.getRacfid());
-      user.setRacfid(racfId);
-      validateRacfidUserCreate(user);
+      validateRacfidUserCreate(user, cwsUser);
     }
-    authorizeCreateUser(user);//move authorization here because user may change for racfid case
-    return user;
   }
 
   @Override
-  public User validateVerifyIfUserCanBeCreated(UniversalUserToken admin, String racfId, String email) {
-    User user = new User();
-    user.setEmail(toLowerCase(email));
-    user.setRacfid(toUpperCase(racfId));
+  public void validateVerifyIfUserCanBeCreated(UniversalUserToken admin, User user, CwsUserInfo cwsUser) {
+    user.setEmail(toLowerCase(user.getEmail()));
+    String racfId = toUpperCase(user.getRacfid());
+    user.setRacfid(racfId);
 
-    User enrichedUser = validateRacfidUserCreate(user);
-    validateByCreateAuthorizationRules(admin, enrichedUser);
-    return enrichedUser;
+    validateRacfidUserCreate(user, cwsUser);
+    authorizeVerifyIfUserCanBeCreated(admin, user);
   }
 
   @Override
@@ -100,27 +94,28 @@ public class ValidationServiceImpl implements ValidationService {
     }
   }
 
-  private User validateRacfidUserCreate(User user) {
-    enrichUserByCwsData(user);
+  private void validateRacfidUserCreate(User user, CwsUserInfo cwsUser) {
+    String racfid = user.getRacfid();
+
+    validateActiveUserExistsInCws(cwsUser, racfid);
     validateEmailDoesNotExistInCognito(user.getEmail());
-    validateRacfidDoesNotExistInCognito(user.getRacfid());
-    return user;
+    validateRacfidDoesNotExistInCognito(racfid);
   }
 
-  private void enrichUserByCwsData(User user){
-    CwsUserInfo cwsUser = getCwsUserData(user.getRacfid());
-    enrichDataFromCwsOffice(cwsUser.getCwsOffice(), user);
-    enrichDataFromStaffPerson(cwsUser.getStaffPerson(), user);
+  void validateActiveUserExistsInCws(CwsUserInfo cwsUser, String racfid) {
+    if (cwsUser == null) {
+      throwValidationException(NO_USER_WITH_RACFID_IN_CWSCMS, racfid);
+    }
   }
 
-  private void validateByCreateAuthorizationRules(UniversalUserToken admin, User user) {
+  private void authorizeVerifyIfUserCanBeCreated(UniversalUserToken admin, User user) {
     if (!authorizeService.canCreateUser(user)) {
       buildVerifyAuthorizationError(admin, user);
     }
   }
 
-  private void validateRacfidDoesNotExistInCognito(String racfId) {
-    if (isActiveRacfIdPresent(racfId)) {
+  void validateRacfidDoesNotExistInCognito(String racfId) {
+    if (isActiveRacfIdPresentInCognito(racfId)) {
       throwValidationException(ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM, racfId);
     }
   }
@@ -131,13 +126,6 @@ public class ValidationServiceImpl implements ValidationService {
     }
   }
 
-  private CwsUserInfo getCwsUserData(String racfId) {
-    CwsUserInfo cwsUser = cwsUserInfoService.getCwsUserByRacfId(racfId);
-    if (cwsUser == null) {
-      throwValidationException(NO_USER_WITH_RACFID_IN_CWSCMS, racfId);
-    }
-    return cwsUser;
-  }
 
   private void validateUpdateByNewUserRoles(UniversalUserToken admin, UserUpdate updateUserDto) {
     Collection<String> newUserRoles = updateUserDto.getRoles();
@@ -160,27 +148,6 @@ public class ValidationServiceImpl implements ValidationService {
     }
   }
 
-  private void enrichDataFromStaffPerson(StaffPerson staffPerson, final User user) {
-    if (staffPerson != null) {
-      user.setFirstName(staffPerson.getFirstName());
-      user.setLastName(staffPerson.getLastName());
-      user.setEndDate(staffPerson.getEndDate());
-      user.setStartDate(staffPerson.getStartDate());
-    }
-  }
-
-  private void enrichDataFromCwsOffice(CwsOffice office, final User user) {
-    if (office != null) { user.setOfficeId(office.getOfficeId());
-      Optional.ofNullable(office.getPrimaryPhoneNumber())
-          .ifPresent(e -> user.setPhoneNumber(e.toString()));
-      Optional.ofNullable(office.getPrimaryPhoneExtensionNumber())
-          .ifPresent(user::setPhoneExtensionNumber);
-      Optional.ofNullable(office.getGovernmentEntityType())
-          .ifPresent(
-              x -> user.setCountyName((GovernmentEntityType.findBySysId(x)).getDescription()));
-    }
-  }
-
   private void buildVerifyAuthorizationError(UniversalUserToken admin, User user) {
     switch (getStrongestAdminRole(admin)) {
       case COUNTY_ADMIN:
@@ -194,7 +161,7 @@ public class ValidationServiceImpl implements ValidationService {
     }
   }
 
-  private boolean isActiveRacfIdPresent(String racfId) {
+  private boolean isActiveRacfIdPresentInCognito(String racfId) {
     Collection<UserType> cognitoUsersByRacfId =
         cognitoServiceFacade.searchAllPages(composeToGetFirstPageByRacfId(toUpperCase(racfId)));
     return !CollectionUtils.isEmpty(cognitoUsersByRacfId)
@@ -230,7 +197,8 @@ public class ValidationServiceImpl implements ValidationService {
   }
 
   void validateActivateUser(String racfId) {
-    getCwsUserData(racfId);
+    CwsUserInfo cwsUser = cwsUserInfoService.getCwsUserByRacfId(racfId);
+    validateActiveUserExistsInCws(cwsUser, racfId);
     validateRacfidDoesNotExistInCognito(racfId);
   }
 
