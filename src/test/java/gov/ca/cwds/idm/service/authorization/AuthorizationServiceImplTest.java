@@ -136,7 +136,7 @@ public class AuthorizationServiceImplTest {
   }
 
   @Test
-  public void testCountyAdminCannotEditStateAdmin() {
+  public void testCountyAdminCannotUpdateStateAdmin() {
     when(getCurrentUser())
         .thenReturn(admin(toSet(COUNTY_ADMIN), "Yolo", toSet("Yolo_1")));
 
