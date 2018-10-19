@@ -58,26 +58,26 @@ public class ValidationServiceImpl implements ValidationService {
   private AdminRoleImplementorFactory adminRoleImplementorFactory;
 
   @Override
-  public void validateUserCreate(UniversalUserToken admin, User user, CwsUserInfo cwsUser) {
-    user.setEmail(toLowerCase(user.getEmail()));
-    String racfId = toUpperCase(user.getRacfid());
-    user.setRacfid(racfId);
+  public void validateUserCreate(UniversalUserToken admin, User enrichedUser, CwsUserInfo cwsUser) {
+    enrichedUser.setEmail(toLowerCase(enrichedUser.getEmail()));
+    String racfId = toUpperCase(enrichedUser.getRacfid());
+    enrichedUser.setRacfid(racfId);
 
-    authorizeCreateUser(user);//move authorization here because user may change for racfid case
+    authorizeCreateUser(enrichedUser);
 
-    if (isRacfidUser(user)) {
-      validateRacfidUserCreate(user, cwsUser);
+    if (isRacfidUser(enrichedUser)) {
+      validateRacfidUserCreate(enrichedUser, cwsUser);
     }
   }
 
   @Override
-  public void validateVerifyIfUserCanBeCreated(UniversalUserToken admin, User user, CwsUserInfo cwsUser) {
-    user.setEmail(toLowerCase(user.getEmail()));
-    String racfId = toUpperCase(user.getRacfid());
-    user.setRacfid(racfId);
+  public void validateVerifyIfUserCanBeCreated(UniversalUserToken admin, User enrichedUser, CwsUserInfo cwsUser) {
+    enrichedUser.setEmail(toLowerCase(enrichedUser.getEmail()));
+    String racfId = toUpperCase(enrichedUser.getRacfid());
+    enrichedUser.setRacfid(racfId);
 
-    validateRacfidUserCreate(user, cwsUser);
-    authorizeVerifyIfUserCanBeCreated(admin, user);
+    validateRacfidUserCreate(enrichedUser, cwsUser);
+    authorizeVerifyIfUserCanBeCreated(admin, enrichedUser);
   }
 
   @Override
@@ -125,7 +125,6 @@ public class ValidationServiceImpl implements ValidationService {
       throwValidationException(USER_WITH_EMAIL_EXISTS_IN_IDM, email);
     }
   }
-
 
   private void validateUpdateByNewUserRoles(UniversalUserToken admin, UserUpdate updateUserDto) {
     Collection<String> newUserRoles = updateUserDto.getRoles();

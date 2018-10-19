@@ -8,9 +8,9 @@ import gov.ca.cwds.service.dto.CwsUserInfo;
 
 public interface ValidationService {
 
-  void validateUserCreate(UniversalUserToken admin, User user, CwsUserInfo cwsUser);
+  void validateUserCreate(UniversalUserToken admin, User enrichedUser, CwsUserInfo cwsUser);
 
-  void validateVerifyIfUserCanBeCreated(UniversalUserToken admin, User user, CwsUserInfo cwsUser);
+  void validateVerifyIfUserCanBeCreated(UniversalUserToken admin, User enrichedUser, CwsUserInfo cwsUser);
 
   void validateUpdateUser(UniversalUserToken admin, UserType existedCognitoUser, UserUpdate updateUserDto);
 }
