@@ -96,7 +96,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.codec.binary.Base64;
-//import org.codehaus.jackson.map.ext.JodaSerializers.LocalDateSerializer;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -172,9 +171,6 @@ public class IdmResourceTest extends BaseIntegrationTest {
 
   @Autowired
   private SearchProperties searchProperties;
-
-  @Autowired
-  private ValidationService validationService;
 
   private SearchService spySearchService;
 
