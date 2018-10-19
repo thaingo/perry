@@ -135,4 +135,13 @@ public class AuthorizationServiceImplTest {
         user(toSet(COUNTY_ADMIN), "Yolo", "Yolo_3")));
   }
 
+  @Test
+  public void testCountyAdminCannotEditStateAdmin() {
+    when(getCurrentUser())
+        .thenReturn(admin(toSet(COUNTY_ADMIN), "Yolo", toSet("Yolo_1")));
+
+    assertFalse(service.canUpdateUser(user(toSet(STATE_ADMIN), "Yolo", "Yolo_1")));
+    assertFalse(service.canUpdateUser(user(toSet(STATE_ADMIN), "Yolo", "Yolo_2")));
+    assertFalse(service.canUpdateUser(user(toSet(STATE_ADMIN), "Madura", "Madura_1")));
+  }
 }
