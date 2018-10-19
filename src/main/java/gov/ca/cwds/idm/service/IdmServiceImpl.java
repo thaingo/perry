@@ -211,6 +211,7 @@ public class IdmServiceImpl implements IdmService {
   }
 
   @Override
+  @SuppressWarnings({"squid:S1166"})//Validation exceptions are already logged by ValidationService
   public UserVerificationResult verifyIfUserCanBeCreated(String racfId, String email) {
     User user = new User();
     user.setEmail(toLowerCase(email));
@@ -257,7 +258,8 @@ public class IdmServiceImpl implements IdmService {
   }
 
   private void enrichDataFromCwsOffice(CwsOffice office, final User user) {
-    if (office != null) { user.setOfficeId(office.getOfficeId());
+    if (office != null) {
+      user.setOfficeId(office.getOfficeId());
       Optional.ofNullable(office.getPrimaryPhoneNumber())
           .ifPresent(e -> user.setPhoneNumber(e.toString()));
       Optional.ofNullable(office.getPrimaryPhoneExtensionNumber())
