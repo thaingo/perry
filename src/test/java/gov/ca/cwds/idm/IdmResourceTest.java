@@ -86,7 +86,6 @@ import gov.ca.cwds.idm.service.SearchRestSender;
 import gov.ca.cwds.idm.service.SearchService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.SearchProperties;
-import gov.ca.cwds.idm.service.validation.ValidationService;
 import gov.ca.cwds.service.messages.MessagesService;
 import java.nio.charset.Charset;
 import java.time.LocalDate;
@@ -1212,13 +1211,6 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @WithMockCustomUser
   public void testVerifyUsersCognitoUserIsPresent() throws Exception {
     assertVerify("julio@gmail.com", "SMITHBO", "fixtures/idm/verify-user/verify-user-present.json");
-  }
-
-  @Test
-  @WithMockCustomUser
-  public void testCreateUserSameEmailAlreadyPresent() throws Exception {
-    assertCreateUserBadRequest(racfIdUser("julio@gmail.com", "SMITHBO", toSet(CWS_WORKER)),
-        "fixtures/idm/create-user/user-with-same-email-in-cognito-error.json");
   }
 
   @Test

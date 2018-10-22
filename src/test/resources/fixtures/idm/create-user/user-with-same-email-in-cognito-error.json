@@ -1,8 +1,0 @@
-  {
-    "status": "BAD_REQUEST",
-    "technical_message":"User with email: julio@gmail.com already exists in Cognito",
-    "user_message":"User with email julio@gmail.com already exists in CWS CARES.",
-    "error_code": "CAP-002",
-    "causes": [
-    ]
-  }

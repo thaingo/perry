@@ -66,7 +66,8 @@ public class ValidationServiceImpl implements ValidationService {
     authorizeCreateUser(enrichedUser);
 
     if (isRacfidUser(enrichedUser)) {
-      validateRacfidUserCreate(enrichedUser, cwsUser);
+      validateActiveUserExistsInCws(cwsUser, racfId);
+      validateRacfidDoesNotExistInCognito(racfId);
     }
   }
 
@@ -76,7 +77,10 @@ public class ValidationServiceImpl implements ValidationService {
     String racfId = toUpperCase(enrichedUser.getRacfid());
     enrichedUser.setRacfid(racfId);
 
-    validateRacfidUserCreate(enrichedUser, cwsUser);
+    validateActiveUserExistsInCws(cwsUser, racfId);
+    validateEmailDoesNotExistInCognito(enrichedUser.getEmail());
+    validateRacfidDoesNotExistInCognito(racfId);
+
     authorizeVerifyIfUserCanBeCreated(admin, enrichedUser);
   }
 
@@ -92,14 +96,6 @@ public class ValidationServiceImpl implements ValidationService {
       LOGGER.error(msg);
       throw new AccessDeniedException(msg);
     }
-  }
-
-  private void validateRacfidUserCreate(User user, CwsUserInfo cwsUser) {
-    String racfid = user.getRacfid();
-
-    validateActiveUserExistsInCws(cwsUser, racfid);
-    validateEmailDoesNotExistInCognito(user.getEmail());
-    validateRacfidDoesNotExistInCognito(racfid);
   }
 
   void validateActiveUserExistsInCws(CwsUserInfo cwsUser, String racfid) {
