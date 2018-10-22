@@ -89,8 +89,7 @@ public class ValidationServiceImpl implements ValidationService {
 
   @Override
   public void validateUpdateUser(UserType existedCognitoUser, UserUpdate updateUserDto) {
-    UniversalUserToken admin = getCurrentUser();
-    validateUpdateByNewUserRoles(admin, updateUserDto);
+    validateUpdateByNewUserRoles(updateUserDto);
     validateActivateUser(existedCognitoUser, updateUserDto);
   }
 
@@ -126,7 +125,7 @@ public class ValidationServiceImpl implements ValidationService {
     }
   }
 
-  private void validateUpdateByNewUserRoles(UniversalUserToken admin, UserUpdate updateUserDto) {
+  private void validateUpdateByNewUserRoles(UserUpdate updateUserDto) {
     Collection<String> newUserRoles = updateUserDto.getRoles();
 
     if (newUserRoles == null) {
