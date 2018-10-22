@@ -137,10 +137,10 @@ public class ValidationServiceImpl implements ValidationService {
       throwValidationException(UNABLE_TO_REMOVE_ALL_ROLES);
     }
 
-    validateByAllowedRoles(admin, newUserRoles);
+    validateByAllowedRoles(newUserRoles);
   }
 
-  private void validateByAllowedRoles(UniversalUserToken admin, Collection<String> newUserRoles) {
+  private void validateByAllowedRoles(Collection<String> newUserRoles) {
     Collection<String> allowedRoles = adminRoleImplementorFactory.getPossibleUserRoles();
     if (!allowedRoles.containsAll(newUserRoles)) {
       throwValidationException(UNABLE_UPDATE_UNALLOWED_ROLES, newUserRoles, allowedRoles);
