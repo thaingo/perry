@@ -88,7 +88,7 @@ public class ValidationServiceMockTest {
   private void validateUpdate(UniversalUserToken admin, UserUpdate userUpdate) {
     PowerMockito.when(getCurrentUser()).thenReturn(admin);
     UserType userType = userType(user(), USER_ID);
-    service.validateUpdateUser(admin, userType, userUpdate);
+    service.validateUpdateUser(userType, userUpdate);
   }
 
   private static UniversalUserToken admin(String... roles) {

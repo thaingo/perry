@@ -90,10 +90,6 @@ public class ValidationServiceImpl implements ValidationService {
   @Override
   public void validateUpdateUser(UserType existedCognitoUser, UserUpdate updateUserDto) {
     UniversalUserToken admin = getCurrentUser();
-    validateUpdateUser(admin, existedCognitoUser, updateUserDto);
-  }
-
-  void validateUpdateUser(UniversalUserToken admin, UserType existedCognitoUser, UserUpdate updateUserDto) {
     validateUpdateByNewUserRoles(admin, updateUserDto);
     validateActivateUser(existedCognitoUser, updateUserDto);
   }
