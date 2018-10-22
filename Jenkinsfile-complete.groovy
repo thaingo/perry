@@ -94,6 +94,15 @@ node('dora-slave') {
             writeFile file: "gradle.properties", text: gradlePropsText
             buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'integrationTestDev --stacktrace'
         }
+        stage('Trigger Security scan') {
+            def props = readProperties  file: 'build/resources/main/version.properties'
+            def build_version = props["build.version"]
+            sh "echo build_version: ${build_version}"
+            build job: 'tenable-scan', parameters: [
+                    [$class: 'StringParameterValue', name: 'CONTAINER_NAME', value: 'perry'],
+                    [$class: 'StringParameterValue', name: 'CONTAINER_VERSION', value: "${build_version}" ]
+            ]
+        }
         stage('Push artifacts') {
             // Artifactory
             rtGradle.deployer.deployArtifacts = true

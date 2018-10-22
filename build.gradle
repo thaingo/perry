@@ -1,3 +1,4 @@
+import org.apache.tools.ant.filters.ReplaceTokens
 import org.apache.tools.ant.taskdefs.condition.Os
 import java.text.SimpleDateFormat
 
@@ -229,6 +230,13 @@ task checkDockerService {
             throw new GradleException('Docker service is not available. Windows users should start Docker Quickstart Terminal of Docker Toolbox')
         }
     }
+}
+
+processResources {
+    filter(ReplaceTokens, tokens: [
+            'build.version': projectVersion,
+            'build.number' : (System.getenv("BUILD_NUMBER") ?: "IDE")
+    ])
 }
 
 publishing {
