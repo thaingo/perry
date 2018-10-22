@@ -1025,6 +1025,12 @@ public class IdmResourceTest extends BaseIntegrationTest {
 
   @Test
   @WithMockCustomUser
+  public void testUpdateUser_CountyAdminCannotUpdateStateAdmin() throws Exception {
+    assertUpdateUserUnauthorized(STATE_ADMIN_ID);
+  }
+
+  @Test
+  @WithMockCustomUser
   public void testUpdateUserNoChanges() throws Exception {
     assertUpdateNoChangesSuccess();
   }
@@ -1078,13 +1084,17 @@ public class IdmResourceTest extends BaseIntegrationTest {
   }
 
   private void assertUpdateUserUnauthorized() throws Exception {
+    assertUpdateUserUnauthorized(USER_WITH_RACFID_AND_DB_DATA_ID);
+  }
+
+  private void assertUpdateUserUnauthorized(String userId) throws Exception {
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setEnabled(Boolean.FALSE);
     userUpdate.setPermissions(toSet("RFA-rollout", "Hotline-rollout"));
 
     mockMvc
         .perform(
-            MockMvcRequestBuilders.patch("/idm/users/" + USER_WITH_RACFID_AND_DB_DATA_ID)
+            MockMvcRequestBuilders.patch("/idm/users/" + userId)
                 .contentType(JSON_CONTENT_TYPE)
                 .content(asJsonString(userUpdate)))
         .andExpect(MockMvcResultMatchers.status().isUnauthorized())

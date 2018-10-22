@@ -18,6 +18,7 @@ public final class TestHelper {
 
   public static User user(String countyName, String officeId) {
     User user = new User();
+    user.setId("userId");
     user.setCountyName(countyName);
     user.setOfficeId(officeId);
     return user;
@@ -58,6 +59,7 @@ public final class TestHelper {
   public static UniversalUserToken admin(Set<String> roles, String countyName,
       Set<String> adminOfficeIds) {
     UniversalUserToken admin = new UniversalUserToken();
+    admin.setUserId("adminId");
     admin.setRoles(roles);
     admin.setParameter(COUNTY_NAME_PARAM, countyName);
     admin.setParameter(ADMIN_OFFICE_IDS_PARAM, adminOfficeIds);

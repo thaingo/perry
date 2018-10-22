@@ -44,6 +44,10 @@ public class AuthorizationServiceImpl implements AuthorizationService {
       return false;
     }
     User user = getUserFromUserId(userId);
+    return canUpdateUser(user);
+  }
+
+  public boolean canUpdateUser(User user) {
     return adminRoleImplementorFactory.getAdminActionsAuthorizer(getCurrentUser(), user).canUpdateUser();
   }
 
