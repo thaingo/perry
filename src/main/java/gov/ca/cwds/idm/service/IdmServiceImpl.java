@@ -126,7 +126,7 @@ public class IdmServiceImpl implements IdmService {
 
     UserType existedCognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
 
-    validationService.validateUpdateUser(getCurrentUser(), existedCognitoUser, updateUserDto);
+    validationService.validateUpdateUser(existedCognitoUser, updateUserDto);
 
     ExecutionStatus updateAttributesStatus =
         updateUserAttributes(userId, updateUserDto, existedCognitoUser);
@@ -160,7 +160,7 @@ public class IdmServiceImpl implements IdmService {
   public String createUser(User user) {
     CwsUserInfo cwsUser = getCwsUserData(user);
     enrichUserByCwsData(user, cwsUser);
-    validationService.validateUserCreate(getCurrentUser(), user, cwsUser);
+    validationService.validateUserCreate(user, cwsUser);
     UserType userType = cognitoServiceFacade.createUser(user);
     String userId = userType.getUsername();
     PutInSearchExecution doraExecution = createUserInSearch(userType);
@@ -221,7 +221,7 @@ public class IdmServiceImpl implements IdmService {
     enrichUserByCwsData(user, cwsUser);
 
     try {
-      validationService.validateVerifyIfUserCanBeCreated(getCurrentUser(), user, cwsUser);
+      validationService.validateVerifyIfUserCanBeCreated(user, cwsUser);
       return UserVerificationResult.Builder.anUserVerificationResult()
           .withUser(user)
           .withVerificationPassed().build();

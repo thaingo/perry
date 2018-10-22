@@ -1,16 +1,15 @@
 package gov.ca.cwds.idm.service.validation;
 
 import com.amazonaws.services.cognitoidp.model.UserType;
-import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.service.dto.CwsUserInfo;
 
 public interface ValidationService {
 
-  void validateUserCreate(UniversalUserToken admin, User enrichedUser, CwsUserInfo cwsUser);
+  void validateUserCreate(User enrichedUser, CwsUserInfo cwsUser);
 
-  void validateVerifyIfUserCanBeCreated(UniversalUserToken admin, User enrichedUser, CwsUserInfo cwsUser);
+  void validateVerifyIfUserCanBeCreated(User enrichedUser, CwsUserInfo cwsUser);
 
-  void validateUpdateUser(UniversalUserToken admin, UserType existedCognitoUser, UserUpdate updateUserDto);
+  void validateUpdateUser(UserType existedCognitoUser, UserUpdate updateUserDto);
 }

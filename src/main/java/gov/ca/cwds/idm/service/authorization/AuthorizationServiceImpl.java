@@ -29,12 +29,12 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
   @Override
   public boolean canViewUser(User user) {
-    return adminRoleImplementorFactory.getAdminActionsAuthorizer(getCurrentUser(), user).canViewUser();
+    return adminRoleImplementorFactory.getAdminActionsAuthorizer(user).canViewUser();
   }
 
   @Override
   public boolean canCreateUser(User user) {
-    return adminRoleImplementorFactory.getAdminActionsAuthorizer(getCurrentUser(), user).canCreateUser();
+    return adminRoleImplementorFactory.getAdminActionsAuthorizer(user).canCreateUser();
   }
 
   @Override
@@ -48,13 +48,13 @@ public class AuthorizationServiceImpl implements AuthorizationService {
   }
 
   public boolean canUpdateUser(User user) {
-    return adminRoleImplementorFactory.getAdminActionsAuthorizer(getCurrentUser(), user).canUpdateUser();
+    return adminRoleImplementorFactory.getAdminActionsAuthorizer(user).canUpdateUser();
   }
 
   @Override
   public boolean canResendInvitationMessage(String email) {
     User user = getUserByEmail(email);
-    return adminRoleImplementorFactory.getAdminActionsAuthorizer(getCurrentUser(), user).canResendInvitationMessage();
+    return adminRoleImplementorFactory.getAdminActionsAuthorizer(user).canResendInvitationMessage();
   }
 
   private User getUserByEmail(String email) {

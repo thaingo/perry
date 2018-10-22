@@ -13,6 +13,7 @@ import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID_IN_CW
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_REMOVE_ALL_ROLES;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_UNALLOWED_ROLES;
 import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
+import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.Utils.isRacfidUser;
 import static gov.ca.cwds.util.Utils.toLowerCase;
 import static gov.ca.cwds.util.Utils.toUpperCase;
@@ -58,7 +59,7 @@ public class ValidationServiceImpl implements ValidationService {
   private AdminRoleImplementorFactory adminRoleImplementorFactory;
 
   @Override
-  public void validateUserCreate(UniversalUserToken admin, User enrichedUser, CwsUserInfo cwsUser) {
+  public void validateUserCreate(User enrichedUser, CwsUserInfo cwsUser) {
     enrichedUser.setEmail(toLowerCase(enrichedUser.getEmail()));
     String racfId = toUpperCase(enrichedUser.getRacfid());
     enrichedUser.setRacfid(racfId);
@@ -72,7 +73,9 @@ public class ValidationServiceImpl implements ValidationService {
   }
 
   @Override
-  public void validateVerifyIfUserCanBeCreated(UniversalUserToken admin, User enrichedUser, CwsUserInfo cwsUser) {
+  public void validateVerifyIfUserCanBeCreated(User enrichedUser, CwsUserInfo cwsUser) {
+    UniversalUserToken admin = getCurrentUser();
+
     enrichedUser.setEmail(toLowerCase(enrichedUser.getEmail()));
     String racfId = toUpperCase(enrichedUser.getRacfid());
     enrichedUser.setRacfid(racfId);
@@ -85,7 +88,12 @@ public class ValidationServiceImpl implements ValidationService {
   }
 
   @Override
-  public void validateUpdateUser(UniversalUserToken admin, UserType existedCognitoUser, UserUpdate updateUserDto) {
+  public void validateUpdateUser(UserType existedCognitoUser, UserUpdate updateUserDto) {
+    UniversalUserToken admin = getCurrentUser();
+    validateUpdateUser(admin, existedCognitoUser, updateUserDto);
+  }
+
+  void validateUpdateUser(UniversalUserToken admin, UserType existedCognitoUser, UserUpdate updateUserDto) {
     validateUpdateByNewUserRoles(admin, updateUserDto);
     validateActivateUser(existedCognitoUser, updateUserDto);
   }
@@ -137,7 +145,7 @@ public class ValidationServiceImpl implements ValidationService {
   }
 
   private void validateByAllowedRoles(UniversalUserToken admin, Collection<String> newUserRoles) {
-    Collection<String> allowedRoles = adminRoleImplementorFactory.getPossibleUserRoles(admin);
+    Collection<String> allowedRoles = adminRoleImplementorFactory.getPossibleUserRoles();
     if (!allowedRoles.containsAll(newUserRoles)) {
       throwValidationException(UNABLE_UPDATE_UNALLOWED_ROLES, newUserRoles, allowedRoles);
     }
