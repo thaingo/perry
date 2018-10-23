@@ -1,26 +1,18 @@
 package gov.ca.cwds.idm.service.validation;
 
-import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
-import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
-import static gov.ca.cwds.idm.service.authorization.UserRolesService.getStrongestAdminRole;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByEmail;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByRacfId;
 import static gov.ca.cwds.service.messages.MessageCode.ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM;
-import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY;
-import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_OFFICE;
-import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_CREATE_USER;
 import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID_IN_CWSCMS;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_REMOVE_ALL_ROLES;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_UNALLOWED_ROLES;
 import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
-import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.Utils.isRacfidUser;
 import static gov.ca.cwds.util.Utils.toUpperCase;
 
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
-import gov.ca.cwds.idm.service.authorization.AuthorizationService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
 import gov.ca.cwds.idm.service.role.implementor.AdminRoleImplementorFactory;
@@ -51,8 +43,6 @@ public class ValidationServiceImpl implements ValidationService {
 
   private CognitoServiceFacade cognitoServiceFacade;
 
-  private AuthorizationService authorizeService;
-
   private AdminRoleImplementorFactory adminRoleImplementorFactory;
 
   @Override
@@ -71,8 +61,6 @@ public class ValidationServiceImpl implements ValidationService {
     validateActiveUserExistsInCws(activeUserExistsInCws, racfId);
     validateEmailDoesNotExistInCognito(enrichedUser.getEmail());
     validateRacfidDoesNotExistInCognito(racfId);
-
-    authorizeVerifyIfUserCanBeCreated(enrichedUser);
   }
 
   @Override
@@ -84,12 +72,6 @@ public class ValidationServiceImpl implements ValidationService {
   void validateActiveUserExistsInCws(boolean activeUserExistsInCws, String racfid) {
     if (!activeUserExistsInCws) {
       throwValidationException(NO_USER_WITH_RACFID_IN_CWSCMS, racfid);
-    }
-  }
-
-  private void authorizeVerifyIfUserCanBeCreated(User user) {
-    if (!authorizeService.canCreateUser(user)) {
-      buildVerifyAuthorizationError(user);
     }
   }
 
@@ -123,19 +105,6 @@ public class ValidationServiceImpl implements ValidationService {
     Collection<String> allowedRoles = adminRoleImplementorFactory.getPossibleUserRoles();
     if (!allowedRoles.containsAll(newUserRoles)) {
       throwValidationException(UNABLE_UPDATE_UNALLOWED_ROLES, newUserRoles, allowedRoles);
-    }
-  }
-
-  private void buildVerifyAuthorizationError(User user) {
-    switch (getStrongestAdminRole(getCurrentUser())) {
-      case COUNTY_ADMIN:
-        throwValidationException(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY, user.getCountyName());
-        break;
-      case OFFICE_ADMIN:
-        throwValidationException(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_OFFICE, user.getCountyName());
-        break;
-      default:
-        throwValidationException(NOT_AUTHORIZED_TO_CREATE_USER);
     }
   }
 
@@ -200,12 +169,6 @@ public class ValidationServiceImpl implements ValidationService {
   public void setCognitoServiceFacade(
       CognitoServiceFacade cognitoServiceFacade) {
     this.cognitoServiceFacade = cognitoServiceFacade;
-  }
-
-  @Autowired
-  public void setAuthorizeService(
-      AuthorizationService authorizeService) {
-    this.authorizeService = authorizeService;
   }
 
   @Autowired

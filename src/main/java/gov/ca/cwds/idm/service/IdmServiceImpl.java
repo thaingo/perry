@@ -1,16 +1,21 @@
 package gov.ca.cwds.idm.service;
 
+import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
+import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.CREATE;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
 import static gov.ca.cwds.idm.service.ExecutionStatus.FAIL;
 import static gov.ca.cwds.idm.service.ExecutionStatus.SUCCESS;
 import static gov.ca.cwds.idm.service.ExecutionStatus.WAS_NOT_EXECUTED;
+import static gov.ca.cwds.idm.service.authorization.UserRolesService.getStrongestAdminRole;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getRACFId;
 import static gov.ca.cwds.service.messages.MessageCode.DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_UPDATE_USER_ENABLED_STATUS;
+import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY;
+import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_OFFICE;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_CREATE_USER;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_CREATE_IDM_USER_IN_ES;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_PURGE_PROCESSED_USER_LOGS;
@@ -23,6 +28,7 @@ import static gov.ca.cwds.service.messages.MessageCode.USER_PARTIAL_UPDATE_AND_S
 import static gov.ca.cwds.service.messages.MessageCode.USER_PARTIAL_UPDATE_AND_SAVE_TO_SEARCH_ERRORS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_UPDATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_UPDATE_SAVE_TO_SEARCH_ERROR;
+import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.Utils.isRacfidUser;
 import static gov.ca.cwds.util.Utils.toLowerCase;
 import static gov.ca.cwds.util.Utils.toUpperCase;
@@ -233,15 +239,21 @@ public class IdmServiceImpl implements IdmService {
 
     try {
       validationService.validateVerifyIfUserCanBeCreated(user, cwsUser != null);
-      return UserVerificationResult.Builder.anUserVerificationResult()
-          .withUser(user)
-          .withVerificationPassed().build();
-
     } catch (UserIdmValidationException e) {
-      return UserVerificationResult.Builder.anUserVerificationResult()
-          .withVerificationFailed(e.getErrorCode().getValue(), e.getUserMessage())
-          .build();
+      return buildUserVerificationErrorResult(e.getErrorCode(), e.getUserMessage());
     }
+
+    if (!authorizeService.canCreateUser(user)) {
+      return buildVerifyAuthorizationError(user);
+    }
+
+    return UserVerificationResult.Builder.anUserVerificationResult().withUser(user)
+        .withVerificationPassed().build();
+  }
+
+  private UserVerificationResult buildUserVerificationErrorResult(MessageCode code, String msg) {
+    return UserVerificationResult.Builder.anUserVerificationResult()
+        .withVerificationFailed(code.getValue(), msg).build();
   }
 
   private void authorizeCreateUser(User user) {
@@ -250,6 +262,24 @@ public class IdmServiceImpl implements IdmService {
       LOGGER.error(msg);
       throw new AccessDeniedException(msg);
     }
+  }
+
+  private UserVerificationResult buildVerifyAuthorizationError(User user) {
+    switch (getStrongestAdminRole(getCurrentUser())) {
+      case COUNTY_ADMIN:
+        return buildVerifyAuthorizationError(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY, user.getCountyName());
+      case OFFICE_ADMIN:
+        return buildVerifyAuthorizationError(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_OFFICE, user.getCountyName());
+      default:
+        return buildVerifyAuthorizationError(NOT_AUTHORIZED_TO_CREATE_USER);
+    }
+  }
+
+  private UserVerificationResult buildVerifyAuthorizationError(MessageCode messageCode, Object... args) {
+    String msg = messages.getTechMessage(messageCode, args);
+    String userMsg = messages.getUserMessage(messageCode, args);
+    LOGGER.error(msg);
+    return buildUserVerificationErrorResult(messageCode, userMsg);
   }
 
   private CwsUserInfo getCwsUserData(User user) {
