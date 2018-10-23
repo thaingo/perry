@@ -69,10 +69,7 @@ public class ValidationServiceImpl implements ValidationService {
   @Override
   public void validateVerifyIfUserCanBeCreated(User enrichedUser, CwsUserInfo cwsUser) {
     UniversalUserToken admin = getCurrentUser();
-
-    enrichedUser.setEmail(toLowerCase(enrichedUser.getEmail()));
-    String racfId = toUpperCase(enrichedUser.getRacfid());
-    enrichedUser.setRacfid(racfId);
+    String racfId = enrichedUser.getRacfid();
 
     validateActiveUserExistsInCws(cwsUser, racfId);
     validateEmailDoesNotExistInCognito(enrichedUser.getEmail());

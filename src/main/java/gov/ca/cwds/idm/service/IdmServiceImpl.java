@@ -224,7 +224,7 @@ public class IdmServiceImpl implements IdmService {
   public UserVerificationResult verifyIfUserCanBeCreated(String racfId, String email) {
     User user = new User();
     user.setEmail(toLowerCase(email));
-    user.setRacfid(racfId);
+    user.setRacfid(toUpperCase(racfId));
 
     CwsUserInfo cwsUser = getCwsUserData(user);
     enrichUserByCwsData(user, cwsUser);
