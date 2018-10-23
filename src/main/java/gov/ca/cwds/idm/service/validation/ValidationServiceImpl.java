@@ -68,14 +68,13 @@ public class ValidationServiceImpl implements ValidationService {
 
   @Override
   public void validateVerifyIfUserCanBeCreated(User enrichedUser, boolean activeUserExistsInCws) {
-    UniversalUserToken admin = getCurrentUser();
     String racfId = enrichedUser.getRacfid();
 
     validateActiveUserExistsInCws(activeUserExistsInCws, racfId);
     validateEmailDoesNotExistInCognito(enrichedUser.getEmail());
     validateRacfidDoesNotExistInCognito(racfId);
 
-    authorizeVerifyIfUserCanBeCreated(admin, enrichedUser);
+    authorizeVerifyIfUserCanBeCreated(enrichedUser);
   }
 
   @Override
@@ -90,9 +89,9 @@ public class ValidationServiceImpl implements ValidationService {
     }
   }
 
-  private void authorizeVerifyIfUserCanBeCreated(UniversalUserToken admin, User user) {
+  private void authorizeVerifyIfUserCanBeCreated(User user) {
     if (!authorizeService.canCreateUser(user)) {
-      buildVerifyAuthorizationError(admin, user);
+      buildVerifyAuthorizationError(user);
     }
   }
 
@@ -129,8 +128,8 @@ public class ValidationServiceImpl implements ValidationService {
     }
   }
 
-  private void buildVerifyAuthorizationError(UniversalUserToken admin, User user) {
-    switch (getStrongestAdminRole(admin)) {
+  private void buildVerifyAuthorizationError(User user) {
+    switch (getStrongestAdminRole(getCurrentUser())) {
       case COUNTY_ADMIN:
         throwValidationException(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY, user.getCountyName());
         break;
