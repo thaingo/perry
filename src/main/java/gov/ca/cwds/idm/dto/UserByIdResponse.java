@@ -9,7 +9,7 @@ import java.io.Serializable;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class UserByIdResponse implements Serializable {
 
-  private static final long serialVersionUID = 2528332054070849802L;
+  private static final long serialVersionUID = -7644760098359425249L;
 
   private User user;
   private UserEditDetails editDetails;
