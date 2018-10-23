@@ -168,7 +168,7 @@ public class IdmServiceImpl implements IdmService {
     user.setRacfid(racfId);
 
     authorizeCreateUser(user);
-    validationService.validateUserCreate(user, cwsUser);
+    validationService.validateUserCreate(user, cwsUser != null);
 
     UserType userType = cognitoServiceFacade.createUser(user);
     String userId = userType.getUsername();
@@ -230,7 +230,7 @@ public class IdmServiceImpl implements IdmService {
     enrichUserByCwsData(user, cwsUser);
 
     try {
-      validationService.validateVerifyIfUserCanBeCreated(user, cwsUser);
+      validationService.validateVerifyIfUserCanBeCreated(user, cwsUser != null);
       return UserVerificationResult.Builder.anUserVerificationResult()
           .withUser(user)
           .withVerificationPassed().build();

@@ -58,20 +58,20 @@ public class ValidationServiceImpl implements ValidationService {
   private AdminRoleImplementorFactory adminRoleImplementorFactory;
 
   @Override
-  public void validateUserCreate(User enrichedUser, CwsUserInfo cwsUser) {
+  public void validateUserCreate(User enrichedUser, boolean activeUserExistsInCws) {
     if (isRacfidUser(enrichedUser)) {
       String racfId = enrichedUser.getRacfid();
-      validateActiveUserExistsInCws(cwsUser, racfId);
+      validateActiveUserExistsInCws(activeUserExistsInCws, racfId);
       validateRacfidDoesNotExistInCognito(racfId);
     }
   }
 
   @Override
-  public void validateVerifyIfUserCanBeCreated(User enrichedUser, CwsUserInfo cwsUser) {
+  public void validateVerifyIfUserCanBeCreated(User enrichedUser, boolean activeUserExistsInCws) {
     UniversalUserToken admin = getCurrentUser();
     String racfId = enrichedUser.getRacfid();
 
-    validateActiveUserExistsInCws(cwsUser, racfId);
+    validateActiveUserExistsInCws(activeUserExistsInCws, racfId);
     validateEmailDoesNotExistInCognito(enrichedUser.getEmail());
     validateRacfidDoesNotExistInCognito(racfId);
 
@@ -84,8 +84,8 @@ public class ValidationServiceImpl implements ValidationService {
     validateActivateUser(existedCognitoUser, updateUserDto);
   }
 
-  void validateActiveUserExistsInCws(CwsUserInfo cwsUser, String racfid) {
-    if (cwsUser == null) {
+  void validateActiveUserExistsInCws(boolean activeUserExistsInCws, String racfid) {
+    if (!activeUserExistsInCws) {
       throwValidationException(NO_USER_WITH_RACFID_IN_CWSCMS, racfid);
     }
   }
@@ -179,7 +179,7 @@ public class ValidationServiceImpl implements ValidationService {
 
   void validateActivateUser(String racfId) {
     CwsUserInfo cwsUser = cwsUserInfoService.getCwsUserByRacfId(racfId);
-    validateActiveUserExistsInCws(cwsUser, racfId);
+    validateActiveUserExistsInCws(cwsUser != null, racfId);
     validateRacfidDoesNotExistInCognito(racfId);
   }
 
