@@ -10,6 +10,7 @@ import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STAND
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getRACFId;
 import static gov.ca.cwds.service.messages.MessageCode.DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_UPDATE_USER_ENABLED_STATUS;
+import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_CREATE_USER;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_CREATE_IDM_USER_IN_ES;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_PURGE_PROCESSED_USER_LOGS;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_IDM_USER_IN_ES;
@@ -21,9 +22,9 @@ import static gov.ca.cwds.service.messages.MessageCode.USER_PARTIAL_UPDATE_AND_S
 import static gov.ca.cwds.service.messages.MessageCode.USER_PARTIAL_UPDATE_AND_SAVE_TO_SEARCH_ERRORS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_UPDATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_UPDATE_SAVE_TO_SEARCH_ERROR;
-import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.Utils.isRacfidUser;
 import static gov.ca.cwds.util.Utils.toLowerCase;
+import static gov.ca.cwds.util.Utils.toUpperCase;
 import static java.util.stream.Collectors.toSet;
 
 import com.amazonaws.services.cognitoidp.model.UserType;
@@ -72,6 +73,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -160,7 +162,14 @@ public class IdmServiceImpl implements IdmService {
   public String createUser(User user) {
     CwsUserInfo cwsUser = getCwsUserData(user);
     enrichUserByCwsData(user, cwsUser);
+
+    user.setEmail(toLowerCase(user.getEmail()));
+    String racfId = toUpperCase(user.getRacfid());
+    user.setRacfid(racfId);
+
+    authorizeCreateUser(user);
     validationService.validateUserCreate(user, cwsUser);
+
     UserType userType = cognitoServiceFacade.createUser(user);
     String userId = userType.getUsername();
     PutInSearchExecution doraExecution = createUserInSearch(userType);
@@ -230,6 +239,14 @@ public class IdmServiceImpl implements IdmService {
       return UserVerificationResult.Builder.anUserVerificationResult()
           .withVerificationFailed(e.getErrorCode().getValue(), e.getUserMessage())
           .build();
+    }
+  }
+
+  private void authorizeCreateUser(User user) {
+    if(!authorizeService.canCreateUser(user)) {
+      String msg = messages.getTechMessage(NOT_AUTHORIZED_TO_CREATE_USER);
+      LOGGER.error(msg);
+      throw new AccessDeniedException(msg);
     }
   }
 

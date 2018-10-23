@@ -38,7 +38,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -60,13 +59,8 @@ public class ValidationServiceImpl implements ValidationService {
 
   @Override
   public void validateUserCreate(User enrichedUser, CwsUserInfo cwsUser) {
-    enrichedUser.setEmail(toLowerCase(enrichedUser.getEmail()));
-    String racfId = toUpperCase(enrichedUser.getRacfid());
-    enrichedUser.setRacfid(racfId);
-
-    authorizeCreateUser(enrichedUser);
-
     if (isRacfidUser(enrichedUser)) {
+      String racfId = enrichedUser.getRacfid();
       validateActiveUserExistsInCws(cwsUser, racfId);
       validateRacfidDoesNotExistInCognito(racfId);
     }
@@ -91,14 +85,6 @@ public class ValidationServiceImpl implements ValidationService {
   public void validateUpdateUser(UserType existedCognitoUser, UserUpdate updateUserDto) {
     validateUpdateByNewUserRoles(updateUserDto);
     validateActivateUser(existedCognitoUser, updateUserDto);
-  }
-
-  private void authorizeCreateUser(User user) {
-    if(!authorizeService.canCreateUser(user)) {
-      String msg = messagesService.getTechMessage(NOT_AUTHORIZED_TO_CREATE_USER);
-      LOGGER.error(msg);
-      throw new AccessDeniedException(msg);
-    }
   }
 
   void validateActiveUserExistsInCws(CwsUserInfo cwsUser, String racfid) {
