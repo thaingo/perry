@@ -1,5 +1,6 @@
 package gov.ca.cwds.idm.service;
 
+import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.CREATE;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
 import static gov.ca.cwds.idm.service.ExecutionStatus.FAIL;
@@ -225,6 +226,7 @@ public class IdmServiceImpl implements IdmService {
     User user = new User();
     user.setEmail(toLowerCase(email));
     user.setRacfid(toUpperCase(racfId));
+    user.setRoles(Utils.toSet(CWS_WORKER));
 
     CwsUserInfo cwsUser = getCwsUserData(user);
     enrichUserByCwsData(user, cwsUser);
