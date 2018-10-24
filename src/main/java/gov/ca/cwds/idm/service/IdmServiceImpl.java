@@ -1,6 +1,7 @@
 package gov.ca.cwds.idm.service;
 
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.CREATE;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
@@ -10,15 +11,12 @@ import static gov.ca.cwds.idm.service.ExecutionStatus.WAS_NOT_EXECUTED;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.getStrongestAdminRole;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
-import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByEmail;
-import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByRacfId;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getRACFId;
-import static gov.ca.cwds.service.messages.MessageCode.ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_UPDATE_USER_ENABLED_STATUS;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_OFFICE;
-import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID_IN_CWSCMS;
+import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_CREATE_USER;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_CREATE_IDM_USER_IN_ES;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_PURGE_PROCESSED_USER_LOGS;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_IDM_USER_IN_ES;
@@ -30,8 +28,8 @@ import static gov.ca.cwds.service.messages.MessageCode.USER_PARTIAL_UPDATE_AND_S
 import static gov.ca.cwds.service.messages.MessageCode.USER_PARTIAL_UPDATE_AND_SAVE_TO_SEARCH_ERRORS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_UPDATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_UPDATE_SAVE_TO_SEARCH_ERROR;
-import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
+import static gov.ca.cwds.util.Utils.isRacfidUser;
 import static gov.ca.cwds.util.Utils.toLowerCase;
 import static gov.ca.cwds.util.Utils.toUpperCase;
 import static java.util.stream.Collectors.toSet;
@@ -55,11 +53,10 @@ import gov.ca.cwds.idm.service.cognito.StandardUserAttribute;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil;
-import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
 import gov.ca.cwds.idm.service.execution.OptionalExecution;
 import gov.ca.cwds.idm.service.execution.PutInSearchExecution;
 import gov.ca.cwds.idm.service.filter.MainRoleFilter;
-import gov.ca.cwds.idm.service.validation.ValidateUpdateUserByAdminRolesService;
+import gov.ca.cwds.idm.service.validation.ValidationService;
 import gov.ca.cwds.rest.api.domain.PartialSuccessException;
 import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
 import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType;
@@ -74,7 +71,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -84,9 +80,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
 @Service
 @Profile("idm")
@@ -117,7 +112,7 @@ public class IdmServiceImpl implements IdmService {
   private MappingService mappingService;
 
   @Autowired
-  private ValidateUpdateUserByAdminRolesService userValidateUpdateByAdminRolesService;
+  private ValidationService validationService;
 
   @Override
   public User findUser(String id) {
@@ -140,7 +135,7 @@ public class IdmServiceImpl implements IdmService {
 
     UserType existedCognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
 
-    validateUpdateUser(existedCognitoUser, updateUserDto);
+    validationService.validateUpdateUser(existedCognitoUser, updateUserDto);
 
     ExecutionStatus updateAttributesStatus =
         updateUserAttributes(userId, updateUserDto, existedCognitoUser);
@@ -164,73 +159,6 @@ public class IdmServiceImpl implements IdmService {
         userId, updateAttributesStatus, updateUserEnabledExecution, doraExecution);
   }
 
-  private void validateUpdateUser(UserType existedCognitoUser, UserUpdate updateUserDto) {
-    validateByAdminRoles(existedCognitoUser, updateUserDto);
-    validateActivateUser(existedCognitoUser, updateUserDto);
-  }
-
-  private void validateByAdminRoles(UserType existedCognitoUser, UserUpdate updateUserDto) {
-    if(updateUserDto.getRoles() == null) {
-      return;
-    }
-    User newUser = getNewUser(existedCognitoUser, updateUserDto);
-    userValidateUpdateByAdminRolesService.validateUpdateUser(newUser);
-  }
-
-  private void validateActivateUser(UserType existedCognitoUser, UserUpdate updateUserDto) {
-    if (!canChangeToEnableActiveStatus(updateUserDto.getEnabled(),
-        existedCognitoUser.getEnabled())) {
-      return;
-    }
-    String racfId = CognitoUtils.getRACFId(existedCognitoUser);
-    if (StringUtils.isEmpty(racfId)) {
-      return;
-    }
-    validateActivateUser(racfId);
-  }
-
-  void validateActivateUser(String racfId) {
-    CwsUserInfo cwsUser = cwsUserInfoService.getCwsUserByRacfId(racfId);
-    // validates users not active in CWS cannot be set to Active in CWS CARES
-    if (cwsUser == null) {
-      String msg = messages.getTechMessage(NO_USER_WITH_RACFID_IN_CWSCMS, racfId);
-      String userMsg = messages.getUserMessage(NO_USER_WITH_RACFID_IN_CWSCMS, racfId);
-      throw new UserIdmValidationException(msg, userMsg, NO_USER_WITH_RACFID_IN_CWSCMS);
-    }
-
-    // validates no other Active users with same RACFID in CWS CARES exist
-    if (isActiveRacfIdPresent(racfId)) {
-      String msg = messages.getTechMessage(ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM, racfId);
-      String userMsg = messages.getUserMessage(ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM, racfId);
-      throw new UserIdmValidationException(msg, userMsg, ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM);
-    }
-  }
-
-  private static boolean canChangeToEnableActiveStatus(Boolean newEnabled, Boolean currentEnabled) {
-    return newEnabled != null && !newEnabled.equals(currentEnabled) && newEnabled;
-  }
-
-  private User getNewUser(UserType existedCognitoUser, UserUpdate updateUserDto) {
-    User user = mappingService.toUser(existedCognitoUser);
-    enrichUserByUpdateDto(user, updateUserDto);
-    return user;
-  }
-
-  static void enrichUserByUpdateDto(User user, UserUpdate updateUserDto) {
-    Boolean newEnabled = updateUserDto.getEnabled();
-    if(newEnabled != null) {
-      user.setEnabled(newEnabled);
-    }
-    Set<String> newPermissions = updateUserDto.getPermissions();
-    if(newPermissions != null) {
-      user.setPermissions(newPermissions);
-    }
-    Set<String> newRoles = updateUserDto.getRoles();
-    if(newRoles != null) {
-      user.setRoles(newRoles);
-    }
-  }
-
   private boolean doesElasticSearchNeedUpdate(ExecutionStatus updateAttributesStatus,
       OptionalExecution<UserEnableStatusRequest, Boolean> updateUserEnabledExecution) {
     return updateAttributesStatus == SUCCESS
@@ -239,6 +167,16 @@ public class IdmServiceImpl implements IdmService {
 
   @Override
   public String createUser(User user) {
+    CwsUserInfo cwsUser = getCwsUserData(user);
+    enrichUserByCwsData(user, cwsUser);
+
+    user.setEmail(toLowerCase(user.getEmail()));
+    String racfId = toUpperCase(user.getRacfid());
+    user.setRacfid(racfId);
+
+    authorizeCreateUser(user);
+    validationService.validateUserCreate(user, cwsUser != null);
+
     UserType userType = cognitoServiceFacade.createUser(user);
     String userId = userType.getUsername();
     PutInSearchExecution doraExecution = createUserInSearch(userType);
@@ -289,47 +227,96 @@ public class IdmServiceImpl implements IdmService {
   }
 
   @Override
+  @SuppressWarnings({"squid:S1166"})//Validation exceptions are already logged by ValidationService
   public UserVerificationResult verifyIfUserCanBeCreated(String racfId, String email) {
-    email = toLowerCase(email);
+    User user = new User();
+    user.setEmail(toLowerCase(email));
+    user.setRacfid(toUpperCase(racfId));
+    user.setRoles(Utils.toSet(CWS_WORKER));
 
-    CwsUserInfo cwsUser = cwsUserInfoService.getCwsUserByRacfId(racfId);
-    if (cwsUser == null) {
-      return composeNegativeResultWithMessage(NO_USER_WITH_RACFID_IN_CWSCMS, racfId);
-    }
-    if (checkIfUserWithEmailExistsInCognito(email)) {
-      return composeNegativeResultWithMessage(USER_WITH_EMAIL_EXISTS_IN_IDM, email);
-    }
+    CwsUserInfo cwsUser = getCwsUserData(user);
+    enrichUserByCwsData(user, cwsUser);
 
-    if (isActiveRacfIdPresent(racfId)) {
-      return composeNegativeResultWithMessage(ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM, racfId);
-    }
-
-    User user = composeUser(cwsUser, email);
-    Optional<MessageCode> authorizationError = buildAuthorizationError();
-    if (!authorizeService.canCreateUser(user) && authorizationError.isPresent()) {
-      return composeNegativeResultWithMessage(authorizationError.get(), user.getCountyName());
+    try {
+      validationService.validateVerifyIfUserCanBeCreated(user, cwsUser != null);
+    } catch (UserIdmValidationException e) {
+      return buildUserVerificationErrorResult(e.getErrorCode(), e.getUserMessage());
     }
 
-    return UserVerificationResult.Builder.anUserVerificationResult()
-        .withUser(user)
+    if (!authorizeService.canCreateUser(user)) {
+      return buildVerifyAuthorizationError(user);
+    }
+
+    return UserVerificationResult.Builder.anUserVerificationResult().withUser(user)
         .withVerificationPassed().build();
   }
 
-  private Optional<MessageCode> buildAuthorizationError() {
-    switch (getStrongestAdminRole(getCurrentUser())) {
-      case COUNTY_ADMIN:
-        return Optional.of(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY);
-      case OFFICE_ADMIN:
-        return Optional.of(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_OFFICE);
-      default:
-        return Optional.empty();
+  private UserVerificationResult buildUserVerificationErrorResult(MessageCode code, String msg) {
+    return UserVerificationResult.Builder.anUserVerificationResult()
+        .withVerificationFailed(code.getValue(), msg).build();
+  }
+
+  private void authorizeCreateUser(User user) {
+    if(!authorizeService.canCreateUser(user)) {
+      String msg = messages.getTechMessage(NOT_AUTHORIZED_TO_CREATE_USER);
+      LOGGER.error(msg);
+      throw new AccessDeniedException(msg);
     }
   }
 
-  private boolean checkIfUserWithEmailExistsInCognito(String email) {
-    Collection<UserType> cognitoUsers =
-        cognitoServiceFacade.searchPage(composeToGetFirstPageByEmail(email)).getUsers();
-    return !CollectionUtils.isEmpty(cognitoUsers);
+  private UserVerificationResult buildVerifyAuthorizationError(User user) {
+    switch (getStrongestAdminRole(getCurrentUser())) {
+      case COUNTY_ADMIN:
+        return buildVerifyAuthorizationError(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY, user.getCountyName());
+      case OFFICE_ADMIN:
+        return buildVerifyAuthorizationError(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_OFFICE, user.getCountyName());
+      default:
+        return buildVerifyAuthorizationError(NOT_AUTHORIZED_TO_CREATE_USER);
+    }
+  }
+
+  private UserVerificationResult buildVerifyAuthorizationError(MessageCode messageCode, Object... args) {
+    String msg = messages.getTechMessage(messageCode, args);
+    String userMsg = messages.getUserMessage(messageCode, args);
+    LOGGER.error(msg);
+    return buildUserVerificationErrorResult(messageCode, userMsg);
+  }
+
+  private CwsUserInfo getCwsUserData(User user) {
+    if (isRacfidUser(user)) {
+      return cwsUserInfoService.getCwsUserByRacfId(user.getRacfid());
+    } else {
+      return null;
+    }
+  }
+
+  private void enrichUserByCwsData(User user, CwsUserInfo cwsUser){
+    if(cwsUser != null) {
+      enrichDataFromCwsOffice(cwsUser.getCwsOffice(), user);
+      enrichDataFromStaffPerson(cwsUser.getStaffPerson(), user);
+    }
+  }
+
+  private void enrichDataFromStaffPerson(StaffPerson staffPerson, final User user) {
+    if (staffPerson != null) {
+      user.setFirstName(staffPerson.getFirstName());
+      user.setLastName(staffPerson.getLastName());
+      user.setEndDate(staffPerson.getEndDate());
+      user.setStartDate(staffPerson.getStartDate());
+    }
+  }
+
+  private void enrichDataFromCwsOffice(CwsOffice office, final User user) {
+    if (office != null) {
+      user.setOfficeId(office.getOfficeId());
+      Optional.ofNullable(office.getPrimaryPhoneNumber())
+          .ifPresent(e -> user.setPhoneNumber(e.toString()));
+      Optional.ofNullable(office.getPrimaryPhoneExtensionNumber())
+          .ifPresent(user::setPhoneExtensionNumber);
+      Optional.ofNullable(office.getGovernmentEntityType())
+          .ifPresent(
+              x -> user.setCountyName((GovernmentEntityType.findBySysId(x)).getDescription()));
+    }
   }
 
   private ExecutionStatus updateUserAttributes(
@@ -511,19 +498,6 @@ public class IdmServiceImpl implements IdmService {
         .collect(Collectors.toList());
   }
 
-  private boolean isActiveRacfIdPresent(String racfId) {
-    Collection<UserType> cognitoUsersByRacfId =
-        cognitoServiceFacade.searchAllPages(composeToGetFirstPageByRacfId(toUpperCase(racfId)));
-    return !CollectionUtils.isEmpty(cognitoUsersByRacfId)
-        && isActiveUserPresent(cognitoUsersByRacfId);
-  }
-
-  private static boolean isActiveUserPresent(Collection<UserType> cognitoUsers) {
-    return cognitoUsers
-        .stream()
-        .anyMatch(userType -> Objects.equals(userType.getEnabled(), Boolean.TRUE));
-  }
-
   static Set<String> transformSearchValues(Set<String> values, StandardUserAttribute searchAttr) {
     if (searchAttr == RACFID_STANDARD) {
       values = applyFunctionToValues(values, Utils::toUpperCase);
@@ -598,46 +572,6 @@ public class IdmServiceImpl implements IdmService {
     };
   }
 
-  private UserVerificationResult composeNegativeResultWithMessage(
-      MessageCode errorCode, Object... params) {
-    String message = messages.getUserMessage(errorCode, params);
-    LOGGER.info(message);
-    return UserVerificationResult.Builder.anUserVerificationResult()
-        .withVerificationFailed(errorCode.getValue(), message)
-        .build();
-  }
-
-  private User composeUser(CwsUserInfo cwsUser, String email) {
-    User user = new User();
-    user.setEmail(email);
-    user.setRacfid(cwsUser.getRacfId());
-    enrichDataFromCwsOffice(cwsUser.getCwsOffice(), user);
-    enrichDataFromStaffPerson(cwsUser.getStaffPerson(), user);
-    return user;
-  }
-
-  private void enrichDataFromStaffPerson(StaffPerson staffPerson, final User user) {
-    if (staffPerson != null) {
-      user.setFirstName(staffPerson.getFirstName());
-      user.setLastName(staffPerson.getLastName());
-      user.setEndDate(staffPerson.getEndDate());
-      user.setStartDate(staffPerson.getStartDate());
-    }
-  }
-
-  private void enrichDataFromCwsOffice(CwsOffice office, final User user) {
-    if (office != null) {
-      user.setOfficeId(office.getOfficeId());
-      Optional.ofNullable(office.getPrimaryPhoneNumber())
-          .ifPresent(e -> user.setPhoneNumber(e.toString()));
-      Optional.ofNullable(office.getPrimaryPhoneExtensionNumber())
-          .ifPresent(user::setPhoneExtensionNumber);
-      Optional.ofNullable(office.getGovernmentEntityType())
-          .ifPresent(
-              x -> user.setCountyName((GovernmentEntityType.findBySysId(x)).getDescription()));
-    }
-  }
-
   public void setSearchService(SearchService searchService) {
     this.searchService = searchService;
   }
@@ -667,8 +601,7 @@ public class IdmServiceImpl implements IdmService {
     this.mappingService = mappingService;
   }
 
-  public void setUserValidateUpdateByAdminRolesService(
-      ValidateUpdateUserByAdminRolesService userValidateUpdateByAdminRolesService) {
-    this.userValidateUpdateByAdminRolesService = userValidateUpdateByAdminRolesService;
+  public void setValidationService(ValidationService validationService) {
+    this.validationService = validationService;
   }
 }

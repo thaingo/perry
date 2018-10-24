@@ -48,7 +48,6 @@ import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -72,6 +71,7 @@ import com.amazonaws.services.cognitoidp.model.InvalidParameterException;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import com.amazonaws.services.cognitoidp.model.UsernameExistsException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.collect.Iterables;
 import gov.ca.cwds.BaseIntegrationTest;
 import gov.ca.cwds.config.LoggingRequestIdFilter;
@@ -88,10 +88,12 @@ import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.SearchProperties;
 import gov.ca.cwds.service.messages.MessagesService;
 import java.nio.charset.Charset;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import org.apache.commons.codec.binary.Base64;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -137,6 +139,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
 
   private static final String NEW_USER_SUCCESS_ID_2 = "17067e4e-270f-4623-b86c-b4d4fa527a35";
   private static final String NEW_USER_SUCCESS_ID_3 = "17067e4e-270f-4623-b86c-b4d4fa527a36";
+  private static final String NEW_USER_SUCCESS_ID_4 = "17067e4e-270f-4623-b86c-b4d4fa527a37";
   private static final String SSO_TOKEN = "b02aa833-f8b2-4d28-8796-3abe059313d1";
   private static final String YOLO_COUNTY_USERS_EMAIL = "julio@gmail.com";
   private static final String BASIC_AUTH_HEADER = prepareBasicAuthHeader();
@@ -514,20 +517,22 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @Test
   @WithMockCustomUser
   public void testCreateUserSuccess() throws Exception {
-    assertCreateUserSuccess("gonzales@gmail.com", NEW_USER_SUCCESS_ID);
+    assertCreateUserSuccess(user("gonzales@gmail.com"), NEW_USER_SUCCESS_ID);
   }
 
   @Test
   @WithMockCustomUser(roles = {STATE_ADMIN}, county = "Madera")
   public void testCreateUserStateAdmin() throws Exception {
-    assertCreateUserSuccess("gonzales2@gmail.com", NEW_USER_SUCCESS_ID_2);
+    assertCreateUserSuccess(user("gonzales2@gmail.com"), NEW_USER_SUCCESS_ID_2);
   }
 
-  private void assertCreateUserSuccess(String email, String newUserId) throws Exception {
-    User user = user(email);
-    AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
-    setCreateUserResult(request, newUserId);
+  private void assertCreateUserSuccess(User user, String newUserId) throws Exception {
+    assertCreateUserSuccess(user, user, newUserId);
+  }
 
+  private void assertCreateUserSuccess(User user, User actuallySendUser, String newUserId) throws Exception {
+
+    AdminCreateUserRequest request = setCreateRequestAndResult(actuallySendUser, newUserId);
     setDoraSuccess();
 
     mockMvc
@@ -544,10 +549,17 @@ public class IdmResourceTest extends BaseIntegrationTest {
     verifyDoraCalls(1);
   }
 
+  private AdminCreateUserRequest setCreateRequestAndResult(User actuallySendUser,
+      String newUserId) {
+    AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(actuallySendUser);
+    setCreateUserResult(request, newUserId);
+    return request;
+  }
+
   @Test
   @WithMockCustomUser(roles = {OFFICE_ADMIN})
   public void testCreateUserOfficeAdmin() throws Exception {
-    assertCreateUserSuccess("gonzales3@gmail.com", NEW_USER_SUCCESS_ID_3);
+    assertCreateUserSuccess(user("gonzales3@gmail.com"), NEW_USER_SUCCESS_ID_3);
   }
 
   @Test
@@ -567,8 +579,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
 
     setDoraError();
 
-    AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
-    setCreateUserResult(request, NEW_USER_ES_FAIL_ID);
+    AdminCreateUserRequest request = setCreateRequestAndResult(user, NEW_USER_ES_FAIL_ID);
 
     MvcResult result =
         mockMvc
@@ -1092,123 +1103,147 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @Test
   @WithMockCustomUser
   public void testVerifyUsers() throws Exception {
-    MvcResult result =
-        mockMvc
-            .perform(
-                MockMvcRequestBuilders.get("/idm/users/verify?email=test@test.com&racfid=SMITHB3"))
-            .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
-            .andReturn();
-
-    assertNonStrict(result, "fixtures/idm/verify-user/verify-valid.json");
+    assertVerify("test@test.com", "SMITHB3", "fixtures/idm/verify-user/verify-valid.json");
   }
 
   @Test
   @WithMockCustomUser
   public void testVerifyErrorMessageForUserWithActiveStatusInCognito() throws Exception {
-    MvcResult result =
-        mockMvc
-            .perform(
-                MockMvcRequestBuilders.get("/idm/users/verify?email=test@test.com&racfid=SMITHBO"))
-            .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
-            .andReturn();
-
-    assertNonStrict(result,
+    assertVerify("test@test.com", "SMITHBO",
         "fixtures/idm/verify-user/verify-active-racfid-already-in-cognito-message.json");
   }
 
   @Test
   @WithMockCustomUser
-  public void testVerifyUsersRacfidInLowerCase() throws Exception {
-    MvcResult result =
-        mockMvc
-            .perform(
-                MockMvcRequestBuilders.get("/idm/users/verify?email=test@test.com&racfid=smithb3"))
-            .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
-            .andReturn();
+  public void testCreateUserWithActiveStatusInCognito() throws Exception {
+    assertCreateUserBadRequest(racfIdUser("test@test.com", "SMITHBO", toSet(CWS_WORKER)),
+        "fixtures/idm/create-user/active-user-with-same-racfid-in-cognito-error.json");
+  }
 
-    assertNonStrict(result, "fixtures/idm/verify-user/verify-valid.json");
+  @Test
+  @WithMockCustomUser
+  public void testVerifyUsersRacfidInLowerCase() throws Exception {
+    assertVerify("test@test.com", "smithb3", "fixtures/idm/verify-user/verify-valid.json");
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {STATE_ADMIN})
+  public void testCreateRacfidUser() throws Exception {
+    User user = getElroydaUser();
+    User actuallySendUser = getActuallySendElroydaUser();
+    ((TestCognitoServiceFacade) cognitoServiceFacade).setSearchByRacfidRequestAndResult("ELROYDA");
+
+    assertCreateUserSuccess(user, actuallySendUser, NEW_USER_SUCCESS_ID_4);
+  }
+
+  @Test
+  @WithMockCustomUser
+  public void testCreateRacfidUserUnautorized() throws Exception {
+    User user = getElroydaUser();
+    User actuallySendUser = getActuallySendElroydaUser();
+    AdminCreateUserRequest request = setCreateRequestAndResult(actuallySendUser, NEW_USER_SUCCESS_ID_4);
+    ((TestCognitoServiceFacade) cognitoServiceFacade).setSearchByRacfidRequestAndResult("ELROYDA");
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.post("/idm/users")
+                .contentType(JSON_CONTENT_TYPE)
+                .content(asJsonString(user)))
+        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+        .andReturn();
+
+    verify(cognito, times(0)).adminCreateUser(request);
+  }
+
+  private User getElroydaUser() {
+    return racfIdUser("Test@Test.com", "elroyda", toSet(CWS_WORKER));
+  }
+
+  private User getActuallySendElroydaUser() {
+    User actuallySendUser = racfIdUser("test@test.com", "ELROYDA", toSet(CWS_WORKER));
+    actuallySendUser.setFirstName("Donna");
+    actuallySendUser.setLastName("Elroy");
+    actuallySendUser.setCountyName("Napa");
+    actuallySendUser.setOfficeId("TG7O51q0Ki");
+    actuallySendUser.setStartDate(LocalDate.of(1998, 4, 14));
+    return actuallySendUser;
   }
 
   @Test
   @WithMockCustomUser
   public void testVerifyUsersWithEmailInMixedCase() throws Exception {
-    MvcResult result =
-        mockMvc
-            .perform(
-                MockMvcRequestBuilders.get("/idm/users/verify?email=Test@Test.com&racfid=SMITHB3"))
-            .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
-            .andReturn();
-
-    assertNonStrict(result, "fixtures/idm/verify-user/verify-valid.json");
+    assertVerify("Test@Test.com", "SMITHB3", "fixtures/idm/verify-user/verify-valid.json");
   }
 
   @Test
   @WithMockCustomUser
-  public void testVerifyUsersNoRacfId() throws Exception {
-    assertVerufyUserSuccess();
+  public void testVerifyUsersNoRacfIdInCws() throws Exception {
+    assertVerifyUserNoRacfidInCws();
   }
+
+  @Test
+  @WithMockCustomUser
+  public void testCreateUserNoRacfIdInCws() throws Exception {
+    assertCreateUserBadRequest(racfIdUser("test@test.com", "SMITHB1", toSet(CWS_WORKER)),
+        "fixtures/idm/create-user/no-racfid-in-cws-error.json");
+  }
+
 
   @Test
   @WithMockCustomUser(roles = {STATE_ADMIN}, county = "Madera")
   public void testVerifyUserStateAdmin() throws Exception {
-    assertVerufyUserSuccess();
+    assertVerifyUserNoRacfidInCws();
   }
 
   @Test
   @WithMockCustomUser(roles = {OFFICE_ADMIN})
   public void testVerifyUserOfficeAdmin() throws Exception {
-    assertVerufyUserSuccess();
+    assertVerifyUserNoRacfidInCws();
   }
 
   @Test
   @WithMockCustomUser(roles = {OFFICE_ADMIN}, adminOfficeIds = {"otherOfficeId"})
   public void testVerifyUserOfficeAdminOtherOffice() throws Exception {
-    MvcResult result =
-        mockMvc
-            .perform(
-                MockMvcRequestBuilders.get("/idm/users/verify?email=test@test.com&racfid=SMITHB3"))
-            .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
-            .andReturn();
-
-    assertNonStrict(result, "fixtures/idm/verify-user/verify-other-office.json");
-  }
-
-  private void assertVerufyUserSuccess() throws Exception {
-    MvcResult result =
-        mockMvc
-            .perform(
-                MockMvcRequestBuilders.get("/idm/users/verify?email=test@test.com&racfid=SMITHB1"))
-            .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
-            .andReturn();
-
-    assertNonStrict(result, "fixtures/idm/verify-user/verify-no-racfid.json");
+    assertVerify("test@test.com", "SMITHB3", "fixtures/idm/verify-user/verify-other-office.json");
   }
 
   @Test
   @WithMockCustomUser
   public void testVerifyUsersCognitoUserIsPresent() throws Exception {
-    MvcResult result =
-        mockMvc
-            .perform(
-                MockMvcRequestBuilders.get(
-                    "/idm/users/verify?email=julio@gmail.com&racfid=SMITHBO"))
-            .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
-            .andReturn();
-
-    assertNonStrict(result, "fixtures/idm/verify-user/verify-user-present.json");
+    assertVerify("julio@gmail.com", "SMITHBO", "fixtures/idm/verify-user/verify-user-present.json");
   }
 
   @Test
   @WithMockCustomUser(roles = {"OtherRole"})
   public void testVerifyUserWithOtherRole() throws Exception {
     assertVerifyUserUnauthorized();
+  }
+
+  @Test
+  @WithMockCustomUser(county = "Madera")
+  public void testVerifyUsersOtherCounty() throws Exception {
+    assertVerify("test@test.com", "SMITHB3", "fixtures/idm/verify-user/verify-other-county.json");
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {CALS_ADMIN})
+  public void testVerifyUsersCalsAdmin() throws Exception {
+    assertVerifyUserUnauthorized();
+  }
+
+  private void assertVerify(String email, String racfId, String fixturePath) throws Exception {
+    MvcResult result =
+        mockMvc
+            .perform(
+                MockMvcRequestBuilders.get("/idm/users/verify?email=" + email + "&racfid=" + racfId))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
+            .andReturn();
+
+    assertNonStrict(result, fixturePath);
+  }
+  private void assertVerifyUserNoRacfidInCws() throws Exception {
+    assertVerify("test@test.com", "SMITHB1", "fixtures/idm/verify-user/verify-no-racfid.json");
   }
 
   private void assertVerifyUserUnauthorized() throws Exception {
@@ -1219,24 +1254,19 @@ public class IdmResourceTest extends BaseIntegrationTest {
         .andReturn();
   }
 
-  @Test
-  @WithMockCustomUser(county = "Madera")
-  public void testVerifyUsersOtherCounty() throws Exception {
-    MvcResult result =
-        mockMvc
-            .perform(
-                MockMvcRequestBuilders.get("/idm/users/verify?email=test@test.com&racfid=SMITHB3"))
-            .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
-            .andReturn();
+  private void assertCreateUserBadRequest(User user, String fixturePath) throws Exception {
+    AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
 
-    assertNonStrict(result, "fixtures/idm/verify-user/verify-other-county.json");
-  }
+    MvcResult result = mockMvc
+        .perform(
+            MockMvcRequestBuilders.post("/idm/users")
+                .contentType(JSON_CONTENT_TYPE)
+                .content(asJsonString(user)))
+        .andExpect(MockMvcResultMatchers.status().isBadRequest())
+        .andReturn();
 
-  @Test
-  @WithMockCustomUser(roles = {CALS_ADMIN})
-  public void testVerifyUsersCalsAdmin() throws Exception {
-    assertVerifyUserUnauthorized();
+    assertExtensible(result, fixturePath);
+    verify(cognito, times(0)).adminCreateUser(request);
   }
 
 
@@ -1513,6 +1543,13 @@ public class IdmResourceTest extends BaseIntegrationTest {
     return user("gonzales@gmail.com");
   }
 
+  private User racfIdUser(String email, String racfId, Set<String> roles) {
+    User user = user(email);
+    user.setRacfid(racfId);
+    user.setRoles(roles);
+    return user;
+  }
+
   private static User user(String email) {
     User user = new User();
     user.setEmail(email);
@@ -1538,7 +1575,10 @@ public class IdmResourceTest extends BaseIntegrationTest {
 
   private static String asJsonString(final Object obj) {
     try {
-      return new ObjectMapper().writeValueAsString(obj);
+      ObjectMapper objectMapper = new ObjectMapper();
+      JavaTimeModule javaTimeModule = new JavaTimeModule();
+      objectMapper.registerModule(javaTimeModule);
+      return objectMapper.writeValueAsString(obj);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

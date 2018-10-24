@@ -1,6 +1,7 @@
 package gov.ca.cwds.rest.api.domain;
 
 import gov.ca.cwds.service.messages.MessageCode;
+import java.util.ArrayList;
 import java.util.List;
 
 public abstract class IdmException extends RuntimeException {
@@ -11,7 +12,7 @@ public abstract class IdmException extends RuntimeException {
 
   private final MessageCode errorCode;
 
-  private List<Exception> causes;
+  private final List<Exception> causes = new ArrayList<>();
 
   public IdmException(String techMessage, String userMessage, MessageCode errorCode) {
     super(techMessage);
@@ -34,7 +35,10 @@ public abstract class IdmException extends RuntimeException {
   }
 
   public void setCauses(List<Exception> causes) {
-    this.causes = causes;
+    this.causes.clear();
+    if(causes != null) {
+      this.causes.addAll(causes);
+    }
   }
 
   public List<Exception> getCauses() {
