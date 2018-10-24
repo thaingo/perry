@@ -6,6 +6,7 @@ import gov.ca.cwds.idm.persistence.ns.entity.UserNsEntity;
 import gov.ca.cwds.idm.persistence.ns.repository.UserNsRepository;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -35,6 +36,18 @@ public class UserNsService {
 
     userNsRepository.save(userNsEntity);
     userLogService.logUpdate(username);
+  }
+
+  @Transactional(value = TOKEN_TRANSACTION_MANAGER, readOnly = true)
+  public Optional<LocalDateTime> getLastLoginTime(String username) {
+
+    List<UserNsEntity> userList =  userNsRepository.findByUsername(username);
+
+    if(userList.isEmpty()) {
+      return Optional.empty();
+    } else {
+      return Optional.ofNullable(userList.get(0).getLastLoginTime());
+    }
   }
 
   @Autowired
