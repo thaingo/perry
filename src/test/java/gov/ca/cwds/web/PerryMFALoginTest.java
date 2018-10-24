@@ -6,7 +6,6 @@ import static gov.ca.cwds.util.LiquibaseUtils.runLiquibaseScript;
 import static gov.ca.cwds.web.MockOAuth2Service.EXPECTED_SSO_TOKEN;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 import gov.ca.cwds.BaseIntegrationTest;
@@ -99,13 +98,13 @@ public class PerryMFALoginTest extends BaseIntegrationTest {
     String token = result.getResponse().getContentAsString();
     LOGGER.info("Perry token: {}", token);
     Assert.assertTrue(token.matches(UUID_PATTERN));
-    result = validateToken(token, MockMvcResultMatchers.status().isOk(), AUTH_JSON);
+    result = validateToken(token, MockMvcResultMatchers.status().isOk());
     String perryJson = result.getResponse().getContentAsString();
     LOGGER.info("Perry JSON: {}", perryJson);
     JSONAssert.assertEquals(FixtureHelpers.fixture(AUTH_JSON), perryJson, false);
     setLogoutHandlerSecurityContext(token, result.getRequest().getSession());
     logout(result);
-    validateToken(token, MockMvcResultMatchers.status().is4xxClientError(), AUTH_JSON);
+    validateToken(token, MockMvcResultMatchers.status().is4xxClientError());
   }
 
   @Test
@@ -123,7 +122,6 @@ public class PerryMFALoginTest extends BaseIntegrationTest {
   public void whenRacfidMissingMFAJsonProvided_thenLoginSuccessfully() throws Exception {
     Mockito.when(oAuth2Service.getUserInfo(EXPECTED_SSO_TOKEN))
         .thenReturn(MockOAuth2Service.constructUserInfo(MISSING_RACFID_MFA_RESPONSE_JSON));
-    Mockito.doCallRealMethod().when(oAuth2Service).validate(any());
     runLoginFlow(MISSING_RACFID_MFA_RESPONSE_JSON, AUTH_NO_RACFID_JSON);
   }
 
@@ -131,7 +129,6 @@ public class PerryMFALoginTest extends BaseIntegrationTest {
   public void whenKeyInfoMissingMFAJsonProvided_thenLoginSuccessfully() throws Exception {
     Mockito.when(oAuth2Service.getUserInfo(EXPECTED_SSO_TOKEN))
         .thenReturn(MockOAuth2Service.constructUserInfo(KEY_INFO_MISSING_MFA_RESPONSE_JSON));
-    Mockito.doCallRealMethod().when(oAuth2Service).validate(any());
     runLoginFlow(KEY_INFO_MISSING_MFA_RESPONSE_JSON, AUTH_MISSING_INFO_JSON);
   }
 
@@ -156,7 +153,7 @@ public class PerryMFALoginTest extends BaseIntegrationTest {
     String token = result.getResponse().getContentAsString();
     LOGGER.info("Perry token: {}", token);
     Assert.assertTrue(token.matches(UUID_PATTERN));
-    result = validateToken(token, MockMvcResultMatchers.status().isOk(), authJson);
+    result = validateToken(token, MockMvcResultMatchers.status().isOk());
     String perryJson = result.getResponse().getContentAsString();
     LOGGER.info("Perry JSON: {}", perryJson);
     JSONAssert.assertEquals(FixtureHelpers.fixture(authJson), perryJson, false);
@@ -201,8 +198,7 @@ public class PerryMFALoginTest extends BaseIntegrationTest {
     LOGGER.info("Logout redirect URL: {}", result.getResponse().getRedirectedUrl());
   }
 
-  private MvcResult validateToken(String token, ResultMatcher resultMatcher, String authJson)
-      throws Exception {
+  private MvcResult validateToken(String token, ResultMatcher resultMatcher) throws Exception {
     MvcResult result;
     result = mockMvc
         .perform(get(AUTHN_VALIDATE_URL + token))

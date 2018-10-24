@@ -362,4 +362,41 @@
     </insert>
   </changeSet>
 
+  <changeSet id="data_for_cms_db_7" author="Dmytro.Palczewski">
+    <insert tableName="USERID_T">
+      <column name="IDENTIFIER" value="DTN0v5v00E"/>
+      <column name="LOGON_ID" value="ELROYDA "/>
+      <column name="END_DT"/>
+      <column name="END_TM"/>
+      <column name="LST_UPD_ID" value="q54"/>
+      <column name="LST_UPD_TS" valueDate="2009-05-18 17:10:43.010371"/>
+      <column name="FKFPSTFPRT"/>
+      <column name="FKSTFPERST" value="06N"/>
+      <column name="SYS_DMC" valueNumeric="5394"/>
+    </insert>
+    <insert tableName="STFPERST">
+      <column name="IDENTIFIER" value="06N"/>
+      <column name="END_DT"/>
+      <column name="FIRST_NM" value="Donna               "/>
+      <column name="JOB_TL_DSC" value="                              "/>
+      <column name="LAST_NM" value="Elroy                    "/>
+      <column name="MID_INI_NM" value=" "/>
+      <column name="NMPRFX_DSC" value="      "/>
+      <column name="PHONE_NO" valueNumeric="4084419876"/>
+      <column name="TEL_EXT_NO" valueNumeric="0"/>
+      <column name="START_DT" valueDate="1998-04-14"/>
+      <column name="SUFX_TLDSC" value="    "/>
+      <column name="TLCMTR_IND" value="N"/>
+      <column name="LST_UPD_ID" value="q38"/>
+      <column name="LST_UPD_TS" valueDate="2000-08-29 13:51:39.247824"/>
+      <column name="FKCWS_OFFT" value="TG7O51q0Ki"/>
+      <column name="AVLOC_DSC" value="                                                                                                                                                                "/>
+      <column name="SSRS_WKRID" value="100 "/>
+      <column name="CNTY_SPFCD" value="43"/>
+      <column name="DTYWKR_IND" value="N"/>
+      <column name="FKCWSADDRT" value="SL7OmyCq38"/>
+      <column name="EMAIL_ADDR"/>
+    </insert>
+  </changeSet>
+
 </databaseChangeLog>

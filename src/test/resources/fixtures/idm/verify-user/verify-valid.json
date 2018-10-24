@@ -11,6 +11,6 @@
       "phone_number": "4646464646",
       "phone_extension_number": "11",
       "start_date": "1980-08-08",
-      "roles": []
+      "roles": ["CWS-worker"]
     }
   }
