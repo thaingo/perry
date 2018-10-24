@@ -29,11 +29,6 @@ node('dora-slave') {
                 buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'clean jar'
             }
         }
-        stage('Trigger Security scan') {
-             def props = readProperties  file: 'build/resources/main/version.properties'
-             def build_version = props["build.version"]
-             sh "echo build_version: ${build_version}"
-        }
         stage('Unit Tests') {
             buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'test jacocoTestReport', switches: '--info'
         }
