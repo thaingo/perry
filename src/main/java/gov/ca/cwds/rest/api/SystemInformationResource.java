@@ -45,18 +45,15 @@ public class SystemInformationResource {
       }
   )
   public ResponseEntity<SystemInformationDto> getInfo() {
-    Object infoObj = infoEndpoint.invoke().get("build");
+    Map<String, String> info = (Map<String, String>) infoEndpoint.invoke().get("build");
     Health health = healthEndpoint.invoke();
-    SystemInformationDto systemInformation = prepareSystemInformation(infoObj, health);
+    SystemInformationDto systemInformation = prepareSystemInformation(info, health);
     int statusCode =
         systemInformation.isHealthStatus() ? HttpStatus.OK.value() : HTTP_STATUS_NOT_HEALTHY;
     return ResponseEntity.status(statusCode).body(systemInformation);
   }
 
-  @SuppressWarnings("unchecked")
-  private SystemInformationDto prepareSystemInformation(Object infoObj, Health health) {
-    Map<String, String> info = (Map<String, String>) infoObj;
-
+  private SystemInformationDto prepareSystemInformation(Map<String, String> info, Health health) {
     SystemInformationDto systemInformation = new SystemInformationDto();
     systemInformation.setApplicationName(toRealNull(info.get("name")));
     systemInformation.setVersion(toRealNull(info.get("version")));
