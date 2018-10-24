@@ -120,7 +120,6 @@ public class CognitoUtils {
             .addAttribute(LAST_NAME, user.getLastName())
             .addAttribute(COUNTY, user.getCountyName())
             .addAttribute(OFFICE, user.getOfficeId())
-            .addAttribute(PHONE_NUMBER, user.getPhoneNumber())
             .addAttribute(RACFID_CUSTOM, racfid)
             .addAttribute(RACFID_CUSTOM_2, racfid)
             .addAttribute(RACFID_STANDARD, racfid)

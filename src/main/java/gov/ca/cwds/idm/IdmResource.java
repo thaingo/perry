@@ -4,7 +4,6 @@ import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STAND
 import static gov.ca.cwds.service.messages.MessageCode.INVALID_DATE_FORMAT;
 import static java.util.stream.Collectors.toList;
 
-import gov.ca.cwds.config.api.idm.Roles;
 import gov.ca.cwds.data.persistence.auth.CwsOffice;
 import gov.ca.cwds.idm.dto.IdmApiCustomError;
 import gov.ca.cwds.idm.dto.User;
@@ -275,7 +274,9 @@ public class IdmResource {
     } catch (UserIdmValidationException e) {
       HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
       IdmApiCustomError apiError = buildApiCustomError(e, httpStatus);
-      apiError.getCauses().add(e.getCause().getMessage());
+      if(e.getCause() != null) {
+        apiError.getCauses().add(e.getCause().getMessage());
+      }
       return new ResponseEntity<>(apiError, httpStatus);
     } catch (PartialSuccessException e) {
       URI locationUri = getNewUserLocationUri(e.getUserId());
