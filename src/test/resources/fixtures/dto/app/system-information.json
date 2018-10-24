@@ -1,0 +1,19 @@
+{
+  "application": "app1",
+  "version": "1.0",
+  "build": "123",
+  "git_commit": "5fe64cdd988f8218b3568e886064be03cb990ae8",
+  "health_status": true,
+  "health_checks": {
+    "some_health": {
+      "healthy": false,
+      "message": "something is not healthy",
+      "timestamp": "2018-10-10T14:42:15.000-07:00"
+    },
+    "test_health": {
+      "healthy": true,
+      "message": "test is healthy",
+      "timestamp": "2018-10-10T13:30:56.000-07:00"
+    }
+  }
+}
