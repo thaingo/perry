@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Profile("idm")
-public class LastLoginTimeService {
+public class UserNsService {
 
   private UserNsRepository userNsRepository;
 
