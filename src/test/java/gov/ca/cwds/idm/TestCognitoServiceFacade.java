@@ -34,6 +34,7 @@ import com.amazonaws.services.cognitoidp.model.ListUsersRequest;
 import com.amazonaws.services.cognitoidp.model.ListUsersResult;
 import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
 import com.amazonaws.services.cognitoidp.model.UserType;
+import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.cognito.CognitoObjectMapperHolder;
 import gov.ca.cwds.idm.service.cognito.CognitoProperties;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacadeImpl;
@@ -337,7 +338,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
     when(cognito.adminListDevices(any(AdminListDevicesRequest.class))).thenReturn(result);
   }
 
-  private void setListUsersRequestAndResult(String paginationToken, TestUser... testUsers) {
+  void setListUsersRequestAndResult(String paginationToken, TestUser... testUsers) {
     ListUsersRequest request =
         new ListUsersRequest().withUserPoolId(USERPOOL).withLimit(DEFAULT_PAGESIZE);
 
@@ -523,12 +524,16 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
   }
 
   ListUsersRequest setSearchByRacfidRequestAndResult(TestUser testUser) {
+    return setSearchByRacfidRequestAndResult(testUser.getRacfId(), userType(testUser));
+  }
+
+  public ListUsersRequest setSearchByRacfidRequestAndResult(String racfid, UserType... responseUsers) {
 
     ListUsersRequest request =
         composeListUsersRequest(
-            composeToGetFirstPageByAttribute(RACFID_STANDARD, testUser.getRacfId()));
+            composeToGetFirstPageByAttribute(RACFID_STANDARD, racfid));
 
-    ListUsersResult result = new ListUsersResult().withUsers(userType(testUser));
+    ListUsersResult result = new ListUsersResult().withUsers(responseUsers);
 
     when(cognito.listUsers(request)).thenReturn(result);
 

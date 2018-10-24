@@ -267,7 +267,9 @@ public class IdmResource {
     } catch (UserIdmValidationException e) {
       HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
       IdmApiCustomError apiError = buildApiCustomError(e, httpStatus);
-      apiError.getCauses().add(e.getCause().getMessage());
+      if(e.getCause() != null) {
+        apiError.getCauses().add(e.getCause().getMessage());
+      }
       return new ResponseEntity<>(apiError, httpStatus);
     } catch (PartialSuccessException e) {
       URI locationUri = getNewUserLocationUri(e.getUserId());
