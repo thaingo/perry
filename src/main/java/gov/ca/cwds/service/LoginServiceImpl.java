@@ -2,8 +2,10 @@ package gov.ca.cwds.service;
 
 import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.data.reissue.model.PerryTokenEntity;
+import gov.ca.cwds.event.UserLoggedInEvent;
 import gov.ca.cwds.service.sso.SsoService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,7 @@ public class LoginServiceImpl implements LoginService {
   private IdentityMappingService identityMappingService;
   private TokenService tokenService;
   private SsoService ssoService;
+  private ApplicationEventPublisher eventPublisher;
 
   @Override
   public String issueAccessCode(String providerId) {
@@ -24,7 +27,9 @@ public class LoginServiceImpl implements LoginService {
     UniversalUserToken userToken = (UniversalUserToken) securityContext.getAuthentication().getPrincipal();
     String ssoToken = ssoService.getSsoToken();
     String identity = identityMappingService.map(userToken, providerId);
-    return tokenService.issueAccessCode(userToken, ssoToken, identity, ssoService.getSecurityContext());
+    String accessCode = tokenService.issueAccessCode(userToken, ssoToken, identity, ssoService.getSecurityContext());
+    eventPublisher.publishEvent(new UserLoggedInEvent(userToken));
+    return accessCode;
   }
 
   @Override
@@ -58,5 +63,10 @@ public class LoginServiceImpl implements LoginService {
   @Autowired
   public void setSsoService(SsoService ssoService) {
     this.ssoService = ssoService;
+  }
+
+  @Autowired
+  public void setEventPublisher(ApplicationEventPublisher eventPublisher) {
+    this.eventPublisher = eventPublisher;
   }
 }
