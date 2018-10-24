@@ -1,5 +1,6 @@
 package gov.ca.cwds.idm.service.role.implementor;
 
+import static gov.ca.cwds.idm.service.authorization.UserRolesService.isStateAdmin;
 import static gov.ca.cwds.idm.service.role.implementor.AuthorizationUtils.isPrincipalInTheSameCountyWith;
 
 import gov.ca.cwds.idm.dto.User;
@@ -25,7 +26,7 @@ class CountyAdminAuthorizer implements AdminActionsAuthorizer {
 
   @Override
   public boolean canUpdateUser() {
-    return isPrincipalInTheSameCountyWith(user);
+    return isPrincipalInTheSameCountyWith(user) && !isStateAdmin(user);
   }
 
   @Override
