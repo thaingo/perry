@@ -13,7 +13,7 @@ import javax.validation.constraints.Size;
 
 @Entity
 @Table(name = "user")
-public class UserNsEntity {
+public class UserNs {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -57,10 +57,10 @@ public class UserNsEntity {
     if (this == o) {
       return true;
     }
-    if (!(o instanceof UserNsEntity)) {
+    if (!(o instanceof UserNs)) {
       return false;
     }
-    UserNsEntity that = (UserNsEntity) o;
+    UserNs that = (UserNs) o;
     return Objects.equals(getUsername(), that.getUsername());
   }
 
