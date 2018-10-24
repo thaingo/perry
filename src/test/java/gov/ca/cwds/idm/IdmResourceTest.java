@@ -185,6 +185,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @BeforeClass
   public static void beforeClass() throws Exception {
     runLiquibaseScript(CMS_STORE_URL, "liquibase/cms-data.xml");
+    runLiquibaseScript(TOKEN_STORE_URL, "liquibase/ns-data.xml");
   }
 
   @Before

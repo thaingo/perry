@@ -114,6 +114,9 @@ public class IdmServiceImpl implements IdmService {
   @Autowired
   private ValidationService validationService;
 
+  @Autowired
+  private UserNsService userNsService;
+
   @Override
   public User findUser(String id) {
     UserType cognitoUser = cognitoServiceFacade.getCognitoUserById(id);
@@ -533,8 +536,7 @@ public class IdmServiceImpl implements IdmService {
   }
 
   private User enrichUserWithLastLoginDateTime(User user) {
-    cognitoServiceFacade.getLastAuthenticatedTimestamp(user.getId())
-        .ifPresent(user::setLastLoginDateTime);
+    userNsService.getLastLoginTime(user.getId()).ifPresent(user::setLastLoginDateTime);
     return user;
   }
 

@@ -1,5 +1,6 @@
 package gov.ca.cwds.idm.service;
 
+import static gov.ca.cwds.BaseIntegrationTest.H2_DRIVER_CLASS_NAME;
 import static gov.ca.cwds.BaseIntegrationTest.IDM_BASIC_AUTH_PASS;
 import static gov.ca.cwds.BaseIntegrationTest.IDM_BASIC_AUTH_USER;
 import static gov.ca.cwds.idm.service.IdmServiceImpl.transformSearchValues;
@@ -14,6 +15,8 @@ import static gov.ca.cwds.service.messages.MessageCode.USER_PARTIAL_UPDATE;
 import static gov.ca.cwds.service.messages.MessageCode.USER_PARTIAL_UPDATE_AND_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_PARTIAL_UPDATE_AND_SAVE_TO_SEARCH_ERRORS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_UPDATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
+import static gov.ca.cwds.util.LiquibaseUtils.TOKEN_STORE_URL;
+import static gov.ca.cwds.util.LiquibaseUtils.createTokenStoreDatabase;
 import static gov.ca.cwds.util.Utils.toSet;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -34,6 +37,7 @@ import gov.ca.cwds.rest.api.domain.PartialSuccessException;
 import gov.ca.cwds.service.CwsUserInfoService;
 import java.util.List;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +51,8 @@ import org.springframework.test.context.junit4.SpringRunner;
     "perry.identityManager.idmBasicAuthUser=" + IDM_BASIC_AUTH_USER,
     "perry.identityManager.idmBasicAuthPass=" + IDM_BASIC_AUTH_PASS,
     "perry.identityManager.idmMapping=config/idm.groovy",
-    "spring.jpa.hibernate.ddl-auto=none"
+    "spring.jpa.hibernate.ddl-auto=none",
+    "perry.tokenStore.datasource.url=" + TOKEN_STORE_URL,
 })
 public class IdmServiceImplTest {
 
@@ -65,6 +70,12 @@ public class IdmServiceImplTest {
   private UserLogTransactionalService userLogTransactionalServiceMock =
       mock(UserLogTransactionalService.class);
   private SearchService searchServiceMock = mock(SearchService.class);
+
+  @BeforeClass
+  public static void prepareDatabases() throws Exception {
+    Class.forName(H2_DRIVER_CLASS_NAME);
+    createTokenStoreDatabase();
+  }
 
   @Before
   public void before() {
