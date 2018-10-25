@@ -23,7 +23,6 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.amazonaws.services.cognitoidp.model.UserType;
@@ -36,12 +35,12 @@ import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.rest.api.domain.PartialSuccessException;
 import gov.ca.cwds.service.CwsUserInfoService;
 import java.util.List;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -60,31 +59,24 @@ public class IdmServiceImplTest {
 
   @Autowired
   private IdmServiceImpl service;
-  @Autowired
-  private UserLogService userLogService;
-  @Autowired
-  private MappingService mappingService;
 
-  private CognitoServiceFacade cognitoServiceFacadeMock = mock(CognitoServiceFacade.class);
-  private CwsUserInfoService cwsUserInfoServiceMock = mock(CwsUserInfoService.class);
-  private UserLogTransactionalService userLogTransactionalServiceMock =
-      mock(UserLogTransactionalService.class);
-  private SearchService searchServiceMock = mock(SearchService.class);
+  @MockBean
+  private CognitoServiceFacade cognitoServiceFacadeMock;
+
+  @MockBean
+  private CwsUserInfoService cwsUserInfoServiceMock;
+
+  @MockBean
+  private UserLogTransactionalService userLogTransactionalServiceMock;
+
+
+  @MockBean
+  private SearchService searchServiceMock;
 
   @BeforeClass
   public static void prepareDatabases() throws Exception {
     Class.forName(H2_DRIVER_CLASS_NAME);
     createTokenStoreDatabase();
-  }
-
-  @Before
-  public void before() {
-    service.setCognitoServiceFacade(cognitoServiceFacadeMock);
-    service.setCwsUserInfoService(cwsUserInfoServiceMock);
-    service.setSearchService(searchServiceMock);
-    mappingService.setCwsUserInfoService(cwsUserInfoServiceMock);
-
-    userLogService.setUserLogTransactionalService(userLogTransactionalServiceMock);
   }
 
   @Test

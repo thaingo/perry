@@ -2,6 +2,7 @@ package gov.ca.cwds.idm.service;
 
 import static gov.ca.cwds.config.TokenServiceConfiguration.TOKEN_TRANSACTION_MANAGER;
 
+import gov.ca.cwds.idm.dto.UserIdAndOperation;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
 import gov.ca.cwds.idm.persistence.ns.repository.UserLogRepository;
 import java.time.LocalDateTime;
@@ -24,7 +25,7 @@ public class UserLogTransactionalService {
   }
 
   @Transactional(value = TOKEN_TRANSACTION_MANAGER, readOnly = true)
-  public List<Object[]> getUserIdAndOperationTypes(LocalDateTime lastDate) {
+  public List<UserIdAndOperation> getUserIdAndOperationTypes(LocalDateTime lastDate) {
     return userLogRepository.getUserIdAndOperationTypes(lastDate);
   }
 

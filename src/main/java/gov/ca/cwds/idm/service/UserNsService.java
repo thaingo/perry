@@ -36,7 +36,7 @@ public class UserNsService {
     userNsEntity.setLastLoginTime(loginTime);
 
     userNsRepository.save(userNsEntity);
-    userLogService.logUpdate(username);
+    userLogService.logUpdate(username, loginTime);
   }
 
   @Transactional(value = TOKEN_TRANSACTION_MANAGER, readOnly = true)

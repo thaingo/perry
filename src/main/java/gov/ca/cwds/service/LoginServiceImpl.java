@@ -4,6 +4,7 @@ import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.data.reissue.model.PerryTokenEntity;
 import gov.ca.cwds.event.UserLoggedInEvent;
 import gov.ca.cwds.service.sso.SsoService;
+import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.context.SecurityContext;
@@ -28,7 +29,7 @@ public class LoginServiceImpl implements LoginService {
     String ssoToken = ssoService.getSsoToken();
     String identity = identityMappingService.map(userToken, providerId);
     String accessCode = tokenService.issueAccessCode(userToken, ssoToken, identity, ssoService.getSecurityContext());
-    eventPublisher.publishEvent(new UserLoggedInEvent(userToken));
+    eventPublisher.publishEvent(new UserLoggedInEvent(userToken, LocalDateTime.now()));
     return accessCode;
   }
 
