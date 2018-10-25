@@ -1,3 +1,4 @@
+import org.apache.tools.ant.filters.ReplaceTokens
 import org.apache.tools.ant.taskdefs.condition.Os
 import java.text.SimpleDateFormat
 
@@ -230,6 +231,13 @@ task checkDockerService {
         }
     }
 }
+
+processResources {
+     filter(ReplaceTokens, tokens: [
+             'build.version': projectVersion,
+             'build.number' : (System.getenv("BUILD_NUMBER") ?: "IDE")
+     ])
+ }
 
 publishing {
     publications {

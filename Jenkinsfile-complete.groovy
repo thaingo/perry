@@ -126,6 +126,17 @@ node('dora-slave') {
                 }
             }
         }
+        stage('Trigger Security scan') {
+            def props = readProperties  file: 'build/resources/main/version.properties'
+            def build_version = props["build.version"]
+            sh "echo build_version: ${build_version}"
+            build job: 'tenable-scan', 
+                parameters: [
+                    [$class: 'StringParameterValue', name: 'CONTAINER_NAME', value: 'perry'],
+                    [$class: 'StringParameterValue', name: 'CONTAINER_VERSION', value: "${build_version}"]
+                ],
+                wait: false 
+        }
     } catch (Exception e) {
         emailext attachLog: true, body: "Failed: ${e}", recipientProviders: [[$class: 'DevelopersRecipientProvider']],
                 subject: "Perry CI pipeline failed", to: "Leonid.Marushevskiy@osi.ca.gov, Alex.Kuznetsov@osi.ca.gov"
