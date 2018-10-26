@@ -18,9 +18,14 @@
       "County-admin"
     ]
   },
-  "editable": true,
-  "possible_roles": [
-    "CWS-worker",
-    "Office-admin"
-  ]
+  "edit_details": {
+    "editable": true,
+    "roles": {
+      "editable": true,
+      "possible_values": [
+        "CWS-worker",
+        "Office-admin"
+      ]
+    }
+  }
 }

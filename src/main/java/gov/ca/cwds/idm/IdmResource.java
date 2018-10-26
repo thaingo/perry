@@ -9,6 +9,7 @@ import gov.ca.cwds.idm.dto.IdmApiCustomError;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserAndOperation;
 import gov.ca.cwds.idm.dto.UserByIdResponse;
+import gov.ca.cwds.idm.dto.UserEditDetails;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.UserVerificationResult;
 import gov.ca.cwds.idm.dto.UsersPage;
@@ -17,8 +18,7 @@ import gov.ca.cwds.idm.persistence.ns.entity.Permission;
 import gov.ca.cwds.idm.service.DictionaryProvider;
 import gov.ca.cwds.idm.service.IdmService;
 import gov.ca.cwds.idm.service.OfficeService;
-import gov.ca.cwds.idm.service.authorization.AuthorizationService;
-import gov.ca.cwds.idm.service.role.implementor.AdminRoleImplementorFactory;
+import gov.ca.cwds.idm.service.UserEditDetailsService;
 import gov.ca.cwds.rest.api.domain.IdmException;
 import gov.ca.cwds.rest.api.domain.PartialSuccessException;
 import gov.ca.cwds.rest.api.domain.UserAlreadyExistsException;
@@ -78,10 +78,7 @@ public class IdmResource {
   private OfficeService officeService;
 
   @Autowired
-  private AdminRoleImplementorFactory adminRoleImplementorFactory;
-
-  @Autowired
-  private AuthorizationService authorizationService;
+  private UserEditDetailsService userEditDetailsService;
 
   @RequestMapping(method = RequestMethod.GET, value = "/users", produces = "application/json")
   @ApiOperation(
@@ -180,12 +177,8 @@ public class IdmResource {
 
     try {
       User user = idmService.findUser(id);
-      UserByIdResponse response =
-          UserByIdResponse.UserByIdResponseBuilder.anUserByIdResponse()
-              .withUser(user)
-              .withEditable(authorizationService.canUpdateUser(id))
-              .withPossibleRoles(adminRoleImplementorFactory.getPossibleUserRoles())
-              .build();
+      UserEditDetails editDetails = userEditDetailsService.getEditDetails(user);
+      UserByIdResponse response = new UserByIdResponse(user, editDetails);
       return ResponseEntity.ok().body(response);
     } catch (UserNotFoundPerryException e) {
       return ResponseEntity.notFound().build();
@@ -316,14 +309,14 @@ public class IdmResource {
 
   @RequestMapping(method = RequestMethod.GET, value = "/roles", produces = "application/json")
   @ApiResponses(
-    value = {
-      @ApiResponse(code = 401, message = "Not Authorized"),
-      @ApiResponse(code = 404, message = "Not found")
-    }
+      value = {
+          @ApiResponse(code = 401, message = "Not Authorized"),
+          @ApiResponse(code = 404, message = "Not found")
+      }
   )
   @ApiOperation(
-    value = "Get List of possible roles",
-    responseContainer = "List"
+      value = "Get List of possible roles",
+      responseContainer = "List"
   )
   @PreAuthorize("@userRoleService.isAdmin(principal)")
   public List<Map<String, String>> getRoles() {
