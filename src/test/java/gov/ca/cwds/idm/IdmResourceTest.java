@@ -1549,7 +1549,6 @@ public class IdmResourceTest extends BaseIntegrationTest {
   private User racfIdUser(String email, String racfId, Set<String> roles) {
     User user = new User();
     user.setEmail(email);
-//    User user = user(email);
     user.setRacfid(racfId);
     user.setRoles(roles);
     return user;
