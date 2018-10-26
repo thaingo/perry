@@ -1,0 +1,10 @@
+{
+  "build": {
+    "version": "4.0.0-SNAPSHOT",
+    "buildNumber": "null",
+    "artifact": "perry",
+    "name": "perry",
+    "group": "gov.ca.cwds.api",
+    "time": "2018-10-18 18:09:14+0000"
+  }
+}
