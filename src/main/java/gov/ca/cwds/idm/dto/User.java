@@ -27,11 +27,11 @@ public class User implements RolesHolder, Serializable {
 
   @NotBlank private String email;
 
-  @NotBlank private String firstName;
+  private String firstName;
 
-  @NotBlank private String lastName;
+  private String lastName;
 
-  @NotBlank private String countyName;
+  private String countyName;
 
   private String racfid;
 
