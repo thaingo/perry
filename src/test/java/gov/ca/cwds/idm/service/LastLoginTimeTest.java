@@ -49,7 +49,7 @@ public class LastLoginTimeTest {
   private UserLoggedInEventListener userLoggedInEventListener;
 
   @Autowired
-  private UserNsService userNsService;
+  private NsUserService nsUserService;
 
   @Autowired
   private UserLogService userLogService;
@@ -75,14 +75,14 @@ public class LastLoginTimeTest {
 
     userLogRepository.deleteAll();
 
-    assertThat(userNsService.getLastLoginTime(NEW_USER_NAME), is(Optional.empty()));
+    assertThat(nsUserService.getLastLoginTime(NEW_USER_NAME), is(Optional.empty()));
 
     userLoggedInEventListener.handleUserLoggedInEvent(loggedInEvent(NEW_USER_NAME, FIRST_LOGIN_TIME));
-    assertThat(userNsService.getLastLoginTime(NEW_USER_NAME), is(Optional.of(FIRST_LOGIN_TIME)));
+    assertThat(nsUserService.getLastLoginTime(NEW_USER_NAME), is(Optional.of(FIRST_LOGIN_TIME)));
     assertLastUserLog(dateTime(FIRST_LOGIN_TIME_MILLIS - 100), NEW_USER_NAME, UPDATE);
 
     userLoggedInEventListener.handleUserLoggedInEvent(loggedInEvent(NEW_USER_NAME, SECOND_LOGIN_TIME));
-    assertThat(userNsService.getLastLoginTime(NEW_USER_NAME), is(Optional.of(SECOND_LOGIN_TIME)));
+    assertThat(nsUserService.getLastLoginTime(NEW_USER_NAME), is(Optional.of(SECOND_LOGIN_TIME)));
     assertLastUserLog(dateTime(SECOND_LOGIN_TIME_MILLIS - 100), NEW_USER_NAME, UPDATE);
   }
 

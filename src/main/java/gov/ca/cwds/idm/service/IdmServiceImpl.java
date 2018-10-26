@@ -47,7 +47,7 @@ import gov.ca.cwds.idm.dto.UsersPage;
 import gov.ca.cwds.idm.dto.UsersSearchCriteria;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
-import gov.ca.cwds.idm.persistence.ns.entity.UserNs;
+import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
 import gov.ca.cwds.idm.service.authorization.AuthorizationService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.StandardUserAttribute;
@@ -116,7 +116,7 @@ public class IdmServiceImpl implements IdmService {
   private ValidationService validationService;
 
   @Autowired
-  private UserNsService userNsService;
+  private NsUserService nsUserService;
 
   @Override
   public User findUser(String id) {
@@ -525,8 +525,8 @@ public class IdmServiceImpl implements IdmService {
     Collection<String> racfIds = userNameToRacfId.values();
 
     Map<String, LocalDateTime> userNameToLastLoginTime =
-        userNsService.findByUsernames(userNames).stream()
-        .collect(Collectors.toMap(UserNs::getUsername, UserNs::getLastLoginTime));
+        nsUserService.findByUsernames(userNames).stream()
+        .collect(Collectors.toMap(NsUser::getUsername, NsUser::getLastLoginTime));
 
     Map<String, CwsUserInfo> idToCmsUser = cwsUserInfoService.findUsers(racfIds)
         .stream().collect(
@@ -548,7 +548,7 @@ public class IdmServiceImpl implements IdmService {
   }
 
   private User enrichUserWithLastLoginDateTime(User user) {
-    userNsService.getLastLoginTime(user.getId()).ifPresent(user::setLastLoginDateTime);
+    nsUserService.getLastLoginTime(user.getId()).ifPresent(user::setLastLoginDateTime);
     return user;
   }
 
