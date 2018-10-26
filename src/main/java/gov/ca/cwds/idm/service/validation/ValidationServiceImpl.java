@@ -5,9 +5,8 @@ import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUti
 import static gov.ca.cwds.service.messages.MessageCode.ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.COUNTY_NAME_IS_NOT_PROVIDED;
 import static gov.ca.cwds.service.messages.MessageCode.FIRST_NAME_IS_NOT_PROVIDED;
-import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_CREATE_USER;
-import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID_IN_CWSCMS;
 import static gov.ca.cwds.service.messages.MessageCode.LAST_NAME_IS_NOT_PROVIDED;
+import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID_IN_CWSCMS;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_REMOVE_ALL_ROLES;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_UNALLOWED_ROLES;
 import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
@@ -17,7 +16,6 @@ import static gov.ca.cwds.util.Utils.toUpperCase;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
-import gov.ca.cwds.idm.service.authorization.AuthorizationService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
 import gov.ca.cwds.idm.service.role.implementor.AdminRoleImplementorFactory;
@@ -33,7 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -50,8 +47,6 @@ public class ValidationServiceImpl implements ValidationService {
   private CognitoServiceFacade cognitoServiceFacade;
 
   private AdminRoleImplementorFactory adminRoleImplementorFactory;
-
-  private AuthorizationService authorizationService;
 
   @Override
   public void validateUserCreate(User enrichedUser, boolean activeUserExistsInCws) {
@@ -80,14 +75,6 @@ public class ValidationServiceImpl implements ValidationService {
   public void validateUpdateUser(UserType existedCognitoUser, UserUpdate updateUserDto) {
     validateUpdateByNewUserRoles(updateUserDto);
     validateActivateUser(existedCognitoUser, updateUserDto);
-  }
-
-  private void authorizeCreateUser(User user) {
-    if(!authorizationService.canCreateUser(user)) {
-      String msg = messagesService.getTechMessage(NOT_AUTHORIZED_TO_CREATE_USER);
-      LOGGER.error(msg);
-      throw new AccessDeniedException(msg);
-    }
   }
 
   private void validateFirstNameIsProvided(User user) {
@@ -214,11 +201,5 @@ public class ValidationServiceImpl implements ValidationService {
   public void setAdminRoleImplementorFactory(
       AdminRoleImplementorFactory adminRoleImplementorFactory) {
     this.adminRoleImplementorFactory = adminRoleImplementorFactory;
-  }
-
-  @Autowired
-  public void setAuthorizationService(
-      AuthorizationService authorizationService) {
-    this.authorizationService = authorizationService;
   }
 }
