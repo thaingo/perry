@@ -4,7 +4,6 @@ import gov.ca.cwds.PerryProperties;
 import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.data.reissue.TokenRepository;
 import gov.ca.cwds.data.reissue.model.PerryTokenEntity;
-import gov.ca.cwds.event.UserLoggedInEvent;
 import gov.ca.cwds.rest.api.domain.PerryException;
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -14,7 +13,6 @@ import java.util.Optional;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.oauth2.common.util.RandomValueStringGenerator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,7 +29,6 @@ public class TokenService {
   private PerryProperties properties;
   private TokenRepository tokenRepository;
   private RandomValueStringGenerator generator = new RandomValueStringGenerator();
-  private ApplicationEventPublisher eventPublisher;
 
   public String issueAccessCode(UniversalUserToken userToken, String ssoToken, String jsonToken, Serializable securityContext) {
     String accessCode = generator.generate();
@@ -45,7 +42,6 @@ public class TokenService {
     perryTokenEntity.setLastUsedDate(perryTokenEntity.getCreatedDate());
     deleteExpiredRecords();
     tokenRepository.save(perryTokenEntity);
-    eventPublisher.publishEvent(new UserLoggedInEvent(userToken));
     return accessCode;
   }
 
@@ -106,11 +102,6 @@ public class TokenService {
   @Autowired
   public void setTokenRepository(TokenRepository tokenRepository) {
     this.tokenRepository = tokenRepository;
-  }
-
-  @Autowired
-  public void setEventPublisher(ApplicationEventPublisher eventPublisher) {
-    this.eventPublisher = eventPublisher;
   }
 
   private void validateToken(PerryTokenEntity perryTokenEntity) {

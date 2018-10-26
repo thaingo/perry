@@ -1,5 +1,6 @@
 package gov.ca.cwds.idm.persistence.ns.repository;
 
+import gov.ca.cwds.idm.dto.UserIdAndOperation;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,10 +22,10 @@ public interface UserLogRepository extends CrudRepository<UserLog, Long> {
   UserLog save(UserLog entity);
 
   @Query(
-      "select u.username, u.operationType from UserLog u "
+      "select new gov.ca.cwds.idm.dto.UserIdAndOperation(u.username, u.operationType) from UserLog u "
           + "where u.operationTime > :" + LAST_DATE
           + " group by u.username, u.operationType")
-  List<Object[]> getUserIdAndOperationTypes(@Param(LAST_DATE) LocalDateTime lastDate);
+  List<UserIdAndOperation> getUserIdAndOperationTypes(@Param(LAST_DATE) LocalDateTime lastDate);
 
   @Query("delete from UserLog u where u.operationTime <= :" + LAST_DATE)
   @Modifying

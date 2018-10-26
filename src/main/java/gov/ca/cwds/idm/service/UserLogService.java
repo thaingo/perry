@@ -13,7 +13,6 @@ import gov.ca.cwds.idm.service.execution.OptionalExecution;
 import gov.ca.cwds.service.messages.MessagesService;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,18 +36,16 @@ public class UserLogService {
     return log(username, UPDATE);
   }
 
+  public OptionalExecution<String, UserLog> logUpdate(String username, LocalDateTime updateTime) {
+    return log(username, UPDATE, updateTime);
+  }
+
   @SuppressWarnings({"fb-contrib:CLI_CONSTANT_LIST_INDEX"})
   public List<UserIdAndOperation> getUserIdAndOperations(LocalDateTime lastJobTime) {
     if (lastJobTime == null) {
       throw new IllegalArgumentException("Last Job Time cannot be null");
     }
-
-    List<Object[]> iDAndOperationPairs = userLogTransactionalService.getUserIdAndOperationTypes(lastJobTime);
-
-    return iDAndOperationPairs
-        .stream()
-        .map(e -> new UserIdAndOperation((String) e[0], (OperationType) e[1]))
-        .collect(Collectors.toList());
+    return userLogTransactionalService.getUserIdAndOperationTypes(lastJobTime);
   }
 
   public int deleteProcessedLogs(LocalDateTime lastJobTime) {
@@ -56,6 +53,11 @@ public class UserLogService {
   }
 
   private OptionalExecution<String, UserLog> log(String username, OperationType operationType) {
+    return log(username, operationType, LocalDateTime.now());
+  }
+
+  private OptionalExecution<String, UserLog> log(String username, OperationType operationType,
+      LocalDateTime updateTime) {
 
     return new OptionalExecution<String, UserLog>(username){
       @Override
@@ -63,7 +65,7 @@ public class UserLogService {
         UserLog userLog = new UserLog();
         userLog.setUsername(username);
         userLog.setOperationType(operationType);
-        userLog.setOperationTime(LocalDateTime.now());
+        userLog.setOperationTime(updateTime);
 
         return userLogTransactionalService.save(userLog);
       }

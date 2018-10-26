@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+  <changeSet id="data_for_ns_db" author="Dmytro.Palczewski">
+    <insert tableName="user">
+      <column name="username" value="2be3221f-8c2f-4386-8a95-a68f0282efb0"/>
+      <column name="last_login_time" valueDate="2018-09-17 05:01:12"/>
+    </insert>
+    <insert tableName="user">
+      <column name="username" value="d740ec1d-80ae-4d84-a8c4-9bed7a942f5b"/>
+      <column name="last_login_time" valueDate="2018-09-17 05:01:12"/>
+    </insert>
+    <insert tableName="user">
+      <column name="username" value="2be3551f-8c9w-4386-8a95-a68f0777efb0"/>
+      <column name="last_login_time" valueDate="2018-09-17 05:01:12"/>
+    </insert>
+    <insert tableName="user">
+      <column name="username" value="24051d54-9321-4dd2-a92f-6425d6c455be"/>
+      <column name="last_login_time" valueDate="2018-09-17 05:01:12"/>
+    </insert>
+    <insert tableName="user">
+      <column name="username" value="d740ec1d-66ae-4d84-a8c4-8bed7a942f5b"/>
+      <column name="last_login_time" valueDate="2018-09-17 05:01:12"/>
+    </insert>
+    <insert tableName="user">
+      <column name="username" value="17067e4e-270f-4623-b86c-b4d4fa524f38"/>
+      <column name="last_login_time" valueDate="2018-09-17 05:01:12"/>
+    </insert>
+  </changeSet>
+
+</databaseChangeLog>

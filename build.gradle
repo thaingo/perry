@@ -37,7 +37,7 @@ project.ext {
     projectMajorVersion = '4.0.1'
     mainclass = 'gov.ca.cwds.PerryApplication'
     targetDockerHubOrganization = System.env.DOCKERHUB_ORG ?: 'cwds'
-    cwdsModelVersion = '0.9.4_678-RC'
+    cwdsModelVersion = '0.10.1_684-RC'
     powerMockVersion = "1.7.3"
 
     // assume that Windows users use the Docker Toolbox

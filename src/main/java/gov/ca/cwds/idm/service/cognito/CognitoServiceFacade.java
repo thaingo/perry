@@ -1,6 +1,5 @@
 package gov.ca.cwds.idm.service.cognito;
 
-import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
 import com.amazonaws.services.cognitoidp.model.AdminCreateUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserRequest;
 import com.amazonaws.services.cognitoidp.model.UserType;
@@ -9,9 +8,7 @@ import gov.ca.cwds.idm.dto.UserEnableStatusRequest;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.context.annotation.Profile;
 
 /**
@@ -31,14 +28,6 @@ public interface CognitoServiceFacade {
   UserType getCognitoUserById(String id);
 
   AdminGetUserRequest createAdminGetUserRequest(String id);
-
-  /**
-   * Returns last authenticated timestamp as last out of all authenticated timestamps from different
-   * login devices
-   *
-   * @see AWSCognitoIdentityProvider#adminListDevices
-   */
-  Optional<LocalDateTime> getLastAuthenticatedTimestamp(String userId);
 
   //method is used in annotation, don't remove it
   String getCountyName(String userId);

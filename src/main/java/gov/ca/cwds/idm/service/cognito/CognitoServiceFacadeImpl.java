@@ -4,7 +4,6 @@ import static gov.ca.cwds.idm.persistence.ns.OperationType.GET;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PERMISSIONS;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.ROLES;
-import static gov.ca.cwds.idm.service.cognito.UserLastAuthenticatedTimestampExtractor.extractUserLastAuthenticatedTimestamp;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.EMAIL_DELIVERY;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.buildCreateUserAttributes;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.createDelimitedAttribute;
@@ -32,8 +31,6 @@ import com.amazonaws.services.cognitoidp.model.AdminDisableUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminEnableUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserResult;
-import com.amazonaws.services.cognitoidp.model.AdminListDevicesRequest;
-import com.amazonaws.services.cognitoidp.model.AdminListDevicesResult;
 import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesRequest;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.DeliveryMediumType;
@@ -57,10 +54,8 @@ import gov.ca.cwds.rest.api.domain.UserAlreadyExistsException;
 import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
 import gov.ca.cwds.rest.api.domain.UserNotFoundPerryException;
 import gov.ca.cwds.service.messages.MessagesService;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import javax.annotation.PostConstruct;
@@ -314,27 +309,6 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
         .withUserPoolId(properties.getUserpool())
         .withMessageAction(MessageActionType.RESEND)
         .withDesiredDeliveryMediums(DeliveryMediumType.EMAIL);
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public Optional<LocalDateTime> getLastAuthenticatedTimestamp(String userId) {
-    AdminListDevicesRequest request = composeAdminListDevicesRequest(userId);
-    AdminListDevicesResult response;
-    try {
-      response = identityProvider.adminListDevices(request);
-    } catch (Exception e) {
-      LOGGER.info(String.format("Can't get list of login devices for user %s", userId), e);
-      return Optional.empty();
-    }
-    return extractUserLastAuthenticatedTimestamp(response);
-  }
-
-  AdminListDevicesRequest composeAdminListDevicesRequest(String userId) {
-    return new AdminListDevicesRequest().withUsername(userId)
-        .withUserPoolId(properties.getUserpool());
   }
 
   public ListUsersRequest composeListUsersRequest(CognitoUsersSearchCriteria criteria) {

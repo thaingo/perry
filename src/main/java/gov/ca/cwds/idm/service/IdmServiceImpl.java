@@ -47,6 +47,7 @@ import gov.ca.cwds.idm.dto.UsersPage;
 import gov.ca.cwds.idm.dto.UsersSearchCriteria;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
+import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
 import gov.ca.cwds.idm.service.authorization.AuthorizationService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.StandardUserAttribute;
@@ -113,6 +114,9 @@ public class IdmServiceImpl implements IdmService {
 
   @Autowired
   private ValidationService validationService;
+
+  @Autowired
+  private NsUserService nsUserService;
 
   @Override
   public User findUser(String id) {
@@ -517,24 +521,34 @@ public class IdmServiceImpl implements IdmService {
     for (UserType user : cognitoUsers) {
       userNameToRacfId.put(user.getUsername(), getRACFId(user));
     }
-    Map<String, CwsUserInfo> idToCmsUser = cwsUserInfoService.findUsers(userNameToRacfId.values())
+    Set<String> userNames = userNameToRacfId.keySet();
+    Collection<String> racfIds = userNameToRacfId.values();
+
+    Map<String, LocalDateTime> userNameToLastLoginTime =
+        nsUserService.findByUsernames(userNames).stream()
+        .collect(Collectors.toMap(NsUser::getUsername, NsUser::getLastLoginTime));
+
+    Map<String, CwsUserInfo> idToCmsUser = cwsUserInfoService.findUsers(racfIds)
         .stream().collect(
             Collectors.toMap(CwsUserInfo::getRacfId, e -> e, (user1, user2) -> {
               LOGGER.warn(messages
                   .getTechMessage(DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS, user1.getRacfId()));
               return user1;
             }));
+
     return cognitoUsers
         .stream()
         .map(e -> mappingService.toUser(e, idToCmsUser.get(userNameToRacfId.get(e.getUsername()))))
-        .map(this::enrichUserWithLastLoginDateTime)
+        .map(user -> {
+          user.setLastLoginDateTime(userNameToLastLoginTime.get(user.getId()));
+          return user;
+        })
         .map(this::filterMainRole)
         .collect(Collectors.toList());
   }
 
   private User enrichUserWithLastLoginDateTime(User user) {
-    cognitoServiceFacade.getLastAuthenticatedTimestamp(user.getId())
-        .ifPresent(user::setLastLoginDateTime);
+    nsUserService.getLastLoginTime(user.getId()).ifPresent(user::setLastLoginDateTime);
     return user;
   }
 

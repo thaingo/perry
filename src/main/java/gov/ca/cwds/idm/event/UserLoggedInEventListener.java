@@ -1,7 +1,10 @@
 package gov.ca.cwds.idm.event;
 
+import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_WRITE_LAST_LOGIN_TIME;
+
 import gov.ca.cwds.event.UserLoggedInEvent;
-import gov.ca.cwds.idm.service.UserLogService;
+import gov.ca.cwds.idm.service.NsUserService;
+import gov.ca.cwds.service.messages.MessagesService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,17 +22,26 @@ public class UserLoggedInEventListener {
   private static final Logger LOGGER = LoggerFactory.getLogger(UserLoggedInEventListener.class);
 
   @Autowired
-  private UserLogService userLogService;
+  private NsUserService nsUserService;
+
+  @Autowired
+  private MessagesService messagesService;
 
   @EventListener
   public void handleUserLoggedInEvent(UserLoggedInEvent event) {
     String userId = event.getUserId();
-    if (userId == null) {
-      LOGGER.warn("userToken doesn't contain the userId, no following actions expected}");
-      return;
-    }
-    LOGGER.debug("Handling \"user logged in\" event for user {}", userId);
-    userLogService.logUpdate(userId);
-  }
 
+    try {
+      if (userId == null) {
+        LOGGER.warn("userToken doesn't contain the userId, no following actions expected}");
+        return;
+      }
+      LOGGER.debug("Handling \"user logged in\" event for user {}", userId);
+      nsUserService.saveLastLoginTime(userId, event.getLoginTime());
+
+    } catch (Exception e) {
+      String msg = messagesService.getTechMessage(UNABLE_TO_WRITE_LAST_LOGIN_TIME, userId);
+      LOGGER.error(msg, e);
+    }
+  }
 }
