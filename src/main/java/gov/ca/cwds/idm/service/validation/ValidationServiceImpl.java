@@ -3,6 +3,9 @@ package gov.ca.cwds.idm.service.validation;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByEmail;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByRacfId;
 import static gov.ca.cwds.service.messages.MessageCode.ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM;
+import static gov.ca.cwds.service.messages.MessageCode.COUNTY_NAME_IS_NOT_PROVIDED;
+import static gov.ca.cwds.service.messages.MessageCode.FIRST_NAME_IS_NOT_PROVIDED;
+import static gov.ca.cwds.service.messages.MessageCode.LAST_NAME_IS_NOT_PROVIDED;
 import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID_IN_CWSCMS;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_REMOVE_ALL_ROLES;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_UNALLOWED_ROLES;
@@ -47,6 +50,11 @@ public class ValidationServiceImpl implements ValidationService {
 
   @Override
   public void validateUserCreate(User enrichedUser, boolean activeUserExistsInCws) {
+
+    validateFirstNameIsProvided(enrichedUser);
+    validateLastNameIsProvided(enrichedUser);
+    validateCountyNameIsProvided(enrichedUser);
+
     if (isRacfidUser(enrichedUser)) {
       String racfId = enrichedUser.getRacfid();
       validateActiveUserExistsInCws(activeUserExistsInCws, racfId);
@@ -69,7 +77,25 @@ public class ValidationServiceImpl implements ValidationService {
     validateActivateUser(existedCognitoUser, updateUserDto);
   }
 
-  void validateActiveUserExistsInCws(boolean activeUserExistsInCws, String racfid) {
+  private void validateFirstNameIsProvided(User user) {
+    validateIsNotBlank(user.getFirstName(), FIRST_NAME_IS_NOT_PROVIDED);
+  }
+
+  private void validateLastNameIsProvided(User user) {
+    validateIsNotBlank(user.getLastName(), LAST_NAME_IS_NOT_PROVIDED);
+  }
+
+  private void validateCountyNameIsProvided(User user) {
+    validateIsNotBlank(user.getCountyName(), COUNTY_NAME_IS_NOT_PROVIDED);
+  }
+
+  private void validateIsNotBlank(String value, MessageCode errorCode) {
+    if (StringUtils.isBlank(value)) {
+      throwValidationException(errorCode);
+    }
+  }
+
+  private void validateActiveUserExistsInCws(boolean activeUserExistsInCws, String racfid) {
     if (!activeUserExistsInCws) {
       throwValidationException(NO_USER_WITH_RACFID_IN_CWSCMS, racfid);
     }

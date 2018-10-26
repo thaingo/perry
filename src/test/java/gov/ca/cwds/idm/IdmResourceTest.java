@@ -1117,7 +1117,8 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @Test
   @WithMockCustomUser
   public void testCreateUserWithActiveStatusInCognito() throws Exception {
-    assertCreateUserBadRequest(racfIdUser("test@test.com", "SMITHBO", toSet(CWS_WORKER)),
+    User user = racfIdUser("test@test.com", "SMITHBO", toSet(CWS_WORKER));
+    assertCreateUserBadRequest(user,
         "fixtures/idm/create-user/active-user-with-same-racfid-in-cognito-error.json");
   }
 
@@ -1185,10 +1186,12 @@ public class IdmResourceTest extends BaseIntegrationTest {
   @Test
   @WithMockCustomUser
   public void testCreateUserNoRacfIdInCws() throws Exception {
-    assertCreateUserBadRequest(racfIdUser("test@test.com", "SMITHB1", toSet(CWS_WORKER)),
-        "fixtures/idm/create-user/no-racfid-in-cws-error.json");
-  }
+    User user = user("test@test.com");
+    user.setRacfid("SMITHB1");
+    user.setRoles(toSet(CWS_WORKER));
 
+    assertCreateUserBadRequest(user, "fixtures/idm/create-user/no-racfid-in-cws-error.json");
+  }
 
   @Test
   @WithMockCustomUser(roles = {STATE_ADMIN}, county = "Madera")
@@ -1545,7 +1548,8 @@ public class IdmResourceTest extends BaseIntegrationTest {
   }
 
   private User racfIdUser(String email, String racfId, Set<String> roles) {
-    User user = user(email);
+    User user = new User();
+    user.setEmail(email);
     user.setRacfid(racfId);
     user.setRoles(roles);
     return user;

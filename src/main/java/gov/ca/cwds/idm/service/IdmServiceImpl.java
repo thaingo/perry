@@ -178,8 +178,8 @@ public class IdmServiceImpl implements IdmService {
     String racfId = toUpperCase(user.getRacfid());
     user.setRacfid(racfId);
 
-    authorizeCreateUser(user);
     validationService.validateUserCreate(user, cwsUser != null);
+    authorizeCreateUser(user);
 
     UserType userType = cognitoServiceFacade.createUser(user);
     String userId = userType.getUsername();
