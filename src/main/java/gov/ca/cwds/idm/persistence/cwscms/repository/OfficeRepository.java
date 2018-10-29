@@ -16,14 +16,16 @@ public interface OfficeRepository extends ReadOnlyRepository<CwsOffice, String> 
 
   String COUNTY_NAME = "countyName";
 
+  String ORDER_BY_CLAUSE = " order by trim(office.cwsOfficeName)";
+
   String GET_ALL_OFFICES_QUERY =
       "select new gov.ca.cwds.idm.dto.Office(office.officeId, trim(office.cwsOfficeName),"
       + " office.governmentEntityType, trim(county.shortDescription)) from CwsOffice office,"
       + " County county where office.governmentEntityType = county.systemId";
 
-  @Query(GET_ALL_OFFICES_QUERY)
+  @Query(GET_ALL_OFFICES_QUERY + ORDER_BY_CLAUSE)
   List<Office> findOffices();
 
-  @Query(GET_ALL_OFFICES_QUERY + " and county.shortDescription = :" + COUNTY_NAME)
+  @Query(GET_ALL_OFFICES_QUERY + " and county.shortDescription = :" + COUNTY_NAME + ORDER_BY_CLAUSE)
   List<Office> findCountyOffices(@Param(COUNTY_NAME) String countyName);
 }
