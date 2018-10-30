@@ -194,8 +194,7 @@ dependencies {
 }
 
 test {
-//    exclude '**/smoketest/**', '**/*IdmResourceTest.class'
-    exclude '**/smoketest/**', '**/IdmResourceTestSuite.class'
+    exclude '**/smoketest/**'
 }
 
 task smokeTest(type: Test) {
