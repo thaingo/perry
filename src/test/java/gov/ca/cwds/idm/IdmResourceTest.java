@@ -172,18 +172,11 @@ public abstract class IdmResourceTest extends BaseIntegrationTest {
     rootLogger.addAppender(mockAppender);
   }
 
-  protected final static String prepareBasicAuthHeader() {
+  private static String prepareBasicAuthHeader() {
     String authString = IDM_BASIC_AUTH_USER + ":" + IDM_BASIC_AUTH_PASS;
     byte[] authEncBytes = Base64.encodeBase64(authString.getBytes());
     String authStringEnc = new String(authEncBytes);
     return "Basic " + authStringEnc;
-  }
-
-  protected final void assertGetPermissionsUnauthorized() throws Exception {
-    mockMvc
-        .perform(MockMvcRequestBuilders.get("/idm/permissions"))
-        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
-        .andReturn();
   }
 
   protected final void assertGetRolesSuccess() throws Exception {

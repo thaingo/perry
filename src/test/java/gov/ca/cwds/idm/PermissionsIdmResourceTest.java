@@ -52,4 +52,11 @@ public class PermissionsIdmResourceTest extends IdmResourceTest {
   public void testGetPermissionsOfficeAdmin() throws Exception {
     assertGetPermissionsSuccess();
   }
+
+  private void assertGetPermissionsUnauthorized() throws Exception {
+    mockMvc
+        .perform(MockMvcRequestBuilders.get("/idm/permissions"))
+        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+        .andReturn();
+  }
 }
