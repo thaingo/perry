@@ -1,7 +1,5 @@
 package gov.ca.cwds.idm;
 
-import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
-import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
@@ -178,44 +176,5 @@ public class SecondIdmResourceTest extends IdmResourceTest {
             .andExpect(MockMvcResultMatchers.status().isBadRequest())
             .andReturn();
     assertExtensible(result, "fixtures/idm/failed-operations/failed-operations-invalid-date.json");
-  }
-
-  @Test
-  @WithMockCustomUser(roles = {STATE_ADMIN})
-  public void testGetAdminOfficesStateAdmin() throws Exception {
-    assertAllAdminOffices();
-  }
-
-  @Test
-  @WithMockCustomUser(roles = {STATE_ADMIN, COUNTY_ADMIN})
-  public void testGetAdminOfficesStateAndCountyAdmin() throws Exception {
-    assertAllAdminOffices();
-  }
-
-  @Test
-  @WithMockCustomUser
-  public void testGetAdminOfficesCountyAdmin() throws Exception {
-    assertCountyAdminOffices();
-  }
-
-  @Test
-  @WithMockCustomUser(roles = {OFFICE_ADMIN})
-  public void testGetAdminOfficesOfficeAdmin() throws Exception {
-    assertCountyAdminOffices();
-  }
-
-  @Test
-  @WithMockCustomUser(roles = {COUNTY_ADMIN, OFFICE_ADMIN})
-  public void testGetAdminOfficesCountyAndOfficeAdmin() throws Exception {
-    assertCountyAdminOffices();
-  }
-
-  @Test
-  @WithMockCustomUser(roles = {CALS_ADMIN})
-  public void testGetAdminOfficesCalsAdmin() throws Exception {
-    mockMvc
-        .perform(MockMvcRequestBuilders.get("/idm/admin-offices"))
-        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
-        .andReturn();
   }
 }
