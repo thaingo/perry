@@ -21,7 +21,7 @@
   "edit_details": {
     "editable": true,
     "roles": {
-      "editable": true,
+      "editable": false,
       "possible_values": [
         "CWS-worker",
         "Office-admin"

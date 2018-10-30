@@ -10,4 +10,6 @@ public interface AdminActionsAuthorizer {
 
   boolean canResendInvitationMessage();
 
+  boolean canEditRoles();
+
 }

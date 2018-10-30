@@ -12,4 +12,6 @@ public interface AuthorizationService {
 
   boolean canResendInvitationMessage(String email);
 
+  boolean canEditRoles(User user);
+
 }

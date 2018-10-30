@@ -17,7 +17,7 @@ class StateAdminRoleImplementor implements AdminRoleImplementor {
 
   @Override
   public AdminActionsAuthorizer getAdminActionsAuthorizer(User user) {
-    return StateAdminAuthorizer.INSTANCE;
+    return new StateAdminAuthorizer(user);
   }
 
   @Override

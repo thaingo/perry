@@ -21,7 +21,7 @@
   "edit_details": {
     "editable": false,
     "roles": {
-      "editable": true,
+      "editable": false,
       "possible_values": []
     }
   }

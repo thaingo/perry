@@ -52,6 +52,12 @@ public class AuthorizationServiceImpl implements AuthorizationService {
   }
 
   @Override
+  public boolean canEditRoles(User user) {
+    return canUpdateUser(user) &&
+        adminRoleImplementorFactory.getAdminActionsAuthorizer(user).canEditRoles();
+  }
+
+  @Override
   public boolean canResendInvitationMessage(String email) {
     User user = getUserByEmail(email);
     return adminRoleImplementorFactory.getAdminActionsAuthorizer(user).canResendInvitationMessage();
