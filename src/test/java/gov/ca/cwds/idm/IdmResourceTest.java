@@ -179,62 +179,6 @@ public abstract class IdmResourceTest extends BaseIntegrationTest {
     return "Basic " + authStringEnc;
   }
 
-  protected final void assertGetRolesSuccess() throws Exception {
-    MvcResult result =
-        mockMvc
-            .perform(MockMvcRequestBuilders.get("/idm/roles"))
-            .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
-            .andReturn();
-
-    assertStrict(result, "fixtures/idm/roles/valid.json");
-  }
-
-  protected final void assertGetRolesUnauthorized() throws Exception {
-    mockMvc
-        .perform(MockMvcRequestBuilders.get("/idm/roles"))
-        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
-        .andReturn();
-  }
-
-  protected final void assertGetUserUnauthorized(String userId) throws Exception {
-    mockMvc
-        .perform(MockMvcRequestBuilders.get("/idm/users/" + userId))
-        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
-        .andReturn();
-  }
-
-
-  protected final void assertGetUsersUnauthorized() throws Exception {
-    mockMvc
-        .perform(MockMvcRequestBuilders.get("/idm/users"))
-        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
-        .andReturn();
-  }
-
-  protected final void assertCreateUserSuccess(User user, String newUserId) throws Exception {
-    assertCreateUserSuccess(user, user, newUserId);
-  }
-
-  protected final void assertCreateUserSuccess(User user, User actuallySendUser, String newUserId) throws Exception {
-
-    AdminCreateUserRequest request = setCreateRequestAndResult(actuallySendUser, newUserId);
-    setDoraSuccess();
-
-    mockMvc
-        .perform(
-            MockMvcRequestBuilders.post("/idm/users")
-                .contentType(JSON_CONTENT_TYPE)
-                .content(asJsonString(user)))
-        .andExpect(MockMvcResultMatchers.status().isCreated())
-        .andExpect(header().string("location", "http://localhost/idm/users/" + newUserId))
-        .andReturn();
-
-    verify(cognito, times(1)).adminCreateUser(request);
-    verify(spySearchService, times(1)).createUser(any(User.class));
-    verifyDoraCalls(1);
-  }
-
   protected final AdminCreateUserRequest setCreateRequestAndResult(User actuallySendUser,
       String newUserId) {
     AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(actuallySendUser);

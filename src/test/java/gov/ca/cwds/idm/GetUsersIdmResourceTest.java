@@ -71,4 +71,11 @@ public class GetUsersIdmResourceTest extends IdmResourceTest {
   public void testGetUsersWithOfficeAdmin() throws Exception {
     assertGetUsersUnauthorized();
   }
+
+  private void assertGetUsersUnauthorized() throws Exception {
+    mockMvc
+        .perform(MockMvcRequestBuilders.get("/idm/users"))
+        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+        .andReturn();
+  }
 }

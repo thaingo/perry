@@ -3,8 +3,12 @@ package gov.ca.cwds.idm;
 import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
+import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertStrict;
 
 import org.junit.Test;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 public class RolesIdmResourceTest extends IdmResourceTest {
 
@@ -36,5 +40,23 @@ public class RolesIdmResourceTest extends IdmResourceTest {
   @WithMockCustomUser(roles = {OFFICE_ADMIN})
   public void testGetRolesOfficeAdmin() throws Exception {
     assertGetRolesSuccess();
+  }
+
+  private void assertGetRolesSuccess() throws Exception {
+    MvcResult result =
+        mockMvc
+            .perform(MockMvcRequestBuilders.get("/idm/roles"))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
+            .andReturn();
+
+    assertStrict(result, "fixtures/idm/roles/valid.json");
+  }
+
+  private void assertGetRolesUnauthorized() throws Exception {
+    mockMvc
+        .perform(MockMvcRequestBuilders.get("/idm/roles"))
+        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+        .andReturn();
   }
 }

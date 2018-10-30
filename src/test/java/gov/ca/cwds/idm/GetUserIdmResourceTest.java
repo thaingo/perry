@@ -119,4 +119,11 @@ public class GetUserIdmResourceTest extends IdmResourceTest {
   public void testGetUserStateAdminDifferentCounty() throws Exception {
     testGetValidUser(USER_WITH_RACFID_ID, "fixtures/idm/get-user/with-racfid-valid-2.json");
   }
+
+  private void assertGetUserUnauthorized(String userId) throws Exception {
+    mockMvc
+        .perform(MockMvcRequestBuilders.get("/idm/users/" + userId))
+        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+        .andReturn();
+  }
 }

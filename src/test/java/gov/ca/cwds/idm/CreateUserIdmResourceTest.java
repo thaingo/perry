@@ -208,4 +208,23 @@ public class CreateUserIdmResourceTest extends IdmResourceTest {
 
     assertCreateUserBadRequest(user, "fixtures/idm/create-user/no-racfid-in-cws-error.json");
   }
+
+  private void assertCreateUserSuccess(User user, User actuallySendUser, String newUserId) throws Exception {
+
+    AdminCreateUserRequest request = setCreateRequestAndResult(actuallySendUser, newUserId);
+    setDoraSuccess();
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.post("/idm/users")
+                .contentType(JSON_CONTENT_TYPE)
+                .content(asJsonString(user)))
+        .andExpect(MockMvcResultMatchers.status().isCreated())
+        .andExpect(header().string("location", "http://localhost/idm/users/" + newUserId))
+        .andReturn();
+
+    verify(cognito, times(1)).adminCreateUser(request);
+    verify(spySearchService, times(1)).createUser(any(User.class));
+    verifyDoraCalls(1);
+  }
 }
