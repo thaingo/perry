@@ -5,7 +5,7 @@ import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    FirstIdmResourceTest.class,
+    CreateUserIdmResourceTest.class,
     SecondIdmResourceTest.class
 })
 public class IdmResourceTestSuite {

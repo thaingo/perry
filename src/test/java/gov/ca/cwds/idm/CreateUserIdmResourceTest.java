@@ -28,7 +28,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-public class FirstIdmResourceTest extends IdmResourceTest {
+public class CreateUserIdmResourceTest extends IdmResourceTest {
 
   @Test
   public void testSearchUsersByRacfid() throws Exception {
