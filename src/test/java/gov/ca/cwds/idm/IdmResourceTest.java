@@ -1397,6 +1397,17 @@ public class IdmResourceTest extends BaseIntegrationTest {
   }
 
   @Test
+  @WithMockCustomUser
+  public void testGetOffices() throws Exception {
+    MvcResult result =
+        mockMvc
+            .perform(MockMvcRequestBuilders.get("/idm/offices"))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andReturn();
+    assertStrict(result, "fixtures/idm/offices/offices.json");
+  }
+
+  @Test
   @WithMockCustomUser(roles = {STATE_ADMIN})
   public void testGetAdminOfficesStateAdmin() throws Exception {
     assertAllAdminOffices();
