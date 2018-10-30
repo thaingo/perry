@@ -1,10 +1,13 @@
 package gov.ca.cwds.idm;
 
 import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.ES_ERROR_CREATE_USER_EMAIL;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.NEW_USER_ES_FAIL_ID;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
+import static gov.ca.cwds.util.Utils.toSet;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -157,5 +160,52 @@ public class CreateUserIdmResourceTest extends IdmResourceTest {
         .andReturn();
 
     verify(cognito, times(1)).adminCreateUser(request);
+  }
+
+  @Test
+  @WithMockCustomUser
+  public void testCreateUserWithActiveStatusInCognito() throws Exception {
+    User user = racfIdUser("test@test.com", "SMITHBO", toSet(CWS_WORKER));
+    assertCreateUserBadRequest(user,
+        "fixtures/idm/create-user/active-user-with-same-racfid-in-cognito-error.json");
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {STATE_ADMIN})
+  public void testCreateRacfidUser() throws Exception {
+    User user = getElroydaUser();
+    User actuallySendUser = getActuallySendElroydaUser();
+    ((TestCognitoServiceFacade) cognitoServiceFacade).setSearchByRacfidRequestAndResult("ELROYDA");
+
+    assertCreateUserSuccess(user, actuallySendUser, NEW_USER_SUCCESS_ID_4);
+  }
+
+  @Test
+  @WithMockCustomUser
+  public void testCreateRacfidUserUnautorized() throws Exception {
+    User user = getElroydaUser();
+    User actuallySendUser = getActuallySendElroydaUser();
+    AdminCreateUserRequest request = setCreateRequestAndResult(actuallySendUser, NEW_USER_SUCCESS_ID_4);
+    ((TestCognitoServiceFacade) cognitoServiceFacade).setSearchByRacfidRequestAndResult("ELROYDA");
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.post("/idm/users")
+                .contentType(JSON_CONTENT_TYPE)
+                .content(asJsonString(user)))
+        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+        .andReturn();
+
+    verify(cognito, times(0)).adminCreateUser(request);
+  }
+
+  @Test
+  @WithMockCustomUser
+  public void testCreateUserNoRacfIdInCws() throws Exception {
+    User user = user("test@test.com");
+    user.setRacfid("SMITHB1");
+    user.setRoles(toSet(CWS_WORKER));
+
+    assertCreateUserBadRequest(user, "fixtures/idm/create-user/no-racfid-in-cws-error.json");
   }
 }
