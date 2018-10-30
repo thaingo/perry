@@ -2,11 +2,8 @@ package gov.ca.cwds.idm;
 
 import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
-import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.ES_ERROR_CREATE_USER_EMAIL;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.NEW_USER_ES_FAIL_ID;
-import static gov.ca.cwds.idm.TestCognitoServiceFacade.NEW_USER_SUCCESS_ID;
-import static gov.ca.cwds.idm.TestCognitoServiceFacade.SOME_PAGINATION_TOKEN;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
 import static org.hamcrest.CoreMatchers.is;
@@ -32,20 +29,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 public class FirstIdmResourceTest extends IdmResourceTest {
-
-  @Test
-  public void testGetUsers() throws Exception {
-    MvcResult result =
-        mockMvc
-            .perform(
-                MockMvcRequestBuilders.get("/idm/users")
-                    .header(HttpHeaders.AUTHORIZATION, BASIC_AUTH_HEADER))
-            .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
-            .andReturn();
-
-    assertNonStrict(result, "fixtures/idm/get-users/all-valid.json");
-  }
 
   @Test
   public void testSearchUsersByRacfid() throws Exception {
@@ -79,68 +62,6 @@ public class FirstIdmResourceTest extends IdmResourceTest {
             .andReturn();
 
     assertNonStrict(result, "fixtures/idm/users-search/yolod.json");
-  }
-
-  @Test
-  public void testGetUsersPage() throws Exception {
-    MvcResult result =
-        mockMvc
-            .perform(
-                MockMvcRequestBuilders.get("/idm/users?paginationToken=" + SOME_PAGINATION_TOKEN)
-                    .header(HttpHeaders.AUTHORIZATION, BASIC_AUTH_HEADER))
-            .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
-            .andReturn();
-
-    assertNonStrict(result, "fixtures/idm/get-users/search-valid.json");
-  }
-
-  @Test
-  @WithMockCustomUser(roles = {"OtherRole"})
-  public void testGetUsersWithOtherRole() throws Exception {
-    assertGetUsersUnauthorized();
-  }
-
-  @Test
-  @WithMockCustomUser()
-  public void testGetUsersCountyAdmin() throws Exception {
-    assertGetUsersUnauthorized();
-  }
-
-  @Test
-  @WithMockCustomUser(roles = {STATE_ADMIN})
-  public void testGetUsersWithStateAdmin() throws Exception {
-    assertGetUsersUnauthorized();
-  }
-
-  @Test
-  @WithMockCustomUser(roles = {CALS_ADMIN})
-  public void testGetUsersWithCalsAdmin() throws Exception {
-    assertGetUsersUnauthorized();
-  }
-
-  @Test
-  @WithMockCustomUser(roles = {OFFICE_ADMIN})
-  public void testGetUsersWithOfficeAdmin() throws Exception {
-    assertGetUsersUnauthorized();
-  }
-
-  @Test
-  @WithMockCustomUser
-  public void testCreateUserSuccess() throws Exception {
-    assertCreateUserSuccess(user("gonzales@gmail.com"), NEW_USER_SUCCESS_ID);
-  }
-
-  @Test
-  @WithMockCustomUser(roles = {STATE_ADMIN}, county = "Madera")
-  public void testCreateUserStateAdmin() throws Exception {
-    assertCreateUserSuccess(user("gonzales2@gmail.com"), NEW_USER_SUCCESS_ID_2);
-  }
-
-  @Test
-  @WithMockCustomUser(roles = {OFFICE_ADMIN})
-  public void testCreateUserOfficeAdmin() throws Exception {
-    assertCreateUserSuccess(user("gonzales3@gmail.com"), NEW_USER_SUCCESS_ID_3);
   }
 
   @Test
