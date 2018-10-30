@@ -4,8 +4,10 @@ import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
+import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertStrict;
 
 import org.junit.Test;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
@@ -48,5 +50,18 @@ public class AdminOfficesIdmResourceTest extends IdmResourceTest {
         .perform(MockMvcRequestBuilders.get("/idm/admin-offices"))
         .andExpect(MockMvcResultMatchers.status().isUnauthorized())
         .andReturn();
+  }
+
+  @Test
+  @WithMockCustomUser
+  public void testGetOffices() throws Exception {
+
+    MvcResult result =
+        mockMvc
+            .perform(MockMvcRequestBuilders.get("/idm/offices"))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andReturn();
+
+    assertStrict(result, "fixtures/idm/offices/offices.json");
   }
 }
