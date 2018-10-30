@@ -34,29 +34,10 @@ public class SecondIdmResourceTest extends IdmResourceTest {
 
   @Test
   @WithMockCustomUser
-  public void testVerifyUsers() throws Exception {
-    assertVerify("test@test.com", "SMITHB3", "fixtures/idm/verify-user/verify-valid.json");
-  }
-
-  @Test
-  @WithMockCustomUser
-  public void testVerifyErrorMessageForUserWithActiveStatusInCognito() throws Exception {
-    assertVerify("test@test.com", "SMITHBO",
-        "fixtures/idm/verify-user/verify-active-racfid-already-in-cognito-message.json");
-  }
-
-  @Test
-  @WithMockCustomUser
   public void testCreateUserWithActiveStatusInCognito() throws Exception {
     User user = racfIdUser("test@test.com", "SMITHBO", toSet(CWS_WORKER));
     assertCreateUserBadRequest(user,
         "fixtures/idm/create-user/active-user-with-same-racfid-in-cognito-error.json");
-  }
-
-  @Test
-  @WithMockCustomUser
-  public void testVerifyUsersRacfidInLowerCase() throws Exception {
-    assertVerify("test@test.com", "smithb3", "fixtures/idm/verify-user/verify-valid.json");
   }
 
   @Test
@@ -90,18 +71,6 @@ public class SecondIdmResourceTest extends IdmResourceTest {
 
   @Test
   @WithMockCustomUser
-  public void testVerifyUsersWithEmailInMixedCase() throws Exception {
-    assertVerify("Test@Test.com", "SMITHB3", "fixtures/idm/verify-user/verify-valid.json");
-  }
-
-  @Test
-  @WithMockCustomUser
-  public void testVerifyUsersNoRacfIdInCws() throws Exception {
-    assertVerifyUserNoRacfidInCws();
-  }
-
-  @Test
-  @WithMockCustomUser
   public void testCreateUserNoRacfIdInCws() throws Exception {
     User user = user("test@test.com");
     user.setRacfid("SMITHB1");
@@ -109,49 +78,6 @@ public class SecondIdmResourceTest extends IdmResourceTest {
 
     assertCreateUserBadRequest(user, "fixtures/idm/create-user/no-racfid-in-cws-error.json");
   }
-
-  @Test
-  @WithMockCustomUser(roles = {STATE_ADMIN}, county = "Madera")
-  public void testVerifyUserStateAdmin() throws Exception {
-    assertVerifyUserNoRacfidInCws();
-  }
-
-  @Test
-  @WithMockCustomUser(roles = {OFFICE_ADMIN})
-  public void testVerifyUserOfficeAdmin() throws Exception {
-    assertVerifyUserNoRacfidInCws();
-  }
-
-  @Test
-  @WithMockCustomUser(roles = {OFFICE_ADMIN}, adminOfficeIds = {"otherOfficeId"})
-  public void testVerifyUserOfficeAdminOtherOffice() throws Exception {
-    assertVerify("test@test.com", "SMITHB3", "fixtures/idm/verify-user/verify-other-office.json");
-  }
-
-  @Test
-  @WithMockCustomUser
-  public void testVerifyUsersCognitoUserIsPresent() throws Exception {
-    assertVerify("julio@gmail.com", "SMITHBO", "fixtures/idm/verify-user/verify-user-present.json");
-  }
-
-  @Test
-  @WithMockCustomUser(roles = {"OtherRole"})
-  public void testVerifyUserWithOtherRole() throws Exception {
-    assertVerifyUserUnauthorized();
-  }
-
-  @Test
-  @WithMockCustomUser(county = "Madera")
-  public void testVerifyUsersOtherCounty() throws Exception {
-    assertVerify("test@test.com", "SMITHB3", "fixtures/idm/verify-user/verify-other-county.json");
-  }
-
-  @Test
-  @WithMockCustomUser(roles = {CALS_ADMIN})
-  public void testVerifyUsersCalsAdmin() throws Exception {
-    assertVerifyUserUnauthorized();
-  }
-
 
   @Test
   @WithMockCustomUser(county = "OtherCounty")
