@@ -1,8 +1,8 @@
 package gov.ca.cwds.idm.service;
 
+import gov.ca.cwds.idm.dto.ListOfValues;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserEditDetails;
-import gov.ca.cwds.idm.dto.ListOfValues;
 import gov.ca.cwds.idm.service.authorization.AuthorizationService;
 import gov.ca.cwds.idm.service.role.implementor.AdminRoleImplementorFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,7 @@ public class UserEditDetailsService {
     editDetails.setEditable(authorizationService.canUpdateUser(user.getId()));
 
     ListOfValues usersPossibleRoles = new ListOfValues();
-    usersPossibleRoles.setEditable(true);
+    usersPossibleRoles.setEditable(authorizationService.canEditRoles(user));
     usersPossibleRoles.setPossibleValues(adminRoleImplementorFactory.getPossibleUserRoles());
 
     editDetails.setRoles(usersPossibleRoles);

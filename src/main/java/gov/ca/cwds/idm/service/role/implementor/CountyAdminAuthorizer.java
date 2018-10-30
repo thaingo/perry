@@ -1,5 +1,6 @@
 package gov.ca.cwds.idm.service.role.implementor;
 
+import static gov.ca.cwds.idm.service.authorization.UserRolesService.isCountyAdmin;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isStateAdmin;
 import static gov.ca.cwds.idm.service.role.implementor.AuthorizationUtils.isPrincipalInTheSameCountyWith;
 
@@ -32,6 +33,11 @@ class CountyAdminAuthorizer implements AdminActionsAuthorizer {
   @Override
   public boolean canResendInvitationMessage() {
     return isPrincipalInTheSameCountyWith(user);
+  }
+
+  @Override
+  public boolean canEditRoles() {
+    return !isStateAdmin(user) && !isCountyAdmin(user);
   }
 
 }

@@ -40,6 +40,12 @@ class OfficeAdminAuthorizer implements AdminActionsAuthorizer {
     return isAdminInTheSameOfficeAsUser();
   }
 
+  @Override
+  public boolean canEditRoles() {
+    //There is no requirements at this moment
+    return true;
+  }
+
   private boolean userIsStateAdminFromOtherOffice() {
     return isStateAdmin(user) && !isAdminInTheSameOfficeAsUser();
   }

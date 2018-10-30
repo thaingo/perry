@@ -32,4 +32,9 @@ class CalsAdminAuthorizer implements AdminActionsAuthorizer {
     return false;
   }
 
+  @Override
+  public boolean canEditRoles() {
+    return false;
+  }
+
 }

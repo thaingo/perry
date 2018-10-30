@@ -1,12 +1,16 @@
 package gov.ca.cwds.idm.service.role.implementor;
 
+import static gov.ca.cwds.idm.service.authorization.UserRolesService.isStateAdmin;
+
+import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.authorization.AdminActionsAuthorizer;
 
 class StateAdminAuthorizer implements AdminActionsAuthorizer {
 
-  static final StateAdminAuthorizer INSTANCE = new StateAdminAuthorizer();
+  private User user;
 
-  private StateAdminAuthorizer() {
+  StateAdminAuthorizer(User user) {
+    this.user = user;
   }
 
   @Override
@@ -27,6 +31,11 @@ class StateAdminAuthorizer implements AdminActionsAuthorizer {
   @Override
   public boolean canResendInvitationMessage() {
     return true;
+  }
+
+  @Override
+  public boolean canEditRoles() {
+    return !isStateAdmin(user);
   }
 
 }
