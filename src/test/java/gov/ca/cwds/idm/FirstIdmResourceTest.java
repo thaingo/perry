@@ -44,36 +44,6 @@ public class FirstIdmResourceTest extends IdmResourceTest {
 
   @Test
   @WithMockCustomUser
-  public void testGetRoles() throws Exception {
-    assertGetRolesSuccess();
-  }
-
-  @Test
-  @WithMockCustomUser(roles = {"OtherRole"})
-  public void testGetRolesWithOtherRole() throws Exception {
-    assertGetRolesUnauthorized();
-  }
-
-  @Test
-  @WithMockCustomUser(roles = {STATE_ADMIN})
-  public void testGetRolesStateAdmin() throws Exception {
-    assertGetRolesSuccess();
-  }
-
-  @Test
-  @WithMockCustomUser(roles = {CALS_ADMIN})
-  public void testGetRolesCalsAdmin() throws Exception {
-    assertGetRolesSuccess();
-  }
-
-  @Test
-  @WithMockCustomUser(roles = {OFFICE_ADMIN})
-  public void testGetRolesOfficeAdmin() throws Exception {
-    assertGetRolesSuccess();
-  }
-
-  @Test
-  @WithMockCustomUser
   public void testGetUserNoRacfId() throws Exception {
     testGetValidUser(USER_NO_RACFID_ID, "fixtures/idm/get-user/no-racfid-valid.json");
   }
