@@ -267,4 +267,19 @@ public class CreateUserIdmResourceTest extends IdmResourceTest {
     actuallySendUser.setStartDate(LocalDate.of(1998, 4, 14));
     return actuallySendUser;
   }
+
+  private void assertCreateUserBadRequest(User user, String fixturePath) throws Exception {
+    AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
+
+    MvcResult result = mockMvc
+        .perform(
+            MockMvcRequestBuilders.post("/idm/users")
+                .contentType(JSON_CONTENT_TYPE)
+                .content(asJsonString(user)))
+        .andExpect(MockMvcResultMatchers.status().isBadRequest())
+        .andReturn();
+
+    assertExtensible(result, fixturePath);
+    verify(cognito, times(0)).adminCreateUser(request);
+  }
 }

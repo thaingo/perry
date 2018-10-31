@@ -6,7 +6,6 @@ import static gov.ca.cwds.idm.IdmResourceTest.IDM_BASIC_AUTH_PASS;
 import static gov.ca.cwds.idm.IdmResourceTest.IDM_BASIC_AUTH_USER;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.USERPOOL;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.USER_WITH_RACFID_ID;
-import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertStrict;
 import static gov.ca.cwds.util.LiquibaseUtils.CMS_STORE_URL;
@@ -169,22 +168,6 @@ public abstract class IdmResourceTest extends BaseIntegrationTest {
     String authStringEnc = new String(authEncBytes);
     return "Basic " + authStringEnc;
   }
-
-  protected final void assertCreateUserBadRequest(User user, String fixturePath) throws Exception {
-    AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
-
-    MvcResult result = mockMvc
-        .perform(
-            MockMvcRequestBuilders.post("/idm/users")
-                .contentType(JSON_CONTENT_TYPE)
-                .content(asJsonString(user)))
-        .andExpect(MockMvcResultMatchers.status().isBadRequest())
-        .andReturn();
-
-    assertExtensible(result, fixturePath);
-    verify(cognito, times(0)).adminCreateUser(request);
-  }
-
 
   protected final void assertResendEmailWorksFine() throws Exception {
     AdminCreateUserRequest request =
