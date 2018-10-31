@@ -15,6 +15,7 @@ import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.service.TestHelper;
+import gov.ca.cwds.idm.service.authorization.AuthorizationService;
 import gov.ca.cwds.idm.service.role.implementor.AdminRoleImplementorFactory;
 import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
 import gov.ca.cwds.service.messages.MessagesService;
@@ -40,6 +41,8 @@ public class ValidationServiceMockTest {
   private ValidationServiceImpl service;
 
   private MessagesService messagesServiceMock = mock(MessagesService.class);
+
+  private AuthorizationService authorizationService = mock(AuthorizationService.class);
 
   @Before
   public void before() {

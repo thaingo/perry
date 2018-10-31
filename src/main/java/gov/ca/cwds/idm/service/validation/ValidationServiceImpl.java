@@ -26,13 +26,13 @@ import gov.ca.cwds.service.messages.MessageCode;
 import gov.ca.cwds.service.messages.MessagesService;
 import java.util.Collection;
 import java.util.Objects;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 @Service
 @Profile("idm")
@@ -202,4 +202,5 @@ public class ValidationServiceImpl implements ValidationService {
       AdminRoleImplementorFactory adminRoleImplementorFactory) {
     this.adminRoleImplementorFactory = adminRoleImplementorFactory;
   }
+
 }

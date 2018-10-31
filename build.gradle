@@ -65,6 +65,7 @@ project.ext {
     servletApiVersion = '3.1.0'
 
     commonsLangVersion = '3.6'
+    commonsCollectionsVersion = '4.2'
     commonsIoVersion = '2.5'
     serenityVersion = '1.9.13'
 
@@ -166,6 +167,7 @@ dependencies {
     compile group: 'org.eclipse.jetty', name: 'jetty-webapp', version: '9.4.2.v20170220'
     compile group: 'org.postgresql', name: 'postgresql', version: '9.4.1212.jre7'
     compile "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.8.6"
+    compile group: 'org.apache.commons', name: 'commons-collections4', version: commonsCollectionsVersion
     
     compile project(':jwt-security')
 

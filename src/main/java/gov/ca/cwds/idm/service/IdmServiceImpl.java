@@ -46,14 +46,15 @@ import gov.ca.cwds.idm.dto.UserVerificationResult;
 import gov.ca.cwds.idm.dto.UsersPage;
 import gov.ca.cwds.idm.dto.UsersSearchCriteria;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
-import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
 import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
+import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
 import gov.ca.cwds.idm.service.authorization.AuthorizationService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.StandardUserAttribute;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil;
+import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
 import gov.ca.cwds.idm.service.execution.OptionalExecution;
 import gov.ca.cwds.idm.service.execution.PutInSearchExecution;
 import gov.ca.cwds.idm.service.filter.MainRoleFilter;
@@ -76,6 +77,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,6 +92,9 @@ import org.springframework.stereotype.Service;
 public class IdmServiceImpl implements IdmService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(IdmServiceImpl.class);
+
+  private static final String USER_UPDATE_IS_NOT_ALLOWED = "User update is not allowed";
+  private static final String USER_ROLES_UPDATE_IS_NOT_ALLOWED = "User roles update is not allowed";
 
   @Autowired
   private CognitoServiceFacade cognitoServiceFacade;
@@ -139,6 +144,7 @@ public class IdmServiceImpl implements IdmService {
 
     UserType existedCognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
 
+    authorizeUpdateUser(existedCognitoUser, updateUserDto);
     validationService.validateUpdateUser(existedCognitoUser, updateUserDto);
 
     ExecutionStatus updateAttributesStatus =
@@ -263,9 +269,39 @@ public class IdmServiceImpl implements IdmService {
   private void authorizeCreateUser(User user) {
     if(!authorizeService.canCreateUser(user)) {
       String msg = messages.getTechMessage(NOT_AUTHORIZED_TO_CREATE_USER);
-      LOGGER.error(msg);
-      throw new AccessDeniedException(msg);
+      throwAccessDenied(msg);
     }
+  }
+
+  private void authorizeUpdateUser(UserType existedCognitoUser, UserUpdate updateUserDto) {
+    if (!authorizeService.canUpdateUser(existedCognitoUser)) {
+      throwAccessDenied(USER_UPDATE_IS_NOT_ALLOWED);
+    }
+    authorizeRolesUpdate(existedCognitoUser, updateUserDto);
+  }
+
+  private void authorizeRolesUpdate(UserType existedCognitoUser, UserUpdate updateUserDto) {
+    if (updateUserDto.getRoles() == null) {
+      return;
+    }
+    if (!isAbleToEditRolesForUser(existedCognitoUser)
+        && wasRolesActuallyEdited(existedCognitoUser, updateUserDto)) {
+      throwAccessDenied(USER_ROLES_UPDATE_IS_NOT_ALLOWED);
+    }
+  }
+
+  private void throwAccessDenied(String message) {
+    LOGGER.error(message);
+    throw new AccessDeniedException(message);
+  }
+
+  private boolean wasRolesActuallyEdited(UserType existedCognitoUser, UserUpdate updateUserDto) {
+    return !CollectionUtils.isEqualCollection(CognitoUtils.getRoles(existedCognitoUser),
+        updateUserDto.getRoles());
+  }
+
+  private boolean isAbleToEditRolesForUser(UserType existedCognitoUser) {
+    return authorizeService.canEditRoles(existedCognitoUser);
   }
 
   private UserVerificationResult buildVerifyAuthorizationError(User user) {
