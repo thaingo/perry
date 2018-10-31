@@ -227,4 +227,11 @@ public class CreateUserIdmResourceTest extends IdmResourceTest {
     verify(spySearchService, times(1)).createUser(any(User.class));
     verifyDoraCalls(1);
   }
+
+  private  AdminCreateUserRequest setCreateRequestAndResult(User actuallySendUser,
+      String newUserId) {
+    AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(actuallySendUser);
+    ((TestCognitoServiceFacade) cognitoServiceFacade).setCreateUserResult(request, newUserId);
+    return request;
+  }
 }

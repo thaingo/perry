@@ -179,13 +179,6 @@ public abstract class IdmResourceTest extends BaseIntegrationTest {
     return "Basic " + authStringEnc;
   }
 
-  protected final AdminCreateUserRequest setCreateRequestAndResult(User actuallySendUser,
-      String newUserId) {
-    AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(actuallySendUser);
-    setCreateUserResult(request, newUserId);
-    return request;
-  }
-
   protected final void assertCreateUserUnauthorized() throws Exception {
     User user = user();
     user.setEmail("unauthorized@gmail.com");
@@ -467,19 +460,6 @@ public abstract class IdmResourceTest extends BaseIntegrationTest {
     user.setCountyName(WithMockCustomUser.COUNTY);
     user.setOfficeId(WithMockCustomUser.OFFICE_ID);
     return user;
-  }
-
-  private AdminCreateUserRequest setCreateUserResult(AdminCreateUserRequest request, String newId) {
-
-    UserType newUser = new UserType();
-    newUser.setUsername(newId);
-    newUser.setEnabled(true);
-    newUser.setUserStatus("FORCE_CHANGE_PASSWORD");
-    newUser.withAttributes(request.getUserAttributes());
-
-    AdminCreateUserResult result = new AdminCreateUserResult().withUser(newUser);
-    when(cognito.adminCreateUser(request)).thenReturn(result);
-    return request;
   }
 
   protected final static String asJsonString(final Object obj) {
