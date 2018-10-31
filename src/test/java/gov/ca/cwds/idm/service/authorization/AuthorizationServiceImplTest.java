@@ -15,11 +15,14 @@ import static org.junit.Assert.assertTrue;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
+import com.amazonaws.services.cognitoidp.model.UserType;
+import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.role.implementor.AdminRoleImplementorFactory;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -40,6 +43,11 @@ public class AuthorizationServiceImplTest {
   public void testAdminCantUpdateHimself() {
     String adminId = "someId";
     when(CurrentAuthenticatedUserUtil.getCurrentUserName()).thenReturn(adminId);
+    CognitoServiceFacade cognitoServiceFacade = Mockito.mock(CognitoServiceFacade.class);
+    UserType user = new UserType();
+    user.setUsername(adminId);
+    Mockito.when(cognitoServiceFacade.getCognitoUserById(adminId)).thenReturn(user);
+    service.setCognitoServiceFacade(cognitoServiceFacade);
     assertFalse(service.canUpdateUser(adminId));
   }
 

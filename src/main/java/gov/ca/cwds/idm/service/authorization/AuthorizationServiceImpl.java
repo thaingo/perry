@@ -39,11 +39,17 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
   @Override
   public boolean canUpdateUser(String userId) {
+    UserType existedCognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
+    return canUpdateUser(existedCognitoUser);
+  }
+
+  @Override
+  public boolean canUpdateUser(UserType existingUser) {
     // admin can't update himself
-    if (userId.equals(getCurrentUserName())) {
+    if (existingUser.getUsername().equals(getCurrentUserName())) {
       return false;
     }
-    User user = getUserFromUserId(userId);
+    User user = composeUser(existingUser);
     return canUpdateUser(user);
   }
 
@@ -77,11 +83,6 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     } else {
       throw new IllegalStateException();
     }
-  }
-
-  private User getUserFromUserId(String userId) {
-    UserType cognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
-    return composeUser(cognitoUser);
   }
 
   private User composeUser(UserType cognitoUser) {

@@ -9,6 +9,8 @@ public interface AuthorizationService {
 
   boolean canCreateUser(User user);
 
+  boolean canUpdateUser(UserType existingUser);
+
   boolean canUpdateUser(String userId);
 
   boolean canResendInvitationMessage(String email);

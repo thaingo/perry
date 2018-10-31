@@ -16,7 +16,6 @@ import static gov.ca.cwds.util.Utils.toUpperCase;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
-import gov.ca.cwds.idm.service.authorization.AuthorizationService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
 import gov.ca.cwds.idm.service.role.implementor.AdminRoleImplementorFactory;
@@ -49,8 +48,6 @@ public class ValidationServiceImpl implements ValidationService {
 
   private AdminRoleImplementorFactory adminRoleImplementorFactory;
 
-  private AuthorizationService authorizationService;
-
   @Override
   public void validateUserCreate(User enrichedUser, boolean activeUserExistsInCws) {
 
@@ -76,28 +73,8 @@ public class ValidationServiceImpl implements ValidationService {
 
   @Override
   public void validateUpdateUser(UserType existedCognitoUser, UserUpdate updateUserDto) {
-    validateAbilityToUpdateRoles(existedCognitoUser, updateUserDto);
     validateUpdateByNewUserRoles(updateUserDto);
     validateActivateUser(existedCognitoUser, updateUserDto);
-  }
-
-  private void validateAbilityToUpdateRoles(UserType existedCognitoUser, UserUpdate updateUserDto) {
-    if (updateUserDto.getRoles() == null) {
-      return;
-    }
-    if (!isAbleToEditRolesForUser(existedCognitoUser)
-        && wasRolesActuallyEdited(existedCognitoUser, updateUserDto)) {
-      throwValidationException(MessageCode.ROLES_UPDATE_IS_NOT_ALLOWED);
-    }
-  }
-
-  private boolean wasRolesActuallyEdited(UserType existedCognitoUser, UserUpdate updateUserDto) {
-    return !CollectionUtils.isEqualCollection(CognitoUtils.getRoles(existedCognitoUser),
-        updateUserDto.getRoles());
-  }
-
-  private boolean isAbleToEditRolesForUser(UserType existedCognitoUser) {
-    return authorizationService.canEditRoles(existedCognitoUser);
   }
 
   private void validateFirstNameIsProvided(User user) {
@@ -224,12 +201,6 @@ public class ValidationServiceImpl implements ValidationService {
   public void setAdminRoleImplementorFactory(
       AdminRoleImplementorFactory adminRoleImplementorFactory) {
     this.adminRoleImplementorFactory = adminRoleImplementorFactory;
-  }
-
-  @Autowired
-  public void setAuthorizationService(
-      AuthorizationService authorizationService) {
-    this.authorizationService = authorizationService;
   }
 
 }

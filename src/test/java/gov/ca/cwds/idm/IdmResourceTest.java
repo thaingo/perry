@@ -768,8 +768,12 @@ public class IdmResourceTest extends BaseIntegrationTest {
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setEnabled(Boolean.TRUE);
     userUpdate.setRoles(toSet("County-admin"));
-    assertUpdateBadRequest(STATE_ADMIN_ID, userUpdate,
-        "fixtures/idm/update-user/not-allowed-roles-editing.json");
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.patch("/idm/users/" + STATE_ADMIN_ID)
+                .contentType(JSON_CONTENT_TYPE)
+                .content(asJsonString(userUpdate)))
+        .andExpect(MockMvcResultMatchers.status().isUnauthorized());
   }
 
   @Test

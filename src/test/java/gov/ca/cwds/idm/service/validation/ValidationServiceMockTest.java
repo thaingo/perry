@@ -49,7 +49,6 @@ public class ValidationServiceMockTest {
     mockStatic(CurrentAuthenticatedUserUtil.class);
     service = new ValidationServiceImpl();
     service.setMessagesService(messagesServiceMock);
-    service.setAuthorizationService(authorizationService);
     service.setAdminRoleImplementorFactory(new AdminRoleImplementorFactory());
   }
 
