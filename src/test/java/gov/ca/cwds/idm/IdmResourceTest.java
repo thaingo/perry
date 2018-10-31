@@ -5,7 +5,6 @@ import static gov.ca.cwds.idm.IdmResourceTest.DORA_WS_MAX_ATTEMPTS;
 import static gov.ca.cwds.idm.IdmResourceTest.IDM_BASIC_AUTH_PASS;
 import static gov.ca.cwds.idm.IdmResourceTest.IDM_BASIC_AUTH_USER;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.USERPOOL;
-import static gov.ca.cwds.idm.TestCognitoServiceFacade.USER_WITH_RACFID_ID;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertStrict;
 import static gov.ca.cwds.util.LiquibaseUtils.CMS_STORE_URL;
@@ -26,7 +25,6 @@ import ch.qos.logback.classic.spi.LoggingEvent;
 import ch.qos.logback.core.Appender;
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
 import com.amazonaws.services.cognitoidp.model.AdminCreateUserRequest;
-import com.amazonaws.services.cognitoidp.model.AdminCreateUserResult;
 import com.amazonaws.services.cognitoidp.model.AdminDisableUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminDisableUserResult;
 import com.amazonaws.services.cognitoidp.model.AdminEnableUserRequest;
@@ -34,7 +32,6 @@ import com.amazonaws.services.cognitoidp.model.AdminEnableUserResult;
 import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesRequest;
 import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesResult;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
-import com.amazonaws.services.cognitoidp.model.UserType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import gov.ca.cwds.BaseIntegrationTest;
@@ -168,27 +165,6 @@ public abstract class IdmResourceTest extends BaseIntegrationTest {
     String authStringEnc = new String(authEncBytes);
     return "Basic " + authStringEnc;
   }
-
-  protected final void assertResendEmailWorksFine() throws Exception {
-    AdminCreateUserRequest request =
-        ((TestCognitoServiceFacade) cognitoServiceFacade)
-            .createResendEmailRequest(YOLO_COUNTY_USERS_EMAIL);
-
-    UserType user = new UserType();
-    user.setUsername(USER_WITH_RACFID_ID);
-    user.setEnabled(true);
-    user.setUserStatus("FORCE_CHANGE_PASSWORD");
-
-    AdminCreateUserResult result = new AdminCreateUserResult().withUser(user);
-    when(cognito.adminCreateUser(request)).thenReturn(result);
-
-    mockMvc
-        .perform(
-            MockMvcRequestBuilders.get(
-                "/idm/users/resend?email="+YOLO_COUNTY_USERS_EMAIL))
-        .andExpect(MockMvcResultMatchers.status().isOk())
-        .andReturn();
-   }
 
   protected final void assertAllAdminOffices() throws Exception {
     assertAdminOffices("all-offices.json");
