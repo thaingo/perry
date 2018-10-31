@@ -8,6 +8,7 @@ import static gov.ca.cwds.idm.TestCognitoServiceFacade.INACTIVE_USER_WITH_ACTIVE
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.INACTIVE_USER_WITH_NO_ACTIVE_RACFID_IN_CMS;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.INACTIVE_USER_WITH_NO_RACFID;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.STATE_ADMIN_ID;
+import static gov.ca.cwds.idm.TestCognitoServiceFacade.USERPOOL;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.USER_NO_RACFID_ID;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.USER_WITH_RACFID_AND_DB_DATA_ID;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.USER_WITH_RACFID_ID;
@@ -26,11 +27,16 @@ import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import ch.qos.logback.classic.spi.LoggingEvent;
 import com.amazonaws.services.cognitoidp.model.AdminDisableUserRequest;
+import com.amazonaws.services.cognitoidp.model.AdminDisableUserResult;
 import com.amazonaws.services.cognitoidp.model.AdminEnableUserRequest;
+import com.amazonaws.services.cognitoidp.model.AdminEnableUserResult;
 import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesRequest;
+import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesResult;
+import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.google.common.collect.Iterables;
 import gov.ca.cwds.config.LoggingRequestIdFilter;
 import gov.ca.cwds.config.LoggingUserIdFilter;
@@ -435,5 +441,41 @@ public class UpdateUserIdmResourceTest extends BaseIdmResourceTest {
                 .content(asJsonString(userUpdate)))
         .andExpect(MockMvcResultMatchers.status().isUnauthorized())
         .andReturn();
+  }
+
+  private AdminUpdateUserAttributesRequest setUpdateUserAttributesRequestAndResult(
+      String id, AttributeType... userAttributes) {
+    AdminUpdateUserAttributesRequest request =
+        new AdminUpdateUserAttributesRequest()
+            .withUsername(id)
+            .withUserPoolId(USERPOOL)
+            .withUserAttributes(userAttributes);
+    AdminUpdateUserAttributesResult result = new AdminUpdateUserAttributesResult();
+    when(cognito.adminUpdateUserAttributes(request)).thenReturn(result);
+    return request;
+  }
+
+  private AdminDisableUserRequest setDisableUserRequestAndResult(String id) {
+    AdminDisableUserRequest request =
+        new AdminDisableUserRequest().withUsername(id).withUserPoolId(USERPOOL);
+    AdminDisableUserResult result = new AdminDisableUserResult();
+    when(cognito.adminDisableUser(request)).thenReturn(result);
+    return request;
+  }
+
+  private AdminDisableUserRequest setDisableUserRequestAndFail(String id) {
+    AdminDisableUserRequest request =
+        new AdminDisableUserRequest().withUsername(id).withUserPoolId(USERPOOL);
+    when(cognito.adminDisableUser(request))
+        .thenThrow(new RuntimeException("Update enable status error"));
+    return request;
+  }
+
+  private AdminEnableUserRequest setEnableUserRequestAndResult(String id) {
+    AdminEnableUserRequest request =
+        new AdminEnableUserRequest().withUsername(id).withUserPoolId(USERPOOL);
+    AdminEnableUserResult result = new AdminEnableUserResult();
+    when(cognito.adminEnableUser(request)).thenReturn(result);
+    return request;
   }
 }

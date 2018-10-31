@@ -3,7 +3,6 @@ package gov.ca.cwds.idm;
 import static gov.ca.cwds.idm.BaseIdmResourceTest.DORA_WS_MAX_ATTEMPTS;
 import static gov.ca.cwds.idm.BaseIdmResourceTest.IDM_BASIC_AUTH_PASS;
 import static gov.ca.cwds.idm.BaseIdmResourceTest.IDM_BASIC_AUTH_USER;
-import static gov.ca.cwds.idm.TestCognitoServiceFacade.USERPOOL;
 import static gov.ca.cwds.util.LiquibaseUtils.CMS_STORE_URL;
 import static gov.ca.cwds.util.LiquibaseUtils.TOKEN_STORE_URL;
 import static gov.ca.cwds.util.LiquibaseUtils.runLiquibaseScript;
@@ -19,13 +18,6 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.LoggingEvent;
 import ch.qos.logback.core.Appender;
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
-import com.amazonaws.services.cognitoidp.model.AdminDisableUserRequest;
-import com.amazonaws.services.cognitoidp.model.AdminDisableUserResult;
-import com.amazonaws.services.cognitoidp.model.AdminEnableUserRequest;
-import com.amazonaws.services.cognitoidp.model.AdminEnableUserResult;
-import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesRequest;
-import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesResult;
-import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import gov.ca.cwds.BaseIntegrationTest;
@@ -151,42 +143,6 @@ public abstract class BaseIdmResourceTest extends BaseIntegrationTest {
     byte[] authEncBytes = Base64.encodeBase64(authString.getBytes());
     String authStringEnc = new String(authEncBytes);
     return "Basic " + authStringEnc;
-  }
-
-  protected final AdminUpdateUserAttributesRequest setUpdateUserAttributesRequestAndResult(
-      String id, AttributeType... userAttributes) {
-    AdminUpdateUserAttributesRequest request =
-        new AdminUpdateUserAttributesRequest()
-            .withUsername(id)
-            .withUserPoolId(USERPOOL)
-            .withUserAttributes(userAttributes);
-    AdminUpdateUserAttributesResult result = new AdminUpdateUserAttributesResult();
-    when(cognito.adminUpdateUserAttributes(request)).thenReturn(result);
-    return request;
-  }
-
-  protected final AdminDisableUserRequest setDisableUserRequestAndResult(String id) {
-    AdminDisableUserRequest request =
-        new AdminDisableUserRequest().withUsername(id).withUserPoolId(USERPOOL);
-    AdminDisableUserResult result = new AdminDisableUserResult();
-    when(cognito.adminDisableUser(request)).thenReturn(result);
-    return request;
-  }
-
-  protected final AdminDisableUserRequest setDisableUserRequestAndFail(String id) {
-    AdminDisableUserRequest request =
-        new AdminDisableUserRequest().withUsername(id).withUserPoolId(USERPOOL);
-    when(cognito.adminDisableUser(request))
-        .thenThrow(new RuntimeException("Update enable status error"));
-    return request;
-  }
-
-  protected final AdminEnableUserRequest setEnableUserRequestAndResult(String id) {
-    AdminEnableUserRequest request =
-        new AdminEnableUserRequest().withUsername(id).withUserPoolId(USERPOOL);
-    AdminEnableUserResult result = new AdminEnableUserResult();
-    when(cognito.adminEnableUser(request)).thenReturn(result);
-    return request;
   }
 
   protected final static User user() {
