@@ -24,6 +24,7 @@ import com.google.common.collect.Iterables;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
+import java.time.LocalDate;
 import org.junit.Test;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -251,5 +252,19 @@ public class CreateUserIdmResourceTest extends IdmResourceTest {
 
     verify(cognito, times(0)).adminCreateUser(request);
     verify(spySearchService, times(0)).createUser(any(User.class));
+  }
+
+  private User getElroydaUser() {
+    return racfIdUser("Test@Test.com", "elroyda", toSet(CWS_WORKER));
+  }
+
+  private User getActuallySendElroydaUser() {
+    User actuallySendUser = racfIdUser("test@test.com", "ELROYDA", toSet(CWS_WORKER));
+    actuallySendUser.setFirstName("Donna");
+    actuallySendUser.setLastName("Elroy");
+    actuallySendUser.setCountyName("Napa");
+    actuallySendUser.setOfficeId("TG7O51q0Ki");
+    actuallySendUser.setStartDate(LocalDate.of(1998, 4, 14));
+    return actuallySendUser;
   }
 }

@@ -1,6 +1,5 @@
 package gov.ca.cwds.idm;
 
-import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.idm.IdmResource.DATETIME_FORMAT_PATTERN;
 import static gov.ca.cwds.idm.IdmResourceTest.DORA_WS_MAX_ATTEMPTS;
 import static gov.ca.cwds.idm.IdmResourceTest.IDM_BASIC_AUTH_PASS;
@@ -13,7 +12,6 @@ import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertStrict;
 import static gov.ca.cwds.util.LiquibaseUtils.CMS_STORE_URL;
 import static gov.ca.cwds.util.LiquibaseUtils.TOKEN_STORE_URL;
 import static gov.ca.cwds.util.LiquibaseUtils.runLiquibaseScript;
-import static gov.ca.cwds.util.Utils.toSet;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -52,7 +50,6 @@ import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.SearchProperties;
 import gov.ca.cwds.service.messages.MessagesService;
 import java.nio.charset.Charset;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Iterator;
@@ -171,20 +168,6 @@ public abstract class IdmResourceTest extends BaseIntegrationTest {
     byte[] authEncBytes = Base64.encodeBase64(authString.getBytes());
     String authStringEnc = new String(authEncBytes);
     return "Basic " + authStringEnc;
-  }
-
-  protected final User getElroydaUser() {
-    return racfIdUser("Test@Test.com", "elroyda", toSet(CWS_WORKER));
-  }
-
-  protected final User getActuallySendElroydaUser() {
-    User actuallySendUser = racfIdUser("test@test.com", "ELROYDA", toSet(CWS_WORKER));
-    actuallySendUser.setFirstName("Donna");
-    actuallySendUser.setLastName("Elroy");
-    actuallySendUser.setCountyName("Napa");
-    actuallySendUser.setOfficeId("TG7O51q0Ki");
-    actuallySendUser.setStartDate(LocalDate.of(1998, 4, 14));
-    return actuallySendUser;
   }
 
   protected final void assertVerify(String email, String racfId, String fixturePath) throws Exception {
