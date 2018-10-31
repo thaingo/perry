@@ -39,8 +39,13 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
   @Override
   public boolean canUpdateUser(String userId) {
-    UserType existedCognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
-    return canUpdateUser(existedCognitoUser);
+    // admin can't update himself
+    if (userId.equals(getCurrentUserName())) {
+      return false;
+    }
+    UserType existingCognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
+    User user = composeUser(existingCognitoUser);
+    return canUpdateUser(user);
   }
 
   @Override
@@ -53,7 +58,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     return canUpdateUser(user);
   }
 
-  public boolean canUpdateUser(User user) {
+  boolean canUpdateUser(User user) {
     return adminRoleImplementorFactory.getAdminActionsAuthorizer(user).canUpdateUser();
   }
 
