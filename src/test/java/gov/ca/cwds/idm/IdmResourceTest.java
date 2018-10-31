@@ -6,14 +6,10 @@ import static gov.ca.cwds.idm.IdmResourceTest.DORA_WS_MAX_ATTEMPTS;
 import static gov.ca.cwds.idm.IdmResourceTest.IDM_BASIC_AUTH_PASS;
 import static gov.ca.cwds.idm.IdmResourceTest.IDM_BASIC_AUTH_USER;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.USERPOOL;
-import static gov.ca.cwds.idm.TestCognitoServiceFacade.USER_WITH_RACFID_AND_DB_DATA_ID;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.USER_WITH_RACFID_ID;
-import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PERMISSIONS;
-import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.ROLES;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertStrict;
-import static gov.ca.cwds.idm.util.TestUtils.attr;
 import static gov.ca.cwds.util.LiquibaseUtils.CMS_STORE_URL;
 import static gov.ca.cwds.util.LiquibaseUtils.TOKEN_STORE_URL;
 import static gov.ca.cwds.util.LiquibaseUtils.runLiquibaseScript;
@@ -46,7 +42,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import gov.ca.cwds.BaseIntegrationTest;
 import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
 import gov.ca.cwds.idm.persistence.ns.repository.UserLogRepository;
@@ -178,66 +173,6 @@ public abstract class IdmResourceTest extends BaseIntegrationTest {
     return "Basic " + authStringEnc;
   }
 
-  protected final void assertUpdateBadRequest(String userId, UserUpdate userUpdate, String fixture) throws Exception {
-    MvcResult result = mockMvc
-        .perform(
-            MockMvcRequestBuilders.patch("/idm/users/" + userId)
-                .contentType(JSON_CONTENT_TYPE)
-                .content(asJsonString(userUpdate)))
-        .andExpect(MockMvcResultMatchers.status().isBadRequest())
-        .andReturn();
-    assertExtensible(result, fixture);
-  }
-
-
-  protected final void assertUpdateNoChangesSuccess() throws Exception {
-    String userId = USER_WITH_RACFID_AND_DB_DATA_ID;
-    UserUpdate userUpdate = new UserUpdate();
-    userUpdate.setEnabled(Boolean.TRUE);
-    userUpdate.setPermissions(toSet("test"));
-    userUpdate.setRoles(toSet("CWS-worker"));
-
-    AdminUpdateUserAttributesRequest updateAttributesRequest =
-        setUpdateUserAttributesRequestAndResult(
-            userId,
-            attr(PERMISSIONS.getName(), "test"),
-            attr(ROLES.getName(), "CWS-worker")
-        );
-
-    AdminEnableUserRequest enableUserRequest = setEnableUserRequestAndResult(userId);
-
-    mockMvc
-        .perform(
-            MockMvcRequestBuilders.patch("/idm/users/" + userId)
-                .contentType(JSON_CONTENT_TYPE)
-                .content(asJsonString(userUpdate)))
-        .andExpect(MockMvcResultMatchers.status().isNoContent())
-        .andReturn();
-
-    verify(cognito, times(0)).adminUpdateUserAttributes(updateAttributesRequest);
-    verify(cognito, times(0)).adminEnableUser(enableUserRequest);
-    verify(spySearchService, times(0)).createUser(any(User.class));
-    verifyDoraCalls(0);
-  }
-
-  protected final void assertUpdateUserUnauthorized() throws Exception {
-    assertUpdateUserUnauthorized(USER_WITH_RACFID_AND_DB_DATA_ID);
-  }
-
-  protected final void assertUpdateUserUnauthorized(String userId) throws Exception {
-    UserUpdate userUpdate = new UserUpdate();
-    userUpdate.setEnabled(Boolean.FALSE);
-    userUpdate.setPermissions(toSet("RFA-rollout", "Hotline-rollout"));
-
-    mockMvc
-        .perform(
-            MockMvcRequestBuilders.patch("/idm/users/" + userId)
-                .contentType(JSON_CONTENT_TYPE)
-                .content(asJsonString(userUpdate)))
-        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
-        .andReturn();
-  }
-
   protected final User getElroydaUser() {
     return racfIdUser("Test@Test.com", "elroyda", toSet(CWS_WORKER));
   }
@@ -251,7 +186,6 @@ public abstract class IdmResourceTest extends BaseIntegrationTest {
     actuallySendUser.setStartDate(LocalDate.of(1998, 4, 14));
     return actuallySendUser;
   }
-
 
   protected final void assertVerify(String email, String racfId, String fixturePath) throws Exception {
     MvcResult result =

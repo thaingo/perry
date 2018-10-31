@@ -376,4 +376,63 @@ public class UserUpdateIdmResourceTest extends IdmResourceTest {
   public void testUpdateUserOfficeOtherOffice() throws Exception {
     assertUpdateUserUnauthorized();
   }
+
+  private void assertUpdateBadRequest(String userId, UserUpdate userUpdate, String fixture) throws Exception {
+    MvcResult result = mockMvc
+        .perform(
+            MockMvcRequestBuilders.patch("/idm/users/" + userId)
+                .contentType(JSON_CONTENT_TYPE)
+                .content(asJsonString(userUpdate)))
+        .andExpect(MockMvcResultMatchers.status().isBadRequest())
+        .andReturn();
+    assertExtensible(result, fixture);
+  }
+
+  private void assertUpdateNoChangesSuccess() throws Exception {
+    String userId = USER_WITH_RACFID_AND_DB_DATA_ID;
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setEnabled(Boolean.TRUE);
+    userUpdate.setPermissions(toSet("test"));
+    userUpdate.setRoles(toSet("CWS-worker"));
+
+    AdminUpdateUserAttributesRequest updateAttributesRequest =
+        setUpdateUserAttributesRequestAndResult(
+            userId,
+            attr(PERMISSIONS.getName(), "test"),
+            attr(ROLES.getName(), "CWS-worker")
+        );
+
+    AdminEnableUserRequest enableUserRequest = setEnableUserRequestAndResult(userId);
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.patch("/idm/users/" + userId)
+                .contentType(JSON_CONTENT_TYPE)
+                .content(asJsonString(userUpdate)))
+        .andExpect(MockMvcResultMatchers.status().isNoContent())
+        .andReturn();
+
+    verify(cognito, times(0)).adminUpdateUserAttributes(updateAttributesRequest);
+    verify(cognito, times(0)).adminEnableUser(enableUserRequest);
+    verify(spySearchService, times(0)).createUser(any(User.class));
+    verifyDoraCalls(0);
+  }
+
+  private void assertUpdateUserUnauthorized() throws Exception {
+    assertUpdateUserUnauthorized(USER_WITH_RACFID_AND_DB_DATA_ID);
+  }
+
+  private void assertUpdateUserUnauthorized(String userId) throws Exception {
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setEnabled(Boolean.FALSE);
+    userUpdate.setPermissions(toSet("RFA-rollout", "Hotline-rollout"));
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.patch("/idm/users/" + userId)
+                .contentType(JSON_CONTENT_TYPE)
+                .content(asJsonString(userUpdate)))
+        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+        .andReturn();
+  }
 }
