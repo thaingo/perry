@@ -6,7 +6,6 @@ import static gov.ca.cwds.idm.IdmResourceTest.IDM_BASIC_AUTH_PASS;
 import static gov.ca.cwds.idm.IdmResourceTest.IDM_BASIC_AUTH_USER;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.USERPOOL;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
-import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertStrict;
 import static gov.ca.cwds.util.LiquibaseUtils.CMS_STORE_URL;
 import static gov.ca.cwds.util.LiquibaseUtils.TOKEN_STORE_URL;
 import static gov.ca.cwds.util.LiquibaseUtils.runLiquibaseScript;
@@ -164,23 +163,6 @@ public abstract class IdmResourceTest extends BaseIntegrationTest {
     byte[] authEncBytes = Base64.encodeBase64(authString.getBytes());
     String authStringEnc = new String(authEncBytes);
     return "Basic " + authStringEnc;
-  }
-
-  protected final void assertAllAdminOffices() throws Exception {
-    assertAdminOffices("all-offices.json");
-  }
-
-  protected final void assertCountyAdminOffices() throws Exception {
-    assertAdminOffices("county-offices.json");
-  }
-
-  private void assertAdminOffices(String fixtureName) throws Exception {
-    MvcResult result =
-        mockMvc
-            .perform(MockMvcRequestBuilders.get("/idm/admin-offices"))
-            .andExpect(MockMvcResultMatchers.status().isOk())
-            .andReturn();
-    assertStrict(result, "fixtures/idm/admin-offices/" + fixtureName);
   }
 
   protected final UserLog userLog(String userName, OperationType operation, LocalDateTime dateTime) {

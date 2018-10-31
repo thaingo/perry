@@ -64,4 +64,21 @@ public class OfficesIdmResourceTest extends IdmResourceTest {
 
     assertStrict(result, "fixtures/idm/offices/offices.json");
   }
+
+  private void assertAllAdminOffices() throws Exception {
+    assertAdminOffices("all-offices.json");
+  }
+
+  private void assertCountyAdminOffices() throws Exception {
+    assertAdminOffices("county-offices.json");
+  }
+
+  private void assertAdminOffices(String fixtureName) throws Exception {
+    MvcResult result =
+        mockMvc
+            .perform(MockMvcRequestBuilders.get("/idm/admin-offices"))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andReturn();
+    assertStrict(result, "fixtures/idm/admin-offices/" + fixtureName);
+  }
 }
