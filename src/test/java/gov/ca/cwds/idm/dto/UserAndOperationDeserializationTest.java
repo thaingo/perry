@@ -1,16 +1,13 @@
-package gov.ca.cwds.idm;
+package gov.ca.cwds.idm.dto;
 
 import static io.dropwizard.testing.FixtureHelpers.fixture;
-
 import static org.junit.Assert.assertTrue;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import gov.ca.cwds.idm.dto.UserAndOperation;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import java.util.List;
-
 import org.junit.Test;
 
 public class UserAndOperationDeserializationTest {
