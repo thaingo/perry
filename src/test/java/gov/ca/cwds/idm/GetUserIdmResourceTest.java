@@ -12,9 +12,16 @@ import static gov.ca.cwds.idm.TestCognitoServiceFacade.USER_NO_RACFID_ID;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.USER_WITH_NO_PHONE_EXTENSION;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.USER_WITH_RACFID_AND_DB_DATA_ID;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.USER_WITH_RACFID_ID;
+import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
+import com.amazonaws.services.cognitoidp.model.AdminCreateUserRequest;
+import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.util.WithMockCustomUser;
 import org.junit.Test;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
@@ -126,5 +133,17 @@ public class GetUserIdmResourceTest extends BaseIdmResourceTest {
         .perform(MockMvcRequestBuilders.get("/idm/users/" + userId))
         .andExpect(MockMvcResultMatchers.status().isUnauthorized())
         .andReturn();
+  }
+
+  private void testGetValidUser(String userId, String fixtureFilePath) throws Exception {
+
+    MvcResult result =
+        mockMvc
+            .perform(MockMvcRequestBuilders.get("/idm/users/" + userId))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
+            .andReturn();
+
+    assertNonStrict(result, fixtureFilePath);
   }
 }

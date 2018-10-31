@@ -283,4 +283,20 @@ public class CreateUserIdmResourceTest extends BaseIdmResourceTest {
     assertExtensible(result, fixturePath);
     verify(cognito, times(0)).adminCreateUser(request);
   }
+
+  private void testCreateUserValidationError(User user) throws Exception {
+
+    AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.post("/idm/users")
+                .contentType(JSON_CONTENT_TYPE)
+                .content(asJsonString(user)))
+        .andExpect(MockMvcResultMatchers.status().isBadRequest())
+        .andReturn();
+
+    verify(cognito, times(0)).adminCreateUser(request);
+    verify(spySearchService, times(0)).createUser(any(User.class));
+  }
 }
