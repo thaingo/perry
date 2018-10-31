@@ -27,7 +27,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.LoggingEvent;
@@ -177,24 +176,6 @@ public abstract class IdmResourceTest extends BaseIntegrationTest {
     byte[] authEncBytes = Base64.encodeBase64(authString.getBytes());
     String authStringEnc = new String(authEncBytes);
     return "Basic " + authStringEnc;
-  }
-
-  protected final void assertCreateUserUnauthorized() throws Exception {
-    User user = user();
-    user.setEmail("unauthorized@gmail.com");
-
-    AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
-
-    mockMvc
-        .perform(
-            MockMvcRequestBuilders.post("/idm/users")
-                .contentType(JSON_CONTENT_TYPE)
-                .content(asJsonString(user)))
-        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
-        .andReturn();
-
-    verify(cognito, times(0)).adminCreateUser(request);
-    verify(spySearchService, times(0)).createUser(any(User.class));
   }
 
   protected final void assertUpdateBadRequest(String userId, UserUpdate userUpdate, String fixture) throws Exception {

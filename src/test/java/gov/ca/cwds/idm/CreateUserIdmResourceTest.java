@@ -234,4 +234,22 @@ public class CreateUserIdmResourceTest extends IdmResourceTest {
     ((TestCognitoServiceFacade) cognitoServiceFacade).setCreateUserResult(request, newUserId);
     return request;
   }
+
+  private void assertCreateUserUnauthorized() throws Exception {
+    User user = user();
+    user.setEmail("unauthorized@gmail.com");
+
+    AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.post("/idm/users")
+                .contentType(JSON_CONTENT_TYPE)
+                .content(asJsonString(user)))
+        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+        .andReturn();
+
+    verify(cognito, times(0)).adminCreateUser(request);
+    verify(spySearchService, times(0)).createUser(any(User.class));
+  }
 }
