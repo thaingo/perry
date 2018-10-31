@@ -54,4 +54,9 @@ public class Office implements Serializable {
   public void setOfficeName(String officeName) {
     this.officeName = officeName;
   }
+
+  @Override
+  public String toString() {
+    return officeName;
+  }
 }
