@@ -713,7 +713,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
   }
 
   @Test
-  @WithMockCustomUser
+  @WithMockCustomUser(roles = {STATE_ADMIN})
   public void testUpdateUser() throws Exception {
 
     UserUpdate userUpdate = new UserUpdate();
@@ -758,8 +758,18 @@ public class IdmResourceTest extends BaseIntegrationTest {
     userUpdate.setEnabled(Boolean.FALSE);
     userUpdate.setRoles(toSet("State-admin"));
 
-    assertUpdateBadRequest(USER_NO_RACFID_ID, userUpdate,
+    assertUpdateBadRequest(USER_WITH_RACFID_AND_DB_DATA_ID, userUpdate,
         "fixtures/idm/update-user/not-allowed-role-error.json");
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {STATE_ADMIN})
+  public void testUpdatingRolesIsNotAllowed() throws Exception {
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setEnabled(Boolean.TRUE);
+    userUpdate.setRoles(toSet("County-admin"));
+    assertUpdateBadRequest(STATE_ADMIN_ID, userUpdate,
+        "fixtures/idm/update-user/not-allowed-roles-editing.json");
   }
 
   @Test
@@ -770,7 +780,7 @@ public class IdmResourceTest extends BaseIntegrationTest {
     userUpdate.setEnabled(Boolean.FALSE);
     userUpdate.setRoles(toSet());
 
-    assertUpdateBadRequest(USER_NO_RACFID_ID, userUpdate,
+    assertUpdateBadRequest(USER_WITH_RACFID_AND_DB_DATA_ID, userUpdate,
         "fixtures/idm/update-user/no-roles-error.json");
   }
 
