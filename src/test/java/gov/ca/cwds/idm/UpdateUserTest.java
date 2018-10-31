@@ -52,7 +52,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-public class UpdateUserIdmResourceTest extends BaseIdmResourceTest {
+public class UpdateUserTest extends BaseIdmResourceTest {
 
   @Test
   @WithMockCustomUser
