@@ -12,7 +12,7 @@ import org.junit.Test;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-public class ResendInvitationEmailIdmResourceTest extends IdmResourceTest {
+public class ResendInvitationEmailIdmResourceTest extends BaseIdmResourceTest {
 
   @Test
   @WithMockCustomUser(county = "OtherCounty")

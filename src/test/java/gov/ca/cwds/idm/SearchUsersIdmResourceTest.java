@@ -8,7 +8,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-public class SearchUsersIdmResourceTest extends IdmResourceTest {
+public class SearchUsersIdmResourceTest extends BaseIdmResourceTest {
 
   @Test
   public void testSearchUsersByRacfid() throws Exception {

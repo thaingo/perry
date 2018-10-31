@@ -1,8 +1,8 @@
 package gov.ca.cwds.idm;
 
-import static gov.ca.cwds.idm.IdmResourceTest.DORA_WS_MAX_ATTEMPTS;
-import static gov.ca.cwds.idm.IdmResourceTest.IDM_BASIC_AUTH_PASS;
-import static gov.ca.cwds.idm.IdmResourceTest.IDM_BASIC_AUTH_USER;
+import static gov.ca.cwds.idm.BaseIdmResourceTest.DORA_WS_MAX_ATTEMPTS;
+import static gov.ca.cwds.idm.BaseIdmResourceTest.IDM_BASIC_AUTH_PASS;
+import static gov.ca.cwds.idm.BaseIdmResourceTest.IDM_BASIC_AUTH_USER;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.USERPOOL;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
 import static gov.ca.cwds.util.LiquibaseUtils.CMS_STORE_URL;
@@ -80,7 +80,7 @@ import org.springframework.web.client.RestTemplate;
         "perry.doraWsRetryDelayMs=500"
     }
 )
-public abstract class IdmResourceTest extends BaseIntegrationTest {
+public abstract class BaseIdmResourceTest extends BaseIntegrationTest {
 
   protected static final String NEW_USER_SUCCESS_ID_2 = "17067e4e-270f-4623-b86c-b4d4fa527a35";
   protected static final String NEW_USER_SUCCESS_ID_3 = "17067e4e-270f-4623-b86c-b4d4fa527a36";

@@ -17,7 +17,7 @@ import org.junit.Test;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-public class GetUserIdmResourceTest extends IdmResourceTest {
+public class GetUserIdmResourceTest extends BaseIdmResourceTest {
 
   @Test
   @WithMockCustomUser

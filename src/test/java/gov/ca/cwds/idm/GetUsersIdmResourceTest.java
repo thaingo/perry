@@ -12,7 +12,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-public class GetUsersIdmResourceTest extends IdmResourceTest {
+public class GetUsersIdmResourceTest extends BaseIdmResourceTest {
 
   @Test
   public void testGetUsers() throws Exception {
