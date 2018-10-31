@@ -24,6 +24,7 @@ import com.google.common.collect.Iterables;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
+import gov.ca.cwds.idm.util.WithMockCustomUser;
 import java.time.LocalDate;
 import org.junit.Test;
 import org.springframework.test.web.servlet.MvcResult;

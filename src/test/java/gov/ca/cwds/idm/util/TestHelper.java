@@ -1,4 +1,4 @@
-package gov.ca.cwds.idm.service;
+package gov.ca.cwds.idm.util;
 
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.util.UniversalUserTokenDeserializer.ADMIN_OFFICE_IDS_PARAM;

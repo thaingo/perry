@@ -14,6 +14,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import com.google.common.collect.Iterables;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
+import gov.ca.cwds.idm.util.WithMockCustomUser;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Iterator;

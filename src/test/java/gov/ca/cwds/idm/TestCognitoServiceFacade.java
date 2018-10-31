@@ -32,6 +32,7 @@ import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.service.cognito.CognitoProperties;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacadeImpl;
+import gov.ca.cwds.idm.util.WithMockCustomUser;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;

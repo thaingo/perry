@@ -38,6 +38,7 @@ import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
+import gov.ca.cwds.idm.util.WithMockCustomUser;
 import java.util.Map;
 import org.junit.Test;
 import org.mockito.InOrder;
