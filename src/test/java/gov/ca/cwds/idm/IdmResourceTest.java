@@ -1,6 +1,5 @@
 package gov.ca.cwds.idm;
 
-import static gov.ca.cwds.idm.IdmResource.DATETIME_FORMAT_PATTERN;
 import static gov.ca.cwds.idm.IdmResourceTest.DORA_WS_MAX_ATTEMPTS;
 import static gov.ca.cwds.idm.IdmResourceTest.IDM_BASIC_AUTH_PASS;
 import static gov.ca.cwds.idm.IdmResourceTest.IDM_BASIC_AUTH_USER;
@@ -9,8 +8,6 @@ import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
 import static gov.ca.cwds.util.LiquibaseUtils.CMS_STORE_URL;
 import static gov.ca.cwds.util.LiquibaseUtils.TOKEN_STORE_URL;
 import static gov.ca.cwds.util.LiquibaseUtils.runLiquibaseScript;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -35,8 +32,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import gov.ca.cwds.BaseIntegrationTest;
 import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.persistence.ns.OperationType;
-import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
 import gov.ca.cwds.idm.persistence.ns.repository.UserLogRepository;
 import gov.ca.cwds.idm.service.IdmServiceImpl;
 import gov.ca.cwds.idm.service.SearchRestSender;
@@ -45,9 +40,6 @@ import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.SearchProperties;
 import gov.ca.cwds.service.messages.MessagesService;
 import java.nio.charset.Charset;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.codec.binary.Base64;
@@ -163,33 +155,6 @@ public abstract class IdmResourceTest extends BaseIntegrationTest {
     byte[] authEncBytes = Base64.encodeBase64(authString.getBytes());
     String authStringEnc = new String(authEncBytes);
     return "Basic " + authStringEnc;
-  }
-
-  protected final UserLog userLog(String userName, OperationType operation, LocalDateTime dateTime) {
-    UserLog log = new UserLog();
-    log.setUsername(userName);
-    log.setOperationType(operation);
-    log.setOperationTime(dateTime);
-    return userLogRepository.save(log);
-  }
-
-  protected final void assertUserLog(
-      UserLog userLog, String username, OperationType operationType, LocalDateTime time) {
-    assertThat(userLog.getUsername(), is(username));
-    assertThat(userLog.getOperationType(), is(operationType));
-    assertThat(userLog.getOperationTime(), is(time));
-  }
-
-  protected final void assertUserLog(
-      Iterator<UserLog> iterator, String username, OperationType operationType,
-      LocalDateTime time) {
-    UserLog userLog = iterator.next();
-    assertUserLog(userLog, username, operationType, time);
-  }
-
-  protected final static String getDateString(LocalDateTime date) {
-    DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATETIME_FORMAT_PATTERN);
-    return date.format(formatter);
   }
 
   protected final void testGetValidUser(String userId, String fixtureFilePath) throws Exception {

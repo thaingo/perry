@@ -1,5 +1,6 @@
 package gov.ca.cwds.idm;
 
+import static gov.ca.cwds.idm.IdmResource.DATETIME_FORMAT_PATTERN;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.USER_NO_RACFID_ID;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.USER_WITH_RACFID_AND_DB_DATA_ID;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.USER_WITH_RACFID_ID;
@@ -11,8 +12,10 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import com.google.common.collect.Iterables;
+import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Iterator;
 import org.junit.Test;
 import org.springframework.http.HttpHeaders;
@@ -84,5 +87,32 @@ public class GetFailedOperationsIdmResourceTest extends IdmResourceTest {
             .andExpect(MockMvcResultMatchers.status().isBadRequest())
             .andReturn();
     assertExtensible(result, "fixtures/idm/failed-operations/failed-operations-invalid-date.json");
+  }
+
+  private UserLog userLog(String userName, OperationType operation, LocalDateTime dateTime) {
+    UserLog log = new UserLog();
+    log.setUsername(userName);
+    log.setOperationType(operation);
+    log.setOperationTime(dateTime);
+    return userLogRepository.save(log);
+  }
+
+  private void assertUserLog(
+      Iterator<UserLog> iterator, String username, OperationType operationType,
+      LocalDateTime time) {
+    UserLog userLog = iterator.next();
+    assertUserLog(userLog, username, operationType, time);
+  }
+
+  private void assertUserLog(
+      UserLog userLog, String username, OperationType operationType, LocalDateTime time) {
+    assertThat(userLog.getUsername(), is(username));
+    assertThat(userLog.getOperationType(), is(operationType));
+    assertThat(userLog.getOperationTime(), is(time));
+  }
+
+  private static String getDateString(LocalDateTime date) {
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATETIME_FORMAT_PATTERN);
+    return date.format(formatter);
   }
 }
