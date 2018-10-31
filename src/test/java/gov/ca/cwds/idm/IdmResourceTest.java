@@ -170,29 +170,6 @@ public abstract class IdmResourceTest extends BaseIntegrationTest {
     return "Basic " + authStringEnc;
   }
 
-  protected final void assertVerify(String email, String racfId, String fixturePath) throws Exception {
-    MvcResult result =
-        mockMvc
-            .perform(
-                MockMvcRequestBuilders.get("/idm/users/verify?email=" + email + "&racfid=" + racfId))
-            .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
-            .andReturn();
-
-    assertNonStrict(result, fixturePath);
-  }
-  protected final void assertVerifyUserNoRacfidInCws() throws Exception {
-    assertVerify("test@test.com", "SMITHB1", "fixtures/idm/verify-user/verify-no-racfid.json");
-  }
-
-  protected final void assertVerifyUserUnauthorized() throws Exception {
-    mockMvc
-        .perform(
-            MockMvcRequestBuilders.get("/idm/users/verify?email=test@test.com&racfid=CWDS"))
-        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
-        .andReturn();
-  }
-
   protected final void assertCreateUserBadRequest(User user, String fixturePath) throws Exception {
     AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
 

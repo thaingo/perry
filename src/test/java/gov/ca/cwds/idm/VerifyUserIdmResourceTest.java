@@ -3,8 +3,12 @@ package gov.ca.cwds.idm;
 import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
+import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
 
 import org.junit.Test;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 public class VerifyUserIdmResourceTest extends IdmResourceTest {
 
@@ -79,5 +83,29 @@ public class VerifyUserIdmResourceTest extends IdmResourceTest {
   @WithMockCustomUser(roles = {CALS_ADMIN})
   public void testVerifyUsersCalsAdmin() throws Exception {
     assertVerifyUserUnauthorized();
+  }
+
+  private void assertVerify(String email, String racfId, String fixturePath) throws Exception {
+    MvcResult result =
+        mockMvc
+            .perform(
+                MockMvcRequestBuilders.get("/idm/users/verify?email=" + email + "&racfid=" + racfId))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
+            .andReturn();
+
+    assertNonStrict(result, fixturePath);
+  }
+
+  private void assertVerifyUserNoRacfidInCws() throws Exception {
+    assertVerify("test@test.com", "SMITHB1", "fixtures/idm/verify-user/verify-no-racfid.json");
+  }
+
+  private void assertVerifyUserUnauthorized() throws Exception {
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.get("/idm/users/verify?email=test@test.com&racfid=CWDS"))
+        .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+        .andReturn();
   }
 }
