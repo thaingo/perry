@@ -1,8 +1,0 @@
-{
-  "status": "BAD_REQUEST",
-  "technical_message": "Roles editing is not allowed",
-  "user_message": "Roles editing is not allowed",
-  "error_code": "CAP-038",
-  "causes": []
-}
-
