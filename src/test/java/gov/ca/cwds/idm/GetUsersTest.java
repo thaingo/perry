@@ -3,7 +3,7 @@ package gov.ca.cwds.idm;
 import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
-import static gov.ca.cwds.idm.TestCognitoServiceFacade.SOME_PAGINATION_TOKEN;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.SOME_PAGINATION_TOKEN;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
 
 import gov.ca.cwds.idm.util.WithMockCustomUser;

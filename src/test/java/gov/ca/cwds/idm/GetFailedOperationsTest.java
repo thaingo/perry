@@ -1,9 +1,9 @@
 package gov.ca.cwds.idm;
 
 import static gov.ca.cwds.idm.IdmResource.DATETIME_FORMAT_PATTERN;
-import static gov.ca.cwds.idm.TestCognitoServiceFacade.USER_NO_RACFID_ID;
-import static gov.ca.cwds.idm.TestCognitoServiceFacade.USER_WITH_RACFID_AND_DB_DATA_ID;
-import static gov.ca.cwds.idm.TestCognitoServiceFacade.USER_WITH_RACFID_ID;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_NO_RACFID_ID;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_WITH_RACFID_AND_DB_DATA_ID;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_WITH_RACFID_ID;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.CREATE;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
