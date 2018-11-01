@@ -26,9 +26,9 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @PrepareForTest(fullyQualifiedNames = "gov.ca.cwds.util.CurrentAuthenticatedUserUtil")
 public class OfficeAdminAuthorizerTest {
 
-  @Before
-  public void before() {
-    mockStatic(CurrentAuthenticatedUserUtil.class);
+  @Test
+  public void canEditRoles() {
+    assertTrue(new OfficeAdminAuthorizer(null).canEditRoles());
   }
 
   @Test
@@ -73,6 +73,11 @@ public class OfficeAdminAuthorizerTest {
     assertFalse(
         new OfficeAdminAuthorizer(TestHelper.user(toSet(OFFICE_ADMIN),
             "Yolo", "Yolo_2")).canUpdateUser());
+  }
+
+  @Before
+  public void mockOfficeAdmin() {
+    mockStatic(CurrentAuthenticatedUserUtil.class);
   }
 
 }

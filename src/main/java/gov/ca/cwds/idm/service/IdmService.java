@@ -17,8 +17,7 @@ public interface IdmService {
   @PostAuthorize("@authorizationService.canViewUser(returnObject)")
   User findUser(String id);
 
-  @PreAuthorize("@authorizationService.canUpdateUser(#id)")
-  void updateUser(@P("id") String id, UserUpdate updateUserDto);
+  void updateUser(String id, UserUpdate updateUserDto);
 
   UserVerificationResult verifyIfUserCanBeCreated(String racfId, String email);
 
@@ -29,7 +28,6 @@ public interface IdmService {
   List<User> searchUsers(UsersSearchCriteria usersSearchCriteria);
 
   List<UserAndOperation> getFailedOperations(LocalDateTime lastJobTime);
-
 
   @PreAuthorize("@authorizationService.canResendInvitationMessage(#email)")
   void resendInvitationMessage(@P("email") String email);

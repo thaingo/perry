@@ -1,6 +1,10 @@
 package gov.ca.cwds.idm.util;
 
+import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
+import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.util.UniversalUserTokenDeserializer.ADMIN_OFFICE_IDS_PARAM;
 import static gov.ca.cwds.util.UniversalUserTokenDeserializer.COUNTY_NAME_PARAM;
 import static gov.ca.cwds.util.Utils.toSet;
@@ -65,4 +69,25 @@ public final class TestHelper {
     admin.setParameter(ADMIN_OFFICE_IDS_PARAM, adminOfficeIds);
     return admin;
   }
+
+  public static User prepareStateAdmin() {
+    return TestHelper.user(toSet(STATE_ADMIN),
+        "Yolo", "Yolo_2");
+  }
+
+  public static User prepareCountyAdmin() {
+    return TestHelper.user(toSet(COUNTY_ADMIN),
+        "Yolo", "Yolo_2");
+  }
+
+  public static User prepareOfficeAdmin() {
+    return TestHelper.user(toSet(OFFICE_ADMIN),
+        "Yolo", "Yolo_2");
+  }
+
+  public static User prepareCalsAdmin() {
+    return TestHelper.user(toSet(CALS_ADMIN),
+        "Yolo", "Yolo_2");
+  }
+
 }
