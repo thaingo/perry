@@ -13,12 +13,7 @@ import static gov.ca.cwds.idm.TestCognitoServiceFacade.USER_WITH_NO_PHONE_EXTENS
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.USER_WITH_RACFID_AND_DB_DATA_ID;
 import static gov.ca.cwds.idm.TestCognitoServiceFacade.USER_WITH_RACFID_ID;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
-import com.amazonaws.services.cognitoidp.model.AdminCreateUserRequest;
-import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.util.WithMockCustomUser;
 import org.junit.Test;
 import org.springframework.test.web.servlet.MvcResult;
