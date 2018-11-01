@@ -110,8 +110,18 @@ public abstract class BaseIdmResourceTest extends BaseIntegrationTest {
     return "Basic " + authStringEnc;
   }
 
-  protected final static User user() {
+  protected final User user() {
     return user("gonzales@gmail.com");
+  }
+
+  protected final User user(String email) {
+    User user = new User();
+    user.setEmail(email);
+    user.setFirstName("Garcia");
+    user.setLastName("Gonzales");
+    user.setCountyName(WithMockCustomUser.COUNTY);
+    user.setOfficeId(WithMockCustomUser.OFFICE_ID);
+    return user;
   }
 
   protected final User racfIdUser(String email, String racfId, Set<String> roles) {
@@ -119,16 +129,6 @@ public abstract class BaseIdmResourceTest extends BaseIntegrationTest {
     user.setEmail(email);
     user.setRacfid(racfId);
     user.setRoles(roles);
-    return user;
-  }
-
-  protected final static User user(String email) {
-    User user = new User();
-    user.setEmail(email);
-    user.setFirstName("Garcia");
-    user.setLastName("Gonzales");
-    user.setCountyName(WithMockCustomUser.COUNTY);
-    user.setOfficeId(WithMockCustomUser.OFFICE_ID);
     return user;
   }
 
