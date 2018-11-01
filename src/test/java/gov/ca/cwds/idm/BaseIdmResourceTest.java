@@ -18,8 +18,6 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.LoggingEvent;
 import ch.qos.logback.core.Appender;
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import gov.ca.cwds.BaseIntegrationTest;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.persistence.ns.repository.UserLogRepository;
@@ -167,15 +165,29 @@ public abstract class BaseIdmResourceTest extends BaseIntegrationTest {
     return user;
   }
 
-  protected final static String asJsonString(final Object obj) {
-    try {
-      ObjectMapper objectMapper = new ObjectMapper();
-      JavaTimeModule javaTimeModule = new JavaTimeModule();
-      objectMapper.registerModule(javaTimeModule);
-      return objectMapper.writeValueAsString(obj);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+  protected final void setDoraSuccess() {
+    when(mockRestTemplate.exchange(
+        any(String.class),
+        any(HttpMethod.class),
+        any(HttpEntity.class),
+        any(Class.class),
+        any(Map.class)))
+        .thenReturn(ResponseEntity.ok().body("{\"success\":true}"));
+  }
+
+  protected final void setDoraError() {
+    doThrow(new RestClientException("Elastic Search error"))
+        .when(mockRestTemplate).exchange(any(String.class), any(HttpMethod.class),
+        any(HttpEntity.class), any(Class.class), any(Map.class));
+  }
+
+  protected final void verifyDoraCalls(int times) {
+    verify(mockRestTemplate, times(times)).exchange(
+        any(String.class),
+        any(HttpMethod.class),
+        any(HttpEntity.class),
+        any(Class.class),
+        any(Map.class));
   }
 
   @Component
@@ -201,35 +213,9 @@ public abstract class BaseIdmResourceTest extends BaseIntegrationTest {
   }
 
   public static class TestSearchService extends SearchService {
-
     @Override
     protected String getSsoToken() {
       return SSO_TOKEN;
     }
-  }
-
-  protected final void setDoraSuccess() {
-    when(mockRestTemplate.exchange(
-        any(String.class),
-        any(HttpMethod.class),
-        any(HttpEntity.class),
-        any(Class.class),
-        any(Map.class)))
-        .thenReturn(ResponseEntity.ok().body("{\"success\":true}"));
-  }
-
-  protected final void setDoraError() {
-    doThrow(new RestClientException("Elastic Search error"))
-        .when(mockRestTemplate).exchange(any(String.class), any(HttpMethod.class),
-        any(HttpEntity.class), any(Class.class), any(Map.class));
-  }
-
-  protected final void verifyDoraCalls(int times) {
-    verify(mockRestTemplate, times(times)).exchange(
-        any(String.class),
-        any(HttpMethod.class),
-        any(HttpEntity.class),
-        any(Class.class),
-        any(Map.class));
   }
 }
