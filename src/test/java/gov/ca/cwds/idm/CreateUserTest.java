@@ -35,6 +35,18 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 public class CreateUserTest extends BaseIdmResourceWithSearchTest {
 
   @Test
+  @WithMockCustomUser(roles = {STATE_ADMIN}, county = "Madera")
+  public void testCreateUserStateAdmin() throws Exception {
+    assertCreateUserSuccess(user("gonzales2@gmail.com"), "new_user_success_id_1");
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {OFFICE_ADMIN})
+  public void testCreateUserOfficeAdmin() throws Exception {
+    assertCreateUserSuccess(user("gonzales3@gmail.com"), "new_user_success_id_2");
+  }
+
+  @Test
   @WithMockCustomUser(roles = {OFFICE_ADMIN}, adminOfficeIds = {"otherOfficeId"})
   public void testCreateUserOfficeAdminOtherOffice() throws Exception {
     assertCreateUserUnauthorized();
@@ -180,7 +192,7 @@ public class CreateUserTest extends BaseIdmResourceWithSearchTest {
     User actuallySendUser = getActuallySendElroydaUser();
     ((TestCognitoServiceFacade) cognitoServiceFacade).setSearchByRacfidRequestAndResult("ELROYDA");
 
-    assertCreateUserSuccess(user, actuallySendUser, NEW_USER_SUCCESS_ID_4);
+    assertCreateUserSuccess(user, actuallySendUser, "new_user_success_id_3");
   }
 
   @Test
@@ -188,7 +200,7 @@ public class CreateUserTest extends BaseIdmResourceWithSearchTest {
   public void testCreateRacfidUserUnautorized() throws Exception {
     User user = getElroydaUser();
     User actuallySendUser = getActuallySendElroydaUser();
-    AdminCreateUserRequest request = setCreateRequestAndResult(actuallySendUser, NEW_USER_SUCCESS_ID_4);
+    AdminCreateUserRequest request = setCreateRequestAndResult(actuallySendUser, "new_user_success_id_4");
     ((TestCognitoServiceFacade) cognitoServiceFacade).setSearchByRacfidRequestAndResult("ELROYDA");
 
     mockMvc
@@ -210,6 +222,10 @@ public class CreateUserTest extends BaseIdmResourceWithSearchTest {
     user.setRoles(toSet(CWS_WORKER));
 
     assertCreateUserBadRequest(user, "fixtures/idm/create-user/no-racfid-in-cws-error.json");
+  }
+
+  private void assertCreateUserSuccess(User user, String newUserId) throws Exception {
+    assertCreateUserSuccess(user, user, newUserId);
   }
 
   private void assertCreateUserSuccess(User user, User actuallySendUser, String newUserId) throws Exception {

@@ -54,7 +54,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 )
 public abstract class BaseIdmResourceTest extends BaseIntegrationTest {
 
-  protected static final String NEW_USER_SUCCESS_ID_4 = "17067e4e-270f-4623-b86c-b4d4fa527a37";
   protected static final String SSO_TOKEN = "b02aa833-f8b2-4d28-8796-3abe059313d1";
   protected static final String YOLO_COUNTY_USERS_EMAIL = "julio@gmail.com";
   protected static final String BASIC_AUTH_HEADER = prepareBasicAuthHeader();
