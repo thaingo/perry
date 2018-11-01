@@ -15,6 +15,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 public class ResendInvitationEmailTest extends BaseIdmResourceTest {
 
+  private static final String YOLO_COUNTY_USERS_EMAIL = "julio@gmail.com";
+
   @Test
   @WithMockCustomUser(county = "OtherCounty")
   public void testResendInvitationEmailWithDifferentCounty() throws Exception {
