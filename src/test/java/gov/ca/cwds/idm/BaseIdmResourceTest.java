@@ -6,13 +6,7 @@ import static gov.ca.cwds.idm.BaseIdmResourceTest.IDM_BASIC_AUTH_USER;
 import static gov.ca.cwds.util.LiquibaseUtils.CMS_STORE_URL;
 import static gov.ca.cwds.util.LiquibaseUtils.TOKEN_STORE_URL;
 import static gov.ca.cwds.util.LiquibaseUtils.runLiquibaseScript;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.LoggingEvent;
@@ -22,14 +16,11 @@ import gov.ca.cwds.BaseIntegrationTest;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.persistence.ns.repository.UserLogRepository;
 import gov.ca.cwds.idm.service.IdmServiceImpl;
-import gov.ca.cwds.idm.service.SearchRestSender;
 import gov.ca.cwds.idm.service.SearchService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
-import gov.ca.cwds.idm.service.cognito.SearchProperties;
 import gov.ca.cwds.idm.util.WithMockCustomUser;
 import gov.ca.cwds.service.messages.MessagesService;
 import java.nio.charset.Charset;
-import java.util.Map;
 import java.util.Set;
 import org.apache.commons.codec.binary.Base64;
 import org.junit.Before;
@@ -42,15 +33,10 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.client.RestClientException;
-import org.springframework.web.client.RestTemplate;
 
 @RunWith(SpringRunner.class)
 @ActiveProfiles({"dev", "idm"})
@@ -93,19 +79,6 @@ public abstract class BaseIdmResourceTest extends BaseIntegrationTest {
   @Autowired
   protected UserLogRepository userLogRepository;
 
-  @Autowired
-  protected SearchService searchService;
-
-  @Autowired
-  protected SearchRestSender searchRestSender;
-
-  @Autowired
-  protected SearchProperties searchProperties;
-
-  protected SearchService spySearchService;
-
-  protected RestTemplate mockRestTemplate = mock(RestTemplate.class);
-
   protected AWSCognitoIdentityProvider cognito;
 
   protected Appender mockAppender = mock(Appender.class);
@@ -124,12 +97,6 @@ public abstract class BaseIdmResourceTest extends BaseIntegrationTest {
 
     ((TestCognitoServiceFacade) cognitoServiceFacade).setMessagesService(messagesService);
 
-    searchRestSender.setRestTemplate(mockRestTemplate);
-    searchService.setRestSender(searchRestSender);
-    searchService.setSearchProperties(searchProperties);
-    spySearchService = spy(searchService);
-
-    idmService.setSearchService(spySearchService);
     cognito = ((TestCognitoServiceFacade) cognitoServiceFacade).getIdentityProvider();
 
     Logger rootLogger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
@@ -163,31 +130,6 @@ public abstract class BaseIdmResourceTest extends BaseIntegrationTest {
     user.setCountyName(WithMockCustomUser.COUNTY);
     user.setOfficeId(WithMockCustomUser.OFFICE_ID);
     return user;
-  }
-
-  protected final void setDoraSuccess() {
-    when(mockRestTemplate.exchange(
-        any(String.class),
-        any(HttpMethod.class),
-        any(HttpEntity.class),
-        any(Class.class),
-        any(Map.class)))
-        .thenReturn(ResponseEntity.ok().body("{\"success\":true}"));
-  }
-
-  protected final void setDoraError() {
-    doThrow(new RestClientException("Elastic Search error"))
-        .when(mockRestTemplate).exchange(any(String.class), any(HttpMethod.class),
-        any(HttpEntity.class), any(Class.class), any(Map.class));
-  }
-
-  protected final void verifyDoraCalls(int times) {
-    verify(mockRestTemplate, times(times)).exchange(
-        any(String.class),
-        any(HttpMethod.class),
-        any(HttpEntity.class),
-        any(Class.class),
-        any(Map.class));
   }
 
   @Component
