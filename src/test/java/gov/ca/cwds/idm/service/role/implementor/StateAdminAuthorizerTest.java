@@ -1,11 +1,11 @@
 package gov.ca.cwds.idm.service.role.implementor;
 
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
-import static gov.ca.cwds.idm.service.TestHelper.admin;
-import static gov.ca.cwds.idm.service.TestHelper.prepareCalsAdmin;
-import static gov.ca.cwds.idm.service.TestHelper.prepareCountyAdmin;
-import static gov.ca.cwds.idm.service.TestHelper.prepareOfficeAdmin;
-import static gov.ca.cwds.idm.service.TestHelper.prepareStateAdmin;
+import static gov.ca.cwds.idm.util.TestHelper.admin;
+import static gov.ca.cwds.idm.util.TestHelper.prepareCalsAdmin;
+import static gov.ca.cwds.idm.util.TestHelper.prepareCountyAdmin;
+import static gov.ca.cwds.idm.util.TestHelper.prepareOfficeAdmin;
+import static gov.ca.cwds.idm.util.TestHelper.prepareStateAdmin;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserCountyName;
 import static gov.ca.cwds.util.Utils.toSet;

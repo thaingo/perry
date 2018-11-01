@@ -56,7 +56,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 public class UpdateUserTest extends BaseIdmResourceWithSearchTest {
 
   @Test
-  @WithMockCustomUser
+  @WithMockCustomUser(roles = {STATE_ADMIN})
   public void testUpdateUser() throws Exception {
 
     UserUpdate userUpdate = new UserUpdate();
@@ -101,8 +101,22 @@ public class UpdateUserTest extends BaseIdmResourceWithSearchTest {
     userUpdate.setEnabled(Boolean.FALSE);
     userUpdate.setRoles(toSet("State-admin"));
 
-    assertUpdateBadRequest(USER_NO_RACFID_ID, userUpdate,
+    assertUpdateBadRequest(USER_WITH_RACFID_AND_DB_DATA_ID, userUpdate,
         "fixtures/idm/update-user/not-allowed-role-error.json");
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {STATE_ADMIN})
+  public void testUpdatingRolesIsNotAllowed() throws Exception {
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setEnabled(Boolean.TRUE);
+    userUpdate.setRoles(toSet("County-admin"));
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.patch("/idm/users/" + STATE_ADMIN_ID)
+                .contentType(JSON_CONTENT_TYPE)
+                .content(asJsonString(userUpdate)))
+        .andExpect(MockMvcResultMatchers.status().isUnauthorized());
   }
 
   @Test
@@ -113,7 +127,7 @@ public class UpdateUserTest extends BaseIdmResourceWithSearchTest {
     userUpdate.setEnabled(Boolean.FALSE);
     userUpdate.setRoles(toSet());
 
-    assertUpdateBadRequest(USER_NO_RACFID_ID, userUpdate,
+    assertUpdateBadRequest(USER_WITH_RACFID_AND_DB_DATA_ID, userUpdate,
         "fixtures/idm/update-user/no-roles-error.json");
   }
 
