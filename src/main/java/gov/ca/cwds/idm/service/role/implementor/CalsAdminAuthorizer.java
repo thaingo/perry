@@ -1,20 +1,17 @@
 package gov.ca.cwds.idm.service.role.implementor;
 
 import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.service.authorization.AdminActionsAuthorizer;
 import gov.ca.cwds.idm.service.authorization.UserRolesService;
 
-class CalsAdminAuthorizer implements AdminActionsAuthorizer {
-
-  private User user;
+class CalsAdminAuthorizer extends AbstractAdminActionsAuthorizer {
 
   CalsAdminAuthorizer(User user) {
-    this.user = user;
+    super(user);
   }
 
   @Override
   public boolean canViewUser() {
-    return UserRolesService.isCalsExternalWorker(user);
+    return UserRolesService.isCalsExternalWorker(getUser());
   }
 
   @Override

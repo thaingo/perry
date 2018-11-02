@@ -5,6 +5,7 @@ import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.idm.util.TestHelper.admin;
+import static gov.ca.cwds.idm.util.TestHelper.user;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserCountyName;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserOfficeIds;
@@ -28,7 +29,7 @@ public class OfficeAdminAuthorizerTest {
 
   @Test
   public void canEditRoles() {
-    assertTrue(new OfficeAdminAuthorizer(null).canEditRoles());
+    assertTrue(new OfficeAdminAuthorizer(user("Yolo", "Yolo_1")).canEditRoles());
   }
 
   @Test
