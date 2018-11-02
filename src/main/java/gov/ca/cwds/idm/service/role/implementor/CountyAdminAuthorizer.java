@@ -5,39 +5,36 @@ import static gov.ca.cwds.idm.service.authorization.UserRolesService.isStateAdmi
 import static gov.ca.cwds.idm.service.role.implementor.AuthorizationUtils.isPrincipalInTheSameCountyWith;
 
 import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.service.authorization.AdminActionsAuthorizer;
 
-class CountyAdminAuthorizer implements AdminActionsAuthorizer {
-
-  private final User user;
+class CountyAdminAuthorizer extends AbstractAdminActionsAuthorizer {
 
   CountyAdminAuthorizer(User user) {
-    this.user = user;
+    super(user);
   }
 
   @Override
   public boolean canViewUser() {
-    return isPrincipalInTheSameCountyWith(user);
+    return isPrincipalInTheSameCountyWith(getUser());
   }
 
   @Override
   public boolean canCreateUser() {
-    return isPrincipalInTheSameCountyWith(user);
+    return isPrincipalInTheSameCountyWith(getUser());
   }
 
   @Override
   public boolean canUpdateUser() {
-    return isPrincipalInTheSameCountyWith(user) && !isStateAdmin(user);
+    return isPrincipalInTheSameCountyWith(getUser()) && !isStateAdmin(getUser());
   }
 
   @Override
   public boolean canResendInvitationMessage() {
-    return isPrincipalInTheSameCountyWith(user);
+    return isPrincipalInTheSameCountyWith(getUser());
   }
 
   @Override
   public boolean canEditRoles() {
-    return !isStateAdmin(user) && !isCountyAdmin(user);
+    return super.canEditRoles() && (!isStateAdmin(getUser()) && !isCountyAdmin(getUser()));
   }
 
 }

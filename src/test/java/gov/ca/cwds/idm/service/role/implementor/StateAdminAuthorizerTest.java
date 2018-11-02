@@ -42,7 +42,7 @@ public class StateAdminAuthorizerTest {
 
   @Test
   public void canEditCalsAdminRoles() {
-    assertTrue(new StateAdminAuthorizer(prepareCalsAdmin()).canEditRoles());
+    assertFalse(new StateAdminAuthorizer(prepareCalsAdmin()).canEditRoles());
   }
 
   @Before

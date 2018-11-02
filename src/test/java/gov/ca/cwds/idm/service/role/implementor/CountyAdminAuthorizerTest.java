@@ -42,7 +42,7 @@ public class CountyAdminAuthorizerTest {
 
   @Test
   public void canEditCalsAdminRoles() {
-    assertTrue(new CountyAdminAuthorizer(prepareCalsAdmin()).canEditRoles());
+    assertFalse(new CountyAdminAuthorizer(prepareCalsAdmin()).canEditRoles());
   }
 
   @Before
