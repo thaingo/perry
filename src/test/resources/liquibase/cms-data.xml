@@ -399,4 +399,32 @@
     </insert>
   </changeSet>
 
+  <changeSet id="data_for_cms_db_8" author="Dmytro.Palczewski">
+    <insert tableName="CWS_OFFT">
+      <column name="IDENTIFIER" value="JhiFUTy00E"/>
+      <column name="FAX_NO" valueNumeric="0"/>
+      <column name="GEO_RGNTCD" value="  "/>
+      <column name="GVR_ENTC" valueNumeric="1124"/>
+      <column name="HDQRTR_IND" value="N"/>
+      <column name="INACTV_IND" value="Y"/>
+      <column name="MAILST_DSC" value="       "/>
+      <column name="MSG_TEL_NO" valueNumeric="0"/>
+      <column name="MSG_EXT_NO" valueNumeric="0"/>
+      <column name="CWS_OFF_NO" value="     "/>
+      <column name="PRM_TEL_NO" valueNumeric="4654789796"/>
+      <column name="PRM_EXT_NO" valueNumeric="0"/>
+      <column name="LST_UPD_ID" value="0V2"/>
+      <column name="LST_UPD_TS" valueDate="2004-09-21 16:02:00.258906"/>
+      <column name="FKSTFPERST"/>
+      <column name="COMNT_DSC" value="                                                                                                                        "/>
+      <column name="AGENCY_NM" value="Win Agency                                   "/>
+      <column name="DPT_DIV_NM" value="Department                                   "/>
+      <column name="CWS_OFF_NM" value="Yolo Office 3                                "/>
+      <column name="CNTY_SPFCD" value="57"/>
+      <column name="AGCY_CD_NO" valueNumeric="0"/>
+      <column name="LOC_CNTY" valueNumeric="0"/>
+      <column name="DIR_NM_TL" value="d                                            "/>
+    </insert>
+  </changeSet>
+
 </databaseChangeLog>
