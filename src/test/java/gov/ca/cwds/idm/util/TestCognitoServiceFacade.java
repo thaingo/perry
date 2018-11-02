@@ -1,4 +1,4 @@
-package gov.ca.cwds.idm;
+package gov.ca.cwds.idm.util;
 
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.COUNTY;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.OFFICE;
@@ -43,30 +43,30 @@ import liquibase.util.StringUtils;
 
 public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
 
-  static final String USER_NO_RACFID_ID = "2be3221f-8c2f-4386-8a95-a68f0282efb0";
-  static final String USER_CALS_EXTERNAL = "2be3551f-8c9w-4386-8a95-a68f0777efb0";
-  static final String USER_WITH_RACFID_ID = "24051d54-9321-4dd2-a92f-6425d6c455be";
-  static final String USER_WITH_RACFID_AND_DB_DATA_ID =
+  public static final String USER_NO_RACFID_ID = "2be3221f-8c2f-4386-8a95-a68f0282efb0";
+  public static final String USER_CALS_EXTERNAL = "2be3551f-8c9w-4386-8a95-a68f0777efb0";
+  public static final String USER_WITH_RACFID_ID = "24051d54-9321-4dd2-a92f-6425d6c455be";
+  public static final String USER_WITH_RACFID_AND_DB_DATA_ID =
       "d740ec1d-80ae-4d84-a8c4-9bed7a942f5b";
-  static final String USER_WITH_NO_PHONE_EXTENSION = "d740ec1d-66ae-4d84-a8c4-8bed7a942f5b";
-  static final String NEW_USER_SUCCESS_ID = "17067e4e-270f-4623-b86c-b4d4fa527a34";
-  static final String NEW_USER_ES_FAIL_ID = "08e14c57-6e5e-48dd-8172-e8949c2a7f76";
-  static final String ES_ERROR_CREATE_USER_EMAIL = "es.error@create.com";
-  static final String SOME_PAGINATION_TOKEN = "somePaginationToken";
-  static final String ABSENT_USER_ID = "absentUserId";
-  static final String ERROR_USER_ID = "errorUserId";
-  static final String INACTIVE_USER_WITH_NO_ACTIVE_RACFID_IN_CMS =
+  public static final String USER_WITH_NO_PHONE_EXTENSION = "d740ec1d-66ae-4d84-a8c4-8bed7a942f5b";
+  public static final String NEW_USER_SUCCESS_ID = "17067e4e-270f-4623-b86c-b4d4fa527a34";
+  public static final String NEW_USER_ES_FAIL_ID = "08e14c57-6e5e-48dd-8172-e8949c2a7f76";
+  public static final String ES_ERROR_CREATE_USER_EMAIL = "es.error@create.com";
+  public static final String SOME_PAGINATION_TOKEN = "somePaginationToken";
+  public static final String ABSENT_USER_ID = "absentUserId";
+  public static final String ERROR_USER_ID = "errorUserId";
+  public static final String INACTIVE_USER_WITH_NO_ACTIVE_RACFID_IN_CMS =
       "17067e4e-270f-4623-b86c-b4d4fa527z79";
-  static final String INACTIVE_USER_WITH_ACTIVE_RACFID_IN_CMS =
+  public static final String INACTIVE_USER_WITH_ACTIVE_RACFID_IN_CMS =
       "17067e4e-270f-4623-b86c-b4d4fa524f38";
-  static final String USER_WITH_INACTIVE_STATUS_COGNITO =
+  public static final String USER_WITH_INACTIVE_STATUS_COGNITO =
       "17067e4e-270f-4623-b86c-b4d4fa527a22";
-  static final String INACTIVE_USER_WITH_NO_RACFID =
+  public static final String INACTIVE_USER_WITH_NO_RACFID =
       "17067e4e-270f-4623-b86c-b4d4fa525d68";
-  static final String STATE_ADMIN_ID = "2d9369b4-5855-4a2c-95f7-3617fab1496a";
-  static final String COUNTY_ADMIN_ID = "c3702f4c113f1d2415447c8bfe8321d8df2d5151";
+  public static final String STATE_ADMIN_ID = "2d9369b4-5855-4a2c-95f7-3617fab1496a";
+  public static final String COUNTY_ADMIN_ID = "c3702f4c113f1d2415447c8bfe8321d8df2d5151";
 
-  static final String USERPOOL = "userpool";
+  public static final String USERPOOL = "userpool";
 
   private AWSCognitoIdentityProvider cognito;
 
@@ -489,7 +489,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
     return request;
   }
 
-  AdminCreateUserRequest setCreateUserResult(AdminCreateUserRequest request, String newId) {
+  public AdminCreateUserRequest setCreateUserResult(AdminCreateUserRequest request, String newId) {
 
     UserType newUser = new UserType();
     newUser.setUsername(newId);

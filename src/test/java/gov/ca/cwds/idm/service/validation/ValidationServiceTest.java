@@ -2,7 +2,7 @@ package gov.ca.cwds.idm.service.validation;
 
 import static gov.ca.cwds.BaseIntegrationTest.IDM_BASIC_AUTH_PASS;
 import static gov.ca.cwds.BaseIntegrationTest.IDM_BASIC_AUTH_USER;
-import static gov.ca.cwds.idm.service.TestHelper.userType;
+import static gov.ca.cwds.idm.util.TestHelper.userType;
 import static gov.ca.cwds.util.Utils.toSet;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -11,7 +11,7 @@ import static org.mockito.Mockito.when;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.MappingService;
-import gov.ca.cwds.idm.service.TestHelper;
+import gov.ca.cwds.idm.util.TestHelper;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
 import gov.ca.cwds.service.CwsUserInfoService;

@@ -1,4 +1,4 @@
-package gov.ca.cwds.idm;
+package gov.ca.cwds.idm.util;
 
 import static gov.ca.cwds.util.UniversalUserTokenDeserializer.ADMIN_OFFICE_IDS_PARAM;
 import static gov.ca.cwds.util.UniversalUserTokenDeserializer.COUNTY_NAME_PARAM;
