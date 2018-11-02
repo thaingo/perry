@@ -50,11 +50,11 @@ public class OfficeService {
 
     switch (UserRolesService.getStrongestAdminRole(currentUser)) {
       case STATE_ADMIN:
-        offices = officeRepository.findOffices();
+        offices = officeRepository.findActiveOffices();
         break;
       case OFFICE_ADMIN:
       case COUNTY_ADMIN:
-        offices = officeRepository.findCountyOffices(getCurrentUserCountyName());
+        offices = officeRepository.findCountyActiveOffices(getCurrentUserCountyName());
         break;
       default:
         String msg = messagesService
