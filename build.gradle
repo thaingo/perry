@@ -34,7 +34,7 @@ project.ext {
     configPath = "$rootProject.projectDir/config/"
     springVersion = "1.5.13.RELEASE"
     springfoxSwaggerVersion = "2.9.0"
-    projectMajorVersion = '4.0.1'
+    projectMajorVersion = '4.0.2'
     mainclass = 'gov.ca.cwds.PerryApplication'
     targetDockerHubOrganization = System.env.DOCKERHUB_ORG ?: 'cwds'
     cwdsModelVersion = '0.10.1_684-RC'
