@@ -19,7 +19,8 @@ public interface OfficeRepository extends ReadOnlyRepository<CwsOffice, String> 
   String GET_ALL_OFFICES_QUERY =
       "select new gov.ca.cwds.idm.dto.Office(office.officeId, trim(office.cwsOfficeName),"
       + " office.governmentEntityType, trim(county.shortDescription)) from CwsOffice office,"
-      + " County county where office.governmentEntityType = county.systemId";
+      + " County county where office.governmentEntityType = county.systemId "
+      + " and office.inactiveIndicator = 'N'";
 
   @Query(GET_ALL_OFFICES_QUERY)
   List<Office> findOffices();
