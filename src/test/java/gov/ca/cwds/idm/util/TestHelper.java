@@ -1,4 +1,4 @@
-package gov.ca.cwds.idm.service;
+package gov.ca.cwds.idm.util;
 
 import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
