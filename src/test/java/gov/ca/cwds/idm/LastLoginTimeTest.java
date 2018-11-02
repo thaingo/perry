@@ -1,12 +1,7 @@
-package gov.ca.cwds.idm.service;
+package gov.ca.cwds.idm;
 
-import static gov.ca.cwds.BaseIntegrationTest.H2_DRIVER_CLASS_NAME;
-import static gov.ca.cwds.BaseIntegrationTest.IDM_BASIC_AUTH_PASS;
-import static gov.ca.cwds.BaseIntegrationTest.IDM_BASIC_AUTH_USER;
 import static gov.ca.cwds.config.TokenServiceConfiguration.TOKEN_TRANSACTION_MANAGER;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
-import static gov.ca.cwds.util.LiquibaseUtils.TOKEN_STORE_URL;
-import static gov.ca.cwds.util.LiquibaseUtils.createTokenStoreDatabase;
 import static gov.ca.cwds.util.UniversalUserTokenDeserializer.USER_NAME;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -17,31 +12,18 @@ import gov.ca.cwds.event.UserLoggedInEvent;
 import gov.ca.cwds.idm.dto.UserIdAndOperation;
 import gov.ca.cwds.idm.event.UserLoggedInEventListener;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
-import gov.ca.cwds.idm.persistence.ns.repository.UserLogRepository;
+import gov.ca.cwds.idm.service.NsUserService;
+import gov.ca.cwds.idm.service.UserLogService;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-@RunWith(SpringRunner.class)
-@ActiveProfiles({"dev", "idm"})
-@SpringBootTest(properties = {
-    "perry.identityManager.idmBasicAuthUser=" + IDM_BASIC_AUTH_USER,
-    "perry.identityManager.idmBasicAuthPass=" + IDM_BASIC_AUTH_PASS,
-    "perry.identityManager.idmMapping=config/idm.groovy",
-    "spring.jpa.hibernate.ddl-auto=none",
-    "perry.tokenStore.datasource.url=" + TOKEN_STORE_URL,
-})
-public class LastLoginTimeTest {
+public class LastLoginTimeTest extends BaseIdmResourceTest {
 
   private static final String NEW_USER_NAME = "last-login-time-test-unique-username";
 
@@ -53,15 +35,6 @@ public class LastLoginTimeTest {
 
   @Autowired
   private UserLogService userLogService;
-
-  @Autowired
-  private UserLogRepository userLogRepository;
-
-  @BeforeClass
-  public static void prepareDatabases() throws Exception {
-    Class.forName(H2_DRIVER_CLASS_NAME);
-    createTokenStoreDatabase();
-  }
 
   @Test
   @Transactional(value = TOKEN_TRANSACTION_MANAGER)
