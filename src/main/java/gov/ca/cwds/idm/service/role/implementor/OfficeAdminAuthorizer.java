@@ -7,20 +7,17 @@ import static gov.ca.cwds.idm.service.role.implementor.AuthorizationUtils.isPrin
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserOfficeIds;
 
 import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.service.authorization.AdminActionsAuthorizer;
 import java.util.Set;
 
-class OfficeAdminAuthorizer implements AdminActionsAuthorizer {
-
-  private final User user;
+class OfficeAdminAuthorizer extends AbstractAdminActionsAuthorizer {
 
   OfficeAdminAuthorizer(User user) {
-    this.user = user;
+    super(user);
   }
 
   @Override
   public boolean canViewUser() {
-    return isPrincipalInTheSameCountyWith(user)
+    return isPrincipalInTheSameCountyWith(getUser())
         && !userIsStateAdminFromOtherOffice()
         && !userIsCountyAdminFromOtherOffice();
   }
@@ -32,7 +29,7 @@ class OfficeAdminAuthorizer implements AdminActionsAuthorizer {
 
   @Override
   public boolean canUpdateUser() {
-    return isAdminInTheSameOfficeAsUser() && !isAdmin(user);
+    return isAdminInTheSameOfficeAsUser() && !isAdmin(getUser());
   }
 
   @Override
@@ -40,22 +37,16 @@ class OfficeAdminAuthorizer implements AdminActionsAuthorizer {
     return isAdminInTheSameOfficeAsUser();
   }
 
-  @Override
-  public boolean canEditRoles() {
-    //There is no requirements at this moment
-    return true;
-  }
-
   private boolean userIsStateAdminFromOtherOffice() {
-    return isStateAdmin(user) && !isAdminInTheSameOfficeAsUser();
+    return isStateAdmin(getUser()) && !isAdminInTheSameOfficeAsUser();
   }
 
   private boolean userIsCountyAdminFromOtherOffice() {
-    return isCountyAdmin(user) && !isAdminInTheSameOfficeAsUser();
+    return isCountyAdmin(getUser()) && !isAdminInTheSameOfficeAsUser();
   }
 
   private boolean isAdminInTheSameOfficeAsUser() {
-    String userOfficeId = user.getOfficeId();
+    String userOfficeId = getUser().getOfficeId();
     Set<String> adminOfficeIds = getCurrentUserOfficeIds();
     return userOfficeId != null && adminOfficeIds != null && adminOfficeIds.contains(userOfficeId);
   }

@@ -1,5 +1,7 @@
 package gov.ca.cwds.idm.service.authorization;
 
+import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.CALS_EXTERNAL_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
@@ -37,6 +39,27 @@ public class AuthorizationServiceImplTest {
     service = new AuthorizationServiceImpl();
     service.setAdminRoleImplementorFactory(new AdminRoleImplementorFactory());
     mockStatic(CurrentAuthenticatedUserUtil.class);
+  }
+
+  @Test
+  public void updateCalsExternalWorkerRole() {
+    assertCantUpdateRole(CALS_EXTERNAL_WORKER);
+  }
+
+  @Test
+  public void updateCalsAdminRole() {
+    assertCantUpdateRole(CALS_ADMIN);
+  }
+
+  @Test
+  public void updateCalsAdminRolePlusSomeRole() {
+    assertCantUpdateRole(CALS_ADMIN);
+  }
+
+  private void assertCantUpdateRole(String ... roles) {
+    when(getCurrentUser()).thenReturn(
+        admin(toSet(STATE_ADMIN), "Yolo", toSet("Yolo_2")));
+    assertFalse(service.canEditRoles(user(toSet(roles), "Yolo", "Yolo_1")));
   }
 
   @Test

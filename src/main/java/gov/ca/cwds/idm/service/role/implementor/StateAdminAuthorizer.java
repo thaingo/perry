@@ -3,14 +3,11 @@ package gov.ca.cwds.idm.service.role.implementor;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isStateAdmin;
 
 import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.service.authorization.AdminActionsAuthorizer;
 
-class StateAdminAuthorizer implements AdminActionsAuthorizer {
-
-  private User user;
+class StateAdminAuthorizer extends AbstractAdminActionsAuthorizer {
 
   StateAdminAuthorizer(User user) {
-    this.user = user;
+    super(user);
   }
 
   @Override
@@ -35,7 +32,7 @@ class StateAdminAuthorizer implements AdminActionsAuthorizer {
 
   @Override
   public boolean canEditRoles() {
-    return !isStateAdmin(user);
+    return super.canEditRoles() && !isStateAdmin(getUser());
   }
 
 }
