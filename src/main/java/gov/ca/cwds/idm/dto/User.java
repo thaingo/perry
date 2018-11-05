@@ -1,7 +1,7 @@
 package gov.ca.cwds.idm.dto;
 
 import static gov.ca.cwds.util.Utils.DATE_FORMAT;
-import static gov.ca.cwds.util.Utils.TIME_FORMAT;
+import static gov.ca.cwds.util.Utils.DATE_TIME_FORMAT;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -21,7 +21,7 @@ import org.hibernate.validator.constraints.NotBlank;
 @SuppressWarnings("squid:S3437")
 public class User implements RolesHolder, Serializable {
 
-  private static final long serialVersionUID = -5958790384369574754L;
+  private static final long serialVersionUID = 5574485220333060398L;
 
   private String id;
 
@@ -53,12 +53,16 @@ public class User implements RolesHolder, Serializable {
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_FORMAT)
   private Date userLastModifiedDate;
 
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_FORMAT + " " + TIME_FORMAT)
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_TIME_FORMAT)
   private LocalDateTime lastLoginDateTime;
 
   private Boolean enabled;
 
   private String status;
+
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_TIME_FORMAT)
+  private LocalDateTime registrationResubmitDateTime =
+      LocalDateTime.of(2018, 11, 5, 10, 53, 24);
 
   private Set<String> permissions = new LinkedHashSet<>();
 
@@ -182,6 +186,14 @@ public class User implements RolesHolder, Serializable {
 
   public void setLastLoginDateTime(LocalDateTime lastLoginDateTime) {
     this.lastLoginDateTime = lastLoginDateTime;
+  }
+
+  public LocalDateTime getRegistrationResubmitDateTime() {
+    return registrationResubmitDateTime;
+  }
+
+  public void setRegistrationResubmitDateTime(LocalDateTime registrationResubmitDateTime) {
+    this.registrationResubmitDateTime = registrationResubmitDateTime;
   }
 
   public Set<String> getPermissions() {
