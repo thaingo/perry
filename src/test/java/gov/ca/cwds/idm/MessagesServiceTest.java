@@ -1,4 +1,4 @@
-package gov.ca.cwds.service.messages;
+package gov.ca.cwds.idm;
 
 import static gov.ca.cwds.service.messages.MessageCode.IDM_MAPPING_SCRIPT_ERROR;
 import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID_IN_CWSCMS;
@@ -6,18 +6,8 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-@ActiveProfiles({"dev"})
-public class MessagesServiceTest {
-
-  @Autowired private MessagesService messagesService;
+public class MessagesServiceTest extends BaseIdmResourceTest {
 
   @Test
   public void testGet() {
