@@ -108,13 +108,13 @@ public class GetUserTest extends BaseIdmResourceTest {
   @Test
   @WithMockCustomUser(roles = {OFFICE_ADMIN}, adminOfficeIds = {"OtherOfficeId"})
   public void testGetOtherOfficeCountyAdminByOfficeAdmin() throws Exception {
-    assertGetUserUnauthorized(COUNTY_ADMIN_ID);
+    testGetValidUser(COUNTY_ADMIN_ID, "fixtures/idm/get-user/with-county-admin-id.json");
   }
 
   @Test
   @WithMockCustomUser(roles = {OFFICE_ADMIN}, adminOfficeIds = {"OtherOfficeId"})
   public void testGetOtherOfficeStateAdminByOfficeAdmin() throws Exception {
-    assertGetUserUnauthorized(STATE_ADMIN_ID);
+    testGetValidUser(STATE_ADMIN_ID, "fixtures/idm/get-user/with-state-admin-id.json");
   }
 
   @Test

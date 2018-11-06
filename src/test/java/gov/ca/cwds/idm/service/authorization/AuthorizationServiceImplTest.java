@@ -160,9 +160,9 @@ public class AuthorizationServiceImplTest {
         user(toSet(STATE_ADMIN), "Yolo", "Yolo_1")));
     assertTrue(service.canViewUser(
         user(toSet(COUNTY_ADMIN), "Yolo", "Yolo_1")));
-    assertFalse(service.canViewUser(
+    assertTrue(service.canViewUser(
         user(toSet(STATE_ADMIN), "Yolo", "Yolo_3")));
-    assertFalse(service.canViewUser(
+    assertTrue(service.canViewUser(
         user(toSet(COUNTY_ADMIN), "Yolo", "Yolo_3")));
   }
 

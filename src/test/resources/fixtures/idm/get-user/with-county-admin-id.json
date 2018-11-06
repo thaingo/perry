@@ -1,0 +1,32 @@
+{
+  "user": {
+    "id": "c3702f4c113f1d2415447c8bfe8321d8df2d5151",
+    "first_name": "Reddy",
+    "last_name": "Jkuser",
+    "county_name": "Yolo",
+    "office_id": "JzoGSkE05I",
+    "email": "jkuser@gmail.com",
+    "user_create_date": "2018-05-03",
+    "start_date": "1997-08-13",
+    "user_last_modified_date": "2018-05-31",
+    "enabled": true,
+    "status": "CONFIRMED",
+    "racfid": "MCALLUM",
+    "registration_resubmit_date_time": "2018-11-05 10:53:24",
+    "phone_number": "4646464646",
+    "phone_extension_number": "11",
+    "permissions": [
+      "test"
+    ],
+    "roles": [
+      "County-admin"
+    ]
+  },
+  "edit_details": {
+    "editable": false,
+    "roles": {
+      "editable": false,
+      "possible_values": ["CWS-worker"]
+    }
+  }
+}
