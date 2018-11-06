@@ -1,0 +1,32 @@
+{
+  "user": {
+    "id": "2d9369b4-5855-4a2c-95f7-3617fab1496a",
+    "first_name": "Christina",
+    "last_name": "Yull",
+    "county_name": "Yolo",
+    "office_id": "JzoGSkE05I",
+    "email": "yull@gmail.com",
+    "user_create_date": "2018-05-03",
+    "start_date": "2017-11-06",
+    "user_last_modified_date": "2018-05-31",
+    "enabled": true,
+    "status": "CONFIRMED",
+    "racfid": "YULLC",
+    "registration_resubmit_date_time": "2018-11-05 10:53:24",
+    "phone_number": "4646464646",
+    "phone_extension_number": "11",
+    "permissions": [
+      "test"
+    ],
+    "roles": [
+      "State-admin"
+    ]
+  },
+  "edit_details": {
+    "editable": false,
+    "roles": {
+      "editable": false,
+      "possible_values": ["CWS-worker"]
+    }
+  }
+}
