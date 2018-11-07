@@ -16,7 +16,7 @@
       "last_login_date_time": "2018-09-17 05:01:12",
       "enabled": true,
       "status": "CONFIRMED",
-      "registration_resubmit_date_time": "2018-11-05 10:53:24",
+      "last_registration_resubmit_date_time": "2018-11-05 10:53:24",
       "permissions": [
         "test"
       ],
@@ -39,7 +39,7 @@
       "last_login_date_time": "2018-09-17 05:01:12",
       "enabled": true,
       "status": "CONFIRMED",
-      "registration_resubmit_date_time": "2018-11-05 10:53:24",
+      "last_registration_resubmit_date_time": "2018-11-05 10:53:24",
       "permissions": [
         "Hotline-rollout"
       ],
@@ -61,7 +61,6 @@
       "last_login_date_time": "2018-09-17 05:01:12",
       "enabled": true,
       "status": "FORCE_CHANGE_PASSWORD",
-      "registration_resubmit_date_time": "2018-11-05 10:53:24",
       "permissions": [
         "Snapshot-rollout",
         "RFA-rollout"
