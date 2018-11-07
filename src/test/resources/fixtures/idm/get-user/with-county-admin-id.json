@@ -12,7 +12,7 @@
     "enabled": true,
     "status": "CONFIRMED",
     "racfid": "MCALLUM",
-    "registration_resubmit_date_time": "2018-11-05 10:53:24",
+    "last_registration_resubmit_date_time": "2018-11-05 10:53:24",
     "phone_number": "4646464646",
     "phone_extension_number": "11",
     "permissions": [

@@ -11,7 +11,7 @@
     "enabled": true,
     "status": "CONFIRMED",
     "racfid": "YOLOD",
-    "registration_resubmit_date_time": "2018-11-05 10:53:24",
+    "last_registration_resubmit_date_time": "2018-11-05 10:53:24",
     "permissions": [
       "Hotline-rollout"
     ],
@@ -35,7 +35,7 @@
     "enabled": true,
     "status": "CONFIRMED",
     "racfid": "SMITHBO",
-    "registration_resubmit_date_time": "2018-11-05 10:53:24",
+    "last_registration_resubmit_date_time": "2018-11-05 10:53:24",
     "permissions": [
       "test"
     ],
@@ -59,7 +59,7 @@
     "enabled": false,
     "status": "CONFIRMED",
     "racfid": "SMITHBO",
-    "registration_resubmit_date_time": "2018-11-05 10:53:24",
+    "last_registration_resubmit_date_time": "2018-11-05 10:53:24",
     "permissions": [
       "test"
     ],

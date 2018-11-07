@@ -21,7 +21,7 @@ import org.hibernate.validator.constraints.NotBlank;
 @SuppressWarnings("squid:S3437")
 public class User implements RolesHolder, Serializable {
 
-  private static final long serialVersionUID = 5574485220333060398L;
+  private static final long serialVersionUID = 2496822683156998660L;
 
   private String id;
 
@@ -61,7 +61,7 @@ public class User implements RolesHolder, Serializable {
   private String status;
 
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_TIME_FORMAT)
-  private LocalDateTime registrationResubmitDateTime =
+  private LocalDateTime lastRegistrationResubmitDateTime =
       LocalDateTime.of(2018, 11, 5, 10, 53, 24);
 
   private Set<String> permissions = new LinkedHashSet<>();
@@ -188,12 +188,12 @@ public class User implements RolesHolder, Serializable {
     this.lastLoginDateTime = lastLoginDateTime;
   }
 
-  public LocalDateTime getRegistrationResubmitDateTime() {
-    return registrationResubmitDateTime;
+  public LocalDateTime getLastRegistrationResubmitDateTime() {
+    return lastRegistrationResubmitDateTime;
   }
 
-  public void setRegistrationResubmitDateTime(LocalDateTime registrationResubmitDateTime) {
-    this.registrationResubmitDateTime = registrationResubmitDateTime;
+  public void setLastRegistrationResubmitDateTime(LocalDateTime lastRegistrationResubmitDateTime) {
+    this.lastRegistrationResubmitDateTime = lastRegistrationResubmitDateTime;
   }
 
   public Set<String> getPermissions() {
