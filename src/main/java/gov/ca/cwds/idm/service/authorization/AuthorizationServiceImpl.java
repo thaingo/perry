@@ -2,7 +2,6 @@ package gov.ca.cwds.idm.service.authorization;
 
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.getStrongestAdminRole;
-import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByEmail;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserName;
 
@@ -11,11 +10,9 @@ import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.MappingService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.role.implementor.AdminRoleImplementorFactory;
-import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 @Service("authorizationService")
 @Profile("idm")
@@ -43,8 +40,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     if (userId.equals(getCurrentUserName())) {
       return false;
     }
-    UserType existingCognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
-    User user = composeUser(existingCognitoUser);
+    User user = getUserById(userId);
     return canUpdateUser(user);
   }
 
@@ -75,19 +71,14 @@ public class AuthorizationServiceImpl implements AuthorizationService {
   }
 
   @Override
-  public boolean canResendInvitationMessage(String email) {
-    User user = getUserByEmail(email);
+  public boolean canResendInvitationMessage(String userId) {
+    User user = getUserById(userId);
     return adminRoleImplementorFactory.getAdminActionsAuthorizer(user).canResendInvitationMessage();
   }
 
-  private User getUserByEmail(String email) {
-    List<UserType> cognitoUsers =
-        cognitoServiceFacade.searchPage(composeToGetFirstPageByEmail(email)).getUsers();
-    if (!CollectionUtils.isEmpty(cognitoUsers)) {
-      return composeUser(cognitoUsers.get(0));
-    } else {
-      throw new IllegalStateException();
-    }
+  private User getUserById(String userId) {
+    UserType existingCognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
+    return composeUser(existingCognitoUser);
   }
 
   private User composeUser(UserType cognitoUser) {

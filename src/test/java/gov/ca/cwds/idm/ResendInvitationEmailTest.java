@@ -16,24 +16,24 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 public class ResendInvitationEmailTest extends BaseIdmResourceTest {
 
-  private static final String YOLO_COUNTY_USERS_EMAIL = "julio@gmail.com";
+  private static final String USER_WITH_RACFID_ID_EMAIL = "julio@gmail.com";
 
   @Test
   @WithMockCustomUser(county = "OtherCounty")
   public void testResendInvitationEmailWithDifferentCounty() throws Exception {
-    assertResendEmailUnauthorized(YOLO_COUNTY_USERS_EMAIL);
+    assertResendEmailUnauthorized(USER_WITH_RACFID_ID);
   }
 
   @Test
   @WithMockCustomUser(roles = {OFFICE_ADMIN}, adminOfficeIds = {"otherOfficeId"})
   public void testResendInvitationEmailWithOfficeRole() throws Exception {
-    assertResendEmailUnauthorized(YOLO_COUNTY_USERS_EMAIL);
+    assertResendEmailUnauthorized(USER_WITH_RACFID_ID);
   }
 
   @Test
   @WithMockCustomUser(roles = {"OtherRole"})
   public void testResendInvitationEmailWithOtherRole() throws Exception {
-    assertResendEmailUnauthorized(YOLO_COUNTY_USERS_EMAIL);
+    assertResendEmailUnauthorized(USER_WITH_RACFID_ID);
   }
 
   @Test
@@ -48,9 +48,9 @@ public class ResendInvitationEmailTest extends BaseIdmResourceTest {
     assertResendEmailWorksFine();
   }
 
-  private void assertResendEmailUnauthorized(String email) throws Exception {
+  private void assertResendEmailUnauthorized(String id) throws Exception {
     mockMvc
-        .perform(MockMvcRequestBuilders.get("/idm/users/resend?email=" + email))
+        .perform(MockMvcRequestBuilders.get("/idm/users/resend?id=" + id))
         .andExpect(MockMvcResultMatchers.status().isUnauthorized())
         .andReturn();
   }
@@ -58,10 +58,10 @@ public class ResendInvitationEmailTest extends BaseIdmResourceTest {
   private void assertResendEmailWorksFine() throws Exception {
     AdminCreateUserRequest request =
         ((TestCognitoServiceFacade) cognitoServiceFacade)
-            .createResendEmailRequest(YOLO_COUNTY_USERS_EMAIL);
+            .createResendEmailRequest(USER_WITH_RACFID_ID_EMAIL);
 
     UserType user = new UserType();
-    user.setUsername(USER_WITH_RACFID_ID);
+    user.setUsername(USER_WITH_RACFID_ID_EMAIL);
     user.setEnabled(true);
     user.setUserStatus("FORCE_CHANGE_PASSWORD");
 
@@ -71,7 +71,7 @@ public class ResendInvitationEmailTest extends BaseIdmResourceTest {
     mockMvc
         .perform(
             MockMvcRequestBuilders.get(
-                "/idm/users/resend?email="+YOLO_COUNTY_USERS_EMAIL))
+                "/idm/users/resend?id=" + USER_WITH_RACFID_ID))
         .andExpect(MockMvcResultMatchers.status().isOk())
         .andReturn();
   }
