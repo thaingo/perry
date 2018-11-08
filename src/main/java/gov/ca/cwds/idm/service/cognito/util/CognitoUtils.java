@@ -10,7 +10,6 @@ import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL_VERIFIED;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.FIRST_NAME;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.LAST_NAME;
-import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.PHONE_NUMBER;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.util.Utils.toSet;
 import static gov.ca.cwds.util.Utils.toUpperCase;
@@ -54,6 +53,10 @@ public class CognitoUtils {
 
   public static String getCountyName(UserType cognitoUser) {
     return getAttributeValue(cognitoUser, COUNTY.getName());
+  }
+
+  public static String getEmail(UserType cognitoUser) {
+    return getAttributeValue(cognitoUser, EMAIL.getName());
   }
 
   public static Set<String> getPermissions(UserType cognitoUser) {
