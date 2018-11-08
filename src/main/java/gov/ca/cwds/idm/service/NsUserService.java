@@ -24,17 +24,18 @@ public class NsUserService {
   @Transactional(value = TOKEN_TRANSACTION_MANAGER)
   public void saveLastLoginTime(String username, LocalDateTime loginTime) {
     NsUser nsUser = getOrCreateNewUser(username);
-    nsUser.setLastLoginTime(loginTime);
 
+    nsUser.setLastLoginTime(loginTime);
     nsUserRepository.save(nsUser);
     userLogService.logUpdate(username, loginTime);
   }
 
   @Transactional(value = TOKEN_TRANSACTION_MANAGER)
-  public void saveLastRegistrationResubmitTime(String username, LocalDateTime registrationResubmitTime) {
+  public void saveLastRegistrationResubmitTime(String username,
+      LocalDateTime registrationResubmitTime) {
     NsUser nsUser = getOrCreateNewUser(username);
-    nsUser.setLastRegistrationResubmitTime(registrationResubmitTime);
 
+    nsUser.setLastRegistrationResubmitTime(registrationResubmitTime);
     nsUserRepository.save(nsUser);
     userLogService.logUpdate(username, registrationResubmitTime);
   }

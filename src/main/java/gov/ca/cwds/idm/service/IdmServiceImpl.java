@@ -19,6 +19,7 @@ import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USE
 import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_CREATE_USER;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_CREATE_IDM_USER_IN_ES;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_PURGE_PROCESSED_USER_LOGS;
+import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_WRITE_LAST_REGISTRATION_RESUBMIT_TIME;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_IDM_USER_IN_ES;
 import static gov.ca.cwds.service.messages.MessageCode.USER_CREATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_CREATE_SAVE_TO_SEARCH_ERROR;
@@ -234,6 +235,13 @@ public class IdmServiceImpl implements IdmService {
   @Override
   public void resendInvitationMessage(String userId) {
     cognitoServiceFacade.resendInvitationMessage(userId);
+
+    try {
+      nsUserService.saveLastRegistrationResubmitTime(userId, LocalDateTime.now());
+    } catch (Exception e) {
+      String msg = messages.getTechMessage(UNABLE_TO_WRITE_LAST_REGISTRATION_RESUBMIT_TIME, userId);
+      LOGGER.error(msg, e);
+    }
   }
 
   @Override
