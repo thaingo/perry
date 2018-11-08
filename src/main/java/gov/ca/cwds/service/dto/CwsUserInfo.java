@@ -15,6 +15,7 @@ public class CwsUserInfo {
   private Set<StaffUnitAuthority> staffUnitAuths;
   private StaffPerson staffPerson;
   private CwsOffice cwsOffice;
+  private Boolean hasAssignments;
 
   public boolean isSocialWorker() {
     return socialWorker;
@@ -64,6 +65,14 @@ public class CwsUserInfo {
     this.racfId = racfId;
   }
 
+  public Boolean getHasAssignments() {
+    return hasAssignments;
+  }
+
+  public void setHasAssignments(Boolean hasAssignments) {
+    this.hasAssignments = hasAssignments;
+  }
+
   public static final class CwsUserInfoBuilder {
     private String racfId;
     private boolean socialWorker;
@@ -71,6 +80,7 @@ public class CwsUserInfo {
     private Set<StaffUnitAuthority> staffUnitAuths;
     private StaffPerson staffPerson;
     private CwsOffice cwsOffice;
+    private Boolean hasAssignments;
 
     private CwsUserInfoBuilder() {}
 
@@ -108,6 +118,11 @@ public class CwsUserInfo {
       return this;
     }
 
+    public CwsUserInfoBuilder withHasAssignments(Boolean hasAssignments) {
+      this.hasAssignments = hasAssignments;
+      return this;
+    }
+
     public CwsUserInfo build() {
       CwsUserInfo cwsUserInfo = new CwsUserInfo();
       cwsUserInfo.setRacfId(racfId);
@@ -116,6 +131,7 @@ public class CwsUserInfo {
       cwsUserInfo.setStaffUnitAuths(staffUnitAuths);
       cwsUserInfo.setStaffPerson(staffPerson);
       cwsUserInfo.setCwsOffice(cwsOffice);
+      cwsUserInfo.setHasAssignments(hasAssignments);
       return cwsUserInfo;
     }
   }

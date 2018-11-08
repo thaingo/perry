@@ -12,6 +12,24 @@ if (authorization) {
         privileges.push it.authPrivilegeTypeDesc
     }
 
+    // Populate case carrying Social Worker permission
+    def caseCarryingSocialWorkerPermissions = [
+            "CANS-staff-person-clients-read",
+            "CANS-client-read",
+            "CANS-client-search",
+            "CANS-assessment-read",
+            "CANS-assessment-create",
+            "CANS-assessment-in-progress-update",
+            "CANS-assessment-completed-update",
+            "CANS-assessment-completed-delete",
+            "CANS-assessment-in-progress-delete",
+            "CANS-assessment-complete"
+    ]
+
+    if (privileges.contains("CWS Case Management") && authorization.hasAssignments) {
+        privileges += caseCarryingSocialWorkerPermissions
+    }
+
     def supervisorAuthorities = ["S", "A", "T", "B"]
 
     def supervisor = authorization.unitAuthority != null && authorization.unitAuthority.size() > 0 && authorization.unitAuthority.every { a ->

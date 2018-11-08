@@ -82,6 +82,7 @@ public class CwsUserInfoService {
         .withSocialWorker(socialWorker)
         .withUserAuthPrivs(userAuthPrivs)
         .withStaffPerson(staffPerson)
+        .withHasAssignments(userIdDao.assignmentsCount(staffPerson.getId()) > 0)
         .build();
   }
 
