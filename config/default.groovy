@@ -27,7 +27,19 @@ if (authorization) {
 
     def governmentEntityType = GovernmentEntityType.findBySysId(authorization.cwsOffice?.governmentEntityType)
 
-    def cansSupervisorPermissions = ["CANS-staff-person-subordinates-read", "CANS-staff-person-read", "CANS-staff-person-clients-read", "CANS-client-read", "CANS-client-search", "CANS-assessment-read", "CANS-assessment-create", "CANS-assessment-in-progress-update", "CANS-assessment-completed-update", "CANS-assessment-completed-delete", "CANS-assessment-in-progress-delete", "CANS-assessment-complete"]
+    def cansSupervisorPermissions = [
+            "CANS-staff-person-subordinates-read",
+            "CANS-staff-person-read",
+            "CANS-staff-person-clients-read",
+            "CANS-client-read",
+            "CANS-client-search",
+            "CANS-assessment-read",
+            "CANS-assessment-create",
+            "CANS-assessment-in-progress-update",
+            "CANS-assessment-completed-update",
+            "CANS-assessment-completed-delete",
+            "CANS-assessment-in-progress-delete",
+            "CANS-assessment-complete"]
     if (supervisor) {
         cansSupervisorPermissions.each {
             privileges.push it
