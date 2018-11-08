@@ -13,6 +13,7 @@ import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL_VERIFI
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.FIRST_NAME;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.LAST_NAME;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
+import static gov.ca.cwds.idm.util.TestUtils.attr;
 import static gov.ca.cwds.util.Utils.toSet;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -43,6 +44,7 @@ import gov.ca.cwds.rest.api.domain.UserNotFoundPerryException;
 import gov.ca.cwds.service.messages.MessagesService;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -226,18 +228,26 @@ public class CognitoServiceFacadeTest {
 
   @Test
   public void testCreateAdminResendInvitationMessage() {
-    AdminCreateUserResult mockResult = new AdminCreateUserResult();
     String userId = "amzon-id-user-1";
-    UserType userType = userType(userId);
+    String userEmail = "user@email";
+
+    AdminGetUserRequest expectedGetUserRequest = facade.createAdminGetUserRequest(userId);
+    AdminGetUserResult mockGetUserResult = new AdminGetUserResult();
+    mockGetUserResult.setUsername(userId);
+    Collection<AttributeType> attrs = new ArrayList<>();
+    attrs.add(attr(EMAIL.getName(), userEmail));
+    mockGetUserResult.withUserAttributes(attrs);
+    when(identityProvider.adminGetUser(expectedGetUserRequest)).thenReturn(mockGetUserResult);
+
+    AdminCreateUserRequest expectedRequest = facade.createResendEmailRequest(userEmail);
+    AdminCreateUserResult mockResult = new AdminCreateUserResult();
+    UserType userType = userType(userEmail);
     mockResult.setUser(userType);
-
-    AdminCreateUserRequest expectedRequest = facade.createResendEmailRequest(userId);
-
     when(identityProvider.adminCreateUser(expectedRequest)).thenReturn(mockResult);
 
     UserType UserType = facade.resendInvitationMessage(userId);
     verify(identityProvider, times(1)).adminCreateUser(expectedRequest);
-    assertThat(UserType.getUsername(), is(userId));
+    assertThat(UserType.getUsername(), is(userEmail));
   }
 
   private ListUsersRequest setListUsersRequestAndResponse(

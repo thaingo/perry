@@ -8,6 +8,7 @@ import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.EMAIL_DELIVERY;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.buildCreateUserAttributes;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.createDelimitedAttribute;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getDelimitedAttributeValue;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getEmail;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_CONNECT_TO_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_GET_USER_FROM_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_UPDATE_USER_IN_IDM;
@@ -293,7 +294,9 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
   }
 
   @Override
-  public UserType resendInvitationMessage(String email) {
+  public UserType resendInvitationMessage(String userId) {
+    UserType cognitoUser = getCognitoUserById(userId);
+    String email = getEmail(cognitoUser);
     AdminCreateUserRequest request = createResendEmailRequest(email);
     return identityProvider.adminCreateUser(request).getUser();
   }
