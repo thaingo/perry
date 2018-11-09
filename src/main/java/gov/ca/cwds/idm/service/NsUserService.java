@@ -23,11 +23,11 @@ public class NsUserService {
   @Transactional(value = TOKEN_TRANSACTION_MANAGER, readOnly = true)
   public Optional<NsUser> findByUsername(String username) {
 
-    Set<NsUser> userSet =  nsUserRepository.findByUsername(username);
-
     if(username == null) {
       throw new IllegalArgumentException("username is null");
     }
+
+    Set<NsUser> userSet =  nsUserRepository.findByUsername(username);
 
     if(userSet.size() > 1) {
       throw new IllegalStateException(
