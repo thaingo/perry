@@ -1,5 +1,6 @@
 package gov.ca.cwds.idm;
 
+import static gov.ca.cwds.config.TokenServiceConfiguration.TOKEN_TRANSACTION_MANAGER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_WITH_RACFID_ID;
@@ -13,7 +14,9 @@ import gov.ca.cwds.idm.util.WithMockCustomUser;
 import org.junit.Test;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.transaction.annotation.Transactional;
 
+@Transactional(value = TOKEN_TRANSACTION_MANAGER)
 public class ResendInvitationEmailTest extends BaseIdmResourceTest {
 
   private static final String USER_WITH_RACFID_ID_EMAIL = "julio@gmail.com";

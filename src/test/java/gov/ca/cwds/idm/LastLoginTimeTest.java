@@ -4,6 +4,7 @@ import static gov.ca.cwds.config.TokenServiceConfiguration.TOKEN_TRANSACTION_MAN
 import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
 import static gov.ca.cwds.util.UniversalUserTokenDeserializer.USER_NAME;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
@@ -12,6 +13,7 @@ import gov.ca.cwds.event.UserLoggedInEvent;
 import gov.ca.cwds.idm.dto.UserIdAndOperation;
 import gov.ca.cwds.idm.event.UserLoggedInEventListener;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
+import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
 import gov.ca.cwds.idm.service.NsUserService;
 import gov.ca.cwds.idm.service.UserLogService;
 import java.time.Instant;
@@ -48,14 +50,14 @@ public class LastLoginTimeTest extends BaseIdmResourceTest {
 
     userLogRepository.deleteAll();
 
-    assertThat(nsUserService.getLastLoginTime(NEW_USER_NAME), is(Optional.empty()));
+    assertThat(getLastLoginTime(NEW_USER_NAME), nullValue());
 
     userLoggedInEventListener.handleUserLoggedInEvent(loggedInEvent(NEW_USER_NAME, FIRST_LOGIN_TIME));
-    assertThat(nsUserService.getLastLoginTime(NEW_USER_NAME), is(Optional.of(FIRST_LOGIN_TIME)));
+    assertThat(getLastLoginTime(NEW_USER_NAME), is(FIRST_LOGIN_TIME));
     assertLastUserLog(dateTime(FIRST_LOGIN_TIME_MILLIS - 100), NEW_USER_NAME, UPDATE);
 
     userLoggedInEventListener.handleUserLoggedInEvent(loggedInEvent(NEW_USER_NAME, SECOND_LOGIN_TIME));
-    assertThat(nsUserService.getLastLoginTime(NEW_USER_NAME), is(Optional.of(SECOND_LOGIN_TIME)));
+    assertThat(getLastLoginTime(NEW_USER_NAME), is(SECOND_LOGIN_TIME));
     assertLastUserLog(dateTime(SECOND_LOGIN_TIME_MILLIS - 100), NEW_USER_NAME, UPDATE);
   }
 
@@ -75,5 +77,10 @@ public class LastLoginTimeTest extends BaseIdmResourceTest {
     UniversalUserToken token = new UniversalUserToken();
     token.setParameter(USER_NAME, username);
     return new UserLoggedInEvent(token, loginTime);
+  }
+
+  private LocalDateTime getLastLoginTime(String username) {
+    Optional<NsUser> nsUserOpt = nsUserService.findByUsername(username);
+    return nsUserOpt.map(NsUser::getLastLoginTime).orElse(null);
   }
 }

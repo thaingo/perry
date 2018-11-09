@@ -5,7 +5,6 @@ import static gov.ca.cwds.config.TokenServiceConfiguration.TOKEN_TRANSACTION_MAN
 import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
 import gov.ca.cwds.idm.persistence.ns.repository.NsUserRepository;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +20,30 @@ public class NsUserService {
 
   private UserLogService userLogService;
 
+  @Transactional(value = TOKEN_TRANSACTION_MANAGER, readOnly = true)
+  public Optional<NsUser> findByUsername(String username) {
+
+    Set<NsUser> userSet =  nsUserRepository.findByUsername(username);
+
+    if(username == null) {
+      throw new IllegalArgumentException("username is null");
+    }
+
+    if(userSet.size() > 1) {
+      throw new IllegalStateException(
+          "more then one user with username " + username + " are found");
+    }
+
+    if(userSet.isEmpty()) {
+      return Optional.empty();
+    }
+
+    return Optional.of(userSet.iterator().next());
+  }
+
   @Transactional(value = TOKEN_TRANSACTION_MANAGER)
   public void saveLastLoginTime(String username, LocalDateTime loginTime) {
-    NsUser nsUser = getOrCreateNewUser(username);
+    NsUser nsUser = getOrCreateNewNsUser(username);
 
     nsUser.setLastLoginTime(loginTime);
     nsUserRepository.save(nsUser);
@@ -33,36 +53,22 @@ public class NsUserService {
   @Transactional(value = TOKEN_TRANSACTION_MANAGER)
   public void saveLastRegistrationResubmitTime(String username,
       LocalDateTime registrationResubmitTime) {
-    NsUser nsUser = getOrCreateNewUser(username);
+    NsUser nsUser = getOrCreateNewNsUser(username);
 
     nsUser.setLastRegistrationResubmitTime(registrationResubmitTime);
     nsUserRepository.save(nsUser);
     userLogService.logUpdate(username, registrationResubmitTime);
   }
 
-  private NsUser getOrCreateNewUser(String username) {
-    List<NsUser> userList =  nsUserRepository.findByUsername(username);
+  private NsUser getOrCreateNewNsUser(String username) {
+    Optional<NsUser> nsUserOpt = findByUsername(username);
 
-    NsUser nsUser;
-
-    if(userList.isEmpty()) {
-      nsUser = new NsUser();
+    if(nsUserOpt.isPresent()) {
+      return nsUserOpt.get();
+    } else {
+      NsUser nsUser = new NsUser();
       nsUser.setUsername(username);
-    } else {
-      nsUser = userList.get(0);
-    }
-    return nsUser;
-  }
-
-  @Transactional(value = TOKEN_TRANSACTION_MANAGER, readOnly = true)
-  public Optional<LocalDateTime> getLastLoginTime(String username) {
-
-    List<NsUser> userList =  nsUserRepository.findByUsername(username);
-
-    if(userList.isEmpty()) {
-      return Optional.empty();
-    } else {
-      return Optional.ofNullable(userList.get(0).getLastLoginTime());
+      return nsUser;
     }
   }
 

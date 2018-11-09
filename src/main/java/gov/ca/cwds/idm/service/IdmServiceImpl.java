@@ -58,7 +58,6 @@ import gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
 import gov.ca.cwds.idm.service.execution.OptionalExecution;
 import gov.ca.cwds.idm.service.execution.PutInSearchExecution;
-import gov.ca.cwds.idm.service.filter.MainRoleFilter;
 import gov.ca.cwds.idm.service.validation.ValidationService;
 import gov.ca.cwds.rest.api.domain.PartialSuccessException;
 import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
@@ -127,17 +126,7 @@ public class IdmServiceImpl implements IdmService {
   @Override
   public User findUser(String id) {
     UserType cognitoUser = cognitoServiceFacade.getCognitoUserById(id);
-    User user = mappingService.toUser(cognitoUser);
-    filterMainRole(user);
-    return enrichUserWithLastLoginDateTime(user);
-  }
-
-  private User filterMainRole(User user) {
-    Set<String> roles = user.getRoles();
-    if (!roles.isEmpty()) {
-      user.setRoles(MainRoleFilter.filter(roles));
-    }
-    return user;
+    return mappingService.toUser(cognitoUser);
   }
 
   @Override
@@ -502,7 +491,6 @@ public class IdmServiceImpl implements IdmService {
     }
   }
 
-
   private void deleteProcessedLogs(LocalDateTime lastJobTime) {
     int deletedCount = 0;
     try {
@@ -562,17 +550,13 @@ public class IdmServiceImpl implements IdmService {
 
   private List<User> enrichCognitoUsers(Collection<UserType> cognitoUsers) {
     Map<String, String> userNameToRacfId = new HashMap<>(cognitoUsers.size());
-    for (UserType user : cognitoUsers) {
-      userNameToRacfId.put(user.getUsername(), getRACFId(user));
+    for (UserType userType : cognitoUsers) {
+      userNameToRacfId.put(userType.getUsername(), getRACFId(userType));
     }
     Set<String> userNames = userNameToRacfId.keySet();
     Collection<String> racfIds = userNameToRacfId.values();
 
-    Map<String, LocalDateTime> userNameToLastLoginTime =
-        nsUserService.findByUsernames(userNames).stream()
-        .collect(Collectors.toMap(NsUser::getUsername, NsUser::getLastLoginTime));
-
-    Map<String, CwsUserInfo> idToCmsUser = cwsUserInfoService.findUsers(racfIds)
+    Map<String, CwsUserInfo> racfidToCmsUser = cwsUserInfoService.findUsers(racfIds)
         .stream().collect(
             Collectors.toMap(CwsUserInfo::getRacfId, e -> e, (user1, user2) -> {
               LOGGER.warn(messages
@@ -580,20 +564,18 @@ public class IdmServiceImpl implements IdmService {
               return user1;
             }));
 
+    Map<String, NsUser> usernameToNsUser =
+        nsUserService.findByUsernames(userNames).stream()
+            .collect(Collectors.toMap(NsUser::getUsername, e -> e));
+
     return cognitoUsers
         .stream()
-        .map(e -> mappingService.toUser(e, idToCmsUser.get(userNameToRacfId.get(e.getUsername()))))
-        .map(user -> {
-          user.setLastLoginDateTime(userNameToLastLoginTime.get(user.getId()));
-          return user;
-        })
-        .map(this::filterMainRole)
-        .collect(Collectors.toList());
-  }
-
-  private User enrichUserWithLastLoginDateTime(User user) {
-    nsUserService.getLastLoginTime(user.getId()).ifPresent(user::setLastLoginDateTime);
-    return user;
+        .map(userType -> mappingService.toUser(
+            userType,
+            racfidToCmsUser.get(userNameToRacfId.get(userType.getUsername())),
+            usernameToNsUser.get(userType.getUsername())
+            )
+        ).collect(Collectors.toList());
   }
 
   private PutInSearchExecution<String> updateUserInSearch(String id) {

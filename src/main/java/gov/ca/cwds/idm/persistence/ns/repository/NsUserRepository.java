@@ -1,7 +1,6 @@
 package gov.ca.cwds.idm.persistence.ns.repository;
 
 import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
-import java.util.List;
 import java.util.Set;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.Query;
@@ -18,7 +17,7 @@ public interface NsUserRepository extends CrudRepository<NsUser, Long> {
   String USERNAMES = "usernames";
 
   @Query("select u from NsUser u where u.username = :" + USERNAME)
-  List<NsUser> findByUsername(@Param(USERNAME)String username);
+  Set<NsUser> findByUsername(@Param(USERNAME)String username);
 
   @Query("select u from NsUser u where u.username in :" + USERNAMES)
   Set<NsUser> findByUsernames(@Param(USERNAMES) Set<String> usernames);

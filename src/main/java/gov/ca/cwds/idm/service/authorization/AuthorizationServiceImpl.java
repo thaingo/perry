@@ -86,7 +86,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     if (OFFICE_ADMIN.equals(getStrongestAdminRole(getCurrentUser()))) {
       user = mappingService.toUser(cognitoUser);
     } else {
-      user = mappingService.toUserWithoutCwsData(cognitoUser);
+      user = mappingService.toUserWithoutDbData(cognitoUser);
     }
     return user;
   }
