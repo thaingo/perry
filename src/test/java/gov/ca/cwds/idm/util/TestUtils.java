@@ -3,7 +3,10 @@ package gov.ca.cwds.idm.util;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 
 public final class TestUtils {
@@ -31,4 +34,9 @@ public final class TestUtils {
       throw new RuntimeException(e);
     }
   }
+
+  public static LocalDateTime dateTime(long millis) {
+    return LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), ZoneId.systemDefault());
+  }
+
 }

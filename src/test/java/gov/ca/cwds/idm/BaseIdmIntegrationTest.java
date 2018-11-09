@@ -1,8 +1,8 @@
 package gov.ca.cwds.idm;
 
-import static gov.ca.cwds.idm.BaseIdmResourceTest.DORA_WS_MAX_ATTEMPTS;
-import static gov.ca.cwds.idm.BaseIdmResourceTest.IDM_BASIC_AUTH_PASS;
-import static gov.ca.cwds.idm.BaseIdmResourceTest.IDM_BASIC_AUTH_USER;
+import static gov.ca.cwds.idm.BaseIdmIntegrationTest.DORA_WS_MAX_ATTEMPTS;
+import static gov.ca.cwds.idm.BaseIdmIntegrationTest.IDM_BASIC_AUTH_PASS;
+import static gov.ca.cwds.idm.BaseIdmIntegrationTest.IDM_BASIC_AUTH_USER;
 import static gov.ca.cwds.util.LiquibaseUtils.CMS_STORE_URL;
 import static gov.ca.cwds.util.LiquibaseUtils.TOKEN_STORE_URL;
 import static gov.ca.cwds.util.LiquibaseUtils.runLiquibaseScript;
@@ -53,7 +53,7 @@ import org.springframework.test.context.junit4.SpringRunner;
         "perry.doraWsRetryDelayMs=500"
     }
 )
-public abstract class BaseIdmResourceTest extends BaseIntegrationTest {
+public abstract class BaseIdmIntegrationTest extends BaseIntegrationTest {
 
   protected static final String BASIC_AUTH_HEADER = prepareBasicAuthHeader();
   protected static final MediaType JSON_CONTENT_TYPE =
