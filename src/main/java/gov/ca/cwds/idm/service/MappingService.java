@@ -75,12 +75,11 @@ public class MappingService {
     user.setLastRegistrationResubmitDateTime(nsUser.getLastRegistrationResubmitTime());
   }
 
-  private User filterMainRole(User user) {
+  private void filterMainRole(User user) {
     Set<String> roles = user.getRoles();
     if (!roles.isEmpty()) {
       user.setRoles(MainRoleFilter.filter(roles));
     }
-    return user;
   }
 
   @Autowired
