@@ -53,7 +53,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-public class UpdateUserTest extends BaseIdmResourceWithSearchTest {
+public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
 
   @Test
   @WithMockCustomUser(roles = {STATE_ADMIN})

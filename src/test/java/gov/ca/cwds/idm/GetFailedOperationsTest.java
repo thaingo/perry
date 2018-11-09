@@ -24,7 +24,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-public class GetFailedOperationsTest extends BaseIdmResourceTest {
+public class GetFailedOperationsTest extends BaseIdmIntegrationTest {
 
   @Test
   public void testGetFailedOperations() throws Exception {

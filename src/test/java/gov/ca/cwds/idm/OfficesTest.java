@@ -12,7 +12,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-public class OfficesTest extends BaseIdmResourceTest {
+public class OfficesTest extends BaseIdmIntegrationTest {
 
   @Test
   @WithMockCustomUser(roles = {STATE_ADMIN})
