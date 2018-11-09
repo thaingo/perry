@@ -5,6 +5,7 @@ import static gov.ca.cwds.config.TokenServiceConfiguration.TOKEN_TRANSACTION_MAN
 import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
 import gov.ca.cwds.idm.persistence.ns.repository.NsUserRepository;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,18 +28,18 @@ public class NsUserService {
       throw new IllegalArgumentException("username is null");
     }
 
-    Set<NsUser> userSet =  nsUserRepository.findByUsername(username);
+    List<NsUser> userList =  nsUserRepository.findByUsername(username);
 
-    if(userSet.size() > 1) {
+    if(userList.size() > 1) {
       throw new IllegalStateException(
           "more then one user with username " + username + " are found");
     }
 
-    if(userSet.isEmpty()) {
+    if(userList.isEmpty()) {
       return Optional.empty();
     }
 
-    return Optional.of(userSet.iterator().next());
+    return Optional.of(userList.get(0));
   }
 
   @Transactional(value = TOKEN_TRANSACTION_MANAGER)
@@ -73,7 +74,7 @@ public class NsUserService {
   }
 
   @Transactional(value = TOKEN_TRANSACTION_MANAGER, readOnly = true)
-  public Set<NsUser> findByUsernames(Set<String> usernames) {
+  public List<NsUser> findByUsernames(Set<String> usernames) {
     return nsUserRepository.findByUsernames(usernames);
   }
 
