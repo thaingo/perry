@@ -224,9 +224,12 @@ public class IdmServiceImpl implements IdmService {
   @Override
   public void resendInvitationMessage(String userId) {
     cognitoServiceFacade.resendInvitationMessage(userId);
+    saveResendInvitationMessageRequestTimeInDb(userId, LocalDateTime.now());
+  }
 
+  private void saveResendInvitationMessageRequestTimeInDb(String userId, LocalDateTime resubmitTime) {
     try {
-      nsUserService.saveLastRegistrationResubmitTime(userId, LocalDateTime.now());
+      nsUserService.saveLastRegistrationResubmitTime(userId, resubmitTime);
     } catch (Exception e) {
       String msg = messages.getTechMessage(UNABLE_TO_WRITE_LAST_REGISTRATION_RESUBMIT_TIME, userId);
       LOGGER.error(msg, e);
