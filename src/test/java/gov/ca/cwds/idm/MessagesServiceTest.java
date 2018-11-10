@@ -7,7 +7,7 @@ import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 
-public class MessagesServiceTest extends BaseIdmResourceTest {
+public class MessagesServiceTest extends BaseIdmIntegrationTest {
 
   @Test
   public void testGet() {

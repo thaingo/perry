@@ -20,7 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-public abstract class BaseIdmResourceWithSearchTest extends BaseIdmResourceTest {
+public abstract class BaseIdmIntegrationWithSearchTest extends BaseIdmIntegrationTest {
 
   @Autowired
   protected SearchService searchService;

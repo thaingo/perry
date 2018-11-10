@@ -6,10 +6,13 @@ import static gov.ca.cwds.service.messages.MessageCode.IDM_MAPPING_SCRIPT_ERROR;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.PerryProperties;
 import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
+import gov.ca.cwds.idm.service.filter.MainRoleFilter;
 import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.service.CwsUserInfoService;
 import gov.ca.cwds.service.dto.CwsUserInfo;
 import gov.ca.cwds.service.messages.MessagesService;
+import java.util.Set;
 import javax.script.ScriptException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,28 +33,53 @@ public class MappingService {
 
   private CwsUserInfoService cwsUserInfoService;
 
+  private NsUserService nsUserService;
+
   public User toUser(UserType cognitoUser) {
+    String userId = cognitoUser.getUsername();
     String racfId = getRACFId(cognitoUser);
+
     CwsUserInfo cwsUser = cwsUserInfoService.getCwsUserByRacfId(racfId);
-    return toUser(cognitoUser, cwsUser);
+    NsUser nsUser = nsUserService.findByUsername(userId).orElse(null);
+
+    return toUser(cognitoUser, cwsUser, nsUser);
   }
 
-  public User toUser(UserType cognitoUser, CwsUserInfo cwsUser) {
+  public User toUser(UserType cognitoUser, CwsUserInfo cwsUser, NsUser nsUser) {
+    User user;
     try {
-      return configuration.getIdentityManager().getIdmMapping().map(cognitoUser, cwsUser);
+      user =  configuration.getIdentityManager().getIdmMapping().map(cognitoUser, cwsUser);
     } catch (ScriptException e) {
       LOGGER.error(messages.getTechMessage(IDM_MAPPING_SCRIPT_ERROR));
       throw new PerryException(e.getMessage(), e);
     }
+    enrichWithNsUser(user, nsUser);
+    filterMainRole(user);
+    return user;
   }
 
-  public User toUserWithoutCwsData(UserType cognitoUser) {
-    return toUser(cognitoUser, null);
+  public User toUserWithoutDbData(UserType cognitoUser) {
+    return toUser(cognitoUser, null, null);
   }
 
   @Autowired
   public void setConfiguration(PerryProperties configuration) {
     this.configuration = configuration;
+  }
+
+  private void enrichWithNsUser(User user, NsUser nsUser) {
+    if (nsUser == null) {
+      return;
+    }
+    user.setLastLoginDateTime(nsUser.getLastLoginTime());
+    user.setLastRegistrationResubmitDateTime(nsUser.getLastRegistrationResubmitTime());
+  }
+
+  private void filterMainRole(User user) {
+    Set<String> roles = user.getRoles();
+    if (!roles.isEmpty()) {
+      user.setRoles(MainRoleFilter.filter(roles));
+    }
   }
 
   @Autowired
@@ -62,5 +90,10 @@ public class MappingService {
   @Autowired
   public void setCwsUserInfoService(CwsUserInfoService cwsUserInfoService) {
     this.cwsUserInfoService = cwsUserInfoService;
+  }
+
+  @Autowired
+  public void setNsUserService(NsUserService nsUserService) {
+    this.nsUserService = nsUserService;
   }
 }
