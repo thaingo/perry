@@ -12,17 +12,19 @@ if (authorization) {
         privileges.push it.authPrivilegeTypeDesc
     }
 
-    def supervisorAuthorities = ["S", "A", "T", "B"]
-
-    def supervisor = authorization.unitAuthority != null && authorization.unitAuthority.size() > 0 && authorization.unitAuthority.every { a ->
-        supervisorAuthorities.any {
-            it == a.unitAuthorityCode
-        }
+    def authorityCodes = []
+    authorization.unitAuthority.findAll {
+        it.endDate == null
+    } each {
+        authorityCodes.push it.unitAuthorityCode
     }
 
-    def authorityCodes = []
-    authorization.unitAuthority.each {
-        authorityCodes.push it.unitAuthorityCode
+    def supervisorAuthorities = ["S", "A", "T", "B"]
+
+    def supervisor = authorityCodes.size() > 0 && authorityCodes.every { a ->
+        supervisorAuthorities.any {
+            it == a
+        }
     }
 
     def governmentEntityType = GovernmentEntityType.findBySysId(authorization.cwsOffice?.governmentEntityType)

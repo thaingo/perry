@@ -20,6 +20,14 @@
       "county_code": "21",
       "unit_authority_code_desc": "Supervisor",
       "county": "Marin"
+    },
+    {
+      "unit_authority_code": "A",
+      "assigned_unit": "ABC123",
+      "county_code": "21",
+      "unit_authority_code_desc": "Approval Authority",
+      "county": "Marin",
+      "end_date": "2018-10-10"
     }
   ],
   "cws_office": {
