@@ -355,12 +355,12 @@ public class IdmResource {
   @PreAuthorize("@userRoleService.isAdmin(principal) &&  " +
       " !@userRoleService.isCalsAdminStrongestRole(principal)")
   public ResponseEntity resendInvitationEmail(
-      @ApiParam(required = true, name = "email", value = "The email of the user", example = "email@example.com")
+      @ApiParam(required = true, value = "The unique user ID", example = "userId1")
       @NotNull
-      @RequestParam("email")
-          String email) {
+      @RequestParam("id")
+          String id) {
     try {
-      idmService.resendInvitationMessage(email);
+      idmService.resendInvitationMessage(id);
       return ResponseEntity.ok().build();
     } catch (UserNotFoundPerryException e) {
       return ResponseEntity.notFound().build();

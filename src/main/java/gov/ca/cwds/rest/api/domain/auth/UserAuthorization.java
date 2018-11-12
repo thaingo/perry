@@ -10,7 +10,6 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.Set;
 
 /**
- *
  * @author CWDS API Team
  */
 @ApiModel
@@ -54,6 +53,10 @@ public final class UserAuthorization {
   @JsonProperty("staff_person")
   private StaffPerson staffPerson;
 
+  @ApiModelProperty
+  @JsonProperty("has_assignment")
+  private Boolean hasAssignment;
+
   /**
    * Default, no-param, no-op constructor Required by frameworks.
    */
@@ -64,22 +67,23 @@ public final class UserAuthorization {
   /**
    * JSON Constructor
    *
-   * @param userId            the user id
-   * @param socialWorker      is user a social worker
-   * @param supervisor        is user a supervisor
+   * @param userId the user id
+   * @param socialWorker is user a social worker
+   * @param supervisor is user a supervisor
    * @param overrideAuthority does user have override authority
-   * @param authPrivilege     the authorityPrivilege
-   * @param unitAuthority     the unitAuthority
-   * @param cwsOffice         the cwsOffice
+   * @param authPrivilege the authorityPrivilege
+   * @param unitAuthority the unitAuthority
+   * @param cwsOffice the cwsOffice
    */
   public UserAuthorization(@JsonProperty("user_id") String userId,
-                           @JsonProperty("social_worker") Boolean socialWorker,
-                           @JsonProperty("supervisor") Boolean supervisor,
-                           @JsonProperty("override_authority") Boolean overrideAuthority,
-                           @JsonProperty("authority_privilege") Set<StaffAuthorityPrivilege> authPrivilege,
-                           @JsonProperty("unit_authority") Set<StaffUnitAuthority> unitAuthority,
-                           @JsonProperty("cws_office") CwsOffice cwsOffice,
-                           @JsonProperty("staff_person") StaffPerson staffPerson) {
+      @JsonProperty("social_worker") Boolean socialWorker,
+      @JsonProperty("supervisor") Boolean supervisor,
+      @JsonProperty("override_authority") Boolean overrideAuthority,
+      @JsonProperty("authority_privilege") Set<StaffAuthorityPrivilege> authPrivilege,
+      @JsonProperty("unit_authority") Set<StaffUnitAuthority> unitAuthority,
+      @JsonProperty("cws_office") CwsOffice cwsOffice,
+      @JsonProperty("staff_person") StaffPerson staffPerson,
+      @JsonProperty("has_assignment") Boolean hasAssignment) {
     super();
     this.userId = userId;
     this.socialWorker = socialWorker;
@@ -89,6 +93,7 @@ public final class UserAuthorization {
     this.unitAuthority = unitAuthority;
     this.cwsOffice = cwsOffice;
     this.staffPerson = staffPerson;
+    this.hasAssignment = hasAssignment;
   }
 
   /**
@@ -144,12 +149,22 @@ public final class UserAuthorization {
     return staffPerson;
   }
 
+  /**
+   * @return true if user has assignment
+   */
+  public Boolean getHasAssignment() {
+    return hasAssignment;
+  }
+
+  public void setHasAssignment(Boolean hasAssignment) {
+    this.hasAssignment = hasAssignment;
+  }
 
   /*
-     * (non-Javadoc)
-     *
-     * @see java.lang.Object#hashCode()
-     */
+   * (non-Javadoc)
+   *
+   * @see java.lang.Object#hashCode()
+   */
   @Override
   public int hashCode() {
     final int prime = 31;
@@ -162,12 +177,13 @@ public final class UserAuthorization {
     result = prime * result + ((unitAuthority == null) ? 0 : unitAuthority.hashCode());
     result = prime * result + ((userId == null) ? 0 : userId.hashCode());
     result = prime * result + ((staffPerson == null) ? 0 : staffPerson.hashCode());
+    result = prime * result + ((hasAssignment == null) ? 0 : hasAssignment.hashCode());
     return result;
   }
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see java.lang.Object#equals(java.lang.Object)
    */
   @Override
@@ -238,11 +254,19 @@ public final class UserAuthorization {
     } else if (!staffPerson.equals(other.staffPerson)) {
       return false;
     }
+    if (hasAssignment == null) {
+      if (other.hasAssignment != null) {
+        return false;
+      }
+    } else if (!hasAssignment.equals(other.hasAssignment)) {
+      return false;
+    }
     return true;
   }
 
 
   public static final class UserAuthorizationBuilder {
+
     private String userId;
     private Boolean socialWorker;
     private Boolean supervisor;
@@ -251,6 +275,7 @@ public final class UserAuthorization {
     private Set<StaffUnitAuthority> unitAuthority;
     private CwsOffice cwsOffice;
     private StaffPerson staffPerson;
+    private Boolean hasAssignment;
 
     private UserAuthorizationBuilder() {
     }
@@ -279,7 +304,8 @@ public final class UserAuthorization {
       return this;
     }
 
-    public UserAuthorizationBuilder withAuthorityPrivilege(Set<StaffAuthorityPrivilege> authorityPrivilege) {
+    public UserAuthorizationBuilder withAuthorityPrivilege(
+        Set<StaffAuthorityPrivilege> authorityPrivilege) {
       this.authorityPrivilege = authorityPrivilege;
       return this;
     }
@@ -299,8 +325,14 @@ public final class UserAuthorization {
       return this;
     }
 
+    public UserAuthorizationBuilder withHasAssignment(Boolean hasAssignment) {
+      this.hasAssignment = hasAssignment;
+      return this;
+    }
+
     public UserAuthorization build() {
-      UserAuthorization userAuthorization = new UserAuthorization(userId, socialWorker, supervisor, overrideAuthority, null, unitAuthority, cwsOffice, staffPerson);
+      UserAuthorization userAuthorization = new UserAuthorization(userId, socialWorker, supervisor,
+          overrideAuthority, null, unitAuthority, cwsOffice, staffPerson, hasAssignment);
       userAuthorization.authorityPrivilege = this.authorityPrivilege;
       return userAuthorization;
     }

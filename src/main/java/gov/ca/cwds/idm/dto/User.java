@@ -73,9 +73,6 @@ public class User implements RolesHolder, Serializable {
 
   public void setId(String id) {
     this.id = id;
-    if (Character.isLetter(id.charAt(id.length() - 1))) {
-      lastRegistrationResubmitDateTime = LocalDateTime.of(2018, 11, 5, 10, 53, 24);
-    }
   }
 
   public String getCountyName() {
