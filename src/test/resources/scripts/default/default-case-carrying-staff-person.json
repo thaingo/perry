@@ -1,0 +1,33 @@
+{
+  "user": "userabc",
+  "first_name": "John",
+  "last_name": "Smith",
+  "roles": [
+    "role1",
+    "role2",
+    "SocialWorker"
+  ],
+  "staffId": "q1p",
+  "county_name": "Marin",
+  "county_code": "21",
+  "county_cws_code": 1088,
+  "email": null,
+  "userName": "testUserName",
+  "privileges": [
+    "CWS Case Management System",
+    "Countywide Read",
+    "CANS-staff-person-clients-read",
+    "CANS-client-read",
+    "CANS-client-search",
+    "CANS-assessment-read",
+    "CANS-assessment-create",
+    "CANS-assessment-in-progress-update",
+    "CANS-assessment-completed-update",
+    "CANS-assessment-completed-delete",
+    "CANS-assessment-in-progress-delete",
+    "CANS-assessment-complete",
+    "permission1",
+    "permission2"
+  ],
+  "authorityCodes": []
+}

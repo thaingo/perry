@@ -1,0 +1,33 @@
+{
+  "user_id": "userabc",
+  "social_worker": true,
+  "supervisor": false,
+  "authority_privilege": [
+    {
+      "auth_privilege_type": "1483",
+      "auth_privilege_code": "P",
+      "county_code": "21",
+      "auth_privilege_type_desc": "Countywide Read",
+      "auth_privilege_code_desc": "Staff Person Privilege Type",
+      "county": "Marin"
+    },
+    {
+      "auth_privilege_type": "1468",
+      "auth_privilege_code": "P",
+      "county_code": "21",
+      "auth_privilege_type_desc": "CWS Case Management System",
+      "auth_privilege_code_desc": "Staff Person Privilege Type",
+      "county": "Marin"
+    }
+  ],
+  "cws_office": {
+    "office_id": "ABcDmKx00E",
+    "government_entity_type": "1088"
+  },
+  "staff_person": {
+    "id": "q1p",
+    "last_name": "Smith",
+    "first_name": "John"
+  },
+  "has_assignment": true
+}

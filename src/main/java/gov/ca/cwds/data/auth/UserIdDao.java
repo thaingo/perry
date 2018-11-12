@@ -37,7 +37,7 @@ public interface UserIdDao extends ReadOnlyRepository<UserId, String> {
       value = "SELECT count (asg.ESTBLSH_ID) as assignments"
           + " FROM ASGNM_T as asg"
           + " JOIN CASE_LDT as csl ON asg.FKCASE_LDT = csl.IDENTIFIER"
-          + " JOIN CSLDWGHT as spcl ON csl.IDENTIFIER = spcl.FKCASE_LDT"
+          + " JOIN STFCSLDT as spcl ON csl.IDENTIFIER = spcl.FKCASE_LDT"
           + " JOIN STFPERST as sp ON spcl.FKSTFPERST = sp.IDENTIFIER"
           + " LEFT OUTER JOIN REFERL_T as r"
           + "   ON"

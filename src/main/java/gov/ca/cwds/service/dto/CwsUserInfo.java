@@ -73,6 +73,19 @@ public class CwsUserInfo {
     this.hasAssignments = hasAssignments;
   }
 
+  @Override
+  public String toString() {
+    return "CwsUserInfo{" +
+        "racfId='" + racfId + '\'' +
+        ", socialWorker=" + socialWorker +
+        ", userAuthPrivs=" + userAuthPrivs +
+        ", staffUnitAuths=" + staffUnitAuths +
+        ", staffPerson=" + staffPerson +
+        ", cwsOffice=" + cwsOffice +
+        ", hasAssignments=" + hasAssignments +
+        '}';
+  }
+
   public static final class CwsUserInfoBuilder {
     private String racfId;
     private boolean socialWorker;

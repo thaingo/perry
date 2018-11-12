@@ -3,6 +3,7 @@ import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType
 def authorization = user.authorization
 def token
 
+def cwsCaseManagementSystem = "CWS Case Management System"
 //RACFID USER
 if (authorization) {
     def privileges = []
@@ -14,19 +15,19 @@ if (authorization) {
 
     // Populate case carrying Social Worker permission
     def caseCarryingSocialWorkerPermissions = [
-            "CANS-staff-person-clients-read",
-            "CANS-client-read",
-            "CANS-client-search",
-            "CANS-assessment-read",
-            "CANS-assessment-create",
-            "CANS-assessment-in-progress-update",
-            "CANS-assessment-completed-update",
-            "CANS-assessment-completed-delete",
-            "CANS-assessment-in-progress-delete",
-            "CANS-assessment-complete"
+        "CANS-staff-person-clients-read",
+        "CANS-client-read",
+        "CANS-client-search",
+        "CANS-assessment-read",
+        "CANS-assessment-create",
+        "CANS-assessment-in-progress-update",
+        "CANS-assessment-completed-update",
+        "CANS-assessment-completed-delete",
+        "CANS-assessment-in-progress-delete",
+        "CANS-assessment-complete"
     ]
 
-    if (privileges.contains("CWS Case Management") && authorization.hasAssignments) {
+    if (privileges.contains(cwsCaseManagementSystem) && authorization.hasAssignment) {
         privileges += caseCarryingSocialWorkerPermissions
     }
 
@@ -74,7 +75,7 @@ if (authorization) {
              county_name    : governmentEntityType.description,
              county_code    : governmentEntityType.countyCd,
              county_cws_code: governmentEntityType.sysId,
-             privileges     : privileges + user.permissions,
+             privileges     : (privileges + user.permissions).unique(),
              authorityCodes : authorityCodes]
 
     //for this moment we set only admin's own office to the office ids list
@@ -99,7 +100,7 @@ else {
              privileges     : user.permissions]
 
     if (user.roles.contains("CALS-external-worker")) {
-        token.privileges += ["CWS Case Management System", "Resource Management"]
+        token.privileges += [cwsCaseManagementSystem, "Resource Management"]
     }
 
 }
