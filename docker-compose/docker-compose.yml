@@ -1,17 +1,17 @@
 version: '2.1'
 services:
-  perry:
-    image: cwds/perry
-    hostname: perry
-    depends_on:
-      cals_db2_data:
-        condition: service_started
-      postgresql_data:
-        condition: service_started
-    restart: on-failure
-    ports:
-          - 18080:8080
-    env_file: .env
+#  perry:
+#    image: cwds/perry
+#    hostname: perry
+#    depends_on:
+#      cals_db2_data:
+#        condition: service_started
+#      postgresql_data:
+#        condition: service_started
+#    restart: on-failure
+#    ports:
+#          - 18080:8080
+#    env_file: .env
 
   cals_db2_data:
     image: cwds/db2data

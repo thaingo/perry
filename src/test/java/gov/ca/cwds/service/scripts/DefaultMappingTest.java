@@ -60,4 +60,10 @@ public class DefaultMappingTest extends ScriptTestBase {
     roles = Arrays.asList("role1", "role2", OFFICE_ADMIN);
     test("/scripts/default/default.groovy", "/scripts/default/default-nonracf-office-admin.json", null);
   }
+
+  @Test
+  public void testGroovyMappingCaseCarryingStaffPerson() throws Exception {
+    roles = Arrays.asList("role1", "role2");
+    test("/scripts/default/default.groovy", "/scripts/default/default-case-carrying-staff-person.json", "scripts/default/auth-case-carrying.json");
+  }
 }

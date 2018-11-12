@@ -27,7 +27,8 @@ public class UserAuthorizationService {
                     e.getUserAuthPrivs(),
                     e.getStaffUnitAuths(),
                     e.getCwsOffice(),
-                    e.getStaffPerson()))
+                    e.getStaffPerson(),
+                    e.getHasAssignments()))
         .orElse(null);
   }
 
