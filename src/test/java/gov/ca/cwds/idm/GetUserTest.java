@@ -20,7 +20,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-public class GetUserTest extends BaseIdmResourceTest {
+public class GetUserTest extends BaseIdmIntegrationTest {
 
   @Test
   @WithMockCustomUser

@@ -21,5 +21,5 @@ public interface NsUserRepository extends CrudRepository<NsUser, Long> {
   List<NsUser> findByUsername(@Param(USERNAME)String username);
 
   @Query("select u from NsUser u where u.username in :" + USERNAMES)
-  Set<NsUser> findByUsernames(@Param(USERNAMES) Set<String> usernames);
+  List<NsUser> findByUsernames(@Param(USERNAMES) Set<String> usernames);
 }

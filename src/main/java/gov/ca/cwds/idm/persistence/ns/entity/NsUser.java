@@ -28,6 +28,9 @@ public class NsUser {
   @Column(name = "last_login_time")
   private LocalDateTime lastLoginTime;
 
+  @Column(name = "last_registration_resubmit_time")
+  private LocalDateTime lastRegistrationResubmitTime;
+
   public Long getId() {
     return id;
   }
@@ -50,6 +53,14 @@ public class NsUser {
 
   public void setLastLoginTime(LocalDateTime lastLoginTime) {
     this.lastLoginTime = lastLoginTime;
+  }
+
+  public LocalDateTime getLastRegistrationResubmitTime() {
+    return lastRegistrationResubmitTime;
+  }
+
+  public void setLastRegistrationResubmitTime(LocalDateTime lastRegistrationResubmitTime) {
+    this.lastRegistrationResubmitTime = lastRegistrationResubmitTime;
   }
 
   @Override
