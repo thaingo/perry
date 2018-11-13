@@ -15,16 +15,16 @@ if (authorization) {
 
     // Populate case carrying Social Worker permission
     def caseCarryingSocialWorkerPermissions = [
-        "CANS-staff-person-clients-read",
-        "CANS-client-read",
-        "CANS-client-search",
-        "CANS-assessment-read",
-        "CANS-assessment-create",
-        "CANS-assessment-in-progress-update",
-        "CANS-assessment-completed-update",
-        "CANS-assessment-completed-delete",
-        "CANS-assessment-in-progress-delete",
-        "CANS-assessment-complete"
+            "CANS-staff-person-clients-read",
+            "CANS-client-read",
+            "CANS-client-search",
+            "CANS-assessment-read",
+            "CANS-assessment-create",
+            "CANS-assessment-in-progress-update",
+            "CANS-assessment-completed-update",
+            "CANS-assessment-completed-delete",
+            "CANS-assessment-in-progress-delete",
+            "CANS-assessment-complete"
     ]
 
     if (privileges.contains(cwsCaseManagementSystem) && authorization.hasAssignment) {

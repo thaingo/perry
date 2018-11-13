@@ -69,6 +69,8 @@ public class CwsUserInfoService {
       return null;
     }
 
+    boolean hasAssignments = userIdDao.assignmentsCount(staffPerson.getId()) > 0;
+
     CwsOffice cwsOffice = staffPerson.getOffice();
     if (cwsOffice == null) {
       LOGGER.warn("No cws office for staffPerson {}", staffPerson.getId());
@@ -82,7 +84,7 @@ public class CwsUserInfoService {
         .withSocialWorker(socialWorker)
         .withUserAuthPrivs(userAuthPrivs)
         .withStaffPerson(staffPerson)
-        .withHasAssignments(userIdDao.assignmentsCount(staffPerson.getId()) > 0)
+        .withHasAssignments(hasAssignments)
         .build();
   }
 
