@@ -10,7 +10,7 @@ if (authorization) {
     authorization.authorityPrivilege.findAll {
         it.authPrivilegeCode == "P" && it.endDate == null
     } each {
-        privileges.push it.authPrivilegeTypeDesc
+        privileges.push it.authPrivilegeTypeDesc.trim()
     }
 
     // Populate case carrying Social Worker permission
