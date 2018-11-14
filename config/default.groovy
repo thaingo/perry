@@ -38,7 +38,7 @@ if (authorization) {
         authorityCodes.push it.unitAuthorityCode
     }
 
-    def supervisorAuthorities = ["S"]
+    def supervisorAuthorities = ["S", "A", "T", "B"]
 
     def supervisor = authorityCodes.size() > 0 && authorityCodes.every { a ->
         supervisorAuthorities.any {
