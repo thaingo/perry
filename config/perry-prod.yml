@@ -28,7 +28,7 @@ spring:
           logValidationErrors: ${DB_CMS_LOG_VALIDATION_ERRORS:false}
       jpa:
           database: db2
-          show_sql: ${SHOW_SQL:false}
+          show_sql: ${SHOW_SQL:true}
           hibernate:
               ddl-auto: none
           properties:
