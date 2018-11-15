@@ -68,8 +68,7 @@ if (authorization) {
     }
 
     token =
-            [version        : 102,
-             user           : authorization.userId,
+            [user           : authorization.userId,
              first_name     : authorization.staffPerson?.firstName,
              last_name      : authorization.staffPerson?.lastName,
              email          : user.parameters["email"],
@@ -92,8 +91,7 @@ else {
     def countyName = user.parameters["custom:county"]
     def cwsCounty = countyName ? GovernmentEntityType.findByDescription(countyName) : null
 
-    token = [version        : 102,
-             user           : user.userId,
+    token = [user           : user.userId,
              roles          : user.roles,
              first_name     : user.parameters["given_name"],
              last_name      : user.parameters["family_name"],
