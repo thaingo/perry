@@ -11,12 +11,14 @@ import gov.ca.cwds.rest.api.domain.UserNotFoundPerryException;
 import gov.ca.cwds.service.messages.MessagesService;
 import java.time.format.DateTimeParseException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+@Profile("idm")
 @ControllerAdvice(assignableTypes = {IdmResource.class, OfficesResource.class})
 public class IdmRestExceptionHandler extends ResponseEntityExceptionHandler {
 
@@ -33,6 +35,11 @@ public class IdmRestExceptionHandler extends ResponseEntityExceptionHandler {
     return buildResponseEntity(e, HttpStatus.CONFLICT);
   }
 
+  @ExceptionHandler(value = {UserIdmValidationException.class})
+  protected ResponseEntity<Object> handleUserValidationException(UserIdmValidationException e) {
+    return buildResponseEntity(e, HttpStatus.BAD_REQUEST);
+  }
+
   @ExceptionHandler(value = {DateTimeParseException.class})
   protected ResponseEntity<Object> handleDateTimeParseException(DateTimeParseException e) {
     String msg = messages.getTechMessage(INVALID_DATE_FORMAT, DATETIME_FORMAT_PATTERN);
@@ -47,11 +54,6 @@ public class IdmRestExceptionHandler extends ResponseEntityExceptionHandler {
             .withUserMessage(userMessage)
             .build();
     return new ResponseEntity<>(apiError, httpStatus);
-  }
-
-  @ExceptionHandler(value = {UserIdmValidationException.class})
-  protected ResponseEntity<Object> handleUserValidationException(UserIdmValidationException e) {
-    return buildResponseEntity(e, HttpStatus.BAD_REQUEST);
   }
 
   private ResponseEntity<Object> buildResponseEntity(IdmException e, HttpStatus httpStatus) {
