@@ -116,6 +116,13 @@ public class IdmApiCustomError  implements Serializable {
       return this;
     }
 
+    public IdmApiCustomErrorBuilder withCause(Throwable cause) {
+      if(cause != null && cause.getMessage() != null) {
+        this.causes.add(cause.getMessage());
+      }
+      return this;
+    }
+
     public IdmApiCustomError build() {
       IdmApiCustomError idmApiCustomError = new IdmApiCustomError();
       idmApiCustomError.incidentId = MDC.get(REQUEST_ID);

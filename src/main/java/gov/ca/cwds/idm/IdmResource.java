@@ -20,7 +20,6 @@ import gov.ca.cwds.idm.service.OfficeService;
 import gov.ca.cwds.idm.service.UserEditDetailsService;
 import gov.ca.cwds.rest.api.domain.IdmException;
 import gov.ca.cwds.rest.api.domain.PartialSuccessException;
-import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
 import gov.ca.cwds.service.messages.MessagesService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -189,10 +188,7 @@ public class IdmResource {
     try {
       idmService.updateUser(id, updateUserDto);
       return ResponseEntity.noContent().build();
-    } catch (UserIdmValidationException e) {
-      HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
-      IdmApiCustomError apiError = buildApiCustomError(e, httpStatus);
-      return new ResponseEntity<>(apiError, httpStatus);
+
     } catch (PartialSuccessException e) {
       HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
       IdmApiCustomError apiError = buildApiCustomError(e, httpStatus);
@@ -234,13 +230,6 @@ public class IdmResource {
       URI locationUri = getNewUserLocationUri(newUserId);
       return ResponseEntity.created(locationUri).build();
 
-    } catch (UserIdmValidationException e) {
-      HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
-      IdmApiCustomError apiError = buildApiCustomError(e, httpStatus);
-      if(e.getCause() != null) {
-        apiError.getCauses().add(e.getCause().getMessage());
-      }
-      return new ResponseEntity<>(apiError, httpStatus);
     } catch (PartialSuccessException e) {
       URI locationUri = getNewUserLocationUri(e.getUserId());
       HttpHeaders headers = new HttpHeaders();

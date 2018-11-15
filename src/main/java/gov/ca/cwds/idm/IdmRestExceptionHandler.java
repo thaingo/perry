@@ -6,6 +6,7 @@ import static gov.ca.cwds.service.messages.MessageCode.INVALID_DATE_FORMAT;
 import gov.ca.cwds.idm.dto.IdmApiCustomError;
 import gov.ca.cwds.rest.api.domain.IdmException;
 import gov.ca.cwds.rest.api.domain.UserAlreadyExistsException;
+import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
 import gov.ca.cwds.rest.api.domain.UserNotFoundPerryException;
 import gov.ca.cwds.service.messages.MessagesService;
 import java.time.format.DateTimeParseException;
@@ -29,9 +30,7 @@ public class IdmRestExceptionHandler extends ResponseEntityExceptionHandler {
 
   @ExceptionHandler(value = {UserAlreadyExistsException.class})
   protected ResponseEntity<Object> handleUserAlreadyExists(UserAlreadyExistsException e) {
-    HttpStatus httpStatus = HttpStatus.CONFLICT;
-    IdmApiCustomError apiError = buildApiCustomError(e, httpStatus);
-    return new ResponseEntity<>(apiError, httpStatus);
+    return buildResponseEntity(e, HttpStatus.CONFLICT);
   }
 
   @ExceptionHandler(value = {DateTimeParseException.class})
@@ -50,12 +49,22 @@ public class IdmRestExceptionHandler extends ResponseEntityExceptionHandler {
     return new ResponseEntity<>(apiError, httpStatus);
   }
 
+  @ExceptionHandler(value = {UserIdmValidationException.class})
+  protected ResponseEntity<Object> handleUserValidationException(UserIdmValidationException e) {
+    return buildResponseEntity(e, HttpStatus.BAD_REQUEST);
+  }
+
+  private ResponseEntity<Object> buildResponseEntity(IdmException e, HttpStatus httpStatus) {
+    return new ResponseEntity<>(buildApiCustomError(e, httpStatus), httpStatus);
+  }
+
   private IdmApiCustomError buildApiCustomError(IdmException e, HttpStatus httpStatus) {
     return IdmApiCustomError.IdmApiCustomErrorBuilder.anIdmApiCustomError()
         .withStatus(httpStatus)
         .withErrorCode(e.getErrorCode())
         .withTechnicalMessage(e.getMessage())
         .withUserMessage(e.getUserMessage())
+        .withCause(e.getCause())
         .build();
   }
 }
