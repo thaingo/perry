@@ -23,7 +23,6 @@ import gov.ca.cwds.rest.api.domain.IdmException;
 import gov.ca.cwds.rest.api.domain.PartialSuccessException;
 import gov.ca.cwds.rest.api.domain.UserAlreadyExistsException;
 import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
-import gov.ca.cwds.rest.api.domain.UserNotFoundPerryException;
 import gov.ca.cwds.service.messages.MessagesService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -175,14 +174,10 @@ public class IdmResource {
       @NotNull
           String id) {
 
-    try {
-      User user = idmService.findUser(id);
-      UserEditDetails editDetails = userEditDetailsService.getEditDetails(user);
-      UserByIdResponse response = new UserByIdResponse(user, editDetails);
-      return ResponseEntity.ok().body(response);
-    } catch (UserNotFoundPerryException e) {
-      return ResponseEntity.notFound().build();
-    }
+    User user = idmService.findUser(id);
+    UserEditDetails editDetails = userEditDetailsService.getEditDetails(user);
+    UserByIdResponse response = new UserByIdResponse(user, editDetails);
+    return ResponseEntity.ok().body(response);
   }
 
   @RequestMapping(
@@ -213,8 +208,6 @@ public class IdmResource {
     try {
       idmService.updateUser(id, updateUserDto);
       return ResponseEntity.noContent().build();
-    } catch (UserNotFoundPerryException e) {
-      return ResponseEntity.notFound().build();
     } catch (UserIdmValidationException e) {
       HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
       IdmApiCustomError apiError = buildApiCustomError(e, httpStatus);
@@ -359,12 +352,8 @@ public class IdmResource {
       @NotNull
       @RequestParam("id")
           String id) {
-    try {
-      idmService.resendInvitationMessage(id);
-      return ResponseEntity.ok().build();
-    } catch (UserNotFoundPerryException e) {
-      return ResponseEntity.notFound().build();
-    }
+    idmService.resendInvitationMessage(id);
+    return ResponseEntity.ok().build();
   }
 
   @RequestMapping(
