@@ -1,10 +1,8 @@
 package gov.ca.cwds.idm;
 
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
-import static java.util.stream.Collectors.toList;
 
 import gov.ca.cwds.data.persistence.auth.CwsOffice;
-import gov.ca.cwds.idm.dto.IdmApiCustomError;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserAndOperation;
 import gov.ca.cwds.idm.dto.UserByIdResponse;
@@ -18,8 +16,6 @@ import gov.ca.cwds.idm.service.DictionaryProvider;
 import gov.ca.cwds.idm.service.IdmService;
 import gov.ca.cwds.idm.service.OfficeService;
 import gov.ca.cwds.idm.service.UserEditDetailsService;
-import gov.ca.cwds.rest.api.domain.IdmException;
-import gov.ca.cwds.rest.api.domain.PartialSuccessException;
 import gov.ca.cwds.service.messages.MessagesService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -37,7 +33,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -185,17 +180,9 @@ public class IdmResource {
       @NotNull
       @RequestBody
           UserUpdate updateUserDto) {
-    try {
-      idmService.updateUser(id, updateUserDto);
-      return ResponseEntity.noContent().build();
 
-    } catch (PartialSuccessException e) {
-      HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-      IdmApiCustomError apiError = buildApiCustomError(e, httpStatus);
-      apiError.getCauses()
-          .addAll(e.getCauses().stream().map(Exception::getMessage).collect(toList()));
-      return new ResponseEntity<>(apiError, httpStatus);
-    }
+    idmService.updateUser(id, updateUserDto);
+    return ResponseEntity.noContent().build();
   }
 
   @RequestMapping(method = RequestMethod.POST, value = "/users", consumes = "application/json")
@@ -225,24 +212,13 @@ public class IdmResource {
       @Valid
       @RequestBody
           User user) {
-    try {
-      String newUserId = idmService.createUser(user);
-      URI locationUri = getNewUserLocationUri(newUserId);
-      return ResponseEntity.created(locationUri).build();
 
-    } catch (PartialSuccessException e) {
-      URI locationUri = getNewUserLocationUri(e.getUserId());
-      HttpHeaders headers = new HttpHeaders();
-      headers.setLocation(locationUri);
-      HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-      IdmApiCustomError apiError = buildApiCustomError(e, httpStatus);
-      apiError.getCauses()
-          .addAll(e.getCauses().stream().map(Exception::getMessage).collect(toList()));
-      return new ResponseEntity<>(apiError, headers, httpStatus);
-    }
+    String newUserId = idmService.createUser(user);
+    URI locationUri = getNewUserLocationUri(newUserId);
+    return ResponseEntity.created(locationUri).build();
   }
 
-  private URI getNewUserLocationUri(String newUserId) {
+  static URI getNewUserLocationUri(String newUserId) {
     return ServletUriComponentsBuilder.fromCurrentRequest()
         .path("/{id}")
         .buildAndExpand(newUserId)
@@ -339,14 +315,5 @@ public class IdmResource {
       " !@userRoleService.isCalsAdminStrongestRole(principal)")
   public ResponseEntity getAdminOffices() {
     return ResponseEntity.ok().body(officeService.getOfficesByAdmin());
-  }
-
-  private IdmApiCustomError buildApiCustomError(IdmException e, HttpStatus httpStatus) {
-    return IdmApiCustomError.IdmApiCustomErrorBuilder.anIdmApiCustomError()
-        .withStatus(httpStatus)
-        .withErrorCode(e.getErrorCode())
-        .withTechnicalMessage(e.getMessage())
-        .withUserMessage(e.getUserMessage())
-        .build();
   }
 }

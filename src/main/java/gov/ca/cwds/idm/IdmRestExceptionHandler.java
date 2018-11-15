@@ -1,17 +1,25 @@
 package gov.ca.cwds.idm;
 
 import static gov.ca.cwds.idm.IdmResource.DATETIME_FORMAT_PATTERN;
+import static gov.ca.cwds.idm.IdmResource.getNewUserLocationUri;
+import static gov.ca.cwds.idm.persistence.ns.OperationType.CREATE;
 import static gov.ca.cwds.service.messages.MessageCode.INVALID_DATE_FORMAT;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 import gov.ca.cwds.idm.dto.IdmApiCustomError;
+import gov.ca.cwds.idm.dto.IdmApiCustomError.IdmApiCustomErrorBuilder;
 import gov.ca.cwds.rest.api.domain.IdmException;
+import gov.ca.cwds.rest.api.domain.PartialSuccessException;
 import gov.ca.cwds.rest.api.domain.UserAlreadyExistsException;
 import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
 import gov.ca.cwds.rest.api.domain.UserNotFoundPerryException;
 import gov.ca.cwds.service.messages.MessagesService;
+import java.net.URI;
 import java.time.format.DateTimeParseException;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -32,12 +40,28 @@ public class IdmRestExceptionHandler extends ResponseEntityExceptionHandler {
 
   @ExceptionHandler(value = {UserAlreadyExistsException.class})
   protected ResponseEntity<Object> handleUserAlreadyExists(UserAlreadyExistsException e) {
-    return buildResponseEntity(e, HttpStatus.CONFLICT);
+    return buildResponseEntity(HttpStatus.CONFLICT, e);
   }
 
   @ExceptionHandler(value = {UserIdmValidationException.class})
   protected ResponseEntity<Object> handleUserValidationException(UserIdmValidationException e) {
-    return buildResponseEntity(e, HttpStatus.BAD_REQUEST);
+    return buildResponseEntity(HttpStatus.BAD_REQUEST, e);
+  }
+
+  @ExceptionHandler(value = {PartialSuccessException.class})
+  protected ResponseEntity<Object> handlePartialSuccess(PartialSuccessException e) {
+
+    HttpStatus httpStatus = INTERNAL_SERVER_ERROR;
+    List<Exception> causes = e.getCauses();
+
+    if (e.getOperationType() == CREATE) {
+      URI locationUri = getNewUserLocationUri(e.getUserId());
+      HttpHeaders headers = new HttpHeaders();
+      headers.setLocation(locationUri);
+      return buildResponseEntity(httpStatus, e, causes, headers);
+    } else {
+      return buildResponseEntity(httpStatus, e, causes);
+    }
   }
 
   @ExceptionHandler(value = {DateTimeParseException.class})
@@ -56,17 +80,35 @@ public class IdmRestExceptionHandler extends ResponseEntityExceptionHandler {
     return new ResponseEntity<>(apiError, httpStatus);
   }
 
-  private ResponseEntity<Object> buildResponseEntity(IdmException e, HttpStatus httpStatus) {
-    return new ResponseEntity<>(buildApiCustomError(e, httpStatus), httpStatus);
+  private ResponseEntity<Object> buildResponseEntity(HttpStatus httpStatus, IdmException e) {
+    return new ResponseEntity<>(buildApiCustomError(httpStatus, e), httpStatus);
   }
 
-  private IdmApiCustomError buildApiCustomError(IdmException e, HttpStatus httpStatus) {
-    return IdmApiCustomError.IdmApiCustomErrorBuilder.anIdmApiCustomError()
+  private ResponseEntity<Object> buildResponseEntity(HttpStatus httpStatus, IdmException e,
+      List<Exception> causes) {
+    return new ResponseEntity<>(buildApiCustomError(httpStatus, e, causes), httpStatus);
+  }
+
+  private ResponseEntity<Object> buildResponseEntity(HttpStatus httpStatus, IdmException e,
+      List<Exception> causes, HttpHeaders headers) {
+    return new ResponseEntity<>(buildApiCustomError(httpStatus, e, causes), headers, httpStatus);
+  }
+
+  private IdmApiCustomError buildApiCustomError(HttpStatus httpStatus, IdmException e) {
+    return createErrorBuilder(e, httpStatus).build();
+  }
+
+  private IdmApiCustomError buildApiCustomError(HttpStatus httpStatus, IdmException e,
+      List<Exception> causes) {
+    return createErrorBuilder(e, httpStatus).withCauses(causes).build();
+  }
+
+  private IdmApiCustomErrorBuilder createErrorBuilder(IdmException e, HttpStatus httpStatus) {
+    return IdmApiCustomErrorBuilder.anIdmApiCustomError()
         .withStatus(httpStatus)
         .withErrorCode(e.getErrorCode())
         .withTechnicalMessage(e.getMessage())
         .withUserMessage(e.getUserMessage())
-        .withCause(e.getCause())
-        .build();
+        .withCause(e.getCause());
   }
 }
