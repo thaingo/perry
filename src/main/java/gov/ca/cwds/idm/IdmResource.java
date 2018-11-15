@@ -21,7 +21,6 @@ import gov.ca.cwds.idm.service.OfficeService;
 import gov.ca.cwds.idm.service.UserEditDetailsService;
 import gov.ca.cwds.rest.api.domain.IdmException;
 import gov.ca.cwds.rest.api.domain.PartialSuccessException;
-import gov.ca.cwds.rest.api.domain.UserAlreadyExistsException;
 import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
 import gov.ca.cwds.service.messages.MessagesService;
 import io.swagger.annotations.ApiOperation;
@@ -253,10 +252,6 @@ public class IdmResource {
       URI locationUri = getNewUserLocationUri(newUserId);
       return ResponseEntity.created(locationUri).build();
 
-    } catch (UserAlreadyExistsException e) {
-      HttpStatus httpStatus = HttpStatus.CONFLICT;
-      IdmApiCustomError apiError = buildApiCustomError(e, httpStatus);
-      return new ResponseEntity<>(apiError, httpStatus);
     } catch (UserIdmValidationException e) {
       HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
       IdmApiCustomError apiError = buildApiCustomError(e, httpStatus);
