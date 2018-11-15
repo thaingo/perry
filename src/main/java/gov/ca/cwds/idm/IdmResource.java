@@ -1,7 +1,6 @@
 package gov.ca.cwds.idm;
 
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
-import static gov.ca.cwds.service.messages.MessageCode.INVALID_DATE_FORMAT;
 import static java.util.stream.Collectors.toList;
 
 import gov.ca.cwds.data.persistence.auth.CwsOffice;
@@ -30,7 +29,6 @@ import io.swagger.annotations.ApiResponses;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -137,24 +135,8 @@ public class IdmResource {
           value = "Last date of successful batch job execution in yyyy-MM-dd-HH.mm.ss.SSS format")
       @RequestParam(name = "date")
           String lastJobDateStr) {
-    LocalDateTime lastJobTime;
-    try {
-      DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATETIME_FORMAT_PATTERN);
-      lastJobTime = LocalDateTime.parse(lastJobDateStr, formatter);
-    } catch (DateTimeParseException e) {
-      String msg = messages.getTechMessage(INVALID_DATE_FORMAT, DATETIME_FORMAT_PATTERN);
-      String userMessage = messages.getUserMessage(INVALID_DATE_FORMAT, DATETIME_FORMAT_PATTERN);
-      LOGGER.error(msg, e);
-      HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
-      IdmApiCustomError apiError =
-          IdmApiCustomError.IdmApiCustomErrorBuilder.anIdmApiCustomError()
-              .withStatus(httpStatus)
-              .withErrorCode(INVALID_DATE_FORMAT)
-              .withTechnicalMessage(msg)
-              .withUserMessage(userMessage)
-              .build();
-      return new ResponseEntity<>(apiError, httpStatus);
-    }
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATETIME_FORMAT_PATTERN);
+    LocalDateTime lastJobTime = LocalDateTime.parse(lastJobDateStr, formatter);
     return ResponseEntity.ok().body(idmService.getFailedOperations(lastJobTime));
   }
 
