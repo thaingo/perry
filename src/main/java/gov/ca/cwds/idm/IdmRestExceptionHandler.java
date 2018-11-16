@@ -27,29 +27,29 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 @Profile("idm")
-@ControllerAdvice(assignableTypes = {IdmResource.class, OfficesResource.class})
+@ControllerAdvice(assignableTypes = {IdmResource.class})
 public class IdmRestExceptionHandler extends ResponseEntityExceptionHandler {
 
   @Autowired
   private MessagesService messages;
 
   @ExceptionHandler(value = {UserNotFoundPerryException.class})
-  protected ResponseEntity<Object> handleUserNotFound() {
+  ResponseEntity<Object> handleUserNotFound() {
     return ResponseEntity.notFound().build();
   }
 
   @ExceptionHandler(value = {UserAlreadyExistsException.class})
-  protected ResponseEntity<Object> handleUserAlreadyExists(UserAlreadyExistsException e) {
+  ResponseEntity<Object> handleUserAlreadyExists(UserAlreadyExistsException e) {
     return buildResponseEntity(HttpStatus.CONFLICT, e);
   }
 
   @ExceptionHandler(value = {UserIdmValidationException.class})
-  protected ResponseEntity<Object> handleUserValidationException(UserIdmValidationException e) {
+  ResponseEntity<Object> handleUserValidationException(UserIdmValidationException e) {
     return buildResponseEntity(HttpStatus.BAD_REQUEST, e);
   }
 
   @ExceptionHandler(value = {PartialSuccessException.class})
-  protected ResponseEntity<Object> handlePartialSuccess(PartialSuccessException e) {
+  ResponseEntity<Object> handlePartialSuccess(PartialSuccessException e) {
 
     HttpStatus httpStatus = INTERNAL_SERVER_ERROR;
     List<Exception> causes = e.getCauses();
@@ -65,7 +65,7 @@ public class IdmRestExceptionHandler extends ResponseEntityExceptionHandler {
   }
 
   @ExceptionHandler(value = {DateTimeParseException.class})
-  protected ResponseEntity<Object> handleDateTimeParseException(DateTimeParseException e) {
+  ResponseEntity<Object> handleDateTimeParseException(DateTimeParseException e) {
     String msg = messages.getTechMessage(INVALID_DATE_FORMAT, DATETIME_FORMAT_PATTERN);
     String userMessage = messages.getUserMessage(INVALID_DATE_FORMAT, DATETIME_FORMAT_PATTERN);
     logger.error(msg, e);
