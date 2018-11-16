@@ -38,13 +38,7 @@ if (authorization) {
         authorityCodes.push it.unitAuthorityCode
     }
 
-    def supervisorAuthorities = ["S", "A", "T", "B"]
-
-    def supervisor = authorityCodes.size() > 0 && authorityCodes.every { a ->
-        supervisorAuthorities.any {
-            it == a
-        }
-    }
+    def supervisor = authorityCodes.size() > 0 && authorityCodes.contains("S")
 
     def governmentEntityType = GovernmentEntityType.findBySysId(authorization.cwsOffice?.governmentEntityType)
 
