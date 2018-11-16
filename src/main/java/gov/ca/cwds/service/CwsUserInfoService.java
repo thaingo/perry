@@ -77,7 +77,7 @@ public class CwsUserInfoService {
       return null;
     }
 
-    return CwsUserInfo.CwsUserInfoBuilder.aCwsUserInfo()
+    CwsUserInfo cwsUserInfo = CwsUserInfo.CwsUserInfoBuilder.aCwsUserInfo()
         .withRacfId(user.getLogonId())
         .withCwsOffice(cwsOffice)
         .withStaffUnitAuths(setStaffUnitAuths)
@@ -86,6 +86,8 @@ public class CwsUserInfoService {
         .withStaffPerson(staffPerson)
         .withHasAssignments(hasAssignments)
         .build();
+    LOGGER.debug("User info [{}]", cwsUserInfo);
+    return cwsUserInfo;
   }
 
   private boolean isSocialWorker(UserId userId) {
