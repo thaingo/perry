@@ -97,7 +97,7 @@
         </WhileController>
         <hashTree>
           <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set Config" enabled="true">
-            <stringProp name="filename">perry_performance_preint_config.csv</stringProp>
+            <stringProp name="filename">perry_performance_sandboxk8s_config.csv</stringProp>
             <stringProp name="fileEncoding"></stringProp>
             <stringProp name="variableNames">propertyName,propertyValue,propertyDescription</stringProp>
             <boolProp name="ignoreFirstLine">false</boolProp>
@@ -268,7 +268,7 @@ ${__setProperty(userCount,${count})};</stringProp>
           <boolProp name="LoopController.continue_forever">false</boolProp>
           <stringProp name="LoopController.loops">1</stringProp>
         </elementProp>
-        <stringProp name="ThreadGroup.num_threads">10</stringProp>
+        <stringProp name="ThreadGroup.num_threads">100</stringProp>
         <stringProp name="ThreadGroup.ramp_time">1</stringProp>
         <longProp name="ThreadGroup.start_time">1525377506000</longProp>
         <longProp name="ThreadGroup.end_time">1525377506000</longProp>
@@ -514,6 +514,8 @@ ${__setProperty(userCount,${count})};</stringProp>
         <boolProp name="ThreadGroup.scheduler">false</boolProp>
         <stringProp name="ThreadGroup.duration"></stringProp>
         <stringProp name="ThreadGroup.delay"></stringProp>
+        <longProp name="ThreadGroup.start_time">1537998436000</longProp>
+        <longProp name="ThreadGroup.end_time">1537998436000</longProp>
       </ThreadGroup>
       <hashTree>
         <GenericController guiclass="LogicControllerGui" testclass="GenericController" testname="User Login Controller" enabled="true"/>
