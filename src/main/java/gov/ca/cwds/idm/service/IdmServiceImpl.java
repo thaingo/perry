@@ -480,20 +480,9 @@ public class IdmServiceImpl implements IdmService {
       OptionalExecution dbLogExecution = doraExecution.getUserLogExecution();
 
       if (dbLogExecution.getExecutionStatus() == SUCCESS) {
-//        MessageCode errorCode = USER_CREATE_SAVE_TO_SEARCH_ERROR;
-//        String msg = messages.getTechMessage(errorCode, userId);
-//        String userMsg = messages.getUserMessage(errorCode, userId);
-//        throw new PartialSuccessException(userId, CREATE, msg, userMsg, errorCode,
-//            doraExecution.getException());
         throwPartialSuccessException(userId, CREATE, USER_CREATE_SAVE_TO_SEARCH_ERROR,
             doraExecution.getException());
       } else { // logging in db failed
-//        MessageCode errorCode = USER_CREATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
-//        String msg = messages.getTechMessage(errorCode, userId);
-//        String userMsg = messages.getUserMessage(errorCode, userId);
-//        throw new PartialSuccessException(
-//            userId, CREATE, msg, userMsg, errorCode, doraExecution.getException(),
-//            dbLogExecution.getException());
         throwPartialSuccessException(userId, CREATE, USER_CREATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS,
             doraExecution.getException(), dbLogExecution.getException());
       }
