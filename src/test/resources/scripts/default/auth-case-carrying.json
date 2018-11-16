@@ -15,7 +15,7 @@
       "auth_privilege_type": "1468",
       "auth_privilege_code": "P",
       "county_code": "21",
-      "auth_privilege_type_desc": "CWS Case Management System",
+      "auth_privilege_type_desc": "CWS Case Management System        ",
       "auth_privilege_code_desc": "Staff Person Privilege Type",
       "county": "Marin"
     }
