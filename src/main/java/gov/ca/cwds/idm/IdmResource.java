@@ -29,8 +29,6 @@ import java.util.Map;
 import java.util.Set;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
@@ -52,8 +50,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 public class IdmResource {
 
   public static final String DATETIME_FORMAT_PATTERN = "yyyy-MM-dd-HH.mm.ss.SSS";
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(IdmResource.class);
 
   @Autowired
   private IdmService idmService;
