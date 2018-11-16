@@ -1,0 +1,26 @@
+{
+  "user": "userabc",
+  "first_name": "John",
+  "last_name": "Smith",
+  "roles": [
+    "role1",
+    "role2",
+    "SocialWorker"
+  ],
+  "staffId": "q1p",
+  "county_name": "Marin",
+  "county_code": "21",
+  "county_cws_code": 1088,
+  "email": null,
+  "userName": "testUserName",
+  "privileges": [
+    "CANS-client-read",
+    "CANS-client-search",
+    "CANS-assessment-read",
+    "CANS-assessment-create",
+    "CANS-assessment-in-progress-update",
+    "CANS-assessment-in-progress-delete",
+    "CANS-assessment-complete"
+  ],
+  "authorityCodes": ["R"]
+}

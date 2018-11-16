@@ -13,6 +13,17 @@ if (authorization) {
         privileges.push it.authPrivilegeTypeDesc.trim()
     }
 
+    def authorityCodes = []
+    authorization.unitAuthority.findAll {
+        it.endDate == null
+    } each {
+        authorityCodes.push it.unitAuthorityCode
+    }
+
+    def supervisor = authorityCodes.size() > 0 && authorityCodes.contains("S")
+
+    def governmentEntityType = GovernmentEntityType.findBySysId(authorization.cwsOffice?.governmentEntityType)
+
     // Populate case carrying Social Worker permission
     def caseCarryingSocialWorkerPermissions = [
             "CANS-staff-person-clients-read",
@@ -31,17 +42,6 @@ if (authorization) {
         privileges += caseCarryingSocialWorkerPermissions
     }
 
-    def authorityCodes = []
-    authorization.unitAuthority.findAll {
-        it.endDate == null
-    } each {
-        authorityCodes.push it.unitAuthorityCode
-    }
-
-    def supervisor = authorityCodes.size() > 0 && authorityCodes.contains("S")
-
-    def governmentEntityType = GovernmentEntityType.findBySysId(authorization.cwsOffice?.governmentEntityType)
-
     def cansSupervisorPermissions = [
             "CANS-staff-person-subordinates-read",
             "CANS-staff-person-read",
@@ -55,10 +55,9 @@ if (authorization) {
             "CANS-assessment-completed-delete",
             "CANS-assessment-in-progress-delete",
             "CANS-assessment-complete"]
+
     if (supervisor) {
-        cansSupervisorPermissions.each {
-            privileges.push it
-        }
+        privileges += cansSupervisorPermissions
     }
 
     token =
