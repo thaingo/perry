@@ -18,18 +18,15 @@ import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
+import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.idm.service.role.implementor.AdminRoleImplementorFactory;
-import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
 import gov.ca.cwds.service.CwsUserInfoService;
 import gov.ca.cwds.service.dto.CwsUserInfo;
 import gov.ca.cwds.service.messages.MessageCode;
-import gov.ca.cwds.service.messages.MessagesService;
 import java.util.Collection;
 import java.util.Objects;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -38,15 +35,13 @@ import org.springframework.stereotype.Service;
 @Profile("idm")
 public class ValidationServiceImpl implements ValidationService {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(ValidationServiceImpl.class);
-
   private CwsUserInfoService cwsUserInfoService;
-
-  private MessagesService messagesService;
 
   private CognitoServiceFacade cognitoServiceFacade;
 
   private AdminRoleImplementorFactory adminRoleImplementorFactory;
+
+  private ExceptionFactory exceptionFactory;
 
   @Override
   public void validateUserCreate(User enrichedUser, boolean activeUserExistsInCws) {
@@ -148,10 +143,7 @@ public class ValidationServiceImpl implements ValidationService {
   }
 
   private void throwValidationException(MessageCode messageCode, Object... args) {
-    String msg = messagesService.getTechMessage(messageCode, args);
-    String userMsg = messagesService.getUserMessage(messageCode, args);
-    LOGGER.error(msg);
-    throw new UserIdmValidationException(msg, userMsg, messageCode);
+    throw exceptionFactory.createValidationException(messageCode, args);
   }
 
   private void validateActivateUser(UserType existedCognitoUser, UserUpdate updateUserDto) {
@@ -187,11 +179,6 @@ public class ValidationServiceImpl implements ValidationService {
   }
 
   @Autowired
-  public void setMessagesService(MessagesService messagesService) {
-    this.messagesService = messagesService;
-  }
-
-  @Autowired
   public void setCognitoServiceFacade(
       CognitoServiceFacade cognitoServiceFacade) {
     this.cognitoServiceFacade = cognitoServiceFacade;
@@ -203,4 +190,8 @@ public class ValidationServiceImpl implements ValidationService {
     this.adminRoleImplementorFactory = adminRoleImplementorFactory;
   }
 
+  @Autowired
+  public void setExceptionFactory(ExceptionFactory exceptionFactory) {
+    this.exceptionFactory = exceptionFactory;
+  }
 }

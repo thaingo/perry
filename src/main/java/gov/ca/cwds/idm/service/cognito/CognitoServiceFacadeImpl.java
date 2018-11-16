@@ -40,7 +40,6 @@ import com.amazonaws.services.cognitoidp.model.InvalidParameterException;
 import com.amazonaws.services.cognitoidp.model.ListUsersRequest;
 import com.amazonaws.services.cognitoidp.model.ListUsersResult;
 import com.amazonaws.services.cognitoidp.model.MessageActionType;
-import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import com.amazonaws.services.cognitoidp.model.UsernameExistsException;
 import gov.ca.cwds.idm.dto.User;
@@ -51,9 +50,9 @@ import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
 import gov.ca.cwds.rest.api.domain.PerryException;
-import gov.ca.cwds.rest.api.domain.UserAlreadyExistsException;
-import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
-import gov.ca.cwds.rest.api.domain.UserNotFoundPerryException;
+import gov.ca.cwds.idm.exception.UserAlreadyExistsException;
+import gov.ca.cwds.idm.exception.UserValidationException;
+import gov.ca.cwds.idm.exception.UserNotFoundException;
 import gov.ca.cwds.service.messages.MessagesService;
 import java.util.ArrayList;
 import java.util.List;
@@ -115,7 +114,7 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
       String msg = messages.getTechMessage(IDM_USER_VALIDATION_FAILED);
       String userMsg = messages.getUserMessage(IDM_USER_VALIDATION_FAILED);
       LOGGER.error(msg, e);
-      throw new UserIdmValidationException(msg, userMsg, IDM_USER_VALIDATION_FAILED, e);
+      throw new UserValidationException(msg, userMsg, IDM_USER_VALIDATION_FAILED, e);
     }
   }
 
@@ -352,11 +351,11 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
 
     try {
       return function.apply(request);
-    } catch (UserNotFoundException e) {
+    } catch (com.amazonaws.services.cognitoidp.model.UserNotFoundException e) {
       String msg = messages.getTechMessage(USER_NOT_FOUND_BY_ID_IN_IDM, userId);
       String userMsg = messages.getUserMessage(USER_NOT_FOUND_BY_ID_IN_IDM, userId);
       LOGGER.error(msg, e);
-      throw new UserNotFoundPerryException(msg, userMsg, USER_NOT_FOUND_BY_ID_IN_IDM, e);
+      throw new UserNotFoundException(msg, userMsg, USER_NOT_FOUND_BY_ID_IN_IDM, e);
 
     } catch (Exception e) {
       String msg = "";

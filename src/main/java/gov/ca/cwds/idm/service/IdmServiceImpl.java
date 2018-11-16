@@ -59,8 +59,8 @@ import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
 import gov.ca.cwds.idm.service.execution.OptionalExecution;
 import gov.ca.cwds.idm.service.execution.PutInSearchExecution;
 import gov.ca.cwds.idm.service.validation.ValidationService;
-import gov.ca.cwds.rest.api.domain.PartialSuccessException;
-import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
+import gov.ca.cwds.idm.exception.PartialSuccessException;
+import gov.ca.cwds.idm.exception.UserValidationException;
 import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType;
 import gov.ca.cwds.service.CwsUserInfoService;
 import gov.ca.cwds.service.dto.CwsUserInfo;
@@ -249,7 +249,7 @@ public class IdmServiceImpl implements IdmService {
 
     try {
       validationService.validateVerifyIfUserCanBeCreated(user, cwsUser != null);
-    } catch (UserIdmValidationException e) {
+    } catch (UserValidationException e) {
       return buildUserVerificationErrorResult(e.getErrorCode(), e.getUserMessage());
     }
 

@@ -19,11 +19,11 @@ import gov.ca.cwds.idm.service.DictionaryProvider;
 import gov.ca.cwds.idm.service.IdmService;
 import gov.ca.cwds.idm.service.OfficeService;
 import gov.ca.cwds.idm.service.UserEditDetailsService;
-import gov.ca.cwds.rest.api.domain.IdmException;
-import gov.ca.cwds.rest.api.domain.PartialSuccessException;
-import gov.ca.cwds.rest.api.domain.UserAlreadyExistsException;
-import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
-import gov.ca.cwds.rest.api.domain.UserNotFoundPerryException;
+import gov.ca.cwds.idm.exception.IdmException;
+import gov.ca.cwds.idm.exception.PartialSuccessException;
+import gov.ca.cwds.idm.exception.UserAlreadyExistsException;
+import gov.ca.cwds.idm.exception.UserValidationException;
+import gov.ca.cwds.idm.exception.UserNotFoundException;
 import gov.ca.cwds.service.messages.MessagesService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -180,7 +180,7 @@ public class IdmResource {
       UserEditDetails editDetails = userEditDetailsService.getEditDetails(user);
       UserByIdResponse response = new UserByIdResponse(user, editDetails);
       return ResponseEntity.ok().body(response);
-    } catch (UserNotFoundPerryException e) {
+    } catch (UserNotFoundException e) {
       return ResponseEntity.notFound().build();
     }
   }
@@ -213,9 +213,9 @@ public class IdmResource {
     try {
       idmService.updateUser(id, updateUserDto);
       return ResponseEntity.noContent().build();
-    } catch (UserNotFoundPerryException e) {
+    } catch (UserNotFoundException e) {
       return ResponseEntity.notFound().build();
-    } catch (UserIdmValidationException e) {
+    } catch (UserValidationException e) {
       HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
       IdmApiCustomError apiError = buildApiCustomError(e, httpStatus);
       return new ResponseEntity<>(apiError, httpStatus);
@@ -264,7 +264,7 @@ public class IdmResource {
       HttpStatus httpStatus = HttpStatus.CONFLICT;
       IdmApiCustomError apiError = buildApiCustomError(e, httpStatus);
       return new ResponseEntity<>(apiError, httpStatus);
-    } catch (UserIdmValidationException e) {
+    } catch (UserValidationException e) {
       HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
       IdmApiCustomError apiError = buildApiCustomError(e, httpStatus);
       if(e.getCause() != null) {
@@ -362,7 +362,7 @@ public class IdmResource {
     try {
       idmService.resendInvitationMessage(id);
       return ResponseEntity.ok().build();
-    } catch (UserNotFoundPerryException e) {
+    } catch (UserNotFoundException e) {
       return ResponseEntity.notFound().build();
     }
   }

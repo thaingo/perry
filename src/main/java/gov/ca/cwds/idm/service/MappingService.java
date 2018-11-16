@@ -7,11 +7,10 @@ import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.PerryProperties;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
+import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.idm.service.filter.MainRoleFilter;
-import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.service.CwsUserInfoService;
 import gov.ca.cwds.service.dto.CwsUserInfo;
-import gov.ca.cwds.service.messages.MessagesService;
 import java.util.Set;
 import javax.script.ScriptException;
 import org.slf4j.Logger;
@@ -29,11 +28,11 @@ public class MappingService {
 
   private PerryProperties configuration;
 
-  private MessagesService messages;
-
   private CwsUserInfoService cwsUserInfoService;
 
   private NsUserService nsUserService;
+
+  private ExceptionFactory exceptionFactory;
 
   public User toUser(UserType cognitoUser) {
     String userId = cognitoUser.getUsername();
@@ -50,8 +49,7 @@ public class MappingService {
     try {
       user =  configuration.getIdentityManager().getIdmMapping().map(cognitoUser, cwsUser);
     } catch (ScriptException e) {
-      LOGGER.error(messages.getTechMessage(IDM_MAPPING_SCRIPT_ERROR));
-      throw new PerryException(e.getMessage(), e);
+      throw exceptionFactory.createIdmException(IDM_MAPPING_SCRIPT_ERROR);
     }
     enrichWithNsUser(user, nsUser);
     filterMainRole(user);
@@ -83,11 +81,6 @@ public class MappingService {
   }
 
   @Autowired
-  public void setMessages(MessagesService messages) {
-    this.messages = messages;
-  }
-
-  @Autowired
   public void setCwsUserInfoService(CwsUserInfoService cwsUserInfoService) {
     this.cwsUserInfoService = cwsUserInfoService;
   }
@@ -95,5 +88,10 @@ public class MappingService {
   @Autowired
   public void setNsUserService(NsUserService nsUserService) {
     this.nsUserService = nsUserService;
+  }
+
+  @Autowired
+  public void setExceptionFactory(ExceptionFactory exceptionFactory) {
+    this.exceptionFactory = exceptionFactory;
   }
 }

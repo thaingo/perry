@@ -14,10 +14,11 @@ import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
+import gov.ca.cwds.idm.exception.UserValidationException;
 import gov.ca.cwds.idm.service.authorization.AuthorizationService;
+import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.idm.service.role.implementor.AdminRoleImplementorFactory;
 import gov.ca.cwds.idm.util.TestHelper;
-import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
 import gov.ca.cwds.service.messages.MessagesService;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import org.junit.Before;
@@ -42,13 +43,13 @@ public class ValidationServiceMockTest {
 
   private MessagesService messagesServiceMock = mock(MessagesService.class);
 
-  private AuthorizationService authorizationService = mock(AuthorizationService.class);
-
   @Before
   public void before() {
     mockStatic(CurrentAuthenticatedUserUtil.class);
     service = new ValidationServiceImpl();
-    service.setMessagesService(messagesServiceMock);
+    ExceptionFactory exceptionFactory = new ExceptionFactory();
+    exceptionFactory.setMessagesService(messagesServiceMock);
+    service.setExceptionFactory(exceptionFactory);
     service.setAdminRoleImplementorFactory(new AdminRoleImplementorFactory());
   }
 
@@ -84,7 +85,7 @@ public class ValidationServiceMockTest {
   }
 
   private void testAdminCanNotUpdate(UniversalUserToken admin, UserUpdate userUpdate) {
-    expectedException.expect(UserIdmValidationException.class);
+    expectedException.expect(UserValidationException.class);
     validateUpdate(admin, userUpdate);
   }
 
