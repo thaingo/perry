@@ -8,9 +8,9 @@ public class PartialSuccessException extends IdmException {
 
   private static final long serialVersionUID = -4103865347957948978L;
 
-  private String userId;
+  private final String userId;
 
-  private OperationType operationType;
+  private final OperationType operationType;
 
   public PartialSuccessException(String userId, OperationType operationType,
       String techMessage, String userMessage,
