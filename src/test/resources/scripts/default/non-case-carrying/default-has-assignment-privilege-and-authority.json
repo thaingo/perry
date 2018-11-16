@@ -1,0 +1,20 @@
+{
+  "user": "userabc",
+  "first_name": "John",
+  "last_name": "Smith",
+  "roles": [
+    "SocialWorker"
+  ],
+  "staffId": "q1p",
+  "county_name": "Marin",
+  "county_code": "21",
+  "county_cws_code": 1088,
+  "email": null,
+  "userName": "testUserName",
+  "privileges": [
+    "Countywide Read",
+    "permission1",
+    "permission2"
+  ],
+  "authorityCodes": ["R"]
+}
