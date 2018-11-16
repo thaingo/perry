@@ -13,6 +13,15 @@ if (authorization) {
         privileges.push it.authPrivilegeTypeDesc.trim()
     }
 
+    def authorityCodes = []
+    authorization.unitAuthority.findAll {
+        it.endDate == null
+    } each {
+        authorityCodes.push it.unitAuthorityCode
+    }
+
+    def governmentEntityType = GovernmentEntityType.findBySysId(authorization.cwsOffice?.governmentEntityType)
+
     // Populate case carrying Social Worker permission
     def caseCarryingSocialWorkerPermissions = [
             "CANS-staff-person-clients-read",
@@ -31,17 +40,6 @@ if (authorization) {
         privileges += caseCarryingSocialWorkerPermissions
     }
 
-    def authorityCodes = []
-    authorization.unitAuthority.findAll {
-        it.endDate == null
-    } each {
-        authorityCodes.push it.unitAuthorityCode
-    }
-
-    def supervisor = authorityCodes.size() > 0 && authorityCodes.contains("S")
-
-    def governmentEntityType = GovernmentEntityType.findBySysId(authorization.cwsOffice?.governmentEntityType)
-
     def cansSupervisorPermissions = [
             "CANS-staff-person-subordinates-read",
             "CANS-staff-person-read",
@@ -55,10 +53,35 @@ if (authorization) {
             "CANS-assessment-completed-delete",
             "CANS-assessment-in-progress-delete",
             "CANS-assessment-complete"]
-    if (supervisor) {
-        cansSupervisorPermissions.each {
-            privileges.push it
-        }
+
+    def isSupervisor = authorityCodes.size() > 0 && authorityCodes.contains("S")
+
+    if (isSupervisor) {
+        privileges += cansSupervisorPermissions
+    }
+
+    // Populate non case carrying Social Worker permission
+    def nonCaseCarryingSocialWorkerPermissions = [
+            "CANS-client-read",
+            "CANS-client-search",
+            "CANS-assessment-read",
+            "CANS-assessment-create",
+            "CANS-assessment-in-progress-update",
+            "CANS-assessment-in-progress-delete",
+            "CANS-assessment-complete"
+    ]
+
+    def overridePrivileges = ["Countywide Read", "Countywide Read/Write", "Statewide Read",
+                              "Officewide Read", "Officewide Read/Write"]
+
+    def isNonCaseCarryingWorker = !authorization.hasAssignment &&
+            (
+                    authorityCodes.size() > 0 && (authorityCodes.contains("U") || authorityCodes.contains("R")) ||
+                            !Collections.disjoint(privileges, overridePrivileges)
+            )
+
+    if (isNonCaseCarryingWorker) {
+        privileges += nonCaseCarryingSocialWorkerPermissions
     }
 
     token =
@@ -66,7 +89,7 @@ if (authorization) {
              first_name     : authorization.staffPerson?.firstName,
              last_name      : authorization.staffPerson?.lastName,
              email          : user.parameters["email"],
-             roles          : user.roles + [supervisor ? "Supervisor" : "SocialWorker"],
+             roles          : user.roles + [isSupervisor ? "Supervisor" : "SocialWorker"],
              staffId        : authorization.staffPerson?.id,
              county_name    : governmentEntityType.description,
              county_code    : governmentEntityType.countyCd,

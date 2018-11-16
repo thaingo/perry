@@ -18,7 +18,9 @@ public class DefaultMappingTest extends ScriptTestBase {
   protected UniversalUserToken createUniversalUserToken() {
     UniversalUserToken result = new UniversalUserToken();
     result.setUserId("userId");
-    result.getRoles().addAll(roles);
+    if (roles != null) {
+      result.getRoles().addAll(roles);
+    }
     result.setParameter("userName", "testUserName");
     result.setParameter("custom:office", "15");
     result.getPermissions().addAll(Arrays.asList("permission1", "permission2"));

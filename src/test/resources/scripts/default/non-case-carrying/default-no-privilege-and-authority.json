@@ -3,8 +3,6 @@
   "first_name": "John",
   "last_name": "Smith",
   "roles": [
-    "role1",
-    "role2",
     "SocialWorker"
   ],
   "staffId": "q1p",
@@ -20,7 +18,9 @@
     "CANS-assessment-create",
     "CANS-assessment-in-progress-update",
     "CANS-assessment-in-progress-delete",
-    "CANS-assessment-complete"
+    "CANS-assessment-complete",
+    "permission1",
+    "permission2"
   ],
   "authorityCodes": ["R"]
 }

@@ -20,8 +20,6 @@ if (authorization) {
         authorityCodes.push it.unitAuthorityCode
     }
 
-    def supervisor = authorityCodes.size() > 0 && authorityCodes.contains("S")
-
     def governmentEntityType = GovernmentEntityType.findBySysId(authorization.cwsOffice?.governmentEntityType)
 
     // Populate case carrying Social Worker permission
@@ -56,8 +54,34 @@ if (authorization) {
             "CANS-assessment-in-progress-delete",
             "CANS-assessment-complete"]
 
-    if (supervisor) {
+    def isSupervisor = authorityCodes.size() > 0 && authorityCodes.contains("S")
+
+    if (isSupervisor) {
         privileges += cansSupervisorPermissions
+    }
+
+    // Populate non case carrying Social Worker permission
+    def nonCaseCarryingSocialWorkerPermissions = [
+            "CANS-client-read",
+            "CANS-client-search",
+            "CANS-assessment-read",
+            "CANS-assessment-create",
+            "CANS-assessment-in-progress-update",
+            "CANS-assessment-in-progress-delete",
+            "CANS-assessment-complete"
+    ]
+
+    def overridePrivileges = ["Countywide Read", "Countywide Read/Write", "Statewide Read",
+                              "Officewide Read", "Officewide Read/Write"]
+
+    def isNonCaseCarryingWorker = !authorization.hasAssignment &&
+            (
+                    authorityCodes.size() > 0 && (authorityCodes.contains("U") || authorityCodes.contains("R")) ||
+                            !Collections.disjoint(privileges, overridePrivileges)
+            )
+
+    if (isNonCaseCarryingWorker) {
+        privileges += nonCaseCarryingSocialWorkerPermissions
     }
 
     token =
@@ -65,7 +89,7 @@ if (authorization) {
              first_name     : authorization.staffPerson?.firstName,
              last_name      : authorization.staffPerson?.lastName,
              email          : user.parameters["email"],
-             roles          : user.roles + [supervisor ? "Supervisor" : "SocialWorker"],
+             roles          : user.roles + [isSupervisor ? "Supervisor" : "SocialWorker"],
              staffId        : authorization.staffPerson?.id,
              county_name    : governmentEntityType.description,
              county_code    : governmentEntityType.countyCd,
