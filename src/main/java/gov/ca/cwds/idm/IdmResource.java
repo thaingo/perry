@@ -16,7 +16,6 @@ import gov.ca.cwds.idm.service.DictionaryProvider;
 import gov.ca.cwds.idm.service.IdmService;
 import gov.ca.cwds.idm.service.OfficeService;
 import gov.ca.cwds.idm.service.UserEditDetailsService;
-import gov.ca.cwds.service.messages.MessagesService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -56,9 +55,6 @@ public class IdmResource {
 
   @Autowired
   private DictionaryProvider dictionaryProvider;
-
-  @Autowired
-  private MessagesService messages;
 
   @Autowired
   private OfficeService officeService;
