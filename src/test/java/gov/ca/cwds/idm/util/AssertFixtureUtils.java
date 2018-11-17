@@ -29,6 +29,7 @@ public final class AssertFixtureUtils {
   private static void assertWithFixture(MvcResult result, String fixturePath, JSONCompareMode mode) throws IOException, JSONException {
     MockHttpServletResponse response = result.getResponse();
     String strResponse = response.getContentAsString();
+    System.out.println("response = " + strResponse);
     JSONAssert.assertEquals(fixture(fixturePath), strResponse, mode);
   }
 }

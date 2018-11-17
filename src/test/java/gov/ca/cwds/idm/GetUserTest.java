@@ -90,7 +90,7 @@ public class GetUserTest extends BaseIdmIntegrationTest {
   @Test
   @WithMockCustomUser
   public void testGetUserError() throws Exception {
-    assertGetUserUnauthorized(ERROR_USER_ID);
+    assertGetUserInternalServerError(ERROR_USER_ID);
   }
 
   @Test
@@ -127,6 +127,13 @@ public class GetUserTest extends BaseIdmIntegrationTest {
     mockMvc
         .perform(MockMvcRequestBuilders.get("/idm/users/" + userId))
         .andExpect(MockMvcResultMatchers.status().isUnauthorized())
+        .andReturn();
+  }
+
+  private void assertGetUserInternalServerError(String userId) throws Exception {
+    mockMvc
+        .perform(MockMvcRequestBuilders.get("/idm/users/" + userId))
+        .andExpect(MockMvcResultMatchers.status().isInternalServerError())
         .andReturn();
   }
 

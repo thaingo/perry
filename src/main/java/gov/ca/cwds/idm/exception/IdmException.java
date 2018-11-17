@@ -21,7 +21,7 @@ public class IdmException extends RuntimeException {
   }
 
   public IdmException(String techMessage, String userMessage, MessageCode errorCode, Throwable e) {
-    super(techMessage, e);
+    super(techMessage + ": " + e.getMessage(), e);
     this.userMessage = userMessage;
     this.errorCode = errorCode;
   }

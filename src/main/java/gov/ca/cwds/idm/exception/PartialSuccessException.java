@@ -9,7 +9,6 @@ public class PartialSuccessException extends IdmException {
 
   private String userId;
 
-
   public PartialSuccessException(String userId, String techMessage, String userMessage,
       MessageCode errorCode, Exception... causes) {
     super(techMessage, userMessage, errorCode);
@@ -17,13 +16,7 @@ public class PartialSuccessException extends IdmException {
     this.userId = userId;
   }
 
-  public PartialSuccessException(String userId, String techMessage, MessageCode errorCode,
-      Exception... causes) {
-    this(userId, techMessage, techMessage, errorCode, causes);
-  }
-
   public String getUserId() {
     return userId;
   }
-
 }

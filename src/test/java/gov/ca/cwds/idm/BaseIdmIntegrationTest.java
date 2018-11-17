@@ -18,6 +18,7 @@ import gov.ca.cwds.idm.persistence.ns.repository.UserLogRepository;
 import gov.ca.cwds.idm.service.IdmServiceImpl;
 import gov.ca.cwds.idm.service.SearchService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
+import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.idm.util.TestCognitoServiceFacade;
 import gov.ca.cwds.idm.util.WithMockCustomUser;
 import gov.ca.cwds.service.messages.MessagesService;
@@ -67,6 +68,9 @@ public abstract class BaseIdmIntegrationTest extends BaseIntegrationTest {
   protected CognitoServiceFacade cognitoServiceFacade;
 
   @Autowired
+  protected ExceptionFactory exceptionFactory;
+
+  @Autowired
   protected MessagesService messagesService;
 
   @Autowired
@@ -91,7 +95,7 @@ public abstract class BaseIdmIntegrationTest extends BaseIntegrationTest {
   @Before
   public void before() {
 
-    ((TestCognitoServiceFacade) cognitoServiceFacade).setMessagesService(messagesService);
+    ((TestCognitoServiceFacade) cognitoServiceFacade).setExceptionFactory(exceptionFactory);
 
     cognito = ((TestCognitoServiceFacade) cognitoServiceFacade).getIdentityProvider();
 

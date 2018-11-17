@@ -49,7 +49,7 @@ public class MappingService {
     try {
       user =  configuration.getIdentityManager().getIdmMapping().map(cognitoUser, cwsUser);
     } catch (ScriptException e) {
-      throw exceptionFactory.createIdmException(IDM_MAPPING_SCRIPT_ERROR);
+      throw exceptionFactory.createIdmException(IDM_MAPPING_SCRIPT_ERROR, e);
     }
     enrichWithNsUser(user, nsUser);
     filterMainRole(user);

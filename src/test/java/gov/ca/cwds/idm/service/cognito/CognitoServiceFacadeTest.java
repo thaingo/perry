@@ -37,9 +37,10 @@ import com.amazonaws.services.cognitoidp.model.ListUsersRequest;
 import com.amazonaws.services.cognitoidp.model.ListUsersResult;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
-import gov.ca.cwds.rest.api.domain.PerryException;
+import gov.ca.cwds.idm.exception.IdmException;
 import gov.ca.cwds.idm.exception.UserNotFoundException;
+import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
+import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.service.messages.MessagesService;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -69,9 +70,12 @@ public class CognitoServiceFacadeTest {
     properties.setRegion("us-east-2");
 
     facade = new CognitoServiceFacadeImpl();
+    ExceptionFactory exceptionFactory = new ExceptionFactory();
+    exceptionFactory.setMessagesService(messagesService);
+
     facade.setProperties(properties);
     facade.setIdentityProvider(identityProvider);
-    facade.setMessagesService(messagesService);
+    facade.setExceptionFactory(exceptionFactory);
   }
 
   @Test
@@ -126,7 +130,7 @@ public class CognitoServiceFacadeTest {
     facade.getCognitoUserById("id");
   }
 
-  @Test(expected = PerryException.class)
+  @Test(expected = IdmException.class)
   public void testGetByIdException() {
     when(identityProvider.adminGetUser(any(AdminGetUserRequest.class)))
         .thenThrow(new RuntimeException());

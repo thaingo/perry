@@ -182,6 +182,8 @@ public class IdmResource {
       return ResponseEntity.ok().body(response);
     } catch (UserNotFoundException e) {
       return ResponseEntity.notFound().build();
+    } catch (IdmException e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
   }
 
@@ -225,6 +227,8 @@ public class IdmResource {
       apiError.getCauses()
           .addAll(e.getCauses().stream().map(Exception::getMessage).collect(toList()));
       return new ResponseEntity<>(apiError, httpStatus);
+    } catch (IdmException e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
   }
 
