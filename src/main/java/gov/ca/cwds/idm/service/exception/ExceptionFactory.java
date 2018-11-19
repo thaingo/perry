@@ -22,14 +22,6 @@ public class ExceptionFactory {
 
   private MessagesService messagesService;
 
-  interface IdmExceptionCreator<T extends IdmException> {
-    T create(String techMsg, String userMsg, MessageCode messageCode);
-  }
-
-  interface IdmExceptionWithCauseCreator<T extends IdmException> {
-    T create(String techMsg, String userMsg, MessageCode messageCode, Throwable cause);
-  }
-
   public IdmException createIdmException(MessageCode messageCode, Throwable cause, String... args) {
     return createExceptionWithCause(IdmException::new, cause, messageCode, args);
   }
@@ -57,24 +49,34 @@ public class ExceptionFactory {
   public PartialSuccessException createPartialSuccessException(String userId, MessageCode errorCode,
       Exception... causes) {
     Messages messages = messagesService.getMessages(errorCode, userId);
-    PartialSuccessException e = new PartialSuccessException(
+    PartialSuccessException ex = new PartialSuccessException(
         userId, messages.getTechMsg(), messages.getUserMsg(), errorCode, causes);
-    LOGGER.error(messages.getTechMsg());
-    return e;
+    LOGGER.error(messages.getTechMsg(), ex);
+    return ex;
   }
 
   private <T extends IdmException> T createException(IdmExceptionCreator<T> creator,
       MessageCode messageCode, String... args) {
     Messages messages = messagesService.getMessages(messageCode, args);
-    LOGGER.error(messages.getTechMsg());
-    return creator.create(messages.getTechMsg(), messages.getUserMsg(), messageCode);
+    T ex = creator.create(messages.getTechMsg(), messages.getUserMsg(), messageCode);
+    LOGGER.error(messages.getTechMsg(), ex);
+    return ex;
   }
 
   private <T extends IdmException> T createExceptionWithCause(IdmExceptionWithCauseCreator<T> creator,
       Throwable cause, MessageCode messageCode, String... args) {
     Messages messages = messagesService.getMessages(messageCode, args);
-    LOGGER.error(messages.getTechMsg());
-    return creator.create(messages.getTechMsg(), messages.getUserMsg(), messageCode, cause);
+    T ex = creator.create(messages.getTechMsg(), messages.getUserMsg(), messageCode, cause);
+    LOGGER.error(messages.getTechMsg(), ex);
+    return ex;
+  }
+
+  interface IdmExceptionCreator<T extends IdmException> {
+    T create(String techMsg, String userMsg, MessageCode messageCode);
+  }
+
+  interface IdmExceptionWithCauseCreator<T extends IdmException> {
+    T create(String techMsg, String userMsg, MessageCode messageCode, Throwable cause);
   }
 
   @Autowired
