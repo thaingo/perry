@@ -18,7 +18,9 @@ public class DefaultMappingTest extends ScriptTestBase {
   protected UniversalUserToken createUniversalUserToken() {
     UniversalUserToken result = new UniversalUserToken();
     result.setUserId("userId");
-    result.getRoles().addAll(roles);
+    if (roles != null) {
+      result.getRoles().addAll(roles);
+    }
     result.setParameter("userName", "testUserName");
     result.setParameter("custom:office", "15");
     result.getPermissions().addAll(Arrays.asList("permission1", "permission2"));
@@ -65,5 +67,25 @@ public class DefaultMappingTest extends ScriptTestBase {
   public void testGroovyMappingCaseCarryingStaffPerson() throws Exception {
     roles = Arrays.asList("role1", "role2");
     test("/scripts/default/default.groovy", "/scripts/default/default-case-carrying-staff-person.json", "scripts/default/auth-case-carrying.json");
+  }
+
+  @Test
+  public void nonCaseCarryingWorkerMapping_success_whenNoPrivilegeButHasAuthorityAndNoAssignment() throws Exception {
+    test("/scripts/default/default.groovy", "/scripts/default/non-case-carrying/default-no-privilege-and-authority.json", "scripts/default/non-case-carrying/auth-no-privilege-and-authority.json");
+  }
+
+  @Test
+  public void nonCaseCarryingWorkerMapping_success_whenPrivilegeAndAuthorityAndNoAssignment() throws Exception {
+    test("/scripts/default/default.groovy", "/scripts/default/non-case-carrying/default-privilege-and-authority.json", "scripts/default/non-case-carrying/auth-privilege-and-authority.json");
+  }
+
+  @Test
+  public void nonCaseCarryingWorkerMapping_success_whenPrivilegeAndNoAuthorityAndNoAssignment() throws Exception {
+    test("/scripts/default/default.groovy", "/scripts/default/non-case-carrying/default-privilege-no-authority.json", "scripts/default/non-case-carrying/auth-privilege-no-authority.json");
+  }
+
+  @Test
+  public void nonCaseCarryingWorkerMapping_fail_whenPrivilegeAndAuthorityAndHasAssignment() throws Exception {
+    test("/scripts/default/default.groovy", "/scripts/default/non-case-carrying/default-has-assignment-privilege-and-authority.json", "scripts/default/non-case-carrying/auth-has-assignment-privilege-and-authority.json");
   }
 }
