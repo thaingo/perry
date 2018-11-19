@@ -57,6 +57,7 @@ import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
+import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.idm.service.execution.OptionalExecution;
 import gov.ca.cwds.idm.service.execution.PutInSearchExecution;
 import gov.ca.cwds.idm.service.validation.ValidationService;
@@ -123,6 +124,9 @@ public class IdmServiceImpl implements IdmService {
 
   @Autowired
   private NsUserService nsUserService;
+
+  @Autowired
+  private ExceptionFactory exceptionFactory;
 
   @Override
   public User findUser(String id) {
@@ -502,11 +506,8 @@ public class IdmServiceImpl implements IdmService {
 
   private void throwPartialSuccessException(
       String userId, MessageCode errorCode, Exception... causes) {
-    String msg = messages.getTechMessage(errorCode, userId);
-    String userMsg = messages.getUserMessage(errorCode, userId);
-    PartialSuccessException e = new PartialSuccessException(userId, msg, userMsg, errorCode,
+    PartialSuccessException e = exceptionFactory.createPartialSuccessException(userId, errorCode,
         causes);
-    LOGGER.error(msg, e);
     throw e;
   }
 
