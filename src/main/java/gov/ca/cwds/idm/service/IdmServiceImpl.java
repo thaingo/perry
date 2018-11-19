@@ -3,6 +3,7 @@ package gov.ca.cwds.idm.service;
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
+import static gov.ca.cwds.idm.IdmResource.DATETIME_FORMATTER;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.CREATE;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
 import static gov.ca.cwds.idm.service.ExecutionStatus.FAIL;
@@ -315,7 +316,7 @@ public class IdmServiceImpl implements IdmService {
     }
   }
 
-  private UserVerificationResult buildVerifyAuthorizationError(MessageCode messageCode, Object... args) {
+  private UserVerificationResult buildVerifyAuthorizationError(MessageCode messageCode, String... args) {
     String msg = messages.getTechMessage(messageCode, args);
     String userMsg = messages.getUserMessage(messageCode, args);
     LOGGER.error(msg);
@@ -472,24 +473,16 @@ public class IdmServiceImpl implements IdmService {
     return updateUserEnabledExecution;
   }
 
-
   private void handleCreatePartialSuccess(String userId, PutInSearchExecution doraExecution) {
     if (doraExecution.getExecutionStatus() == FAIL) {
       OptionalExecution dbLogExecution = doraExecution.getUserLogExecution();
 
       if (dbLogExecution.getExecutionStatus() == SUCCESS) {
-        MessageCode errorCode = USER_CREATE_SAVE_TO_SEARCH_ERROR;
-        String msg = messages.getTechMessage(errorCode, userId);
-        String userMsg = messages.getUserMessage(errorCode, userId);
-        throw new PartialSuccessException(userId, msg, userMsg, errorCode,
+        throwPartialSuccessException(userId, USER_CREATE_SAVE_TO_SEARCH_ERROR,
             doraExecution.getException());
       } else { // logging in db failed
-        MessageCode errorCode = USER_CREATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
-        String msg = messages.getTechMessage(errorCode, userId);
-        String userMsg = messages.getUserMessage(errorCode, userId);
-        throw new PartialSuccessException(
-            userId, msg, userMsg, errorCode, doraExecution.getException(),
-            dbLogExecution.getException());
+        throwPartialSuccessException(userId, USER_CREATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS,
+            doraExecution.getException(), dbLogExecution.getException());
       }
     }
   }
@@ -499,7 +492,8 @@ public class IdmServiceImpl implements IdmService {
     try {
       deletedCount = userLogService.deleteProcessedLogs(lastJobTime);
     } catch (Exception e) {
-      LOGGER.error(messages.getTechMessage(UNABLE_TO_PURGE_PROCESSED_USER_LOGS, lastJobTime), e);
+      LOGGER.error(messages.getTechMessage(UNABLE_TO_PURGE_PROCESSED_USER_LOGS,
+          lastJobTime.format(DATETIME_FORMATTER)), e);
     }
     if (deletedCount > 0) {
       LOGGER.info("{} processed user log records are deleted", deletedCount);

@@ -1,16 +1,23 @@
 package gov.ca.cwds.util;
 
-import gov.ca.cwds.idm.dto.User;
-import org.junit.Test;
-import org.springframework.boot.actuate.health.Status;
-
-import static gov.ca.cwds.util.Utils.*;
+import static gov.ca.cwds.util.Utils.healthCheckUtcTimeToPacific;
+import static gov.ca.cwds.util.Utils.isRacfidUser;
+import static gov.ca.cwds.util.Utils.isStatusHealthy;
+import static gov.ca.cwds.util.Utils.toCommaDelimitedString;
+import static gov.ca.cwds.util.Utils.toLowerCase;
+import static gov.ca.cwds.util.Utils.toUpperCase;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+
+import gov.ca.cwds.idm.dto.User;
+import java.util.ArrayList;
+import java.util.Arrays;
+import org.junit.Test;
+import org.springframework.boot.actuate.health.Status;
 
 public class UtilsTest {
 
@@ -56,5 +63,13 @@ public class UtilsTest {
   public void testHealthCheckUtcTimeToPacific() {
     assertThat(healthCheckUtcTimeToPacific("2018-10-22 22:59:43+0000"),
         is(equalTo("2018-10-22T15:59:43.000-07:00")));
+  }
+
+  @Test
+  public void testToCommaDelimitedString() {
+    assertThat(toCommaDelimitedString(null), nullValue());
+    assertThat(toCommaDelimitedString(new ArrayList<>()), is(equalTo("[]")));
+    assertThat(toCommaDelimitedString(Arrays.asList("one")), is(equalTo("[one]")));
+    assertThat(toCommaDelimitedString(Arrays.asList("one", "two")), is(equalTo("[one, two]")));
   }
 }

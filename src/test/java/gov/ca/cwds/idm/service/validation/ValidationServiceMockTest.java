@@ -7,7 +7,9 @@ import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.idm.util.TestHelper.userType;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.Utils.toSet;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 import com.amazonaws.services.cognitoidp.model.UserType;
@@ -15,17 +17,19 @@ import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.exception.UserValidationException;
-import gov.ca.cwds.idm.service.authorization.AuthorizationService;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.idm.service.role.implementor.AdminRoleImplementorFactory;
 import gov.ca.cwds.idm.util.TestHelper;
+import gov.ca.cwds.service.messages.MessageCode;
 import gov.ca.cwds.service.messages.MessagesService;
+import gov.ca.cwds.service.messages.MessagesService.Messages;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -51,6 +55,9 @@ public class ValidationServiceMockTest {
     exceptionFactory.setMessagesService(messagesServiceMock);
     service.setExceptionFactory(exceptionFactory);
     service.setAdminRoleImplementorFactory(new AdminRoleImplementorFactory());
+
+    when(messagesServiceMock.getMessages(any(MessageCode.class), ArgumentMatchers.<String>any()))
+        .thenReturn(new Messages("", ""));
   }
 
   @Test

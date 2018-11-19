@@ -10,6 +10,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import org.apache.commons.lang3.SerializationUtils;
@@ -102,5 +103,12 @@ public class Utils {
     ZonedDateTime dt = ZonedDateTime.parse(ht, formatterIn)
         .withZoneSameInstant(ZoneId.of("America/Los_Angeles"));
     return dt.format(formatterOut);
+  }
+
+  public static String toCommaDelimitedString(Collection<String> collection) {
+    if (collection == null) {
+      return null;
+    }
+    return "[" + String.join(", ", collection) + "]";
   }
 }

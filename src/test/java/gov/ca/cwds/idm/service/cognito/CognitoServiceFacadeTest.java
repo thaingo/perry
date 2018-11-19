@@ -41,7 +41,9 @@ import gov.ca.cwds.idm.exception.IdmException;
 import gov.ca.cwds.idm.exception.UserNotFoundException;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
+import gov.ca.cwds.service.messages.MessageCode;
 import gov.ca.cwds.service.messages.MessagesService;
+import gov.ca.cwds.service.messages.MessagesService.Messages;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -51,6 +53,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InOrder;
 
 public class CognitoServiceFacadeTest {
@@ -76,6 +79,9 @@ public class CognitoServiceFacadeTest {
     facade.setProperties(properties);
     facade.setIdentityProvider(identityProvider);
     facade.setExceptionFactory(exceptionFactory);
+
+    when(messagesService.getMessages(any(MessageCode.class), ArgumentMatchers.<String>any()))
+        .thenReturn(new Messages("", ""));
   }
 
   @Test

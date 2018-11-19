@@ -30,12 +30,36 @@ public class MessagesService {
     userMessagesAccessor = new MessageSourceAccessor(userMessageSource, DEFAULT_LOCALE);
   }
 
-  public String getTechMessage(MessageCode messageCode, Object... args) {
+  public String getTechMessage(MessageCode messageCode, String... args) {
     return techMessagesAccessor.getMessage(messageCode.getValue(), args);
   }
 
-  public String getUserMessage(MessageCode messageCode, Object... args) {
+  public String getUserMessage(MessageCode messageCode, String... args) {
     return userMessagesAccessor.getMessage(messageCode.getValue(), args);
   }
 
+  public Messages getMessages(MessageCode messageCode, String... args) {
+    String techMsg = getTechMessage(messageCode, args);
+    String userMsg = getUserMessage(messageCode, args);
+    return new Messages(techMsg, userMsg);
+  }
+
+  public static class Messages {
+
+    private final String techMsg;
+    private final String userMsg;
+
+    public Messages(String techMsg, String userMsg) {
+      this.techMsg = techMsg;
+      this.userMsg = userMsg;
+    }
+
+    public String getTechMsg() {
+      return techMsg;
+    }
+
+    public String getUserMsg() {
+      return userMsg;
+    }
+  }
 }

@@ -63,6 +63,8 @@ public class IdmResource {
 
   public static final String DATETIME_FORMAT_PATTERN = "yyyy-MM-dd-HH.mm.ss.SSS";
 
+  public static final DateTimeFormatter DATETIME_FORMATTER = DateTimeFormatter.ofPattern(DATETIME_FORMAT_PATTERN);
+
   private static final Logger LOGGER = LoggerFactory.getLogger(IdmResource.class);
 
   @Autowired
@@ -141,8 +143,7 @@ public class IdmResource {
           String lastJobDateStr) {
     LocalDateTime lastJobTime;
     try {
-      DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATETIME_FORMAT_PATTERN);
-      lastJobTime = LocalDateTime.parse(lastJobDateStr, formatter);
+      lastJobTime = LocalDateTime.parse(lastJobDateStr, DATETIME_FORMATTER);
     } catch (DateTimeParseException e) {
       String msg = messages.getTechMessage(INVALID_DATE_FORMAT, DATETIME_FORMAT_PATTERN);
       String userMessage = messages.getUserMessage(INVALID_DATE_FORMAT, DATETIME_FORMAT_PATTERN);

@@ -11,6 +11,7 @@ import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_REMOVE_ALL_ROLE
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_UNALLOWED_ROLES;
 import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
 import static gov.ca.cwds.util.Utils.isRacfidUser;
+import static gov.ca.cwds.util.Utils.toCommaDelimitedString;
 import static gov.ca.cwds.util.Utils.toUpperCase;
 
 import com.amazonaws.services.cognitoidp.model.UserType;
@@ -125,7 +126,10 @@ public class ValidationServiceImpl implements ValidationService {
   private void validateByAllowedRoles(Collection<String> newUserRoles) {
     Collection<String> allowedRoles = adminRoleImplementorFactory.getPossibleUserRoles();
     if (!allowedRoles.containsAll(newUserRoles)) {
-      throwValidationException(UNABLE_UPDATE_UNALLOWED_ROLES, newUserRoles, allowedRoles);
+      throwValidationException(
+          UNABLE_UPDATE_UNALLOWED_ROLES,
+          toCommaDelimitedString(newUserRoles),
+          toCommaDelimitedString(allowedRoles));
     }
   }
 
@@ -142,7 +146,7 @@ public class ValidationServiceImpl implements ValidationService {
     return !CollectionUtils.isEmpty(cognitoUsers);
   }
 
-  private void throwValidationException(MessageCode messageCode, Object... args) {
+  private void throwValidationException(MessageCode messageCode, String... args) {
     throw exceptionFactory.createValidationException(messageCode, args);
   }
 

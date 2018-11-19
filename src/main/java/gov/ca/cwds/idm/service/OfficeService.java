@@ -6,6 +6,7 @@ import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_GET_MANAGED_OFFICES_LIST;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserCountyName;
+import static gov.ca.cwds.util.Utils.toCommaDelimitedString;
 
 import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.dto.Office;
@@ -59,7 +60,7 @@ public class OfficeService {
       default:
         String msg = messagesService
             .getTechMessage(NOT_AUTHORIZED_TO_GET_MANAGED_OFFICES_LIST,
-                currentUser.getUserId(), currentUser.getRoles());
+                currentUser.getUserId(), toCommaDelimitedString(currentUser.getRoles()));
         LOGGER.error(msg);
         throw new AccessDeniedException(msg);
     }
