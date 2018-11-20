@@ -4,11 +4,11 @@ import static gov.ca.cwds.BaseIntegrationTest.H2_DRIVER_CLASS_NAME;
 import static gov.ca.cwds.BaseIntegrationTest.IDM_BASIC_AUTH_PASS;
 import static gov.ca.cwds.BaseIntegrationTest.IDM_BASIC_AUTH_USER;
 import static gov.ca.cwds.idm.service.IdmServiceImpl.transformSearchValues;
-import static gov.ca.cwds.idm.util.TestHelper.user;
-import static gov.ca.cwds.idm.util.TestHelper.userType;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.FIRST_NAME;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
+import static gov.ca.cwds.idm.util.TestHelper.user;
+import static gov.ca.cwds.idm.util.TestHelper.userType;
 import static gov.ca.cwds.service.messages.MessageCode.USER_CREATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_CREATE_SAVE_TO_SEARCH_ERROR;
 import static gov.ca.cwds.service.messages.MessageCode.USER_PARTIAL_UPDATE;
@@ -21,19 +21,31 @@ import static gov.ca.cwds.util.Utils.toSet;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import static org.mockito.AdditionalAnswers.delegatesTo;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.amazonaws.services.cognitoidp.model.UserType;
-import gov.ca.cwds.idm.util.WithMockCustomUser;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserEnableStatusRequest;
 import gov.ca.cwds.idm.dto.UserUpdate;
+import gov.ca.cwds.idm.dto.UsersSearchCriteria;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.exception.PartialSuccessException;
+import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
+import gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil;
+import gov.ca.cwds.idm.util.WithMockCustomUser;
+import gov.ca.cwds.idm.exception.PartialSuccessException;
 import gov.ca.cwds.service.CwsUserInfoService;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -41,6 +53,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -69,6 +82,8 @@ public class IdmServiceImplTest {
   @MockBean
   private UserLogTransactionalService userLogTransactionalServiceMock;
 
+  @Autowired
+  private NsUserService nsUserService;
 
   @MockBean
   private SearchService searchServiceMock;
@@ -276,7 +291,7 @@ public class IdmServiceImplTest {
   @WithMockCustomUser
   public void testUpdateUser_AttrsNotSetAndEnableStatusError() {
     UserUpdate userUpdate = new UserUpdate();
-     userUpdate.setEnabled(Boolean.FALSE);
+    userUpdate.setEnabled(Boolean.FALSE);
 
     User existedUser = user();
     existedUser.setPermissions(toSet("old permission"));
@@ -308,13 +323,46 @@ public class IdmServiceImplTest {
         is(toSet("John", "JOHN", "john")));
   }
 
+  @Test
+  public void testSearchUsersNoResult() {
+    NsUserService spyNsUserService = mock(NsUserService.class, delegatesTo(nsUserService));
+    service.setNsUserService(spyNsUserService);
+    String racfIdUserAbsent1 = "NORACF";
+    String racfIdUserAbsent2 = "NORAC1";
+    String racfIdUserPresent = "ROOBLA";
+    UsersSearchCriteria searchCriteriaUsersAbsent = new UsersSearchCriteria(RACFID_STANDARD,
+        new HashSet<>(
+            Arrays.asList(racfIdUserAbsent1, racfIdUserAbsent2)));
+    UsersSearchCriteria searchCriteriaUserPresent = new UsersSearchCriteria(RACFID_STANDARD,
+        new HashSet<>(
+            Collections.singletonList(racfIdUserPresent)));
+    CognitoUsersSearchCriteria cognitoSearchCriteriaUserAbsent1 = CognitoUsersSearchCriteriaUtil
+        .composeToGetFirstPageByAttribute(RACFID_STANDARD, racfIdUserAbsent1);
+    CognitoUsersSearchCriteria cognitoSearchCriteriaUserAbsent2 = CognitoUsersSearchCriteriaUtil
+        .composeToGetFirstPageByAttribute(RACFID_STANDARD, racfIdUserAbsent2);
+    CognitoUsersSearchCriteria cognitoSearchCriteriaUserPresent = CognitoUsersSearchCriteriaUtil
+        .composeToGetFirstPageByAttribute(RACFID_STANDARD, racfIdUserPresent);
+    when(cognitoServiceFacadeMock.searchAllPages(cognitoSearchCriteriaUserAbsent1))
+        .thenReturn(Collections.emptyList());
+    when(cognitoServiceFacadeMock.searchAllPages(cognitoSearchCriteriaUserAbsent2))
+        .thenReturn(Collections.emptyList());
+    when(cognitoServiceFacadeMock.searchAllPages(cognitoSearchCriteriaUserPresent))
+        .thenReturn(Collections.singletonList(userType(user(), USER_ID)));
+
+    service.searchUsers(searchCriteriaUsersAbsent);
+    verify(spyNsUserService, never()).findByUsernames(any());
+    service.searchUsers(searchCriteriaUserPresent);
+    verify(spyNsUserService, times(1)).findByUsernames(any());
+  }
+
   private void setCreateUserResult(User user, String newId) {
     UserType newUser = userType(user, newId);
     when(cognitoServiceFacadeMock.createUser(user)).thenReturn(newUser);
   }
 
   private void setUpdateUserAttributesResult(String userId, UserUpdate userUpdate, boolean result) {
-    when(cognitoServiceFacadeMock.updateUserAttributes(eq(userId), any(UserType.class), eq(userUpdate)))
+    when(cognitoServiceFacadeMock
+        .updateUserAttributes(eq(userId), any(UserType.class), eq(userUpdate)))
         .thenReturn(result);
   }
 

@@ -1,6 +1,8 @@
 package gov.ca.cwds.idm.service.cognito.dto;
 
 import gov.ca.cwds.idm.service.cognito.StandardUserAttribute;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 @SuppressWarnings({"fb-contrib:OCP_OVERLY_CONCRETE_PARAMETER"})
 public class CognitoUsersSearchCriteria {
@@ -85,5 +87,15 @@ public class CognitoUsersSearchCriteria {
       }
       return searchCriteria;
     }
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    return EqualsBuilder.reflectionEquals(this, o);
+  }
+
+  @Override
+  public int hashCode() {
+    return HashCodeBuilder.reflectionHashCode(this);
   }
 }
