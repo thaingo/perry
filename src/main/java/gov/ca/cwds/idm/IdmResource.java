@@ -52,8 +52,6 @@ public class IdmResource {
 
   public static final DateTimeFormatter DATETIME_FORMATTER = DateTimeFormatter.ofPattern(DATETIME_FORMAT_PATTERN);
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(IdmResource.class);
-
   @Autowired
   private IdmService idmService;
 

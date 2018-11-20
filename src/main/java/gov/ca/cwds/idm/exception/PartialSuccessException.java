@@ -22,8 +22,7 @@ public class PartialSuccessException extends IdmException {
   }
 
   public PartialSuccessException(String userId, OperationType operationType,
-      String techMessage,
-      MessageCode errorCode, Exception... causes) {
+      String techMessage, MessageCode errorCode, Exception... causes) {
     this(userId, operationType, techMessage, techMessage, errorCode, causes);
   }
 

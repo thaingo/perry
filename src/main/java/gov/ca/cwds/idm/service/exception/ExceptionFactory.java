@@ -5,6 +5,7 @@ import gov.ca.cwds.idm.exception.PartialSuccessException;
 import gov.ca.cwds.idm.exception.UserAlreadyExistsException;
 import gov.ca.cwds.idm.exception.UserNotFoundException;
 import gov.ca.cwds.idm.exception.UserValidationException;
+import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.service.messages.MessageCode;
 import gov.ca.cwds.service.messages.MessagesService;
 import gov.ca.cwds.service.messages.MessagesService.Messages;
@@ -46,11 +47,11 @@ public class ExceptionFactory {
     return createExceptionWithCause(UserValidationException::new, cause, messageCode, args);
   }
 
-  public PartialSuccessException createPartialSuccessException(String userId, MessageCode errorCode,
-      Exception... causes) {
+  public PartialSuccessException createPartialSuccessException(
+      String userId, OperationType operationType, MessageCode errorCode, Exception... causes) {
     Messages messages = messagesService.getMessages(errorCode, userId);
     PartialSuccessException ex = new PartialSuccessException(
-        userId, messages.getTechMsg(), messages.getUserMsg(), errorCode, causes);
+        userId, operationType, messages.getTechMsg(), messages.getUserMsg(), errorCode, causes);
     LOGGER.error(messages.getTechMsg(), ex);
     return ex;
   }
