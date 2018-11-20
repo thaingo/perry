@@ -114,8 +114,17 @@ public class IdmApiCustomError  implements Serializable {
     }
 
     public IdmApiCustomErrorBuilder withCauses(List<Exception> causes) {
-      this.causes.addAll(causes.stream().map(Exception::getMessage).collect(toList()));
+      this.causes.addAll(causes.stream().map(this::getMessageWithCause).collect(toList()));
       return this;
+    }
+
+    private String getMessageWithCause(Exception e) {
+      String result = e.getMessage();
+      Throwable cause = e.getCause();
+      if (cause != null && cause.getMessage() != null) {
+        result += ": " + cause.getMessage();
+      }
+      return result;
     }
 
     public IdmApiCustomErrorBuilder withCause(Throwable cause) {
