@@ -50,6 +50,7 @@ import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
+import gov.ca.cwds.service.messages.MessageCode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -322,23 +323,20 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
 
     try {
       return function.apply(request);
-
     } catch (com.amazonaws.services.cognitoidp.model.UserNotFoundException e) {
       throw exceptionFactory.createUserNotFoundException(USER_NOT_FOUND_BY_ID_IN_IDM, e, userId);
-
     } catch (Exception e) {
-      return handleCognitoException(operation, e);
+      throw exceptionFactory.createIdmException(getErrorCode(operation), e);
     }
   }
 
-  private <R extends AmazonWebServiceResult> R handleCognitoException(OperationType operation,
-      Exception e) {
+  private MessageCode getErrorCode(OperationType operation) {
     if (operation == UPDATE) {
-      throw exceptionFactory.createIdmException(ERROR_UPDATE_USER_IN_IDM, e);
+      return ERROR_UPDATE_USER_IN_IDM;
     } else if (operation == GET) {
-      throw exceptionFactory.createIdmException(ERROR_GET_USER_FROM_IDM, e);
+      return ERROR_GET_USER_FROM_IDM;
     } else {
-      throw exceptionFactory.createIdmException(IDM_GENERIC_ERROR, e);
+      return IDM_GENERIC_ERROR;
     }
   }
 
