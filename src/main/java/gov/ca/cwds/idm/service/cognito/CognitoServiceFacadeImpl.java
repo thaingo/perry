@@ -57,8 +57,6 @@ import java.util.Set;
 import java.util.function.Function;
 import javax.annotation.PostConstruct;
 import liquibase.util.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -67,8 +65,6 @@ import org.springframework.stereotype.Service;
 @Profile("idm")
 @SuppressWarnings({"fb-contrib:EXS_EXCEPTION_SOFTENING_NO_CONSTRAINTS"})
 public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(CognitoServiceFacadeImpl.class);
 
   private CognitoProperties properties;
 
