@@ -327,13 +327,18 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
       throw exceptionFactory.createUserNotFoundException(USER_NOT_FOUND_BY_ID_IN_IDM, e, userId);
 
     } catch (Exception e) {
-      if (operation == UPDATE) {
-        throw exceptionFactory.createIdmException(ERROR_UPDATE_USER_IN_IDM, e);
-      } else if (operation == GET) {
-        throw exceptionFactory.createIdmException(ERROR_GET_USER_FROM_IDM, e);
-      } else {
-        throw exceptionFactory.createIdmException(IDM_GENERIC_ERROR, e);
-      }
+      return handleCognitoException(operation, e);
+    }
+  }
+
+  private <R extends AmazonWebServiceResult> R handleCognitoException(OperationType operation,
+      Exception e) {
+    if (operation == UPDATE) {
+      throw exceptionFactory.createIdmException(ERROR_UPDATE_USER_IN_IDM, e);
+    } else if (operation == GET) {
+      throw exceptionFactory.createIdmException(ERROR_GET_USER_FROM_IDM, e);
+    } else {
+      throw exceptionFactory.createIdmException(IDM_GENERIC_ERROR, e);
     }
   }
 
