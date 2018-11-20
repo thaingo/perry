@@ -13,8 +13,6 @@ import gov.ca.cwds.service.CwsUserInfoService;
 import gov.ca.cwds.service.dto.CwsUserInfo;
 import java.util.Set;
 import javax.script.ScriptException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -23,8 +21,6 @@ import org.springframework.stereotype.Service;
 @Profile("idm")
 @SuppressWarnings({"fb-contrib:EXS_EXCEPTION_SOFTENING_NO_CONSTRAINTS"})
 public class MappingService {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(MappingService.class);
 
   private PerryProperties configuration;
 
