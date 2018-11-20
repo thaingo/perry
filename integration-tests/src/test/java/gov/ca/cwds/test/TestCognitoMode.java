@@ -77,7 +77,7 @@ public class TestCognitoMode {
   @Test
   public void testCognitoMode() throws Exception {
     loginSteps.goToPerryLoginUrl(testDataBean.getUrl() + "/authn/login?callback=" + testDataBean.getUrl() + "/demo-sp.html");
-    loginSteps.isElementPresentXpath(USERNAME_XPATH);
+    //loginSteps.isElementPresentXpath(USERNAME_XPATH);
     loginSteps.typeXpath(USERNAME_XPATH, testDataBean.getUsername());
     loginSteps.typeXpath(PASSWORD_XPATH, testDataBean.getPassword());
     loginSteps.clickXpath(SUBMIT_XPATH);
