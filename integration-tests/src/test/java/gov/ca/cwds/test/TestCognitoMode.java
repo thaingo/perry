@@ -27,7 +27,7 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 @Concurrent
 public class TestCognitoMode {
 
-  public static final String USERNAME_XPATH = "(//input[@id='username'])[2]";
+  public static final String USERNAME_XPATH = "(//input[@name='username'])[2]";
   public static final String PASSWORD_XPATH = "(//input[@id='password'])[2]";
   public static final String SUBMIT_XPATH = "(//form[@name='cognitoSignInForm'])[2]";
 
