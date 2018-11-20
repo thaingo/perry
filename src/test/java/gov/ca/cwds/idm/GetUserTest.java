@@ -3,6 +3,7 @@ package gov.ca.cwds.idm;
 import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
+import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.ABSENT_USER_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.COUNTY_ADMIN_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.ERROR_USER_ID;
@@ -90,7 +91,11 @@ public class GetUserTest extends BaseIdmIntegrationTest {
   @Test
   @WithMockCustomUser
   public void testGetUserError() throws Exception {
-    assertGetUserInternalServerError(ERROR_USER_ID);
+    MvcResult result = mockMvc
+        .perform(MockMvcRequestBuilders.get("/idm/users/" + ERROR_USER_ID))
+        .andExpect(MockMvcResultMatchers.status().isInternalServerError())
+        .andReturn();
+    assertExtensible(result, "fixtures/idm/get-user/internal-error.json");
   }
 
   @Test
@@ -127,13 +132,6 @@ public class GetUserTest extends BaseIdmIntegrationTest {
     mockMvc
         .perform(MockMvcRequestBuilders.get("/idm/users/" + userId))
         .andExpect(MockMvcResultMatchers.status().isUnauthorized())
-        .andReturn();
-  }
-
-  private void assertGetUserInternalServerError(String userId) throws Exception {
-    mockMvc
-        .perform(MockMvcRequestBuilders.get("/idm/users/" + userId))
-        .andExpect(MockMvcResultMatchers.status().isInternalServerError())
         .andReturn();
   }
 
