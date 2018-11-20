@@ -508,9 +508,8 @@ public class IdmServiceImpl implements IdmService {
 
   private void throwPartialSuccessException(
       String userId, OperationType operationType, MessageCode errorCode, Exception... causes) {
-    PartialSuccessException e = exceptionFactory.createPartialSuccessException(userId, operationType, errorCode,
+    throw exceptionFactory.createPartialSuccessException(userId, operationType, errorCode,
         causes);
-    throw e;
   }
 
   private static List<UserIdAndOperation> filterIdAndOperationList(
