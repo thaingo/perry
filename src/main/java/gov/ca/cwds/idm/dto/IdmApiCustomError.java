@@ -1,6 +1,7 @@
 package gov.ca.cwds.idm.dto;
 
 import static gov.ca.cwds.config.LoggingRequestIdFilter.REQUEST_ID;
+import static java.util.stream.Collectors.toList;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -112,8 +113,15 @@ public class IdmApiCustomError  implements Serializable {
       return this;
     }
 
-    public IdmApiCustomErrorBuilder withCauses(List<String> causes) {
-      this.causes = causes;
+    public IdmApiCustomErrorBuilder withCauses(List<Exception> causes) {
+      this.causes.addAll(causes.stream().map(Exception::getMessage).collect(toList()));
+      return this;
+    }
+
+    public IdmApiCustomErrorBuilder withCause(Throwable cause) {
+      if(cause != null && cause.getMessage() != null) {
+        this.causes.add(cause.getMessage());
+      }
       return this;
     }
 

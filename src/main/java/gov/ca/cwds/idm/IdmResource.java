@@ -1,11 +1,8 @@
 package gov.ca.cwds.idm;
 
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
-import static gov.ca.cwds.service.messages.MessageCode.INVALID_DATE_FORMAT;
-import static java.util.stream.Collectors.toList;
 
 import gov.ca.cwds.data.persistence.auth.CwsOffice;
-import gov.ca.cwds.idm.dto.IdmApiCustomError;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserAndOperation;
 import gov.ca.cwds.idm.dto.UserByIdResponse;
@@ -19,12 +16,6 @@ import gov.ca.cwds.idm.service.DictionaryProvider;
 import gov.ca.cwds.idm.service.IdmService;
 import gov.ca.cwds.idm.service.OfficeService;
 import gov.ca.cwds.idm.service.UserEditDetailsService;
-import gov.ca.cwds.idm.exception.IdmException;
-import gov.ca.cwds.idm.exception.PartialSuccessException;
-import gov.ca.cwds.idm.exception.UserAlreadyExistsException;
-import gov.ca.cwds.idm.exception.UserValidationException;
-import gov.ca.cwds.idm.exception.UserNotFoundException;
-import gov.ca.cwds.service.messages.MessagesService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -32,17 +23,13 @@ import io.swagger.annotations.ApiResponses;
 import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -72,9 +59,6 @@ public class IdmResource {
 
   @Autowired
   private DictionaryProvider dictionaryProvider;
-
-  @Autowired
-  private MessagesService messages;
 
   @Autowired
   private OfficeService officeService;
@@ -141,23 +125,7 @@ public class IdmResource {
           value = "Last date of successful batch job execution in yyyy-MM-dd-HH.mm.ss.SSS format")
       @RequestParam(name = "date")
           String lastJobDateStr) {
-    LocalDateTime lastJobTime;
-    try {
-      lastJobTime = LocalDateTime.parse(lastJobDateStr, DATETIME_FORMATTER);
-    } catch (DateTimeParseException e) {
-      String msg = messages.getTechMessage(INVALID_DATE_FORMAT, DATETIME_FORMAT_PATTERN);
-      String userMessage = messages.getUserMessage(INVALID_DATE_FORMAT, DATETIME_FORMAT_PATTERN);
-      LOGGER.error(msg, e);
-      HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
-      IdmApiCustomError apiError =
-          IdmApiCustomError.IdmApiCustomErrorBuilder.anIdmApiCustomError()
-              .withStatus(httpStatus)
-              .withErrorCode(INVALID_DATE_FORMAT)
-              .withTechnicalMessage(msg)
-              .withUserMessage(userMessage)
-              .build();
-      return new ResponseEntity<>(apiError, httpStatus);
-    }
+    LocalDateTime lastJobTime = LocalDateTime.parse(lastJobDateStr, DATETIME_FORMATTER);
     return ResponseEntity.ok().body(idmService.getFailedOperations(lastJobTime));
   }
 
@@ -176,16 +144,10 @@ public class IdmResource {
       @NotNull
           String id) {
 
-    try {
-      User user = idmService.findUser(id);
-      UserEditDetails editDetails = userEditDetailsService.getEditDetails(user);
-      UserByIdResponse response = new UserByIdResponse(user, editDetails);
-      return ResponseEntity.ok().body(response);
-    } catch (UserNotFoundException e) {
-      return ResponseEntity.notFound().build();
-    } catch (IdmException e) {
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-    }
+    User user = idmService.findUser(id);
+    UserEditDetails editDetails = userEditDetailsService.getEditDetails(user);
+    UserByIdResponse response = new UserByIdResponse(user, editDetails);
+    return ResponseEntity.ok().body(response);
   }
 
   @RequestMapping(
@@ -213,24 +175,9 @@ public class IdmResource {
       @NotNull
       @RequestBody
           UserUpdate updateUserDto) {
-    try {
-      idmService.updateUser(id, updateUserDto);
-      return ResponseEntity.noContent().build();
-    } catch (UserNotFoundException e) {
-      return ResponseEntity.notFound().build();
-    } catch (UserValidationException e) {
-      HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
-      IdmApiCustomError apiError = buildApiCustomError(e, httpStatus);
-      return new ResponseEntity<>(apiError, httpStatus);
-    } catch (PartialSuccessException e) {
-      HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-      IdmApiCustomError apiError = buildApiCustomError(e, httpStatus);
-      apiError.getCauses()
-          .addAll(e.getCauses().stream().map(Exception::getMessage).collect(toList()));
-      return new ResponseEntity<>(apiError, httpStatus);
-    } catch (IdmException e) {
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-    }
+
+    idmService.updateUser(id, updateUserDto);
+    return ResponseEntity.noContent().build();
   }
 
   @RequestMapping(method = RequestMethod.POST, value = "/users", consumes = "application/json")
@@ -260,35 +207,13 @@ public class IdmResource {
       @Valid
       @RequestBody
           User user) {
-    try {
-      String newUserId = idmService.createUser(user);
-      URI locationUri = getNewUserLocationUri(newUserId);
-      return ResponseEntity.created(locationUri).build();
 
-    } catch (UserAlreadyExistsException e) {
-      HttpStatus httpStatus = HttpStatus.CONFLICT;
-      IdmApiCustomError apiError = buildApiCustomError(e, httpStatus);
-      return new ResponseEntity<>(apiError, httpStatus);
-    } catch (UserValidationException e) {
-      HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
-      IdmApiCustomError apiError = buildApiCustomError(e, httpStatus);
-      if(e.getCause() != null) {
-        apiError.getCauses().add(e.getCause().getMessage());
-      }
-      return new ResponseEntity<>(apiError, httpStatus);
-    } catch (PartialSuccessException e) {
-      URI locationUri = getNewUserLocationUri(e.getUserId());
-      HttpHeaders headers = new HttpHeaders();
-      headers.setLocation(locationUri);
-      HttpStatus httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-      IdmApiCustomError apiError = buildApiCustomError(e, httpStatus);
-      apiError.getCauses()
-          .addAll(e.getCauses().stream().map(Exception::getMessage).collect(toList()));
-      return new ResponseEntity<>(apiError, headers, httpStatus);
-    }
+    String newUserId = idmService.createUser(user);
+    URI locationUri = getNewUserLocationUri(newUserId);
+    return ResponseEntity.created(locationUri).build();
   }
 
-  private URI getNewUserLocationUri(String newUserId) {
+  static URI getNewUserLocationUri(String newUserId) {
     return ServletUriComponentsBuilder.fromCurrentRequest()
         .path("/{id}")
         .buildAndExpand(newUserId)
@@ -364,12 +289,8 @@ public class IdmResource {
       @NotNull
       @RequestParam("id")
           String id) {
-    try {
-      idmService.resendInvitationMessage(id);
-      return ResponseEntity.ok().build();
-    } catch (UserNotFoundException e) {
-      return ResponseEntity.notFound().build();
-    }
+    idmService.resendInvitationMessage(id);
+    return ResponseEntity.ok().build();
   }
 
   @RequestMapping(
@@ -389,14 +310,5 @@ public class IdmResource {
       " !@userRoleService.isCalsAdminStrongestRole(principal)")
   public ResponseEntity getAdminOffices() {
     return ResponseEntity.ok().body(officeService.getOfficesByAdmin());
-  }
-
-  private IdmApiCustomError buildApiCustomError(IdmException e, HttpStatus httpStatus) {
-    return IdmApiCustomError.IdmApiCustomErrorBuilder.anIdmApiCustomError()
-        .withStatus(httpStatus)
-        .withErrorCode(e.getErrorCode())
-        .withTechnicalMessage(e.getMessage())
-        .withUserMessage(e.getUserMessage())
-        .build();
   }
 }

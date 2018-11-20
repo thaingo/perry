@@ -417,11 +417,12 @@ public class IdmServiceImpl implements IdmService {
       Exception logDbException) {
 
     if (doraStatus == SUCCESS) {
-      throwPartialSuccessException(userId, USER_PARTIAL_UPDATE, updateEnableException);
+      throwPartialSuccessException(userId, UPDATE, USER_PARTIAL_UPDATE, updateEnableException);
 
     } else if (doraStatus == FAIL && logDbStatus == SUCCESS) {
       throwPartialSuccessException(
           userId,
+          UPDATE,
           USER_PARTIAL_UPDATE_AND_SAVE_TO_SEARCH_ERRORS,
           updateEnableException,
           doraException);
@@ -429,6 +430,7 @@ public class IdmServiceImpl implements IdmService {
     } else if (doraStatus == FAIL && logDbStatus == FAIL) {
       throwPartialSuccessException(
           userId,
+          UPDATE,
           USER_PARTIAL_UPDATE_AND_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS,
           updateEnableException,
           doraException,
@@ -444,11 +446,11 @@ public class IdmServiceImpl implements IdmService {
       Exception logDbException) {
 
     if (doraStatus == FAIL && logDbStatus == SUCCESS) {
-      throwPartialSuccessException(userId, USER_UPDATE_SAVE_TO_SEARCH_ERROR, doraException);
+      throwPartialSuccessException(userId, UPDATE, USER_UPDATE_SAVE_TO_SEARCH_ERROR, doraException);
 
     } else if (doraStatus == FAIL && logDbStatus == FAIL) {
       throwPartialSuccessException(
-          userId, USER_UPDATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS, doraException, logDbException);
+          userId, UPDATE, USER_UPDATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS, doraException, logDbException);
     }
   }
 
@@ -482,10 +484,10 @@ public class IdmServiceImpl implements IdmService {
       OptionalExecution dbLogExecution = doraExecution.getUserLogExecution();
 
       if (dbLogExecution.getExecutionStatus() == SUCCESS) {
-        throwPartialSuccessException(userId, USER_CREATE_SAVE_TO_SEARCH_ERROR,
+        throwPartialSuccessException(userId, CREATE, USER_CREATE_SAVE_TO_SEARCH_ERROR,
             doraExecution.getException());
       } else { // logging in db failed
-        throwPartialSuccessException(userId, USER_CREATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS,
+        throwPartialSuccessException(userId, CREATE, USER_CREATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS,
             doraExecution.getException(), dbLogExecution.getException());
       }
     }
@@ -505,8 +507,8 @@ public class IdmServiceImpl implements IdmService {
   }
 
   private void throwPartialSuccessException(
-      String userId, MessageCode errorCode, Exception... causes) {
-    PartialSuccessException e = exceptionFactory.createPartialSuccessException(userId, errorCode,
+      String userId, OperationType operationType, MessageCode errorCode, Exception... causes) {
+    PartialSuccessException e = exceptionFactory.createPartialSuccessException(userId, operationType, errorCode,
         causes);
     throw e;
   }
