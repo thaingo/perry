@@ -72,10 +72,12 @@ public class ExceptionFactory {
     return ex;
   }
 
+  @FunctionalInterface
   interface IdmExceptionCreator<T extends IdmException> {
     T create(String techMsg, String userMsg, MessageCode messageCode);
   }
 
+  @FunctionalInterface
   interface IdmExceptionWithCauseCreator<T extends IdmException> {
     T create(String techMsg, String userMsg, MessageCode messageCode, Throwable cause);
   }
