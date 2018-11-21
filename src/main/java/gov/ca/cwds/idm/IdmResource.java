@@ -266,7 +266,7 @@ public class IdmResource {
     return ResponseEntity.ok().body(idmService.verifyIfUserCanBeCreated(racfId, email));
   }
 
-  @RequestMapping(method = RequestMethod.GET, value = "users/resend", produces = "application/json")
+  @RequestMapping(method = RequestMethod.POST, value = "users/{id}/registration-request", produces = "application/json")
   @ApiOperation(
       value =
           "Resend the invitation message to a user that already exists and reset the expiration\n "
@@ -283,7 +283,7 @@ public class IdmResource {
   public ResponseEntity resendInvitationEmail(
       @ApiParam(required = true, value = "The unique user ID", example = "userId1")
       @NotNull
-      @RequestParam("id")
+      @PathVariable("id")
           String id) {
     idmService.resendInvitationMessage(id);
     return ResponseEntity.ok().build();

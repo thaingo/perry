@@ -88,7 +88,7 @@ public class ResendInvitationEmailTest extends BaseIdmIntegrationWithUserLogTest
 
   private void assertResendEmailUnauthorized(String id) throws Exception {
     mockMvc
-        .perform(MockMvcRequestBuilders.get("/idm/users/resend?id=" + id))
+        .perform(MockMvcRequestBuilders.post("/idm/users/" + id + "/registration-request"))
         .andExpect(MockMvcResultMatchers.status().isUnauthorized())
         .andReturn();
   }
@@ -108,8 +108,8 @@ public class ResendInvitationEmailTest extends BaseIdmIntegrationWithUserLogTest
 
     mockMvc
         .perform(
-            MockMvcRequestBuilders.get(
-                "/idm/users/resend?id=" + USER_WITH_RACFID_ID))
+            MockMvcRequestBuilders.post(
+                "/idm/users/" + USER_WITH_RACFID_ID + "/registration-request"))
         .andExpect(MockMvcResultMatchers.status().isOk())
         .andReturn();
   }
