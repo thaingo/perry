@@ -71,6 +71,7 @@ import gov.ca.cwds.util.Utils;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -547,6 +548,9 @@ public class IdmServiceImpl implements IdmService {
   }
 
   private List<User> enrichCognitoUsers(Collection<UserType> cognitoUsers) {
+    if (CollectionUtils.isEmpty(cognitoUsers)) {
+      return Collections.emptyList();
+    }
     Map<String, String> userNameToRacfId = new HashMap<>(cognitoUsers.size());
     for (UserType userType : cognitoUsers) {
       userNameToRacfId.put(userType.getUsername(), getRACFId(userType));
@@ -617,6 +621,10 @@ public class IdmServiceImpl implements IdmService {
   public void setCognitoServiceFacade(
       CognitoServiceFacade cognitoServiceFacade) {
     this.cognitoServiceFacade = cognitoServiceFacade;
+  }
+
+  public void setNsUserService(NsUserService nsUserService) {
+    this.nsUserService = nsUserService;
   }
 
   public void setCwsUserInfoService(CwsUserInfoService cwsUserInfoService) {
