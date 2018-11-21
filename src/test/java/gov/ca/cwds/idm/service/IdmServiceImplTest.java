@@ -32,7 +32,7 @@ import gov.ca.cwds.idm.dto.UserEnableStatusRequest;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
-import gov.ca.cwds.rest.api.domain.PartialSuccessException;
+import gov.ca.cwds.idm.exception.PartialSuccessException;
 import gov.ca.cwds.service.CwsUserInfoService;
 import java.util.List;
 import org.junit.BeforeClass;

@@ -30,6 +30,7 @@ import static gov.ca.cwds.service.messages.MessageCode.USER_PARTIAL_UPDATE_AND_S
 import static gov.ca.cwds.service.messages.MessageCode.USER_UPDATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_UPDATE_SAVE_TO_SEARCH_ERROR;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
+import static gov.ca.cwds.util.Utils.URL_DATETIME_FORMATTER;
 import static gov.ca.cwds.util.Utils.isRacfidUser;
 import static gov.ca.cwds.util.Utils.toLowerCase;
 import static gov.ca.cwds.util.Utils.toUpperCase;
@@ -46,6 +47,7 @@ import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.UserVerificationResult;
 import gov.ca.cwds.idm.dto.UsersPage;
 import gov.ca.cwds.idm.dto.UsersSearchCriteria;
+import gov.ca.cwds.idm.exception.UserValidationException;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
@@ -56,11 +58,10 @@ import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
+import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.idm.service.execution.OptionalExecution;
 import gov.ca.cwds.idm.service.execution.PutInSearchExecution;
 import gov.ca.cwds.idm.service.validation.ValidationService;
-import gov.ca.cwds.rest.api.domain.PartialSuccessException;
-import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
 import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType;
 import gov.ca.cwds.service.CwsUserInfoService;
 import gov.ca.cwds.service.dto.CwsUserInfo;
@@ -122,6 +123,9 @@ public class IdmServiceImpl implements IdmService {
 
   @Autowired
   private NsUserService nsUserService;
+
+  @Autowired
+  private ExceptionFactory exceptionFactory;
 
   @Override
   public User findUser(String id) {
@@ -249,7 +253,7 @@ public class IdmServiceImpl implements IdmService {
 
     try {
       validationService.validateVerifyIfUserCanBeCreated(user, cwsUser != null);
-    } catch (UserIdmValidationException e) {
+    } catch (UserValidationException e) {
       return buildUserVerificationErrorResult(e.getErrorCode(), e.getUserMessage());
     }
 
@@ -315,7 +319,7 @@ public class IdmServiceImpl implements IdmService {
     }
   }
 
-  private UserVerificationResult buildVerifyAuthorizationError(MessageCode messageCode, Object... args) {
+  private UserVerificationResult buildVerifyAuthorizationError(MessageCode messageCode, String... args) {
     String msg = messages.getTechMessage(messageCode, args);
     String userMsg = messages.getUserMessage(messageCode, args);
     LOGGER.error(msg);
@@ -474,7 +478,6 @@ public class IdmServiceImpl implements IdmService {
     return updateUserEnabledExecution;
   }
 
-
   private void handleCreatePartialSuccess(String userId, PutInSearchExecution doraExecution) {
     if (doraExecution.getExecutionStatus() == FAIL) {
       OptionalExecution dbLogExecution = doraExecution.getUserLogExecution();
@@ -494,7 +497,8 @@ public class IdmServiceImpl implements IdmService {
     try {
       deletedCount = userLogService.deleteProcessedLogs(lastJobTime);
     } catch (Exception e) {
-      LOGGER.error(messages.getTechMessage(UNABLE_TO_PURGE_PROCESSED_USER_LOGS, lastJobTime), e);
+      LOGGER.error(messages.getTechMessage(UNABLE_TO_PURGE_PROCESSED_USER_LOGS,
+          lastJobTime.format(URL_DATETIME_FORMATTER)), e);
     }
     if (deletedCount > 0) {
       LOGGER.info("{} processed user log records are deleted", deletedCount);
@@ -503,12 +507,8 @@ public class IdmServiceImpl implements IdmService {
 
   private void throwPartialSuccessException(
       String userId, OperationType operationType, MessageCode errorCode, Exception... causes) {
-    String msg = messages.getTechMessage(errorCode, userId);
-    String userMsg = messages.getUserMessage(errorCode, userId);
-    PartialSuccessException e = new PartialSuccessException(userId, operationType, msg, userMsg, errorCode,
+    throw exceptionFactory.createPartialSuccessException(userId, operationType, errorCode,
         causes);
-    LOGGER.error(msg, e);
-    throw e;
   }
 
   private static List<UserIdAndOperation> filterIdAndOperationList(

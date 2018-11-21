@@ -10,6 +10,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import org.apache.commons.lang3.SerializationUtils;
@@ -23,6 +24,10 @@ public class Utils {
   public static final String DATE_FORMAT = "yyyy-MM-dd";
   public static final String TIME_FORMAT = "HH:mm:ss";
   public static final String DATE_TIME_FORMAT = DATE_FORMAT + " " + TIME_FORMAT;
+
+  public static final String URL_DATETIME_FORMAT_PATTERN = "yyyy-MM-dd-HH.mm.ss.SSS";
+  public static final DateTimeFormatter URL_DATETIME_FORMATTER =
+      DateTimeFormatter.ofPattern(URL_DATETIME_FORMAT_PATTERN);
 
   private static final String HEALTHY_CODE = "UP";
 
@@ -102,5 +107,12 @@ public class Utils {
     ZonedDateTime dt = ZonedDateTime.parse(ht, formatterIn)
         .withZoneSameInstant(ZoneId.of("America/Los_Angeles"));
     return dt.format(formatterOut);
+  }
+
+  public static String toCommaDelimitedString(Collection<String> collection) {
+    if (collection == null) {
+      return null;
+    }
+    return "[" + String.join(", ", collection) + "]";
   }
 }

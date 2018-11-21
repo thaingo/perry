@@ -1,19 +1,20 @@
 package gov.ca.cwds.idm;
 
-import static gov.ca.cwds.idm.IdmResource.DATETIME_FORMAT_PATTERN;
 import static gov.ca.cwds.idm.IdmResource.getNewUserLocationUri;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.CREATE;
 import static gov.ca.cwds.service.messages.MessageCode.INVALID_DATE_FORMAT;
+import static gov.ca.cwds.util.Utils.URL_DATETIME_FORMAT_PATTERN;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 import gov.ca.cwds.idm.dto.IdmApiCustomError;
 import gov.ca.cwds.idm.dto.IdmApiCustomError.IdmApiCustomErrorBuilder;
-import gov.ca.cwds.rest.api.domain.IdmException;
-import gov.ca.cwds.rest.api.domain.PartialSuccessException;
-import gov.ca.cwds.rest.api.domain.UserAlreadyExistsException;
-import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
-import gov.ca.cwds.rest.api.domain.UserNotFoundPerryException;
+import gov.ca.cwds.idm.exception.IdmException;
+import gov.ca.cwds.idm.exception.PartialSuccessException;
+import gov.ca.cwds.idm.exception.UserAlreadyExistsException;
+import gov.ca.cwds.idm.exception.UserValidationException;
+import gov.ca.cwds.idm.exception.UserNotFoundException;
 import gov.ca.cwds.service.messages.MessagesService;
+import gov.ca.cwds.service.messages.MessagesService.Messages;
 import java.net.URI;
 import java.time.format.DateTimeParseException;
 import java.util.List;
@@ -31,9 +32,14 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class IdmRestExceptionHandler extends ResponseEntityExceptionHandler {
 
   @Autowired
-  private MessagesService messages;
+  private MessagesService messagesService;
 
-  @ExceptionHandler(value = {UserNotFoundPerryException.class})
+  @ExceptionHandler(value = {IdmException.class})
+  ResponseEntity<Object> handleIdmException(IdmException e) {
+    return buildResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, e);
+  }
+
+  @ExceptionHandler(value = {UserNotFoundException.class})
   ResponseEntity<Object> handleUserNotFound() {
     return ResponseEntity.notFound().build();
   }
@@ -43,8 +49,8 @@ public class IdmRestExceptionHandler extends ResponseEntityExceptionHandler {
     return buildResponseEntity(HttpStatus.CONFLICT, e);
   }
 
-  @ExceptionHandler(value = {UserIdmValidationException.class})
-  ResponseEntity<Object> handleUserValidationException(UserIdmValidationException e) {
+  @ExceptionHandler(value = {UserValidationException.class})
+  ResponseEntity<Object> handleUserValidationException(UserValidationException e) {
     return buildResponseEntity(HttpStatus.BAD_REQUEST, e);
   }
 
@@ -66,16 +72,17 @@ public class IdmRestExceptionHandler extends ResponseEntityExceptionHandler {
 
   @ExceptionHandler(value = {DateTimeParseException.class})
   ResponseEntity<Object> handleDateTimeParseException(DateTimeParseException e) {
-    String msg = messages.getTechMessage(INVALID_DATE_FORMAT, DATETIME_FORMAT_PATTERN);
-    String userMessage = messages.getUserMessage(INVALID_DATE_FORMAT, DATETIME_FORMAT_PATTERN);
-    logger.error(msg, e);
+    Messages messages = messagesService
+        .getMessages(INVALID_DATE_FORMAT, URL_DATETIME_FORMAT_PATTERN);
+
+    logger.error(messages.getTechMsg(), e);
     HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
     IdmApiCustomError apiError =
         IdmApiCustomError.IdmApiCustomErrorBuilder.anIdmApiCustomError()
             .withStatus(httpStatus)
             .withErrorCode(INVALID_DATE_FORMAT)
-            .withTechnicalMessage(msg)
-            .withUserMessage(userMessage)
+            .withTechnicalMessage(messages.getTechMsg())
+            .withUserMessage(messages.getUserMsg())
             .build();
     return new ResponseEntity<>(apiError, httpStatus);
   }

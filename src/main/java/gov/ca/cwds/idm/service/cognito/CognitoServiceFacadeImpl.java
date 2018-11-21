@@ -12,8 +12,8 @@ import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getEmail;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_CONNECT_TO_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_GET_USER_FROM_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_UPDATE_USER_IN_IDM;
+import static gov.ca.cwds.service.messages.MessageCode.IDM_GENERIC_ERROR;
 import static gov.ca.cwds.service.messages.MessageCode.IDM_USER_VALIDATION_FAILED;
-import static gov.ca.cwds.service.messages.MessageCode.UNABLE_CREATE_NEW_IDM_USER;
 import static gov.ca.cwds.service.messages.MessageCode.USER_NOT_FOUND_BY_ID_IN_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
 import static gov.ca.cwds.util.Utils.toLowerCase;
@@ -40,7 +40,6 @@ import com.amazonaws.services.cognitoidp.model.InvalidParameterException;
 import com.amazonaws.services.cognitoidp.model.ListUsersRequest;
 import com.amazonaws.services.cognitoidp.model.ListUsersResult;
 import com.amazonaws.services.cognitoidp.model.MessageActionType;
-import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import com.amazonaws.services.cognitoidp.model.UsernameExistsException;
 import gov.ca.cwds.idm.dto.User;
@@ -50,19 +49,14 @@ import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
-import gov.ca.cwds.rest.api.domain.PerryException;
-import gov.ca.cwds.rest.api.domain.UserAlreadyExistsException;
-import gov.ca.cwds.rest.api.domain.UserIdmValidationException;
-import gov.ca.cwds.rest.api.domain.UserNotFoundPerryException;
-import gov.ca.cwds.service.messages.MessagesService;
+import gov.ca.cwds.idm.service.exception.ExceptionFactory;
+import gov.ca.cwds.service.messages.MessageCode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 import javax.annotation.PostConstruct;
 import liquibase.util.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -72,13 +66,11 @@ import org.springframework.stereotype.Service;
 @SuppressWarnings({"fb-contrib:EXS_EXCEPTION_SOFTENING_NO_CONSTRAINTS"})
 public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(CognitoServiceFacadeImpl.class);
-
   private CognitoProperties properties;
 
-  private MessagesService messages;
-
   private AWSCognitoIdentityProvider identityProvider;
+
+  private ExceptionFactory exceptionFactory;
 
   @PostConstruct
   public void init() {
@@ -105,17 +97,10 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
       return result.getUser();
 
     } catch (UsernameExistsException e) {
-      String causeMsg = messages.getTechMessage(USER_WITH_EMAIL_EXISTS_IN_IDM, user.getEmail());
-      String msg = messages.getTechMessage(UNABLE_CREATE_NEW_IDM_USER, causeMsg);
-      String userMsg = messages.getUserMessage(USER_WITH_EMAIL_EXISTS_IN_IDM, user.getEmail());
-      LOGGER.error(msg, e);
-      throw new UserAlreadyExistsException(causeMsg, userMsg, USER_WITH_EMAIL_EXISTS_IN_IDM, e);
-
+      throw exceptionFactory
+          .createUserAlreadyExistsException(USER_WITH_EMAIL_EXISTS_IN_IDM, e, user.getEmail());
     } catch (InvalidParameterException e) {
-      String msg = messages.getTechMessage(IDM_USER_VALIDATION_FAILED);
-      String userMsg = messages.getUserMessage(IDM_USER_VALIDATION_FAILED);
-      LOGGER.error(msg, e);
-      throw new UserIdmValidationException(msg, userMsg, IDM_USER_VALIDATION_FAILED, e);
+      throw exceptionFactory.createValidationException(IDM_USER_VALIDATION_FAILED, e);
     }
   }
 
@@ -155,7 +140,7 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
       ListUsersResult result = identityProvider.listUsers(request);
       return new CognitoUserPage(result.getUsers(), result.getPaginationToken());
     } catch (Exception e) {
-      throw new PerryException(messages.getTechMessage(ERROR_CONNECT_TO_IDM), e);
+      throw exceptionFactory.createIdmException(ERROR_CONNECT_TO_IDM, e);
     }
   }
 
@@ -329,6 +314,28 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
     return request;
   }
 
+  private <T extends AmazonWebServiceRequest, R extends AmazonWebServiceResult>
+  R executeInCognito(Function<T, R> function, T request, String userId, OperationType operation) {
+
+    try {
+      return function.apply(request);
+    } catch (com.amazonaws.services.cognitoidp.model.UserNotFoundException e) {
+      throw exceptionFactory.createUserNotFoundException(USER_NOT_FOUND_BY_ID_IN_IDM, e, userId);
+    } catch (Exception e) {
+      throw exceptionFactory.createIdmException(getErrorCode(operation), e);
+    }
+  }
+
+  private MessageCode getErrorCode(OperationType operation) {
+    if (operation == UPDATE) {
+      return ERROR_UPDATE_USER_IN_IDM;
+    } else if (operation == GET) {
+      return ERROR_GET_USER_FROM_IDM;
+    } else {
+      return IDM_GENERIC_ERROR;
+    }
+  }
+
   @Autowired
   public void setProperties(CognitoProperties properties) {
     this.properties = properties;
@@ -343,31 +350,7 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
   }
 
   @Autowired
-  public void setMessagesService(MessagesService messages) {
-    this.messages = messages;
+  public void setExceptionFactory(ExceptionFactory exceptionFactory) {
+    this.exceptionFactory = exceptionFactory;
   }
-
-  private <T extends AmazonWebServiceRequest, R extends AmazonWebServiceResult>
-  R executeInCognito(Function<T, R> function, T request, String userId, OperationType operation) {
-
-    try {
-      return function.apply(request);
-    } catch (UserNotFoundException e) {
-      String msg = messages.getTechMessage(USER_NOT_FOUND_BY_ID_IN_IDM, userId);
-      String userMsg = messages.getUserMessage(USER_NOT_FOUND_BY_ID_IN_IDM, userId);
-      LOGGER.error(msg, e);
-      throw new UserNotFoundPerryException(msg, userMsg, USER_NOT_FOUND_BY_ID_IN_IDM, e);
-
-    } catch (Exception e) {
-      String msg = "";
-      if (operation == UPDATE) {
-        msg = messages.getTechMessage(ERROR_UPDATE_USER_IN_IDM);
-      } else if (operation == GET) {
-        msg = messages.getTechMessage(ERROR_GET_USER_FROM_IDM);
-      }
-      LOGGER.error(msg, e);
-      throw new PerryException(msg, e);
-    }
-  }
-
 }

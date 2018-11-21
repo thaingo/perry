@@ -35,13 +35,15 @@ import com.amazonaws.services.cognitoidp.model.AdminGetUserResult;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.ListUsersRequest;
 import com.amazonaws.services.cognitoidp.model.ListUsersResult;
-import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.idm.exception.IdmException;
+import gov.ca.cwds.idm.exception.UserNotFoundException;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
-import gov.ca.cwds.rest.api.domain.PerryException;
-import gov.ca.cwds.rest.api.domain.UserNotFoundPerryException;
+import gov.ca.cwds.idm.service.exception.ExceptionFactory;
+import gov.ca.cwds.service.messages.MessageCode;
 import gov.ca.cwds.service.messages.MessagesService;
+import gov.ca.cwds.service.messages.MessagesService.Messages;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -51,6 +53,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InOrder;
 
 public class CognitoServiceFacadeTest {
@@ -70,9 +73,15 @@ public class CognitoServiceFacadeTest {
     properties.setRegion("us-east-2");
 
     facade = new CognitoServiceFacadeImpl();
+    ExceptionFactory exceptionFactory = new ExceptionFactory();
+    exceptionFactory.setMessagesService(messagesService);
+
     facade.setProperties(properties);
     facade.setIdentityProvider(identityProvider);
-    facade.setMessagesService(messagesService);
+    facade.setExceptionFactory(exceptionFactory);
+
+    when(messagesService.getMessages(any(MessageCode.class), ArgumentMatchers.<String>any()))
+        .thenReturn(new Messages("", ""));
   }
 
   @Test
@@ -120,14 +129,14 @@ public class CognitoServiceFacadeTest {
     assertThat(attr.getValue(), is("attrValue"));
   }
 
-  @Test(expected = UserNotFoundPerryException.class)
+  @Test(expected = UserNotFoundException.class)
   public void testGetByIdUserNotFoundException() {
     when(identityProvider.adminGetUser(any(AdminGetUserRequest.class)))
-        .thenThrow(new UserNotFoundException("user not found"));
+        .thenThrow(new com.amazonaws.services.cognitoidp.model.UserNotFoundException("user not found"));
     facade.getCognitoUserById("id");
   }
 
-  @Test(expected = PerryException.class)
+  @Test(expected = IdmException.class)
   public void testGetByIdException() {
     when(identityProvider.adminGetUser(any(AdminGetUserRequest.class)))
         .thenThrow(new RuntimeException());

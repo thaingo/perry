@@ -1,10 +1,10 @@
-package gov.ca.cwds.rest.api.domain;
+package gov.ca.cwds.idm.exception;
 
 import gov.ca.cwds.service.messages.MessageCode;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class IdmException extends RuntimeException {
+public class IdmException extends RuntimeException {
 
   private static final long serialVersionUID = -6897429965862778311L;
 

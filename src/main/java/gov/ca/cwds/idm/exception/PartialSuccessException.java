@@ -1,4 +1,4 @@
-package gov.ca.cwds.rest.api.domain;
+package gov.ca.cwds.idm.exception;
 
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.service.messages.MessageCode;
@@ -22,8 +22,7 @@ public class PartialSuccessException extends IdmException {
   }
 
   public PartialSuccessException(String userId, OperationType operationType,
-      String techMessage,
-      MessageCode errorCode, Exception... causes) {
+      String techMessage, MessageCode errorCode, Exception... causes) {
     this(userId, operationType, techMessage, techMessage, errorCode, causes);
   }
 

@@ -1,4 +1,4 @@
-package gov.ca.cwds.rest.api.domain;
+package gov.ca.cwds.idm.exception;
 
 import gov.ca.cwds.service.messages.MessageCode;
 
