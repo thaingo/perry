@@ -40,8 +40,8 @@ public class IdmRestExceptionHandler extends ResponseEntityExceptionHandler {
   }
 
   @ExceptionHandler(value = {UserNotFoundException.class})
-  ResponseEntity<Object> handleUserNotFound() {
-    return ResponseEntity.notFound().build();
+  ResponseEntity<Object> handleUserNotFound(UserNotFoundException e) {
+    return buildResponseEntity(HttpStatus.NOT_FOUND, e);
   }
 
   @ExceptionHandler(value = {UserAlreadyExistsException.class})
