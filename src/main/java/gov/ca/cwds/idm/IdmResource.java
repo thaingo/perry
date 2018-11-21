@@ -1,6 +1,7 @@
 package gov.ca.cwds.idm;
 
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
+import static gov.ca.cwds.util.Utils.URL_DATETIME_FORMATTER;
 
 import gov.ca.cwds.data.persistence.auth.CwsOffice;
 import gov.ca.cwds.idm.dto.User;
@@ -22,7 +23,6 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import java.net.URI;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -48,9 +48,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 @SuppressWarnings({"squid:S1166"})
 public class IdmResource {
 
-  public static final String DATETIME_FORMAT_PATTERN = "yyyy-MM-dd-HH.mm.ss.SSS";
 
-  public static final DateTimeFormatter DATETIME_FORMATTER = DateTimeFormatter.ofPattern(DATETIME_FORMAT_PATTERN);
 
   @Autowired
   private IdmService idmService;
@@ -123,7 +121,7 @@ public class IdmResource {
           value = "Last date of successful batch job execution in yyyy-MM-dd-HH.mm.ss.SSS format")
       @RequestParam(name = "date")
           String lastJobDateStr) {
-    LocalDateTime lastJobTime = LocalDateTime.parse(lastJobDateStr, DATETIME_FORMATTER);
+    LocalDateTime lastJobTime = LocalDateTime.parse(lastJobDateStr, URL_DATETIME_FORMATTER);
     return ResponseEntity.ok().body(idmService.getFailedOperations(lastJobTime));
   }
 
