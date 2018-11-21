@@ -12,12 +12,11 @@
   "email": null,
   "userName": "testUserName",
   "privileges": [
-    "Countywide Read",
     "CANS-client-read",
     "CANS-client-search",
     "CANS-assessment-read",
     "permission1",
     "permission2"
   ],
-  "authorityCodes": ["R"]
+  "authorityCodes": []
 }

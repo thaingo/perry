@@ -88,4 +88,9 @@ public class DefaultMappingTest extends ScriptTestBase {
   public void nonCaseCarryingWorkerMapping_fail_whenPrivilegeAndAuthorityAndHasAssignment() throws Exception {
     test("/scripts/default/default.groovy", "/scripts/default/non-case-carrying/default-has-assignment-privilege-and-authority.json", "scripts/default/non-case-carrying/auth-has-assignment-privilege-and-authority.json");
   }
+
+  @Test
+  public void defaultMinimumMapping_success_whenNoPrivilegesAndNoAuthorities() throws Exception {
+    test("/scripts/default/default.groovy", "/scripts/default/minimal-default-permissions/default-privilege-and-authority.json", "scripts/default/minimal-default-permissions/auth-no-privilege-and-no-authority.json");
+  }
 }
