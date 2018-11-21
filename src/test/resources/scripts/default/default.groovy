@@ -36,7 +36,9 @@ if (authorization) {
             "CANS-assessment-complete"
     ]
 
-    if (privileges.contains(cwsCaseManagementSystem) && authorization.hasAssignment) {
+    def isCaseCarryingWorker = privileges.contains(cwsCaseManagementSystem) && authorization.hasAssignment
+
+    if (isCaseCarryingWorker) {
         privileges += caseCarryingSocialWorkerPermissions
     }
 
@@ -74,14 +76,26 @@ if (authorization) {
     def overridePrivileges = ["Countywide Read", "Countywide Read/Write", "Statewide Read",
                               "Officewide Read", "Officewide Read/Write"]
 
+    def overrideAuthorities = ["U", "R", "A", "T", "B"]
+
     def isNonCaseCarryingWorker = !authorization.hasAssignment &&
             (
-                    authorityCodes.size() > 0 && (authorityCodes.contains("U") || authorityCodes.contains("R")) ||
+                    !Collections.disjoint(authorityCodes, overrideAuthorities) ||
                             !Collections.disjoint(privileges, overridePrivileges)
             )
 
     if (isNonCaseCarryingWorker) {
         privileges += nonCaseCarryingSocialWorkerPermissions
+    }
+
+    def minimalDefaultPermissions = [
+            "CANS-client-read",
+            "CANS-client-search",
+            "CANS-assessment-read"
+    ]
+
+    if (!isSupervisor && !isNonCaseCarryingWorker && !isCaseCarryingWorker) {
+        privileges += minimalDefaultPermissions
     }
 
     token =
