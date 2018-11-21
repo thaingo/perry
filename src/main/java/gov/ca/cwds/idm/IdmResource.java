@@ -4,6 +4,7 @@ import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STAND
 import static gov.ca.cwds.util.Utils.URL_DATETIME_FORMATTER;
 
 import gov.ca.cwds.data.persistence.auth.CwsOffice;
+import gov.ca.cwds.idm.dto.RegistrationResubmitResponse;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserAndOperation;
 import gov.ca.cwds.idm.dto.UserByIdResponse;
@@ -266,7 +267,10 @@ public class IdmResource {
     return ResponseEntity.ok().body(idmService.verifyIfUserCanBeCreated(racfId, email));
   }
 
-  @RequestMapping(method = RequestMethod.POST, value = "users/{id}/registration-request", produces = "application/json")
+  @RequestMapping(
+      method = RequestMethod.POST,
+      value = "users/{id}/registration-request",
+      produces = "application/json")
   @ApiOperation(
       value =
           "Resend the invitation message to a user that already exists and reset the expiration\n "
@@ -280,13 +284,14 @@ public class IdmResource {
   )
   @PreAuthorize("@userRoleService.isAdmin(principal) &&  " +
       " !@userRoleService.isCalsAdminStrongestRole(principal)")
-  public ResponseEntity resendInvitationEmail(
+  public ResponseEntity<RegistrationResubmitResponse> resendInvitationEmail(
       @ApiParam(required = true, value = "The unique user ID", example = "userId1")
       @NotNull
       @PathVariable("id")
           String id) {
-    idmService.resendInvitationMessage(id);
-    return ResponseEntity.ok().build();
+
+    RegistrationResubmitResponse response = idmService.resendInvitationMessage(id);
+    return ResponseEntity.ok().body(response);
   }
 
   @RequestMapping(

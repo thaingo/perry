@@ -1,5 +1,6 @@
 package gov.ca.cwds.idm.service;
 
+import gov.ca.cwds.idm.dto.RegistrationResubmitResponse;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserAndOperation;
 import gov.ca.cwds.idm.dto.UserUpdate;
@@ -30,5 +31,5 @@ public interface IdmService {
   List<UserAndOperation> getFailedOperations(LocalDateTime lastJobTime);
 
   @PreAuthorize("@authorizationService.canResendInvitationMessage(#id)")
-  void resendInvitationMessage(@P("id") String id);
+  RegistrationResubmitResponse resendInvitationMessage(@P("id") String id);
 }
