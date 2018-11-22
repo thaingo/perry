@@ -1,6 +1,7 @@
 package gov.ca.cwds.idm.service.cognito;
 
 import static gov.ca.cwds.idm.persistence.ns.OperationType.GET;
+import static gov.ca.cwds.idm.persistence.ns.OperationType.RESEND_INVITATION_EMAIL;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PERMISSIONS;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.ROLES;
@@ -12,6 +13,7 @@ import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getEmail;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_CONNECT_TO_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_GET_USER_FROM_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_UPDATE_USER_IN_IDM;
+import static gov.ca.cwds.service.messages.MessageCode.IDM_ERROR_AT_RESEND_INVITATION_EMAIL;
 import static gov.ca.cwds.service.messages.MessageCode.IDM_GENERIC_ERROR;
 import static gov.ca.cwds.service.messages.MessageCode.IDM_USER_VALIDATION_FAILED;
 import static gov.ca.cwds.service.messages.MessageCode.USER_NOT_FOUND_BY_ID_IN_IDM;
@@ -283,7 +285,9 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
     UserType cognitoUser = getCognitoUserById(userId);
     String email = getEmail(cognitoUser);
     AdminCreateUserRequest request = createResendEmailRequest(email);
-    return identityProvider.adminCreateUser(request).getUser();
+    AdminCreateUserResult result =
+        executeInCognito(identityProvider::adminCreateUser, request, userId, RESEND_INVITATION_EMAIL);
+    return result.getUser();
   }
 
   /**
@@ -331,6 +335,8 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
       return ERROR_UPDATE_USER_IN_IDM;
     } else if (operation == GET) {
       return ERROR_GET_USER_FROM_IDM;
+    } else if (operation == RESEND_INVITATION_EMAIL) {
+      return IDM_ERROR_AT_RESEND_INVITATION_EMAIL;
     } else {
       return IDM_GENERIC_ERROR;
     }

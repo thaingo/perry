@@ -39,6 +39,7 @@ import static java.util.stream.Collectors.toSet;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.data.persistence.auth.CwsOffice;
 import gov.ca.cwds.data.persistence.auth.StaffPerson;
+import gov.ca.cwds.idm.dto.RegistrationResubmitResponse;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserAndOperation;
 import gov.ca.cwds.idm.dto.UserEnableStatusRequest;
@@ -227,9 +228,13 @@ public class IdmServiceImpl implements IdmService {
   }
 
   @Override
-  public void resendInvitationMessage(String userId) {
+  public RegistrationResubmitResponse resendInvitationMessage(String userId) {
     cognitoServiceFacade.resendInvitationMessage(userId);
-    saveResendInvitationMessageRequestTimeInDb(userId, LocalDateTime.now());
+
+    LocalDateTime resubmitDateTime = LocalDateTime.now();
+    saveResendInvitationMessageRequestTimeInDb(userId, resubmitDateTime);
+
+    return new RegistrationResubmitResponse(userId, resubmitDateTime);
   }
 
   private void saveResendInvitationMessageRequestTimeInDb(String userId, LocalDateTime resubmitTime) {
