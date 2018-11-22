@@ -24,6 +24,8 @@ public class Utils {
   public static final String DATE_FORMAT = "yyyy-MM-dd";
   public static final String TIME_FORMAT = "HH:mm:ss";
   public static final String DATE_TIME_FORMAT = DATE_FORMAT + " " + TIME_FORMAT;
+  public static final DateTimeFormatter DATETIME_FORMATTER =
+      DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
 
   public static final String URL_DATETIME_FORMAT_PATTERN = "yyyy-MM-dd-HH.mm.ss.SSS";
   public static final DateTimeFormatter URL_DATETIME_FORMATTER =
