@@ -18,4 +18,14 @@ public class MessagesServiceTest extends BaseIdmIntegrationTest {
         messagesService.getTechMessage(NO_USER_WITH_RACFID_IN_CWSCMS, "ABCDEF"),
         is("No user with RACFID: ABCDEF found in CWSCMS"));
   }
+
+  @Test
+  public void testExtraParameter() {
+    assertThat(
+        messagesService.getTechMessage(IDM_MAPPING_SCRIPT_ERROR, "extra"),
+        is("Error while running the IdmMappingScript"));
+    assertThat(
+        messagesService.getTechMessage(NO_USER_WITH_RACFID_IN_CWSCMS, "ABCDEF", "extra"),
+        is("No user with RACFID: ABCDEF found in CWSCMS"));
+  }
 }
