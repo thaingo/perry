@@ -1,5 +1,6 @@
 package gov.ca.cwds.idm.service.exception;
 
+import gov.ca.cwds.idm.exception.AdminAuthorizationException;
 import gov.ca.cwds.idm.exception.IdmException;
 import gov.ca.cwds.idm.exception.PartialSuccessException;
 import gov.ca.cwds.idm.exception.UserAlreadyExistsException;
@@ -45,6 +46,11 @@ public class ExceptionFactory {
   public UserValidationException createValidationException(MessageCode messageCode, Throwable cause,
       String... args) {
     return createExceptionWithCause(UserValidationException::new, cause, messageCode, args);
+  }
+
+  public AdminAuthorizationException createAuthorizationException(MessageCode messageCode,
+      String... args) {
+    return createException(AdminAuthorizationException::new, messageCode, args);
   }
 
   public PartialSuccessException createPartialSuccessException(

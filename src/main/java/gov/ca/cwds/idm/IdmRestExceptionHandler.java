@@ -8,6 +8,7 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 import gov.ca.cwds.idm.dto.IdmApiCustomError;
 import gov.ca.cwds.idm.dto.IdmApiCustomError.IdmApiCustomErrorBuilder;
+import gov.ca.cwds.idm.exception.AdminAuthorizationException;
 import gov.ca.cwds.idm.exception.IdmException;
 import gov.ca.cwds.idm.exception.PartialSuccessException;
 import gov.ca.cwds.idm.exception.UserAlreadyExistsException;
@@ -52,6 +53,11 @@ public class IdmRestExceptionHandler extends ResponseEntityExceptionHandler {
   @ExceptionHandler(value = {UserValidationException.class})
   ResponseEntity<Object> handleUserValidationException(UserValidationException e) {
     return buildResponseEntity(HttpStatus.BAD_REQUEST, e);
+  }
+
+  @ExceptionHandler(value = {AdminAuthorizationException.class})
+  ResponseEntity<Object> handleAdminAuthorizationException(AdminAuthorizationException e) {
+    return buildResponseEntity(HttpStatus.UNAUTHORIZED, e);
   }
 
   @ExceptionHandler(value = {PartialSuccessException.class})
