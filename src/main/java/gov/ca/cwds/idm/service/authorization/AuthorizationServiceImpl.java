@@ -2,6 +2,7 @@ package gov.ca.cwds.idm.service.authorization;
 
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.getStrongestAdminRole;
+import static gov.ca.cwds.service.messages.MessageCode.ADMIN_CANNOT_UPDATE_HIMSELF;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserName;
 
@@ -12,6 +13,7 @@ import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.idm.service.role.implementor.AbstractAdminActionsAuthorizer;
 import gov.ca.cwds.idm.service.role.implementor.AdminRoleImplementorFactory;
+import gov.ca.cwds.service.messages.MessageCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -44,7 +46,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
   public boolean canUpdateUser(String userId) {
     // admin can't update himself
     if (userId.equals(getCurrentUserName())) {
-      return false;
+      throw exceptionFactory.createAuthorizationException(ADMIN_CANNOT_UPDATE_HIMSELF);
     }
     User user = getUserById(userId);
     return canUpdateUser(user);

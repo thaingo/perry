@@ -8,6 +8,7 @@ import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.idm.util.TestHelper.admin;
 import static gov.ca.cwds.idm.util.TestHelper.user;
+import static gov.ca.cwds.service.messages.MessageCode.ADMIN_CANNOT_UPDATE_HIMSELF;
 import static gov.ca.cwds.service.messages.MessageCode.COUNTY_ADMIN_CANNOT_VIEW_USER_FROM_OTHER_COUNTY;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserCountyName;
@@ -92,7 +93,7 @@ public class AuthorizationServiceImplTest {
     user.setUsername(adminId);
     Mockito.when(cognitoServiceFacade.getCognitoUserById(adminId)).thenReturn(user);
     service.setCognitoServiceFacade(cognitoServiceFacade);
-    assertFalse(service.canUpdateUser(adminId));
+    assertCannotUpdateUser(adminId, ADMIN_CANNOT_UPDATE_HIMSELF);
   }
 
 
@@ -143,15 +144,6 @@ public class AuthorizationServiceImplTest {
     assertCannotViewUser(
         user("Yolo", "Yolo_1"),
         COUNTY_ADMIN_CANNOT_VIEW_USER_FROM_OTHER_COUNTY);
-  }
-
-  private void assertCannotViewUser(User user, MessageCode errorCode) {
-    try {
-      service.canViewUser(user);
-      fail("Expected an AdminAuthorizationException to be thrown");
-    } catch (AdminAuthorizationException e) {
-      assertThat(e.getErrorCode(), is(errorCode));
-    }
   }
 
   @Test
@@ -207,5 +199,23 @@ public class AuthorizationServiceImplTest {
     assertFalse(service.canUpdateUser(user(toSet(STATE_ADMIN), "Yolo", "Yolo_1")));
     assertFalse(service.canUpdateUser(user(toSet(STATE_ADMIN), "Yolo", "Yolo_2")));
     assertFalse(service.canUpdateUser(user(toSet(STATE_ADMIN), "Madura", "Madura_1")));
+  }
+
+  private void assertCannotViewUser(User user, MessageCode errorCode) {
+    try {
+      service.canViewUser(user);
+      fail("Expected an AdminAuthorizationException to be thrown");
+    } catch (AdminAuthorizationException e) {
+      assertThat(e.getErrorCode(), is(errorCode));
+    }
+  }
+
+  private void assertCannotUpdateUser(String userId, MessageCode errorCode) {
+    try {
+      service.canUpdateUser(userId);
+      fail("Expected an AdminAuthorizationException to be thrown");
+    } catch (AdminAuthorizationException e) {
+      assertThat(e.getErrorCode(), is(errorCode));
+    }
   }
 }
