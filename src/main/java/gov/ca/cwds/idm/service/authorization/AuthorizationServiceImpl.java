@@ -9,6 +9,8 @@ import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.MappingService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
+import gov.ca.cwds.idm.service.exception.ExceptionFactory;
+import gov.ca.cwds.idm.service.role.implementor.AbstractAdminActionsAuthorizer;
 import gov.ca.cwds.idm.service.role.implementor.AdminRoleImplementorFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
@@ -24,9 +26,13 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
   private AdminRoleImplementorFactory adminRoleImplementorFactory;
 
+  private ExceptionFactory exceptionFactory;
+
   @Override
-  public boolean canViewUser(User user) {
-    return adminRoleImplementorFactory.getAdminActionsAuthorizer(user).canViewUser();
+  public void canViewUser(User user) {
+    AbstractAdminActionsAuthorizer authorizer = adminRoleImplementorFactory.getAdminActionsAuthorizer(user);
+    authorizer.setExceptionFactory(exceptionFactory);
+    authorizer.canViewUser();
   }
 
   @Override
@@ -105,5 +111,10 @@ public class AuthorizationServiceImpl implements AuthorizationService {
   public void setAdminRoleImplementorFactory(
       AdminRoleImplementorFactory adminRoleImplementorFactory) {
     this.adminRoleImplementorFactory = adminRoleImplementorFactory;
+  }
+
+  @Autowired
+  public void setExceptionFactory(ExceptionFactory exceptionFactory) {
+    this.exceptionFactory = exceptionFactory;
   }
 }

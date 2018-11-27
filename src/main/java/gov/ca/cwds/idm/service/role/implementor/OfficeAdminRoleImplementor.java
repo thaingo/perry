@@ -4,7 +4,6 @@ import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static java.util.Collections.unmodifiableList;
 
 import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.service.authorization.AdminActionsAuthorizer;
 import java.util.Collections;
 import java.util.List;
 
@@ -14,7 +13,7 @@ import java.util.List;
 class OfficeAdminRoleImplementor implements AdminRoleImplementor {
 
   @Override
-  public AdminActionsAuthorizer getAdminActionsAuthorizer(User user) {
+  public AbstractAdminActionsAuthorizer getAdminActionsAuthorizer(User user) {
     return new OfficeAdminAuthorizer(user);
   }
 

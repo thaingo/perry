@@ -5,7 +5,6 @@ import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static java.util.Collections.unmodifiableList;
 
 import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.service.authorization.AdminActionsAuthorizer;
 import java.util.Arrays;
 import java.util.List;
 
@@ -15,7 +14,7 @@ import java.util.List;
 class CountyAdminRoleImplementor implements AdminRoleImplementor {
 
   @Override
-  public AdminActionsAuthorizer getAdminActionsAuthorizer(User user) {
+  public AbstractAdminActionsAuthorizer getAdminActionsAuthorizer(User user) {
     return new CountyAdminAuthorizer(user);
   }
 

@@ -132,7 +132,9 @@ public class IdmServiceImpl implements IdmService {
   @Override
   public User findUser(String id) {
     UserType cognitoUser = cognitoServiceFacade.getCognitoUserById(id);
-    return mappingService.toUser(cognitoUser);
+    User user = mappingService.toUser(cognitoUser);
+    authorizeService.canViewUser(user);
+    return user;
   }
 
   @Override

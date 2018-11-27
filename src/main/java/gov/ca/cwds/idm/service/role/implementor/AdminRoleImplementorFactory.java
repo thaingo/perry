@@ -2,6 +2,7 @@ package gov.ca.cwds.idm.service.role.implementor;
 
 import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.IDM_JOB;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
@@ -30,12 +31,14 @@ public class AdminRoleImplementorFactory {
         return new OfficeAdminRoleImplementor();
       case CALS_ADMIN:
         return new CalsAdminRoleImplementor();
+      case IDM_JOB:
+        return new IdmJobRoleImplementor();
       default:
         throw new IllegalStateException();
     }
   }
 
-  public AdminActionsAuthorizer getAdminActionsAuthorizer(User user) {
+  public AbstractAdminActionsAuthorizer getAdminActionsAuthorizer(User user) {
     return createAdminRoleImplementor().getAdminActionsAuthorizer(user);
   }
 

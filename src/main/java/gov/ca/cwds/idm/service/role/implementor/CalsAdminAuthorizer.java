@@ -1,5 +1,7 @@
 package gov.ca.cwds.idm.service.role.implementor;
 
+import static gov.ca.cwds.service.messages.MessageCode.CALS_ADMIN_CANNOT_VIEW_NON_CALS_USER;
+
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.authorization.UserRolesService;
 
@@ -10,8 +12,10 @@ class CalsAdminAuthorizer extends AbstractAdminActionsAuthorizer {
   }
 
   @Override
-  public boolean canViewUser() {
-    return UserRolesService.isCalsExternalWorker(getUser());
+  public void canViewUser() {
+    if (!UserRolesService.isCalsExternalWorker(getUser())) {
+      throwAuthorizationException(CALS_ADMIN_CANNOT_VIEW_NON_CALS_USER, getUser().getId());
+    }
   }
 
   @Override

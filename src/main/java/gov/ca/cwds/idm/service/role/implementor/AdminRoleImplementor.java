@@ -1,7 +1,6 @@
 package gov.ca.cwds.idm.service.role.implementor;
 
 import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.service.authorization.AdminActionsAuthorizer;
 import java.util.List;
 
 /**
@@ -9,7 +8,7 @@ import java.util.List;
  */
 public interface AdminRoleImplementor {
 
-  AdminActionsAuthorizer getAdminActionsAuthorizer(User user);
+  AbstractAdminActionsAuthorizer getAdminActionsAuthorizer(User user);
 
   List<String> getPossibleUserRoles();
 

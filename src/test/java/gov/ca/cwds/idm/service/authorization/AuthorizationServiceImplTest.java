@@ -8,22 +8,34 @@ import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.idm.util.TestHelper.admin;
 import static gov.ca.cwds.idm.util.TestHelper.user;
+import static gov.ca.cwds.service.messages.MessageCode.COUNTY_ADMIN_CANNOT_VIEW_USER_FROM_OTHER_COUNTY;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserCountyName;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserOfficeIds;
 import static gov.ca.cwds.util.Utils.toSet;
+import static org.assertj.core.api.Fail.fail;
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import com.amazonaws.services.cognitoidp.model.UserType;
+import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.idm.exception.AdminAuthorizationException;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
+import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.idm.service.role.implementor.AdminRoleImplementorFactory;
+import gov.ca.cwds.service.messages.MessageCode;
+import gov.ca.cwds.service.messages.MessagesService;
+import gov.ca.cwds.service.messages.MessagesService.Messages;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -38,6 +50,15 @@ public class AuthorizationServiceImplTest {
   public void before() {
     service = new AuthorizationServiceImpl();
     service.setAdminRoleImplementorFactory(new AdminRoleImplementorFactory());
+
+    MessagesService messagesServiceMock = mock(MessagesService.class);
+    ExceptionFactory exceptionFactory = new ExceptionFactory();
+    exceptionFactory.setMessagesService(messagesServiceMock);
+    service.setExceptionFactory(exceptionFactory);
+
+    when(messagesServiceMock.getMessages(any(MessageCode.class), ArgumentMatchers.<String>any()))
+            .thenReturn(new Messages("techMsg", "userMsg"));
+
     mockStatic(CurrentAuthenticatedUserUtil.class);
   }
 
@@ -66,7 +87,7 @@ public class AuthorizationServiceImplTest {
   public void testAdminCantUpdateHimself() {
     String adminId = "someId";
     when(CurrentAuthenticatedUserUtil.getCurrentUserName()).thenReturn(adminId);
-    CognitoServiceFacade cognitoServiceFacade = Mockito.mock(CognitoServiceFacade.class);
+    CognitoServiceFacade cognitoServiceFacade = mock(CognitoServiceFacade.class);
     UserType user = new UserType();
     user.setUsername(adminId);
     Mockito.when(cognitoServiceFacade.getCognitoUserById(adminId)).thenReturn(user);
@@ -79,21 +100,21 @@ public class AuthorizationServiceImplTest {
   public void testByUserAndAdmin_StateAdminSameCounty() {
     when(getCurrentUser()).thenReturn(
         admin(toSet(STATE_ADMIN, OFFICE_ADMIN), "Yolo", toSet("Yolo_2")));
-    assertTrue(service.canViewUser(user("Yolo", "Yolo_1")));
+    service.canViewUser(user("Yolo", "Yolo_1"));
   }
 
   @Test
   public void testByUserAndAdmin_StateAdminDifferentCounty() {
     when(getCurrentUser())
         .thenReturn(admin(toSet(STATE_ADMIN), "Yolo", null));
-    assertTrue(service.canViewUser(user("Madera", "Madera_1")));
+    service.canViewUser(user("Madera", "Madera_1"));
   }
 
   @Test
   public void testByUserAndAdmin_StateAdminNoCounty() {
     when(getCurrentUser())
         .thenReturn(admin(toSet(STATE_ADMIN), null, null));
-    assertTrue(service.canViewUser(user("Madera", "Madera_1")));
+    service.canViewUser(user("Madera", "Madera_1"));
   }
 
   @Test
@@ -102,7 +123,7 @@ public class AuthorizationServiceImplTest {
         .thenReturn(admin(toSet(COUNTY_ADMIN, OFFICE_ADMIN),
             "Yolo", toSet("Yolo_2")));
     when(getCurrentUserCountyName()).thenReturn("Yolo");
-    assertTrue(service.canViewUser(user("Yolo", "Yolo_1")));
+    service.canViewUser(user("Yolo", "Yolo_1"));
   }
 
   @Test
@@ -111,14 +132,26 @@ public class AuthorizationServiceImplTest {
         .thenReturn(admin(toSet(COUNTY_ADMIN), "Yolo", null));
     when(getCurrentUserCountyName())
         .thenReturn("Yolo");
-    assertTrue(service.canViewUser(user("Yolo", "Yolo_1")));
+    service.canViewUser(user("Yolo", "Yolo_1"));
   }
 
   @Test
   public void testByUserAndAdmin_CountyAdminDifferentCounty() {
     when(getCurrentUser())
         .thenReturn(admin(toSet(COUNTY_ADMIN), "Madera", null));
-    assertFalse(service.canViewUser(user("Yolo", "Yolo_1")));
+
+    assertCannotViewUser(
+        user("Yolo", "Yolo_1"),
+        COUNTY_ADMIN_CANNOT_VIEW_USER_FROM_OTHER_COUNTY);
+  }
+
+  private void assertCannotViewUser(User user, MessageCode errorCode) {
+    try {
+      service.canViewUser(user);
+      fail("Expected an AdminAuthorizationException to be thrown");
+    } catch (AdminAuthorizationException e) {
+      assertThat(e.getErrorCode(), is(errorCode));
+    }
   }
 
   @Test
@@ -127,7 +160,7 @@ public class AuthorizationServiceImplTest {
         .thenReturn(admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_1")));
     when(getCurrentUserCountyName()).thenReturn("Yolo");
     when(getCurrentUserOfficeIds()).thenReturn(toSet("Yolo_1"));
-    assertTrue(service.canViewUser(user("Yolo", "Yolo_1")));
+    service.canViewUser(user("Yolo", "Yolo_1"));
   }
 
   @Test
@@ -153,17 +186,17 @@ public class AuthorizationServiceImplTest {
     when(getCurrentUserOfficeIds()).thenReturn(toSet("Yolo_1", "Yolo_2"));
     when(getCurrentUserCountyName()).thenReturn("Yolo");
 
-    assertTrue(service.canViewUser(user(toSet(CWS_WORKER), "Yolo", "Yolo_1")));
-    assertTrue(service.canViewUser(
-        user(toSet(CWS_WORKER), "Yolo", "Yolo_3")));
-    assertTrue(service.canViewUser(
-        user(toSet(STATE_ADMIN), "Yolo", "Yolo_1")));
-    assertTrue(service.canViewUser(
-        user(toSet(COUNTY_ADMIN), "Yolo", "Yolo_1")));
-    assertTrue(service.canViewUser(
-        user(toSet(STATE_ADMIN), "Yolo", "Yolo_3")));
-    assertTrue(service.canViewUser(
-        user(toSet(COUNTY_ADMIN), "Yolo", "Yolo_3")));
+    service.canViewUser(user(toSet(CWS_WORKER), "Yolo", "Yolo_1"));
+    service.canViewUser(
+        user(toSet(CWS_WORKER), "Yolo", "Yolo_3"));
+    service.canViewUser(
+        user(toSet(STATE_ADMIN), "Yolo", "Yolo_1"));
+    service.canViewUser(
+        user(toSet(COUNTY_ADMIN), "Yolo", "Yolo_1"));
+   service.canViewUser(
+        user(toSet(STATE_ADMIN), "Yolo", "Yolo_3"));
+    service.canViewUser(
+        user(toSet(COUNTY_ADMIN), "Yolo", "Yolo_3"));
   }
 
   @Test

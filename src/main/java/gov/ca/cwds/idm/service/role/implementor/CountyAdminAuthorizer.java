@@ -3,6 +3,7 @@ package gov.ca.cwds.idm.service.role.implementor;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isCountyAdmin;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isStateAdmin;
 import static gov.ca.cwds.idm.service.role.implementor.AuthorizationUtils.isPrincipalInTheSameCountyWith;
+import static gov.ca.cwds.service.messages.MessageCode.COUNTY_ADMIN_CANNOT_VIEW_USER_FROM_OTHER_COUNTY;
 
 import gov.ca.cwds.idm.dto.User;
 
@@ -13,8 +14,10 @@ class CountyAdminAuthorizer extends AbstractAdminActionsAuthorizer {
   }
 
   @Override
-  public boolean canViewUser() {
-    return isPrincipalInTheSameCountyWith(getUser());
+  public void canViewUser() {
+    if(!isPrincipalInTheSameCountyWith(getUser())) {
+      throwAuthorizationException(COUNTY_ADMIN_CANNOT_VIEW_USER_FROM_OTHER_COUNTY, getUser().getId());
+    }
   }
 
   @Override

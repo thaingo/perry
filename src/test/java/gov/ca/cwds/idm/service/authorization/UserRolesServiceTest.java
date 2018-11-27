@@ -53,9 +53,9 @@ public class UserRolesServiceTest {
     assertTrue(UserRolesService.isNonRacfIdCalsUser(userToken(CALS_EXTERNAL_WORKER, CWS_WORKER)));
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test
   public void testGetStrongestAdminRoleForIdmJob() {
-    UserRolesService.getStrongestAdminRole(userToken(IDM_JOB));
+    assertThat(UserRolesService.getStrongestAdminRole(userToken(IDM_JOB)), is(IDM_JOB));
   }
 
   @Test(expected = IllegalStateException.class)
