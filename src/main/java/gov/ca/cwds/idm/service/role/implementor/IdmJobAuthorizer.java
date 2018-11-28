@@ -1,5 +1,7 @@
 package gov.ca.cwds.idm.service.role.implementor;
 
+import static gov.ca.cwds.service.messages.MessageCode.IDM_JOB_CANNOT_UPDATE_USER;
+
 import gov.ca.cwds.idm.dto.User;
 
 class IdmJobAuthorizer extends AbstractAdminActionsAuthorizer {
@@ -9,7 +11,7 @@ class IdmJobAuthorizer extends AbstractAdminActionsAuthorizer {
   }
 
   @Override
-  public void canViewUser() {
+  public void checkCanViewUser() {
   }
 
   @Override
@@ -18,8 +20,8 @@ class IdmJobAuthorizer extends AbstractAdminActionsAuthorizer {
   }
 
   @Override
-  public boolean canUpdateUser() {
-    return false;
+  public void checkCanUpdateUser() {
+    throwAuthorizationException(IDM_JOB_CANNOT_UPDATE_USER);
   }
 
   @Override

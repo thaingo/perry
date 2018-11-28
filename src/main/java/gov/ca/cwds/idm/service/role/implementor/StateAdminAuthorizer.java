@@ -11,7 +11,7 @@ class StateAdminAuthorizer extends AbstractAdminActionsAuthorizer {
   }
 
   @Override
-  public void canViewUser() {
+  public void checkCanViewUser() {
   }
 
   @Override
@@ -20,8 +20,7 @@ class StateAdminAuthorizer extends AbstractAdminActionsAuthorizer {
   }
 
   @Override
-  public boolean canUpdateUser() {
-    return true;
+  public void checkCanUpdateUser() {
   }
 
   @Override

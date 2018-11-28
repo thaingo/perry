@@ -10,8 +10,6 @@ import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.service.messages.MessageCode;
 import gov.ca.cwds.service.messages.MessagesService;
 import gov.ca.cwds.service.messages.MessagesService.Messages;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -19,8 +17,6 @@ import org.springframework.stereotype.Service;
 @Service
 @Profile("idm")
 public class ExceptionFactory {
-
-  private static final Logger LOGGER = LoggerFactory.getLogger(ExceptionFactory.class);
 
   private MessagesService messagesService;
 
@@ -56,26 +52,20 @@ public class ExceptionFactory {
   public PartialSuccessException createPartialSuccessException(
       String userId, OperationType operationType, MessageCode errorCode, Exception... causes) {
     Messages messages = messagesService.getMessages(errorCode, userId);
-    PartialSuccessException ex = new PartialSuccessException(
+    return new PartialSuccessException(
         userId, operationType, messages.getTechMsg(), messages.getUserMsg(), errorCode, causes);
-    LOGGER.error(messages.getTechMsg(), ex);
-    return ex;
   }
 
   private <T extends IdmException> T createException(IdmExceptionCreator<T> creator,
       MessageCode messageCode, String... args) {
     Messages messages = messagesService.getMessages(messageCode, args);
-    T ex = creator.create(messages.getTechMsg(), messages.getUserMsg(), messageCode);
-    LOGGER.error(messages.getTechMsg(), ex);
-    return ex;
+    return creator.create(messages.getTechMsg(), messages.getUserMsg(), messageCode);
   }
 
   private <T extends IdmException> T createExceptionWithCause(IdmExceptionWithCauseCreator<T> creator,
       Throwable cause, MessageCode messageCode, String... args) {
     Messages messages = messagesService.getMessages(messageCode, args);
-    T ex = creator.create(messages.getTechMsg(), messages.getUserMsg(), messageCode, cause);
-    LOGGER.error(messages.getTechMsg(), ex);
-    return ex;
+    return creator.create(messages.getTechMsg(), messages.getUserMsg(), messageCode, cause);
   }
 
   @FunctionalInterface

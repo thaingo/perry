@@ -133,7 +133,7 @@ public class IdmServiceImpl implements IdmService {
   public User findUser(String id) {
     UserType cognitoUser = cognitoServiceFacade.getCognitoUserById(id);
     User user = mappingService.toUser(cognitoUser);
-    authorizeService.canViewUser(user);
+    authorizeService.checkCanViewUser(user);
     return user;
   }
 
@@ -286,9 +286,7 @@ public class IdmServiceImpl implements IdmService {
   }
 
   private void authorizeUpdateUser(UserType existedCognitoUser, UserUpdate updateUserDto) {
-    if (!authorizeService.canUpdateUser(existedCognitoUser)) {
-      throwAccessDenied(USER_UPDATE_IS_NOT_ALLOWED);
-    }
+    authorizeService.checkCanUpdateUser(existedCognitoUser);
     authorizeRolesUpdate(existedCognitoUser, updateUserDto);
   }
 

@@ -8,12 +8,12 @@ import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserName;
 
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.idm.exception.AdminAuthorizationException;
 import gov.ca.cwds.idm.service.MappingService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.idm.service.role.implementor.AbstractAdminActionsAuthorizer;
 import gov.ca.cwds.idm.service.role.implementor.AdminRoleImplementorFactory;
-import gov.ca.cwds.service.messages.MessageCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -31,10 +31,8 @@ public class AuthorizationServiceImpl implements AuthorizationService {
   private ExceptionFactory exceptionFactory;
 
   @Override
-  public void canViewUser(User user) {
-    AbstractAdminActionsAuthorizer authorizer = adminRoleImplementorFactory.getAdminActionsAuthorizer(user);
-    authorizer.setExceptionFactory(exceptionFactory);
-    authorizer.canViewUser();
+  public void checkCanViewUser(User user) {
+    getAdminActionsAuthorizer(user).checkCanViewUser();
   }
 
   @Override
@@ -43,27 +41,51 @@ public class AuthorizationServiceImpl implements AuthorizationService {
   }
 
   @Override
-  public boolean canUpdateUser(String userId) {
-    // admin can't update himself
+  public void checkCanUpdateUser(String userId) {
     if (userId.equals(getCurrentUserName())) {
       throw exceptionFactory.createAuthorizationException(ADMIN_CANNOT_UPDATE_HIMSELF);
     }
     User user = getUserById(userId);
-    return canUpdateUser(user);
+    checkCanUpdateUser(user);
   }
 
   @Override
-  public boolean canUpdateUser(UserType existingUser) {
-    // admin can't update himself
-    if (existingUser.getUsername().equals(getCurrentUserName())) {
+  public boolean canUpdateUser(String userId) {
+    try {
+      checkCanUpdateUser(userId);
+    } catch (AdminAuthorizationException e) {
       return false;
     }
-    User user = composeUser(existingUser);
-    return canUpdateUser(user);
+    return true;
   }
 
-  boolean canUpdateUser(User user) {
-    return adminRoleImplementorFactory.getAdminActionsAuthorizer(user).canUpdateUser();
+  @Override
+  public void checkCanUpdateUser(UserType existingUser) {
+    if (existingUser.getUsername().equals(getCurrentUserName())) {
+      throw exceptionFactory.createAuthorizationException(ADMIN_CANNOT_UPDATE_HIMSELF);
+    }
+    User user = composeUser(existingUser);
+    checkCanUpdateUser(user);
+  }
+
+  void checkCanUpdateUser(User user) {
+    getAdminActionsAuthorizer(user).checkCanUpdateUser();
+  }
+
+  @Override
+  public boolean canUpdateUser(User user) {
+    try {
+      checkCanUpdateUser(user);
+    } catch (AdminAuthorizationException e) {
+      return false;
+    }
+    return true;
+  }
+
+  private AbstractAdminActionsAuthorizer getAdminActionsAuthorizer(User user) {
+    AbstractAdminActionsAuthorizer authorizer = adminRoleImplementorFactory.getAdminActionsAuthorizer(user);
+    authorizer.setExceptionFactory(exceptionFactory);
+    return authorizer;
   }
 
   @Override

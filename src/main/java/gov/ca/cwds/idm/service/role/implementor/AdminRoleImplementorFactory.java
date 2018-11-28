@@ -8,7 +8,6 @@ import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 
 import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.service.authorization.AdminActionsAuthorizer;
 import gov.ca.cwds.idm.service.authorization.UserRolesService;
 import java.util.List;
 import org.springframework.context.annotation.Profile;
