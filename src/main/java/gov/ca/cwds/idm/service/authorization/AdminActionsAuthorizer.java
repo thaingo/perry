@@ -8,7 +8,7 @@ public interface AdminActionsAuthorizer {
 
   void checkCanUpdateUser();
 
-  boolean canResendInvitationMessage();
+  void checkCanResendInvitationMessage();
 
   boolean canEditRoles();
 

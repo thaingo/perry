@@ -2,6 +2,7 @@ package gov.ca.cwds.idm.service.role.implementor;
 
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isAdmin;
 import static gov.ca.cwds.idm.service.role.implementor.AuthorizationUtils.isPrincipalInTheSameCountyWith;
+import static gov.ca.cwds.service.messages.MessageCode.OFFICE_ADMIN_CANNOT_RESEND_INVITATION_FOR_USER_FROM_OTHER_OFFICE;
 import static gov.ca.cwds.service.messages.MessageCode.OFFICE_ADMIN_CANNOT_UPDATE_ADMIN;
 import static gov.ca.cwds.service.messages.MessageCode.OFFICE_ADMIN_CANNOT_UPDATE_USER_FROM_OTHER_COUNTY;
 import static gov.ca.cwds.service.messages.MessageCode.OFFICE_ADMIN_CANNOT_VIEW_USER_FROM_OTHER_COUNTY;
@@ -42,8 +43,11 @@ class OfficeAdminAuthorizer extends AbstractAdminActionsAuthorizer {
   }
 
   @Override
-  public boolean canResendInvitationMessage() {
-    return isAdminInTheSameOfficeAsUser();
+  public void checkCanResendInvitationMessage() {
+    if (!isAdminInTheSameOfficeAsUser()) {
+      throwAuthorizationException(
+          OFFICE_ADMIN_CANNOT_RESEND_INVITATION_FOR_USER_FROM_OTHER_OFFICE, getUser().getId());
+    }
   }
 
   private boolean isAdminInTheSameOfficeAsUser() {

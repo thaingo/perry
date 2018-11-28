@@ -24,8 +24,7 @@ class StateAdminAuthorizer extends AbstractAdminActionsAuthorizer {
   }
 
   @Override
-  public boolean canResendInvitationMessage() {
-    return true;
+  public void checkCanResendInvitationMessage() {
   }
 
   @Override

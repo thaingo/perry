@@ -101,9 +101,9 @@ public class AuthorizationServiceImpl implements AuthorizationService {
   }
 
   @Override
-  public boolean canResendInvitationMessage(String userId) {
+  public void checkCanResendInvitationMessage(String userId) {
     User user = getUserById(userId);
-    return adminRoleImplementorFactory.getAdminActionsAuthorizer(user).canResendInvitationMessage();
+    getAdminActionsAuthorizer(user).checkCanResendInvitationMessage();
   }
 
   private User getUserById(String userId) {

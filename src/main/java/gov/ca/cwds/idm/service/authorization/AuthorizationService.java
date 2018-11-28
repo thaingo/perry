@@ -17,7 +17,7 @@ public interface AuthorizationService {
 
   boolean canUpdateUser(String userId);
 
-  boolean canResendInvitationMessage(String id);
+  void checkCanResendInvitationMessage(String id);
 
   boolean canEditRoles(User user);
 

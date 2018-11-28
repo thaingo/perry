@@ -96,7 +96,6 @@ public class IdmServiceImpl implements IdmService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(IdmServiceImpl.class);
 
-  private static final String USER_UPDATE_IS_NOT_ALLOWED = "User update is not allowed";
   private static final String USER_ROLES_UPDATE_IS_NOT_ALLOWED = "User roles update is not allowed";
 
   @Autowired
@@ -231,6 +230,7 @@ public class IdmServiceImpl implements IdmService {
 
   @Override
   public RegistrationResubmitResponse resendInvitationMessage(String userId) {
+    authorizeService.checkCanResendInvitationMessage(userId);
     cognitoServiceFacade.resendInvitationMessage(userId);
 
     LocalDateTime resubmitDateTime = LocalDateTime.now();

@@ -1,5 +1,6 @@
 package gov.ca.cwds.idm.service.role.implementor;
 
+import static gov.ca.cwds.service.messages.MessageCode.CALS_ADMIN_CANNOT_RESEND_INVITATION_MESSAGE;
 import static gov.ca.cwds.service.messages.MessageCode.CALS_ADMIN_CANNOT_UPDATE_USER;
 import static gov.ca.cwds.service.messages.MessageCode.CALS_ADMIN_CANNOT_VIEW_NON_CALS_USER;
 
@@ -30,8 +31,8 @@ class CalsAdminAuthorizer extends AbstractAdminActionsAuthorizer {
   }
 
   @Override
-  public boolean canResendInvitationMessage() {
-    return false;
+  public void checkCanResendInvitationMessage() {
+    throwAuthorizationException(CALS_ADMIN_CANNOT_RESEND_INVITATION_MESSAGE);
   }
 
   @Override

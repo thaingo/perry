@@ -1,6 +1,6 @@
 package gov.ca.cwds.idm.service.role.implementor;
 
-import static gov.ca.cwds.service.messages.MessageCode.IDM_JOB_CANNOT_UPDATE_USER;
+import static gov.ca.cwds.service.messages.MessageCode.ROLE_IS_UNSUFFICIENT_FOR_OPERATION;
 
 import gov.ca.cwds.idm.dto.User;
 
@@ -21,12 +21,12 @@ class IdmJobAuthorizer extends AbstractAdminActionsAuthorizer {
 
   @Override
   public void checkCanUpdateUser() {
-    throwAuthorizationException(IDM_JOB_CANNOT_UPDATE_USER);
+    throwAuthorizationException(ROLE_IS_UNSUFFICIENT_FOR_OPERATION);
   }
 
   @Override
-  public boolean canResendInvitationMessage() {
-    return false;
+  public void checkCanResendInvitationMessage() {
+    throwAuthorizationException(ROLE_IS_UNSUFFICIENT_FOR_OPERATION);
   }
 
   @Override
