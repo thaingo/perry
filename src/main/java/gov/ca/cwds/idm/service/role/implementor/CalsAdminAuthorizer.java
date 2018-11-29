@@ -21,21 +21,25 @@ class CalsAdminAuthorizer extends AbstractAdminActionsAuthorizer {
 
   @Override
   public void checkCanCreateUser() {
-    throwAuthorizationException(ROLE_IS_UNSUFFICIENT_FOR_OPERATION);
+    unsufficientRoleError();
   }
 
   @Override
   public void checkCanUpdateUser() {
-    throwAuthorizationException(ROLE_IS_UNSUFFICIENT_FOR_OPERATION);
+    unsufficientRoleError();
   }
 
   @Override
   public void checkCanResendInvitationMessage() {
-    throwAuthorizationException(ROLE_IS_UNSUFFICIENT_FOR_OPERATION);
+    unsufficientRoleError();
   }
 
   @Override
   public void checkCanEditRoles() {
+    unsufficientRoleError();
+  }
+
+  private void unsufficientRoleError() {
     throwAuthorizationException(ROLE_IS_UNSUFFICIENT_FOR_OPERATION);
   }
 }

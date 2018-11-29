@@ -89,8 +89,6 @@ public class IdmServiceImpl implements IdmService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(IdmServiceImpl.class);
 
-  private static final String USER_ROLES_UPDATE_IS_NOT_ALLOWED = "User roles update is not allowed";
-
   @Autowired
   private CognitoServiceFacade cognitoServiceFacade;
 

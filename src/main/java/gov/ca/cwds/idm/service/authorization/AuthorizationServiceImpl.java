@@ -15,6 +15,8 @@ import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.idm.service.role.implementor.AbstractAdminActionsAuthorizer;
 import gov.ca.cwds.idm.service.role.implementor.AdminRoleImplementorFactory;
 import java.util.function.Consumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,8 @@ import org.springframework.stereotype.Service;
 @Service("authorizationService")
 @Profile("idm")
 public class AuthorizationServiceImpl implements AuthorizationService {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(AuthorizationServiceImpl.class);
 
   private CognitoServiceFacade cognitoServiceFacade;
 
@@ -52,7 +56,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
   @Override
   public boolean canUpdateUser(String userId) {
-    return canAuthorizeOperation(userId, this::checkCanUpdateUser);
+    return canAuthorizeOperation(userId, this::checkCanUpdateUser, "user update");
   }
 
   @Override
@@ -76,13 +80,17 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
   @Override
   public boolean canEditRoles(User user) {
-    return canAuthorizeOperation(user, this::checkCanEditRoles);
+    return canAuthorizeOperation(user, this::checkCanEditRoles, "roles editing");
   }
 
-  private <T> boolean canAuthorizeOperation(T input, Consumer<T> check) {
+  @SuppressWarnings({"squid:S1166", "fb-contrib:EXS_EXCEPTION_SOFTENING_RETURN_FALSE"})
+  //squid:S1166: exceptions stack trace can be omitted in this context
+  //fb-contrib:EXS_EXCEPTION_SOFTENING_RETURN_FALSE: our design needs a boolean result
+  private <T> boolean canAuthorizeOperation(T input, Consumer<T> check, String operationName) {
     try {
       check.accept(input);
     } catch (AdminAuthorizationException e) {
+      LOGGER.info(operationName + " can not be authorized, because: " + e.getUserMessage());
       return false;
     }
     return true;
