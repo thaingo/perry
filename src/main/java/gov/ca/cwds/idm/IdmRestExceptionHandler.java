@@ -32,43 +32,42 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @ControllerAdvice(assignableTypes = {IdmResource.class})
 public class IdmRestExceptionHandler extends ResponseEntityExceptionHandler {
 
-
   @Autowired
   private MessagesService messagesService;
 
   @ExceptionHandler(value = {IdmException.class})
   ResponseEntity<Object> handleIdmException(IdmException e) {
-    logger.error(e);
+    logger.error(e.getMessage(), e);
     return buildResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, e);
   }
 
   @ExceptionHandler(value = {UserNotFoundException.class})
   ResponseEntity<Object> handleUserNotFound(UserNotFoundException e) {
-    logger.error(e);
+    logger.error(e.getMessage(), e);
     return buildResponseEntity(HttpStatus.NOT_FOUND, e);
   }
 
   @ExceptionHandler(value = {UserAlreadyExistsException.class})
   ResponseEntity<Object> handleUserAlreadyExists(UserAlreadyExistsException e) {
-    logger.error(e);
+    logger.error(e.getMessage(), e);
     return buildResponseEntity(HttpStatus.CONFLICT, e);
   }
 
   @ExceptionHandler(value = {UserValidationException.class})
   ResponseEntity<Object> handleUserValidationException(UserValidationException e) {
-    logger.error(e);
+    logger.error(e.getMessage(), e);
     return buildResponseEntity(HttpStatus.BAD_REQUEST, e);
   }
 
   @ExceptionHandler(value = {AdminAuthorizationException.class})
   ResponseEntity<Object> handleAdminAuthorizationException(AdminAuthorizationException e) {
-    logger.error(e);
+    logger.error(e.getMessage(), e);
     return buildResponseEntity(HttpStatus.UNAUTHORIZED, e);
   }
 
   @ExceptionHandler(value = {PartialSuccessException.class})
   ResponseEntity<Object> handlePartialSuccess(PartialSuccessException e) {
-    logger.error(e);
+    logger.error(e.getMessage(), e);
 
     HttpStatus httpStatus = INTERNAL_SERVER_ERROR;
     List<Exception> causes = e.getCauses();

@@ -12,25 +12,26 @@ class IdmJobAuthorizer extends AbstractAdminActionsAuthorizer {
 
   @Override
   public void checkCanViewUser() {
+    //no authorization rules to check
   }
 
   @Override
   public void checkCanCreateUser() {
-    throwAuthorizationException(ROLE_IS_UNSUFFICIENT_FOR_OPERATION);
+    unsufficientRoleError();
   }
 
   @Override
   public void checkCanUpdateUser() {
-    throwAuthorizationException(ROLE_IS_UNSUFFICIENT_FOR_OPERATION);
+    unsufficientRoleError();
   }
 
   @Override
   public void checkCanResendInvitationMessage() {
-    throwAuthorizationException(ROLE_IS_UNSUFFICIENT_FOR_OPERATION);
+    unsufficientRoleError();
   }
 
   @Override
   public void checkCanEditRoles() {
-    throwAuthorizationException(ROLE_IS_UNSUFFICIENT_FOR_OPERATION);
+    unsufficientRoleError();
   }
 }

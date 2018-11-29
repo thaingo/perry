@@ -17,14 +17,17 @@ class StateAdminAuthorizer extends AbstractAdminActionsAuthorizer {
 
   @Override
   public void checkCanCreateUser() {
+    //no authorization rules to check
   }
 
   @Override
   public void checkCanUpdateUser() {
+    //no authorization rules to check
   }
 
   @Override
   public void checkCanResendInvitationMessage() {
+    //no authorization rules to check
   }
 
   @Override

@@ -2,6 +2,7 @@ package gov.ca.cwds.idm.service.role.implementor;
 
 import static gov.ca.cwds.service.messages.MessageCode.CALS_ADMIN_ROLES_CANNOT_BE_EDITED;
 import static gov.ca.cwds.service.messages.MessageCode.CANNOT_EDIT_ROLES_OF_CALS_EXTERNAL_WORKER;
+import static gov.ca.cwds.service.messages.MessageCode.ROLE_IS_UNSUFFICIENT_FOR_OPERATION;
 
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.authorization.AdminActionsAuthorizer;
@@ -39,6 +40,10 @@ public abstract class AbstractAdminActionsAuthorizer implements AdminActionsAuth
 
   protected void throwAuthorizationException(MessageCode messageCode, String... args) {
     throw exceptionFactory.createAuthorizationException(messageCode, args);
+  }
+
+  protected void unsufficientRoleError() {
+    throwAuthorizationException(ROLE_IS_UNSUFFICIENT_FOR_OPERATION);
   }
 
   public void setExceptionFactory(ExceptionFactory exceptionFactory) {
