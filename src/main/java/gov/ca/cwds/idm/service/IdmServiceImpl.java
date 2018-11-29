@@ -254,13 +254,8 @@ public class IdmServiceImpl implements IdmService {
 
     try {
       validationService.validateVerifyIfUserCanBeCreated(user, cwsUser != null);
-    } catch (UserValidationException e) {
-      return buildUserVerificationErrorResult(e.getErrorCode(), e.getUserMessage());
-    }
-
-    try {
       authorizeService.checkCanCreateUser(user);
-    } catch (AdminAuthorizationException e) {
+    } catch (UserValidationException | AdminAuthorizationException e) {
       return buildUserVerificationErrorResult(e.getErrorCode(), e.getUserMessage());
     }
 
