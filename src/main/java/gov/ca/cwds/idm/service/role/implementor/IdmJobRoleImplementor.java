@@ -13,6 +13,6 @@ class IdmJobRoleImplementor implements AdminRoleImplementor {
 
   @Override
   public List<String> getPossibleUserRoles() {
-    return Collections.EMPTY_LIST;
+    return Collections.emptyList();
   }
 }

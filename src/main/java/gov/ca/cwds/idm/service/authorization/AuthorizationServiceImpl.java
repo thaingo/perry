@@ -90,7 +90,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     try {
       check.accept(input);
     } catch (AdminAuthorizationException e) {
-      LOGGER.info(operationName + " can not be authorized, because: " + e.getUserMessage());
+      LOGGER.info("{} can not be authorized, since: {}", operationName, e.getUserMessage());
       return false;
     }
     return true;
