@@ -204,13 +204,13 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
 
   @Test
   @WithMockCustomUser
-  public void testCreateRacfidUserUnautorized() throws Exception {
+  public void testCreateRacfidUserUnauthorized() throws Exception {
     User user = getElroydaUser();
     User actuallySendUser = getActuallySendElroydaUser();
     AdminCreateUserRequest request = setCreateRequestAndResult(actuallySendUser, "new_user_success_id_5");
     ((TestCognitoServiceFacade) cognitoServiceFacade).setSearchByRacfidRequestAndResult("ELROYDA");
 
-    mockMvc
+    MvcResult result = mockMvc
         .perform(
             MockMvcRequestBuilders.post("/idm/users")
                 .contentType(JSON_CONTENT_TYPE)
@@ -219,6 +219,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
         .andReturn();
 
     verify(cognito, times(0)).adminCreateUser(request);
+    assertExtensible(result, "fixtures/idm/create-user/racfid-user-unauthorized.json");
   }
 
   @Test
