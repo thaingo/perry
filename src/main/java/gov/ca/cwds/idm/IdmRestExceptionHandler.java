@@ -38,37 +38,37 @@ public class IdmRestExceptionHandler extends ResponseEntityExceptionHandler {
 
   @ExceptionHandler(value = {IdmException.class})
   ResponseEntity<Object> handleIdmException(IdmException e) {
-    logger.error(e.getMessage(), e);
+    logger.error(e);
     return buildResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, e);
   }
 
   @ExceptionHandler(value = {UserNotFoundException.class})
   ResponseEntity<Object> handleUserNotFound(UserNotFoundException e) {
-    logger.error(e.getMessage(), e);
+    logger.error(e);
     return buildResponseEntity(HttpStatus.NOT_FOUND, e);
   }
 
   @ExceptionHandler(value = {UserAlreadyExistsException.class})
   ResponseEntity<Object> handleUserAlreadyExists(UserAlreadyExistsException e) {
-    logger.error(e.getMessage(), e);
+    logger.error(e);
     return buildResponseEntity(HttpStatus.CONFLICT, e);
   }
 
   @ExceptionHandler(value = {UserValidationException.class})
   ResponseEntity<Object> handleUserValidationException(UserValidationException e) {
-    logger.error(e.getMessage(), e);
+    logger.error(e);
     return buildResponseEntity(HttpStatus.BAD_REQUEST, e);
   }
 
   @ExceptionHandler(value = {AdminAuthorizationException.class})
   ResponseEntity<Object> handleAdminAuthorizationException(AdminAuthorizationException e) {
-    logger.error(e.getMessage(), e);
+    logger.error(e);
     return buildResponseEntity(HttpStatus.UNAUTHORIZED, e);
   }
 
   @ExceptionHandler(value = {PartialSuccessException.class})
   ResponseEntity<Object> handlePartialSuccess(PartialSuccessException e) {
-    logger.error(e.getMessage(), e);
+    logger.error(e);
 
     HttpStatus httpStatus = INTERNAL_SERVER_ERROR;
     List<Exception> causes = e.getCauses();
@@ -85,12 +85,11 @@ public class IdmRestExceptionHandler extends ResponseEntityExceptionHandler {
 
   @ExceptionHandler(value = {DateTimeParseException.class})
   ResponseEntity<Object> handleDateTimeParseException(DateTimeParseException e) {
-    logger.error(e.getMessage(), e);
 
     Messages messages = messagesService
         .getMessages(INVALID_DATE_FORMAT, URL_DATETIME_FORMAT_PATTERN);
-
     logger.error(messages.getTechMsg(), e);
+
     HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
     IdmApiCustomError apiError =
         IdmApiCustomError.IdmApiCustomErrorBuilder.anIdmApiCustomError()
