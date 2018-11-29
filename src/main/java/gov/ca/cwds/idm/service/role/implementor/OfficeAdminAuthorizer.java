@@ -5,7 +5,7 @@ import static gov.ca.cwds.idm.service.role.implementor.AuthorizationUtils.isPrin
 import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_OFFICE;
 import static gov.ca.cwds.service.messages.MessageCode.OFFICE_ADMIN_CANNOT_RESEND_INVITATION_FOR_USER_FROM_OTHER_OFFICE;
 import static gov.ca.cwds.service.messages.MessageCode.OFFICE_ADMIN_CANNOT_UPDATE_ADMIN;
-import static gov.ca.cwds.service.messages.MessageCode.OFFICE_ADMIN_CANNOT_UPDATE_USER_FROM_OTHER_COUNTY;
+import static gov.ca.cwds.service.messages.MessageCode.OFFICE_ADMIN_CANNOT_UPDATE_USER_FROM_OTHER_OFFICE;
 import static gov.ca.cwds.service.messages.MessageCode.OFFICE_ADMIN_CANNOT_VIEW_USER_FROM_OTHER_COUNTY;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserOfficeIds;
 
@@ -37,7 +37,7 @@ class OfficeAdminAuthorizer extends AbstractAdminActionsAuthorizer {
   public void checkCanUpdateUser() {
    if(!isAdminInTheSameOfficeAsUser()) {
      throwAuthorizationException(
-         OFFICE_ADMIN_CANNOT_UPDATE_USER_FROM_OTHER_COUNTY, getUser().getId());
+         OFFICE_ADMIN_CANNOT_UPDATE_USER_FROM_OTHER_OFFICE, getUser().getId());
    }
 
    if(isAdmin(getUser())) {
