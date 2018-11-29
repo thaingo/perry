@@ -2,10 +2,10 @@ package gov.ca.cwds.idm.service.role.implementor;
 
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.idm.util.TestHelper.admin;
-import static gov.ca.cwds.idm.util.TestHelper.prepareCalsAdmin;
-import static gov.ca.cwds.idm.util.TestHelper.prepareCountyAdmin;
-import static gov.ca.cwds.idm.util.TestHelper.prepareOfficeAdmin;
-import static gov.ca.cwds.idm.util.TestHelper.prepareStateAdmin;
+import static gov.ca.cwds.idm.util.TestHelper.calsAdmin;
+import static gov.ca.cwds.idm.util.TestHelper.countyAdmin;
+import static gov.ca.cwds.idm.util.TestHelper.officeAdmin;
+import static gov.ca.cwds.idm.util.TestHelper.stateAdmin;
 import static gov.ca.cwds.service.messages.MessageCode.CALS_ADMIN_ROLES_CANNOT_BE_EDITED;
 import static gov.ca.cwds.service.messages.MessageCode.STATE_ADMIN_ROLES_CANNOT_BE_EDITED;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
@@ -35,21 +35,21 @@ public class StateAdminAuthorizerTest extends BaseAuthorizerTest {
 
   @Test
   public void canNotStateAdminEditRoles() {
-    assertCanNotEditRoles(prepareStateAdmin(), STATE_ADMIN_ROLES_CANNOT_BE_EDITED);
+    assertCanNotEditRoles(stateAdmin(), STATE_ADMIN_ROLES_CANNOT_BE_EDITED);
   }
 
   @Test
   public void canEditCountyAdminRoles() {
-    assertCanEditRoles(prepareCountyAdmin());
+    assertCanEditRoles(countyAdmin());
   }
 
   @Test
   public void canEditOfficeAdminRoles() {
-    assertCanEditRoles(prepareOfficeAdmin());
+    assertCanEditRoles(officeAdmin());
   }
 
   @Test
   public void canEditCalsAdminRoles() {
-    assertCanNotEditRoles(prepareCalsAdmin(), CALS_ADMIN_ROLES_CANNOT_BE_EDITED);
+    assertCanNotEditRoles(calsAdmin(), CALS_ADMIN_ROLES_CANNOT_BE_EDITED);
   }
 }
