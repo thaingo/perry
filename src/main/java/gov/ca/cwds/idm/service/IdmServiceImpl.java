@@ -294,9 +294,8 @@ public class IdmServiceImpl implements IdmService {
     if (updateUserDto.getRoles() == null) {
       return;
     }
-    if (!isAbleToEditRolesForUser(existedCognitoUser)
-        && wasRolesActuallyEdited(existedCognitoUser, updateUserDto)) {
-      throwAccessDenied(USER_ROLES_UPDATE_IS_NOT_ALLOWED);
+    if (wasRolesActuallyEdited(existedCognitoUser, updateUserDto)) {
+      authorizeService.checkCanEditRoles(existedCognitoUser);
     }
   }
 
@@ -308,10 +307,6 @@ public class IdmServiceImpl implements IdmService {
   private boolean wasRolesActuallyEdited(UserType existedCognitoUser, UserUpdate updateUserDto) {
     return !CollectionUtils.isEqualCollection(CognitoUtils.getRoles(existedCognitoUser),
         updateUserDto.getRoles());
-  }
-
-  private boolean isAbleToEditRolesForUser(UserType existedCognitoUser) {
-    return authorizeService.canEditRoles(existedCognitoUser);
   }
 
   private UserVerificationResult buildVerifyAuthorizationError(User user) {

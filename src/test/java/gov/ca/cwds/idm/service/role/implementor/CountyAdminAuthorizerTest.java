@@ -6,51 +6,50 @@ import static gov.ca.cwds.idm.util.TestHelper.prepareCalsAdmin;
 import static gov.ca.cwds.idm.util.TestHelper.prepareCountyAdmin;
 import static gov.ca.cwds.idm.util.TestHelper.prepareOfficeAdmin;
 import static gov.ca.cwds.idm.util.TestHelper.prepareStateAdmin;
+import static gov.ca.cwds.service.messages.MessageCode.CALS_ADMIN_ROLES_CANNOT_BE_EDITED;
+import static gov.ca.cwds.service.messages.MessageCode.COUNTY_ADMIN_CANNOT_EDIT_ROLES_OF_OTHER_COUNTY_ADMIN;
+import static gov.ca.cwds.service.messages.MessageCode.STATE_ADMIN_ROLES_CANNOT_BE_EDITED;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserCountyName;
 import static gov.ca.cwds.util.Utils.toSet;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
+import gov.ca.cwds.idm.dto.User;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(fullyQualifiedNames = "gov.ca.cwds.util.CurrentAuthenticatedUserUtil")
-public class CountyAdminAuthorizerTest {
-
-  @Test
-  public void canNotEditStateAdminRoles() {
-    assertFalse(new CountyAdminAuthorizer(prepareStateAdmin()).canEditRoles());
-  }
-
-  @Test
-  public void canNotEditCountyAdminRoles() {
-    assertFalse(new CountyAdminAuthorizer(prepareCountyAdmin()).canEditRoles());
-  }
-
-  @Test
-  public void canEditOfficeAdminRoles() {
-    assertTrue(new CountyAdminAuthorizer(prepareOfficeAdmin()).canEditRoles());
-  }
-
-  @Test
-  public void canEditCalsAdminRoles() {
-    assertFalse(new CountyAdminAuthorizer(prepareCalsAdmin()).canEditRoles());
-  }
+public class CountyAdminAuthorizerTest extends BaseAuthorizerTest {
 
   @Before
   public void mockCountyAdmin() {
-    mockStatic(CurrentAuthenticatedUserUtil.class);
     when(getCurrentUser()).thenReturn(admin(toSet(COUNTY_ADMIN),
         "Yolo", toSet("Yolo_2")));
     when(getCurrentUserCountyName()).thenReturn("Yolo");
   }
 
+  @Override
+  protected AbstractAdminActionsAuthorizer getAuthorizer(User user) {
+    return new CountyAdminAuthorizer(user);
+  }
+
+  @Test
+  public void canNotEditStateAdminRoles() {
+    assertCanNotEditRoles(prepareStateAdmin(), STATE_ADMIN_ROLES_CANNOT_BE_EDITED);
+  }
+
+  @Test
+  public void canNotEditCountyAdminRoles() {
+    assertCanNotEditRoles(prepareCountyAdmin(),
+        COUNTY_ADMIN_CANNOT_EDIT_ROLES_OF_OTHER_COUNTY_ADMIN);
+  }
+
+  @Test
+  public void canEditOfficeAdminRoles() {
+    assertCanEditRoles(prepareOfficeAdmin());
+  }
+
+  @Test
+  public void canEditCalsAdminRoles() {
+    assertCanNotEditRoles(prepareCalsAdmin(), CALS_ADMIN_ROLES_CANNOT_BE_EDITED);
+  }
 }

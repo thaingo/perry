@@ -14,6 +14,7 @@ import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.idm.service.role.implementor.AbstractAdminActionsAuthorizer;
 import gov.ca.cwds.idm.service.role.implementor.AdminRoleImplementorFactory;
+import java.util.function.Consumer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -37,7 +38,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
   @Override
   public boolean canCreateUser(User user) {
-    return adminRoleImplementorFactory.getAdminActionsAuthorizer(user).canCreateUser();
+    return getAdminActionsAuthorizer(user).canCreateUser();
   }
 
   @Override
@@ -51,12 +52,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
   @Override
   public boolean canUpdateUser(String userId) {
-    try {
-      checkCanUpdateUser(userId);
-    } catch (AdminAuthorizationException e) {
-      return false;
-    }
-    return true;
+    return canAuthorizeOperation(userId, this::checkCanUpdateUser);
   }
 
   @Override
@@ -74,15 +70,10 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
   @Override
   public boolean canUpdateUser(User user) {
-    try {
-      checkCanUpdateUser(user);
-    } catch (AdminAuthorizationException e) {
-      return false;
-    }
-    return true;
+    return canAuthorizeOperation(user, this::checkCanUpdateUser);
   }
 
-  private AbstractAdminActionsAuthorizer getAdminActionsAuthorizer(User user) {
+  private AdminActionsAuthorizer getAdminActionsAuthorizer(User user) {
     AbstractAdminActionsAuthorizer authorizer = adminRoleImplementorFactory.getAdminActionsAuthorizer(user);
     authorizer.setExceptionFactory(exceptionFactory);
     return authorizer;
@@ -90,14 +81,27 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
   @Override
   public boolean canEditRoles(User user) {
-    return canUpdateUser(user) &&
-        adminRoleImplementorFactory.getAdminActionsAuthorizer(user).canEditRoles();
+    return canAuthorizeOperation(user, this::checkCanEditRoles);
+  }
+
+  private <T> boolean canAuthorizeOperation(T input, Consumer<T> check) {
+    try {
+      check.accept(input);
+    } catch (AdminAuthorizationException e) {
+      return false;
+    }
+    return true;
   }
 
   @Override
-  public boolean canEditRoles(UserType cognitoUser) {
+  public void checkCanEditRoles(UserType cognitoUser) {
     User user = composeUser(cognitoUser);
-    return canEditRoles(user);
+    checkCanEditRoles(user);
+  }
+
+  private void checkCanEditRoles(User user) {
+    checkCanUpdateUser(user);
+    getAdminActionsAuthorizer(user).checkCanEditRoles();
   }
 
   @Override

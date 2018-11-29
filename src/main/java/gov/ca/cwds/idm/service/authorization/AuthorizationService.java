@@ -21,6 +21,6 @@ public interface AuthorizationService {
 
   boolean canEditRoles(User user);
 
-  boolean canEditRoles(UserType cognitoUser);
+  void checkCanEditRoles(UserType cognitoUser);
 
 }

@@ -49,6 +49,7 @@ public class AuthorizationServiceImplTest {
 
   private AuthorizationServiceImpl service;
 
+
   @Before
   public void before() {
     service = new AuthorizationServiceImpl();

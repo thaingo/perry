@@ -30,8 +30,7 @@ class IdmJobAuthorizer extends AbstractAdminActionsAuthorizer {
   }
 
   @Override
-  public boolean canEditRoles() {
-    return false;
+  public void checkCanEditRoles() {
+    throwAuthorizationException(ROLE_IS_UNSUFFICIENT_FOR_OPERATION);
   }
-
 }

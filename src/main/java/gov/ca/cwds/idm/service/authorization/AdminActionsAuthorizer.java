@@ -10,6 +10,6 @@ public interface AdminActionsAuthorizer {
 
   void checkCanResendInvitationMessage();
 
-  boolean canEditRoles();
+  void checkCanEditRoles();
 
 }

@@ -1,8 +1,7 @@
 package gov.ca.cwds.idm.service.role.implementor;
 
-import static gov.ca.cwds.service.messages.MessageCode.CALS_ADMIN_CANNOT_RESEND_INVITATION_MESSAGE;
-import static gov.ca.cwds.service.messages.MessageCode.CALS_ADMIN_CANNOT_UPDATE_USER;
 import static gov.ca.cwds.service.messages.MessageCode.CALS_ADMIN_CANNOT_VIEW_NON_CALS_USER;
+import static gov.ca.cwds.service.messages.MessageCode.ROLE_IS_UNSUFFICIENT_FOR_OPERATION;
 
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.authorization.UserRolesService;
@@ -27,17 +26,16 @@ class CalsAdminAuthorizer extends AbstractAdminActionsAuthorizer {
 
   @Override
   public void checkCanUpdateUser() {
-    throwAuthorizationException(CALS_ADMIN_CANNOT_UPDATE_USER);
+    throwAuthorizationException(ROLE_IS_UNSUFFICIENT_FOR_OPERATION);
   }
 
   @Override
   public void checkCanResendInvitationMessage() {
-    throwAuthorizationException(CALS_ADMIN_CANNOT_RESEND_INVITATION_MESSAGE);
+    throwAuthorizationException(ROLE_IS_UNSUFFICIENT_FOR_OPERATION);
   }
 
   @Override
-  public boolean canEditRoles() {
-    return false;
+  public void checkCanEditRoles() {
+    throwAuthorizationException(ROLE_IS_UNSUFFICIENT_FOR_OPERATION);
   }
-
 }

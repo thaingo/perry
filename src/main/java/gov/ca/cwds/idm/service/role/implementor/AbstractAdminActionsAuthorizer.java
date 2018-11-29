@@ -1,5 +1,8 @@
 package gov.ca.cwds.idm.service.role.implementor;
 
+import static gov.ca.cwds.service.messages.MessageCode.CALS_ADMIN_ROLES_CANNOT_BE_EDITED;
+import static gov.ca.cwds.service.messages.MessageCode.CANNOT_EDIT_ROLES_OF_CALS_EXTERNAL_WORKER;
+
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.authorization.AdminActionsAuthorizer;
 import gov.ca.cwds.idm.service.authorization.UserRolesService;
@@ -19,17 +22,23 @@ public abstract class AbstractAdminActionsAuthorizer implements AdminActionsAuth
     this.user = user;
   }
 
+  @Override
+  public void checkCanEditRoles() {
+    if(UserRolesService.isCalsExternalWorker(user)) {
+      throwAuthorizationException(CANNOT_EDIT_ROLES_OF_CALS_EXTERNAL_WORKER, user.getId());
+    }
+
+    if(UserRolesService.isCalsAdmin(user)) {
+      throwAuthorizationException(CALS_ADMIN_ROLES_CANNOT_BE_EDITED, user.getId());
+    }
+  }
+
   protected User getUser() {
     return user;
   }
 
   protected void throwAuthorizationException(MessageCode messageCode, String... args) {
     throw exceptionFactory.createAuthorizationException(messageCode, args);
-  }
-
-  @Override
-  public boolean canEditRoles() {
-    return !UserRolesService.isCalsExternalWorker(user) && !UserRolesService.isCalsAdmin(user);
   }
 
   public void setExceptionFactory(ExceptionFactory exceptionFactory) {
