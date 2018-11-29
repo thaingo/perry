@@ -7,7 +7,7 @@ public interface AuthorizationService {
 
   void checkCanViewUser(User user);
 
-  boolean canCreateUser(User user);
+  void checkCanCreateUser(User user);
 
   void checkCanUpdateUser(UserType existingUser);
 

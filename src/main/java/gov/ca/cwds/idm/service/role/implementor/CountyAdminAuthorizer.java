@@ -8,6 +8,7 @@ import static gov.ca.cwds.service.messages.MessageCode.COUNTY_ADMIN_CANNOT_RESEN
 import static gov.ca.cwds.service.messages.MessageCode.COUNTY_ADMIN_CANNOT_UPDATE_STATE_ADMIN;
 import static gov.ca.cwds.service.messages.MessageCode.COUNTY_ADMIN_CANNOT_UPDATE_USER_FROM_OTHER_COUNTY;
 import static gov.ca.cwds.service.messages.MessageCode.COUNTY_ADMIN_CANNOT_VIEW_USER_FROM_OTHER_COUNTY;
+import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY;
 import static gov.ca.cwds.service.messages.MessageCode.STATE_ADMIN_ROLES_CANNOT_BE_EDITED;
 
 import gov.ca.cwds.idm.dto.User;
@@ -26,8 +27,11 @@ class CountyAdminAuthorizer extends AbstractAdminActionsAuthorizer {
   }
 
   @Override
-  public boolean canCreateUser() {
-    return isPrincipalInTheSameCountyWith(getUser());
+  public void checkCanCreateUser() {
+    if(!isPrincipalInTheSameCountyWith(getUser())) {
+      throwAuthorizationException(
+          NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY, getUser().getCountyName());
+    }
   }
 
   @Override

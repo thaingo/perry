@@ -20,8 +20,8 @@ class CalsAdminAuthorizer extends AbstractAdminActionsAuthorizer {
   }
 
   @Override
-  public boolean canCreateUser() {
-    return false;
+  public void checkCanCreateUser() {
+    throwAuthorizationException(ROLE_IS_UNSUFFICIENT_FOR_OPERATION);
   }
 
   @Override

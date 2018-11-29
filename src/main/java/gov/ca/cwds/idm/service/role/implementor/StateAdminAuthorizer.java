@@ -16,8 +16,7 @@ class StateAdminAuthorizer extends AbstractAdminActionsAuthorizer {
   }
 
   @Override
-  public boolean canCreateUser() {
-    return true;
+  public void checkCanCreateUser() {
   }
 
   @Override
@@ -36,5 +35,4 @@ class StateAdminAuthorizer extends AbstractAdminActionsAuthorizer {
       throwAuthorizationException(STATE_ADMIN_ROLES_CANNOT_BE_EDITED, getUser().getId());
     }
   }
-
 }

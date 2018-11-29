@@ -4,7 +4,7 @@ public interface AdminActionsAuthorizer {
 
   void checkCanViewUser();
 
-  boolean canCreateUser();
+  void checkCanCreateUser();
 
   void checkCanUpdateUser();
 

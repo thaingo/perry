@@ -9,8 +9,6 @@ import gov.ca.cwds.idm.dto.UsersPage;
 import gov.ca.cwds.idm.dto.UsersSearchCriteria;
 import java.time.LocalDateTime;
 import java.util.List;
-import org.springframework.security.access.method.P;
-import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface IdmService {
 

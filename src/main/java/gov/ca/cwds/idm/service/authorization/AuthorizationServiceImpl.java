@@ -37,8 +37,8 @@ public class AuthorizationServiceImpl implements AuthorizationService {
   }
 
   @Override
-  public boolean canCreateUser(User user) {
-    return getAdminActionsAuthorizer(user).canCreateUser();
+  public void checkCanCreateUser(User user) {
+    getAdminActionsAuthorizer(user).checkCanCreateUser();
   }
 
   @Override

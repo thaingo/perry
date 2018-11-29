@@ -12,6 +12,7 @@ import static gov.ca.cwds.service.messages.MessageCode.ADMIN_CANNOT_UPDATE_HIMSE
 import static gov.ca.cwds.service.messages.MessageCode.COUNTY_ADMIN_CANNOT_UPDATE_STATE_ADMIN;
 import static gov.ca.cwds.service.messages.MessageCode.COUNTY_ADMIN_CANNOT_UPDATE_USER_FROM_OTHER_COUNTY;
 import static gov.ca.cwds.service.messages.MessageCode.COUNTY_ADMIN_CANNOT_VIEW_USER_FROM_OTHER_COUNTY;
+import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_OFFICE;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserCountyName;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserOfficeIds;
@@ -35,6 +36,7 @@ import gov.ca.cwds.service.messages.MessageCode;
 import gov.ca.cwds.service.messages.MessagesService;
 import gov.ca.cwds.service.messages.MessagesService.Messages;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
+import java.util.function.Consumer;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -96,7 +98,7 @@ public class AuthorizationServiceImplTest {
     user.setUsername(adminId);
     Mockito.when(cognitoServiceFacade.getCognitoUserById(adminId)).thenReturn(user);
     service.setCognitoServiceFacade(cognitoServiceFacade);
-    assertCannotUpdateUser(adminId, ADMIN_CANNOT_UPDATE_HIMSELF);
+    assertCanNotUpdateUser(adminId, ADMIN_CANNOT_UPDATE_HIMSELF);
   }
 
 
@@ -162,16 +164,19 @@ public class AuthorizationServiceImplTest {
   public void testByUserAndAdmin_OfficeAdminDifferentOffice() {
     when(getCurrentUser())
         .thenReturn(admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_2")));
-    assertFalse(
-        service.canCreateUser(user("Yolo", "Yolo_1")));
+    assertCanNotCreateUser(
+        user("Yolo", "Yolo_1"),
+        NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_OFFICE);
   }
 
   @Test
   public void testByUserAndAdmin_OfficeAdmin_UserNoOffice() {
     when(getCurrentUser())
         .thenReturn(admin(toSet(OFFICE_ADMIN), "Yolo", toSet("Yolo_2")));
-    assertFalse(
-        service.canCreateUser(user("Yolo", null)));
+    assertCanNotCreateUser(
+        user("Yolo", null),
+        NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_OFFICE
+    );
   }
 
   @Test
@@ -213,26 +218,24 @@ public class AuthorizationServiceImplTest {
   }
 
   private void assertCanNotUpdateUser(User user, MessageCode errorCode) {
-    try {
-      service.checkCanUpdateUser(user);
-      fail("Expected an AdminAuthorizationException to be thrown");
-    } catch (AdminAuthorizationException e) {
-      assertThat(e.getErrorCode(), is(errorCode));
-    }
+    assertCanNot(user, errorCode, service::checkCanUpdateUser);
   }
 
   private void assertCanNotViewUser(User user, MessageCode errorCode) {
-    try {
-      service.checkCanViewUser(user);
-      fail("Expected an AdminAuthorizationException to be thrown");
-    } catch (AdminAuthorizationException e) {
-      assertThat(e.getErrorCode(), is(errorCode));
-    }
+    assertCanNot(user, errorCode, service::checkCanViewUser);
   }
 
-  private void assertCannotUpdateUser(String userId, MessageCode errorCode) {
+  private void assertCanNotUpdateUser(String userId, MessageCode errorCode) {
+    assertCanNot(userId, errorCode, service::checkCanUpdateUser);
+  }
+
+  private void assertCanNotCreateUser(User user, MessageCode errorCode) {
+    assertCanNot(user, errorCode, service::checkCanCreateUser);
+  }
+
+  private <T> void assertCanNot(T input, MessageCode errorCode, Consumer<T> check) {
     try {
-      service.checkCanUpdateUser(userId);
+      check.accept(input);
       fail("Expected an AdminAuthorizationException to be thrown");
     } catch (AdminAuthorizationException e) {
       assertThat(e.getErrorCode(), is(errorCode));

@@ -1,22 +1,16 @@
 package gov.ca.cwds.idm.service;
 
-import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
-import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.CREATE;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
 import static gov.ca.cwds.idm.service.ExecutionStatus.FAIL;
 import static gov.ca.cwds.idm.service.ExecutionStatus.SUCCESS;
 import static gov.ca.cwds.idm.service.ExecutionStatus.WAS_NOT_EXECUTED;
-import static gov.ca.cwds.idm.service.authorization.UserRolesService.getStrongestAdminRole;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getRACFId;
 import static gov.ca.cwds.service.messages.MessageCode.DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_UPDATE_USER_ENABLED_STATUS;
-import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY;
-import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_OFFICE;
-import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_CREATE_USER;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_CREATE_IDM_USER_IN_ES;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_PURGE_PROCESSED_USER_LOGS;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_WRITE_LAST_REGISTRATION_RESUBMIT_TIME;
@@ -29,7 +23,6 @@ import static gov.ca.cwds.service.messages.MessageCode.USER_PARTIAL_UPDATE_AND_S
 import static gov.ca.cwds.service.messages.MessageCode.USER_PARTIAL_UPDATE_AND_SAVE_TO_SEARCH_ERRORS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_UPDATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_UPDATE_SAVE_TO_SEARCH_ERROR;
-import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.Utils.URL_DATETIME_FORMATTER;
 import static gov.ca.cwds.util.Utils.isRacfidUser;
 import static gov.ca.cwds.util.Utils.toLowerCase;
@@ -48,6 +41,7 @@ import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.UserVerificationResult;
 import gov.ca.cwds.idm.dto.UsersPage;
 import gov.ca.cwds.idm.dto.UsersSearchCriteria;
+import gov.ca.cwds.idm.exception.AdminAuthorizationException;
 import gov.ca.cwds.idm.exception.UserValidationException;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
@@ -86,7 +80,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -182,7 +175,7 @@ public class IdmServiceImpl implements IdmService {
     user.setRacfid(racfId);
 
     validationService.validateUserCreate(user, cwsUser != null);
-    authorizeCreateUser(user);
+    authorizeService.checkCanCreateUser(user);
 
     UserType userType = cognitoServiceFacade.createUser(user);
     String userId = userType.getUsername();
@@ -265,8 +258,10 @@ public class IdmServiceImpl implements IdmService {
       return buildUserVerificationErrorResult(e.getErrorCode(), e.getUserMessage());
     }
 
-    if (!authorizeService.canCreateUser(user)) {
-      return buildVerifyAuthorizationError(user);
+    try {
+      authorizeService.checkCanCreateUser(user);
+    } catch (AdminAuthorizationException e) {
+      return buildUserVerificationErrorResult(e.getErrorCode(), e.getUserMessage());
     }
 
     return UserVerificationResult.Builder.anUserVerificationResult().withUser(user)
@@ -276,13 +271,6 @@ public class IdmServiceImpl implements IdmService {
   private UserVerificationResult buildUserVerificationErrorResult(MessageCode code, String msg) {
     return UserVerificationResult.Builder.anUserVerificationResult()
         .withVerificationFailed(code.getValue(), msg).build();
-  }
-
-  private void authorizeCreateUser(User user) {
-    if(!authorizeService.canCreateUser(user)) {
-      String msg = messages.getTechMessage(NOT_AUTHORIZED_TO_CREATE_USER);
-      throwAccessDenied(msg);
-    }
   }
 
   private void authorizeUpdateUser(UserType existedCognitoUser, UserUpdate updateUserDto) {
@@ -299,32 +287,9 @@ public class IdmServiceImpl implements IdmService {
     }
   }
 
-  private void throwAccessDenied(String message) {
-    LOGGER.error(message);
-    throw new AccessDeniedException(message);
-  }
-
   private boolean wasRolesActuallyEdited(UserType existedCognitoUser, UserUpdate updateUserDto) {
     return !CollectionUtils.isEqualCollection(CognitoUtils.getRoles(existedCognitoUser),
         updateUserDto.getRoles());
-  }
-
-  private UserVerificationResult buildVerifyAuthorizationError(User user) {
-    switch (getStrongestAdminRole(getCurrentUser())) {
-      case COUNTY_ADMIN:
-        return buildVerifyAuthorizationError(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY, user.getCountyName());
-      case OFFICE_ADMIN:
-        return buildVerifyAuthorizationError(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_OFFICE, user.getCountyName());
-      default:
-        return buildVerifyAuthorizationError(NOT_AUTHORIZED_TO_CREATE_USER);
-    }
-  }
-
-  private UserVerificationResult buildVerifyAuthorizationError(MessageCode messageCode, String... args) {
-    String msg = messages.getTechMessage(messageCode, args);
-    String userMsg = messages.getUserMessage(messageCode, args);
-    LOGGER.error(msg);
-    return buildUserVerificationErrorResult(messageCode, userMsg);
   }
 
   private CwsUserInfo getCwsUserData(User user) {
