@@ -68,11 +68,6 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     getAdminActionsAuthorizer(user).checkCanUpdateUser();
   }
 
-  @Override
-  public boolean canUpdateUser(User user) {
-    return canAuthorizeOperation(user, this::checkCanUpdateUser);
-  }
-
   private AdminActionsAuthorizer getAdminActionsAuthorizer(User user) {
     AbstractAdminActionsAuthorizer authorizer = adminRoleImplementorFactory.getAdminActionsAuthorizer(user);
     authorizer.setExceptionFactory(exceptionFactory);

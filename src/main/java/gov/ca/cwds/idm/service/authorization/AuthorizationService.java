@@ -11,16 +11,13 @@ public interface AuthorizationService {
 
   void checkCanUpdateUser(UserType existingUser);
 
-  boolean canUpdateUser(User existingUser);
-
   void checkCanUpdateUser(String userId);
 
   boolean canUpdateUser(String userId);
 
   void checkCanResendInvitationMessage(String id);
 
-  boolean canEditRoles(User user);
-
   void checkCanEditRoles(UserType cognitoUser);
 
+  boolean canEditRoles(User user);
 }
