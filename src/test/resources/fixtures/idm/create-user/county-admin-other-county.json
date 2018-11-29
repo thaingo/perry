@@ -1,0 +1,6 @@
+{
+  "status": "UNAUTHORIZED",
+  "technical_message": "You are not authorized to add user from County other than yours",
+  "user_message": "You cannot add this user because they exist in Yolo county.",
+  "error_code": "CAP-004"
+}

@@ -56,7 +56,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
   @Test
   @WithMockCustomUser(roles = {OFFICE_ADMIN}, adminOfficeIds = {"otherOfficeId"})
   public void testCreateUserOfficeAdminOtherOffice() throws Exception {
-    assertCreateUserUnauthorized();
+    assertCreateUserUnauthorized("fixtures/idm/create-user/office-admin-other-office.json");
   }
 
   @Test
@@ -123,7 +123,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
   @Test
   @WithMockCustomUser(county = "OtherCounty")
   public void testCreateUserInOtherCounty() throws Exception {
-    assertCreateUserUnauthorized();
+    assertCreateUserUnauthorized("fixtures/idm/create-user/county-admin-other-county.json");
   }
 
   @Test
@@ -261,13 +261,13 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
     return request;
   }
 
-  private void assertCreateUserUnauthorized() throws Exception {
+  private MvcResult assertCreateUserUnauthorized() throws Exception {
     User user = user();
     user.setEmail("unauthorized@gmail.com");
 
     AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
 
-    mockMvc
+    MvcResult result = mockMvc
         .perform(
             MockMvcRequestBuilders.post("/idm/users")
                 .contentType(JSON_CONTENT_TYPE)
@@ -277,6 +277,12 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
 
     verify(cognito, times(0)).adminCreateUser(request);
     verify(spySearchService, times(0)).createUser(any(User.class));
+    return result;
+  }
+
+  private void assertCreateUserUnauthorized(String fixturePath) throws Exception {
+    MvcResult result = assertCreateUserUnauthorized();
+    assertExtensible(result, fixturePath);
   }
 
   private User getElroydaUser() {
