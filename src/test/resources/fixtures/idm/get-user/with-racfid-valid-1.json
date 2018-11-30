@@ -27,6 +27,16 @@
         "CWS-worker",
         "Office-admin"
       ]
+    },
+    "permissions": {
+      "editable": true,
+      "possible_values": [
+        "CANS-rollout",
+        "Facility-search-rollout",
+        "Hotline-rollout",
+        "RFA-rollout",
+        "Snapshot-rollout"
+      ]
     }
   }
 }
