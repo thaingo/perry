@@ -5,8 +5,6 @@ import static gov.ca.cwds.service.messages.MessageCode.CALS_ADMIN_CANNOT_VIEW_NO
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.authorization.UserRolesService;
 
-@SuppressWarnings({"common-java:DuplicatedBlocks"})
-//it's not a duplication but super class method invocation where common code is extracted
 class CalsAdminAuthorizer extends AbstractAdminActionsAuthorizer {
 
   CalsAdminAuthorizer(User user) {
@@ -21,21 +19,25 @@ class CalsAdminAuthorizer extends AbstractAdminActionsAuthorizer {
   }
 
   @Override
+  @SuppressWarnings({"common-java:DuplicatedBlocks"})
   public void checkCanCreateUser() {
     unsufficientRoleError();
   }
 
   @Override
+  @SuppressWarnings({"common-java:DuplicatedBlocks"})
   public void checkCanUpdateUser() {
     unsufficientRoleError();
   }
 
   @Override
+  @SuppressWarnings({"common-java:DuplicatedBlocks"})
   public void checkCanResendInvitationMessage() {
     unsufficientRoleError();
   }
 
   @Override
+  @SuppressWarnings({"common-java:DuplicatedBlocks"})
   public void checkCanEditRoles() {
     unsufficientRoleError();
   }
