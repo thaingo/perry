@@ -13,6 +13,7 @@ class StateAdminAuthorizer extends AbstractAdminActionsAuthorizer {
 
   @Override
   public void checkCanViewUser() {
+    //no authorization rules to check
   }
 
   @Override

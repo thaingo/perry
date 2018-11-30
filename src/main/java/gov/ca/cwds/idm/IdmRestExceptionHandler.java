@@ -30,6 +30,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 @Profile("idm")
 @ControllerAdvice(assignableTypes = {IdmResource.class})
+@SuppressWarnings({"fb-contrib:LO_STUTTERED_MESSAGE"})//IdmExceptions contain our custom messages
 public class IdmRestExceptionHandler extends ResponseEntityExceptionHandler {
 
   @Autowired

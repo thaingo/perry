@@ -4,6 +4,8 @@ import static gov.ca.cwds.service.messages.MessageCode.ROLE_IS_UNSUFFICIENT_FOR_
 
 import gov.ca.cwds.idm.dto.User;
 
+@SuppressWarnings({"common-java:DuplicatedBlocks"})
+//it's not a duplication but super class method invocation where common code is extracted
 class IdmJobAuthorizer extends AbstractAdminActionsAuthorizer {
 
   IdmJobAuthorizer(User user) {
