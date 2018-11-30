@@ -14,25 +14,21 @@ class IdmJobAuthorizer extends AbstractAdminActionsAuthorizer {
   }
 
   @Override
-  @SuppressWarnings({"common-java:DuplicatedBlocks"})
   public void checkCanCreateUser() {
     unsufficientRoleError();
   }
 
   @Override
-  @SuppressWarnings({"common-java:DuplicatedBlocks"})
   public void checkCanUpdateUser() {
     unsufficientRoleError();
   }
 
   @Override
-  @SuppressWarnings({"common-java:DuplicatedBlocks"})
   public void checkCanResendInvitationMessage() {
     unsufficientRoleError();
   }
 
   @Override
-  @SuppressWarnings({"common-java:DuplicatedBlocks"})
   public void checkCanEditRoles() {
     unsufficientRoleError();
   }
