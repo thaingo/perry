@@ -1,7 +1,7 @@
 {
   "status": "UNAUTHORIZED",
   "technical_message": "Office admin cannot update the user from the other office, username: d740ec1d-80ae-4d84-a8c4-9bed7a942f5b",
-  "user_message": "As office admin You cannot update a user from the other office",
+  "user_message": "As an office admin You cannot update a user from the other office",
   "error_code": "CAP-048"
 }
 

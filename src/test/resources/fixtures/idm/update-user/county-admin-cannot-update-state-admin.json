@@ -1,6 +1,6 @@
 {
   "status": "UNAUTHORIZED",
   "technical_message": "County admin cannot update the state admin, username: 2d9369b4-5855-4a2c-95f7-3617fab1496a",
-  "user_message": "As county admin You cannot update a state admin",
+  "user_message": "As a county admin You cannot update a state admin",
   "error_code": "CAP-046"
 }

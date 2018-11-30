@@ -1,6 +1,6 @@
 {
   "status": "UNAUTHORIZED",
   "technical_message": "Office admin cannot request invitation email resending for the user from the other office, username: 24051d54-9321-4dd2-a92f-6425d6c455be",
-  "user_message": "As Office admin You cannot request invitation email resending for the user from the other office",
+  "user_message": "As an office admin You cannot request invitation email resending for the user from the other office",
   "error_code": "CAP-051"
 }
