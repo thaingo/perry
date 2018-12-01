@@ -53,9 +53,6 @@ public class UserRolesService {
   }
 
   public static <T extends RolesHolder> String getStrongestAdminRole(T user) {
-    if(isIdmJob(user)){
-      return IDM_JOB;
-    }
 
     if (!isAdmin(user)) {
       throw new IllegalStateException("Unexpected user role. Admin is expected");

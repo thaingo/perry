@@ -30,8 +30,6 @@ public class AdminRoleImplementorFactory {
         return new OfficeAdminRoleImplementor();
       case CALS_ADMIN:
         return new CalsAdminRoleImplementor();
-      case IDM_JOB:
-        return new IdmJobRoleImplementor();
       default:
         throw new IllegalStateException();
     }

@@ -121,9 +121,14 @@ public class IdmServiceImpl implements IdmService {
 
   @Override
   public User findUser(String id) {
+    User user = getUser(id);
+    authorizeService.checkCanViewUser(user);
+    return user;
+  }
+
+  private User getUser(String id) {
     UserType cognitoUser = cognitoServiceFacade.getCognitoUserById(id);
     User user = mappingService.toUser(cognitoUser);
-    authorizeService.checkCanViewUser(user);
     return user;
   }
 
@@ -215,7 +220,7 @@ public class IdmServiceImpl implements IdmService {
 
     return filterIdAndOperationList(dbList)
         .stream()
-        .map(e -> new UserAndOperation(findUser(e.getId()), e.getOperation()))
+        .map(e -> new UserAndOperation(getUser(e.getId()), e.getOperation()))
         .collect(Collectors.toList());
   }
 

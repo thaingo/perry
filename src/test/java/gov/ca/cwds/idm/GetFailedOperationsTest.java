@@ -1,6 +1,5 @@
 package gov.ca.cwds.idm;
 
-import static gov.ca.cwds.config.api.idm.Roles.IDM_JOB;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.CREATE;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
@@ -27,10 +26,9 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 public class GetFailedOperationsTest extends BaseIdmIntegrationTest {
 
   @Test
-  @WithMockCustomUser(roles = {IDM_JOB})
   public void testGetFailedOperations() throws Exception {
     userLogRepository.deleteAll();
-    LocalDateTime log1time = LocalDateTime.of(2019, 1, 1, 12, 0, 15);
+    LocalDateTime log1time = LocalDateTime.of(2018, 1, 1, 12, 0, 15);
     LocalDateTime log0time = log1time.minusHours(4).plusMinutes(13);
     LocalDateTime log2time = log1time.plusMinutes(10);
     LocalDateTime log3time = log2time.plusMinutes(10).minusSeconds(15);
