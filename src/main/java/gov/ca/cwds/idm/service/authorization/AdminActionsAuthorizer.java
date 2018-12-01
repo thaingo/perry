@@ -2,14 +2,14 @@ package gov.ca.cwds.idm.service.authorization;
 
 public interface AdminActionsAuthorizer {
 
-  boolean canViewUser();
+  void checkCanViewUser();
 
-  boolean canCreateUser();
+  void checkCanCreateUser();
 
-  boolean canUpdateUser();
+  void checkCanUpdateUser();
 
-  boolean canResendInvitationMessage();
+  void checkCanResendInvitationMessage();
 
-  boolean canEditRoles();
+  void checkCanEditRoles();
 
 }

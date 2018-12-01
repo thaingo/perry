@@ -3,6 +3,7 @@ package gov.ca.cwds.idm.util;
 import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
+import static gov.ca.cwds.config.api.idm.Roles.IDM_JOB;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.util.UniversalUserTokenDeserializer.ADMIN_OFFICE_IDS_PARAM;
@@ -70,24 +71,34 @@ public final class TestHelper {
     return admin;
   }
 
-  public static User prepareStateAdmin() {
+  public static UniversalUserToken idmJob() {
+    UniversalUserToken admin = new UniversalUserToken();
+    admin.setRoles(toSet(IDM_JOB));
+    return admin;
+  }
+
+  public static User stateAdmin() {
     return TestHelper.user(toSet(STATE_ADMIN),
         "Yolo", "Yolo_2");
   }
 
-  public static User prepareCountyAdmin() {
+  public static User countyAdmin() {
     return TestHelper.user(toSet(COUNTY_ADMIN),
         "Yolo", "Yolo_2");
   }
 
-  public static User prepareOfficeAdmin() {
+  public static User officeAdmin() {
     return TestHelper.user(toSet(OFFICE_ADMIN),
         "Yolo", "Yolo_2");
   }
 
-  public static User prepareCalsAdmin() {
+  public static User calsAdmin() {
     return TestHelper.user(toSet(CALS_ADMIN),
         "Yolo", "Yolo_2");
   }
 
+  public static User cwsWorker() {
+    return TestHelper.user(toSet(CWS_WORKER),
+        "Yolo", "Yolo_2");
+  }
 }

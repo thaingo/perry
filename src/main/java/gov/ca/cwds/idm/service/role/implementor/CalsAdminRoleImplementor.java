@@ -3,7 +3,6 @@ package gov.ca.cwds.idm.service.role.implementor;
 import static java.util.Collections.unmodifiableList;
 
 import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.service.authorization.AdminActionsAuthorizer;
 import java.util.Collections;
 import java.util.List;
 
@@ -13,7 +12,7 @@ import java.util.List;
 class CalsAdminRoleImplementor implements AdminRoleImplementor {
 
   @Override
-  public AdminActionsAuthorizer getAdminActionsAuthorizer(User user) {
+  public AbstractAdminActionsAuthorizer getAdminActionsAuthorizer(User user) {
     return new CalsAdminAuthorizer(user);
   }
 

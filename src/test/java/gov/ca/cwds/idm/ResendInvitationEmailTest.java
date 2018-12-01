@@ -4,6 +4,7 @@ import static gov.ca.cwds.config.TokenServiceConfiguration.TOKEN_TRANSACTION_MAN
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
+import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_WITH_RACFID_ID;
 import static gov.ca.cwds.idm.util.TestUtils.dateTime;
 import static org.hamcrest.CoreMatchers.is;
@@ -40,13 +41,15 @@ public class ResendInvitationEmailTest extends BaseIdmIntegrationWithUserLogTest
   @Test
   @WithMockCustomUser(county = "OtherCounty")
   public void testResendInvitationEmailWithDifferentCounty() throws Exception {
-    assertResendEmailUnauthorized(USER_WITH_RACFID_ID);
+    assertResendEmailUnauthorized(USER_WITH_RACFID_ID,
+        "fixtures/idm/resend-invitation-email/with-different-county.json");
   }
 
   @Test
   @WithMockCustomUser(roles = {OFFICE_ADMIN}, adminOfficeIds = {"otherOfficeId"})
   public void testResendInvitationEmailWithOfficeRole() throws Exception {
-    assertResendEmailUnauthorized(USER_WITH_RACFID_ID);
+    assertResendEmailUnauthorized(USER_WITH_RACFID_ID,
+        "fixtures/idm/resend-invitation-email/with-office-role.json");
   }
 
   @Test
@@ -89,11 +92,16 @@ public class ResendInvitationEmailTest extends BaseIdmIntegrationWithUserLogTest
     assertLastUserLog(dateTime(SECOND_RESUBMIT_TIME_MILLIS - 100), USER_NAME, UPDATE);
   }
 
-  private void assertResendEmailUnauthorized(String id) throws Exception {
-    mockMvc
+  private MvcResult assertResendEmailUnauthorized(String id) throws Exception {
+    return mockMvc
         .perform(MockMvcRequestBuilders.post("/idm/users/" + id + "/registration-request"))
         .andExpect(MockMvcResultMatchers.status().isUnauthorized())
         .andReturn();
+  }
+
+  private void assertResendEmailUnauthorized(String id, String fixtureFilePath) throws Exception {
+    MvcResult result = assertResendEmailUnauthorized(id);
+    assertExtensible(result, fixtureFilePath);
   }
 
   private void assertResendEmailWorksFine() throws Exception {

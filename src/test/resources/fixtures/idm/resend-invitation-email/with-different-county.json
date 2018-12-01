@@ -1,0 +1,6 @@
+{
+  "status": "UNAUTHORIZED",
+  "technical_message": "County admin cannot request invitation email resending for the user from the other county, username: 24051d54-9321-4dd2-a92f-6425d6c455be",
+  "user_message": "As a county admin You cannot request invitation email resending for the user from the other county",
+  "error_code": "CAP-050"
+}

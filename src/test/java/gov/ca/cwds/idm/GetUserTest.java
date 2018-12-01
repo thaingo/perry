@@ -46,7 +46,8 @@ public class GetUserTest extends BaseIdmIntegrationTest {
   @Test
   @WithMockCustomUser(roles = {CALS_ADMIN})
   public void testGetUserCalsAdminUnauthorized() throws Exception {
-    assertGetUserUnauthorized(USER_NO_RACFID_ID);
+    assertGetUserUnauthorized(USER_NO_RACFID_ID,
+        "fixtures/idm/get-user/cals-admin-unauthorized.json");
   }
 
   @Test
@@ -101,7 +102,8 @@ public class GetUserTest extends BaseIdmIntegrationTest {
   @Test
   @WithMockCustomUser(county = "Madera")
   public void testGetUserByOtherCountyAdmin() throws Exception {
-    assertGetUserUnauthorized(USER_NO_RACFID_ID);
+    assertGetUserUnauthorized(USER_NO_RACFID_ID,
+        "fixtures/idm/get-user/by-other-county-admin.json");
   }
 
   @Test
@@ -128,11 +130,16 @@ public class GetUserTest extends BaseIdmIntegrationTest {
     testGetValidUser(USER_WITH_RACFID_ID, "fixtures/idm/get-user/with-racfid-valid-2.json");
   }
 
-  private void assertGetUserUnauthorized(String userId) throws Exception {
-    mockMvc
+  private MvcResult assertGetUserUnauthorized(String userId) throws Exception {
+    return mockMvc
         .perform(MockMvcRequestBuilders.get("/idm/users/" + userId))
         .andExpect(MockMvcResultMatchers.status().isUnauthorized())
         .andReturn();
+  }
+
+  private void assertGetUserUnauthorized(String userId, String fixturePath) throws Exception {
+    MvcResult result = assertGetUserUnauthorized(userId);
+    assertExtensible(result, fixturePath);
   }
 
   private void testGetValidUser(String userId, String fixtureFilePath) throws Exception {

@@ -8,11 +8,12 @@ import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 import gov.ca.cwds.idm.dto.IdmApiCustomError;
 import gov.ca.cwds.idm.dto.IdmApiCustomError.IdmApiCustomErrorBuilder;
+import gov.ca.cwds.idm.exception.AdminAuthorizationException;
 import gov.ca.cwds.idm.exception.IdmException;
 import gov.ca.cwds.idm.exception.PartialSuccessException;
 import gov.ca.cwds.idm.exception.UserAlreadyExistsException;
-import gov.ca.cwds.idm.exception.UserValidationException;
 import gov.ca.cwds.idm.exception.UserNotFoundException;
+import gov.ca.cwds.idm.exception.UserValidationException;
 import gov.ca.cwds.service.messages.MessagesService;
 import gov.ca.cwds.service.messages.MessagesService.Messages;
 import java.net.URI;
@@ -29,6 +30,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 @Profile("idm")
 @ControllerAdvice(assignableTypes = {IdmResource.class})
+@SuppressWarnings({"fb-contrib:LO_STUTTERED_MESSAGE"})//IdmExceptions contain our custom messages
 public class IdmRestExceptionHandler extends ResponseEntityExceptionHandler {
 
   @Autowired
@@ -36,26 +38,37 @@ public class IdmRestExceptionHandler extends ResponseEntityExceptionHandler {
 
   @ExceptionHandler(value = {IdmException.class})
   ResponseEntity<Object> handleIdmException(IdmException e) {
+    logger.error(e.getMessage(), e);
     return buildResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR, e);
   }
 
   @ExceptionHandler(value = {UserNotFoundException.class})
   ResponseEntity<Object> handleUserNotFound(UserNotFoundException e) {
+    logger.error(e.getMessage(), e);
     return buildResponseEntity(HttpStatus.NOT_FOUND, e);
   }
 
   @ExceptionHandler(value = {UserAlreadyExistsException.class})
   ResponseEntity<Object> handleUserAlreadyExists(UserAlreadyExistsException e) {
+    logger.error(e.getMessage(), e);
     return buildResponseEntity(HttpStatus.CONFLICT, e);
   }
 
   @ExceptionHandler(value = {UserValidationException.class})
   ResponseEntity<Object> handleUserValidationException(UserValidationException e) {
+    logger.error(e.getMessage(), e);
     return buildResponseEntity(HttpStatus.BAD_REQUEST, e);
+  }
+
+  @ExceptionHandler(value = {AdminAuthorizationException.class})
+  ResponseEntity<Object> handleAdminAuthorizationException(AdminAuthorizationException e) {
+    logger.error(e.getMessage(), e);
+    return buildResponseEntity(HttpStatus.UNAUTHORIZED, e);
   }
 
   @ExceptionHandler(value = {PartialSuccessException.class})
   ResponseEntity<Object> handlePartialSuccess(PartialSuccessException e) {
+    logger.error(e.getMessage(), e);
 
     HttpStatus httpStatus = INTERNAL_SERVER_ERROR;
     List<Exception> causes = e.getCauses();
@@ -72,10 +85,11 @@ public class IdmRestExceptionHandler extends ResponseEntityExceptionHandler {
 
   @ExceptionHandler(value = {DateTimeParseException.class})
   ResponseEntity<Object> handleDateTimeParseException(DateTimeParseException e) {
+
     Messages messages = messagesService
         .getMessages(INVALID_DATE_FORMAT, URL_DATETIME_FORMAT_PATTERN);
-
     logger.error(messages.getTechMsg(), e);
+
     HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
     IdmApiCustomError apiError =
         IdmApiCustomError.IdmApiCustomErrorBuilder.anIdmApiCustomError()

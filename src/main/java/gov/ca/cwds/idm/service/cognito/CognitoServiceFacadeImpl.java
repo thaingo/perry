@@ -185,7 +185,7 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
     AdminGetUserRequest request = createAdminGetUserRequest(id);
     AdminGetUserResult agur;
 
-    agur = executeInCognito(identityProvider::adminGetUser, request, id, GET);
+    agur = executeUserOperationInCognito(identityProvider::adminGetUser, request, id, GET);
 
     return new UserType()
         .withUsername(agur.getUsername())
@@ -222,7 +222,7 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
               .withUserPoolId(properties.getUserpool())
               .withUserAttributes(updateAttributes);
 
-      executeInCognito(
+      executeUserOperationInCognito(
           identityProvider::adminUpdateUserAttributes, adminUpdateUserAttributesRequest, id,
           UPDATE);
       executed = true;
@@ -267,13 +267,13 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
       if (newEnabled) {
         AdminEnableUserRequest adminEnableUserRequest =
             new AdminEnableUserRequest().withUsername(id).withUserPoolId(properties.getUserpool());
-        executeInCognito(identityProvider::adminEnableUser, adminEnableUserRequest, id, UPDATE);
+        executeUserOperationInCognito(identityProvider::adminEnableUser, adminEnableUserRequest, id, UPDATE);
         executed = true;
 
       } else {
         AdminDisableUserRequest adminDisableUserRequest =
             new AdminDisableUserRequest().withUsername(id).withUserPoolId(properties.getUserpool());
-        executeInCognito(identityProvider::adminDisableUser, adminDisableUserRequest, id, UPDATE);
+        executeUserOperationInCognito(identityProvider::adminDisableUser, adminDisableUserRequest, id, UPDATE);
         executed = true;
       }
     }
@@ -286,7 +286,7 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
     String email = getEmail(cognitoUser);
     AdminCreateUserRequest request = createResendEmailRequest(email);
     AdminCreateUserResult result =
-        executeInCognito(identityProvider::adminCreateUser, request, userId, RESEND_INVITATION_EMAIL);
+        executeUserOperationInCognito(identityProvider::adminCreateUser, request, userId, RESEND_INVITATION_EMAIL);
     return result.getUser();
   }
 
@@ -319,14 +319,14 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
   }
 
   private <T extends AmazonWebServiceRequest, R extends AmazonWebServiceResult>
-  R executeInCognito(Function<T, R> function, T request, String userId, OperationType operation) {
+  R executeUserOperationInCognito(Function<T, R> function, T request, String userId, OperationType operation) {
 
     try {
       return function.apply(request);
     } catch (com.amazonaws.services.cognitoidp.model.UserNotFoundException e) {
       throw exceptionFactory.createUserNotFoundException(USER_NOT_FOUND_BY_ID_IN_IDM, e, userId);
     } catch (Exception e) {
-      throw exceptionFactory.createIdmException(getErrorCode(operation), e);
+      throw exceptionFactory.createIdmException(getErrorCode(operation), e, userId);
     }
   }
 

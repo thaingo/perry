@@ -3,6 +3,7 @@ package gov.ca.cwds.idm.service.authorization;
 import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CALS_EXTERNAL_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.IDM_JOB;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 
@@ -35,6 +36,10 @@ public class UserRolesService {
     return user.getRoles().contains(OFFICE_ADMIN);
   }
 
+  public static <T extends RolesHolder> boolean isIdmJob(T user) {
+    return user.getRoles().contains(IDM_JOB);
+  }
+
   public static <T extends RolesHolder> boolean isCalsAdmin(T user) {
     return user.getRoles().contains(CALS_ADMIN);
   }
@@ -48,6 +53,7 @@ public class UserRolesService {
   }
 
   public static <T extends RolesHolder> String getStrongestAdminRole(T user) {
+
     if (!isAdmin(user)) {
       throw new IllegalStateException("Unexpected user role. Admin is expected");
     }

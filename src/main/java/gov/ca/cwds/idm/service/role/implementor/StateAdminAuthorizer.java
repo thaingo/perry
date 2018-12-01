@@ -1,6 +1,7 @@
 package gov.ca.cwds.idm.service.role.implementor;
 
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isStateAdmin;
+import static gov.ca.cwds.service.messages.MessageCode.STATE_ADMIN_ROLES_CANNOT_BE_EDITED;
 
 import gov.ca.cwds.idm.dto.User;
 
@@ -11,28 +12,31 @@ class StateAdminAuthorizer extends AbstractAdminActionsAuthorizer {
   }
 
   @Override
-  public boolean canViewUser() {
-    return true;
+  public void checkCanViewUser() {
+    //no authorization rules to check
   }
 
   @Override
-  public boolean canCreateUser() {
-    return true;
+  public void checkCanCreateUser() {
+    //no authorization rules to check
   }
 
   @Override
-  public boolean canUpdateUser() {
-    return true;
+  public void checkCanUpdateUser() {
+    //no authorization rules to check
   }
 
   @Override
-  public boolean canResendInvitationMessage() {
-    return true;
+  public void checkCanResendInvitationMessage() {
+    //no authorization rules to check
   }
 
   @Override
-  public boolean canEditRoles() {
-    return super.canEditRoles() && !isStateAdmin(getUser());
-  }
+  public void checkCanEditRoles() {
+    super.checkCanEditRoles();
 
+    if(isStateAdmin(getUser())) {
+      throwAuthorizationException(STATE_ADMIN_ROLES_CANNOT_BE_EDITED, getUser().getId());
+    }
+  }
 }

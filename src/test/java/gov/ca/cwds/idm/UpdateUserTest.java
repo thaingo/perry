@@ -111,12 +111,13 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setEnabled(Boolean.TRUE);
     userUpdate.setRoles(toSet("County-admin"));
-    mockMvc
+    MvcResult result = mockMvc
         .perform(
             MockMvcRequestBuilders.patch("/idm/users/" + STATE_ADMIN_ID)
                 .contentType(JSON_CONTENT_TYPE)
                 .content(asJsonString(userUpdate)))
-        .andExpect(MockMvcResultMatchers.status().isUnauthorized());
+        .andExpect(MockMvcResultMatchers.status().isUnauthorized()).andReturn();
+    assertExtensible(result, "fixtures/idm/update-user/update-roles-not-allowed.json");
   }
 
   @Test
@@ -285,7 +286,8 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
                     .content(asJsonString(userUpdate)))
             .andExpect(MockMvcResultMatchers.status().isInternalServerError())
             .andReturn();
-    assertExtensible(result, "fixtures/idm/partial-success-user-update/partial-update.json");
+    assertExtensible(result,
+        "fixtures/idm/partial-success-user-update/partial-update.json");
 
     verify(cognito, times(1)).adminUpdateUserAttributes(updateAttributesRequest);
     verify(cognito, times(1)).adminDisableUser(disableUserRequest);
@@ -354,25 +356,27 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
   @Test
   @WithMockCustomUser(county = "Madera")
   public void testUpdateUserByOtherCountyAdmin() throws Exception {
-    assertUpdateUserUnauthorized();
+    assertUpdateSomeUserUnauthorized(
+        "fixtures/idm/update-user/other-county-admin.json");
   }
 
   @Test
   @WithMockCustomUser(roles = {CALS_ADMIN})
   public void testUpdateUserCalsAdmin() throws Exception {
-    assertUpdateUserUnauthorized();
+    assertUpdateSomeUserUnauthorized();
   }
 
   @Test
   @WithMockCustomUser(roles = {"OtherRole"})
   public void testUpdateUserWithOtherRole() throws Exception {
-    assertUpdateUserUnauthorized();
+    assertUpdateSomeUserUnauthorized();
   }
 
   @Test
   @WithMockCustomUser
   public void testUpdateUser_CountyAdminCannotUpdateStateAdmin() throws Exception {
-    assertUpdateUserUnauthorized(STATE_ADMIN_ID);
+    assertUpdateUserUnauthorized(STATE_ADMIN_ID,
+        "fixtures/idm/update-user/county-admin-cannot-update-state-admin.json");
   }
 
   @Test
@@ -396,7 +400,8 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
   @Test
   @WithMockCustomUser(roles = {OFFICE_ADMIN}, adminOfficeIds = {"otherOfficeId"})
   public void testUpdateUserOfficeOtherOffice() throws Exception {
-    assertUpdateUserUnauthorized();
+    assertUpdateSomeUserUnauthorized(
+        "fixtures/idm/update-user/other-office.json");
   }
 
   private void assertUpdateBadRequest(String userId, UserUpdate userUpdate, String fixture) throws Exception {
@@ -440,22 +445,31 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     verifyDoraCalls(0);
   }
 
-  private void assertUpdateUserUnauthorized() throws Exception {
+  private void assertUpdateSomeUserUnauthorized() throws Exception {
     assertUpdateUserUnauthorized(USER_WITH_RACFID_AND_DB_DATA_ID);
   }
 
-  private void assertUpdateUserUnauthorized(String userId) throws Exception {
+  private void assertUpdateSomeUserUnauthorized(String fixturePath) throws Exception {
+    assertUpdateUserUnauthorized(USER_WITH_RACFID_AND_DB_DATA_ID, fixturePath);
+  }
+
+  private MvcResult assertUpdateUserUnauthorized(String userId) throws Exception {
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setEnabled(Boolean.FALSE);
     userUpdate.setPermissions(toSet("RFA-rollout", "Hotline-rollout"));
 
-    mockMvc
+    return mockMvc
         .perform(
             MockMvcRequestBuilders.patch("/idm/users/" + userId)
                 .contentType(JSON_CONTENT_TYPE)
                 .content(asJsonString(userUpdate)))
         .andExpect(MockMvcResultMatchers.status().isUnauthorized())
         .andReturn();
+  }
+
+  private void assertUpdateUserUnauthorized(String userId, String fixturePath) throws Exception {
+    MvcResult result = assertUpdateUserUnauthorized(userId);
+    assertExtensible(result, fixturePath);
   }
 
   private AdminUpdateUserAttributesRequest setUpdateUserAttributesRequestAndResult(
