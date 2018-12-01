@@ -5,18 +5,19 @@ import gov.ca.cwds.idm.dto.User;
 
 public interface AuthorizationService {
 
-  boolean canViewUser(User user);
+  void checkCanViewUser(User user);
 
-  boolean canCreateUser(User user);
+  void checkCanCreateUser(User user);
 
-  boolean canUpdateUser(UserType existingUser);
+  void checkCanUpdateUser(UserType existingUser);
+
+  void checkCanUpdateUser(String userId);
 
   boolean canUpdateUser(String userId);
 
-  boolean canResendInvitationMessage(String id);
+  void checkCanResendInvitationMessage(String id);
+
+  void checkCanEditRoles(UserType cognitoUser);
 
   boolean canEditRoles(User user);
-
-  boolean canEditRoles(UserType cognitoUser);
-
 }

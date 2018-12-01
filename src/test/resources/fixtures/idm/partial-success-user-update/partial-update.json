@@ -4,6 +4,6 @@
   "user_message": "User with username d740ec1d-80ae-4d84-a8c4-9bed7a942f5b was partially updated in the system: attributes updated, enable status was not",
   "error_code": "CAP-022",
   "causes": [
-    "Exception while updating user in AWS Cognito: Update enable status error"
+    "Exception while updating user in AWS Cognito, username: d740ec1d-80ae-4d84-a8c4-9bed7a942f5b: Update enable status error"
   ]
 }

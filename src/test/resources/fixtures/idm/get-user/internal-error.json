@@ -1,6 +1,6 @@
 {
   "status": "INTERNAL_SERVER_ERROR",
-  "technical_message": "Exception while getting user from AWS Cognito",
+  "technical_message": "Exception while getting user from AWS Cognito, username: errorUserId",
   "user_message": "Exception while getting user from AWS Cognito",
   "error_code": "CAP-009",
   "causes": [

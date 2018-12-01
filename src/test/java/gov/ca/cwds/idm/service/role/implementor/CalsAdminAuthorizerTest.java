@@ -1,15 +1,19 @@
 package gov.ca.cwds.idm.service.role.implementor;
 
-import static org.junit.Assert.assertFalse;
+import static gov.ca.cwds.service.messages.MessageCode.ROLE_IS_UNSUFFICIENT_FOR_OPERATION;
 
 import gov.ca.cwds.idm.dto.User;
 import org.junit.Test;
 
-public class CalsAdminAuthorizerTest {
+public class CalsAdminAuthorizerTest extends BaseAuthorizerTest {
+
+  @Override
+  protected AbstractAdminActionsAuthorizer getAuthorizer(User user) {
+    return new CalsAdminAuthorizer(user);
+  }
 
   @Test
   public void canNotEditStateAdminTest() {
-    assertFalse(new CalsAdminAuthorizer(new User()).canEditRoles());
+    assertCanNotEditRoles(new User(), ROLE_IS_UNSUFFICIENT_FOR_OPERATION);
   }
-
 }

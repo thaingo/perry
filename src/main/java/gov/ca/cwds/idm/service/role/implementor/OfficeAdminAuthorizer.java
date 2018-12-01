@@ -2,6 +2,11 @@ package gov.ca.cwds.idm.service.role.implementor;
 
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isAdmin;
 import static gov.ca.cwds.idm.service.role.implementor.AuthorizationUtils.isPrincipalInTheSameCountyWith;
+import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_OFFICE;
+import static gov.ca.cwds.service.messages.MessageCode.OFFICE_ADMIN_CANNOT_RESEND_INVITATION_FOR_USER_FROM_OTHER_OFFICE;
+import static gov.ca.cwds.service.messages.MessageCode.OFFICE_ADMIN_CANNOT_UPDATE_ADMIN;
+import static gov.ca.cwds.service.messages.MessageCode.OFFICE_ADMIN_CANNOT_UPDATE_USER_FROM_OTHER_OFFICE;
+import static gov.ca.cwds.service.messages.MessageCode.OFFICE_ADMIN_CANNOT_VIEW_USER_FROM_OTHER_COUNTY;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserOfficeIds;
 
 import gov.ca.cwds.idm.dto.User;
@@ -14,23 +19,39 @@ class OfficeAdminAuthorizer extends AbstractAdminActionsAuthorizer {
   }
 
   @Override
-  public boolean canViewUser() {
-    return isPrincipalInTheSameCountyWith(getUser());
+  public void checkCanViewUser() {
+    if(!isPrincipalInTheSameCountyWith(getUser())) {
+      throwAuthorizationException(OFFICE_ADMIN_CANNOT_VIEW_USER_FROM_OTHER_COUNTY, getUser().getId());
+    }
   }
 
   @Override
-  public boolean canCreateUser() {
-    return isAdminInTheSameOfficeAsUser();
+  public void checkCanCreateUser() {
+    if(!isAdminInTheSameOfficeAsUser()) {
+      throwAuthorizationException(
+          NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_OFFICE, getUser().getCountyName());
+    }
   }
 
   @Override
-  public boolean canUpdateUser() {
-    return isAdminInTheSameOfficeAsUser() && !isAdmin(getUser());
+  public void checkCanUpdateUser() {
+   if(!isAdminInTheSameOfficeAsUser()) {
+     throwAuthorizationException(
+         OFFICE_ADMIN_CANNOT_UPDATE_USER_FROM_OTHER_OFFICE, getUser().getId());
+   }
+
+   if(isAdmin(getUser())) {
+     throwAuthorizationException(
+         OFFICE_ADMIN_CANNOT_UPDATE_ADMIN, getUser().getId());
+   }
   }
 
   @Override
-  public boolean canResendInvitationMessage() {
-    return isAdminInTheSameOfficeAsUser();
+  public void checkCanResendInvitationMessage() {
+    if (!isAdminInTheSameOfficeAsUser()) {
+      throwAuthorizationException(
+          OFFICE_ADMIN_CANNOT_RESEND_INVITATION_FOR_USER_FROM_OTHER_OFFICE, getUser().getId());
+    }
   }
 
   private boolean isAdminInTheSameOfficeAsUser() {
