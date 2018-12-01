@@ -8,13 +8,15 @@ import java.io.Serializable;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class UserEditDetails implements Serializable {
 
-
-  private static final long serialVersionUID = -6452557971504377076L;
+  private static final long serialVersionUID = -3136968159403822894L;
 
   private boolean editable;
 
   @JsonProperty("roles")
   private ListOfValues roles;
+
+  @JsonProperty("permissions")
+  private ListOfValues permissions;
 
   public boolean isEditable() {
     return editable;
@@ -30,5 +32,13 @@ public class UserEditDetails implements Serializable {
 
   public void setRoles(ListOfValues roles) {
     this.roles = roles;
+  }
+
+  public ListOfValues getPermissions() {
+    return permissions;
+  }
+
+  public void setPermissions(ListOfValues permissions) {
+    this.permissions = permissions;
   }
 }
