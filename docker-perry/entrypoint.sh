@@ -1,7 +1,10 @@
 #!/bin/bash
 
-
-if ( ${COGNITO_MODE:?} ) ; then
+if ( ${CLUSTERED_DEV_MODE:?} ); then
+  echo "CLUSTERED DEV MODE"
+  PERRY_CONFIG="--spring.config.location=config/perry-clustered-dev.yml"
+  JAVA_OPTS="-Dspring.profiles.active=dev,liquibase"
+elif ( ${COGNITO_MODE:?} ) ; then
   echo "COGNITO MODE"
   PERRY_CONFIG="--spring.config.location=config/perry-prod.yml"
   JAVA_OPTS="-Dspring.profiles.active=prod,cognito,liquibase"
