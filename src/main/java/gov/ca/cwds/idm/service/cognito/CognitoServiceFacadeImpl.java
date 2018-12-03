@@ -106,15 +106,6 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
     }
   }
 
-  //method is used in annotation, don't remove it
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public String getCountyName(String userId) {
-    return CognitoUtils.getCountyName(getCognitoUserById(userId));
-  }
 
   /**
    * {@inheritDoc}
