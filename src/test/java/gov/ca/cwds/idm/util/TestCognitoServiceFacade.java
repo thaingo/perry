@@ -143,7 +143,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
             "Garcia",
             "Gonzales",
             WithMockCustomUser.COUNTY,
-            "test",
+            "Hotline-rollout",
             "CWS-worker",
             "SMITHBO",
             WithMockCustomUser.OFFICE_ID);

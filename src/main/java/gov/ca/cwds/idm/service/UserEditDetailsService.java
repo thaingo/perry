@@ -1,13 +1,12 @@
 package gov.ca.cwds.idm.service;
 
+import static gov.ca.cwds.util.Utils.isRacfidUser;
+
 import gov.ca.cwds.idm.dto.ListOfValues;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserEditDetails;
-import gov.ca.cwds.idm.persistence.ns.entity.Permission;
 import gov.ca.cwds.idm.service.authorization.AuthorizationService;
 import gov.ca.cwds.idm.service.role.implementor.AdminRoleImplementorFactory;
-import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -22,15 +21,12 @@ public class UserEditDetailsService {
   @Autowired
   private AdminRoleImplementorFactory adminRoleImplementorFactory;
 
-  @Autowired
-  private DictionaryProvider dictionaryProvider;
-
   public UserEditDetails getEditDetails(User user) {
     UserEditDetails editDetails = new UserEditDetails();
 
     editDetails.setEditable(authorizationService.canUpdateUser(user.getId()));
     editDetails.setRoles(getRoles(user));
-    editDetails.setPermissions(getPermissions());
+    editDetails.setPermissions(getPermissions(user));
 
     return editDetails;
   }
@@ -42,14 +38,12 @@ public class UserEditDetailsService {
     return usersPossibleRoles;
   }
 
-  private ListOfValues getPermissions() {
+  private ListOfValues getPermissions(User user) {
     ListOfValues usersPossiblePermissions = new ListOfValues();
     usersPossiblePermissions.setEditable(true);
 
-    List<String> permissionNames =
-        dictionaryProvider.getPermissions().stream()
-            .map(Permission::getName).collect(Collectors.toList());
-    usersPossiblePermissions.setPossibleValues(permissionNames);
+    usersPossiblePermissions
+        .setPossibleValues(adminRoleImplementorFactory.getPossibleUserPermissions(isRacfidUser(user)));
 
     return usersPossiblePermissions;
   }

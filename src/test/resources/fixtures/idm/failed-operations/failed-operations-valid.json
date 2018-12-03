@@ -18,7 +18,7 @@
       "status": "CONFIRMED",
       "last_registration_resubmit_date_time": "2018-11-05 10:53:24",
       "permissions": [
-        "test"
+        "Hotline-rollout"
       ],
       "roles": [
         "CWS-worker"

@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * Created by Alexander Serbin on 10/9/2018
  */
-class CountyAdminRoleImplementor implements AdminRoleImplementor {
+class CountyAdminRoleImplementor extends AbstractAdminRoleImplementor {
 
   @Override
   public AbstractAdminActionsAuthorizer getAdminActionsAuthorizer(User user) {

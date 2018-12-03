@@ -419,7 +419,7 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     String userId = USER_WITH_RACFID_AND_DB_DATA_ID;
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setEnabled(Boolean.TRUE);
-    userUpdate.setPermissions(toSet("test"));
+    userUpdate.setPermissions(toSet("Hotline-rollout"));
     userUpdate.setRoles(toSet("CWS-worker"));
 
     AdminUpdateUserAttributesRequest updateAttributesRequest =

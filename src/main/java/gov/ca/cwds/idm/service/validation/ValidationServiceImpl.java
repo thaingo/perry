@@ -8,6 +8,7 @@ import static gov.ca.cwds.service.messages.MessageCode.FIRST_NAME_IS_NOT_PROVIDE
 import static gov.ca.cwds.service.messages.MessageCode.LAST_NAME_IS_NOT_PROVIDED;
 import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID_IN_CWSCMS;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_REMOVE_ALL_ROLES;
+import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_UNALLOWED_PERMISSIONS;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_UNALLOWED_ROLES;
 import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
 import static gov.ca.cwds.util.Utils.isRacfidUser;
@@ -71,6 +72,7 @@ public class ValidationServiceImpl implements ValidationService {
   public void validateUpdateUser(UserType existedCognitoUser, UserUpdate updateUserDto) {
     validateUpdateByNewUserRoles(updateUserDto);
     validateActivateUser(existedCognitoUser, updateUserDto);
+    validateUpdateByNewUserPermissions(existedCognitoUser, updateUserDto);
   }
 
   private void validateFirstNameIsProvided(User user) {
@@ -130,6 +132,30 @@ public class ValidationServiceImpl implements ValidationService {
           UNABLE_UPDATE_UNALLOWED_ROLES,
           toCommaDelimitedString(newUserRoles),
           toCommaDelimitedString(allowedRoles));
+    }
+  }
+
+  private void validateUpdateByNewUserPermissions(UserType existedCognitoUser, UserUpdate updateUserDto) {
+    Collection<String> newUserPermissions = updateUserDto.getPermissions();
+
+    if (newUserPermissions == null) {
+      return;
+    }
+
+    validateByAllowedPermissions(existedCognitoUser, newUserPermissions);
+  }
+
+  private void validateByAllowedPermissions(UserType existedCognitoUser, Collection<String> newUserPermissions) {
+
+    Collection<String> allowedPermissions = adminRoleImplementorFactory
+        .getPossibleUserPermissions(isRacfidUser(existedCognitoUser));
+
+    if (!allowedPermissions.containsAll(newUserPermissions)) {
+      throwValidationException(
+          UNABLE_UPDATE_UNALLOWED_PERMISSIONS,
+          toCommaDelimitedString(newUserPermissions),
+          toCommaDelimitedString(allowedPermissions),
+          existedCognitoUser.getUsername());
     }
   }
 

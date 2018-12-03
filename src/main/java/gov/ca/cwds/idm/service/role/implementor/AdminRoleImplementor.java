@@ -12,4 +12,5 @@ public interface AdminRoleImplementor {
 
   List<String> getPossibleUserRoles();
 
+  List<String> getPossibleUserPermissions(boolean isRacfidUser);
 }
