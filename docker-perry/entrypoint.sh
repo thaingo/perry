@@ -4,6 +4,10 @@ if ( ${CLUSTERED_DEV_MODE:?} ); then
   echo "CLUSTERED DEV MODE"
   PERRY_CONFIG="--spring.config.location=config/perry-clustered-dev.yml"
   JAVA_OPTS="-Dspring.profiles.active=dev,liquibase"
+elif ( ${DEV_MODE:?} ); then
+  echo "DEV MODE"
+  PERRY_CONFIG="--spring.config.location=config/perry-dev.yml"
+  JAVA_OPTS="-Dspring.profiles.active=dev,liquibase"
 elif ( ${COGNITO_MODE:?} ) ; then
   echo "COGNITO MODE"
   PERRY_CONFIG="--spring.config.location=config/perry-prod.yml"
@@ -15,14 +19,10 @@ elif ( ${COGNITO_MODE:?} ) ; then
     echo "LOGIN TYPE: OAUTH2"
     JAVA_OPTS="$JAVA_OPTS,oauth2"
   fi
-elif ([ -z "$DEV_MODE" ] || ! $DEV_MODE); then
+else
   echo "PROD MODE"
   PERRY_CONFIG="--spring.config.location=config/perry-prod.yml"
   JAVA_OPTS="-Dspring.profiles.active=prod,saf,liquibase,oauth2"
-else
-  echo "DEV MODE"
-  PERRY_CONFIG="--spring.config.location=config/perry-dev.yml"
-  JAVA_OPTS="-Dspring.profiles.active=dev,liquibase"
 fi
 
 if [ "$IDM_MODE" = true ] ; then
