@@ -1,14 +1,14 @@
 #!/bin/bash
 
-if ( ${CLUSTERED_DEV_MODE:?} ); then
+if [ "$PERRY_MODE" = "PROD"  ]; then
+  echo "PROD MODE"
+  PERRY_CONFIG="--spring.config.location=config/perry-prod.yml"
+  JAVA_OPTS="-Dspring.profiles.active=prod,saf,liquibase,oauth2"
+elif [ "$PERRY_MODE" = "CLUSTERED_DEV" ]; then
   echo "CLUSTERED DEV MODE"
   PERRY_CONFIG="--spring.config.location=config/perry-clustered-dev.yml"
   JAVA_OPTS="-Dspring.profiles.active=dev,liquibase"
-elif ( ${DEV_MODE:?} ); then
-  echo "DEV MODE"
-  PERRY_CONFIG="--spring.config.location=config/perry-dev.yml"
-  JAVA_OPTS="-Dspring.profiles.active=dev,liquibase"
-elif ( ${COGNITO_MODE:?} ) ; then
+elif [ "$PERRY_MODE" = "COGNITO"  ]; then
   echo "COGNITO MODE"
   PERRY_CONFIG="--spring.config.location=config/perry-prod.yml"
   JAVA_OPTS="-Dspring.profiles.active=prod,cognito,liquibase"
@@ -20,9 +20,9 @@ elif ( ${COGNITO_MODE:?} ) ; then
     JAVA_OPTS="$JAVA_OPTS,oauth2"
   fi
 else
-  echo "PROD MODE"
-  PERRY_CONFIG="--spring.config.location=config/perry-prod.yml"
-  JAVA_OPTS="-Dspring.profiles.active=prod,saf,liquibase,oauth2"
+  echo "LOCAL DEV MODE"
+  PERRY_CONFIG="--spring.config.location=config/perry-dev.yml"
+  JAVA_OPTS="-Dspring.profiles.active=dev,liquibase"
 fi
 
 if [ "$IDM_MODE" = true ] ; then
