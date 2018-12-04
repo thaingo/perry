@@ -26,7 +26,7 @@ elif [ "$DEV_MODE" = true ] || [ "$PERRY_MODE" = "DEV" ]; then
 else
   echo "COGNITO+MFA MODE BY DEFAULT"
   PERRY_CONFIG="--spring.config.location=config/perry-prod.yml"
-  JAVA_OPTS="-Dspring.profiles.active=prod,cognito,liquibase,mfa,cognito_refresh
+  JAVA_OPTS="-Dspring.profiles.active=prod,cognito,liquibase,mfa,cognito_refresh"
 fi
 
 if [ "$IDM_MODE" = true ] ; then
