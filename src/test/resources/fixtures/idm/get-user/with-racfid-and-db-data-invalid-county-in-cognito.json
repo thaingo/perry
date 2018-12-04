@@ -1,0 +1,44 @@
+{
+  "user": {
+    "id": "145614ce-0168-4950-9b47-7ba0cdf1f299",
+    "email": "stan.hailen@osi.ca.gav",
+    "first_name": "Stan",
+    "last_name": "Hailen",
+    "county_name": "Yolo",
+    "racfid": "HAILES",
+    "start_date": "2017-01-01",
+    "office_id": "JzoGSkE05I",
+    "phone_number": "4646464646",
+    "phone_extension_number": "11",
+    "user_create_date": "2017-05-22",
+    "user_last_modified_date": "2018-12-03",
+    "enabled": true,
+    "status": "CONFIRMED",
+    "permissions": [
+      "Facility-search-rollout"
+    ],
+    "roles": [
+      "CWS-worker"
+    ]
+  },
+  "edit_details": {
+    "editable": true,
+    "roles": {
+      "editable": true,
+      "possible_values": [
+        "Office-admin",
+        "CWS-worker"
+      ]
+    },
+    "permissions": {
+      "editable": true,
+      "possible_values": [
+        "CANS-rollout",
+        "Facility-search-rollout",
+        "Hotline-rollout",
+        "RFA-rollout",
+        "Snapshot-rollout"
+      ]
+    }
+  }
+}
