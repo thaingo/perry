@@ -17,6 +17,7 @@ import static gov.ca.cwds.util.Utils.toUpperCase;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.service.cognito.AttributesBuilder;
 import gov.ca.cwds.idm.service.cognito.UserAttribute;
 import java.util.HashSet;
@@ -127,6 +128,16 @@ public class CognitoUtils {
             .addAttribute(EMAIL_VERIFIED, TRUE_VALUE)
             .addAttribute(createPermissionsAttribute(user.getPermissions()))
             .addAttribute(createRolesAttribute(user.getRoles()));
+    return attributesBuilder.build();
+  }
+
+  public static List<AttributeType> buildUpdateUserAttributes(UserUpdate userUpdate) {
+    AttributesBuilder attributesBuilder = new AttributesBuilder();
+    if (userUpdate.getEmail() != null) {
+      attributesBuilder
+          .addAttribute(EMAIL, userUpdate.getEmail().toLowerCase())
+          .addAttribute(EMAIL_VERIFIED, TRUE_VALUE);
+    }
     return attributesBuilder.build();
   }
 

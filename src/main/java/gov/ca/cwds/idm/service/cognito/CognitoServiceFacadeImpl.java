@@ -7,6 +7,7 @@ import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PERMISSIONS;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.ROLES;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.EMAIL_DELIVERY;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.buildCreateUserAttributes;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.buildUpdateUserAttributes;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.createDelimitedAttribute;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getDelimitedAttributeValue;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getEmail;
@@ -50,7 +51,6 @@ import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
-import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.service.messages.MessageCode;
 import java.util.ArrayList;
@@ -200,7 +200,7 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
    */
   @Override
   public boolean updateUserAttributes(
-      String id, UserType existedCognitoUser, UserUpdate updateUserDto) {
+      String userId, UserType existedCognitoUser, UserUpdate updateUserDto) {
 
     boolean executed = false;
 
@@ -209,13 +209,20 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
     if (!updateAttributes.isEmpty()) {
       AdminUpdateUserAttributesRequest adminUpdateUserAttributesRequest =
           new AdminUpdateUserAttributesRequest()
-              .withUsername(id)
+              .withUsername(userId)
               .withUserPoolId(properties.getUserpool())
               .withUserAttributes(updateAttributes);
+      try {
+        identityProvider.adminUpdateUserAttributes(adminUpdateUserAttributesRequest);
+      } catch (com.amazonaws.services.cognitoidp.model.UserNotFoundException e) {
+        throw exceptionFactory.createUserNotFoundException(USER_NOT_FOUND_BY_ID_IN_IDM, e, userId);
+      } catch (com.amazonaws.services.cognitoidp.model.AliasExistsException e) {
+        throw exceptionFactory.createUserAlreadyExistsException(USER_WITH_EMAIL_EXISTS_IN_IDM, e,
+            updateUserDto.getEmail());
+      } catch (Exception e) {
+        throw exceptionFactory.createIdmException(getErrorCode(UPDATE), e, userId);
+      }
 
-      executeUserOperationInCognito(
-          identityProvider::adminUpdateUserAttributes, adminUpdateUserAttributesRequest, id,
-          UPDATE);
       executed = true;
     }
     return executed;
@@ -223,7 +230,9 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
 
   private List<AttributeType> getUpdateAttributes(
       UserType existedCognitoUser, UserUpdate updateUserDto) {
-    List<AttributeType> updateAttributes = new ArrayList<>();
+
+    List<AttributeType> updateAttributes = new ArrayList<>(
+        buildUpdateUserAttributes(updateUserDto));
 
     addDelimitedAttribute(updateAttributes, PERMISSIONS, updateUserDto.getPermissions(),
         existedCognitoUser);
@@ -258,13 +267,15 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
       if (newEnabled) {
         AdminEnableUserRequest adminEnableUserRequest =
             new AdminEnableUserRequest().withUsername(id).withUserPoolId(properties.getUserpool());
-        executeUserOperationInCognito(identityProvider::adminEnableUser, adminEnableUserRequest, id, UPDATE);
+        executeUserOperationInCognito(identityProvider::adminEnableUser, adminEnableUserRequest, id,
+            UPDATE);
         executed = true;
 
       } else {
         AdminDisableUserRequest adminDisableUserRequest =
             new AdminDisableUserRequest().withUsername(id).withUserPoolId(properties.getUserpool());
-        executeUserOperationInCognito(identityProvider::adminDisableUser, adminDisableUserRequest, id, UPDATE);
+        executeUserOperationInCognito(identityProvider::adminDisableUser, adminDisableUserRequest,
+            id, UPDATE);
         executed = true;
       }
     }
@@ -277,7 +288,8 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
     String email = getEmail(cognitoUser);
     AdminCreateUserRequest request = createResendEmailRequest(email);
     AdminCreateUserResult result =
-        executeUserOperationInCognito(identityProvider::adminCreateUser, request, userId, RESEND_INVITATION_EMAIL);
+        executeUserOperationInCognito(identityProvider::adminCreateUser, request, userId,
+            RESEND_INVITATION_EMAIL);
     return result.getUser();
   }
 
@@ -310,7 +322,8 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
   }
 
   private <T extends AmazonWebServiceRequest, R extends AmazonWebServiceResult>
-  R executeUserOperationInCognito(Function<T, R> function, T request, String userId, OperationType operation) {
+  R executeUserOperationInCognito(Function<T, R> function, T request, String userId,
+      OperationType operation) {
 
     try {
       return function.apply(request);
