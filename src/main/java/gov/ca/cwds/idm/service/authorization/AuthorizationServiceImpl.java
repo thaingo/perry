@@ -1,9 +1,6 @@
 package gov.ca.cwds.idm.service.authorization;
 
-import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
-import static gov.ca.cwds.idm.service.authorization.UserRolesService.getStrongestAdminRole;
 import static gov.ca.cwds.service.messages.MessageCode.ADMIN_CANNOT_UPDATE_HIMSELF;
-import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserName;
 
 import com.amazonaws.services.cognitoidp.model.UserType;
@@ -64,7 +61,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     if (existingUser.getUsername().equals(getCurrentUserName())) {
       throw exceptionFactory.createAuthorizationException(ADMIN_CANNOT_UPDATE_HIMSELF);
     }
-    User user = composeUser(existingUser);
+    User user = mappingService.toUser(existingUser);
     checkCanUpdateUser(user);
   }
 
@@ -98,7 +95,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
   @Override
   public void checkCanEditRoles(UserType cognitoUser) {
-    User user = composeUser(cognitoUser);
+    User user = mappingService.toUser(cognitoUser);
     checkCanEditRoles(user);
   }
 
@@ -115,17 +112,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
   private User getUserById(String userId) {
     UserType existingCognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
-    return composeUser(existingCognitoUser);
-  }
-
-  private User composeUser(UserType cognitoUser) {
-    User user;
-    if (OFFICE_ADMIN.equals(getStrongestAdminRole(getCurrentUser()))) {
-      user = mappingService.toUser(cognitoUser);
-    } else {
-      user = mappingService.toUserWithoutDbData(cognitoUser);
-    }
-    return user;
+    return mappingService.toUser(existingCognitoUser);
   }
 
   @Autowired

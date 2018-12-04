@@ -128,8 +128,7 @@ public class IdmServiceImpl implements IdmService {
 
   private User getUser(String id) {
     UserType cognitoUser = cognitoServiceFacade.getCognitoUserById(id);
-    User user = mappingService.toUser(cognitoUser);
-    return user;
+    return mappingService.toUser(cognitoUser);
   }
 
   @Override
