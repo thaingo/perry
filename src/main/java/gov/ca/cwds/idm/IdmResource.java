@@ -157,7 +157,8 @@ public class IdmResource {
       value = {
           @ApiResponse(code = 204, message = "No Content"),
           @ApiResponse(code = 401, message = "Not Authorized"),
-          @ApiResponse(code = 404, message = "Not found")
+          @ApiResponse(code = 404, message = "Not found"),
+          @ApiResponse(code = 409, message = "Conflict. User with the same email already exists")
       }
   )
   @ApiOperation(value = "Update User")

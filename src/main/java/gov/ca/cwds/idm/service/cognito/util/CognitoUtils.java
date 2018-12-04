@@ -17,6 +17,7 @@ import static gov.ca.cwds.util.Utils.toUpperCase;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.service.cognito.AttributesBuilder;
 import gov.ca.cwds.idm.service.cognito.UserAttribute;
 import java.util.HashSet;
@@ -32,7 +33,8 @@ public class CognitoUtils {
   private static final String COGNITO_LIST_DELIMITER = ":";
   private static final String TRUE_VALUE = "True";
 
-  private CognitoUtils() {}
+  private CognitoUtils() {
+  }
 
   static Optional<AttributeType> getAttribute(UserType cognitoUser, String attrName) {
     List<AttributeType> attributes = cognitoUser.getAttributes();
@@ -51,10 +53,6 @@ public class CognitoUtils {
     return getAttribute(cognitoUser, attributeName).map(AttributeType::getValue).orElse(null);
   }
 
-  public static String getCountyName(UserType cognitoUser) {
-    return getAttributeValue(cognitoUser, COUNTY.getName());
-  }
-
   public static String getEmail(UserType cognitoUser) {
     return getAttributeValue(cognitoUser, EMAIL.getName());
   }
@@ -67,7 +65,8 @@ public class CognitoUtils {
     return getDelimitedAttributeValue(cognitoUser, ROLES);
   }
 
-  public static Set<String> getDelimitedAttributeValue(UserType cognitoUser, UserAttribute userAttribute) {
+  public static Set<String> getDelimitedAttributeValue(UserType cognitoUser,
+      UserAttribute userAttribute) {
     Optional<AttributeType> attrOpt = getAttribute(cognitoUser, userAttribute.getName());
 
     if (!attrOpt.isPresent()) {
@@ -129,6 +128,16 @@ public class CognitoUtils {
             .addAttribute(EMAIL_VERIFIED, TRUE_VALUE)
             .addAttribute(createPermissionsAttribute(user.getPermissions()))
             .addAttribute(createRolesAttribute(user.getRoles()));
+    return attributesBuilder.build();
+  }
+
+  public static List<AttributeType> buildUpdateUserAttributes(UserUpdate userUpdate) {
+    AttributesBuilder attributesBuilder = new AttributesBuilder();
+    if (userUpdate.getEmail() != null) {
+      attributesBuilder
+          .addAttribute(EMAIL, userUpdate.getEmail().toLowerCase())
+          .addAttribute(EMAIL_VERIFIED, TRUE_VALUE);
+    }
     return attributesBuilder.build();
   }
 

@@ -1,22 +1,12 @@
 package gov.ca.cwds.idm.service.cognito.util;
 
-import com.amazonaws.services.cognitoidp.model.AttributeType;
-import com.amazonaws.services.cognitoidp.model.UserType;
-import org.junit.Test;
-
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PERMISSIONS;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.RACFID_CUSTOM;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.attribute;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.createPermissionsAttribute;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getAttribute;
-import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getCountyName;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getCustomDelimitedListAttributeValue;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getPermissions;
-import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.COUNTY;
-import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PERMISSIONS;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getRACFId;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
@@ -26,6 +16,13 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+
+import com.amazonaws.services.cognitoidp.model.AttributeType;
+import com.amazonaws.services.cognitoidp.model.UserType;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+import org.junit.Test;
 
 public class CognitoUtilsTest {
 
@@ -172,23 +169,6 @@ public class CognitoUtilsTest {
     assertThat(attr.getValue(), is("one:two"));
   }
 
-  @Test
-  public void testGetCountyName() {
-    UserType cognitoUser = new UserType();
-
-    AttributeType attr = new AttributeType();
-    attr.setName(COUNTY.getName());
-    attr.setValue("Yolo");
-    cognitoUser.withAttributes(attr);
-
-    assertThat(getCountyName(cognitoUser), is("Yolo"));
-  }
-
-  @Test
-  public void testGetCountyNameNoCountyAttr() {
-    UserType cognitoUser = new UserType();
-    assertThat(getCountyName(cognitoUser), is(nullValue()));
-  }
 
   @Test
   public void testAttribute() {
