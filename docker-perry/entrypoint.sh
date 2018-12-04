@@ -1,12 +1,15 @@
 #!/bin/bash
 
+COGNITO_PROFILES="prod,cognito,liquibase"
+MFA_PROFILES="mfa,cognito_refresh"
+
 if [ "$PERRY_MODE" = "COGNITO"  ]; then
   echo "COGNITO MODE"
   PERRY_CONFIG="--spring.config.location=config/perry-prod.yml"
-  JAVA_OPTS="-Dspring.profiles.active=prod,cognito,liquibase"
+  JAVA_OPTS="-Dspring.profiles.active=$COGNITO_PROFILES"
   if [ "$MFA" = true ] ; then
     echo "LOGIN TYPE: MFA"
-    JAVA_OPTS="$JAVA_OPTS,mfa,cognito_refresh"
+    JAVA_OPTS="$JAVA_OPTS,$MFA_PROFILES"
   else
     echo "LOGIN TYPE: OAUTH2"
     JAVA_OPTS="$JAVA_OPTS,oauth2"
@@ -26,7 +29,7 @@ elif [ "$DEV_MODE" = true ] || [ "$PERRY_MODE" = "DEV" ]; then
 else
   echo "COGNITO+MFA MODE BY DEFAULT"
   PERRY_CONFIG="--spring.config.location=config/perry-prod.yml"
-  JAVA_OPTS="-Dspring.profiles.active=prod,cognito,liquibase,mfa,cognito_refresh"
+  JAVA_OPTS="-Dspring.profiles.active=$COGNITO_PROFILES,$MFA_PROFILES"
 fi
 
 if [ "$IDM_MODE" = true ] ; then
