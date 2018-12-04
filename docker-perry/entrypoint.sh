@@ -19,7 +19,7 @@ elif [ "$PERRY_MODE" = "SAF"  ]; then
   echo "PROD MODE"
   PERRY_CONFIG="--spring.config.location=config/perry-prod.yml"
   JAVA_OPTS="-Dspring.profiles.active=prod,saf,liquibase,oauth2"
-elif (! $DEV_MODE || "$PERRY_MODE" = "DEV"); then
+elif ( "$DEV_MODE" = true || "$PERRY_MODE" = "DEV"); then
   echo "LOCAL DEV MODE"
   PERRY_CONFIG="--spring.config.location=config/perry-dev.yml"
   JAVA_OPTS="-Dspring.profiles.active=dev,liquibase"
