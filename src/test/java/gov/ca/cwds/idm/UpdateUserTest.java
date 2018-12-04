@@ -6,6 +6,8 @@ import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PERMISSIONS;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.ROLES;
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL_VERIFIED;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.INACTIVE_USER_WITH_ACTIVE_RACFID_IN_CMS;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.INACTIVE_USER_WITH_NO_ACTIVE_RACFID_IN_CMS;
@@ -37,6 +39,7 @@ import com.amazonaws.services.cognitoidp.model.AdminEnableUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminEnableUserResult;
 import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesRequest;
 import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesResult;
+import com.amazonaws.services.cognitoidp.model.AliasExistsException;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.google.common.collect.Iterables;
 import gov.ca.cwds.config.LoggingRequestIdFilter;
@@ -46,6 +49,7 @@ import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
 import gov.ca.cwds.idm.util.WithMockCustomUser;
+import java.util.Arrays;
 import java.util.Map;
 import org.junit.Test;
 import org.mockito.InOrder;
@@ -63,10 +67,13 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     userUpdate.setEnabled(Boolean.FALSE);
     userUpdate.setPermissions(toSet("RFA-rollout", "Hotline-rollout"));
     userUpdate.setRoles(toSet("Office-admin", "CWS-worker"));
+    userUpdate.setEmail("somemail@mail.com");
 
     AdminUpdateUserAttributesRequest updateAttributesRequest =
         setUpdateUserAttributesRequestAndResult(
             USER_NO_RACFID_ID,
+            attr(EMAIL.getName(), "somemail@mail.com"),
+            attr(EMAIL_VERIFIED.getName(), "True"),
             attr(PERMISSIONS.getName(), "RFA-rollout:Hotline-rollout"),
             attr(ROLES.getName(), "Office-admin:CWS-worker")
         );
@@ -404,7 +411,73 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
         "fixtures/idm/update-user/other-office.json");
   }
 
-  private void assertUpdateBadRequest(String userId, UserUpdate userUpdate, String fixture) throws Exception {
+  @Test
+  @WithMockCustomUser()
+  public void testUpdateEmailOnlyCamelCase() throws Exception {
+
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setEmail("SomeMail@mail.com");
+
+    AdminUpdateUserAttributesRequest updateAttributesRequest =
+        setUpdateUserAttributesRequestAndResult(
+            USER_NO_RACFID_ID,
+            attr(EMAIL.getName(), "somemail@mail.com"),
+            attr(EMAIL_VERIFIED.getName(), "True")
+        );
+
+    setDoraSuccess();
+
+    AdminDisableUserRequest disableUserRequest = setDisableUserRequestAndResult(USER_NO_RACFID_ID);
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.patch("/idm/users/" + USER_NO_RACFID_ID)
+                .contentType(JSON_CONTENT_TYPE)
+                .content(asJsonString(userUpdate)))
+        .andExpect(MockMvcResultMatchers.status().isNoContent())
+        .andReturn();
+
+    verify(cognito, times(1)).adminUpdateUserAttributes(updateAttributesRequest);
+    verify(cognito, times(0)).adminDisableUser(disableUserRequest);
+    verify(spySearchService, times(1)).updateUser(any(User.class));
+    verifyDoraCalls(1);
+  }
+
+  @Test
+  @WithMockCustomUser()
+  public void testUpdateEmailExists() throws Exception {
+
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setEmail("SomeMail@mail.com");
+
+    AdminUpdateUserAttributesRequest request =
+        new AdminUpdateUserAttributesRequest()
+            .withUsername(USER_WITH_RACFID_ID)
+            .withUserPoolId(USERPOOL)
+            .withUserAttributes(Arrays.asList(attr(EMAIL.getName(), "somemail@mail.com"),
+                attr(EMAIL_VERIFIED.getName(), "True")));
+    when(cognito.adminUpdateUserAttributes(request))
+        .thenThrow(new AliasExistsException("the email already used"));
+
+    AdminDisableUserRequest disableUserRequest = setDisableUserRequestAndResult(
+        USER_WITH_RACFID_ID);
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.patch("/idm/users/" + USER_WITH_RACFID_ID)
+                .contentType(JSON_CONTENT_TYPE)
+                .content(asJsonString(userUpdate)))
+        .andExpect(MockMvcResultMatchers.status().isConflict())
+        .andReturn();
+
+    verify(cognito, times(0)).adminDisableUser(disableUserRequest);
+    verify(spySearchService, times(0)).updateUser(any(User.class));
+    verifyDoraCalls(0);
+  }
+
+
+  private void assertUpdateBadRequest(String userId, UserUpdate userUpdate, String fixture)
+      throws Exception {
     MvcResult result = mockMvc
         .perform(
             MockMvcRequestBuilders.patch("/idm/users/" + userId)

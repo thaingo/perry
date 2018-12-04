@@ -29,9 +29,6 @@ public interface CognitoServiceFacade {
 
   AdminGetUserRequest createAdminGetUserRequest(String id);
 
-  //method is used in annotation, don't remove it
-  String getCountyName(String userId);
-
   void healthCheck();
 
   /**
