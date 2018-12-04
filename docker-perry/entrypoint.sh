@@ -19,10 +19,14 @@ elif [ "$PERRY_MODE" = "SAF"  ]; then
   echo "PROD MODE"
   PERRY_CONFIG="--spring.config.location=config/perry-prod.yml"
   JAVA_OPTS="-Dspring.profiles.active=prod,saf,liquibase,oauth2"
-else
+elif (! $DEV_MODE || "$PERRY_MODE" = "DEV"); then
   echo "LOCAL DEV MODE"
   PERRY_CONFIG="--spring.config.location=config/perry-dev.yml"
   JAVA_OPTS="-Dspring.profiles.active=dev,liquibase"
+else
+  echo "COGNITO+MFA MODE BY DEFAULT"
+  PERRY_CONFIG="--spring.config.location=config/perry-prod.yml"
+  JAVA_OPTS="-Dspring.profiles.active=prod,cognito,liquibase,mfa,cognito_refresh
 fi
 
 if [ "$IDM_MODE" = true ] ; then
