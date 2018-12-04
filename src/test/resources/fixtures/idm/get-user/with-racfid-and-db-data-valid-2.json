@@ -32,7 +32,7 @@
       ]
     },
     "permissions": {
-      "editable": true,
+      "editable": false,
       "possible_values": [
         "CANS-rollout",
         "Facility-search-rollout",

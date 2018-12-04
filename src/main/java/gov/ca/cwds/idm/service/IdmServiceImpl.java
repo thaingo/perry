@@ -273,6 +273,7 @@ public class IdmServiceImpl implements IdmService {
   private void authorizeUpdateUser(UserType existedCognitoUser, UserUpdate updateUserDto) {
     authorizeService.checkCanUpdateUser(existedCognitoUser);
     authorizeRolesUpdate(existedCognitoUser, updateUserDto);
+    authorizePermissionsUpdate(existedCognitoUser, updateUserDto);
   }
 
   private void authorizeRolesUpdate(UserType existedCognitoUser, UserUpdate updateUserDto) {
@@ -284,9 +285,29 @@ public class IdmServiceImpl implements IdmService {
     }
   }
 
+  private void authorizePermissionsUpdate(UserType existedCognitoUser, UserUpdate updateUserDto) {
+    if (updateUserDto.getPermissions() == null) {
+      return;
+    }
+    if (wasPermissionsActuallyEdited(existedCognitoUser, updateUserDto)) {
+      authorizeService.checkCanEditPermissions(existedCognitoUser);
+    }
+  }
+
   private boolean wasRolesActuallyEdited(UserType existedCognitoUser, UserUpdate updateUserDto) {
-    return !CollectionUtils.isEqualCollection(CognitoUtils.getRoles(existedCognitoUser),
+    return wasActuallyEdited(
+        CognitoUtils.getRoles(existedCognitoUser),
         updateUserDto.getRoles());
+  }
+
+  private boolean wasPermissionsActuallyEdited(UserType existedCognitoUser, UserUpdate updateUserDto) {
+    return wasActuallyEdited(
+        CognitoUtils.getPermissions(existedCognitoUser),
+        updateUserDto.getPermissions());
+  }
+
+  private boolean wasActuallyEdited(Set<String> oldSet, Set<String> newSet) {
+    return !CollectionUtils.isEqualCollection(oldSet, newSet);
   }
 
   private CwsUserInfo getCwsUserData(User user) {

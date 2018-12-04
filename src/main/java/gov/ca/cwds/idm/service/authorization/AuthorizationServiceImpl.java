@@ -69,16 +69,45 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     getAdminActionsAuthorizer(user).checkCanUpdateUser();
   }
 
-  private AdminActionsAuthorizer getAdminActionsAuthorizer(User user) {
-    AbstractAdminActionsAuthorizer authorizer = adminRoleImplementorFactory.getAdminActionsAuthorizer(user);
-    authorizer.setExceptionFactory(exceptionFactory);
-    return authorizer;
+  @Override
+  public void checkCanEditRoles(UserType cognitoUser) {
+    User user = mappingService.toUser(cognitoUser);
+    checkCanEditRoles(user);
+  }
+
+  private void checkCanEditRoles(User user) {
+    checkCanUpdateUser(user);
+    getAdminActionsAuthorizer(user).checkCanEditRoles();
   }
 
   @Override
   public boolean canEditRoles(User user) {
     return canAuthorizeOperation(user, this::checkCanEditRoles, "roles editing");
   }
+
+  @Override
+  public void checkCanEditPermissions(UserType cognitoUser) {
+    User user = mappingService.toUser(cognitoUser);
+    checkCanUpdateUser(user);
+  }
+
+  private void checkCanEditPermissions(User user) {
+    checkCanUpdateUser(user);
+    getAdminActionsAuthorizer(user).checkCanEditPermissions();
+  }
+
+  @Override
+  public boolean canEditPermissions(User  user) {
+    return canAuthorizeOperation(user, this::checkCanEditPermissions, "permissions editing");
+  }
+
+  private AdminActionsAuthorizer getAdminActionsAuthorizer(User user) {
+    AbstractAdminActionsAuthorizer authorizer = adminRoleImplementorFactory.getAdminActionsAuthorizer(user);
+    authorizer.setExceptionFactory(exceptionFactory);
+    return authorizer;
+  }
+
+
 
   @SuppressWarnings({"squid:S1166", "fb-contrib:EXS_EXCEPTION_SOFTENING_RETURN_FALSE"})
   //squid:S1166: exceptions stack trace can be omitted in this context
@@ -91,17 +120,6 @@ public class AuthorizationServiceImpl implements AuthorizationService {
       return false;
     }
     return true;
-  }
-
-  @Override
-  public void checkCanEditRoles(UserType cognitoUser) {
-    User user = mappingService.toUser(cognitoUser);
-    checkCanEditRoles(user);
-  }
-
-  private void checkCanEditRoles(User user) {
-    checkCanUpdateUser(user);
-    getAdminActionsAuthorizer(user).checkCanEditRoles();
   }
 
   @Override

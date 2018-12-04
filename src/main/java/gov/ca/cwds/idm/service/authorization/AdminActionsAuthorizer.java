@@ -12,4 +12,6 @@ public interface AdminActionsAuthorizer {
 
   void checkCanEditRoles();
 
+  void checkCanEditPermissions();
+
 }

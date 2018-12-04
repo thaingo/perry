@@ -40,7 +40,7 @@ public class UserEditDetailsService {
 
   private ListOfValues getPermissions(User user) {
     ListOfValues usersPossiblePermissions = new ListOfValues();
-    usersPossiblePermissions.setEditable(true);
+    usersPossiblePermissions.setEditable(authorizationService.canEditPermissions(user));
 
     usersPossiblePermissions
         .setPossibleValues(adminRoleImplementorFactory.getPossibleUserPermissions(isRacfidUser(user)));
