@@ -121,7 +121,6 @@ public class AuthorizationServiceImpl implements AuthorizationService {
   }
 
   private void checkCanEditPermissions(User user) {
-    checkCanUpdateUser(user);
     getAdminActionsAuthorizer(user).checkCanEditPermissions();
   }
 
