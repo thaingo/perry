@@ -1,25 +1,35 @@
 #!/bin/bash
 
+COGNITO_PROFILES="prod,cognito,liquibase"
+MFA_PROFILES="mfa,cognito_refresh"
 
-if ( ${COGNITO_MODE:?} ) ; then
+if [ "$PERRY_MODE" = "COGNITO"  ]; then
   echo "COGNITO MODE"
   PERRY_CONFIG="--spring.config.location=config/perry-prod.yml"
-  JAVA_OPTS="-Dspring.profiles.active=prod,cognito,liquibase"
+  JAVA_OPTS="-Dspring.profiles.active=$COGNITO_PROFILES"
   if [ "$MFA" = true ] ; then
     echo "LOGIN TYPE: MFA"
-    JAVA_OPTS="$JAVA_OPTS,mfa,cognito_refresh"
+    JAVA_OPTS="$JAVA_OPTS,$MFA_PROFILES"
   else
     echo "LOGIN TYPE: OAUTH2"
     JAVA_OPTS="$JAVA_OPTS,oauth2"
   fi
-elif ([ -z "$DEV_MODE" ] || ! $DEV_MODE); then
+elif [ "$PERRY_MODE" = "CLUSTERED_DEV" ]; then
+  echo "CLUSTERED DEV MODE"
+  PERRY_CONFIG="--spring.config.location=config/perry-clustered-dev.yml"
+  JAVA_OPTS="-Dspring.profiles.active=dev,liquibase"
+elif [ "$PERRY_MODE" = "SAF"  ]; then
   echo "PROD MODE"
   PERRY_CONFIG="--spring.config.location=config/perry-prod.yml"
   JAVA_OPTS="-Dspring.profiles.active=prod,saf,liquibase,oauth2"
-else
-  echo "DEV MODE"
+elif [ "$DEV_MODE" = true ] || [ "$PERRY_MODE" = "DEV" ]; then
+  echo "LOCAL DEV MODE"
   PERRY_CONFIG="--spring.config.location=config/perry-dev.yml"
   JAVA_OPTS="-Dspring.profiles.active=dev,liquibase"
+else
+  echo "COGNITO+MFA MODE BY DEFAULT"
+  PERRY_CONFIG="--spring.config.location=config/perry-prod.yml"
+  JAVA_OPTS="-Dspring.profiles.active=$COGNITO_PROFILES,$MFA_PROFILES"
 fi
 
 if [ "$IDM_MODE" = true ] ; then
