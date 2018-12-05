@@ -12,8 +12,6 @@ public interface AuthorizationService {
 
   void checkCanUpdateUser(UserType existingUser, UserUpdate updateUserDto);
 
-  void checkCanUpdateUser(String userId);
-
   boolean canUpdateUser(String userId);
 
   void checkCanResendInvitationMessage(String id);

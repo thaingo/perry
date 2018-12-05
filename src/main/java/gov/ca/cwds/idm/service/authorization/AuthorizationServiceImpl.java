@@ -49,8 +49,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     getAdminActionsAuthorizer(user).checkCanCreateUser();
   }
 
-  @Override
-  public void checkCanUpdateUser(String userId) {
+  void checkCanUpdateUser(String userId) {
     if (userId.equals(getCurrentUserName())) {
       throw exceptionFactory.createAuthorizationException(ADMIN_CANNOT_UPDATE_HIMSELF);
     }
