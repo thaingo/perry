@@ -486,6 +486,47 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
         "fixtures/idm/update-user/non-racfid-user_cans-permission.json");
   }
 
+  @Test
+  @WithMockCustomUser
+  public void testUpdateRacfidUser_CansPermission() throws Exception {
+
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setPermissions(toSet("CANS-rollout"));
+
+    setUpdateUserAttributesRequestAndResult(
+        USER_WITH_RACFID_AND_DB_DATA_ID,
+        attr(PERMISSIONS.getName(), "CANS-rollout")
+    );
+
+    assertSuccessfulUpdate(USER_WITH_RACFID_AND_DB_DATA_ID, userUpdate);
+  }
+
+  @Test
+  @WithMockCustomUser
+  public void testUpdate_NonStandardPermission() throws Exception {
+
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setPermissions(toSet("ArbitraryPermission"));
+
+    setUpdateUserAttributesRequestAndResult(
+        USER_NO_RACFID_ID,
+        attr(PERMISSIONS.getName(), "ArbitraryPermission")
+    );
+
+    assertSuccessfulUpdate(USER_NO_RACFID_ID, userUpdate);
+  }
+
+  private void assertSuccessfulUpdate(String userId, UserUpdate userUpdate) throws Exception {
+    setDoraSuccess();
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.patch("/idm/users/" + userId)
+                .contentType(JSON_CONTENT_TYPE)
+                .content(asJsonString(userUpdate)))
+        .andExpect(MockMvcResultMatchers.status().isNoContent())
+        .andReturn();
+  }
 
   private void assertUpdateBadRequest(String userId, UserUpdate userUpdate, String fixture)
       throws Exception {
@@ -509,7 +550,7 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     AdminUpdateUserAttributesRequest updateAttributesRequest =
         setUpdateUserAttributesRequestAndResult(
             userId,
-            attr(PERMISSIONS.getName(), "test"),
+            attr(PERMISSIONS.getName(), "Hotline-rollout"),
             attr(ROLES.getName(), "CWS-worker")
         );
 
