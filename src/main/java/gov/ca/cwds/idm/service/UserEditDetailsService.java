@@ -24,23 +24,25 @@ public class UserEditDetailsService {
   public UserEditDetails getEditDetails(User user) {
     UserEditDetails editDetails = new UserEditDetails();
 
-    editDetails.setEditable(authorizationService.canUpdateUser(user.getId()));
-    editDetails.setRoles(getRoles(user));
-    editDetails.setPermissions(getPermissions(user));
+    boolean canUpdateUser = authorizationService.canUpdateUser(user.getId());
+
+    editDetails.setEditable(canUpdateUser);
+    editDetails.setRoles(getRoles(user, canUpdateUser));
+    editDetails.setPermissions(getPermissions(user, canUpdateUser));
 
     return editDetails;
   }
 
-  private ListOfValues getRoles(User user) {
+  private ListOfValues getRoles(User user, boolean canUpdateUser) {
     ListOfValues usersPossibleRoles = new ListOfValues();
-    usersPossibleRoles.setEditable(authorizationService.canEditRoles(user));
+    usersPossibleRoles.setEditable(canUpdateUser && authorizationService.canEditRoles(user));
     usersPossibleRoles.setPossibleValues(adminRoleImplementorFactory.getPossibleUserRoles());
     return usersPossibleRoles;
   }
 
-  private ListOfValues getPermissions(User user) {
+  private ListOfValues getPermissions(User user, boolean canUpdateUser) {
     ListOfValues usersPossiblePermissions = new ListOfValues();
-    usersPossiblePermissions.setEditable(authorizationService.canEditPermissions(user));
+    usersPossiblePermissions.setEditable(canUpdateUser && authorizationService.canEditPermissions(user));
 
     usersPossiblePermissions
         .setPossibleValues(adminRoleImplementorFactory.getPossibleUserPermissions(isRacfidUser(user)));

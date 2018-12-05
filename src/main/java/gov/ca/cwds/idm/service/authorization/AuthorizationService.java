@@ -12,9 +12,9 @@ public interface AuthorizationService {
 
   void checkCanUpdateUser(UserType existingUser, UserUpdate updateUserDto);
 
-  boolean canUpdateUser(String userId);
-
   void checkCanResendInvitationMessage(String id);
+
+  boolean canUpdateUser(String userId);
 
   boolean canEditRoles(User user);
 

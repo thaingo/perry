@@ -30,6 +30,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
   private static final String ROLES_EDITING = "roles editing";
   private static final String PERMISSIONS_EDITING = "permissions editing";
+  private static final String USER_UPDATE = "user update";
 
   private CognitoServiceFacade cognitoServiceFacade;
 
@@ -59,7 +60,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
   @Override
   public boolean canUpdateUser(String userId) {
-    return canAuthorizeOperation(userId, this::checkCanUpdateUser, "user update");
+    return canAuthorizeOperation(userId, this::checkCanUpdateUser, USER_UPDATE);
   }
 
   @Override
@@ -122,9 +123,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
   @Override
   public boolean canEditRoles(User user) {
-    return
-        canAuthorizeOperation(user, this::checkCanEditRoles, ROLES_EDITING) &&
-        canAuthorizeOperation(user, this::checkCanUpdateUser, ROLES_EDITING);
+    return canAuthorizeOperation(user, this::checkCanEditRoles, ROLES_EDITING);
   }
 
   private void checkCanEditPermissions(UserType cognitoUser) {
@@ -139,9 +138,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
   @Override
   public boolean canEditPermissions(User  user) {
-    return
-        canAuthorizeOperation(user, this::checkCanEditPermissions, PERMISSIONS_EDITING) &&
-        canAuthorizeOperation(user, this::checkCanUpdateUser, PERMISSIONS_EDITING);
+    return canAuthorizeOperation(user, this::checkCanEditPermissions, PERMISSIONS_EDITING);
   }
 
   private AdminActionsAuthorizer getAdminActionsAuthorizer(User user) {
