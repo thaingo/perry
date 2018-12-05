@@ -28,6 +28,9 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AuthorizationServiceImpl.class);
 
+  private static final String ROLES_EDITING = "roles editing";
+  private static final String PERMISSIONS_EDITING = "permissions editing";
+
   private CognitoServiceFacade cognitoServiceFacade;
 
   private MappingService mappingService;
@@ -115,13 +118,14 @@ public class AuthorizationServiceImpl implements AuthorizationService {
   }
 
   private void checkCanEditRoles(User user) {
-    checkCanUpdateUser(user);
     getAdminActionsAuthorizer(user).checkCanEditRoles();
   }
 
   @Override
   public boolean canEditRoles(User user) {
-    return canAuthorizeOperation(user, this::checkCanEditRoles, "roles editing");
+    return
+        canAuthorizeOperation(user, this::checkCanEditRoles, ROLES_EDITING) &&
+        canAuthorizeOperation(user, this::checkCanUpdateUser, ROLES_EDITING);
   }
 
   private void checkCanEditPermissions(UserType cognitoUser) {
@@ -136,7 +140,9 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
   @Override
   public boolean canEditPermissions(User  user) {
-    return canAuthorizeOperation(user, this::checkCanEditPermissions, "permissions editing");
+    return
+        canAuthorizeOperation(user, this::checkCanEditPermissions, PERMISSIONS_EDITING) &&
+        canAuthorizeOperation(user, this::checkCanUpdateUser, PERMISSIONS_EDITING);
   }
 
   private AdminActionsAuthorizer getAdminActionsAuthorizer(User user) {
