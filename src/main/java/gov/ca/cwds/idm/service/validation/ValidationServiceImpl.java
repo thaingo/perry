@@ -2,13 +2,14 @@ package gov.ca.cwds.idm.service.validation;
 
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByEmail;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByRacfId;
+import static gov.ca.cwds.idm.service.role.implementor.AbstractAdminRoleImplementor.CANS_PERMISSION_NAME;
 import static gov.ca.cwds.service.messages.MessageCode.ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.COUNTY_NAME_IS_NOT_PROVIDED;
 import static gov.ca.cwds.service.messages.MessageCode.FIRST_NAME_IS_NOT_PROVIDED;
 import static gov.ca.cwds.service.messages.MessageCode.LAST_NAME_IS_NOT_PROVIDED;
 import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID_IN_CWSCMS;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_REMOVE_ALL_ROLES;
-import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_UNALLOWED_PERMISSIONS;
+import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_ASSIGN_CANS_PERMISSION_TO_NON_RACFID_USER;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_UNALLOWED_ROLES;
 import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
 import static gov.ca.cwds.util.Utils.isRacfidUser;
@@ -142,20 +143,9 @@ public class ValidationServiceImpl implements ValidationService {
       return;
     }
 
-    validateByAllowedPermissions(existedCognitoUser, newUserPermissions);
-  }
-
-  private void validateByAllowedPermissions(UserType existedCognitoUser, Collection<String> newUserPermissions) {
-
-    Collection<String> allowedPermissions = adminRoleImplementorFactory
-        .getPossibleUserPermissions(isRacfidUser(existedCognitoUser));
-
-    if (!allowedPermissions.containsAll(newUserPermissions)) {
+    if (!isRacfidUser(existedCognitoUser) && newUserPermissions.contains(CANS_PERMISSION_NAME)) {
       throwValidationException(
-          UNABLE_UPDATE_UNALLOWED_PERMISSIONS,
-          toCommaDelimitedString(newUserPermissions),
-          toCommaDelimitedString(allowedPermissions),
-          existedCognitoUser.getUsername());
+          UNABLE_TO_ASSIGN_CANS_PERMISSION_TO_NON_RACFID_USER, existedCognitoUser.getUsername());
     }
   }
 

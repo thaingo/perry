@@ -8,7 +8,7 @@ import java.util.List;
 
 public abstract class AbstractAdminRoleImplementor implements AdminRoleImplementor {
 
-  private static final String CANS_PERMISSION_NAME = "CANS-rollout";
+  public static final String CANS_PERMISSION_NAME = "CANS-rollout";
 
   private DictionaryProvider dictionaryProvider;
 
