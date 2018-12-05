@@ -475,6 +475,17 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     verifyDoraCalls(0);
   }
 
+  @Test
+  @WithMockCustomUser
+  public void testUpdateNonRacfidUser_CansPermission() throws Exception {
+
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setPermissions(toSet("CANS-rollout"));
+
+    assertUpdateBadRequest(USER_NO_RACFID_ID, userUpdate,
+        "fixtures/idm/update-user/non-racfid-user_cans-permission.json");
+  }
+
 
   private void assertUpdateBadRequest(String userId, UserUpdate userUpdate, String fixture)
       throws Exception {

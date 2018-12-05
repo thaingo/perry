@@ -1,0 +1,6 @@
+{
+  "status": "BAD_REQUEST",
+  "technical_message":"Unable to assign CANS-rollout permission to the user without RACFID, username: 2be3221f-8c2f-4386-8a95-a68f0282efb0",
+  "user_message":"Unable to assign CANS permission to the user without CWS Login",
+  "error_code": "CAP-056"
+}

@@ -72,8 +72,8 @@ public class ValidationServiceImpl implements ValidationService {
   @Override
   public void validateUpdateUser(UserType existedCognitoUser, UserUpdate updateUserDto) {
     validateUpdateByNewUserRoles(updateUserDto);
-    validateActivateUser(existedCognitoUser, updateUserDto);
     validateUpdateByNewUserPermissions(existedCognitoUser, updateUserDto);
+    validateActivateUser(existedCognitoUser, updateUserDto);
   }
 
   private void validateFirstNameIsProvided(User user) {
