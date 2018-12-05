@@ -9,7 +9,6 @@ import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.exception.AdminAuthorizationException;
 import gov.ca.cwds.idm.service.MappingService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
-import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.idm.service.role.implementor.AbstractAdminActionsAuthorizer;
 import gov.ca.cwds.idm.service.role.implementor.AdminRoleImplementorFactory;
@@ -70,37 +69,37 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     }
     User user = mappingService.toUser(existingUser);
     checkCanUpdateUser(user);
-    authorizeRolesUpdate(existingUser, updateUserDto);
-    authorizePermissionsUpdate(existingUser, updateUserDto);
+    authorizeRolesUpdate(user, updateUserDto);
+    authorizePermissionsUpdate(user, updateUserDto);
   }
 
-  private void authorizeRolesUpdate(UserType existedCognitoUser, UserUpdate updateUserDto) {
+  private void authorizeRolesUpdate(User user, UserUpdate updateUserDto) {
     if (updateUserDto.getRoles() == null) {
       return;
     }
-    if (wasRolesActuallyEdited(existedCognitoUser, updateUserDto)) {
-      checkCanEditRoles(existedCognitoUser);
+    if (wasRolesActuallyEdited(user, updateUserDto)) {
+      checkCanEditRoles(user);
     }
   }
 
-  private void authorizePermissionsUpdate(UserType existedCognitoUser, UserUpdate updateUserDto) {
+  private void authorizePermissionsUpdate(User user, UserUpdate updateUserDto) {
     if (updateUserDto.getPermissions() == null) {
       return;
     }
-    if (wasPermissionsActuallyEdited(existedCognitoUser, updateUserDto)) {
-      checkCanEditPermissions(existedCognitoUser);
+    if (wasPermissionsActuallyEdited(user, updateUserDto)) {
+      checkCanEditPermissions(user);
     }
   }
 
-  private boolean wasRolesActuallyEdited(UserType existedCognitoUser, UserUpdate updateUserDto) {
+  private boolean wasRolesActuallyEdited(User user, UserUpdate updateUserDto) {
     return wasActuallyEdited(
-        CognitoUtils.getRoles(existedCognitoUser),
+        user.getRoles(),
         updateUserDto.getRoles());
   }
 
-  private boolean wasPermissionsActuallyEdited(UserType existedCognitoUser, UserUpdate updateUserDto) {
+  private boolean wasPermissionsActuallyEdited(User user, UserUpdate updateUserDto) {
     return wasActuallyEdited(
-        CognitoUtils.getPermissions(existedCognitoUser),
+        user.getPermissions(),
         updateUserDto.getPermissions());
   }
 
@@ -112,11 +111,6 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     getAdminActionsAuthorizer(user).checkCanUpdateUser();
   }
 
-  private void checkCanEditRoles(UserType cognitoUser) {
-    User user = mappingService.toUser(cognitoUser);
-    checkCanEditRoles(user);
-  }
-
   private void checkCanEditRoles(User user) {
     getAdminActionsAuthorizer(user).checkCanEditRoles();
   }
@@ -124,11 +118,6 @@ public class AuthorizationServiceImpl implements AuthorizationService {
   @Override
   public boolean canEditRoles(User user) {
     return canAuthorizeOperation(user, this::checkCanEditRoles, ROLES_EDITING);
-  }
-
-  private void checkCanEditPermissions(UserType cognitoUser) {
-    User user = mappingService.toUser(cognitoUser);
-    checkCanUpdateUser(user);
   }
 
   private void checkCanEditPermissions(User user) {
