@@ -20,7 +20,7 @@ public abstract class AbstractAdminRoleImplementor implements AdminRoleImplement
       return allPermissionNames;
     } else {
       return allPermissionNames.stream()
-          .filter(name -> !name.equals(CANS_PERMISSION_NAME))
+          .filter(name -> !CANS_PERMISSION_NAME.equals(name))
           .collect(toList());
     }
   }
