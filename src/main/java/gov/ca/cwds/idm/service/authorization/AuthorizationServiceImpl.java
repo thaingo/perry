@@ -2,12 +2,9 @@ package gov.ca.cwds.idm.service.authorization;
 
 import static gov.ca.cwds.service.messages.MessageCode.ADMIN_CANNOT_UPDATE_HIMSELF;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserName;
-import static gov.ca.cwds.util.Utils.isRacfidUser;
 
 import com.amazonaws.services.cognitoidp.model.UserType;
-import gov.ca.cwds.idm.dto.ListOfValues;
 import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.dto.UserEditDetails;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.exception.AdminAuthorizationException;
 import gov.ca.cwds.idm.service.MappingService;
@@ -60,7 +57,8 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     checkCanUpdateUser(user);
   }
 
-  private boolean canUpdateUser(String userId) {
+  @Override
+  public boolean canUpdateUser(String userId) {
     return canAuthorizeOperation(userId, this::checkCanUpdateUser, USER_UPDATE);
   }
 
@@ -118,36 +116,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
   }
 
   @Override
-  public UserEditDetails getEditDetails(User user) {
-    UserEditDetails editDetails = new UserEditDetails();
-
-    boolean canUpdateUser = canUpdateUser(user.getId());
-
-    editDetails.setEditable(canUpdateUser);
-    editDetails.setRoles(getRoles(user, canUpdateUser));
-    editDetails.setPermissions(getPermissions(user, canUpdateUser));
-
-    return editDetails;
-  }
-
-  private ListOfValues getRoles(User user, boolean canUpdateUser) {
-    ListOfValues usersPossibleRoles = new ListOfValues();
-    usersPossibleRoles.setEditable(canUpdateUser && canEditRoles(user));
-    usersPossibleRoles.setPossibleValues(adminRoleImplementorFactory.getPossibleUserRoles());
-    return usersPossibleRoles;
-  }
-
-  private ListOfValues getPermissions(User user, boolean canUpdateUser) {
-    ListOfValues usersPossiblePermissions = new ListOfValues();
-    usersPossiblePermissions.setEditable(canUpdateUser && canEditPermissions(user));
-
-    usersPossiblePermissions
-        .setPossibleValues(adminRoleImplementorFactory.getPossibleUserPermissions(isRacfidUser(user)));
-
-    return usersPossiblePermissions;
-  }
-
-  boolean canEditRoles(User user) {
+  public boolean canEditRoles(User user) {
     return canAuthorizeOperation(user, this::checkCanEditRoles, ROLES_EDITING);
   }
 
@@ -155,7 +124,8 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     getAdminActionsAuthorizer(user).checkCanEditPermissions();
   }
 
-  private boolean canEditPermissions(User  user) {
+  @Override
+  public boolean canEditPermissions(User  user) {
     return canAuthorizeOperation(user, this::checkCanEditPermissions, PERMISSIONS_EDITING);
   }
 

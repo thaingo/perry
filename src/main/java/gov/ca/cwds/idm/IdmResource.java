@@ -17,6 +17,7 @@ import gov.ca.cwds.idm.persistence.ns.entity.Permission;
 import gov.ca.cwds.idm.service.DictionaryProvider;
 import gov.ca.cwds.idm.service.IdmService;
 import gov.ca.cwds.idm.service.OfficeService;
+import gov.ca.cwds.idm.service.UserEditDetailsService;
 import gov.ca.cwds.idm.service.authorization.AuthorizationService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -61,7 +62,7 @@ public class IdmResource {
   private OfficeService officeService;
 
   @Autowired
-  private AuthorizationService authorizationService;
+  private UserEditDetailsService userEditDetailsService;
 
   @RequestMapping(method = RequestMethod.GET, value = "/users", produces = "application/json")
   @ApiOperation(
@@ -142,7 +143,7 @@ public class IdmResource {
           String id) {
 
     User user = idmService.findUser(id);
-    UserEditDetails editDetails = authorizationService.getEditDetails(user);
+    UserEditDetails editDetails = userEditDetailsService.getEditDetails(user);
     UserByIdResponse response = new UserByIdResponse(user, editDetails);
     return ResponseEntity.ok().body(response);
   }
