@@ -18,6 +18,7 @@
     "CANS-assessment-create",
     "CANS-assessment-in-progress-update",
     "CANS-assessment-in-progress-delete",
+    "CANS-assessment-completed-delete",
     "CANS-assessment-complete",
     "permission1",
     "permission2"
