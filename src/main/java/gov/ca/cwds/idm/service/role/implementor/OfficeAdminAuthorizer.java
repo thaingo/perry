@@ -26,11 +26,9 @@ class OfficeAdminAuthorizer extends AbstractAdminActionsAuthorizer {
     if(!isPrincipalInTheSameCountyWith(getUser())) {
       throwAuthorizationException(OFFICE_ADMIN_CANNOT_VIEW_USER_FROM_OTHER_COUNTY, getUser().getId());
     }
-
     if(UserRolesService.isCalsExternalWorker(getUser())) {
       throwAuthorizationException(OFFICE_ADMIN_CANNOT_VIEW_USERS_WITH_CALS_EXTERNAL_WORKER_ROLE, getUser().getId());
     }
-
     if(UserRolesService.isCalsAdmin(getUser())) {
       throwAuthorizationException(OFFICE_ADMIN_CANNOT_VIEW_USERS_WITH_CALS_ADMIN_ROLE, getUser().getId());
     }
