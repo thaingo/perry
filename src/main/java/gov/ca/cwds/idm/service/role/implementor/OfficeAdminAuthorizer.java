@@ -6,10 +6,13 @@ import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USE
 import static gov.ca.cwds.service.messages.MessageCode.OFFICE_ADMIN_CANNOT_RESEND_INVITATION_FOR_USER_FROM_OTHER_OFFICE;
 import static gov.ca.cwds.service.messages.MessageCode.OFFICE_ADMIN_CANNOT_UPDATE_ADMIN;
 import static gov.ca.cwds.service.messages.MessageCode.OFFICE_ADMIN_CANNOT_UPDATE_USER_FROM_OTHER_OFFICE;
+import static gov.ca.cwds.service.messages.MessageCode.OFFICE_ADMIN_CANNOT_VIEW_USERS_WITH_CALS_ADMIN_ROLE;
+import static gov.ca.cwds.service.messages.MessageCode.OFFICE_ADMIN_CANNOT_VIEW_USERS_WITH_CALS_EXTERNAL_WORKER_ROLE;
 import static gov.ca.cwds.service.messages.MessageCode.OFFICE_ADMIN_CANNOT_VIEW_USER_FROM_OTHER_COUNTY;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserOfficeIds;
 
 import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.idm.service.authorization.UserRolesService;
 import java.util.Set;
 
 class OfficeAdminAuthorizer extends AbstractAdminActionsAuthorizer {
@@ -22,6 +25,14 @@ class OfficeAdminAuthorizer extends AbstractAdminActionsAuthorizer {
   public void checkCanViewUser() {
     if(!isPrincipalInTheSameCountyWith(getUser())) {
       throwAuthorizationException(OFFICE_ADMIN_CANNOT_VIEW_USER_FROM_OTHER_COUNTY, getUser().getId());
+    }
+
+    if(UserRolesService.isCalsExternalWorker(getUser())) {
+      throwAuthorizationException(OFFICE_ADMIN_CANNOT_VIEW_USERS_WITH_CALS_EXTERNAL_WORKER_ROLE, getUser().getId());
+    }
+
+    if(UserRolesService.isCalsAdmin(getUser())) {
+      throwAuthorizationException(OFFICE_ADMIN_CANNOT_VIEW_USERS_WITH_CALS_ADMIN_ROLE, getUser().getId());
     }
   }
 
