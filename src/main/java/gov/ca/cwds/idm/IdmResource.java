@@ -18,7 +18,6 @@ import gov.ca.cwds.idm.service.DictionaryProvider;
 import gov.ca.cwds.idm.service.IdmService;
 import gov.ca.cwds.idm.service.OfficeService;
 import gov.ca.cwds.idm.service.UserEditDetailsService;
-import gov.ca.cwds.idm.service.authorization.AuthorizationService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
