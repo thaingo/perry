@@ -52,23 +52,17 @@ public class ValidationServiceImpl implements ValidationService {
     validateFirstNameIsProvided(enrichedUser);
     validateLastNameIsProvided(enrichedUser);
     validateCountyNameIsProvided(enrichedUser);
-
-
-    if (isRacfidUser(enrichedUser)) {
-      String racfId = enrichedUser.getRacfid();
-      validateActiveUserExistsInCws(activeUserExistsInCws, racfId);
-      validateRacfidDoesNotExistInCognito(racfId);
-    }
     validateCreateByUserPermission(enrichedUser);
+
+    validateActiveRacfidUserExistsInCws(activeUserExistsInCws, enrichedUser.getRacfid());
+    validateRacfidDoesNotExistInCognito(enrichedUser.getRacfid());
   }
 
   @Override
   public void validateVerifyIfUserCanBeCreated(User enrichedUser, boolean activeUserExistsInCws) {
-    String racfId = enrichedUser.getRacfid();
-
-    validateActiveUserExistsInCws(activeUserExistsInCws, racfId);
+    validateActiveRacfidUserExistsInCws(activeUserExistsInCws, enrichedUser.getRacfid());
     validateEmailDoesNotExistInCognito(enrichedUser.getEmail());
-    validateRacfidDoesNotExistInCognito(racfId);
+    validateRacfidDoesNotExistInCognito(enrichedUser.getRacfid());
   }
 
   @Override
@@ -96,13 +90,21 @@ public class ValidationServiceImpl implements ValidationService {
     }
   }
 
-  private void validateActiveUserExistsInCws(boolean activeUserExistsInCws, String racfid) {
+  private void validateActiveRacfidUserExistsInCws(boolean activeUserExistsInCws, String racfId) {
+    if(!isRacfidUser(racfId)){
+      return;
+    }
+
     if (!activeUserExistsInCws) {
-      throwValidationException(NO_USER_WITH_RACFID_IN_CWSCMS, racfid);
+      throwValidationException(NO_USER_WITH_RACFID_IN_CWSCMS, racfId);
     }
   }
 
   void validateRacfidDoesNotExistInCognito(String racfId) {
+    if(!isRacfidUser(racfId)){
+      return;
+    }
+
     if (isActiveRacfIdPresentInCognito(racfId)) {
       throwValidationException(ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM, racfId);
     }
@@ -191,9 +193,9 @@ public class ValidationServiceImpl implements ValidationService {
     return newEnabled != null && !newEnabled.equals(currentEnabled) && newEnabled;
   }
 
-  void validateActivateUser(String racfId) {
+  void validateActivateUser(String racfId ) {
     CwsUserInfo cwsUser = cwsUserInfoService.getCwsUserByRacfId(racfId);
-    validateActiveUserExistsInCws(cwsUser != null, racfId);
+    validateActiveRacfidUserExistsInCws(cwsUser != null, racfId);
     validateRacfidDoesNotExistInCognito(racfId);
   }
 
