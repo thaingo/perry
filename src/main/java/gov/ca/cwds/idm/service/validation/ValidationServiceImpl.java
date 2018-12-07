@@ -53,11 +53,13 @@ public class ValidationServiceImpl implements ValidationService {
     validateLastNameIsProvided(enrichedUser);
     validateCountyNameIsProvided(enrichedUser);
 
+
     if (isRacfidUser(enrichedUser)) {
       String racfId = enrichedUser.getRacfid();
       validateActiveUserExistsInCws(activeUserExistsInCws, racfId);
       validateRacfidDoesNotExistInCognito(racfId);
     }
+    validateCreateByUserPermission(enrichedUser);
   }
 
   @Override
@@ -136,16 +138,24 @@ public class ValidationServiceImpl implements ValidationService {
     }
   }
 
+  private void validateCreateByUserPermission(User user) {
+    validateByCansPermission(user.getPermissions(), isRacfidUser(user), user.getId());
+  }
+
   private void validateUpdateByNewUserPermissions(UserType existedCognitoUser, UserUpdate updateUserDto) {
-    Collection<String> newUserPermissions = updateUserDto.getPermissions();
+    validateByCansPermission(updateUserDto.getPermissions(), isRacfidUser(existedCognitoUser),
+        existedCognitoUser.getUsername());
+  }
+
+  private void validateByCansPermission(Collection<String> newUserPermissions, boolean isRacfidUser,
+      String userId) {
 
     if (newUserPermissions == null) {
       return;
     }
 
-    if (!isRacfidUser(existedCognitoUser) && newUserPermissions.contains(CANS_PERMISSION_NAME)) {
-      throwValidationException(
-          UNABLE_TO_ASSIGN_CANS_PERMISSION_TO_NON_RACFID_USER, existedCognitoUser.getUsername());
+    if (!isRacfidUser && newUserPermissions.contains(CANS_PERMISSION_NAME)) {
+      throwValidationException(UNABLE_TO_ASSIGN_CANS_PERMISSION_TO_NON_RACFID_USER, userId);
     }
   }
 
