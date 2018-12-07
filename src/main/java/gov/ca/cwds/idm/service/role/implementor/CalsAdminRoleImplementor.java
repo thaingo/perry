@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * Created by Alexander Serbin on 10/9/2018
  */
-class CalsAdminRoleImplementor extends AbstractAdminRoleImplementor {
+class CalsAdminRoleImplementor implements AdminRoleImplementor {
 
   @Override
   public AbstractAdminActionsAuthorizer getAdminActionsAuthorizer(User user) {
@@ -20,5 +20,4 @@ class CalsAdminRoleImplementor extends AbstractAdminRoleImplementor {
   public List<String> getPossibleUserRoles() {
     return unmodifiableList(Collections.emptyList());
   }
-
 }

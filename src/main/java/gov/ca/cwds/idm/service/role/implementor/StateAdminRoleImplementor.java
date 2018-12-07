@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Created by Alexander Serbin on 10/9/2018
  */
-class StateAdminRoleImplementor extends AbstractAdminRoleImplementor  {
+class StateAdminRoleImplementor implements AdminRoleImplementor {
 
   @Override
   public AbstractAdminActionsAuthorizer getAdminActionsAuthorizer(User user) {
@@ -23,5 +23,4 @@ class StateAdminRoleImplementor extends AbstractAdminRoleImplementor  {
   public List<String> getPossibleUserRoles() {
     return unmodifiableList(asList(OFFICE_ADMIN, COUNTY_ADMIN, CWS_WORKER));
   }
-
 }

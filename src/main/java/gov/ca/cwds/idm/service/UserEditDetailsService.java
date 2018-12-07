@@ -19,6 +19,8 @@ public class UserEditDetailsService {
 
   private AdminRoleImplementorFactory adminRoleImplementorFactory;
 
+  private PossibleUserPermissionsService possibleUserPermissionsService;
+
   public UserEditDetails getEditDetails(User user) {
     UserEditDetails editDetails = new UserEditDetails();
 
@@ -42,8 +44,8 @@ public class UserEditDetailsService {
     ListOfValues usersPossiblePermissions = new ListOfValues();
     usersPossiblePermissions.setEditable(canUpdateUser && authorizationService.canEditPermissions(user));
 
-    usersPossiblePermissions
-        .setPossibleValues(adminRoleImplementorFactory.getPossibleUserPermissions(isRacfidUser(user)));
+    usersPossiblePermissions.setPossibleValues(
+        possibleUserPermissionsService.getPossibleUserPermissions(isRacfidUser(user)));
 
     return usersPossiblePermissions;
   }
@@ -57,5 +59,11 @@ public class UserEditDetailsService {
   public void setAdminRoleImplementorFactory(
       AdminRoleImplementorFactory adminRoleImplementorFactory) {
     this.adminRoleImplementorFactory = adminRoleImplementorFactory;
+  }
+
+  @Autowired
+  public void setPossibleUserPermissionsService(
+      PossibleUserPermissionsService possibleUserPermissionsService) {
+    this.possibleUserPermissionsService = possibleUserPermissionsService;
   }
 }

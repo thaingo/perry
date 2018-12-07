@@ -7,10 +7,8 @@ import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 
 import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.service.DictionaryProvider;
 import gov.ca.cwds.idm.service.authorization.UserRolesService;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
@@ -21,30 +19,20 @@ import org.springframework.stereotype.Service;
 @Profile("idm")
 public class AdminRoleImplementorFactory {
 
-  @Autowired
-  private DictionaryProvider dictionaryProvider;
-
-  public AdminRoleImplementor createAdminRoleImplementor() {
-    AbstractAdminRoleImplementor implementor;
+  private AdminRoleImplementor createAdminRoleImplementor() {
 
     switch (UserRolesService.getStrongestAdminRole(getCurrentUser())) {
       case STATE_ADMIN:
-        implementor = new StateAdminRoleImplementor();
-        break;
+        return new StateAdminRoleImplementor();
       case COUNTY_ADMIN:
-        implementor = new CountyAdminRoleImplementor();
-        break;
+        return new CountyAdminRoleImplementor();
       case OFFICE_ADMIN:
-        implementor = new OfficeAdminRoleImplementor();
-        break;
+        return new OfficeAdminRoleImplementor();
       case CALS_ADMIN:
-        implementor = new CalsAdminRoleImplementor();
-        break;
+        return new CalsAdminRoleImplementor();
       default:
         throw new IllegalStateException();
     }
-    implementor.setDictionaryProvider(dictionaryProvider);
-    return implementor;
   }
 
   public AbstractAdminActionsAuthorizer getAdminActionsAuthorizer(User user) {
@@ -53,9 +41,5 @@ public class AdminRoleImplementorFactory {
 
   public List<String> getPossibleUserRoles() {
     return createAdminRoleImplementor().getPossibleUserRoles();
-  }
-
-  public List<String> getPossibleUserPermissions(boolean isRacfidUser) {
-    return createAdminRoleImplementor().getPossibleUserPermissions(isRacfidUser);
   }
 }

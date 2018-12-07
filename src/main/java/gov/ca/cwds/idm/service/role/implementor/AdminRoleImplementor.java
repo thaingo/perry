@@ -11,6 +11,4 @@ public interface AdminRoleImplementor {
   AbstractAdminActionsAuthorizer getAdminActionsAuthorizer(User user);
 
   List<String> getPossibleUserRoles();
-
-  List<String> getPossibleUserPermissions(boolean isRacfidUser);
 }

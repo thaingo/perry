@@ -1,18 +1,21 @@
-package gov.ca.cwds.idm.service.role.implementor;
+package gov.ca.cwds.idm.service;
 
 import static java.util.stream.Collectors.toList;
 
 import gov.ca.cwds.idm.persistence.ns.entity.Permission;
-import gov.ca.cwds.idm.service.DictionaryProvider;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Service;
 
-public abstract class AbstractAdminRoleImplementor implements AdminRoleImplementor {
+@Service
+@Profile("idm")
+public class PossibleUserPermissionsService {
 
   public static final String CANS_PERMISSION_NAME = "CANS-rollout";
 
   private DictionaryProvider dictionaryProvider;
 
-  @Override
   public List<String> getPossibleUserPermissions(boolean isRacfidUser) {
     List<String> allPermissionNames = getAllPermissionNames();
 
@@ -30,6 +33,7 @@ public abstract class AbstractAdminRoleImplementor implements AdminRoleImplement
         .map(Permission::getName).collect(toList());
   }
 
+  @Autowired
   public void setDictionaryProvider(DictionaryProvider dictionaryProvider) {
     this.dictionaryProvider = dictionaryProvider;
   }

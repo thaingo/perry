@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * Created by Alexander Serbin on 10/9/2018
  */
-class OfficeAdminRoleImplementor extends AbstractAdminRoleImplementor {
+class OfficeAdminRoleImplementor implements AdminRoleImplementor {
 
   @Override
   public AbstractAdminActionsAuthorizer getAdminActionsAuthorizer(User user) {

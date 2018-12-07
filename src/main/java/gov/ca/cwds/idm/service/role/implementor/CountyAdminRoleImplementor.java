@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * Created by Alexander Serbin on 10/9/2018
  */
-class CountyAdminRoleImplementor extends AbstractAdminRoleImplementor {
+class CountyAdminRoleImplementor implements AdminRoleImplementor {
 
   @Override
   public AbstractAdminActionsAuthorizer getAdminActionsAuthorizer(User user) {
@@ -22,5 +22,4 @@ class CountyAdminRoleImplementor extends AbstractAdminRoleImplementor {
   public List<String> getPossibleUserRoles() {
     return unmodifiableList(Arrays.asList(OFFICE_ADMIN, CWS_WORKER));
   }
-
 }
