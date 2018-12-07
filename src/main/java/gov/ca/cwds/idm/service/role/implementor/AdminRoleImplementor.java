@@ -11,5 +11,4 @@ public interface AdminRoleImplementor {
   AbstractAdminActionsAuthorizer getAdminActionsAuthorizer(User user);
 
   List<String> getPossibleUserRoles();
-
 }

@@ -2,12 +2,14 @@ package gov.ca.cwds.idm.service.validation;
 
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByEmail;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByRacfId;
+import static gov.ca.cwds.idm.service.PossibleUserPermissionsService.CANS_PERMISSION_NAME;
 import static gov.ca.cwds.service.messages.MessageCode.ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.COUNTY_NAME_IS_NOT_PROVIDED;
 import static gov.ca.cwds.service.messages.MessageCode.FIRST_NAME_IS_NOT_PROVIDED;
 import static gov.ca.cwds.service.messages.MessageCode.LAST_NAME_IS_NOT_PROVIDED;
 import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID_IN_CWSCMS;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_REMOVE_ALL_ROLES;
+import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_ASSIGN_CANS_PERMISSION_TO_NON_RACFID_USER;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_UNALLOWED_ROLES;
 import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
 import static gov.ca.cwds.util.Utils.isRacfidUser;
@@ -70,6 +72,7 @@ public class ValidationServiceImpl implements ValidationService {
   @Override
   public void validateUpdateUser(UserType existedCognitoUser, UserUpdate updateUserDto) {
     validateUpdateByNewUserRoles(updateUserDto);
+    validateUpdateByNewUserPermissions(existedCognitoUser, updateUserDto);
     validateActivateUser(existedCognitoUser, updateUserDto);
   }
 
@@ -130,6 +133,19 @@ public class ValidationServiceImpl implements ValidationService {
           UNABLE_UPDATE_UNALLOWED_ROLES,
           toCommaDelimitedString(newUserRoles),
           toCommaDelimitedString(allowedRoles));
+    }
+  }
+
+  private void validateUpdateByNewUserPermissions(UserType existedCognitoUser, UserUpdate updateUserDto) {
+    Collection<String> newUserPermissions = updateUserDto.getPermissions();
+
+    if (newUserPermissions == null) {
+      return;
+    }
+
+    if (!isRacfidUser(existedCognitoUser) && newUserPermissions.contains(CANS_PERMISSION_NAME)) {
+      throwValidationException(
+          UNABLE_TO_ASSIGN_CANS_PERMISSION_TO_NON_RACFID_USER, existedCognitoUser.getUsername());
     }
   }
 

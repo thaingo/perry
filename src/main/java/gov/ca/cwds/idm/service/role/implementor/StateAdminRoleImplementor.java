@@ -23,5 +23,4 @@ class StateAdminRoleImplementor implements AdminRoleImplementor {
   public List<String> getPossibleUserRoles() {
     return unmodifiableList(asList(OFFICE_ADMIN, COUNTY_ADMIN, CWS_WORKER));
   }
-
 }

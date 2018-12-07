@@ -154,10 +154,10 @@ public class IdmServiceImplTest {
   @WithMockCustomUser
   public void testUpdateUser_SearchAndDbLogFail() {
     UserUpdate userUpdate = new UserUpdate();
-    userUpdate.setPermissions(toSet("new permission"));
+    userUpdate.setPermissions(toSet("Snapshot-rollout"));
 
     User existedUser = user();
-    existedUser.setPermissions(toSet("old permission"));
+    existedUser.setPermissions(toSet("Hotline-rollout"));
     UserType existedUserType = userType(existedUser, USER_ID);
 
     setUpdateUserAttributesResult(USER_ID, userUpdate, true);
@@ -187,11 +187,11 @@ public class IdmServiceImplTest {
   @WithMockCustomUser
   public void testPartialUpdateUser() {
     UserUpdate userUpdate = new UserUpdate();
-    userUpdate.setPermissions(toSet("new permission"));
+    userUpdate.setPermissions(toSet("Snapshot-rollout"));
     userUpdate.setEnabled(Boolean.FALSE);
 
     User existedUser = user();
-    existedUser.setPermissions(toSet("old permission"));
+    existedUser.setPermissions(toSet("RFA-rollout"));
     UserType existedUserType = userType(existedUser, USER_ID);
 
     setUpdateUserAttributesResult(USER_ID, userUpdate, true);
@@ -217,11 +217,11 @@ public class IdmServiceImplTest {
   @WithMockCustomUser
   public void testPartialUpdateUser_SearchFail() {
     UserUpdate userUpdate = new UserUpdate();
-    userUpdate.setPermissions(toSet("new permission"));
+    userUpdate.setPermissions(toSet("Snapshot-rollout"));
     userUpdate.setEnabled(Boolean.FALSE);
 
     User existedUser = user();
-    existedUser.setPermissions(toSet("old permission"));
+    existedUser.setPermissions(toSet("RFA-rollout"));
     UserType existedUserType = userType(existedUser, USER_ID);
 
     setUpdateUserAttributesResult(USER_ID, userUpdate, true);
@@ -251,11 +251,11 @@ public class IdmServiceImplTest {
   @WithMockCustomUser
   public void testPartialUpdateUser_SearchAndDbLogFail() {
     UserUpdate userUpdate = new UserUpdate();
-    userUpdate.setPermissions(toSet("new permission"));
+    userUpdate.setPermissions(toSet("Snapshot-rollout"));
     userUpdate.setEnabled(Boolean.FALSE);
 
     User existedUser = user();
-    existedUser.setPermissions(toSet("old permission"));
+    existedUser.setPermissions(toSet("RFA-rollout"));
     UserType existedUserType = userType(existedUser, USER_ID);
 
     setUpdateUserAttributesResult(USER_ID, userUpdate, true);

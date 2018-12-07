@@ -1,5 +1,6 @@
 package gov.ca.cwds.util;
 
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.RACFID_CUSTOM;
 import static gov.ca.cwds.util.Utils.healthCheckUtcTimeToPacific;
 import static gov.ca.cwds.util.Utils.isRacfidUser;
 import static gov.ca.cwds.util.Utils.isStatusHealthy;
@@ -13,6 +14,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+import com.amazonaws.services.cognitoidp.model.AttributeType;
+import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,6 +46,22 @@ public class UtilsTest {
     assertFalse(isRacfidUser(user(null)));
     assertFalse(isRacfidUser(user("")));
     assertFalse(isRacfidUser(user(" ")));
+  }
+
+  @Test
+  public void testIsRacfidCognitoUser() {
+    UserType cognitoUser = new UserType();
+    assertFalse(isRacfidUser(cognitoUser));
+
+    AttributeType racfidAttr = new AttributeType();
+    racfidAttr.setName(RACFID_CUSTOM.getName());
+    racfidAttr.setValue("");
+    cognitoUser.withAttributes(racfidAttr);
+    assertFalse(isRacfidUser(cognitoUser));
+
+    racfidAttr.setValue("SOMERACFID");
+    cognitoUser.withAttributes(racfidAttr);
+    assertTrue(isRacfidUser(cognitoUser));
   }
 
   private User user(String rachfid) {

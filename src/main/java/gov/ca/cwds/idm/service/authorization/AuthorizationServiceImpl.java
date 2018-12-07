@@ -5,13 +5,16 @@ import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserName;
 
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.exception.AdminAuthorizationException;
 import gov.ca.cwds.idm.service.MappingService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.idm.service.role.implementor.AbstractAdminActionsAuthorizer;
 import gov.ca.cwds.idm.service.role.implementor.AdminRoleImplementorFactory;
+import java.util.Set;
 import java.util.function.Consumer;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +26,10 @@ import org.springframework.stereotype.Service;
 public class AuthorizationServiceImpl implements AuthorizationService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AuthorizationServiceImpl.class);
+
+  private static final String ROLES_EDITING = "roles editing";
+  private static final String PERMISSIONS_EDITING = "permissions editing";
+  private static final String USER_UPDATE = "user update";
 
   private CognitoServiceFacade cognitoServiceFacade;
 
@@ -42,8 +49,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     getAdminActionsAuthorizer(user).checkCanCreateUser();
   }
 
-  @Override
-  public void checkCanUpdateUser(String userId) {
+  void checkCanUpdateUser(String userId) {
     if (userId.equals(getCurrentUserName())) {
       throw exceptionFactory.createAuthorizationException(ADMIN_CANNOT_UPDATE_HIMSELF);
     }
@@ -53,31 +59,80 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
   @Override
   public boolean canUpdateUser(String userId) {
-    return canAuthorizeOperation(userId, this::checkCanUpdateUser, "user update");
+    return canAuthorizeOperation(userId, this::checkCanUpdateUser, USER_UPDATE);
   }
 
   @Override
-  public void checkCanUpdateUser(UserType existingUser) {
+  public void checkCanUpdateUser(UserType existingUser, UserUpdate updateUserDto) {
     if (existingUser.getUsername().equals(getCurrentUserName())) {
       throw exceptionFactory.createAuthorizationException(ADMIN_CANNOT_UPDATE_HIMSELF);
     }
     User user = mappingService.toUser(existingUser);
     checkCanUpdateUser(user);
+    authorizeRolesUpdate(user, updateUserDto);
+    authorizePermissionsUpdate(user, updateUserDto);
+  }
+
+  private void authorizeRolesUpdate(User user, UserUpdate updateUserDto) {
+    if (updateUserDto.getRoles() == null) {
+      return;
+    }
+    if (wasRolesActuallyEdited(user, updateUserDto)) {
+      checkCanEditRoles(user);
+    }
+  }
+
+  private void authorizePermissionsUpdate(User user, UserUpdate updateUserDto) {
+    if (updateUserDto.getPermissions() == null) {
+      return;
+    }
+    if (wasPermissionsActuallyEdited(user, updateUserDto)) {
+      checkCanEditPermissions(user);
+    }
+  }
+
+  private boolean wasRolesActuallyEdited(User user, UserUpdate updateUserDto) {
+    return wasActuallyEdited(
+        user.getRoles(),
+        updateUserDto.getRoles());
+  }
+
+  private boolean wasPermissionsActuallyEdited(User user, UserUpdate updateUserDto) {
+    return wasActuallyEdited(
+        user.getPermissions(),
+        updateUserDto.getPermissions());
+  }
+
+    private boolean wasActuallyEdited(Set<String> oldSet, Set<String> newSet) {
+    return !CollectionUtils.isEqualCollection(oldSet, newSet);
   }
 
   void checkCanUpdateUser(User user) {
     getAdminActionsAuthorizer(user).checkCanUpdateUser();
   }
 
-  private AdminActionsAuthorizer getAdminActionsAuthorizer(User user) {
-    AbstractAdminActionsAuthorizer authorizer = adminRoleImplementorFactory.getAdminActionsAuthorizer(user);
-    authorizer.setExceptionFactory(exceptionFactory);
-    return authorizer;
+  private void checkCanEditRoles(User user) {
+    getAdminActionsAuthorizer(user).checkCanEditRoles();
   }
 
   @Override
   public boolean canEditRoles(User user) {
-    return canAuthorizeOperation(user, this::checkCanEditRoles, "roles editing");
+    return canAuthorizeOperation(user, this::checkCanEditRoles, ROLES_EDITING);
+  }
+
+  private void checkCanEditPermissions(User user) {
+    getAdminActionsAuthorizer(user).checkCanEditPermissions();
+  }
+
+  @Override
+  public boolean canEditPermissions(User  user) {
+    return canAuthorizeOperation(user, this::checkCanEditPermissions, PERMISSIONS_EDITING);
+  }
+
+  private AdminActionsAuthorizer getAdminActionsAuthorizer(User user) {
+    AbstractAdminActionsAuthorizer authorizer = adminRoleImplementorFactory.getAdminActionsAuthorizer(user);
+    authorizer.setExceptionFactory(exceptionFactory);
+    return authorizer;
   }
 
   @SuppressWarnings({"squid:S1166", "fb-contrib:EXS_EXCEPTION_SOFTENING_RETURN_FALSE"})
@@ -91,17 +146,6 @@ public class AuthorizationServiceImpl implements AuthorizationService {
       return false;
     }
     return true;
-  }
-
-  @Override
-  public void checkCanEditRoles(UserType cognitoUser) {
-    User user = mappingService.toUser(cognitoUser);
-    checkCanEditRoles(user);
-  }
-
-  private void checkCanEditRoles(User user) {
-    checkCanUpdateUser(user);
-    getAdminActionsAuthorizer(user).checkCanEditRoles();
   }
 
   @Override

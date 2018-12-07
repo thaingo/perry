@@ -20,5 +20,4 @@ class CalsAdminRoleImplementor implements AdminRoleImplementor {
   public List<String> getPossibleUserRoles() {
     return unmodifiableList(Collections.emptyList());
   }
-
 }
