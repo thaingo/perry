@@ -52,7 +52,6 @@ import gov.ca.cwds.idm.service.cognito.StandardUserAttribute;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil;
-import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.idm.service.execution.OptionalExecution;
 import gov.ca.cwds.idm.service.execution.PutInSearchExecution;
@@ -136,7 +135,7 @@ public class IdmServiceImpl implements IdmService {
 
     UserType existedCognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
 
-    authorizeUpdateUser(existedCognitoUser, updateUserDto);
+    authorizeService.checkCanUpdateUser(existedCognitoUser, updateUserDto);
     validationService.validateUpdateUser(existedCognitoUser, updateUserDto);
 
     ExecutionStatus updateAttributesStatus =
@@ -268,25 +267,6 @@ public class IdmServiceImpl implements IdmService {
   private UserVerificationResult buildUserVerificationErrorResult(MessageCode code, String msg) {
     return UserVerificationResult.Builder.anUserVerificationResult()
         .withVerificationFailed(code.getValue(), msg).build();
-  }
-
-  private void authorizeUpdateUser(UserType existedCognitoUser, UserUpdate updateUserDto) {
-    authorizeService.checkCanUpdateUser(existedCognitoUser);
-    authorizeRolesUpdate(existedCognitoUser, updateUserDto);
-  }
-
-  private void authorizeRolesUpdate(UserType existedCognitoUser, UserUpdate updateUserDto) {
-    if (updateUserDto.getRoles() == null) {
-      return;
-    }
-    if (wasRolesActuallyEdited(existedCognitoUser, updateUserDto)) {
-      authorizeService.checkCanEditRoles(existedCognitoUser);
-    }
-  }
-
-  private boolean wasRolesActuallyEdited(UserType existedCognitoUser, UserUpdate updateUserDto) {
-    return !CollectionUtils.isEqualCollection(CognitoUtils.getRoles(existedCognitoUser),
-        updateUserDto.getRoles());
   }
 
   private CwsUserInfo getCwsUserData(User user) {

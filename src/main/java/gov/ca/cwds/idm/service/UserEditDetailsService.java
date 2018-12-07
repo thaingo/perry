@@ -1,13 +1,12 @@
 package gov.ca.cwds.idm.service;
 
+import static gov.ca.cwds.util.Utils.isRacfidUser;
+
 import gov.ca.cwds.idm.dto.ListOfValues;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserEditDetails;
-import gov.ca.cwds.idm.persistence.ns.entity.Permission;
 import gov.ca.cwds.idm.service.authorization.AuthorizationService;
 import gov.ca.cwds.idm.service.role.implementor.AdminRoleImplementorFactory;
-import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -16,41 +15,55 @@ import org.springframework.stereotype.Service;
 @Profile("idm")
 public class UserEditDetailsService {
 
-  @Autowired
   private AuthorizationService authorizationService;
 
-  @Autowired
   private AdminRoleImplementorFactory adminRoleImplementorFactory;
 
-  @Autowired
-  private DictionaryProvider dictionaryProvider;
+  private PossibleUserPermissionsService possibleUserPermissionsService;
 
   public UserEditDetails getEditDetails(User user) {
     UserEditDetails editDetails = new UserEditDetails();
 
-    editDetails.setEditable(authorizationService.canUpdateUser(user.getId()));
-    editDetails.setRoles(getRoles(user));
-    editDetails.setPermissions(getPermissions());
+    boolean canUpdateUser = authorizationService.canUpdateUser(user.getId());
+
+    editDetails.setEditable(canUpdateUser);
+    editDetails.setRoles(getRoles(user, canUpdateUser));
+    editDetails.setPermissions(getPermissions(user, canUpdateUser));
 
     return editDetails;
   }
 
-  private ListOfValues getRoles(User user) {
+  private ListOfValues getRoles(User user, boolean canUpdateUser) {
     ListOfValues usersPossibleRoles = new ListOfValues();
-    usersPossibleRoles.setEditable(authorizationService.canEditRoles(user));
+    usersPossibleRoles.setEditable(canUpdateUser && authorizationService.canEditRoles(user));
     usersPossibleRoles.setPossibleValues(adminRoleImplementorFactory.getPossibleUserRoles());
     return usersPossibleRoles;
   }
 
-  private ListOfValues getPermissions() {
+  private ListOfValues getPermissions(User user, boolean canUpdateUser) {
     ListOfValues usersPossiblePermissions = new ListOfValues();
-    usersPossiblePermissions.setEditable(true);
+    usersPossiblePermissions.setEditable(canUpdateUser && authorizationService.canEditPermissions(user));
 
-    List<String> permissionNames =
-        dictionaryProvider.getPermissions().stream()
-            .map(Permission::getName).collect(Collectors.toList());
-    usersPossiblePermissions.setPossibleValues(permissionNames);
+    usersPossiblePermissions.setPossibleValues(
+        possibleUserPermissionsService.getPossibleUserPermissions(isRacfidUser(user)));
 
     return usersPossiblePermissions;
+  }
+
+  @Autowired
+  public void setAuthorizationService(AuthorizationService authorizationService) {
+    this.authorizationService = authorizationService;
+  }
+
+  @Autowired
+  public void setAdminRoleImplementorFactory(
+      AdminRoleImplementorFactory adminRoleImplementorFactory) {
+    this.adminRoleImplementorFactory = adminRoleImplementorFactory;
+  }
+
+  @Autowired
+  public void setPossibleUserPermissionsService(
+      PossibleUserPermissionsService possibleUserPermissionsService) {
+    this.possibleUserPermissionsService = possibleUserPermissionsService;
   }
 }

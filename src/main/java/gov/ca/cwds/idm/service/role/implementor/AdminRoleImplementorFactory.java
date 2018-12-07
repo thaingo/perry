@@ -2,7 +2,6 @@ package gov.ca.cwds.idm.service.role.implementor;
 
 import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
-import static gov.ca.cwds.config.api.idm.Roles.IDM_JOB;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
@@ -20,7 +19,8 @@ import org.springframework.stereotype.Service;
 @Profile("idm")
 public class AdminRoleImplementorFactory {
 
-  public AdminRoleImplementor createAdminRoleImplementor() {
+  private AdminRoleImplementor createAdminRoleImplementor() {
+
     switch (UserRolesService.getStrongestAdminRole(getCurrentUser())) {
       case STATE_ADMIN:
         return new StateAdminRoleImplementor();
@@ -42,5 +42,4 @@ public class AdminRoleImplementorFactory {
   public List<String> getPossibleUserRoles() {
     return createAdminRoleImplementor().getPossibleUserRoles();
   }
-
 }

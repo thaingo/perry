@@ -1,7 +1,9 @@
 package gov.ca.cwds.util;
 
 import static gov.ca.cwds.config.Constants.DEFAULT_LOCALE;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getRACFId;
 
+import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
 import java.sql.Timestamp;
 import java.time.LocalDate;
@@ -90,6 +92,10 @@ public class Utils {
 
   public static boolean isRacfidUser(User user) {
     return StringUtils.isNotBlank(user.getRacfid());
+  }
+
+  public static boolean isRacfidUser(UserType userType) {
+    return StringUtils.isNotBlank(getRACFId(userType));
   }
 
   public static boolean isStatusHealthy(Status status) {

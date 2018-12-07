@@ -22,5 +22,4 @@ class CountyAdminRoleImplementor implements AdminRoleImplementor {
   public List<String> getPossibleUserRoles() {
     return unmodifiableList(Arrays.asList(OFFICE_ADMIN, CWS_WORKER));
   }
-
 }

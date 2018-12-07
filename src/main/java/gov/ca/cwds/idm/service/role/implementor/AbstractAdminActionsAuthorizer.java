@@ -34,6 +34,11 @@ public abstract class AbstractAdminActionsAuthorizer implements AdminActionsAuth
     }
   }
 
+  @Override
+  public void checkCanEditPermissions() {
+    //no authorization rules to check
+  }
+
   protected User getUser() {
     return user;
   }
