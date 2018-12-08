@@ -8,6 +8,7 @@ import static gov.ca.cwds.service.messages.MessageCode.COUNTY_NAME_IS_NOT_PROVID
 import static gov.ca.cwds.service.messages.MessageCode.FIRST_NAME_IS_NOT_PROVIDED;
 import static gov.ca.cwds.service.messages.MessageCode.LAST_NAME_IS_NOT_PROVIDED;
 import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID_IN_CWSCMS;
+import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_CREATE_NON_RACFID_USER_WITH_CANS_PERMISSION;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_REMOVE_ALL_ROLES;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_ASSIGN_CANS_PERMISSION_TO_NON_RACFID_USER;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_UNALLOWED_ROLES;
@@ -141,23 +142,23 @@ public class ValidationServiceImpl implements ValidationService {
   }
 
   private void validateCreateByUserPermission(User user) {
-    validateByCansPermission(user.getPermissions(), isRacfidUser(user), user.getId());
+    validateByCansPermission(user.getPermissions(), isRacfidUser(user), user.getId(),
+        UNABLE_TO_CREATE_NON_RACFID_USER_WITH_CANS_PERMISSION);
   }
 
   private void validateUpdateByNewUserPermissions(UserType existedCognitoUser, UserUpdate updateUserDto) {
     validateByCansPermission(updateUserDto.getPermissions(), isRacfidUser(existedCognitoUser),
-        existedCognitoUser.getUsername());
+        existedCognitoUser.getUsername(), UNABLE_TO_ASSIGN_CANS_PERMISSION_TO_NON_RACFID_USER);
   }
 
   private void validateByCansPermission(Collection<String> newUserPermissions, boolean isRacfidUser,
-      String userId) {
-
+      String userId, MessageCode errorCode) {
     if (newUserPermissions == null) {
       return;
     }
 
     if (!isRacfidUser && newUserPermissions.contains(CANS_PERMISSION_NAME)) {
-      throwValidationException(UNABLE_TO_ASSIGN_CANS_PERMISSION_TO_NON_RACFID_USER, userId);
+      throwValidationException(errorCode, userId);
     }
   }
 
