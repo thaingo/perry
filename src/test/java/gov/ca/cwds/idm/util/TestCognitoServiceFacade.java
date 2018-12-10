@@ -49,6 +49,8 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
   public static final String USER_WITH_RACFID_AND_DB_DATA_ID =
       "d740ec1d-80ae-4d84-a8c4-9bed7a942f5b";
   public static final String USER_WITH_NO_PHONE_EXTENSION = "d740ec1d-66ae-4d84-a8c4-8bed7a942f5b";
+  public static final String USER_WITH_RACFID_AND_INVALID_COUNTY_IN_COGNITO =
+      "145614ce-0168-4950-9b47-7ba0cdf1f299";
   public static final String NEW_USER_SUCCESS_ID = "17067e4e-270f-4623-b86c-b4d4fa527a34";
   public static final String NEW_USER_ES_FAIL_ID = "08e14c57-6e5e-48dd-8172-e8949c2a7f76";
   public static final String ES_ERROR_CREATE_USER_EMAIL = "es.error@create.com";
@@ -147,6 +149,22 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
             "CWS-worker",
             "SMITHBO",
             WithMockCustomUser.OFFICE_ID);
+
+    testUser(
+        USER_WITH_RACFID_AND_INVALID_COUNTY_IN_COGNITO,
+        Boolean.TRUE,
+        "CONFIRMED",
+        date(2017, 5, 22),
+        date(2018, 12, 3),
+        "stan.hailen@osi.ca.gav",
+        "Stan",
+        "Hailen",
+        "Lake",
+        "Facility-search-rollout",
+        "CWS-worker",
+        "HAILES",
+        WithMockCustomUser.OFFICE_ID);
+
 
     TestUser userWithNoPhoneExtension =
         testUser(

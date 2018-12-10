@@ -50,7 +50,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     if (existingUser.getUsername().equals(getCurrentUserName())) {
       return false;
     }
-    User user = composeUser(existingUser);
+    User user = mappingService.toUser(existingUser);
     return canUpdateUser(user);
   }
 
@@ -66,7 +66,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
   @Override
   public boolean canEditRoles(UserType cognitoUser) {
-    User user = composeUser(cognitoUser);
+    User user = mappingService.toUser(cognitoUser);
     return canEditRoles(user);
   }
 
@@ -78,17 +78,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
   private User getUserById(String userId) {
     UserType existingCognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
-    return composeUser(existingCognitoUser);
-  }
-
-  private User composeUser(UserType cognitoUser) {
-    User user;
-    if (OFFICE_ADMIN.equals(getStrongestAdminRole(getCurrentUser()))) {
-      user = mappingService.toUser(cognitoUser);
-    } else {
-      user = mappingService.toUserWithoutDbData(cognitoUser);
-    }
-    return user;
+    return mappingService.toUser(existingCognitoUser);
   }
 
   @Autowired

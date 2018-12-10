@@ -12,6 +12,7 @@ import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_CALS_EXTERNAL;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_NO_RACFID_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_WITH_NO_PHONE_EXTENSION;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_WITH_RACFID_AND_DB_DATA_ID;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_WITH_RACFID_AND_INVALID_COUNTY_IN_COGNITO;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_WITH_RACFID_ID;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
 
@@ -69,6 +70,15 @@ public class GetUserTest extends BaseIdmIntegrationTest {
         USER_WITH_RACFID_AND_DB_DATA_ID,
         "fixtures/idm/get-user/with-racfid-and-db-data-valid-1.json");
   }
+
+  @Test
+  @WithMockCustomUser
+  public void testGetUserWithRacfIdAndDbData_InvalidCountyInCognito() throws Exception {
+    testGetValidUser(
+        USER_WITH_RACFID_AND_INVALID_COUNTY_IN_COGNITO,
+        "fixtures/idm/get-user/with-racfid-and-db-data-invalid-county-in-cognito.json");
+  }
+
 
   @Test
   @WithMockCustomUser
