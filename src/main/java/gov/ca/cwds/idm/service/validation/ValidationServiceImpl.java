@@ -53,7 +53,7 @@ public class ValidationServiceImpl implements ValidationService {
     validateFirstNameIsProvided(enrichedUser);
     validateLastNameIsProvided(enrichedUser);
     validateCountyNameIsProvided(enrichedUser);
-    validateCreateByUserPermission(enrichedUser);
+    validateCreateByCansPermission(enrichedUser);
 
     validateActiveRacfidUserExistsInCws(activeUserExistsInCws, enrichedUser.getRacfid());
     validateRacfidDoesNotExistInCognito(enrichedUser.getRacfid());
@@ -69,7 +69,7 @@ public class ValidationServiceImpl implements ValidationService {
   @Override
   public void validateUpdateUser(UserType existedCognitoUser, UserUpdate updateUserDto) {
     validateUpdateByNewUserRoles(updateUserDto);
-    validateUpdateByNewUserPermissions(existedCognitoUser, updateUserDto);
+    validateUpdateByCansPermission(existedCognitoUser, updateUserDto);
     validateActivateUser(existedCognitoUser, updateUserDto);
   }
 
@@ -141,12 +141,12 @@ public class ValidationServiceImpl implements ValidationService {
     }
   }
 
-  private void validateCreateByUserPermission(User user) {
+  private void validateCreateByCansPermission(User user) {
     validateByCansPermission(user.getPermissions(), isRacfidUser(user), user.getId(),
         UNABLE_TO_CREATE_NON_RACFID_USER_WITH_CANS_PERMISSION);
   }
 
-  private void validateUpdateByNewUserPermissions(UserType existedCognitoUser, UserUpdate updateUserDto) {
+  private void validateUpdateByCansPermission(UserType existedCognitoUser, UserUpdate updateUserDto) {
     validateByCansPermission(updateUserDto.getPermissions(), isRacfidUser(existedCognitoUser),
         existedCognitoUser.getUsername(), UNABLE_TO_ASSIGN_CANS_PERMISSION_TO_NON_RACFID_USER);
   }
