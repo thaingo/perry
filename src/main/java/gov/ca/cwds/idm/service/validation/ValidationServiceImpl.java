@@ -9,6 +9,7 @@ import static gov.ca.cwds.service.messages.MessageCode.FIRST_NAME_IS_NOT_PROVIDE
 import static gov.ca.cwds.service.messages.MessageCode.LAST_NAME_IS_NOT_PROVIDED;
 import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID_IN_CWSCMS;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_CREATE_NON_RACFID_USER_WITH_CANS_PERMISSION;
+import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_CREATE_USER_WITHOUT_ROLES;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_REMOVE_ALL_ROLES;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_ASSIGN_CANS_PERMISSION_TO_NON_RACFID_USER;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_UNALLOWED_ROLES;
@@ -53,6 +54,10 @@ public class ValidationServiceImpl implements ValidationService {
     validateFirstNameIsProvided(enrichedUser);
     validateLastNameIsProvided(enrichedUser);
     validateCountyNameIsProvided(enrichedUser);
+
+    validateRolesExistAtUserCreate(enrichedUser);
+    validateCreatedUserRolesAreAllowed(enrichedUser);
+
     validateCreateByCansPermission(enrichedUser);
 
     validateActiveRacfidUserExistsInCws(activeUserExistsInCws, enrichedUser.getRacfid());
@@ -100,6 +105,18 @@ public class ValidationServiceImpl implements ValidationService {
     if (!activeUserExistsInCws) {
       throwValidationException(NO_USER_WITH_RACFID_IN_CWSCMS, racfId);
     }
+  }
+
+  private void validateRolesExistAtUserCreate(User user) {
+    Collection<String> roles = user.getRoles();
+
+    if(roles == null || roles.isEmpty()) {
+      throwValidationException(UNABLE_TO_CREATE_USER_WITHOUT_ROLES);
+    }
+  }
+
+  private void validateCreatedUserRolesAreAllowed(User user) {
+
   }
 
   void validateRacfidDoesNotExistInCognito(String racfId) {

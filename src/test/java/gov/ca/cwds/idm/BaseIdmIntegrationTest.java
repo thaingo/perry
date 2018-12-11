@@ -1,5 +1,6 @@
 package gov.ca.cwds.idm;
 
+import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.idm.BaseIdmIntegrationTest.DORA_WS_MAX_ATTEMPTS;
 import static gov.ca.cwds.idm.BaseIdmIntegrationTest.IDM_BASIC_AUTH_PASS;
 import static gov.ca.cwds.idm.BaseIdmIntegrationTest.IDM_BASIC_AUTH_USER;
@@ -22,6 +23,7 @@ import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.idm.util.TestCognitoServiceFacade;
 import gov.ca.cwds.idm.util.WithMockCustomUser;
 import gov.ca.cwds.service.messages.MessagesService;
+import gov.ca.cwds.util.Utils;
 import java.nio.charset.Charset;
 import java.util.Set;
 import org.apache.commons.codec.binary.Base64;
@@ -121,6 +123,7 @@ public abstract class BaseIdmIntegrationTest extends BaseIntegrationTest {
     user.setLastName("Gonzales");
     user.setCountyName(WithMockCustomUser.COUNTY);
     user.setOfficeId(WithMockCustomUser.OFFICE_ID);
+    user.setRoles(Utils.toSet(CWS_WORKER));
     return user;
   }
 
