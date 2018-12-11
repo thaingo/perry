@@ -73,7 +73,7 @@ public class ValidationServiceImpl implements ValidationService {
   }
 
   @Override
-  public void validateUpdateUser(UserType existedCognitoUser, UserUpdate updateUserDto) {
+  public void validateUserUpdate(UserType existedCognitoUser, UserUpdate updateUserDto) {
     validateNotAllRolesAreRemovedAtUpdate(updateUserDto);
     validateNewUserRolesAreAllowedAtUpdate(updateUserDto);
     validateUpdateByCansPermission(existedCognitoUser, updateUserDto);

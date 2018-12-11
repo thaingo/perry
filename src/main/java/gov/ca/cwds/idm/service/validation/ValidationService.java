@@ -10,5 +10,5 @@ public interface ValidationService {
 
   void validateVerifyIfUserCanBeCreated(User enrichedUser, boolean activeUserExistsInCws);
 
-  void validateUpdateUser(UserType existedCognitoUser, UserUpdate updateUserDto);
+  void validateUserUpdate(UserType existedCognitoUser, UserUpdate updateUserDto);
 }
