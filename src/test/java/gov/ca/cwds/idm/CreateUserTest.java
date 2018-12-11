@@ -257,6 +257,22 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
     assertCreateUserSuccess(user, "non_standard_permission_user_success_id");
   }
 
+  @Test
+  @WithMockCustomUser
+  public void testCreateUser_EmptyRoles() throws Exception {
+    User user = user("test@test.com", toSet(), toSet("Snapshot-rollout"));
+    assertCreateUserBadRequest(user,
+        "fixtures/idm/create-user/user-with-no-roles.json");
+  }
+
+  @Test
+  @WithMockCustomUser
+  public void testCreateUser_NoRoles() throws Exception {
+    User user = user("test@test.com", null, toSet("Snapshot-rollout"));
+    assertCreateUserBadRequest(user,
+        "fixtures/idm/create-user/user-with-no-roles.json");
+  }
+
   private void assertCreateUserSuccess(User user, String newUserId) throws Exception {
     assertCreateUserSuccess(user, user, newUserId);
   }

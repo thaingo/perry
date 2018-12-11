@@ -129,6 +129,7 @@ public abstract class BaseIdmIntegrationTest extends BaseIntegrationTest {
 
   protected final User user(String email, Set<String> roles, Set<String> permissions) {
     User user = user(email);
+    user.setRoles(roles);
     user.setPermissions(permissions);
     return user;
   }
