@@ -68,7 +68,8 @@ public class ValidationServiceImpl implements ValidationService {
 
   @Override
   public void validateUpdateUser(UserType existedCognitoUser, UserUpdate updateUserDto) {
-    validateUpdateByNewUserRoles(updateUserDto);
+    validateNotAllRolesAreRemovedAtUpdate(updateUserDto);
+    validateNewUserRolesAreAllowed(updateUserDto);
     validateUpdateByCansPermission(existedCognitoUser, updateUserDto);
     validateActivateUser(existedCognitoUser, updateUserDto);
   }
@@ -117,15 +118,23 @@ public class ValidationServiceImpl implements ValidationService {
     }
   }
 
-  private void validateUpdateByNewUserRoles(UserUpdate updateUserDto) {
+  private void validateNotAllRolesAreRemovedAtUpdate(UserUpdate updateUserDto) {
     Collection<String> newUserRoles = updateUserDto.getRoles();
 
-    if (newUserRoles == null) {
+    if (newUserRoles == null) {//it means that roles are not edited
       return;
     }
 
     if (newUserRoles.isEmpty()) {
       throwValidationException(UNABLE_TO_REMOVE_ALL_ROLES);
+    }
+  }
+
+  private void validateNewUserRolesAreAllowed(UserUpdate updateUserDto) {
+    Collection<String> newUserRoles = updateUserDto.getRoles();
+
+    if (newUserRoles == null) {
+      return;
     }
 
     validateByAllowedRoles(newUserRoles);
