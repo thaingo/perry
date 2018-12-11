@@ -91,11 +91,15 @@ public class Utils {
   }
 
   public static boolean isRacfidUser(User user) {
-    return StringUtils.isNotBlank(user.getRacfid());
+    return isRacfidUser(user.getRacfid());
   }
 
   public static boolean isRacfidUser(UserType userType) {
-    return StringUtils.isNotBlank(getRACFId(userType));
+    return isRacfidUser(getRACFId(userType));
+  }
+
+  public static boolean isRacfidUser(String racfId) {
+    return StringUtils.isNotBlank(racfId);
   }
 
   public static boolean isStatusHealthy(Status status) {

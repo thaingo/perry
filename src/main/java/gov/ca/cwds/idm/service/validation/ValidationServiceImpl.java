@@ -8,6 +8,7 @@ import static gov.ca.cwds.service.messages.MessageCode.COUNTY_NAME_IS_NOT_PROVID
 import static gov.ca.cwds.service.messages.MessageCode.FIRST_NAME_IS_NOT_PROVIDED;
 import static gov.ca.cwds.service.messages.MessageCode.LAST_NAME_IS_NOT_PROVIDED;
 import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID_IN_CWSCMS;
+import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_CREATE_NON_RACFID_USER_WITH_CANS_PERMISSION;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_REMOVE_ALL_ROLES;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_ASSIGN_CANS_PERMISSION_TO_NON_RACFID_USER;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_UNALLOWED_ROLES;
@@ -52,27 +53,23 @@ public class ValidationServiceImpl implements ValidationService {
     validateFirstNameIsProvided(enrichedUser);
     validateLastNameIsProvided(enrichedUser);
     validateCountyNameIsProvided(enrichedUser);
+    validateCreateByCansPermission(enrichedUser);
 
-    if (isRacfidUser(enrichedUser)) {
-      String racfId = enrichedUser.getRacfid();
-      validateActiveUserExistsInCws(activeUserExistsInCws, racfId);
-      validateRacfidDoesNotExistInCognito(racfId);
-    }
+    validateActiveRacfidUserExistsInCws(activeUserExistsInCws, enrichedUser.getRacfid());
+    validateRacfidDoesNotExistInCognito(enrichedUser.getRacfid());
   }
 
   @Override
   public void validateVerifyIfUserCanBeCreated(User enrichedUser, boolean activeUserExistsInCws) {
-    String racfId = enrichedUser.getRacfid();
-
-    validateActiveUserExistsInCws(activeUserExistsInCws, racfId);
+    validateActiveRacfidUserExistsInCws(activeUserExistsInCws, enrichedUser.getRacfid());
     validateEmailDoesNotExistInCognito(enrichedUser.getEmail());
-    validateRacfidDoesNotExistInCognito(racfId);
+    validateRacfidDoesNotExistInCognito(enrichedUser.getRacfid());
   }
 
   @Override
   public void validateUpdateUser(UserType existedCognitoUser, UserUpdate updateUserDto) {
     validateUpdateByNewUserRoles(updateUserDto);
-    validateUpdateByNewUserPermissions(existedCognitoUser, updateUserDto);
+    validateUpdateByCansPermission(existedCognitoUser, updateUserDto);
     validateActivateUser(existedCognitoUser, updateUserDto);
   }
 
@@ -94,13 +91,21 @@ public class ValidationServiceImpl implements ValidationService {
     }
   }
 
-  private void validateActiveUserExistsInCws(boolean activeUserExistsInCws, String racfid) {
+  private void validateActiveRacfidUserExistsInCws(boolean activeUserExistsInCws, String racfId) {
+    if(!isRacfidUser(racfId)){
+      return;
+    }
+
     if (!activeUserExistsInCws) {
-      throwValidationException(NO_USER_WITH_RACFID_IN_CWSCMS, racfid);
+      throwValidationException(NO_USER_WITH_RACFID_IN_CWSCMS, racfId);
     }
   }
 
   void validateRacfidDoesNotExistInCognito(String racfId) {
+    if(!isRacfidUser(racfId)){
+      return;
+    }
+
     if (isActiveRacfIdPresentInCognito(racfId)) {
       throwValidationException(ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM, racfId);
     }
@@ -136,16 +141,24 @@ public class ValidationServiceImpl implements ValidationService {
     }
   }
 
-  private void validateUpdateByNewUserPermissions(UserType existedCognitoUser, UserUpdate updateUserDto) {
-    Collection<String> newUserPermissions = updateUserDto.getPermissions();
+  private void validateCreateByCansPermission(User user) {
+    validateByCansPermission(user.getPermissions(), isRacfidUser(user), user.getId(),
+        UNABLE_TO_CREATE_NON_RACFID_USER_WITH_CANS_PERMISSION);
+  }
 
+  private void validateUpdateByCansPermission(UserType existedCognitoUser, UserUpdate updateUserDto) {
+    validateByCansPermission(updateUserDto.getPermissions(), isRacfidUser(existedCognitoUser),
+        existedCognitoUser.getUsername(), UNABLE_TO_ASSIGN_CANS_PERMISSION_TO_NON_RACFID_USER);
+  }
+
+  private void validateByCansPermission(Collection<String> newUserPermissions, boolean isRacfidUser,
+      String userId, MessageCode errorCode) {
     if (newUserPermissions == null) {
       return;
     }
 
-    if (!isRacfidUser(existedCognitoUser) && newUserPermissions.contains(CANS_PERMISSION_NAME)) {
-      throwValidationException(
-          UNABLE_TO_ASSIGN_CANS_PERMISSION_TO_NON_RACFID_USER, existedCognitoUser.getUsername());
+    if (!isRacfidUser && newUserPermissions.contains(CANS_PERMISSION_NAME)) {
+      throwValidationException(errorCode, userId);
     }
   }
 
@@ -181,9 +194,9 @@ public class ValidationServiceImpl implements ValidationService {
     return newEnabled != null && !newEnabled.equals(currentEnabled) && newEnabled;
   }
 
-  void validateActivateUser(String racfId) {
+  void validateActivateUser(String racfId ) {
     CwsUserInfo cwsUser = cwsUserInfoService.getCwsUserByRacfId(racfId);
-    validateActiveUserExistsInCws(cwsUser != null, racfId);
+    validateActiveRacfidUserExistsInCws(cwsUser != null, racfId);
     validateRacfidDoesNotExistInCognito(racfId);
   }
 

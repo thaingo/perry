@@ -124,11 +124,23 @@ public abstract class BaseIdmIntegrationTest extends BaseIntegrationTest {
     return user;
   }
 
+  protected final User user(String email, Set<String> roles, Set<String> permissions) {
+    User user = user(email);
+    user.setPermissions(permissions);
+    return user;
+  }
+
   protected final User racfIdUser(String email, String racfId, Set<String> roles) {
-    User user = new User();
-    user.setEmail(email);
+    User user = user(email);
     user.setRacfid(racfId);
     user.setRoles(roles);
+    return user;
+  }
+
+  protected final User racfIdUser(String email, String racfId, Set<String> roles,
+      Set<String> permissions) {
+    User user = racfIdUser(email, racfId, roles);
+    user.setPermissions(permissions);
     return user;
   }
 

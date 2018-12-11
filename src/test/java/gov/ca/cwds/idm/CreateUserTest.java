@@ -4,6 +4,7 @@ import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
+import static gov.ca.cwds.idm.service.PossibleUserPermissionsService.CANS_PERMISSION_NAME;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.ES_ERROR_CREATE_USER_EMAIL;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.NEW_USER_ES_FAIL_ID;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
@@ -28,6 +29,7 @@ import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
 import gov.ca.cwds.idm.util.TestCognitoServiceFacade;
 import gov.ca.cwds.idm.util.WithMockCustomUser;
 import java.time.LocalDate;
+import java.util.Set;
 import org.junit.Test;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -195,9 +197,9 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
   @Test
   @WithMockCustomUser(roles = {STATE_ADMIN})
   public void testCreateRacfidUser() throws Exception {
-    User user = getElroydaUser();
-    User actuallySendUser = getActuallySendElroydaUser();
-    ((TestCognitoServiceFacade) cognitoServiceFacade).setSearchByRacfidRequestAndResult("ELROYDA");
+    User user = racfidUserNotExistingInCognito(toSet(CWS_WORKER), toSet("Hotline-rollout"));
+    User actuallySendUser = actuallySendRacfidUserNotExistingInCognito(
+        toSet(CWS_WORKER), toSet("Hotline-rollout"));
 
     assertCreateUserSuccess(user, actuallySendUser, "new_user_success_id_4");
   }
@@ -205,10 +207,11 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
   @Test
   @WithMockCustomUser
   public void testCreateRacfidUserUnauthorized() throws Exception {
-    User user = getElroydaUser();
-    User actuallySendUser = getActuallySendElroydaUser();
+    User user = racfidUserNotExistingInCognito(toSet(CWS_WORKER), toSet("Hotline-rollout"));
+    User actuallySendUser = actuallySendRacfidUserNotExistingInCognito(
+        toSet(CWS_WORKER), toSet("Hotline-rollout"));
+
     AdminCreateUserRequest request = setCreateRequestAndResult(actuallySendUser, "new_user_success_id_5");
-    ((TestCognitoServiceFacade) cognitoServiceFacade).setSearchByRacfidRequestAndResult("ELROYDA");
 
     MvcResult result = mockMvc
         .perform(
@@ -225,11 +228,33 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
   @Test
   @WithMockCustomUser
   public void testCreateUserNoRacfIdInCws() throws Exception {
-    User user = user("test@test.com");
-    user.setRacfid("SMITHB1");
-    user.setRoles(toSet(CWS_WORKER));
-
+    User user = racfIdUser("test@test.com", "SMITHB1", toSet(CWS_WORKER));
     assertCreateUserBadRequest(user, "fixtures/idm/create-user/no-racfid-in-cws-error.json");
+  }
+
+  @Test
+  @WithMockCustomUser
+  public void testCreateNonRacfidUser_CansPermission() throws Exception {
+    User user = user("test@test.com", toSet(CWS_WORKER), toSet(CANS_PERMISSION_NAME));
+    assertCreateUserBadRequest(user,
+        "fixtures/idm/create-user/no-racfid-user-with-cans-permission.json");
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {STATE_ADMIN})
+  public void testCreateRacfidUser_CansPermission() throws Exception {
+    User user = racfidUserNotExistingInCognito(toSet(CWS_WORKER), toSet(CANS_PERMISSION_NAME));
+    User actuallySendUser = actuallySendRacfidUserNotExistingInCognito(
+        toSet(CWS_WORKER), toSet(CANS_PERMISSION_NAME));
+
+    assertCreateUserSuccess(user, actuallySendUser, "new_cans_racfid_user_success_id");
+  }
+
+  @Test
+  @WithMockCustomUser
+  public void testCreateUser_NonStandardPermission() throws Exception {
+    User user = user("test@test.com", toSet(CWS_WORKER), toSet("ArbitraryPermission"));
+    assertCreateUserSuccess(user, "non_standard_permission_user_success_id");
   }
 
   private void assertCreateUserSuccess(User user, String newUserId) throws Exception {
@@ -286,12 +311,16 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
     assertExtensible(result, fixturePath);
   }
 
-  private User getElroydaUser() {
-    return racfIdUser("Test@Test.com", "elroyda", toSet(CWS_WORKER));
+  private User racfidUserNotExistingInCognito(Set<String> roles, Set<String> permissions) {
+    return racfIdUser("Test@Test.com", "elroyda", roles, permissions);
   }
 
-  private User getActuallySendElroydaUser() {
-    User actuallySendUser = racfIdUser("test@test.com", "ELROYDA", toSet(CWS_WORKER));
+  private User actuallySendRacfidUserNotExistingInCognito(Set<String> roles, Set<String> permissions) {
+    ((TestCognitoServiceFacade) cognitoServiceFacade).setSearchByRacfidRequestAndResult("ELROYDA");
+
+    User actuallySendUser = racfidUserNotExistingInCognito(roles, permissions);
+    actuallySendUser.setEmail("test@test.com");
+    actuallySendUser.setRacfid("ELROYDA");
     actuallySendUser.setFirstName("Donna");
     actuallySendUser.setLastName("Elroy");
     actuallySendUser.setCountyName("Napa");
