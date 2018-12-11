@@ -10,6 +10,7 @@ import static gov.ca.cwds.service.messages.MessageCode.LAST_NAME_IS_NOT_PROVIDED
 import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID_IN_CWSCMS;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_CREATE_NON_RACFID_USER_WITH_CANS_PERMISSION;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_CREATE_USER_WITHOUT_ROLES;
+import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_CREATE_USER_WITH_UNALLOWED_ROLES;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_REMOVE_ALL_ROLES;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_ASSIGN_CANS_PERMISSION_TO_NON_RACFID_USER;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_UNALLOWED_ROLES;
@@ -55,8 +56,8 @@ public class ValidationServiceImpl implements ValidationService {
     validateLastNameIsProvided(enrichedUser);
     validateCountyNameIsProvided(enrichedUser);
 
-    validateRolesExistAtUserCreate(enrichedUser);
-    validateCreatedUserRolesAreAllowed(enrichedUser);
+    validateUserRolesExistAtCreate(enrichedUser);
+    validateUserRolesAreAllowedAtCreate(enrichedUser);
 
     validateCreateByCansPermission(enrichedUser);
 
@@ -74,7 +75,7 @@ public class ValidationServiceImpl implements ValidationService {
   @Override
   public void validateUpdateUser(UserType existedCognitoUser, UserUpdate updateUserDto) {
     validateNotAllRolesAreRemovedAtUpdate(updateUserDto);
-    validateNewUserRolesAreAllowed(updateUserDto);
+    validateNewUserRolesAreAllowedAtUpdate(updateUserDto);
     validateUpdateByCansPermission(existedCognitoUser, updateUserDto);
     validateActivateUser(existedCognitoUser, updateUserDto);
   }
@@ -107,7 +108,7 @@ public class ValidationServiceImpl implements ValidationService {
     }
   }
 
-  private void validateRolesExistAtUserCreate(User user) {
+  private void validateUserRolesExistAtCreate(User user) {
     Collection<String> roles = user.getRoles();
 
     if(roles == null || roles.isEmpty()) {
@@ -115,8 +116,8 @@ public class ValidationServiceImpl implements ValidationService {
     }
   }
 
-  private void validateCreatedUserRolesAreAllowed(User user) {
-
+  private void validateUserRolesAreAllowedAtCreate(User user) {
+    validateByAllowedRoles(user.getRoles(), UNABLE_TO_CREATE_USER_WITH_UNALLOWED_ROLES);
   }
 
   void validateRacfidDoesNotExistInCognito(String racfId) {
@@ -147,22 +148,21 @@ public class ValidationServiceImpl implements ValidationService {
     }
   }
 
-  private void validateNewUserRolesAreAllowed(UserUpdate updateUserDto) {
-    Collection<String> newUserRoles = updateUserDto.getRoles();
+  private void validateNewUserRolesAreAllowedAtUpdate(UserUpdate updateUserDto) {
+    validateByAllowedRoles(updateUserDto.getRoles(), UNABLE_UPDATE_UNALLOWED_ROLES);
+  }
 
-    if (newUserRoles == null) {
+  private void validateByAllowedRoles(Collection<String> roles, MessageCode errorCode) {
+
+    if (roles == null) {
       return;
     }
 
-    validateByAllowedRoles(newUserRoles);
-  }
-
-  private void validateByAllowedRoles(Collection<String> newUserRoles) {
     Collection<String> allowedRoles = adminRoleImplementorFactory.getPossibleUserRoles();
-    if (!allowedRoles.containsAll(newUserRoles)) {
+    if (!allowedRoles.containsAll(roles)) {
       throwValidationException(
-          UNABLE_UPDATE_UNALLOWED_ROLES,
-          toCommaDelimitedString(newUserRoles),
+          errorCode,
+          toCommaDelimitedString(roles),
           toCommaDelimitedString(allowedRoles));
     }
   }
