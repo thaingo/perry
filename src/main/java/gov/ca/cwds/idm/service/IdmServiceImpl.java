@@ -136,7 +136,7 @@ public class IdmServiceImpl implements IdmService {
     UserType existedCognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
 
     authorizeService.checkCanUpdateUser(existedCognitoUser, updateUserDto);
-    validationService.validateUpdateUser(existedCognitoUser, updateUserDto);
+    validationService.validateUserUpdate(existedCognitoUser, updateUserDto);
 
     ExecutionStatus updateAttributesStatus =
         updateUserAttributes(userId, updateUserDto, existedCognitoUser);
