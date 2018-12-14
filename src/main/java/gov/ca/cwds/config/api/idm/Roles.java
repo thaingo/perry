@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 @Profile("idm")
 public class Roles {
 
+  public static final String SUPER_ADMIN = "Super-admin";
   public static final String CWS_WORKER = "CWS-worker";
   public static final String CALS_EXTERNAL_WORKER = "CALS-external-worker";
   public static final String IDM_JOB = "IDM-job";
@@ -26,7 +27,7 @@ public class Roles {
   private Roles() {}
 
   public static Set<String> getAdminRoles() {
-    return toSet(COUNTY_ADMIN, STATE_ADMIN, OFFICE_ADMIN, CALS_ADMIN);
+    return toSet(SUPER_ADMIN, COUNTY_ADMIN, STATE_ADMIN, OFFICE_ADMIN, CALS_ADMIN);
   }
 
   /**
@@ -34,6 +35,7 @@ public class Roles {
    */
   static {
     roleList = new ArrayList<>();
+    roleList.add(ImmutableMap.of("id", SUPER_ADMIN, "name", "Super Administrator"));
     roleList.add(ImmutableMap.of("id", STATE_ADMIN, "name", "State Administrator"));
     roleList.add(ImmutableMap.of("id", COUNTY_ADMIN, "name", "County Administrator"));
     roleList.add(ImmutableMap.of("id", OFFICE_ADMIN, "name", "Office Administrator"));

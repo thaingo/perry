@@ -6,6 +6,7 @@ import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.IDM_JOB;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.SUPER_ADMIN;
 
 import gov.ca.cwds.RolesHolder;
 import gov.ca.cwds.config.api.idm.Roles;
@@ -57,7 +58,9 @@ public class UserRolesService {
     if (!isAdmin(user)) {
       throw new IllegalStateException("Unexpected user role. Admin is expected");
     }
-    if (user.getRoles().contains(STATE_ADMIN)) {
+    if (user.getRoles().contains(SUPER_ADMIN)) {
+      return SUPER_ADMIN;
+    } else if (user.getRoles().contains(STATE_ADMIN)) {
       return STATE_ADMIN;
     } else if (user.getRoles().contains(COUNTY_ADMIN)) {
       return COUNTY_ADMIN;
