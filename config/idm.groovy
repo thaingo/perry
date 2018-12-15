@@ -9,7 +9,7 @@ result.userCreateDate = cognitoUser.userCreateDate
 result.userLastModifiedDate = cognitoUser.userLastModifiedDate
 result.status = cognitoUser.userStatus
 result.email = attribute("email")
-result.racfid = attribute("CUSTOM:RACFID")
+result.racfid = attribute("custom:RACFID")
 
 if(StringUtils.isNotBlank(attribute("custom:Permission"))) {
     result.permissions = attribute("custom:Permission").split('\\s*:\\s*') as HashSet
