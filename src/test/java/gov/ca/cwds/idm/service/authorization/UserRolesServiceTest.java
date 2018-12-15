@@ -18,6 +18,7 @@ import static org.junit.Assert.assertTrue;
 
 import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.dto.User;
+import java.util.List;
 import java.util.Set;
 import org.junit.Test;
 
