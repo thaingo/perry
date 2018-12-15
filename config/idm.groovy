@@ -11,12 +11,12 @@ result.status = cognitoUser.userStatus
 result.email = attribute("email")
 result.racfid = attribute("CUSTOM:RACFID")
 
-if(StringUtils.isNotBlank(attribute("custom:permission"))) {
-    result.permissions = attribute("custom:permission").split('\\s*:\\s*') as HashSet
+if(StringUtils.isNotBlank(attribute("custom:Permission"))) {
+    result.permissions = attribute("custom:Permission").split('\\s*:\\s*') as HashSet
 }
 
-if(StringUtils.isNotBlank(attribute("custom:role"))) {
-    result.roles = attribute("custom:role").split('\\s*:\\s*') as HashSet
+if(StringUtils.isNotBlank(attribute("custom:Role"))) {
+    result.roles = attribute("custom:Role").split('\\s*:\\s*') as HashSet
 }
 
 if(cwsUser) {
