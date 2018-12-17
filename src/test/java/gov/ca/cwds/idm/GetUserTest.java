@@ -1,6 +1,7 @@
 package gov.ca.cwds.idm;
 
 import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
@@ -140,12 +141,18 @@ public class GetUserTest extends BaseIdmIntegrationTest {
     testGetValidUser(USER_WITH_RACFID_ID, "fixtures/idm/get-user/with-racfid-valid-2.json");
   }
 
-
   @Test
   @WithMockCustomUser(roles = {OFFICE_ADMIN})
   public void testGetSuperAdminByOfficeAdmin() throws Exception {
     assertGetUserUnauthorized(SUPER_ADMIN_ID,
         "fixtures/idm/get-user/super-admin-by-office-admin.json");
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {COUNTY_ADMIN})
+  public void testGetSuperAdminByCountyAdmin() throws Exception {
+    assertGetUserUnauthorized(SUPER_ADMIN_ID,
+        "fixtures/idm/get-user/super-admin-by-county-admin.json");
   }
 
   private MvcResult assertGetUserUnauthorized(String userId) throws Exception {
