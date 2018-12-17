@@ -1,0 +1,6 @@
+{
+  "status": "UNAUTHORIZED",
+  "technical_message": "State admin cannot view users with Super-admin role, username: a3427f8e-b080-4f71-9514-840c1fcb505b",
+  "user_message": "As an state admin You cannot view users with Super-admin role",
+  "error_code": "CAP-064"
+}

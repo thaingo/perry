@@ -1,10 +1,10 @@
 package gov.ca.cwds.idm;
 
 import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
-import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
+import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.ABSENT_USER_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.COUNTY_ADMIN_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.ERROR_USER_ID;
@@ -16,7 +16,6 @@ import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_WITH_NO_PHONE_E
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_WITH_RACFID_AND_DB_DATA_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_WITH_RACFID_AND_INVALID_COUNTY_IN_COGNITO;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_WITH_RACFID_ID;
-import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
 
 import gov.ca.cwds.idm.util.WithMockCustomUser;
 import org.junit.Test;
@@ -149,10 +148,17 @@ public class GetUserTest extends BaseIdmIntegrationTest {
   }
 
   @Test
-  @WithMockCustomUser(roles = {COUNTY_ADMIN})
+  @WithMockCustomUser
   public void testGetSuperAdminByCountyAdmin() throws Exception {
     assertGetUserUnauthorized(SUPER_ADMIN_ID,
         "fixtures/idm/get-user/super-admin-by-county-admin.json");
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {STATE_ADMIN})
+  public void testGetSuperAdminByStateAdmin() throws Exception {
+    assertGetUserUnauthorized(SUPER_ADMIN_ID,
+        "fixtures/idm/get-user/super-admin-by-state-admin.json");
   }
 
   private MvcResult assertGetUserUnauthorized(String userId) throws Exception {
