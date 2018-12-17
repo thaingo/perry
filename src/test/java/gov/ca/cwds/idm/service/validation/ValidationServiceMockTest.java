@@ -1,5 +1,7 @@
 package gov.ca.cwds.idm.service.validation;
 
+import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.CALS_EXTERNAL_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
@@ -61,30 +63,69 @@ public class ValidationServiceMockTest {
   }
 
   @Test
-  public void testStateAdminAssign() {
+  public void testStateAdminUpdate() {
     testAdminCanNotUpdate(admin(STATE_ADMIN), userUpdate(STATE_ADMIN));
     testAdminCanUpdate(admin(STATE_ADMIN), userUpdate(COUNTY_ADMIN));
     testAdminCanUpdate(admin(STATE_ADMIN), userUpdate(OFFICE_ADMIN));
     testAdminCanUpdate(admin(STATE_ADMIN), userUpdate(CWS_WORKER));
     testAdminCanNotUpdate(admin(STATE_ADMIN), userUpdate());
+    testAdminCanNotUpdate(admin(STATE_ADMIN), userUpdate(CALS_ADMIN));
+    testAdminCanNotUpdate(admin(STATE_ADMIN), userUpdate(CALS_EXTERNAL_WORKER));
   }
 
   @Test
-  public void testCountyAdminAssign() {
+  public void testCountyAdminUpdate() {
     testAdminCanNotUpdate(admin(COUNTY_ADMIN), userUpdate(STATE_ADMIN));
     testAdminCanNotUpdate(admin(COUNTY_ADMIN), userUpdate(COUNTY_ADMIN));
     testAdminCanUpdate(admin(COUNTY_ADMIN), userUpdate(OFFICE_ADMIN));
     testAdminCanUpdate(admin(COUNTY_ADMIN), userUpdate(CWS_WORKER));
     testAdminCanNotUpdate(admin(COUNTY_ADMIN), userUpdate());
+    testAdminCanNotUpdate(admin(COUNTY_ADMIN), userUpdate(CALS_ADMIN));
+    testAdminCanNotUpdate(admin(COUNTY_ADMIN), userUpdate(CALS_EXTERNAL_WORKER));
   }
 
   @Test
-  public void testOfficeAdminAssignStateAdmin() {
+  public void testOfficeAdminUpdate() {
     testAdminCanNotUpdate(admin(OFFICE_ADMIN), userUpdate(STATE_ADMIN));
     testAdminCanNotUpdate(admin(OFFICE_ADMIN), userUpdate(COUNTY_ADMIN));
     testAdminCanNotUpdate(admin(OFFICE_ADMIN), userUpdate(OFFICE_ADMIN));
     testAdminCanUpdate(admin(OFFICE_ADMIN), userUpdate(CWS_WORKER));
     testAdminCanNotUpdate(admin(OFFICE_ADMIN), userUpdate());
+    testAdminCanNotUpdate(admin(OFFICE_ADMIN), userUpdate(CALS_ADMIN));
+    testAdminCanNotUpdate(admin(OFFICE_ADMIN), userUpdate(CALS_EXTERNAL_WORKER));
+  }
+
+  @Test
+  public void testStateAdminCreate() {
+    testAdminCanNotCreate(admin(STATE_ADMIN), user(STATE_ADMIN));
+    testAdminCanCreate(admin(STATE_ADMIN), user(COUNTY_ADMIN));
+    testAdminCanCreate(admin(STATE_ADMIN), user(OFFICE_ADMIN));
+    testAdminCanCreate(admin(STATE_ADMIN), user(CWS_WORKER));
+    testAdminCanNotCreate(admin(STATE_ADMIN), user());
+    testAdminCanNotCreate(admin(STATE_ADMIN), user(CALS_ADMIN));
+    testAdminCanNotCreate(admin(STATE_ADMIN), user(CALS_EXTERNAL_WORKER));
+  }
+
+  @Test
+  public void testCountyAdminCreate() {
+    testAdminCanNotCreate(admin(COUNTY_ADMIN), user(STATE_ADMIN));
+    testAdminCanNotCreate(admin(COUNTY_ADMIN), user(COUNTY_ADMIN));
+    testAdminCanCreate(admin(COUNTY_ADMIN), user(OFFICE_ADMIN));
+    testAdminCanCreate(admin(COUNTY_ADMIN), user(CWS_WORKER));
+    testAdminCanNotCreate(admin(COUNTY_ADMIN), user());
+    testAdminCanNotCreate(admin(COUNTY_ADMIN), user(CALS_ADMIN));
+    testAdminCanNotCreate(admin(COUNTY_ADMIN), user(CALS_EXTERNAL_WORKER));
+  }
+
+  @Test
+  public void testOfficeAdminCreate() {
+    testAdminCanNotCreate(admin(OFFICE_ADMIN), user(STATE_ADMIN));
+    testAdminCanNotCreate(admin(OFFICE_ADMIN), user(COUNTY_ADMIN));
+    testAdminCanNotCreate(admin(OFFICE_ADMIN), user(OFFICE_ADMIN));
+    testAdminCanCreate(admin(OFFICE_ADMIN), user(CWS_WORKER));
+    testAdminCanNotCreate(admin(OFFICE_ADMIN), user());
+    testAdminCanNotCreate(admin(OFFICE_ADMIN), user(CALS_ADMIN));
+    testAdminCanNotCreate(admin(OFFICE_ADMIN), user(CALS_EXTERNAL_WORKER));
   }
 
   private void testAdminCanUpdate(UniversalUserToken admin, UserUpdate userUpdate) {
@@ -99,7 +140,21 @@ public class ValidationServiceMockTest {
   private void validateUpdate(UniversalUserToken admin, UserUpdate userUpdate) {
     PowerMockito.when(getCurrentUser()).thenReturn(admin);
     UserType userType = userType(user(), USER_ID);
-    service.validateUpdateUser(userType, userUpdate);
+    service.validateUserUpdate(userType, userUpdate);
+  }
+
+  private void testAdminCanCreate(UniversalUserToken admin, User user) {
+    validateCreate(admin, user);
+  }
+
+  private void testAdminCanNotCreate(UniversalUserToken admin, User user) {
+    expectedException.expect(UserValidationException.class);
+    validateCreate(admin, user);
+  }
+
+  private void validateCreate(UniversalUserToken admin, User user) {
+    PowerMockito.when(getCurrentUser()).thenReturn(admin);
+    service.validateUserCreate(user, false);
   }
 
   private static UniversalUserToken admin(String... roles) {

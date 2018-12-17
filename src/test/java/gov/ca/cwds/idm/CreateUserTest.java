@@ -5,9 +5,9 @@ import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.idm.service.PossibleUserPermissionsService.CANS_PERMISSION_NAME;
+import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.ES_ERROR_CREATE_USER_EMAIL;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.NEW_USER_ES_FAIL_ID;
-import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
 import static gov.ca.cwds.idm.util.TestUtils.asJsonString;
 import static gov.ca.cwds.util.Utils.toSet;
 import static org.hamcrest.CoreMatchers.is;
@@ -255,6 +255,30 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
   public void testCreateUser_NonStandardPermission() throws Exception {
     User user = user("test@test.com", toSet(CWS_WORKER), toSet("ArbitraryPermission"));
     assertCreateUserSuccess(user, "non_standard_permission_user_success_id");
+  }
+
+  @Test
+  @WithMockCustomUser
+  public void testCreateUser_EmptyRoles() throws Exception {
+    User user = user("test@test.com", toSet(), toSet("Snapshot-rollout"));
+    assertCreateUserBadRequest(user,
+        "fixtures/idm/create-user/user-with-no-roles.json");
+  }
+
+  @Test
+  @WithMockCustomUser
+  public void testCreateUser_NoRoles() throws Exception {
+    User user = user("test@test.com", null, toSet("Snapshot-rollout"));
+    assertCreateUserBadRequest(user,
+        "fixtures/idm/create-user/user-with-no-roles.json");
+  }
+
+  @Test
+  @WithMockCustomUser
+  public void testCreateUser_NotAllowedRole() throws Exception {
+    User user = user("test@test.com", toSet(STATE_ADMIN), toSet("Snapshot-rollout"));
+    assertCreateUserBadRequest(user,
+        "fixtures/idm/create-user/user-with-not-allowed-role.json");
   }
 
   private void assertCreateUserSuccess(User user, String newUserId) throws Exception {
