@@ -125,6 +125,14 @@ public class UserRolesServiceTest {
   }
 
   @Test
+  public void testIsSuperAdmin() {
+    assertTrue(UserRolesService.isSuperAdmin(user(SUPER_ADMIN)));
+    assertTrue(UserRolesService.isSuperAdmin(user(SUPER_ADMIN, STATE_ADMIN)));
+    assertFalse(UserRolesService.isSuperAdmin(user(COUNTY_ADMIN)));
+    assertFalse(UserRolesService.isSuperAdmin(user()));
+  }
+
+  @Test
   public void testCalsAdminCanView() {
     User user = user(CALS_EXTERNAL_WORKER);
     assertTrue(UserRolesService.isCalsExternalWorker(user));

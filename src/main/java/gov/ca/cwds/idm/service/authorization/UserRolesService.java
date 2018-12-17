@@ -22,27 +22,35 @@ public class UserRolesService {
   }
 
   public static <T extends RolesHolder> boolean isCountyAdmin(T user) {
-    return user.getRoles().contains(COUNTY_ADMIN);
+    return hasRole(user, COUNTY_ADMIN);
+  }
+
+  public static <T extends RolesHolder> boolean isSuperAdmin(T user) {
+    return hasRole(user, SUPER_ADMIN);
   }
 
   public static <T extends RolesHolder> boolean isStateAdmin(T user) {
-    return user.getRoles().contains(STATE_ADMIN);
+    return hasRole(user, STATE_ADMIN);
   }
 
   public static <T extends RolesHolder> boolean isCalsExternalWorker(T user) {
-    return user.getRoles().contains(CALS_EXTERNAL_WORKER);
+    return hasRole(user, CALS_EXTERNAL_WORKER);
   }
 
   public static <T extends RolesHolder> boolean isOfficeAdmin(T user) {
-    return user.getRoles().contains(OFFICE_ADMIN);
+    return hasRole(user, OFFICE_ADMIN);
   }
 
   public static <T extends RolesHolder> boolean isIdmJob(T user) {
-    return user.getRoles().contains(IDM_JOB);
+    return hasRole(user, IDM_JOB);
   }
 
   public static <T extends RolesHolder> boolean isCalsAdmin(T user) {
-    return user.getRoles().contains(CALS_ADMIN);
+    return hasRole(user, CALS_ADMIN);
+  }
+
+  private static <T extends RolesHolder> boolean hasRole(T user, String roleName) {
+    return user.getRoles().contains(roleName);
   }
 
   public static <T extends RolesHolder> boolean isAdmin(T user) {
