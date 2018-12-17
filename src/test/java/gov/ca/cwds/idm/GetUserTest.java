@@ -8,6 +8,7 @@ import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.ABSENT_USER_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.COUNTY_ADMIN_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.ERROR_USER_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.STATE_ADMIN_ID;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.SUPER_ADMIN_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_CALS_EXTERNAL;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_NO_RACFID_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_WITH_NO_PHONE_EXTENSION;
@@ -137,6 +138,14 @@ public class GetUserTest extends BaseIdmIntegrationTest {
   @WithMockCustomUser(roles = {STATE_ADMIN}, county = "Madera")
   public void testGetUserStateAdminDifferentCounty() throws Exception {
     testGetValidUser(USER_WITH_RACFID_ID, "fixtures/idm/get-user/with-racfid-valid-2.json");
+  }
+
+
+  @Test
+  @WithMockCustomUser(roles = {OFFICE_ADMIN})
+  public void testGetSuperAdminByOfficeAdmin() throws Exception {
+    assertGetUserUnauthorized(SUPER_ADMIN_ID,
+        "fixtures/idm/get-user/super-admin-by-office-admin.json");
   }
 
   private MvcResult assertGetUserUnauthorized(String userId) throws Exception {

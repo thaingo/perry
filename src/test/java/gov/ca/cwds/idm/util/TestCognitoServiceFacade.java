@@ -67,6 +67,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
       "17067e4e-270f-4623-b86c-b4d4fa525d68";
   public static final String STATE_ADMIN_ID = "2d9369b4-5855-4a2c-95f7-3617fab1496a";
   public static final String COUNTY_ADMIN_ID = "c3702f4c113f1d2415447c8bfe8321d8df2d5151";
+  public static final String SUPER_ADMIN_ID = "a3427f8e-b080-4f71-9514-840c1fcb505b";
 
   public static final String USERPOOL = "userpool";
 
@@ -308,6 +309,21 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
             null,
             null,
             null);
+
+    testUser(
+        SUPER_ADMIN_ID,
+        Boolean.TRUE,
+        "CONFIRMED",
+        date(2018, 9, 14),
+        date(2018, 10, 3),
+        "maygosh@gmail.com",
+        "May",
+        "Gosh",
+        WithMockCustomUser.COUNTY,
+        null,
+        "Super-admin",
+        null,
+        null);
 
     setUpGetAbsentUserRequestAndResult();
 
