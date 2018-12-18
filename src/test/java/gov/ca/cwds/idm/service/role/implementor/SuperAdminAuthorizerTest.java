@@ -100,4 +100,74 @@ public class SuperAdminAuthorizerTest extends BaseAuthorizerTest {
   public void canViewCalsWorker() {
     assertCanViewUser(calsWorker());
   }
+
+  @Test
+  public void canCreateSuperAdmin() {
+    assertCanCreateUser(superAdmin());
+  }
+
+  @Test
+  public void canCreateStateAdmin() {
+    assertCanCreateUser(stateAdmin());
+  }
+
+  @Test
+  public void canCreateCountyAdmin() {
+    assertCanCreateUser(countyAdmin());
+  }
+
+  @Test
+  public void canCreateOfficeAdmin() {
+    assertCanCreateUser(officeAdmin());
+  }
+
+  @Test
+  public void canCreateCalsAdmin() {
+    assertCanCreateUser(calsAdmin());
+  }
+
+  @Test
+  public void canCreateCwsWorker() {
+    assertCanCreateUser(cwsWorker());
+  }
+
+  @Test
+  public void canCreateCalsWorker() {
+    assertCanCreateUser(calsWorker());
+  }
+
+  @Test
+  public void canUpdateSuperAdmin() {
+    assertCanUpdateUser(superAdmin());
+  }
+
+  @Test
+  public void canUpdateStateAdmin() {
+    assertCanUpdateUser(stateAdmin());
+  }
+
+  @Test
+  public void canUpdateCountyAdmin() {
+    assertCanUpdateUser(countyAdmin());
+  }
+
+  @Test
+  public void canUpdateOfficeAdmin() {
+    assertCanUpdateUser(officeAdmin());
+  }
+
+  @Test
+  public void canUpdateCalsAdmin() {
+    assertCanUpdateUser(calsAdmin());
+  }
+
+  @Test
+  public void canUpdateCwsWorker() {
+    assertCanUpdateUser(cwsWorker());
+  }
+
+  @Test
+  public void canUpdateCalsWorker() {
+    assertCanUpdateUser(calsWorker());
+  }
 }
