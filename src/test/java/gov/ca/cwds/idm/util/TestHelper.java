@@ -80,36 +80,30 @@ public final class TestHelper {
   }
 
   public static User superAdmin() {
-    return TestHelper.user(toSet(SUPER_ADMIN),null, null);
+    return TestHelper.user(toSet(SUPER_ADMIN),"Yolo", "Yolo_2");
   }
 
   public static User stateAdmin() {
-    return TestHelper.user(toSet(STATE_ADMIN),
-        "Yolo", "Yolo_2");
+    return TestHelper.user(toSet(STATE_ADMIN),"Yolo", "Yolo_2");
   }
 
   public static User countyAdmin() {
-    return TestHelper.user(toSet(COUNTY_ADMIN),
-        "Yolo", "Yolo_2");
+    return TestHelper.user(toSet(COUNTY_ADMIN),"Yolo", "Yolo_2");
   }
 
   public static User officeAdmin() {
-    return TestHelper.user(toSet(OFFICE_ADMIN),
-        "Yolo", "Yolo_2");
+    return TestHelper.user(toSet(OFFICE_ADMIN), "Yolo", "Yolo_2");
   }
 
   public static User calsAdmin() {
-    return TestHelper.user(toSet(CALS_ADMIN),
-        "Yolo", "Yolo_2");
+    return TestHelper.user(toSet(CALS_ADMIN),"Yolo", "Yolo_2");
   }
 
   public static User cwsWorker() {
-    return TestHelper.user(toSet(CWS_WORKER),
-        "Yolo", "Yolo_2");
+    return TestHelper.user(toSet(CWS_WORKER), "Yolo", "Yolo_2");
   }
 
   public static User calsWorker() {
-    return TestHelper.user(toSet(CALS_EXTERNAL_WORKER),
-        "Yolo", "Yolo_2");
+    return TestHelper.user(toSet(CALS_EXTERNAL_WORKER), "Yolo", "Yolo_2");
   }
 }
