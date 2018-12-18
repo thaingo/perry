@@ -2,6 +2,7 @@ package gov.ca.cwds.idm.service.role.implementor;
 
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isSuperAdmin;
+import static gov.ca.cwds.idm.service.role.implementor.AuthorizationUtils.isPrincipalInTheSameCountyWith;
 import static gov.ca.cwds.service.messages.MessageCode.CALS_ADMIN_ROLES_CANNOT_BE_EDITED;
 import static gov.ca.cwds.service.messages.MessageCode.CANNOT_EDIT_ROLES_OF_CALS_EXTERNAL_WORKER;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_SUPER_ADMIN_CANNOT_VIEW_USERS_WITH_SUPER_ADMIN_ROLE;
@@ -54,10 +55,15 @@ public abstract class AbstractAdminActionsAuthorizer implements AdminActionsAuth
     throwAuthorizationException(ROLE_IS_UNSUFFICIENT_FOR_OPERATION);
   }
 
-  protected final void checkUserIsNotSuperAdmin(String roleName) {
+  protected final void checkUserIsNotSuperAdmin(MessageCode errorCode, String roleName) {
     if (isSuperAdmin(getUser())) {
-      throwAuthorizationException(NOT_SUPER_ADMIN_CANNOT_VIEW_USERS_WITH_SUPER_ADMIN_ROLE,
-          roleName, getUser().getId());
+      throwAuthorizationException(errorCode, roleName, getUser().getId());
+    }
+  }
+
+  protected final void checkAdminAndUserInTheSameCounty(MessageCode errorMessage) {
+    if (!isPrincipalInTheSameCountyWith(getUser())) {
+      throwAuthorizationException(errorMessage, getUser().getId());
     }
   }
 
