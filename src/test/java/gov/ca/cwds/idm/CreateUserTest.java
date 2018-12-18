@@ -4,6 +4,7 @@ import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.SUPER_ADMIN;
 import static gov.ca.cwds.idm.service.PossibleUserPermissionsService.CANS_PERMISSION_NAME;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.ES_ERROR_CREATE_USER_EMAIL;
@@ -279,6 +280,28 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
     User user = user("test@test.com", toSet(STATE_ADMIN), toSet("Snapshot-rollout"));
     assertCreateUserBadRequest(user,
         "fixtures/idm/create-user/user-with-not-allowed-role.json");
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {SUPER_ADMIN})
+  public void testCreateSuperAdminBySuperAdmin() throws Exception {
+    User user = user("super.admin@test.com", toSet(SUPER_ADMIN), toSet("Snapshot-rollout"));
+    assertCreateUserSuccess(user, "super_admin_success_id");
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {SUPER_ADMIN})
+  public void testCreateStateAdminBySuperAdmin() throws Exception {
+    User user = user("state.admin@test.com", toSet(STATE_ADMIN), toSet("Snapshot-rollout"));
+    assertCreateUserSuccess(user, "state_admin_success_id");
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {STATE_ADMIN})
+  public void testSuperAdminCannotBeCreatedByStateAdmin() throws Exception {
+    User user = user("super.admin@test.com", toSet(SUPER_ADMIN), toSet("Snapshot-rollout"));
+    assertCreateUserBadRequest(user,
+        "fixtures/idm/create-user/super-admin-by-state-admin.json");
   }
 
   private void assertCreateUserSuccess(User user, String newUserId) throws Exception {
