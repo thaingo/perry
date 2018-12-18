@@ -65,4 +65,39 @@ public class SuperAdminAuthorizerTest extends BaseAuthorizerTest {
   public void canEditCalsWorkerRoles() {
     assertCanEditRoles(calsWorker());
   }
+
+  @Test
+  public void canViewSuperAdmin() {
+    assertCanViewUser(superAdmin());
+  }
+
+  @Test
+  public void canViewStateAdmin() {
+    assertCanViewUser(stateAdmin());
+  }
+
+  @Test
+  public void canViewCountyAdmin() {
+    assertCanViewUser(countyAdmin());
+  }
+
+  @Test
+  public void canViewOfficeAdmin() {
+    assertCanViewUser(officeAdmin());
+  }
+
+  @Test
+  public void canViewCalsAdmin() {
+    assertCanViewUser(calsAdmin());
+  }
+
+  @Test
+  public void canViewCwsWorker() {
+    assertCanViewUser(cwsWorker());
+  }
+
+  @Test
+  public void canViewCalsWorker() {
+    assertCanViewUser(calsWorker());
+  }
 }

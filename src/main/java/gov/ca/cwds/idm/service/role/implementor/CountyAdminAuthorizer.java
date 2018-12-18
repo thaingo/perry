@@ -1,14 +1,13 @@
 package gov.ca.cwds.idm.service.role.implementor;
 
+import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isCountyAdmin;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isStateAdmin;
-import static gov.ca.cwds.idm.service.authorization.UserRolesService.isSuperAdmin;
 import static gov.ca.cwds.idm.service.role.implementor.AuthorizationUtils.isPrincipalInTheSameCountyWith;
 import static gov.ca.cwds.service.messages.MessageCode.COUNTY_ADMIN_CANNOT_EDIT_ROLES_OF_OTHER_COUNTY_ADMIN;
 import static gov.ca.cwds.service.messages.MessageCode.COUNTY_ADMIN_CANNOT_RESEND_INVITATION_FOR_USER_FROM_OTHER_COUNTY;
 import static gov.ca.cwds.service.messages.MessageCode.COUNTY_ADMIN_CANNOT_UPDATE_STATE_ADMIN;
 import static gov.ca.cwds.service.messages.MessageCode.COUNTY_ADMIN_CANNOT_UPDATE_USER_FROM_OTHER_COUNTY;
-import static gov.ca.cwds.service.messages.MessageCode.COUNTY_ADMIN_CANNOT_VIEW_USERS_WITH_SUPER_ADMIN_ROLE;
 import static gov.ca.cwds.service.messages.MessageCode.COUNTY_ADMIN_CANNOT_VIEW_USER_FROM_OTHER_COUNTY;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY;
 import static gov.ca.cwds.service.messages.MessageCode.STATE_ADMIN_ROLES_CANNOT_BE_EDITED;
@@ -24,19 +23,12 @@ class CountyAdminAuthorizer extends AbstractAdminActionsAuthorizer {
   @Override
   public void checkCanViewUser() {
     checkUserInTheSameCounty();
-    checkUserIsNotSuperAdmin();
+    checkUserIsNotSuperAdmin(COUNTY_ADMIN);
   }
 
   private void checkUserInTheSameCounty() {
     if (!isPrincipalInTheSameCountyWith(getUser())) {
       throwAuthorizationException(COUNTY_ADMIN_CANNOT_VIEW_USER_FROM_OTHER_COUNTY,
-          getUser().getId());
-    }
-  }
-
-  private void checkUserIsNotSuperAdmin() {
-    if (isSuperAdmin(getUser())) {
-      throwAuthorizationException(COUNTY_ADMIN_CANNOT_VIEW_USERS_WITH_SUPER_ADMIN_ROLE,
           getUser().getId());
     }
   }

@@ -3,6 +3,7 @@ package gov.ca.cwds.idm;
 import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.SUPER_ADMIN;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.ABSENT_USER_ID;
@@ -159,6 +160,19 @@ public class GetUserTest extends BaseIdmIntegrationTest {
   public void testGetSuperAdminByStateAdmin() throws Exception {
     assertGetUserUnauthorized(SUPER_ADMIN_ID,
         "fixtures/idm/get-user/super-admin-by-state-admin.json");
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {CALS_ADMIN})
+  public void testGetSuperAdminByCalsAdmin() throws Exception {
+    assertGetUserUnauthorized(SUPER_ADMIN_ID,
+        "fixtures/idm/get-user/super-admin-by-cals-admin.json");
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {SUPER_ADMIN})
+  public void testGetSuperAdminBySuperAdmin() throws Exception {
+    testGetValidUser(SUPER_ADMIN_ID, "fixtures/idm/get-user/super-admin.json");
   }
 
   private MvcResult assertGetUserUnauthorized(String userId) throws Exception {

@@ -1,8 +1,7 @@
 package gov.ca.cwds.idm.service.role.implementor;
 
+import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isStateAdmin;
-import static gov.ca.cwds.idm.service.authorization.UserRolesService.isSuperAdmin;
-import static gov.ca.cwds.service.messages.MessageCode.STATE_ADMIN_CANNOT_VIEW_USERS_WITH_SUPER_ADMIN_ROLE;
 import static gov.ca.cwds.service.messages.MessageCode.STATE_ADMIN_ROLES_CANNOT_BE_EDITED;
 
 import gov.ca.cwds.idm.dto.User;
@@ -15,14 +14,7 @@ class StateAdminAuthorizer extends AbstractAdminActionsAuthorizer {
 
   @Override
   public void checkCanViewUser() {
-    checkUserIsNotSuperAdmin();
-  }
-
-  private void checkUserIsNotSuperAdmin() {
-    if (isSuperAdmin(getUser())) {
-      throwAuthorizationException(STATE_ADMIN_CANNOT_VIEW_USERS_WITH_SUPER_ADMIN_ROLE,
-          getUser().getId());
-    }
+    checkUserIsNotSuperAdmin(STATE_ADMIN);
   }
 
   @Override
