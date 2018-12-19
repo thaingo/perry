@@ -20,12 +20,17 @@ import java.util.Set;
 
 public final class TestHelper {
 
+  public static final String COUNTY_NAME = "Yolo";
+  public static final String OFFICE_ID = "Yolo_2";
+  public static final String ADMIN_ID = "adminId";
+  public static final String USER_ID = "userId";
+
   private TestHelper() {
   }
 
   public static User user(String countyName, String officeId) {
     User user = new User();
-    user.setId("userId");
+    user.setId(USER_ID);
     user.setCountyName(countyName);
     user.setOfficeId(officeId);
     return user;
@@ -66,7 +71,7 @@ public final class TestHelper {
   public static UniversalUserToken admin(Set<String> roles, String countyName,
       Set<String> adminOfficeIds) {
     UniversalUserToken admin = new UniversalUserToken();
-    admin.setUserId("adminId");
+    admin.setUserId(ADMIN_ID);
     admin.setRoles(roles);
     admin.setParameter(COUNTY_NAME_PARAM, countyName);
     admin.setParameter(ADMIN_OFFICE_IDS_PARAM, adminOfficeIds);
@@ -80,30 +85,30 @@ public final class TestHelper {
   }
 
   public static User superAdmin() {
-    return TestHelper.user(toSet(SUPER_ADMIN),"Yolo", "Yolo_2");
+    return user(toSet(SUPER_ADMIN), COUNTY_NAME, OFFICE_ID);
   }
 
   public static User stateAdmin() {
-    return TestHelper.user(toSet(STATE_ADMIN),"Yolo", "Yolo_2");
+    return user(toSet(STATE_ADMIN),COUNTY_NAME, OFFICE_ID);
   }
 
   public static User countyAdmin() {
-    return TestHelper.user(toSet(COUNTY_ADMIN),"Yolo", "Yolo_2");
+    return user(toSet(COUNTY_ADMIN),COUNTY_NAME, OFFICE_ID);
   }
 
   public static User officeAdmin() {
-    return TestHelper.user(toSet(OFFICE_ADMIN), "Yolo", "Yolo_2");
+    return user(toSet(OFFICE_ADMIN), COUNTY_NAME, OFFICE_ID);
   }
 
   public static User calsAdmin() {
-    return TestHelper.user(toSet(CALS_ADMIN),"Yolo", "Yolo_2");
+    return TestHelper.user(toSet(CALS_ADMIN),COUNTY_NAME, OFFICE_ID);
   }
 
   public static User cwsWorker() {
-    return TestHelper.user(toSet(CWS_WORKER), "Yolo", "Yolo_2");
+    return TestHelper.user(toSet(CWS_WORKER), COUNTY_NAME, OFFICE_ID);
   }
 
   public static User calsWorker() {
-    return TestHelper.user(toSet(CALS_EXTERNAL_WORKER), "Yolo", "Yolo_2");
+    return TestHelper.user(toSet(CALS_EXTERNAL_WORKER), COUNTY_NAME, OFFICE_ID);
   }
 }

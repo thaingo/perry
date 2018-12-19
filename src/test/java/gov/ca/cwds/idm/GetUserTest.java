@@ -175,6 +175,12 @@ public class GetUserTest extends BaseIdmIntegrationTest {
     testGetValidUser(SUPER_ADMIN_ID, "fixtures/idm/get-user/super-admin.json");
   }
 
+  @Test
+  @WithMockCustomUser(roles = {SUPER_ADMIN})
+  public void testGetStateAdminBySuperAdmin() throws Exception {
+    testGetValidUser(STATE_ADMIN_ID, "fixtures/idm/get-user/state-admin-by-super-admin.json");
+  }
+
   private MvcResult assertGetUserUnauthorized(String userId) throws Exception {
     return mockMvc
         .perform(MockMvcRequestBuilders.get("/idm/users/" + userId))

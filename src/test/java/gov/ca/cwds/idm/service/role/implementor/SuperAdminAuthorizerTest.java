@@ -1,6 +1,9 @@
 package gov.ca.cwds.idm.service.role.implementor;
 
 import static gov.ca.cwds.config.api.idm.Roles.SUPER_ADMIN;
+import static gov.ca.cwds.idm.util.TestHelper.ADMIN_ID;
+import static gov.ca.cwds.idm.util.TestHelper.COUNTY_NAME;
+import static gov.ca.cwds.idm.util.TestHelper.OFFICE_ID;
 import static gov.ca.cwds.idm.util.TestHelper.admin;
 import static gov.ca.cwds.idm.util.TestHelper.calsAdmin;
 import static gov.ca.cwds.idm.util.TestHelper.calsWorker;
@@ -9,6 +12,7 @@ import static gov.ca.cwds.idm.util.TestHelper.cwsWorker;
 import static gov.ca.cwds.idm.util.TestHelper.officeAdmin;
 import static gov.ca.cwds.idm.util.TestHelper.stateAdmin;
 import static gov.ca.cwds.idm.util.TestHelper.superAdmin;
+import static gov.ca.cwds.service.messages.MessageCode.ADMIN_CANNOT_UPDATE_HIMSELF;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserCountyName;
 import static gov.ca.cwds.util.Utils.toSet;
@@ -27,7 +31,7 @@ public class SuperAdminAuthorizerTest extends BaseAuthorizerTest {
 
   @Before
   public void before() {
-    when(getCurrentUser()).thenReturn(admin(toSet(SUPER_ADMIN),null, null));
+    when(getCurrentUser()).thenReturn(admin(toSet(SUPER_ADMIN), COUNTY_NAME, toSet(OFFICE_ID)));
     when(getCurrentUserCountyName()).thenReturn(null);
   }
 
@@ -68,6 +72,13 @@ public class SuperAdminAuthorizerTest extends BaseAuthorizerTest {
 
   @Test
   public void canViewSuperAdmin() {
+    assertCanViewUser(superAdmin());
+  }
+
+  @Test
+  public void canViewHimself() {
+    User user = superAdmin();
+    user.setId(ADMIN_ID);
     assertCanViewUser(superAdmin());
   }
 

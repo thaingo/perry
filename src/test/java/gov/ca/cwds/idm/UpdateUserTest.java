@@ -19,6 +19,7 @@ import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_WITH_RACFID_AND
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_WITH_RACFID_ID;
 import static gov.ca.cwds.idm.util.TestUtils.asJsonString;
 import static gov.ca.cwds.idm.util.TestUtils.attr;
+import static gov.ca.cwds.idm.util.WithMockCustomUserSecurityContextFactory.ADMIN_ID;
 import static gov.ca.cwds.util.Utils.toSet;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
@@ -333,7 +334,7 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     String requestId = mdcMap.get(LoggingRequestIdFilter.REQUEST_ID);
     assertNotNull(requestId);
     assertTrue(mdcMap.containsKey(LoggingUserIdFilter.USER_ID));
-    assertThat(mdcMap.get(LoggingUserIdFilter.USER_ID), is("userId"));
+    assertThat(mdcMap.get(LoggingUserIdFilter.USER_ID), is(ADMIN_ID));
     String strResponse = result.getResponse().getContentAsString();
     assertThat(
         strResponse, containsString("\"incident_id\":\"" + requestId + "\""));
