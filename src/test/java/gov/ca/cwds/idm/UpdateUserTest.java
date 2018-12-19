@@ -515,6 +515,24 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     assertCanUpdatePermissions(SUPER_ADMIN_ID, toSet("Hotline-rollout"));
   }
 
+  @Test
+  @WithMockCustomUser(roles = {SUPER_ADMIN})
+  public void testSuperAdminCanDisableSuperAdmin() throws Exception {
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setEnabled(Boolean.FALSE);
+
+    assertSuccessfulUpdate(SUPER_ADMIN_ID, userUpdate);
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {SUPER_ADMIN})
+  public void testSuperAdminCanDegradeSuperAdmin() throws Exception {
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setRoles(toSet("CWS-worker"));
+
+    assertSuccessfulUpdate(SUPER_ADMIN_ID, userUpdate);
+  }
+
   private void assertCanUpdatePermissions(String userId, Set<String> permissions) throws Exception{
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setPermissions(permissions);
