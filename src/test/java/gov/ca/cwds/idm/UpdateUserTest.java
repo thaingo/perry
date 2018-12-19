@@ -4,15 +4,18 @@ import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.SUPER_ADMIN;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PERMISSIONS;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.ROLES;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL_VERIFIED;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.createPermissionsAttribute;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.INACTIVE_USER_WITH_ACTIVE_RACFID_IN_CMS;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.INACTIVE_USER_WITH_NO_ACTIVE_RACFID_IN_CMS;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.INACTIVE_USER_WITH_NO_RACFID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.STATE_ADMIN_ID;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.SUPER_ADMIN_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USERPOOL;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_NO_RACFID_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_WITH_RACFID_AND_DB_DATA_ID;
@@ -52,6 +55,7 @@ import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
 import gov.ca.cwds.idm.util.WithMockCustomUser;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Set;
 import org.junit.Test;
 import org.mockito.InOrder;
 import org.springframework.test.web.servlet.MvcResult;
@@ -490,31 +494,37 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
   @Test
   @WithMockCustomUser
   public void testUpdateRacfidUser_CansPermission() throws Exception {
-
-    UserUpdate userUpdate = new UserUpdate();
-    userUpdate.setPermissions(toSet("CANS-rollout"));
-
-    setUpdateUserAttributesRequestAndResult(
-        USER_WITH_RACFID_AND_DB_DATA_ID,
-        attr(PERMISSIONS.getName(), "CANS-rollout")
-    );
-
-    assertSuccessfulUpdate(USER_WITH_RACFID_AND_DB_DATA_ID, userUpdate);
+    assertCanUpdatePermissions(USER_WITH_RACFID_AND_DB_DATA_ID, toSet("CANS-rollout"));
   }
 
   @Test
   @WithMockCustomUser
   public void testUpdate_NonStandardPermission() throws Exception {
+    assertCanUpdatePermissions(USER_NO_RACFID_ID, toSet("ArbitraryPermission"));
+  }
 
+  @Test
+  @WithMockCustomUser(roles = {SUPER_ADMIN})
+  public void testSuperAdminCanUpdateStateAdminPermissions() throws Exception {
+    assertCanUpdatePermissions(STATE_ADMIN_ID, toSet("CANS-rollout"));
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {SUPER_ADMIN})
+  public void testSuperAdminCanUpdateSuperAdminPermissions() throws Exception {
+    assertCanUpdatePermissions(SUPER_ADMIN_ID, toSet("CANS-rollout"));
+  }
+
+  private void assertCanUpdatePermissions(String userId, Set<String> permissions) throws Exception{
     UserUpdate userUpdate = new UserUpdate();
-    userUpdate.setPermissions(toSet("ArbitraryPermission"));
+    userUpdate.setPermissions(permissions);
 
     setUpdateUserAttributesRequestAndResult(
-        USER_NO_RACFID_ID,
-        attr(PERMISSIONS.getName(), "ArbitraryPermission")
+        STATE_ADMIN_ID,
+        createPermissionsAttribute(permissions)
     );
 
-    assertSuccessfulUpdate(USER_NO_RACFID_ID, userUpdate);
+    assertSuccessfulUpdate(USER_WITH_RACFID_AND_DB_DATA_ID, userUpdate);
   }
 
   private void assertSuccessfulUpdate(String userId, UserUpdate userUpdate) throws Exception {
