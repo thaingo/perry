@@ -39,7 +39,7 @@ public class Roles {
    */
   static {
     roleList = new ArrayList<>();
-    roleList.add(ImmutableMap.of("id", SUPER_ADMIN, "name", "Super Administrator"));
+    roleList.add(ImmutableMap.of("id", SUPER_ADMIN, "name", "Global Administrator"));
     roleList.add(ImmutableMap.of("id", STATE_ADMIN, "name", "State Administrator"));
     roleList.add(ImmutableMap.of("id", COUNTY_ADMIN, "name", "County Administrator"));
     roleList.add(ImmutableMap.of("id", OFFICE_ADMIN, "name", "Office Administrator"));
