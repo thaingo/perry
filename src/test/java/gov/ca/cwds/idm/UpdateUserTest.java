@@ -506,13 +506,13 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
   @Test
   @WithMockCustomUser(roles = {SUPER_ADMIN})
   public void testSuperAdminCanUpdateStateAdminPermissions() throws Exception {
-    assertCanUpdatePermissions(STATE_ADMIN_ID, toSet("CANS-rollout"));
+    assertCanUpdatePermissions(STATE_ADMIN_ID, toSet("Hotline-rollout"));
   }
 
   @Test
   @WithMockCustomUser(roles = {SUPER_ADMIN})
   public void testSuperAdminCanUpdateSuperAdminPermissions() throws Exception {
-    assertCanUpdatePermissions(SUPER_ADMIN_ID, toSet("CANS-rollout"));
+    assertCanUpdatePermissions(SUPER_ADMIN_ID, toSet("Hotline-rollout"));
   }
 
   private void assertCanUpdatePermissions(String userId, Set<String> permissions) throws Exception{
@@ -520,11 +520,11 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     userUpdate.setPermissions(permissions);
 
     setUpdateUserAttributesRequestAndResult(
-        STATE_ADMIN_ID,
+        userId,
         createPermissionsAttribute(permissions)
     );
 
-    assertSuccessfulUpdate(USER_WITH_RACFID_AND_DB_DATA_ID, userUpdate);
+    assertSuccessfulUpdate(userId, userUpdate);
   }
 
   private void assertSuccessfulUpdate(String userId, UserUpdate userUpdate) throws Exception {
