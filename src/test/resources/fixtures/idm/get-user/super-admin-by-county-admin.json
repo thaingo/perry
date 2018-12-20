@@ -1,0 +1,6 @@
+{
+  "status": "UNAUTHORIZED",
+  "technical_message": "Only Super-admin can view users with Super-admin role, admin role: County-admin, username: a3427f8e-b080-4f71-9514-840c1fcb505b",
+  "user_message": "As not a Global admin You cannot view users with Global admin role",
+  "error_code": "CAP-062"
+}

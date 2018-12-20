@@ -15,6 +15,8 @@ import org.springframework.security.test.context.support.WithSecurityContextFact
 public class WithMockCustomUserSecurityContextFactory implements
     WithSecurityContextFactory<WithMockCustomUser> {
 
+  public static final String ADMIN_ID = "adminId";
+
   @Override
   public SecurityContext createSecurityContext(WithMockCustomUser annotation) {
     SecurityContext context = SecurityContextHolder.createEmptyContext();
@@ -28,7 +30,7 @@ public class WithMockCustomUserSecurityContextFactory implements
       userToken.setParameter(ADMIN_OFFICE_IDS_PARAM, toSet(annotation.adminOfficeIds()));
     }
 
-    userToken.setUserId("userId");
+    userToken.setUserId(ADMIN_ID);
 
     TestingAuthenticationToken testingAuthenticationToken = new TestingAuthenticationToken(
         userToken, null, annotation.roles());

@@ -3,6 +3,7 @@ package gov.ca.cwds.idm;
 import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.SUPER_ADMIN;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertStrict;
 
 import gov.ca.cwds.idm.util.WithMockCustomUser;
@@ -23,6 +24,12 @@ public class RolesTest extends BaseIdmIntegrationTest {
   @WithMockCustomUser(roles = {"OtherRole"})
   public void testGetRolesWithOtherRole() throws Exception {
     assertGetRolesUnauthorized();
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {SUPER_ADMIN})
+  public void testGetRolesSuperAdmin() throws Exception {
+    assertGetRolesSuccess();
   }
 
   @Test

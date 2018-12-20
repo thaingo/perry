@@ -4,6 +4,7 @@ import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.SUPER_ADMIN;
 
 import gov.ca.cwds.config.api.common.BaseApiConfiguration;
 import org.springframework.context.annotation.Configuration;
@@ -23,7 +24,7 @@ public class PerryIdmAdminConfiguration extends BaseApiConfiguration {
     http.antMatcher("/idm/permissions/**")
         .authorizeRequests()
         .anyRequest()
-        .hasAnyAuthority(COUNTY_ADMIN, STATE_ADMIN, OFFICE_ADMIN, CALS_ADMIN);
+        .hasAnyAuthority(SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CALS_ADMIN);
     super.configure(http);
   }
 }

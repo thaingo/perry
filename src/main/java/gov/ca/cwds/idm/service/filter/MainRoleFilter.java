@@ -6,6 +6,7 @@ import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.SUPER_ADMIN;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -47,6 +48,8 @@ public class MainRoleFilter {
 
   private static int getRoleValue(String role) {
     switch (role) {
+      case SUPER_ADMIN:
+        return 7;
       case STATE_ADMIN:
         return 6;
       case COUNTY_ADMIN:

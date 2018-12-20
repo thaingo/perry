@@ -1,0 +1,7 @@
+{
+  "status": "UNAUTHORIZED",
+  "technical_message": "Cals admin cannot view non Cals user, username: a3427f8e-b080-4f71-9514-840c1fcb505b",
+  "user_message": "As a Cals admin you cannot view non Cals user",
+  "error_code": "CAP-041"
+}
+

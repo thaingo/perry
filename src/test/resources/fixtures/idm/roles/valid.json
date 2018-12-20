@@ -1,5 +1,9 @@
 [
   {
+    "id": "Super-admin",
+    "name": "Global Administrator"
+  },
+  {
     "id": "State-admin",
     "name": "State Administrator"
   },
