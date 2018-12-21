@@ -6,9 +6,11 @@ import static gov.ca.cwds.util.Utils.healthCheckUtcTimeToPacific;
 
 import gov.ca.cwds.dto.app.HealthCheckResultDto;
 import gov.ca.cwds.dto.app.SystemInformationDto;
+import gov.ca.cwds.util.Utils;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import java.util.Date;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.actuate.endpoint.HealthEndpoint;
 import org.springframework.boot.actuate.endpoint.InfoEndpoint;
@@ -45,7 +47,7 @@ public class SystemInformationResource {
       }
   )
   public ResponseEntity<SystemInformationDto> getInfo() {
-    Map<String, String> info = (Map<String, String>) infoEndpoint.invoke().get("build");
+    Map<String, Object> info = (Map<String, Object>) infoEndpoint.invoke().get("build");
     Health health = healthEndpoint.invoke();
     SystemInformationDto systemInformation = prepareSystemInformation(info, health);
     int statusCode =
@@ -53,15 +55,15 @@ public class SystemInformationResource {
     return ResponseEntity.status(statusCode).body(systemInformation);
   }
 
-  private SystemInformationDto prepareSystemInformation(Map<String, String> info, Health health) {
+  private SystemInformationDto prepareSystemInformation(Map<String, Object> info, Health health) {
     SystemInformationDto systemInformation = new SystemInformationDto();
     systemInformation.setApplicationName(toRealNull(info.get("name")));
     systemInformation.setVersion(toRealNull(info.get("version")));
     systemInformation.setBuildNumber(toRealNull(info.get("buildNumber")));
     systemInformation.setHealthStatus(isStatusHealthy(health.getStatus()));
-
-    String time = healthCheckUtcTimeToPacific(info.get("time"));
-    addHealthCheckResults(systemInformation, health, time);
+    Date time = (Date) info.get("time");
+    String pacificTime = Utils.healthCheckUtcTimeToPacific(time);
+    addHealthCheckResults(systemInformation, health, pacificTime);
 
     return systemInformation;
   }
@@ -83,7 +85,11 @@ public class SystemInformationResource {
     return (Health) obj;
   }
 
-  private String toRealNull(String s) {
-    return "null".equals(s) ? null : s;
+  private String toRealNull(Object s) {
+    if (s instanceof String) {
+      return "null".equals(s) ? null : (String) s;
+    }
+    return null;
+
   }
 }
