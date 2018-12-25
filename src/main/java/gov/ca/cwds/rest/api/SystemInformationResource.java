@@ -61,11 +61,20 @@ public class SystemInformationResource {
     systemInformation.setVersion(toRealNull(info.get("version")));
     systemInformation.setBuildNumber(toRealNull(info.get("buildNumber")));
     systemInformation.setHealthStatus(isStatusHealthy(health.getStatus()));
-    Date time = (Date) info.get("time");
-    String pacificTime = Utils.healthCheckUtcTimeToPacific(time);
+    Object time = info.get("time");
+    String pacificTime = toPacificTime(time);
     addHealthCheckResults(systemInformation, health, pacificTime);
 
     return systemInformation;
+  }
+
+  private String toPacificTime(Object time) {
+    if (time instanceof Date) {
+      return Utils.healthCheckUtcTimeToPacific((Date) time);
+    } else if (time instanceof String) {
+      return Utils.healthCheckUtcTimeToPacific((String) time);
+    }
+    return null;
   }
 
   private void addHealthCheckResults(SystemInformationDto systemInformation, Health health,
