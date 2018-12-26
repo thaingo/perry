@@ -11,8 +11,13 @@ import static org.powermock.api.mockito.PowerMockito.when;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.ca.cwds.dto.app.SystemInformationDto;
+import gov.ca.cwds.util.Utils;
 import io.dropwizard.jackson.Jackson;
 import java.io.IOException;
+import java.sql.Date;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -51,8 +56,9 @@ public class SystemInformationResourceTest {
     MockitoAnnotations.initMocks(this);
 
     Map<String, Object> mockInfo = readJsonAsMap("mocks/rest/api/mock-spring-info.json");
+    Map<String, Object> buildInfo = (Map<String, Object>) mockInfo.get("build");
+    buildInfo.put("time", Utils.fromInfoEndpointString((String) buildInfo.get("time")));
     given(infoEndpoint.invoke()).willReturn(mockInfo);
-
     spySystemInformationResource = spy(systemInformationResource);
     when(spySystemInformationResource.objectToHealth(any()))
         .thenAnswer(i -> objectToMockHealth(i.getArguments()[0]));

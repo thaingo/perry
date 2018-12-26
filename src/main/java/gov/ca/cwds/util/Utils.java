@@ -6,6 +6,8 @@ import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getRACFId;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -30,6 +32,8 @@ public class Utils {
       DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
 
   public static final String URL_DATETIME_FORMAT_PATTERN = "yyyy-MM-dd-HH.mm.ss.SSS";
+  public static final String INFO_ENDPOINT_DATE_FORMAT = "yyyy-MM-dd HH:mm:ssZ";
+  public static final String SYSTEM_INFO_DATETIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS[XXX]";
   public static final DateTimeFormatter URL_DATETIME_FORMATTER =
       DateTimeFormatter.ofPattern(URL_DATETIME_FORMAT_PATTERN);
 
@@ -114,12 +118,28 @@ public class Utils {
    * @return a String with local time formatted like "2018-10-18T14:27:16.505-07:00"
    */
   public static String healthCheckUtcTimeToPacific(String ht) {
-    DateTimeFormatter formatterIn = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ssZ");
-    DateTimeFormatter formatterOut = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS[XXX]");
+    DateTimeFormatter formatterIn = DateTimeFormatter.ofPattern(INFO_ENDPOINT_DATE_FORMAT);
+    DateTimeFormatter formatterOut = DateTimeFormatter.ofPattern(SYSTEM_INFO_DATETIME_FORMAT);
     ZonedDateTime dt = ZonedDateTime.parse(ht, formatterIn)
         .withZoneSameInstant(ZoneId.of("America/Los_Angeles"));
     return dt.format(formatterOut);
   }
+
+  public static String healthCheckUtcTimeToPacific(Date ht) {
+    DateTimeFormatter formatterOut = DateTimeFormatter.ofPattern(SYSTEM_INFO_DATETIME_FORMAT);
+    ZonedDateTime dt = ZonedDateTime.ofInstant(ht.toInstant(), ZoneId.of("America/Los_Angeles"));
+    return dt.format(formatterOut);
+  }
+
+  public static Date fromInfoEndpointString(String date) {
+    SimpleDateFormat formatter = new SimpleDateFormat(INFO_ENDPOINT_DATE_FORMAT);
+    try {
+      return formatter.parse(date);
+    } catch (ParseException ignored) {
+    }
+    return null;
+  }
+
 
   public static String toCommaDelimitedString(Collection<String> collection) {
     if (collection == null) {
