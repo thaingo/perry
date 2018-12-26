@@ -4,6 +4,7 @@ import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.SUPER_ADMIN;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertStrict;
 
 import gov.ca.cwds.idm.util.WithMockCustomUser;
@@ -17,6 +18,12 @@ public class OfficesTest extends BaseIdmIntegrationTest {
   @Test
   @WithMockCustomUser(roles = {STATE_ADMIN})
   public void testGetAdminOfficesStateAdmin() throws Exception {
+    assertAllAdminOffices();
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {SUPER_ADMIN})
+  public void testGetAdminOfficesSuperAdmin() throws Exception {
     assertAllAdminOffices();
   }
 
