@@ -2,7 +2,6 @@ package gov.ca.cwds.config;
 
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
-import org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -15,7 +14,7 @@ import org.springframework.session.data.redis.config.annotation.web.http.EnableR
  */
 @Profile("redis")
 @ImportAutoConfiguration(classes = {
-    RedisAutoConfiguration.class, RedisRepositoriesAutoConfiguration.class})
+    RedisAutoConfiguration.class})
 @EnableRedisHttpSession
 @EnableSpringHttpSession
 @Configuration

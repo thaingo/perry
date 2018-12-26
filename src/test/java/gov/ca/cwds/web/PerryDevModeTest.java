@@ -6,8 +6,11 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.ca.cwds.BaseIntegrationTest;
 import gov.ca.cwds.PerryApplication;
+import gov.ca.cwds.dto.app.SystemInformationDto;
+import io.dropwizard.jackson.Jackson;
 import io.dropwizard.testing.FixtureHelpers;
 import org.junit.Assert;
 import org.junit.Test;
@@ -40,6 +43,9 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 public class PerryDevModeTest extends BaseIntegrationTest {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(PerryDevModeTest.class);
+  private static final ObjectMapper MAPPER = Jackson.newObjectMapper();
+  
+  private static final String REDIS_HEALTHCHECK = "redis";
 
   @Test
   public void whenValidMFAJsonProvided_thenAuthenticate() throws Exception {
@@ -105,5 +111,19 @@ public class PerryDevModeTest extends BaseIntegrationTest {
     LOGGER.info("Logout redirect URL: {}", result.getResponse().getRedirectedUrl());
 
   }
+
+  @Test
+  public void testSystemInformationResponseNoRedisProfile() throws Exception {
+    MvcResult result =
+        mockMvc
+            .perform(MockMvcRequestBuilders.get("/system-information"))
+            .andReturn();
+
+    SystemInformationDto response = MAPPER
+        .readValue(result.getResponse().getContentAsString(), SystemInformationDto.class);
+
+    Assert.assertFalse(response.getHealthCheckResults().keySet().contains(REDIS_HEALTHCHECK));
+  }
+
 
 }
