@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
+import org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
@@ -23,9 +25,9 @@ import org.springframework.web.client.RestTemplate;
 @SpringBootApplication
 @EnableTransactionManagement(proxyTargetClass = true)
 @EnableAutoConfiguration(exclude = {FlywayAutoConfiguration.class, SessionAutoConfiguration.class,
-    LiquibaseAutoConfiguration.class})
+    LiquibaseAutoConfiguration.class, RedisAutoConfiguration.class, RedisRepositoriesAutoConfiguration.class})
 @ComponentScan("gov.ca.cwds")
-@EnableGlobalMethodSecurity(prePostEnabled=true)
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 @EntityScan("gov.ca.cwds.data.persistence.auth")
 @EnableConfigurationProperties({PerryProperties.class, CognitoProperties.class, SearchProperties.class})
 public class PerryApplication {
