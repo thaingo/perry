@@ -10,7 +10,7 @@ node('dora-slave') {
                         string(defaultValue: '', description: 'Used for mergerequest default is empty', name: 'refspec'),
                         booleanParam(defaultValue: true, description: 'Enable NewRelic APM', name: 'USE_NEWRELIC'),
                         string(defaultValue: 'inventories/tpt2dev/hosts.yml', description: '', name: 'inventory')
-                ]), pipelineTriggers([pollSCM('H/5 * * * *')])])
+                ])])
     try {
         stage('Preparation') {
             cleanWs()
@@ -23,7 +23,7 @@ node('dora-slave') {
             buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'clean jar'
         }
 
-        stage('Verify SemVer Label'){
+        stage('Verify SemVer Label') {
             checkForLabel("perry")
         }
 
