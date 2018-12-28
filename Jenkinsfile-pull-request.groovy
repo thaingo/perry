@@ -31,9 +31,6 @@ node('dora-slave') {
                 buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'clean jar'
             }
         }
-        stage('Verify SemVer Label') {
-            checkForLabel("perry")
-        }
         stage('Unit Tests') {
             buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'test jacocoTestReport', switches: '--info'
         }
