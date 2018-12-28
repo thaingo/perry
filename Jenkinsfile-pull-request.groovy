@@ -20,7 +20,7 @@ node('dora-slave') {
             rtGradle.useWrapper = true
         }
         stage('Build') {
-            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'clean jar'
+            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'clean jar build=${BUILD_NUMBER}'
         }
 
         stage('Verify SemVer Label') {
