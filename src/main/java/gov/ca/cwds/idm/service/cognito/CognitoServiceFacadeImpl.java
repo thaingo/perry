@@ -7,7 +7,7 @@ import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PERMISSIONS;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.ROLES;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.EMAIL_DELIVERY;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.buildCreateUserAttributes;
-import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.buildUpdateUserAttributes;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.buildEmailAttributes;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.createDelimitedAttribute;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getDelimitedAttributeValue;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getEmail;
@@ -51,6 +51,7 @@ import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
+import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.service.messages.MessageCode;
 import java.util.ArrayList;
@@ -231,9 +232,9 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
   private List<AttributeType> getUpdateAttributes(
       UserType existedCognitoUser, UserUpdate updateUserDto) {
 
-    List<AttributeType> updateAttributes = new ArrayList<>(
-        buildUpdateUserAttributes(updateUserDto));
+    List<AttributeType> updateAttributes = new ArrayList<>();
 
+    addEmailAttributes(updateAttributes, updateUserDto.getEmail(), existedCognitoUser);
     addDelimitedAttribute(updateAttributes, PERMISSIONS, updateUserDto.getPermissions(),
         existedCognitoUser);
     addDelimitedAttribute(updateAttributes, ROLES, updateUserDto.getRoles(), existedCognitoUser);
@@ -249,6 +250,20 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
     if (newValues != null && !newValues.equals(existedValues)) {
       AttributeType delimitedAttr = createDelimitedAttribute(userAttribute, newValues);
       updateAttributes.add(delimitedAttr);
+    }
+  }
+
+  private void addEmailAttributes(List<AttributeType> updateAttributes, String newEmail,
+      UserType existedCognitoUser) {
+
+    if (newEmail == null) {
+      return;
+    }
+
+    String existedEmail = CognitoUtils.getEmail(existedCognitoUser);
+
+    if (!newEmail.equalsIgnoreCase(existedEmail)) {
+      updateAttributes.addAll(buildEmailAttributes(newEmail));
     }
   }
 
