@@ -21,7 +21,9 @@ import gov.ca.cwds.idm.service.cognito.AttributesBuilder;
 import gov.ca.cwds.idm.service.cognito.UserAttribute;
 import gov.ca.cwds.util.Utils;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
@@ -131,15 +133,15 @@ public class CognitoUtils {
     return attributesBuilder.build();
   }
 
-  public static List<AttributeType> buildEmailAttributes(String newEmail) {
-    AttributesBuilder attributesBuilder = new AttributesBuilder();
+  public static Map<UserAttribute, AttributeType> buildEmailAttributes(String newEmail) {
+    Map<UserAttribute, AttributeType> emailAttributes = new LinkedHashMap<>();
+
     if (newEmail != null) {
       newEmail = Utils.toLowerCase(newEmail);
-      attributesBuilder
-          .addAttribute(EMAIL, newEmail)
-          .addAttribute(EMAIL_VERIFIED, TRUE_VALUE);
+      emailAttributes.put(EMAIL, attribute(EMAIL.getName(), newEmail));
+      emailAttributes.put(EMAIL_VERIFIED, attribute(EMAIL_VERIFIED.getName(), TRUE_VALUE));
     }
-    return attributesBuilder.build();
+    return emailAttributes;
   }
 
   public static String getRACFId(UserType user) {

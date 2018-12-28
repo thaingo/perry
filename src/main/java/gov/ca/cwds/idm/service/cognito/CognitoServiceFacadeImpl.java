@@ -5,12 +5,14 @@ import static gov.ca.cwds.idm.persistence.ns.OperationType.RESEND_INVITATION_EMA
 import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PERMISSIONS;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.ROLES;
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.EMAIL_DELIVERY;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.buildCreateUserAttributes;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.buildEmailAttributes;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.createDelimitedAttribute;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getDelimitedAttributeValue;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getEmail;
+import static gov.ca.cwds.service.messages.MessageCode.ERROR_AT_INVITATION_RESENDING_ON_EMAIL_CHANGE;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_CONNECT_TO_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_GET_USER_FROM_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_UPDATE_USER_IN_IDM;
@@ -39,6 +41,7 @@ import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesRequest;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.DeliveryMediumType;
 import com.amazonaws.services.cognitoidp.model.DescribeUserPoolRequest;
+import com.amazonaws.services.cognitoidp.model.ForgotPasswordRequest;
 import com.amazonaws.services.cognitoidp.model.InvalidParameterException;
 import com.amazonaws.services.cognitoidp.model.ListUsersRequest;
 import com.amazonaws.services.cognitoidp.model.ListUsersResult;
@@ -54,12 +57,17 @@ import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.service.messages.MessageCode;
+import gov.ca.cwds.service.messages.MessagesService;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import javax.annotation.PostConstruct;
 import liquibase.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -69,11 +77,15 @@ import org.springframework.stereotype.Service;
 @SuppressWarnings({"fb-contrib:EXS_EXCEPTION_SOFTENING_NO_CONSTRAINTS"})
 public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(CognitoServiceFacadeImpl.class);
+
   private CognitoProperties properties;
 
   private AWSCognitoIdentityProvider identityProvider;
 
   private ExceptionFactory exceptionFactory;
+
+  private MessagesService messagesService;
 
   @PostConstruct
   public void init() {
@@ -203,57 +215,72 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
   public boolean updateUserAttributes(
       String userId, UserType existedCognitoUser, UserUpdate updateUserDto) {
 
-    boolean executed = false;
+    Map<UserAttribute, AttributeType> updatedAttributes = getUpdatedAttributes(existedCognitoUser, updateUserDto);
 
-    List<AttributeType> updateAttributes = getUpdateAttributes(existedCognitoUser, updateUserDto);
-
-    if (!updateAttributes.isEmpty()) {
-      AdminUpdateUserAttributesRequest adminUpdateUserAttributesRequest =
-          new AdminUpdateUserAttributesRequest()
-              .withUsername(userId)
-              .withUserPoolId(properties.getUserpool())
-              .withUserAttributes(updateAttributes);
-      try {
-        identityProvider.adminUpdateUserAttributes(adminUpdateUserAttributesRequest);
-      } catch (com.amazonaws.services.cognitoidp.model.UserNotFoundException e) {
-        throw exceptionFactory.createUserNotFoundException(USER_NOT_FOUND_BY_ID_IN_IDM, e, userId);
-      } catch (com.amazonaws.services.cognitoidp.model.AliasExistsException e) {
-        throw exceptionFactory.createUserAlreadyExistsException(USER_WITH_EMAIL_EXISTS_IN_IDM, e,
-            updateUserDto.getEmail());
-      } catch (Exception e) {
-        throw exceptionFactory.createIdmException(getErrorCode(UPDATE), e, userId);
-      }
-
-      executed = true;
+    if (updatedAttributes.isEmpty()) {
+        return false;
     }
-    return executed;
+
+    AdminUpdateUserAttributesRequest adminUpdateUserAttributesRequest =
+        new AdminUpdateUserAttributesRequest()
+            .withUsername(userId)
+            .withUserPoolId(properties.getUserpool())
+            .withUserAttributes(updatedAttributes.values());
+
+    try {
+      identityProvider.adminUpdateUserAttributes(adminUpdateUserAttributesRequest);
+    } catch (com.amazonaws.services.cognitoidp.model.UserNotFoundException e) {
+      throw exceptionFactory.createUserNotFoundException(USER_NOT_FOUND_BY_ID_IN_IDM, e, userId);
+    } catch (com.amazonaws.services.cognitoidp.model.AliasExistsException e) {
+      throw exceptionFactory.createUserAlreadyExistsException(USER_WITH_EMAIL_EXISTS_IN_IDM, e,
+          updateUserDto.getEmail());
+    } catch (Exception e) {
+      throw exceptionFactory.createIdmException(getErrorCode(UPDATE), e, userId);
+    }
+
+    if(updatedAttributes.containsKey(EMAIL)) {
+      String newEmail = updatedAttributes.get(EMAIL).getValue();
+      resendInvitationEmailOnEmailChange(userId, newEmail);
+    }
+
+    return true;
   }
 
-  private List<AttributeType> getUpdateAttributes(
+  private void resendInvitationEmailOnEmailChange(String userId, String newEmail){
+    try {
+
+    } catch (Exception e) {
+      String msg = messagesService
+          .getTechMessage(ERROR_AT_INVITATION_RESENDING_ON_EMAIL_CHANGE, userId);
+      LOGGER.error(msg, e);
+    }
+  }
+
+  private Map<UserAttribute, AttributeType> getUpdatedAttributes(
       UserType existedCognitoUser, UserUpdate updateUserDto) {
 
-    List<AttributeType> updateAttributes = new ArrayList<>();
+    Map<UserAttribute, AttributeType> updatedAttributes = new LinkedHashMap<>();
 
-    addEmailAttributes(updateAttributes, updateUserDto.getEmail(), existedCognitoUser);
-    addDelimitedAttribute(updateAttributes, PERMISSIONS, updateUserDto.getPermissions(),
+    addEmailAttributes(updatedAttributes, updateUserDto.getEmail(), existedCognitoUser);
+    addDelimitedAttribute(updatedAttributes, PERMISSIONS, updateUserDto.getPermissions(),
         existedCognitoUser);
-    addDelimitedAttribute(updateAttributes, ROLES, updateUserDto.getRoles(), existedCognitoUser);
+    addDelimitedAttribute(updatedAttributes, ROLES, updateUserDto.getRoles(), existedCognitoUser);
 
-    return updateAttributes;
+    return updatedAttributes;
   }
 
-  private void addDelimitedAttribute(List<AttributeType> updateAttributes,
+  private void addDelimitedAttribute(Map<UserAttribute, AttributeType> updateAttributes,
       UserAttribute userAttribute, Set<String> newValues, UserType existedCognitoUser) {
 
     Set<String> existedValues = getDelimitedAttributeValue(existedCognitoUser, userAttribute);
 
     if (newValues != null && !newValues.equals(existedValues)) {
       AttributeType delimitedAttr = createDelimitedAttribute(userAttribute, newValues);
-      updateAttributes.add(delimitedAttr);
+      updateAttributes.put(userAttribute, delimitedAttr);
     }
   }
 
-  private void addEmailAttributes(List<AttributeType> updateAttributes, String newEmail,
+  private void addEmailAttributes(Map<UserAttribute, AttributeType> updatedAttributes, String newEmail,
       UserType existedCognitoUser) {
 
     if (newEmail == null) {
@@ -263,7 +290,7 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
     String existedEmail = CognitoUtils.getEmail(existedCognitoUser);
 
     if (!newEmail.equalsIgnoreCase(existedEmail)) {
-      updateAttributes.addAll(buildEmailAttributes(newEmail));
+      updatedAttributes.putAll(buildEmailAttributes(newEmail));
     }
   }
 
@@ -377,5 +404,10 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
   @Autowired
   public void setExceptionFactory(ExceptionFactory exceptionFactory) {
     this.exceptionFactory = exceptionFactory;
+  }
+
+  @Autowired
+  public void setMessagesService(MessagesService messagesService) {
+    this.messagesService = messagesService;
   }
 }
