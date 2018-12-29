@@ -85,13 +85,6 @@ public class CognitoServiceFacadeTest {
   }
 
   @Test
-  public void testInit() {
-    facade.init();
-    AWSCognitoIdentityProvider identityProvider = facade.getIdentityProvider();
-    assertThat(identityProvider, is(notNullValue()));
-  }
-
-  @Test
   public void testGetById() {
     AdminGetUserResult mockResult = new AdminGetUserResult();
     mockResult.setUsername("id");

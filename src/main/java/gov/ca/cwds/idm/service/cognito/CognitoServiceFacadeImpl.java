@@ -39,13 +39,17 @@ import com.amazonaws.services.cognitoidp.model.AdminGetUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserResult;
 import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesRequest;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
+import com.amazonaws.services.cognitoidp.model.CreateUserPoolClientRequest;
+import com.amazonaws.services.cognitoidp.model.CreateUserPoolClientResult;
 import com.amazonaws.services.cognitoidp.model.DeliveryMediumType;
 import com.amazonaws.services.cognitoidp.model.DescribeUserPoolRequest;
 import com.amazonaws.services.cognitoidp.model.ForgotPasswordRequest;
+import com.amazonaws.services.cognitoidp.model.ForgotPasswordResult;
 import com.amazonaws.services.cognitoidp.model.InvalidParameterException;
 import com.amazonaws.services.cognitoidp.model.ListUsersRequest;
 import com.amazonaws.services.cognitoidp.model.ListUsersResult;
 import com.amazonaws.services.cognitoidp.model.MessageActionType;
+import com.amazonaws.services.cognitoidp.model.UserPoolClientType;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import com.amazonaws.services.cognitoidp.model.UsernameExistsException;
 import gov.ca.cwds.idm.dto.User;
@@ -87,6 +91,10 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
 
   private MessagesService messagesService;
 
+  private String clientId;
+
+  private String clientSecret;
+
   @PostConstruct
   public void init() {
     AWSCredentialsProvider credentialsProvider =
@@ -97,6 +105,17 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
             .withCredentials(credentialsProvider)
             .withRegion(Regions.fromName(properties.getRegion()))
             .build();
+
+    CreateUserPoolClientRequest createUserPoolClientRequest =
+        new CreateUserPoolClientRequest()
+            .withUserPoolId(properties.getUserpool())
+            .withClientName("CAPclient");
+
+    CreateUserPoolClientResult createUserPoolClientResult =
+        identityProvider.createUserPoolClient(createUserPoolClientRequest);
+    UserPoolClientType client = createUserPoolClientResult.getUserPoolClient();
+    clientId = client.getClientId();
+    clientSecret = client.getClientSecret();//is null with dev Brazil2020 pool
   }
 
   /**
@@ -248,12 +267,22 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
 
   private void resendInvitationEmailOnEmailChange(String userId, String newEmail){
     try {
+      ForgotPasswordRequest forgotPasswordRequest = createForgotPasswordRequest(newEmail);
+      ForgotPasswordResult forgotPasswordResult = identityProvider.forgotPassword(forgotPasswordRequest);
 
     } catch (Exception e) {
       String msg = messagesService
           .getTechMessage(ERROR_AT_INVITATION_RESENDING_ON_EMAIL_CHANGE, userId);
       LOGGER.error(msg, e);
     }
+  }
+
+  private ForgotPasswordRequest createForgotPasswordRequest(String newEmail) {
+    ForgotPasswordRequest forgotPasswordRequest =
+        new ForgotPasswordRequest()
+            .withUsername(newEmail)
+            .withClientId(clientId);
+    return forgotPasswordRequest;
   }
 
   private Map<UserAttribute, AttributeType> getUpdatedAttributes(
