@@ -50,6 +50,11 @@ perry:
         testWhileIdle: ${TOKEN_STORE_TEST_WHILE_IDLE:true}
         validationQuery: select 1
         logValidationErrors: ${TOKEN_STORE_LOG_VALIDATION_ERRORS:false}
+        tomcat:
+          # Number of ms to wait before throwing an exception if no connection is available.
+          max-wait=10000
+          # Maximum number of active connections that can be allocated from this pool at the same time.
+          max-active=10
       jpa:
         database: POSTGRESQL
         show_sql: true
