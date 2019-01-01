@@ -37,6 +37,7 @@ import com.amazonaws.services.cognitoidp.model.AdminDisableUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminEnableUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserResult;
+import com.amazonaws.services.cognitoidp.model.AdminResetUserPasswordRequest;
 import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesRequest;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.DeliveryMediumType;
@@ -248,8 +249,10 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
 
   private void resendInvitationEmailOnEmailChange(String userId, String newEmail){
     try {
-      ForgotPasswordRequest forgotPasswordRequest = createForgotPasswordRequest(newEmail);
-      identityProvider.forgotPassword(forgotPasswordRequest);
+//      ForgotPasswordRequest forgotPasswordRequest = createForgotPasswordRequest(newEmail);
+//      identityProvider.forgotPassword(forgotPasswordRequest);
+
+      identityProvider.adminResetUserPassword(createAdminResetUserPasswordRequest(newEmail));
 
     } catch (Exception e) {
       String msg = messagesService
@@ -262,6 +265,12 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
     return new ForgotPasswordRequest()
         .withUsername(newEmail)
         .withClientId("v3miuf2kdq4qrgcnjoo4odafb");
+  }
+
+  private AdminResetUserPasswordRequest createAdminResetUserPasswordRequest(String newEmail) {
+    return new AdminResetUserPasswordRequest()
+        .withUsername(newEmail)
+        .withUserPoolId(properties.getUserpool());
   }
 
   private Map<UserAttribute, AttributeType> getUpdatedAttributes(
