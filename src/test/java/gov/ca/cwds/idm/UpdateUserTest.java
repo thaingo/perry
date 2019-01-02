@@ -41,6 +41,8 @@ import com.amazonaws.services.cognitoidp.model.AdminDisableUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminDisableUserResult;
 import com.amazonaws.services.cognitoidp.model.AdminEnableUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminEnableUserResult;
+import com.amazonaws.services.cognitoidp.model.AdminResetUserPasswordRequest;
+import com.amazonaws.services.cognitoidp.model.AdminResetUserPasswordResult;
 import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesRequest;
 import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesResult;
 import com.amazonaws.services.cognitoidp.model.AliasExistsException;
@@ -52,6 +54,7 @@ import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
+import gov.ca.cwds.idm.util.TestCognitoServiceFacade;
 import gov.ca.cwds.idm.util.WithMockCustomUser;
 import java.util.Arrays;
 import java.util.Map;
@@ -68,16 +71,18 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
   @WithMockCustomUser(roles = {STATE_ADMIN})
   public void testUpdateUser() throws Exception {
 
+    final String NEW_EMAIL = "newmail@mail.com";
+
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setEnabled(Boolean.FALSE);
     userUpdate.setPermissions(toSet("RFA-rollout", "Hotline-rollout"));
     userUpdate.setRoles(toSet("Office-admin", "CWS-worker"));
-    userUpdate.setEmail("somemail@mail.com");
+    userUpdate.setEmail(NEW_EMAIL);
 
     AdminUpdateUserAttributesRequest updateAttributesRequest =
         setUpdateUserAttributesRequestAndResult(
             USER_NO_RACFID_ID,
-            attr(EMAIL.getName(), "somemail@mail.com"),
+            attr(EMAIL.getName(), NEW_EMAIL),
             attr(EMAIL_VERIFIED.getName(), "True"),
             attr(PERMISSIONS.getName(), "RFA-rollout:Hotline-rollout"),
             attr(ROLES.getName(), "Office-admin:CWS-worker")
@@ -86,6 +91,8 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     setDoraSuccess();
 
     AdminDisableUserRequest disableUserRequest = setDisableUserRequestAndResult(USER_NO_RACFID_ID);
+
+    AdminResetUserPasswordRequest resetPasswordRequest = setResetPasswordRequestAndResult(NEW_EMAIL);
 
     mockMvc
         .perform(
@@ -96,11 +103,13 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
         .andReturn();
 
     verify(cognito, times(1)).adminUpdateUserAttributes(updateAttributesRequest);
+    verify(cognito, times(1)).adminResetUserPassword(resetPasswordRequest);
     verify(cognito, times(1)).adminDisableUser(disableUserRequest);
     verify(spySearchService, times(1)).updateUser(any(User.class));
 
     InOrder inOrder = inOrder(cognito);
     inOrder.verify(cognito).adminUpdateUserAttributes(updateAttributesRequest);
+    inOrder.verify(cognito).adminResetUserPassword(resetPasswordRequest);
     inOrder.verify(cognito).adminDisableUser(disableUserRequest);
     verifyDoraCalls(1);
   }
@@ -643,6 +652,14 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
         new AdminDisableUserRequest().withUsername(id).withUserPoolId(USERPOOL);
     AdminDisableUserResult result = new AdminDisableUserResult();
     when(cognito.adminDisableUser(request)).thenReturn(result);
+    return request;
+  }
+
+  private AdminResetUserPasswordRequest setResetPasswordRequestAndResult(String newEmail) {
+    AdminResetUserPasswordRequest request =
+        ((TestCognitoServiceFacade) cognitoServiceFacade).createAdminResetUserPasswordRequest(newEmail);
+    AdminResetUserPasswordResult result = new AdminResetUserPasswordResult();
+    when(cognito.adminResetUserPassword(request)).thenReturn(result);
     return request;
   }
 

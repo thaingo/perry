@@ -267,7 +267,8 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
         .withClientId("v3miuf2kdq4qrgcnjoo4odafb");
   }
 
-  private AdminResetUserPasswordRequest createAdminResetUserPasswordRequest(String newEmail) {
+  @Override
+  public AdminResetUserPasswordRequest createAdminResetUserPasswordRequest(String newEmail) {
     return new AdminResetUserPasswordRequest()
         .withUsername(newEmail)
         .withUserPoolId(properties.getUserpool());
