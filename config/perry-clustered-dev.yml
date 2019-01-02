@@ -48,7 +48,7 @@ perry:
         password: ${TOKEN_STORE_DB_PASSWORD:postgres}
         testOnBorrow: ${TOKEN_STORE_TEST_ON_BORROW:true}
         testWhileIdle: ${TOKEN_STORE_TEST_WHILE_IDLE:true}
-        validationQuery: select 1
+        validationQuery: /* Perry token store healthcheck */select 1 for read only
         logValidationErrors: ${TOKEN_STORE_LOG_VALIDATION_ERRORS:false}
         tomcat:
           # Number of ms to wait before throwing an exception if no connection is available.
