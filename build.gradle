@@ -45,19 +45,16 @@ project.ext {
     devDockerHost = 'localhost'
     devDockerPort = 2376
 
-    isRelease = System.getProperty("Release") == "true"
     buildNumber = System.getProperty('BuildNumber')
     customVersion = System.getProperty('CustomVersion')
 
-    projectSnapshotVersion = projectMajorVersion + "-SNAPSHOT"
-    projectReleaseVersion = (customVersion == null || customVersion == "" || customVersion.startsWith('$') ? projectMajorVersion + '_' + buildNumber + '-RC' : customVersion )
-    projectVersion = (isRelease ? projectReleaseVersion : projectSnapshotVersion )
+    projectVersion = newVersion
     dockerTag = projectVersion
 
     // Publishing configuration
     snapshotMavenRepo = "http://pr.dev.cwds.io/artifactory/repo"
     releaseMavenRepo = "http://pr.dev.cwds.io/artifactory/libs-release"
-    artifactoryRepo = (isRelease ? releaseMavenRepo : snapshotMavenRepo)
+    artifactoryRepo = snapshotMavenRepo
 
     shiroVersion = '1.2.3'
     guiceVersion = '4.0'
@@ -70,6 +67,14 @@ project.ext {
     serenityVersion = '1.9.13'
 
 }
+
+  if (System.getProperty('newVersion') && System.getProperty('newVersion')!='null') {
+      def newVersion = "${System.getProperty('newVersion')}"
+      projectMajorVersion = newVersion
+  } else {
+      version = projectMajorVersion
+  }
+
 group = projectGroup
 
 description = """perry"""
@@ -110,6 +115,9 @@ repositories {
     mavenLocal()
     maven {
         url "http://pr.dev.cwds.io/artifactory/repo"
+    }
+    maven {
+        url "http://pr.dev.cwds.io/artifactory/libs-release"
     }
 }
 
