@@ -280,7 +280,7 @@ public class CognitoServiceFacadeTest {
     user.setCountyName("Madera");
     user.setRacfid("RUBBLBA ");
     user.setOfficeId("Office07IJ");
-    user.setPhoneNumber("+19161111111");
+    user.setOfficePhoneNumber("+19161111111");
     user.setPermissions(toSet("RFA-rollout", "Hotline-rollout"));
     user.setRoles(toSet(COUNTY_ADMIN, CWS_WORKER));
     return user;
