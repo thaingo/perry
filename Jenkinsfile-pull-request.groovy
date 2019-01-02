@@ -4,7 +4,7 @@ node('dora-slave') {
     def serverArti = Artifactory.server 'CWDS_DEV'
     def rtGradle = Artifactory.newGradleBuild()
     def triggerProperties = githubPullRequestBuilderTriggerProperties()
-    properties[(buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5')), disableConcurrentBuilds(), [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
+    properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5')), disableConcurrentBuilds(), [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
     parameters([
                   string(defaultValue: 'SNAPSHOT', description: 'Release version (if not SNAPSHOT will be released to lib-release repository)', name: 'VERSION'),
                   string(defaultValue: 'latest', description: '', name: 'APP_VERSION'),
