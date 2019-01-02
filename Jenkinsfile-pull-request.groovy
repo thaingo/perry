@@ -14,7 +14,7 @@ node('dora-slave') {
                         string(defaultValue: "", description: 'Fill this field if need to specify custom version ', name: 'OVERRIDE_VERSION'),
                         booleanParam(defaultValue: true, description: 'Enable NewRelic APM', name: 'USE_NEWRELIC'),
                         string(defaultValue: 'inventories/tpt2dev/hosts.yml', description: '', name: 'inventory')
-                ]), [pipelineTriggers([triggerProperties]])
+                ]), [pipelineTriggers([triggerProperties])]
             )
     try {
         stage('Preparation') {
