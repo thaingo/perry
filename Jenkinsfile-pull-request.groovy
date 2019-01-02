@@ -4,7 +4,8 @@ node('dora-slave') {
     def serverArti = Artifactory.server 'CWDS_DEV'
     def rtGradle = Artifactory.newGradleBuild()
     def triggerProperties = githubPullRequestBuilderTriggerProperties()
-    properties([ parameters([
+    properties(buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5')), disableConcurrentBuilds(), [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
+    parameters([
                   string(defaultValue: 'SNAPSHOT', description: 'Release version (if not SNAPSHOT will be released to lib-release repository)', name: 'VERSION'),
                   string(defaultValue: 'latest', description: '', name: 'APP_VERSION'),
                   string(defaultValue: 'master', description: '', name: 'branch'),
@@ -32,17 +33,17 @@ node('dora-slave') {
                 buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'clean jar'
             }
         }
-        stage('Unit Tests') {
-            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'test jacocoTestReport', switches: '--info'
-        }
-        stage('SonarQube analysis') {
-            withSonarQubeEnv('Core-SonarQube') {
-                buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'sonarqube'
-            }
-        }
-        stage('License Report') {
-            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'downloadLicenses'
-        }
+//        stage('Unit Tests') {
+//            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'test jacocoTestReport', switches: '--info'
+//        }
+//        stage('SonarQube analysis') {
+//            withSonarQubeEnv('Core-SonarQube') {
+//                buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'sonarqube'
+//            }
+//        }
+//        stage('License Report') {
+//            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'downloadLicenses'
+//        }
 
         stage('Clean Workspace') {
             archiveArtifacts artifacts: '**/perry*.jar,readme.txt', fingerprint: true
