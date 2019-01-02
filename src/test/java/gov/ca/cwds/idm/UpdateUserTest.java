@@ -88,11 +88,11 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
             attr(ROLES.getName(), "Office-admin:CWS-worker")
         );
 
-    setDoraSuccess();
+    AdminResetUserPasswordRequest resetPasswordRequest = setResetPasswordRequestAndResult(NEW_EMAIL);
 
     AdminDisableUserRequest disableUserRequest = setDisableUserRequestAndResult(USER_NO_RACFID_ID);
 
-    AdminResetUserPasswordRequest resetPasswordRequest = setResetPasswordRequestAndResult(NEW_EMAIL);
+    setDoraSuccess();
 
     mockMvc
         .perform(
@@ -584,6 +584,7 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     userUpdate.setEnabled(Boolean.TRUE);
     userUpdate.setPermissions(toSet("Hotline-rollout"));
     userUpdate.setRoles(toSet("CWS-worker"));
+    userUpdate.setEmail("garcia@gmail.com");
 
     AdminUpdateUserAttributesRequest updateAttributesRequest =
         setUpdateUserAttributesRequestAndResult(
@@ -591,6 +592,9 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
             attr(PERMISSIONS.getName(), "Hotline-rollout"),
             attr(ROLES.getName(), "CWS-worker")
         );
+
+    AdminResetUserPasswordRequest resetPasswordRequest =
+        setResetPasswordRequestAndResult("garcia@gmail.com");
 
     AdminEnableUserRequest enableUserRequest = setEnableUserRequestAndResult(userId);
 
@@ -603,6 +607,7 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
         .andReturn();
 
     verify(cognito, times(0)).adminUpdateUserAttributes(updateAttributesRequest);
+    verify(cognito, times(0)).adminResetUserPassword(resetPasswordRequest);
     verify(cognito, times(0)).adminEnableUser(enableUserRequest);
     verify(spySearchService, times(0)).createUser(any(User.class));
     verifyDoraCalls(0);
