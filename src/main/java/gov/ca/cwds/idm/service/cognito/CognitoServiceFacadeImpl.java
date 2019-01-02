@@ -42,7 +42,6 @@ import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesRequest;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.DeliveryMediumType;
 import com.amazonaws.services.cognitoidp.model.DescribeUserPoolRequest;
-import com.amazonaws.services.cognitoidp.model.ForgotPasswordRequest;
 import com.amazonaws.services.cognitoidp.model.InvalidParameterException;
 import com.amazonaws.services.cognitoidp.model.ListUsersRequest;
 import com.amazonaws.services.cognitoidp.model.ListUsersResult;
@@ -249,22 +248,12 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
 
   private void resendInvitationEmailOnEmailChange(String userId, String newEmail){
     try {
-//      ForgotPasswordRequest forgotPasswordRequest = createForgotPasswordRequest(newEmail);
-//      identityProvider.forgotPassword(forgotPasswordRequest);
-
       identityProvider.adminResetUserPassword(createAdminResetUserPasswordRequest(newEmail));
-
     } catch (Exception e) {
       String msg = messagesService
           .getTechMessage(ERROR_AT_INVITATION_RESENDING_ON_EMAIL_CHANGE, userId);
       LOGGER.error(msg, e);
     }
-  }
-
-  private ForgotPasswordRequest createForgotPasswordRequest(String newEmail) {
-    return new ForgotPasswordRequest()
-        .withUsername(newEmail)
-        .withClientId("v3miuf2kdq4qrgcnjoo4odafb");
   }
 
   @Override
