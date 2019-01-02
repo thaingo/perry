@@ -65,6 +65,7 @@ perry:
           hibernate.current_session_context_class : org.springframework.orm.hibernate5.SpringSessionContext
           hibernate.dialect: org.hibernate.dialect.ProgressDialect
           hibernate.default_schema: ${TOKEN_STORE_SCHEMA:perry}
+          hibernate.connection.isolation: 1
     serviceProviders:
       default:
         identityMapping: config/dev.groovy
