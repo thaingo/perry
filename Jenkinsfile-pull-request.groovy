@@ -33,17 +33,20 @@ node('dora-slave') {
                 buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'clean jar'
             }
         }
-//        stage('Unit Tests') {
-//            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'test jacocoTestReport', switches: '--info'
-//        }
-//        stage('SonarQube analysis') {
-//            withSonarQubeEnv('Core-SonarQube') {
-//                buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'sonarqube'
-//            }
-//        }
-//        stage('License Report') {
-//            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'downloadLicenses'
-//        }
+        stage('Verify SemVer Label') {
+          checkForLabel("perry")
+        }
+        stage('Unit Tests') {
+            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'test jacocoTestReport', switches: '--info'
+        }
+        stage('SonarQube analysis') {
+            withSonarQubeEnv('Core-SonarQube') {
+                buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'sonarqube'
+            }
+        }
+        stage('License Report') {
+            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'downloadLicenses'
+        }
 
         stage('Clean Workspace') {
             archiveArtifacts artifacts: '**/perry*.jar,readme.txt', fingerprint: true
