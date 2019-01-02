@@ -43,6 +43,10 @@ public class User implements RolesHolder, Serializable {
 
   private String officeId;
 
+  private String officePhoneNumber;
+
+  private String officePhoneExtensionNumber;
+
   private String phoneNumber;
 
   private String phoneExtensionNumber;
@@ -163,12 +167,12 @@ public class User implements RolesHolder, Serializable {
     this.officeId = officeId;
   }
 
-  public String getPhoneNumber() {
-    return phoneNumber;
+  public String getOfficePhoneNumber() {
+    return officePhoneNumber;
   }
 
-  public void setPhoneNumber(String phoneNumber) {
-    this.phoneNumber = phoneNumber;
+  public void setOfficePhoneNumber(String officePhoneNumber) {
+    this.officePhoneNumber = officePhoneNumber;
   }
 
   public String getEmail() {
@@ -216,6 +220,22 @@ public class User implements RolesHolder, Serializable {
     }
   }
 
+  public String getOfficePhoneExtensionNumber() {
+    return officePhoneExtensionNumber;
+  }
+
+  public void setOfficePhoneExtensionNumber(String officePhoneExtensionNumber) {
+    this.officePhoneExtensionNumber = officePhoneExtensionNumber;
+  }
+
+  public String getPhoneNumber() {
+    return phoneNumber;
+  }
+
+  public void setPhoneNumber(String phoneNumber) {
+    this.phoneNumber = phoneNumber;
+  }
+
   public String getPhoneExtensionNumber() {
     return phoneExtensionNumber;
   }
@@ -223,5 +243,4 @@ public class User implements RolesHolder, Serializable {
   public void setPhoneExtensionNumber(String phoneExtensionNumber) {
     this.phoneExtensionNumber = phoneExtensionNumber;
   }
-
 }
