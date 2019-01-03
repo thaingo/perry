@@ -48,8 +48,8 @@ project.ext {
     buildNumber = System.getProperty('BuildNumber')
     customVersion = System.getProperty('CustomVersion')
 
-    projectVersion = version
-    dockerTag = version
+    projectVersion = System.getProperty('newVersion')
+    dockerTag = System.getProperty('newVersion')
 
     // Publishing configuration
     snapshotMavenRepo = "http://pr.dev.cwds.io/artifactory/repo"
@@ -69,12 +69,10 @@ project.ext {
 }
 
   if (System.getProperty('newVersion') && System.getProperty('newVersion')!='null') {
-      print "This is New Tag"
       def newVersion = "${System.getProperty('newVersion')}"
       version = newVersion
       projectVersion = newVersion
   } else {
-      print "This is Old tag"
       version = projectMajorVersion
   }
 
