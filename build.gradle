@@ -78,10 +78,10 @@ project.ext {
     projectVersion = newVersion
   } else {
     println "using older version"
-    version = projectMajorVersion
+    version = projectVersion
 }
 
-def dockerTag = version
+def dockerTag = projectVersion
 group = projectGroup
 
 description = """perry"""
@@ -111,7 +111,7 @@ sonarqube {
     }
 }
 
-version = projectVersion
+//version = projectVersion
 mainClassName = mainclass
 
 bootRepackage {
