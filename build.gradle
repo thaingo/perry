@@ -49,13 +49,14 @@ project.ext {
     buildNumber = System.getProperty('BuildNumber')
     customVersion = System.getProperty('CustomVersion')
 
-    projectVersion = version
-    //dockerTag = version
+    projectSnapshotVersion = projectMajorVersion + "-SNAPSHOT"
+    projectReleaseVersion = (customVersion == null || customVersion == "" || customVersion.startsWith('$') ? projectMajorVersion + '_' + buildNumber + '-RC' : customVersion )
+    projectVersion = (isRelease ? projectReleaseVersion : projectSnapshotVersion )
 
     // Publishing configuration
     snapshotMavenRepo = "http://pr.dev.cwds.io/artifactory/repo"
     releaseMavenRepo = "http://pr.dev.cwds.io/artifactory/libs-release"
-    artifactoryRepo = snapshotMavenRepo
+    artifactoryRepo = (isRelease ? releaseMavenRepo : snapshotMavenRepo)
 
     shiroVersion = '1.2.3'
     guiceVersion = '4.0'
@@ -69,17 +70,16 @@ project.ext {
 
 }
 
-  if (System.getProperty('newVersion') && System.getProperty('newVersion')!='null') {
-      def newVersion = "${System.getProperty('newVersion')}"
-      version = newVersion
-      projectMajorVersion = newVersion
-      projectVersion = newVersion
+ if (System.getProperty('newVersion') && System.getProperty('newVersion')!='null') {
+    def newVersion = "${System.getProperty('newVersion')}"
+    version = newVersion
+    projectMajorVersion = newVersion
+    projectVersion = newVersion
   } else {
-      version = projectMajorVersion
-  }
+    version = projectMajorVersion
+}
 
 def dockerTag = version
-echo dockerTag
 group = projectGroup
 
 description = """perry"""
@@ -109,7 +109,7 @@ sonarqube {
     }
 }
 
-//version = projectVersion
+version = projectVersion
 mainClassName = mainclass
 
 bootRepackage {
@@ -120,9 +120,6 @@ repositories {
     mavenLocal()
     maven {
         url "http://pr.dev.cwds.io/artifactory/repo"
-    }
-    maven {
-        url "http://pr.dev.cwds.io/artifactory/libs-release"
     }
 }
 
