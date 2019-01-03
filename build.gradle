@@ -48,8 +48,8 @@ project.ext {
     buildNumber = System.getProperty('BuildNumber')
     customVersion = System.getProperty('CustomVersion')
 
-    //projectVersion = version
-    //dockerTag = version
+    projectVersion = version
+    dockerTag = version
 
     // Publishing configuration
     snapshotMavenRepo = "http://pr.dev.cwds.io/artifactory/repo"
@@ -72,10 +72,10 @@ project.ext {
       def newVersion = "${System.getProperty('newVersion')}"
       version = newVersion
       projectMajorVersion = newVersion
+      projectVersion = version
   } else {
       version = projectMajorVersion
   }
-def deockerTag = version
 
 group = projectGroup
 
