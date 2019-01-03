@@ -71,13 +71,13 @@ project.ext {
 }
 
  if (System.getProperty('newVersion') && System.getProperty('newVersion')!='null') {
-    println "newVersion" + "0.0.2"
+    println "Using newer version"
     def newVersion = "${System.getProperty('newVersion')}"
     version = newVersion
     projectMajorVersion = newVersion
     projectVersion = newVersion
   } else {
-    println "oldVersion" + "0.0.1"
+    println "using older version"
     version = projectMajorVersion
 }
 
