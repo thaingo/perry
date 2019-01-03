@@ -72,7 +72,7 @@ project.ext {
       def newVersion = "${System.getProperty('newVersion')}"
       version = newVersion
       projectMajorVersion = newVersion
-      projectVersion = version
+      projectVersion = newVersion
   } else {
       version = projectMajorVersion
   }
