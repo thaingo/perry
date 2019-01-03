@@ -69,10 +69,12 @@ project.ext {
 }
 
   if (System.getProperty('newVersion') && System.getProperty('newVersion')!='null') {
+      print "This is New Tag"
       def newVersion = "${System.getProperty('newVersion')}"
       version = newVersion
       projectVersion = newVersion
   } else {
+      print "This is Old tag"
       version = projectMajorVersion
   }
 
