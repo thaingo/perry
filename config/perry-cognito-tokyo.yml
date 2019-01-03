@@ -1,8 +1,8 @@
 security:
  oauth2:
    client:
-     clientId: ${SAF_CLIENT_ID:26666godh18aaa5ut4jnvkv885}
-     clientSecret: ${SAF_CLIENT_SECRET:}
+     clientId: ${SAF_CLIENT_ID:7l0rg24g5uc3t8cvtnmdfgc2ot}
+     clientSecret: ${SAF_CLIENT_SECRET:pvab427o99hi7dignldj2s403op8msu7idaa7oq04eesrqmpshu}
      accessTokenUri: ${SAF_RETRIEVE_TOKEN_PATH:https://captokyo2020.auth.us-east-2.amazoncognito.com/oauth2/token}
      userAuthorizationUri: ${SAF_AUTH_PATH:https://captokyo2020.auth.us-east-2.amazoncognito.com/login}
      tokenName: ${TOKEN_NAME:access_token}  
