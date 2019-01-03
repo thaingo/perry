@@ -71,13 +71,11 @@ project.ext {
 }
 
  if (System.getProperty('newVersion') && System.getProperty('newVersion')!='null') {
-    println "Using newer version"
     def newVersion = "${System.getProperty('newVersion')}"
     version = newVersion
     projectMajorVersion = newVersion
     projectVersion = newVersion
   } else {
-    println "using older version"
     version = projectVersion
 }
 
@@ -248,7 +246,7 @@ task checkDockerService {
 
 processResources {
      filter(ReplaceTokens, tokens: [
-             'build.version': projectVersion,
+             'build.version': projectVersion as String,
              'build.number' : (System.getenv("BUILD_NUMBER") ?: "IDE")
      ])
  }
