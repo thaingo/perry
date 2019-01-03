@@ -48,8 +48,8 @@ project.ext {
     buildNumber = System.getProperty('BuildNumber')
     customVersion = System.getProperty('CustomVersion')
 
-    projectVersion = System.getProperty('newVersion')
-    dockerTag = System.getProperty('newVersion')
+    //projectVersion = version
+    //dockerTag = version
 
     // Publishing configuration
     snapshotMavenRepo = "http://pr.dev.cwds.io/artifactory/repo"
@@ -75,6 +75,7 @@ project.ext {
   } else {
       version = projectMajorVersion
   }
+def deockerTag = version
 
 group = projectGroup
 
@@ -105,7 +106,7 @@ sonarqube {
     }
 }
 
-version = projectVersion
+//version = projectVersion
 mainClassName = mainclass
 
 bootRepackage {
