@@ -4,6 +4,7 @@ node('dora-slave') {
     def serverArti = Artifactory.server 'CWDS_DEV'
     def rtGradle = Artifactory.newGradleBuild()
     def github_credentials_id = '433ac100-b3c2-4519-b4d6-207c029a103b'
+    newTag = '';
     properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5')), disableConcurrentBuilds(), [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
                 parameters([
                         string(defaultValue: 'latest', description: '', name: 'APP_VERSION'),
@@ -56,7 +57,7 @@ node('dora-slave') {
         }
         stage('Build Docker') {
             withDockerRegistry([credentialsId: '6ba8d05c-ca13-4818-8329-15d41a089ec0']) {
-                buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "publishLatestDocker -DnewVersion=${newTag}".toString()
+                buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'publishLatestDocker'
             }
         }
         stage('Clean Workspace') {
@@ -103,7 +104,7 @@ node('dora-slave') {
         stage('Push artifacts') {
             // Artifactory
             rtGradle.deployer.deployArtifacts = true
-            buildInfo = rtGradle.run buildFile: "build.gradle', tasks: 'publish -DnewVersion=${newTag}".toString()
+            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "publish -DnewVersion=${newTag}".toString()
             rtGradle.deployer.deployArtifacts = false
             // Docker Hub
             withDockerRegistry([credentialsId: '6ba8d05c-ca13-4818-8329-15d41a089ec0']) {
