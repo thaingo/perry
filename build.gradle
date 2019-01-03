@@ -45,6 +45,7 @@ project.ext {
     devDockerHost = 'localhost'
     devDockerPort = 2376
 
+    isRelease = System.getProperty("Release") == "true"
     buildNumber = System.getProperty('BuildNumber')
     customVersion = System.getProperty('CustomVersion')
 
