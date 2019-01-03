@@ -117,7 +117,7 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
 
     return
         new AdminCreateUserRequest()
-            .withUsername(user.getEmail())
+            .withUsername(user.getId())
             .withUserPoolId(properties.getUserpool())
             .withDesiredDeliveryMediums(EMAIL_DELIVERY)
             .withUserAttributes(buildCreateUserAttributes(user));
@@ -285,8 +285,7 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
   @Override
   public UserType resendInvitationMessage(String userId) {
     UserType cognitoUser = getCognitoUserById(userId);
-    String email = getEmail(cognitoUser);
-    AdminCreateUserRequest request = createResendEmailRequest(email);
+    AdminCreateUserRequest request = createResendEmailRequest(userId);
     AdminCreateUserResult result =
         executeUserOperationInCognito(identityProvider::adminCreateUser, request, userId,
             RESEND_INVITATION_EMAIL);
@@ -296,11 +295,11 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
   /**
    * Creates the request for resending email.
    *
-   * @param email email address of the user.
+   * @param userId userId of the user.
    */
-  public AdminCreateUserRequest createResendEmailRequest(String email) {
+  public AdminCreateUserRequest createResendEmailRequest(String userId) {
     return new AdminCreateUserRequest()
-        .withUsername(toLowerCase(email))
+        .withUsername(userId)
         .withUserPoolId(properties.getUserpool())
         .withMessageAction(MessageActionType.RESEND)
         .withDesiredDeliveryMediums(DeliveryMediumType.EMAIL);
