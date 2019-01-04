@@ -1,13 +1,16 @@
 package gov.ca.cwds.data.persistence.auth;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import gov.ca.cwds.data.converter.StringToRequiredIntegerConverter;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.time.LocalDate;
 import java.util.Set;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -52,6 +55,15 @@ public class StaffPerson {
 
   @Column(name = "START_DT")
   private LocalDate startDate;
+
+  @Column(name = "PHONE_NO")
+  @JsonIgnore
+  private Long phoneNumber;
+
+  @Column(name = "TEL_EXT_NO")
+  @JsonIgnore
+  @Convert(converter = StringToRequiredIntegerConverter.class)
+  private String phoneExtensionNumber;
 
   @ManyToOne
   @JoinColumn(name = "FKCWS_OFFT", insertable = false, updatable = false)
@@ -126,6 +138,22 @@ public class StaffPerson {
     this.startDate = startDate;
   }
 
+  public Long getPhoneNumber() {
+    return phoneNumber;
+  }
+
+  public void setPhoneNumber(Long phoneNumber) {
+    this.phoneNumber = phoneNumber;
+  }
+
+  public String getPhoneExtensionNumber() {
+    return phoneExtensionNumber;
+  }
+
+  public void setPhoneExtensionNumber(String phoneExtensionNumber) {
+    this.phoneExtensionNumber = phoneExtensionNumber;
+  }
+
   @Override
   public final boolean equals(Object o) {
     if (this == o) {
@@ -147,6 +175,8 @@ public class StaffPerson {
         .append(startDate, that.startDate)
         .append(office, that.office)
         .append(unitAuthorities, that.unitAuthorities)
+        .append(phoneNumber, that.phoneNumber)
+        .append(phoneExtensionNumber, that.phoneExtensionNumber)
         .isEquals();
   }
 
@@ -161,6 +191,8 @@ public class StaffPerson {
         .append(startDate)
         .append(office)
         .append(unitAuthorities)
+        .append(phoneNumber)
+        .append(phoneExtensionNumber)
         .toHashCode();
   }
 }
