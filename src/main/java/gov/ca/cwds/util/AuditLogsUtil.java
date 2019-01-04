@@ -24,7 +24,7 @@ public class AuditLogsUtil {
 
     AuditEvent<UserChangeLogRecord> auditEvent = new AuditEvent<>();
 
-    auditEvent.setTimestamp(event.getCreatedDateTime());
+    auditEvent.setTimestamp(event.getEventDateTime());
     auditEvent.setEventSource(CAP_EVENT_SOURCE);
     auditEvent.setEventType(USER_CREATED_EVENT_TYPE);
     auditEvent.setUserLogin(getCurrentUserName());

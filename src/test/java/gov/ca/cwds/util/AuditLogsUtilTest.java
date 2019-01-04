@@ -56,8 +56,7 @@ public class AuditLogsUtilTest {
     user.setCountyName(TEST_COUNTY);
     user.setOfficeId(TEST_OFFICE_ID);
     user.setRoles(new LinkedHashSet<>(Arrays.asList(ROLE_1, ROLE_2)));
-    UserCreatedEvent userCreatedEvent = new UserCreatedEvent(user,
-        LocalDateTime.of(2019, 1, 10, 12, 30));
+    UserCreatedEvent userCreatedEvent = new UserCreatedEvent(user);
 
     when(CurrentAuthenticatedUserUtil.getCurrentUserName()).thenReturn(ADMIN_LOGIN);
     when(CurrentAuthenticatedUserUtil.getCurrentUser()).thenReturn(new UniversalUserToken());
@@ -79,7 +78,6 @@ public class AuditLogsUtilTest {
 
     assertEquals(CAP_EVENT_SOURCE, result.getEventSource());
     assertEquals(USER_CREATED_EVENT_TYPE, result.getEventType());
-    assertEquals(LocalDateTime.of(2019, 1, 10, 12, 30), result.getTimestamp());
     assertEquals(ADMIN_LOGIN, result.getUserLogin());
     assertNotNull(result.getId());
 
