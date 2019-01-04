@@ -5,13 +5,14 @@ node('dora-slave') {
     def rtGradle = Artifactory.newGradleBuild()
     def github_credentials_id = '433ac100-b3c2-4519-b4d6-207c029a103b'
     newTag = '';
-    properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5')), disableConcurrentBuilds(), [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
+    properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10')), disableConcurrentBuilds(), [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
                 parameters([
                         string(defaultValue: 'latest', description: '', name: 'APP_VERSION'),
                         string(defaultValue: 'master', description: 'perry branch', name: 'branch'),
                         string(defaultValue: 'master', description: 'ansible branch', name: 'ansible_branch'),
                         string(defaultValue: '', description: 'Used for mergerequest default is empty', name: 'refspec'),
                         booleanParam(defaultValue: true, description: 'Enable NewRelic APM', name: 'USE_NEWRELIC'),
+                        booleanParam(defaultValue: true, description: 'Default release version template is: <majorVersion>_<buildNumber>-RC', name: 'RELEASE_PROJECT'),
                         string(defaultValue: 'inventories/tpt2dev/hosts.yml', description: '', name: 'inventory'),
                         string(defaultValue: 'https://web.dev.cwds.io/perry', description: 'Perry base URL', name: 'PERRY_URL'),
                 ]),
@@ -38,18 +39,18 @@ node('dora-slave') {
             rtGradle.resolver repo: 'repo', server: serverArti
             rtGradle.useWrapper = true
         }
-        stage('Build') {
-            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'clean jar'
-        }
         stage('Increment Tag') {
           newTag = newSemVer()
         }
+        stage('Build') {
+            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "clean jar -DnewVersion=${newTag}".toString()
+        }
         stage('Unit Tests') {
-            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'test jacocoTestReport', switches: '--info'
+            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'test jacocoTestReport', switches: "--info -DnewVersion=${newTag}".toString()
         }
         stage('SonarQube analysis') {
             withSonarQubeEnv('Core-SonarQube') {
-                buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'sonarqube'
+                buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: "sonarqube -DnewVersion=${newTag}".toString()
             }
         }
         stage('License Report') {
@@ -57,7 +58,7 @@ node('dora-slave') {
         }
         stage('Build Docker') {
             withDockerRegistry([credentialsId: '6ba8d05c-ca13-4818-8329-15d41a089ec0']) {
-                buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'publishLatestDocker'
+                buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "publishLatestDocker -DnewVersion=${newTag}".toString()
             }
         }
         stage('Clean Workspace') {
@@ -104,7 +105,7 @@ node('dora-slave') {
         stage('Push artifacts') {
             // Artifactory
             rtGradle.deployer.deployArtifacts = true
-            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "publish -DnewVersion=${newTag}".toString()
+            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "publish -DRelease=$RELEASE_PROJECT -DnewVersion=${newTag}".toString()
             rtGradle.deployer.deployArtifacts = false
             // Docker Hub
             withDockerRegistry([credentialsId: '6ba8d05c-ca13-4818-8329-15d41a089ec0']) {
