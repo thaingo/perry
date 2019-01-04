@@ -12,7 +12,6 @@ node('dora-slave') {
                         string(defaultValue: 'master', description: 'perry branch', name: 'branch'),
                         string(defaultValue: 'master', description: 'ansible branch', name: 'ansible_branch'),
                         string(defaultValue: '', description: 'Used for mergerequest default is empty', name: 'refspec'),
-                        booleanParam(defaultValue: true, description: 'Default release version template is: <majorVersion>_<buildNumber>-RC', name: 'RELEASE_PROJECT'),
                         booleanParam(defaultValue: true, description: 'Enable NewRelic APM', name: 'USE_NEWRELIC'),
                         string(defaultValue: 'inventories/tpt2dev/hosts.yml', description: '', name: 'inventory'),
                         string(defaultValue: 'https://web.dev.cwds.io/perry', description: 'Perry base URL', name: 'PERRY_URL'),
@@ -93,11 +92,11 @@ node('dora-slave') {
         stage('Push artifacts') {
             // Artifactory
             rtGradle.deployer.deployArtifacts = true
-            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "publish -DRelease=$RELEASE_PROJECT -DnewVersion=${newTag}".toString()
+            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "publish -DRelease=true -DnewVersion=${newTag}".toString()
             rtGradle.deployer.deployArtifacts = false
             // Docker Hub
             withDockerRegistry([credentialsId: '6ba8d05c-ca13-4818-8329-15d41a089ec0']) {
-                buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "publishDocker -DRelease=false -DnewVersion=${newTag}".toString()
+                buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "publishDocker -DRelease=true -DnewVersion=${newTag}".toString()
             }
         }
         stage('Tag Git') {
