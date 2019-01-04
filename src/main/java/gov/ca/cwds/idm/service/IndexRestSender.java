@@ -1,6 +1,5 @@
 package gov.ca.cwds.idm.service;
 
-import gov.ca.cwds.idm.dto.User;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,18 +15,18 @@ import org.springframework.web.client.RestTemplate;
 
 @Service
 @Profile("idm")
-public class SearchRestSender {
+public class IndexRestSender {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(SearchRestSender.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(IndexRestSender.class);
 
   @Autowired private RestTemplate restTemplate;
 
   @Autowired
-  @Qualifier("searchRetryTemplate")
+  @Qualifier("indexRetryTemplate")
   private RetryTemplate retryTemplate;
 
   public ResponseEntity<String> send(
-      String urlTemplate, HttpEntity<User> requestEntity, Map<String, String> params) {
+      String urlTemplate, HttpEntity<?> requestEntity, Map<String, String> params) {
 
     return retryTemplate.execute(
         context -> {

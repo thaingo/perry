@@ -185,7 +185,8 @@ public class IdmServiceImpl implements IdmService {
 
     UserType userType = cognitoServiceFacade.createUser(user);
     String userId = userType.getUsername();
-    eventPublisher.publishEvent(new UserCreatedEvent(userId, user, LocalDateTime.now()));
+    user.setId(userId);
+    eventPublisher.publishEvent(new UserCreatedEvent(user, LocalDateTime.now()));
     PutInSearchExecution doraExecution = createUserInSearch(userType);
     handleCreatePartialSuccess(userId, doraExecution);
     return userId;
