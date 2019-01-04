@@ -4,6 +4,7 @@ node('dora-slave') {
     def serverArti = Artifactory.server 'CWDS_DEV'
     def rtGradle = Artifactory.newGradleBuild()
     def github_credentials_id = '433ac100-b3c2-4519-b4d6-207c029a103b'
+    def docker_credentials_id = '6ba8d05c-ca13-4818-8329-15d41a089ec0'
     newTag = '';
     triggerProperties = pullRequestMergedTriggerProperties('perry-master')
     properties([pipelineTriggers([triggerProperties]), buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10')), disableConcurrentBuilds(), [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
@@ -44,7 +45,7 @@ node('dora-slave') {
             buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'downloadLicenses'
         }
         stage('Build Docker') {
-            withDockerRegistry([credentialsId: '6ba8d05c-ca13-4818-8329-15d41a089ec0']) {
+            withDockerRegistry([credentialsId: docker_credentials_id]) {
                 buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "publishLatestDocker -DnewVersion=${newTag}".toString()
             }
         }
@@ -95,7 +96,7 @@ node('dora-slave') {
             buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "publish -DRelease=true -DnewVersion=${newTag}".toString()
             rtGradle.deployer.deployArtifacts = false
             // Docker Hub
-            withDockerRegistry([credentialsId: '6ba8d05c-ca13-4818-8329-15d41a089ec0']) {
+            withDockerRegistry([credentialsId: docker_credentials_id]) {
                 buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "publishDocker -DRelease=true -DnewVersion=${newTag}".toString()
             }
         }
@@ -112,6 +113,22 @@ node('dora-slave') {
                     [$class: 'StringParameterValue', name: 'CONTAINER_VERSION', value: "${build_version}"]
                 ],
                 wait: false 
+        }
+        stage('Deploy to Pre-int') {
+            withCredentials([usernameColonPassword(credentialsId: 'fa186416-faac-44c0-a2fa-089aed50ca17', variable: 'jenkinsauth')]) {
+                sh "curl -u $jenkinsauth 'http://jenkins.mgmt.cwds.io:8080/job/preint/job/deploy-perry/buildWithParameters?token=deployPerryToPreint&version=${newTag}'"
+            }
+        }
+        stage('Update Pre-int Manifest') {
+            updateManifest("perry", "preint", github_credentials_id, newTag)
+        }
+        stage('Deploy to Integration') {
+            withCredentials([usernameColonPassword(credentialsId: 'fa186416-faac-44c0-a2fa-089aed50ca17', variable: 'jenkinsauth')]) {
+                sh "curl -u $jenkinsauth 'http://jenkins.mgmt.cwds.io:8080/job/Integration%20Environment/job/deploy-perry/buildWithParameters?token=deployPerryToIntegration&version=${newTag}'"
+            }
+        }
+        stage('Update Integration Manifest') {
+            updateManifest("perry", "integration", github_credentials_id, newTag)
         }
     } catch (Exception e) {
         emailext attachLog: true, body: "Failed: ${e}", recipientProviders: [[$class: 'DevelopersRecipientProvider']],
