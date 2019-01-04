@@ -5,31 +5,19 @@ node('dora-slave') {
     def rtGradle = Artifactory.newGradleBuild()
     def github_credentials_id = '433ac100-b3c2-4519-b4d6-207c029a103b'
     newTag = '';
-    properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10')), disableConcurrentBuilds(), [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
+    triggerProperties = pullRequestMergedTriggerProperties('perry-master')
+    properties([pipelineTriggers([triggerProperties]), buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10')), disableConcurrentBuilds(), [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
                 parameters([
                         string(defaultValue: 'latest', description: '', name: 'APP_VERSION'),
                         string(defaultValue: 'master', description: 'perry branch', name: 'branch'),
                         string(defaultValue: 'master', description: 'ansible branch', name: 'ansible_branch'),
                         string(defaultValue: '', description: 'Used for mergerequest default is empty', name: 'refspec'),
-                        booleanParam(defaultValue: true, description: 'Enable NewRelic APM', name: 'USE_NEWRELIC'),
                         booleanParam(defaultValue: true, description: 'Default release version template is: <majorVersion>_<buildNumber>-RC', name: 'RELEASE_PROJECT'),
+                        booleanParam(defaultValue: true, description: 'Enable NewRelic APM', name: 'USE_NEWRELIC'),
                         string(defaultValue: 'inventories/tpt2dev/hosts.yml', description: '', name: 'inventory'),
                         string(defaultValue: 'https://web.dev.cwds.io/perry', description: 'Perry base URL', name: 'PERRY_URL'),
-                ]),
-               pipelineTriggers([
-                [$class: 'GenericTrigger',
-                  genericVariables: [
-                    [key: 'pull_request_action', value: 'action', expressionType: 'JSONPath'],
-                    [key: 'pull_request_merged', value: 'pull_request.merged', expressionType: 'JSONPath'],
-                    [key: 'pull_request_event', value: 'pull_request', expressionType: 'JSONPath']
-                    ],
-                  causeString: 'Triggered by a PR merge',
-                  token: 'perry-master',
-                  regexpFilterText: '$pull_request_action:$pull_request_merged',
-                  regexpFilterExpression: '^closed:true$'
-                ]
+                 ])
                ])
-             ])
     try {
         stage('Preparation') {
             cleanWs()
