@@ -5,16 +5,16 @@ import java.time.LocalDateTime;
 
 public class UserCreatedEvent {
 
-  private LocalDateTime createdDateTime;
+  private LocalDateTime eventDateTime;
   private User user;
 
-  public UserCreatedEvent(User user, LocalDateTime dateTime) {
-    this.createdDateTime = dateTime;
+  public UserCreatedEvent(User user) {
+    this.eventDateTime = LocalDateTime.now();
     this.user = user;
   }
 
-  public LocalDateTime getCreatedDateTime() {
-    return createdDateTime;
+  public LocalDateTime getEventDateTime() {
+    return eventDateTime;
   }
 
   public User getUser() {
