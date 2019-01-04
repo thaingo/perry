@@ -5,7 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author CWDS TPT-3 Team
- *     <p>This converter converts string value to long and use zero as default value
+ *     <p>This converter converts string value to int and use zero as default value
  */
 public class StringToRequiredIntegerConverter implements AttributeConverter<String, Integer> {
 

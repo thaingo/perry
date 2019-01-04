@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import gov.ca.cwds.data.converter.StringToRequiredIntegerConverter;
+import gov.ca.cwds.data.converter.StringToRequiredLongConverter;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.time.LocalDate;
@@ -58,7 +59,8 @@ public class StaffPerson {
 
   @Column(name = "PHONE_NO")
   @JsonIgnore
-  private Long phoneNumber;
+  @Convert(converter = StringToRequiredLongConverter.class)
+  private String phoneNumber;
 
   @Column(name = "TEL_EXT_NO")
   @JsonIgnore
@@ -138,11 +140,11 @@ public class StaffPerson {
     this.startDate = startDate;
   }
 
-  public Long getPhoneNumber() {
+  public String getPhoneNumber() {
     return phoneNumber;
   }
 
-  public void setPhoneNumber(Long phoneNumber) {
+  public void setPhoneNumber(String phoneNumber) {
     this.phoneNumber = phoneNumber;
   }
 
