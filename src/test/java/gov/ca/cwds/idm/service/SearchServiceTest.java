@@ -16,7 +16,7 @@ import gov.ca.cwds.PerryProperties;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.service.cognito.SearchProperties;
-import gov.ca.cwds.idm.service.retry.SearchRetryConfiguration;
+import gov.ca.cwds.idm.service.retry.IndexRetryConfiguration;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import org.junit.After;
 import org.junit.Before;
@@ -63,13 +63,13 @@ public class SearchServiceTest {
     properties.setType("user");
     service.setSearchProperties(properties);
 
-    SearchRetryConfiguration searchRetryConfiguration = new SearchRetryConfiguration();
-    searchRetryConfiguration.setProperties(perryProperties);
+    IndexRetryConfiguration indexRetryConfiguration = new IndexRetryConfiguration();
+    indexRetryConfiguration.setProperties(perryProperties);
 
     RestTemplate restTemplate = new RestTemplate();
-    SearchRestSender restSender = new SearchRestSender();
+    IndexRestSender restSender = new IndexRestSender();
     restSender.setRestTemplate(restTemplate);
-    restSender.setRetryTemplate(searchRetryConfiguration.retryTemplate());
+    restSender.setRetryTemplate(indexRetryConfiguration.retryTemplate());
 
     service.setRestSender(restSender);
 
