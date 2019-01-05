@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 @Profile("idm")
 public class AuditLogService {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(SearchService.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(AuditLogService.class);
 
   private static final String DORA_URL = "doraUrl";
   private static final String ES_AUDIT_INDEX = "esUserIndex";
@@ -51,11 +51,13 @@ public class AuditLogService {
     headers.setContentType(MediaType.APPLICATION_JSON);
     HttpEntity<AuditEvent> requestEntity = new HttpEntity<>(event, headers);
 
+    final String eventId = event.getId();
+
     Map<String, String> params = new HashMap<>();
     params.put(DORA_URL, auditProperties.getDoraUrl());
     params.put(ES_AUDIT_INDEX, auditProperties.getIndex());
     params.put(ES_AUDIT_TYPE, auditProperties.getType());
-    params.put(ID, event.getId());
+    params.put(ID, eventId);
     params.put(SSO_TOKEN, getSsoToken());
 
     ResponseEntity<String> response = restSender.send(CREATE_URL_TEMPLATE, requestEntity, params);
@@ -63,7 +65,7 @@ public class AuditLogService {
     if (LOGGER.isInfoEnabled()) {
       LOGGER.info(
           "Audit record, id:{} was successfully stored in Elastic Search index, Dora response string is:{}",
-          event.getId(),
+          eventId,
           response.getBody());
     }
     return response;
