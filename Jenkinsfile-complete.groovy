@@ -26,9 +26,9 @@ node('dora-slave') {
             rtGradle.resolver repo: 'repo', server: serverArti
             rtGradle.useWrapper = true
         }
-        stage('Increment Tag') {
-          newTag = newSemVer()
-        }
+//        stage('Increment Tag') {
+//          newTag = newSemVer()
+//        }
         stage('Build') {
             buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "clean jar -DnewVersion=${newTag}".toString()
         }
