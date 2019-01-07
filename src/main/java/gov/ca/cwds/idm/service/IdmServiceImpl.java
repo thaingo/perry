@@ -290,6 +290,8 @@ public class IdmServiceImpl implements IdmService {
       user.setLastName(staffPerson.getLastName());
       user.setEndDate(staffPerson.getEndDate());
       user.setStartDate(staffPerson.getStartDate());
+      user.setPhoneNumber(staffPerson.getPhoneNumber());
+      user.setPhoneExtensionNumber(staffPerson.getPhoneExtensionNumber());
     }
   }
 
