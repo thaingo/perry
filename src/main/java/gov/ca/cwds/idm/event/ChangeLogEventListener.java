@@ -23,7 +23,7 @@ public class ChangeLogEventListener {
   private AuditLogService auditLogService;
 
   @EventListener
-  @Async
+  @Async("auditListenerTaskExecutor")
   public void handleChangeLogEvent(UserCreatedEvent event) {
 
     AuditEvent auditEvent = composeAuditEvent(event);
@@ -33,6 +33,7 @@ public class ChangeLogEventListener {
     } catch (Exception e) {
       LOGGER.error("Error while storing the audit event {} for user {}.", auditEvent.getEventType(),
           event.getUser().getId());
+      throw e;
     }
   }
 
