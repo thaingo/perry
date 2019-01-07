@@ -1,5 +1,38 @@
 @Library('jenkins-pipeline-utils') _
 
+def notifyBuild(String buildStatus, Exception e){
+  buildStatus =  buildStatus ?: 'SUCCESSFUL'
+
+  // Default values
+  def colorName = 'RED'
+  def colorCode = '#FF0000'
+  def subject = "${buildStatus}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
+  def summary = """*${buildStatus}*: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':\nMore detail in console output at <${env.BUILD_URL}|${env.BUILD_URL}>"""
+  def details = """${buildStatus}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':\n
+    Check console output at ${env.BUILD_URL} """
+
+  // Override default values based on build status
+  if (buildStatus == 'STARTED'){
+    color = 'YELLOW'
+    colorCode = '#FFFF00'
+  } else if (buildStatus == 'SUCCESSFUL'){
+    color = 'GREEN'
+    colorCode = '#00FF00'
+  } else{
+    color = 'RED'
+    colorCode = '#FF0000'
+    details +="<p>Error message ${e.message}, stacktrace: ${e}</p>"
+    summary +="\nError message ${e.message}, stacktrace: ${e}"
+  }
+
+  emailext(
+    subject: subject,
+    body: details,
+    attachLog: true,
+    recipientProviders: [[$class: 'DevelopersRecipientProvider']],
+    to: "Leonid.Marushevskiy@osi.ca.gov, Alex.Kuznetsov@osi.ca.gov"
+}
+
 node('dora-slave') {
     def serverArti = Artifactory.server 'CWDS_DEV'
     def rtGradle = Artifactory.newGradleBuild()
@@ -53,8 +86,10 @@ node('dora-slave') {
         }
 
     } catch (Exception e) {
-        emailext attachLog: true, body: "Failed: ${e}", recipientProviders: [[$class: 'DevelopersRecipientProvider']],
-                subject: "Perry CI pipeline failed", to: "Leonid.Marushevskiy@osi.ca.gov, Alex.Kuznetsov@osi.ca.gov"
+          errorcode = e
+          currentBuild.result = "FAIL"
+          notifyBuild(currentBuild.result,errorcode)
+          throw e;
     } finally {
         publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: 'build/reports/license', reportFiles: 'license-dependency.html', reportName: 'License Report', reportTitles: 'License summary'])
         publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: 'jwt-security/build/reports/tests', reportFiles: 'index.html', reportName: 'jwt-security Report', reportTitles: 'jwt-security Report'])
