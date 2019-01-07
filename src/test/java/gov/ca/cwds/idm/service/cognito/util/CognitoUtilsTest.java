@@ -2,7 +2,10 @@ package gov.ca.cwds.idm.service.cognito.util;
 
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PERMISSIONS;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.RACFID_CUSTOM;
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL_VERIFIED;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.attribute;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.buildEmailAttributes;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.createPermissionsAttribute;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getAttribute;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getCustomDelimitedListAttributeValue;
@@ -19,7 +22,9 @@ import static org.junit.Assert.assertTrue;
 
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.UserType;
+import gov.ca.cwds.idm.service.cognito.UserAttribute;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import org.junit.Test;
@@ -194,5 +199,40 @@ public class CognitoUtilsTest {
   public void testGetRACFIdNoRACFIdAttr() {
     UserType cognitoUser = new UserType();
     assertThat(getRACFId(cognitoUser), is(nullValue()));
+  }
+
+  @Test
+  public void testBuildEmailAttributesNullEmail() {
+    Map<UserAttribute, AttributeType> attrMap = buildEmailAttributes(null);
+    assertThat(attrMap, is(notNullValue()));
+    assertThat(attrMap.size(), is(0));
+  }
+
+  @Test
+  public void testBuildEmailAttributes() {
+    final String NEW_EMAIL = "new@e.mail";
+    Map<UserAttribute, AttributeType> attrMap = buildEmailAttributes(NEW_EMAIL);
+    assertEmailAttributes(attrMap, NEW_EMAIL);
+  }
+
+  @Test
+  public void testBuildEmailAttributesEmptyEmail() {
+    Map<UserAttribute, AttributeType> attrMap = buildEmailAttributes("");
+    assertEmailAttributes(attrMap, "");
+  }
+
+  private void assertEmailAttributes(Map<UserAttribute, AttributeType> attrMap, String email) {
+    assertThat(attrMap, is(notNullValue()));
+    assertThat(attrMap.size(), is(2));
+
+    assertThat(attrMap.get(EMAIL), is(notNullValue()));
+    AttributeType emailAttr = attrMap.get(EMAIL);
+    assertThat(emailAttr.getName(), is(EMAIL.getName()));
+    assertThat(emailAttr.getValue(), is(email));
+
+    assertThat(attrMap.get(EMAIL_VERIFIED), is(notNullValue()));
+    AttributeType emailVerifiedAttr = attrMap.get(EMAIL_VERIFIED);
+    assertThat(emailVerifiedAttr.getName(), is(EMAIL_VERIFIED.getName()));
+    assertThat(emailVerifiedAttr.getValue(), is("True"));
   }
 }
