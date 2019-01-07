@@ -52,7 +52,6 @@ project.ext {
     projectSnapshotVersion = projectMajorVersion + "-SNAPSHOT"
     projectReleaseVersion = (customVersion == null || customVersion == "" || customVersion.startsWith('$') ? projectMajorVersion + '_' + buildNumber + '-RC' : customVersion )
     projectVersion = (isRelease ? projectReleaseVersion : projectSnapshotVersion )
-    dockerTag = projectVersion
 
     // Publishing configuration
     snapshotMavenRepo = "http://pr.dev.cwds.io/artifactory/repo"
@@ -70,6 +69,17 @@ project.ext {
     serenityVersion = '1.9.13'
 
 }
+
+ if (System.getProperty('newVersion') && System.getProperty('newVersion')!='null') {
+    def newVersion = "${System.getProperty('newVersion')}"
+    version = newVersion
+    projectMajorVersion = newVersion
+    projectVersion = newVersion
+  } else {
+    version = projectVersion
+}
+
+def dockerTag = projectVersion
 group = projectGroup
 
 description = """perry"""
@@ -99,7 +109,7 @@ sonarqube {
     }
 }
 
-version = projectVersion
+//version = projectVersion
 mainClassName = mainclass
 
 bootRepackage {
@@ -236,7 +246,7 @@ task checkDockerService {
 
 processResources {
      filter(ReplaceTokens, tokens: [
-             'build.version': projectVersion,
+             'build.version': projectVersion as String,
              'build.number' : (System.getenv("BUILD_NUMBER") ?: "IDE")
      ])
  }

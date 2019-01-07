@@ -29,9 +29,10 @@ if(cwsUser) {
     result.firstName = cwsUser.staffPerson?.firstName
     result.lastName = cwsUser.staffPerson?.lastName
     result.officeId = cwsUser.cwsOffice?.officeId
-    result.phoneExtensionNumber = cwsUser.cwsOffice?.primaryPhoneExtensionNumber
-    result.phoneNumber = cwsUser.cwsOffice?.primaryPhoneNumber
-
+    result.officePhoneNumber = cwsUser.cwsOffice?.primaryPhoneNumber
+    result.officePhoneExtensionNumber = cwsUser.cwsOffice?.primaryPhoneExtensionNumber
+    result.phoneNumber = cwsUser.staffPerson?.phoneNumber
+    result.phoneExtensionNumber = cwsUser.staffPerson?.phoneExtensionNumber
 } else {
     result.countyName = attribute("custom:County")
     result.firstName = attribute("given_name")

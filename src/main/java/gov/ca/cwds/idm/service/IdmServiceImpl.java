@@ -290,6 +290,8 @@ public class IdmServiceImpl implements IdmService {
       user.setLastName(staffPerson.getLastName());
       user.setEndDate(staffPerson.getEndDate());
       user.setStartDate(staffPerson.getStartDate());
+      user.setPhoneNumber(staffPerson.getPhoneNumber());
+      user.setPhoneExtensionNumber(staffPerson.getPhoneExtensionNumber());
     }
   }
 
@@ -297,9 +299,9 @@ public class IdmServiceImpl implements IdmService {
     if (office != null) {
       user.setOfficeId(office.getOfficeId());
       Optional.ofNullable(office.getPrimaryPhoneNumber())
-          .ifPresent(e -> user.setPhoneNumber(e.toString()));
+          .ifPresent(e -> user.setOfficePhoneNumber(e.toString()));
       Optional.ofNullable(office.getPrimaryPhoneExtensionNumber())
-          .ifPresent(user::setPhoneExtensionNumber);
+          .ifPresent(user::setOfficePhoneExtensionNumber);
       Optional.ofNullable(office.getGovernmentEntityType())
           .ifPresent(
               x -> user.setCountyName((GovernmentEntityType.findBySysId(x)).getDescription()));

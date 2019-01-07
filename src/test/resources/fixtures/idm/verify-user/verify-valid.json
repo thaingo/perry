@@ -7,9 +7,11 @@
       "first_name": "John",
       "last_name": "Travolta",
       "office_id": "JzoGSkE07I",
+      "phone_number": "4646888777",
+      "phone_extension_number": "7",
+      "office_phone_number": "4646464646",
+      "office_phone_extension_number": "11",
       "permissions": [],
-      "phone_number": "4646464646",
-      "phone_extension_number": "11",
       "start_date": "1980-08-08",
       "roles": ["CWS-worker"]
     }
