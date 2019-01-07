@@ -48,8 +48,13 @@ perry:
         password: ${TOKEN_STORE_DB_PASSWORD:postgres}
         testOnBorrow: ${TOKEN_STORE_TEST_ON_BORROW:true}
         testWhileIdle: ${TOKEN_STORE_TEST_WHILE_IDLE:true}
-        validationQuery: select 1
+        validationQuery: /* Perry token store healthcheck */select 1 for read only
         logValidationErrors: ${TOKEN_STORE_LOG_VALIDATION_ERRORS:false}
+        tomcat:
+          # Number of ms to wait before throwing an exception if no connection is available.
+          max-wait: 10000
+          # Maximum number of active connections that can be allocated from this pool at the same time.
+          max-active: 10
       jpa:
         database: POSTGRESQL
         show_sql: true
@@ -60,6 +65,7 @@ perry:
           hibernate.current_session_context_class : org.springframework.orm.hibernate5.SpringSessionContext
           hibernate.dialect: org.hibernate.dialect.ProgressDialect
           hibernate.default_schema: ${TOKEN_STORE_SCHEMA:perry}
+          hibernate.connection.isolation: 1
     serviceProviders:
       default:
         identityMapping: config/dev.groovy

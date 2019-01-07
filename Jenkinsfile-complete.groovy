@@ -1,19 +1,23 @@
+@Library('jenkins-pipeline-utils') _
+
 node('dora-slave') {
     def serverArti = Artifactory.server 'CWDS_DEV'
     def rtGradle = Artifactory.newGradleBuild()
-    properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '5')), disableConcurrentBuilds(), [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
+    def github_credentials_id = '433ac100-b3c2-4519-b4d6-207c029a103b'
+    def docker_credentials_id = '6ba8d05c-ca13-4818-8329-15d41a089ec0'
+    newTag = '';
+    triggerProperties = pullRequestMergedTriggerProperties('perry-master')
+    properties([pipelineTriggers([triggerProperties]), buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10')), disableConcurrentBuilds(), [$class: 'RebuildSettings', autoRebuild: false, rebuildDisabled: false],
                 parameters([
-                        string(defaultValue: 'SNAPSHOT', description: 'Release version (if not SNAPSHOT will be released to lib-release repository)', name: 'VERSION'),
                         string(defaultValue: 'latest', description: '', name: 'APP_VERSION'),
                         string(defaultValue: 'master', description: 'perry branch', name: 'branch'),
                         string(defaultValue: 'master', description: 'ansible branch', name: 'ansible_branch'),
                         string(defaultValue: '', description: 'Used for mergerequest default is empty', name: 'refspec'),
-                        booleanParam(defaultValue: true, description: 'Default release version template is: <majorVersion>_<buildNumber>-RC', name: 'RELEASE_PROJECT'),
-                        string(defaultValue: "", description: 'Fill this field if need to specify custom version ', name: 'OVERRIDE_VERSION'),
                         booleanParam(defaultValue: true, description: 'Enable NewRelic APM', name: 'USE_NEWRELIC'),
                         string(defaultValue: 'inventories/tpt2dev/hosts.yml', description: '', name: 'inventory'),
                         string(defaultValue: 'https://web.dev.cwds.io/perry', description: 'Perry base URL', name: 'PERRY_URL'),
-                ]), pipelineTriggers([pollSCM('H/5 * * * *')])])
+                 ])
+               ])
     try {
         stage('Preparation') {
             cleanWs()
@@ -23,33 +27,26 @@ node('dora-slave') {
             rtGradle.resolver repo: 'repo', server: serverArti
             rtGradle.useWrapper = true
         }
+        stage('Increment Tag') {
+          newTag = newSemVer()
+        }
         stage('Build') {
-            if (params.RELEASE_PROJECT) {
-                echo "!!!! BUILD RELEASE VERSION"
-                buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'clean jar -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
-            } else {
-                echo "!!!! BUILD SNAPSHOT VERSION"
-                buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'clean jar'
-            }
+            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "clean jar -DnewVersion=${newTag}".toString()
         }
         stage('Unit Tests') {
-            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'test jacocoTestReport', switches: '--info'
+            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'test jacocoTestReport', switches: "--info -DnewVersion=${newTag}".toString()
         }
         stage('SonarQube analysis') {
             withSonarQubeEnv('Core-SonarQube') {
-                buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'sonarqube'
+                buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: "sonarqube -DnewVersion=${newTag}".toString()
             }
         }
         stage('License Report') {
             buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'downloadLicenses'
         }
         stage('Build Docker') {
-            withDockerRegistry([credentialsId: '6ba8d05c-ca13-4818-8329-15d41a089ec0']) {
-                if (params.RELEASE_PROJECT) {
-                    buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'publishLatestDocker -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
-                } else {
-                    buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'publishLatestDocker -DRelease=false -DBuildNumber=$BUILD_NUMBER'
-                }
+            withDockerRegistry([credentialsId: docker_credentials_id]) {
+                buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "publishLatestDocker -DnewVersion=${newTag}".toString()
             }
         }
         stage('Clean Workspace') {
@@ -96,34 +93,15 @@ node('dora-slave') {
         stage('Push artifacts') {
             // Artifactory
             rtGradle.deployer.deployArtifacts = true
-            if (params.RELEASE_PROJECT) {
-                echo "!!!! PUSH RELEASE VERSION ${params.VERSION}"
-                buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'publish -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
-            } else {
-                echo "!!!! PUSH SNAPSHOT VERSION"
-                buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'publish'
-            }
+            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "publish -DRelease=true -DnewVersion=${newTag}".toString()
             rtGradle.deployer.deployArtifacts = false
             // Docker Hub
-            withDockerRegistry([credentialsId: '6ba8d05c-ca13-4818-8329-15d41a089ec0']) {
-                if (params.RELEASE_PROJECT) {
-                    buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'publishDocker -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
-                } else {
-                    buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'publishDocker -DRelease=false -DBuildNumber=$BUILD_NUMBER'
-                }
+            withDockerRegistry([credentialsId: docker_credentials_id]) {
+                buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: "publishDocker -DRelease=true -DnewVersion=${newTag}".toString()
             }
         }
         stage('Tag Git') {
-            sshagent (credentials: ['433ac100-b3c2-4519-b4d6-207c029a103b']) {
-                if (params.RELEASE_PROJECT) {
-                    echo "!!!! BUILD RELEASE VERSION"
-                    // tagRepo('test-tags')
-                    buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'pushGitTag -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
-                } else {
-                    echo "!!!! BUILD SNAPSHOT VERSION"
-                    buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'pushGitTag -DRelease=$RELEASE_PROJECT -DBuildNumber=$BUILD_NUMBER -DCustomVersion=$OVERRIDE_VERSION'
-                }
-            }
+          tagGithubRepo(newTag, github_credentials_id)
         }
         stage('Trigger Security scan') {
             def props = readProperties  file: 'build/resources/main/version.properties'
@@ -135,6 +113,22 @@ node('dora-slave') {
                     [$class: 'StringParameterValue', name: 'CONTAINER_VERSION', value: "${build_version}"]
                 ],
                 wait: false 
+        }
+        stage('Deploy to Pre-int') {
+            withCredentials([usernameColonPassword(credentialsId: 'fa186416-faac-44c0-a2fa-089aed50ca17', variable: 'jenkinsauth')]) {
+                sh "curl -u $jenkinsauth 'http://jenkins.mgmt.cwds.io:8080/job/preint/job/deploy-perry/buildWithParameters?token=deployPerryToPreint&version=${newTag}'"
+            }
+        }
+        stage('Update Pre-int Manifest') {
+            updateManifest("perry", "preint", github_credentials_id, newTag)
+        }
+        stage('Deploy to Integration') {
+            withCredentials([usernameColonPassword(credentialsId: 'fa186416-faac-44c0-a2fa-089aed50ca17', variable: 'jenkinsauth')]) {
+                sh "curl -u $jenkinsauth 'http://jenkins.mgmt.cwds.io:8080/job/Integration%20Environment/job/deploy-perry/buildWithParameters?token=deployPerryToIntegration&version=${newTag}'"
+            }
+        }
+        stage('Update Integration Manifest') {
+            updateManifest("perry", "integration", github_credentials_id, newTag)
         }
     } catch (Exception e) {
         emailext attachLog: true, body: "Failed: ${e}", recipientProviders: [[$class: 'DevelopersRecipientProvider']],
