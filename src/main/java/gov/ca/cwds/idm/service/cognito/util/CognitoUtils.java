@@ -20,8 +20,8 @@ import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.cognito.AttributesBuilder;
 import gov.ca.cwds.idm.service.cognito.UserAttribute;
 import gov.ca.cwds.util.Utils;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -134,7 +134,7 @@ public class CognitoUtils {
   }
 
   public static Map<UserAttribute, AttributeType> buildEmailAttributes(String newEmail) {
-    Map<UserAttribute, AttributeType> emailAttributes = new LinkedHashMap<>();
+    Map<UserAttribute, AttributeType> emailAttributes = new HashMap<>();
 
     if (newEmail != null) {
       newEmail = Utils.toLowerCase(newEmail);
