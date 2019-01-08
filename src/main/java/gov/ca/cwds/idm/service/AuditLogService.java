@@ -5,6 +5,7 @@ import gov.ca.cwds.idm.service.cognito.AuditProperties;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +52,7 @@ public class AuditLogService {
     headers.setContentType(MediaType.APPLICATION_JSON);
     HttpEntity<AuditEvent> requestEntity = new HttpEntity<>(event, headers);
 
-    final String eventId = event.getId();
+    final String eventId = UUID.randomUUID().toString();
 
     Map<String, String> params = new HashMap<>();
     params.put(DORA_URL, auditProperties.getDoraUrl());

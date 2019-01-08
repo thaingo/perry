@@ -1,10 +1,13 @@
 package gov.ca.cwds.idm.dto;
 
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+@JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class UserChangeLogRecord implements Serializable {
   private static final long serialVersionUID = 8393081330310394261L;
 
@@ -16,8 +19,6 @@ public class UserChangeLogRecord implements Serializable {
   private String userName;
   private String oldValue;
   private String newValue;
-
-
   private String officeId;
   private String countyName;
 

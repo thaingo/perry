@@ -75,11 +75,11 @@ public class AuditLogsUtilTest {
     assertEquals(String.join(", ", ROLE_1, ROLE_2), changeLogRecord.getNewValue());
     assertEquals(TEST_OFFICE_ID, changeLogRecord.getOfficeId());
     assertEquals(TEST_USER_ID, changeLogRecord.getUserId());
+    assertEquals(TEST_FIRST_NAME + " " + TEST_LAST_NAME, changeLogRecord.getUserName());
 
     assertEquals(CAP_EVENT_SOURCE, result.getEventSource());
     assertEquals(USER_CREATED_EVENT_TYPE, result.getEventType());
     assertEquals(ADMIN_LOGIN, result.getUserLogin());
-    assertNotNull(result.getId());
 
   }
 

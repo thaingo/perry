@@ -12,8 +12,6 @@ public class AuditEvent<T> implements Serializable {
 
   private static final long serialVersionUID = 2540746831769360406L;
 
-  private String id;
-
   private String userLogin;
   private T event;
   private String comment;
@@ -22,14 +20,6 @@ public class AuditEvent<T> implements Serializable {
 
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
   private LocalDateTime timestamp;
-
-  public String getId() {
-    return id;
-  }
-
-  public void setId(String id) {
-    this.id = id;
-  }
 
   public String getUserLogin() {
     return userLogin;
