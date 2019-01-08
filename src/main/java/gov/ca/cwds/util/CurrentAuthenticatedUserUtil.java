@@ -2,6 +2,8 @@ package gov.ca.cwds.util;
 
 import static gov.ca.cwds.util.UniversalUserTokenDeserializer.ADMIN_OFFICE_IDS_PARAM;
 import static gov.ca.cwds.util.UniversalUserTokenDeserializer.COUNTY_NAME_PARAM;
+import static gov.ca.cwds.util.UniversalUserTokenDeserializer.FIRST_NAME;
+import static gov.ca.cwds.util.UniversalUserTokenDeserializer.LAST_NAME;
 import static gov.ca.cwds.util.UniversalUserTokenDeserializer.USER_NAME;
 
 import gov.ca.cwds.UniversalUserToken;
@@ -22,6 +24,10 @@ public class CurrentAuthenticatedUserUtil {
 
   public static String getCurrentUserCountyName() {
     return (String) getCurrentUser().getParameter(COUNTY_NAME_PARAM);
+  }
+
+  public static String getCurrentUserFullName() {
+    return getCurrentUser().getParameter(FIRST_NAME) + " " + getCurrentUser().getParameter(LAST_NAME);
   }
 
   public static Set<String> getCurrentUserOfficeIds() {

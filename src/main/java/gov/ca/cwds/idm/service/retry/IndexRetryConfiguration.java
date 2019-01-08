@@ -16,11 +16,11 @@ import org.springframework.web.client.RestClientException;
 @Configuration
 @Profile("idm")
 @EnableRetry
-public class SearchRetryConfiguration {
+public class IndexRetryConfiguration {
 
   private PerryProperties properties;
 
-  @Bean(name = "searchRetryTemplate")
+  @Bean(name = "indexRetryTemplate")
   public RetryTemplate retryTemplate() {
     RetryTemplate retryTemplate = new RetryTemplate();
 
