@@ -1,5 +1,6 @@
 package gov.ca.cwds;
 
+import gov.ca.cwds.idm.service.cognito.AuditProperties;
 import gov.ca.cwds.idm.service.cognito.CognitoProperties;
 import gov.ca.cwds.idm.service.cognito.SearchProperties;
 import gov.ca.cwds.security.jwt.JwtService;
@@ -29,7 +30,8 @@ import org.springframework.web.client.RestTemplate;
 @ComponentScan("gov.ca.cwds")
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 @EntityScan("gov.ca.cwds.data.persistence.auth")
-@EnableConfigurationProperties({PerryProperties.class, CognitoProperties.class, SearchProperties.class})
+@EnableConfigurationProperties({PerryProperties.class, CognitoProperties.class, SearchProperties.class,
+    AuditProperties.class})
 public class PerryApplication {
 
   @Bean

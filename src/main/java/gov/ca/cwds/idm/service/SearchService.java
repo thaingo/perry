@@ -58,7 +58,7 @@ public class SearchService {
 
   @Autowired private SearchProperties searchProperties;
 
-  @Autowired private SearchRestSender restSender;
+  @Autowired private IndexRestSender restSender;
 
   public ResponseEntity<String> createUser(User user) {
     return putUser(user, OperationType.CREATE);
@@ -118,7 +118,7 @@ public class SearchService {
     this.searchProperties = searchProperties;
   }
 
-  public void setRestSender(SearchRestSender restSender) {
+  public void setRestSender(IndexRestSender restSender) {
     this.restSender = restSender;
   }
 }

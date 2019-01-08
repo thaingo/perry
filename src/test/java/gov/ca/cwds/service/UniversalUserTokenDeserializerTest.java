@@ -40,4 +40,12 @@ public class UniversalUserTokenDeserializerTest {
     assert ((Set<String>) adminOfficeObj).iterator().next().equals("ABcDmKx00E");
   }
 
+  @Test
+  public void testUsersFirstNameLastName() throws Exception {
+    String json = ScriptTestBase.readResource("/scripts/default/default-office-admin.json");
+    UniversalUserToken universalUserToken = UniversalUserToken.fromJson(json);
+    assert universalUserToken.getParameter("first_name").equals("John");
+    assert universalUserToken.getParameter("last_name").equals("Smith");
+  }
+
 }
