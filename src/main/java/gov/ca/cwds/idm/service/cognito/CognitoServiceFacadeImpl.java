@@ -4,9 +4,12 @@ import static gov.ca.cwds.idm.persistence.ns.OperationType.GET;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.RESEND_INVITATION_EMAIL;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PERMISSIONS;
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PHONE_EXTENSION;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.ROLES;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.PHONE_NUMBER;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.EMAIL_DELIVERY;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.attribute;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.buildCreateUserAttributes;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.buildEmailAttributes;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.createDelimitedAttribute;
@@ -269,6 +272,8 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
     Map<UserAttribute, AttributeType> updatedAttributes = new LinkedHashMap<>();
 
     addEmailAttributes(updatedAttributes, updateUserDto.getEmail(), existedCognitoUser);
+    addPhoneAttribute(updatedAttributes, updateUserDto.getPhoneNumber(), existedCognitoUser);
+    addPhoneExtensionAttribute(updatedAttributes, updateUserDto.getPhoneExtensionNumber(), existedCognitoUser);
     addDelimitedAttribute(updatedAttributes, PERMISSIONS, updateUserDto.getPermissions(),
         existedCognitoUser);
     addDelimitedAttribute(updatedAttributes, ROLES, updateUserDto.getRoles(), existedCognitoUser);
@@ -279,11 +284,14 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
   private void addDelimitedAttribute(Map<UserAttribute, AttributeType> updateAttributes,
       UserAttribute userAttribute, Set<String> newValues, UserType existedCognitoUser) {
 
+    if(newValues == null) {
+      return;
+    }
+
     Set<String> existedValues = getDelimitedAttributeValue(existedCognitoUser, userAttribute);
 
-    if (newValues != null && !newValues.equals(existedValues)) {
-      AttributeType delimitedAttr = createDelimitedAttribute(userAttribute, newValues);
-      updateAttributes.put(userAttribute, delimitedAttr);
+    if (!newValues.equals(existedValues)) {
+      updateAttributes.put(userAttribute, createDelimitedAttribute(userAttribute, newValues));
     }
   }
 
@@ -294,11 +302,42 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
       return;
     }
 
-    String existedEmail = CognitoUtils.getEmail(existedCognitoUser);
+    String existedEmail = CognitoUtils.getAttributeValue(existedCognitoUser, EMAIL.getName());
 
     if (!newEmail.equalsIgnoreCase(existedEmail)) {
       updatedAttributes.putAll(buildEmailAttributes(newEmail));
     }
+  }
+
+  private void  addPhoneAttribute(Map<UserAttribute, AttributeType> updatedAttributes,
+      String newPhoneNumber, UserType existedCognitoUser) {
+
+    if (newPhoneNumber == null) {
+      return;
+    }
+
+    String existedPhoneNumber =
+        CognitoUtils.getAttributeValue(existedCognitoUser, PHONE_NUMBER.getName());
+
+    if (!newPhoneNumber.equalsIgnoreCase(existedPhoneNumber)) {
+      updatedAttributes.put(PHONE_NUMBER, attribute(PHONE_NUMBER.getName(), newPhoneNumber));
+    }
+  }
+
+  private void  addPhoneExtensionAttribute(Map<UserAttribute, AttributeType> updatedAttributes,
+      String newPhoneExtensionNumber, UserType existedCognitoUser) {
+
+    if (newPhoneExtensionNumber == null) {
+      return;
+    }
+
+    String existedPhoneExtensionNumber =
+        CognitoUtils.getAttributeValue(existedCognitoUser, PHONE_EXTENSION.getName());
+
+    if (!newPhoneExtensionNumber.equalsIgnoreCase(existedPhoneExtensionNumber)) {
+      updatedAttributes.put(PHONE_EXTENSION, attribute(PHONE_EXTENSION.getName(), newPhoneExtensionNumber));
+    }
+
   }
 
   /**
