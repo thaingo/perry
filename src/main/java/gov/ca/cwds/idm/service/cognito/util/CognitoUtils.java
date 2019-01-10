@@ -3,6 +3,7 @@ package gov.ca.cwds.idm.service.cognito.util;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.COUNTY;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.OFFICE;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PERMISSIONS;
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PHONE_EXTENSION;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.RACFID_CUSTOM;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.RACFID_CUSTOM_2;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.ROLES;
@@ -10,6 +11,7 @@ import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL_VERIFIED;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.FIRST_NAME;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.LAST_NAME;
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.PHONE_NUMBER;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.util.Utils.toSet;
 import static gov.ca.cwds.util.Utils.toUpperCase;
@@ -22,6 +24,7 @@ import gov.ca.cwds.idm.service.cognito.UserAttribute;
 import gov.ca.cwds.util.Utils;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -117,6 +120,11 @@ public class CognitoUtils {
 
     String racfid = toUpperCase(user.getRacfid());
 
+    String phoneNumber = user.getPhoneNumber();
+    if(StringUtils.isNotBlank(phoneNumber)) {
+      phoneNumber = "+" + phoneNumber;
+    }
+
     AttributesBuilder attributesBuilder =
         new AttributesBuilder()
             .addAttribute(EMAIL, user.getEmail())
@@ -129,12 +137,14 @@ public class CognitoUtils {
             .addAttribute(RACFID_STANDARD, racfid)
             .addAttribute(EMAIL_VERIFIED, TRUE_VALUE)
             .addAttribute(createPermissionsAttribute(user.getPermissions()))
-            .addAttribute(createRolesAttribute(user.getRoles()));
+            .addAttribute(createRolesAttribute(user.getRoles()))
+            .addAttribute(PHONE_NUMBER, phoneNumber)
+            .addAttribute(PHONE_EXTENSION, user.getPhoneExtensionNumber());
     return attributesBuilder.build();
   }
 
   public static Map<UserAttribute, AttributeType> buildEmailAttributes(String newEmail) {
-    Map<UserAttribute, AttributeType> emailAttributes = new HashMap<>();
+    Map<UserAttribute, AttributeType> emailAttributes = new LinkedHashMap<>();
 
     if (newEmail != null) {
       newEmail = Utils.toLowerCase(newEmail);

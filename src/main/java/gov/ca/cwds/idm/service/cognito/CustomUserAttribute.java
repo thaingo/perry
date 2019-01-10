@@ -6,7 +6,8 @@ public enum CustomUserAttribute implements UserAttribute {
   OFFICE("custom:Office"),
   COUNTY("custom:County"),
   RACFID_CUSTOM("custom:RACFID"),
-  RACFID_CUSTOM_2("custom:RACFId");
+  RACFID_CUSTOM_2("custom:RACFId"),
+  PHONE_EXTENSION("custom:PhoneExtension");
 
   private String name;
 

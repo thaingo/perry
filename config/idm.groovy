@@ -11,6 +11,16 @@ result.status = cognitoUser.userStatus
 result.email = attribute("email")
 result.racfid = attribute("custom:RACFID")
 
+def phoneNumber = attribute("phone_number")
+if(StringUtils.isNotBlank(phoneNumber)) {
+    if(phoneNumber.startsWith("+")) {
+        phoneNumber = phoneNumber.substring(1)
+    }
+    result.phoneNumber = phoneNumber
+}
+
+result.phoneExtensionNumber = attribute("custom:PhoneExtension")
+
 if(StringUtils.isNotBlank(attribute("custom:Permission"))) {
     result.permissions = attribute("custom:Permission").split('\\s*:\\s*') as HashSet
 }
@@ -31,8 +41,6 @@ if(cwsUser) {
     result.officeId = cwsUser.cwsOffice?.officeId
     result.officePhoneNumber = cwsUser.cwsOffice?.primaryPhoneNumber
     result.officePhoneExtensionNumber = cwsUser.cwsOffice?.primaryPhoneExtensionNumber
-    result.phoneNumber = cwsUser.staffPerson?.phoneNumber
-    result.phoneExtensionNumber = cwsUser.staffPerson?.phoneExtensionNumber
 } else {
     result.countyName = attribute("custom:County")
     result.firstName = attribute("given_name")

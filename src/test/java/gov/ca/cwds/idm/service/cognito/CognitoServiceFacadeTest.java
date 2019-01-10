@@ -5,6 +5,7 @@ import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.COUNTY;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.OFFICE;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PERMISSIONS;
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PHONE_EXTENSION;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.RACFID_CUSTOM;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.RACFID_CUSTOM_2;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.ROLES;
@@ -12,6 +13,7 @@ import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL_VERIFIED;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.FIRST_NAME;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.LAST_NAME;
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.PHONE_NUMBER;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.idm.util.TestUtils.attr;
 import static gov.ca.cwds.util.Utils.toSet;
@@ -140,6 +142,8 @@ public class CognitoServiceFacadeTest {
   public void testCreateAdminCreateUserRequest() {
     User user = user();
     user.setEmail("GONZALES@Gmail.com");
+    user.setPhoneNumber("1234567890");
+    user.setPhoneExtensionNumber("54321");
 
     AdminCreateUserRequest request = facade.createAdminCreateUserRequest(user);
 
@@ -150,7 +154,7 @@ public class CognitoServiceFacadeTest {
 
     List<AttributeType> attrs = request.getUserAttributes();
     assertThat(attrs.isEmpty(), is(false));
-    assertThat(attrs.size(), is(11));
+    assertThat(attrs.size(), is(13));
 
     Map<String, String> attrMap = attrMap(attrs);
 
@@ -165,6 +169,8 @@ public class CognitoServiceFacadeTest {
     assertAttr(attrMap, EMAIL_VERIFIED, "True");
     assertAttr(attrMap, PERMISSIONS, "RFA-rollout:Hotline-rollout");
     assertAttr(attrMap, ROLES, "County-admin:CWS-worker");
+    assertAttr(attrMap, PHONE_NUMBER, "+1234567890");
+    assertAttr(attrMap, PHONE_EXTENSION, "54321");
   }
 
   @Test
