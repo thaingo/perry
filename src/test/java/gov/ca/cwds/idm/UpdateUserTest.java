@@ -111,13 +111,11 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
         .andReturn();
 
     verify(cognito, times(1)).adminUpdateUserAttributes(updateAttributesRequest);
-    verify(cognito, times(1)).adminResetUserPassword(resetPasswordRequest);
     verify(cognito, times(1)).adminDisableUser(disableUserRequest);
     verify(spySearchService, times(1)).updateUser(any(User.class));
 
     InOrder inOrder = inOrder(cognito);
     inOrder.verify(cognito).adminUpdateUserAttributes(updateAttributesRequest);
-    inOrder.verify(cognito).adminResetUserPassword(resetPasswordRequest);
     inOrder.verify(cognito).adminDisableUser(disableUserRequest);
     verifyDoraCalls(1);
   }

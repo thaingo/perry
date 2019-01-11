@@ -244,22 +244,7 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
       throw exceptionFactory.createIdmException(getErrorCode(UPDATE), e, userId);
     }
 
-    if(updatedAttributes.containsKey(EMAIL)) {
-      String newEmail = updatedAttributes.get(EMAIL).getValue();
-      resendInvitationEmailOnEmailChange(userId, newEmail);
-    }
-
     return true;
-  }
-
-  private void resendInvitationEmailOnEmailChange(String userId, String newEmail){
-    try {
-      identityProvider.adminResetUserPassword(createAdminResetUserPasswordRequest(newEmail));
-    } catch (Exception e) {
-      String msg = messagesService
-          .getTechMessage(ERROR_AT_INVITATION_RESENDING_ON_EMAIL_CHANGE, userId);
-      LOGGER.error(msg, e);
-    }
   }
 
   @Override
