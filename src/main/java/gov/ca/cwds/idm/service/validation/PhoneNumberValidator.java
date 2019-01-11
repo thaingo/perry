@@ -12,7 +12,7 @@ public class PhoneNumberValidator {
 
   public static boolean isValid(String phoneNumber) {
     if(StringUtils.isBlank(phoneNumber)){
-      return false;
+      return true;
     }
     return PHONE_PATTERN.matcher(phoneNumber).matches();
   }
