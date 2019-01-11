@@ -243,7 +243,7 @@ public class CognitoServiceFacadeTest {
     AdminGetUserResult mockGetUserResult = new AdminGetUserResult();
     mockGetUserResult.setUsername(userId);
     Collection<AttributeType> attrs = new ArrayList<>();
-    attrs.add(attr(EMAIL.getName(), userEmail));
+    attrs.add(attr(EMAIL, userEmail));
     mockGetUserResult.withUserAttributes(attrs);
     when(identityProvider.adminGetUser(expectedGetUserRequest)).thenReturn(mockGetUserResult);
 

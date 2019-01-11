@@ -444,36 +444,36 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
     Collection<AttributeType> attrs = new ArrayList<>();
 
     if (testUser.getEmail() != null) {
-      attrs.add(attr(EMAIL.getName(), testUser.getEmail()));
+      attrs.add(attr(EMAIL, testUser.getEmail()));
     }
     if (testUser.getFirstName() != null) {
-      attrs.add(attr(FIRST_NAME.getName(), testUser.getFirstName()));
+      attrs.add(attr(FIRST_NAME, testUser.getFirstName()));
     }
     if (testUser.getLastName() != null) {
-      attrs.add(attr(LAST_NAME.getName(), testUser.getLastName()));
+      attrs.add(attr(LAST_NAME, testUser.getLastName()));
     }
     if (testUser.getCounty() != null) {
-      attrs.add(attr(COUNTY.getName(), testUser.getCounty()));
+      attrs.add(attr(COUNTY, testUser.getCounty()));
     }
     if (testUser.getPermissions() != null) {
-      attrs.add(attr(PERMISSIONS.getName(), testUser.getPermissions()));
+      attrs.add(attr(PERMISSIONS, testUser.getPermissions()));
     }
     if (testUser.getRoles() != null) {
-      attrs.add(attr(ROLES.getName(), testUser.getRoles()));
+      attrs.add(attr(ROLES, testUser.getRoles()));
     }
     if (testUser.getRacfId() != null) {
-      attrs.add(attr(RACFID_CUSTOM.getName(), testUser.getRacfId()));
-      attrs.add(attr(RACFID_STANDARD.getName(), testUser.getRacfId()));
-      attrs.add(attr(RACFID_CUSTOM_2.getName(), testUser.getRacfId()));
+      attrs.add(attr(RACFID_CUSTOM, testUser.getRacfId()));
+      attrs.add(attr(RACFID_STANDARD, testUser.getRacfId()));
+      attrs.add(attr(RACFID_CUSTOM_2, testUser.getRacfId()));
     }
     if (testUser.getOfficeId() != null) {
-      attrs.add(attr(OFFICE.getName(), testUser.getOfficeId()));
+      attrs.add(attr(OFFICE, testUser.getOfficeId()));
     }
     if (testUser.getPhoneNumber() != null) {
-      attrs.add(attr(PHONE_NUMBER.getName(), testUser.getPhoneNumber()));
+      attrs.add(attr(PHONE_NUMBER, testUser.getPhoneNumber()));
     }
     if (testUser.getPhoneExtension() != null) {
-      attrs.add(attr(PHONE_EXTENSION.getName(), testUser.getPhoneExtension()));
+      attrs.add(attr(PHONE_EXTENSION, testUser.getPhoneExtension()));
     }
     return attrs;
   }

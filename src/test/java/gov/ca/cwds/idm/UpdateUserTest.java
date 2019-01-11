@@ -6,9 +6,11 @@ import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.SUPER_ADMIN;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PERMISSIONS;
+import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PHONE_EXTENSION;
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.ROLES;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL_VERIFIED;
+import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.PHONE_NUMBER;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.createPermissionsAttribute;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.INACTIVE_USER_WITH_ACTIVE_RACFID_IN_CMS;
@@ -72,20 +74,26 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
   public void testUpdateUser() throws Exception {
 
     final String NEW_EMAIL = "newmail@mail.com";
+    final String NEW_PHONE = "6889228010";
+    final String NEW_PHONE_EXTENSION = "123";
 
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setEnabled(Boolean.FALSE);
+    userUpdate.setEmail(NEW_EMAIL);
+    userUpdate.setPhoneNumber(NEW_PHONE);
+    userUpdate.setPhoneExtensionNumber(NEW_PHONE_EXTENSION);
     userUpdate.setPermissions(toSet("RFA-rollout", "Hotline-rollout"));
     userUpdate.setRoles(toSet("Office-admin", "CWS-worker"));
-    userUpdate.setEmail(NEW_EMAIL);
 
     AdminUpdateUserAttributesRequest updateAttributesRequest =
         setUpdateUserAttributesRequestAndResult(
             USER_NO_RACFID_ID,
-            attr(EMAIL.getName(), NEW_EMAIL),
-            attr(EMAIL_VERIFIED.getName(), "True"),
-            attr(PERMISSIONS.getName(), "RFA-rollout:Hotline-rollout"),
-            attr(ROLES.getName(), "Office-admin:CWS-worker")
+            attr(EMAIL, NEW_EMAIL),
+            attr(EMAIL_VERIFIED, "True"),
+            attr(PHONE_NUMBER, "+" + NEW_PHONE),
+            attr(PHONE_EXTENSION, NEW_PHONE_EXTENSION),
+            attr(PERMISSIONS, "RFA-rollout:Hotline-rollout"),
+            attr(ROLES, "Office-admin:CWS-worker")
         );
 
     AdminResetUserPasswordRequest resetPasswordRequest = setResetPasswordRequestAndResult(NEW_EMAIL);
@@ -245,7 +253,7 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
 
     AdminUpdateUserAttributesRequest updateAttributesRequest =
         setUpdateUserAttributesRequestAndResult(
-            USER_WITH_RACFID_ID, attr(PERMISSIONS.getName(), "RFA-rollout:Hotline-rollout"));
+            USER_WITH_RACFID_ID, attr(PERMISSIONS, "RFA-rollout:Hotline-rollout"));
 
     AdminDisableUserRequest disableUserRequest = setDisableUserRequestAndResult(
         USER_WITH_RACFID_ID);
@@ -292,7 +300,7 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     AdminUpdateUserAttributesRequest updateAttributesRequest =
         setUpdateUserAttributesRequestAndResult(
             USER_WITH_RACFID_AND_DB_DATA_ID,
-            attr(PERMISSIONS.getName(), "RFA-rollout:Hotline-rollout"));
+            attr(PERMISSIONS, "RFA-rollout:Hotline-rollout"));
 
     setDoraSuccess();
 
@@ -435,8 +443,8 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     AdminUpdateUserAttributesRequest updateAttributesRequest =
         setUpdateUserAttributesRequestAndResult(
             USER_NO_RACFID_ID,
-            attr(EMAIL.getName(), "somemail@mail.com"),
-            attr(EMAIL_VERIFIED.getName(), "True")
+            attr(EMAIL, "somemail@mail.com"),
+            attr(EMAIL_VERIFIED, "True")
         );
 
     setDoraSuccess();
@@ -468,8 +476,8 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
         new AdminUpdateUserAttributesRequest()
             .withUsername(USER_WITH_RACFID_ID)
             .withUserPoolId(USERPOOL)
-            .withUserAttributes(Arrays.asList(attr(EMAIL.getName(), "somemail@mail.com"),
-                attr(EMAIL_VERIFIED.getName(), "True")));
+            .withUserAttributes(Arrays.asList(attr(EMAIL, "somemail@mail.com"),
+                attr(EMAIL_VERIFIED, "True")));
     when(cognito.adminUpdateUserAttributes(request))
         .thenThrow(new AliasExistsException("the email already used"));
 
@@ -582,15 +590,21 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     String userId = USER_WITH_RACFID_AND_DB_DATA_ID;
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setEnabled(Boolean.TRUE);
+    userUpdate.setEmail("garcia@gmail.com");
+    userUpdate.setPhoneNumber("4646888777");
+    userUpdate.setPhoneExtensionNumber("7");
     userUpdate.setPermissions(toSet("Hotline-rollout"));
     userUpdate.setRoles(toSet("CWS-worker"));
-    userUpdate.setEmail("garcia@gmail.com");
 
     AdminUpdateUserAttributesRequest updateAttributesRequest =
         setUpdateUserAttributesRequestAndResult(
             userId,
-            attr(PERMISSIONS.getName(), "Hotline-rollout"),
-            attr(ROLES.getName(), "CWS-worker")
+            attr(EMAIL, "garcia@gmail.com"),
+            attr(EMAIL_VERIFIED, "True"),
+            attr(PHONE_NUMBER, "+4646888777"),
+            attr(PHONE_EXTENSION, "7"),
+            attr(PERMISSIONS, "Hotline-rollout"),
+            attr(ROLES, "CWS-worker")
         );
 
     AdminResetUserPasswordRequest resetPasswordRequest =

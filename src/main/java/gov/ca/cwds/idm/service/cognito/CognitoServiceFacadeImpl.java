@@ -316,6 +316,8 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
       return;
     }
 
+    newPhoneNumber = "+" + newPhoneNumber;
+
     String existedPhoneNumber =
         CognitoUtils.getAttributeValue(existedCognitoUser, PHONE_NUMBER.getName());
 
@@ -337,7 +339,6 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
     if (!newPhoneExtensionNumber.equalsIgnoreCase(existedPhoneExtensionNumber)) {
       updatedAttributes.put(PHONE_EXTENSION, attribute(PHONE_EXTENSION.getName(), newPhoneExtensionNumber));
     }
-
   }
 
   /**
