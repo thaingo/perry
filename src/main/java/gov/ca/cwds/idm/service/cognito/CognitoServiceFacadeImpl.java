@@ -57,7 +57,6 @@ import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.service.messages.MessageCode;
-import gov.ca.cwds.service.messages.MessagesService;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -67,8 +66,6 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import javax.annotation.PostConstruct;
 import liquibase.util.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -78,15 +75,11 @@ import org.springframework.stereotype.Service;
 @SuppressWarnings({"fb-contrib:EXS_EXCEPTION_SOFTENING_NO_CONSTRAINTS"})
 public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(CognitoServiceFacadeImpl.class);
-
   private CognitoProperties properties;
 
   private AWSCognitoIdentityProvider identityProvider;
 
   private ExceptionFactory exceptionFactory;
-
-  private MessagesService messagesService;
 
   @PostConstruct
   public void init() {
@@ -424,10 +417,5 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
   @Autowired
   public void setExceptionFactory(ExceptionFactory exceptionFactory) {
     this.exceptionFactory = exceptionFactory;
-  }
-
-  @Autowired
-  public void setMessagesService(MessagesService messagesService) {
-    this.messagesService = messagesService;
   }
 }
