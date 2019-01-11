@@ -58,6 +58,10 @@ public class CognitoUtils {
     return getAttribute(cognitoUser, attributeName).map(AttributeType::getValue).orElse(null);
   }
 
+  public static String getAttributeValue(UserType cognitoUser, UserAttribute userAttribute) {
+    return getAttributeValue(cognitoUser, userAttribute.getName());
+  }
+
   public static String getEmail(UserType cognitoUser) {
     return getAttributeValue(cognitoUser, EMAIL.getName());
   }
@@ -93,6 +97,10 @@ public class CognitoUtils {
     permissionsAttr.setName(name);
     permissionsAttr.setValue(value);
     return permissionsAttr;
+  }
+
+  public static AttributeType attribute(UserAttribute userAttribute, String value) {
+    return attribute(userAttribute.getName(), value);
   }
 
   public static String getCustomDelimitedListAttributeValue(Set<String> setOfValues) {

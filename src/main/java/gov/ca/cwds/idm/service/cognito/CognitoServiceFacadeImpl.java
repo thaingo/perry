@@ -14,6 +14,7 @@ import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.attribute;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.buildCreateUserAttributes;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.buildEmailAttributes;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.createDelimitedAttribute;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getAttributeValue;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getDelimitedAttributeValue;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getEmail;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_AT_INVITATION_RESENDING_ON_EMAIL_CHANGE;
@@ -273,13 +274,50 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
     Map<UserAttribute, AttributeType> updatedAttributes = new LinkedHashMap<>();
 
     addEmailAttributes(updatedAttributes, updateUserDto.getEmail(), existedCognitoUser);
-    addPhoneAttribute(updatedAttributes, updateUserDto.getPhoneNumber(), existedCognitoUser);
-    addPhoneExtensionAttribute(updatedAttributes, updateUserDto.getPhoneExtensionNumber(), existedCognitoUser);
+
+    addAttribute(updatedAttributes, PHONE_NUMBER,
+        toCognitoFormat(updateUserDto.getPhoneNumber()), existedCognitoUser);
+
+    addAttribute(updatedAttributes, PHONE_EXTENSION,
+        updateUserDto.getPhoneExtensionNumber(), existedCognitoUser);
+
     addDelimitedAttribute(updatedAttributes, PERMISSIONS, updateUserDto.getPermissions(),
         existedCognitoUser);
+
     addDelimitedAttribute(updatedAttributes, ROLES, updateUserDto.getRoles(), existedCognitoUser);
 
     return updatedAttributes;
+  }
+
+  private void addEmailAttributes(Map<UserAttribute, AttributeType> updatedAttributes, String newEmail,
+      UserType existedCognitoUser) {
+
+    if (newEmail == null) {
+      return;
+    }
+
+    String existedEmail = getAttributeValue(existedCognitoUser, EMAIL.getName());
+
+    if (!newEmail.equalsIgnoreCase(existedEmail)) {
+      updatedAttributes.putAll(buildEmailAttributes(newEmail));
+    }
+  }
+
+  private void addAttribute(
+      Map<UserAttribute, AttributeType> updatedAttributes,
+      UserAttribute userAttribute,
+      String newAttrValue,
+      UserType existedCognitoUser) {
+
+    if (newAttrValue == null) {
+      return;
+    }
+
+    String existedAttrValue = getAttributeValue(existedCognitoUser, userAttribute);
+
+    if (!newAttrValue.equals(existedAttrValue)) {
+      updatedAttributes.put(userAttribute, attribute(userAttribute, newAttrValue));
+    }
   }
 
   private void addDelimitedAttribute(Map<UserAttribute, AttributeType> updateAttributes,
@@ -293,52 +331,6 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
 
     if (!newValues.equals(existedValues)) {
       updateAttributes.put(userAttribute, createDelimitedAttribute(userAttribute, newValues));
-    }
-  }
-
-  private void addEmailAttributes(Map<UserAttribute, AttributeType> updatedAttributes, String newEmail,
-      UserType existedCognitoUser) {
-
-    if (newEmail == null) {
-      return;
-    }
-
-    String existedEmail = CognitoUtils.getAttributeValue(existedCognitoUser, EMAIL.getName());
-
-    if (!newEmail.equalsIgnoreCase(existedEmail)) {
-      updatedAttributes.putAll(buildEmailAttributes(newEmail));
-    }
-  }
-
-  private void  addPhoneAttribute(Map<UserAttribute, AttributeType> updatedAttributes,
-      String newPhoneNumber, UserType existedCognitoUser) {
-
-    if (newPhoneNumber == null) {
-      return;
-    }
-
-    newPhoneNumber = toCognitoFormat(newPhoneNumber);
-
-    String existedPhoneNumber =
-        CognitoUtils.getAttributeValue(existedCognitoUser, PHONE_NUMBER.getName());
-
-    if (!newPhoneNumber.equalsIgnoreCase(existedPhoneNumber)) {
-      updatedAttributes.put(PHONE_NUMBER, attribute(PHONE_NUMBER.getName(), newPhoneNumber));
-    }
-  }
-
-  private void  addPhoneExtensionAttribute(Map<UserAttribute, AttributeType> updatedAttributes,
-      String newPhoneExtensionNumber, UserType existedCognitoUser) {
-
-    if (newPhoneExtensionNumber == null) {
-      return;
-    }
-
-    String existedPhoneExtensionNumber =
-        CognitoUtils.getAttributeValue(existedCognitoUser, PHONE_EXTENSION.getName());
-
-    if (!newPhoneExtensionNumber.equalsIgnoreCase(existedPhoneExtensionNumber)) {
-      updatedAttributes.put(PHONE_EXTENSION, attribute(PHONE_EXTENSION.getName(), newPhoneExtensionNumber));
     }
   }
 
