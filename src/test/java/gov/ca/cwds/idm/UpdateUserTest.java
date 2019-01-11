@@ -550,6 +550,16 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     assertSuccessfulUpdate(SUPER_ADMIN_ID, userUpdate);
   }
 
+  @Test
+  @WithMockCustomUser
+  public void testValidationUpdateInvalidPhoneNumber() throws Exception {
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setPhoneNumber("123-456-7890");
+
+    assertUpdateBadRequest(USER_NO_RACFID_ID, userUpdate,
+        "fixtures/idm/update-user/invalid-phone-number.json");
+  }
+
   private void assertCanUpdatePermissions(String userId, Set<String> permissions) throws Exception{
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setPermissions(permissions);
