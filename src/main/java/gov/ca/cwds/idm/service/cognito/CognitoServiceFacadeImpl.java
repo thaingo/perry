@@ -10,14 +10,10 @@ import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.PHONE_NUMBER;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoPhoneConverter.toCognitoFormat;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.EMAIL_DELIVERY;
-import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.attribute;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.buildCreateUserAttributes;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.buildEmailAttributes;
-import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.createDelimitedAttribute;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getAttributeValue;
-import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getDelimitedAttributeValue;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getEmail;
-import static gov.ca.cwds.service.messages.MessageCode.ERROR_AT_INVITATION_RESENDING_ON_EMAIL_CHANGE;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_CONNECT_TO_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_GET_USER_FROM_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_UPDATE_USER_IN_IDM;
@@ -42,7 +38,6 @@ import com.amazonaws.services.cognitoidp.model.AdminDisableUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminEnableUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserResult;
-import com.amazonaws.services.cognitoidp.model.AdminResetUserPasswordRequest;
 import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesRequest;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.DeliveryMediumType;
@@ -245,13 +240,6 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
     }
 
     return true;
-  }
-
-  @Override
-  public AdminResetUserPasswordRequest createAdminResetUserPasswordRequest(String newEmail) {
-    return new AdminResetUserPasswordRequest()
-        .withUsername(newEmail)
-        .withUserPoolId(properties.getUserpool());
   }
 
   private Map<UserAttribute, AttributeType> getUpdatedAttributes(

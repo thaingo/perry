@@ -2,7 +2,6 @@ package gov.ca.cwds.idm.service.cognito;
 
 import com.amazonaws.services.cognitoidp.model.AdminCreateUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserRequest;
-import com.amazonaws.services.cognitoidp.model.AdminResetUserPasswordRequest;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserEnableStatusRequest;
@@ -29,8 +28,6 @@ public interface CognitoServiceFacade {
   UserType getCognitoUserById(String id);
 
   AdminGetUserRequest createAdminGetUserRequest(String id);
-
-  AdminResetUserPasswordRequest createAdminResetUserPasswordRequest(String newEmail);
 
   void healthCheck();
 

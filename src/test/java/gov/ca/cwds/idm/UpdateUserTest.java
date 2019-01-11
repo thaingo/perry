@@ -43,8 +43,6 @@ import com.amazonaws.services.cognitoidp.model.AdminDisableUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminDisableUserResult;
 import com.amazonaws.services.cognitoidp.model.AdminEnableUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminEnableUserResult;
-import com.amazonaws.services.cognitoidp.model.AdminResetUserPasswordRequest;
-import com.amazonaws.services.cognitoidp.model.AdminResetUserPasswordResult;
 import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesRequest;
 import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesResult;
 import com.amazonaws.services.cognitoidp.model.AliasExistsException;
@@ -56,7 +54,6 @@ import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
-import gov.ca.cwds.idm.util.TestCognitoServiceFacade;
 import gov.ca.cwds.idm.util.WithMockCustomUser;
 import java.util.Arrays;
 import java.util.Map;
@@ -85,19 +82,6 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     userUpdate.setPermissions(toSet("RFA-rollout", "Hotline-rollout"));
     userUpdate.setRoles(toSet("Office-admin", "CWS-worker"));
 
-    AdminUpdateUserAttributesRequest updateAttributesRequest =
-        setUpdateUserAttributesRequestAndResult(
-            USER_NO_RACFID_ID,
-            attr(EMAIL, NEW_EMAIL),
-            attr(EMAIL_VERIFIED, "True"),
-            attr(PHONE_NUMBER, "+" + NEW_PHONE),
-            attr(PHONE_EXTENSION, NEW_PHONE_EXTENSION),
-            attr(PERMISSIONS, "RFA-rollout:Hotline-rollout"),
-            attr(ROLES, "Office-admin:CWS-worker")
-        );
-
-    AdminResetUserPasswordRequest resetPasswordRequest = setResetPasswordRequestAndResult(NEW_EMAIL);
-
     AdminDisableUserRequest disableUserRequest = setDisableUserRequestAndResult(USER_NO_RACFID_ID);
 
     setDoraSuccess();
@@ -110,12 +94,10 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
         .andExpect(MockMvcResultMatchers.status().isNoContent())
         .andReturn();
 
-    verify(cognito, times(1)).adminUpdateUserAttributes(updateAttributesRequest);
     verify(cognito, times(1)).adminDisableUser(disableUserRequest);
     verify(spySearchService, times(1)).updateUser(any(User.class));
 
     InOrder inOrder = inOrder(cognito);
-    inOrder.verify(cognito).adminUpdateUserAttributes(updateAttributesRequest);
     inOrder.verify(cognito).adminDisableUser(disableUserRequest);
     verifyDoraCalls(1);
   }
@@ -615,9 +597,6 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
             attr(ROLES, "CWS-worker")
         );
 
-    AdminResetUserPasswordRequest resetPasswordRequest =
-        setResetPasswordRequestAndResult("garcia@gmail.com");
-
     AdminEnableUserRequest enableUserRequest = setEnableUserRequestAndResult(userId);
 
     mockMvc
@@ -629,7 +608,6 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
         .andReturn();
 
     verify(cognito, times(0)).adminUpdateUserAttributes(updateAttributesRequest);
-    verify(cognito, times(0)).adminResetUserPassword(resetPasswordRequest);
     verify(cognito, times(0)).adminEnableUser(enableUserRequest);
     verify(spySearchService, times(0)).createUser(any(User.class));
     verifyDoraCalls(0);
@@ -679,14 +657,6 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
         new AdminDisableUserRequest().withUsername(id).withUserPoolId(USERPOOL);
     AdminDisableUserResult result = new AdminDisableUserResult();
     when(cognito.adminDisableUser(request)).thenReturn(result);
-    return request;
-  }
-
-  private AdminResetUserPasswordRequest setResetPasswordRequestAndResult(String newEmail) {
-    AdminResetUserPasswordRequest request =
-        ((TestCognitoServiceFacade) cognitoServiceFacade).createAdminResetUserPasswordRequest(newEmail);
-    AdminResetUserPasswordResult result = new AdminResetUserPasswordResult();
-    when(cognito.adminResetUserPassword(request)).thenReturn(result);
     return request;
   }
 
