@@ -68,6 +68,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import javax.annotation.PostConstruct;
 import liquibase.util.StringUtils;
@@ -309,28 +310,34 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
       String newAttrValue,
       UserType existedCognitoUser) {
 
+    addAttribute(updatedAttributes, userAttribute, newAttrValue, existedCognitoUser,
+        CognitoUtils::getAttributeValue, CognitoUtils::attribute);
+  }
+
+  private void addDelimitedAttribute(Map<UserAttribute, AttributeType> updatedAttributes,
+      UserAttribute userAttribute, Set<String> newValues, UserType existedCognitoUser) {
+
+    addAttribute(updatedAttributes, userAttribute, newValues, existedCognitoUser,
+        CognitoUtils::getDelimitedAttributeValue, CognitoUtils::createDelimitedAttribute);
+  }
+
+  private <T> void addAttribute(
+      Map<UserAttribute, AttributeType> updatedAttributes,
+      UserAttribute userAttribute,
+      T newAttrValue,
+      UserType existedCognitoUser,
+      BiFunction<UserType, UserAttribute, T> existedValueGetter,
+      BiFunction<UserAttribute, T, AttributeType> newAttributeCreator
+      ) {
+
     if (newAttrValue == null) {
       return;
     }
 
-    String existedAttrValue = getAttributeValue(existedCognitoUser, userAttribute);
+    T existedAttrValue = existedValueGetter.apply(existedCognitoUser, userAttribute);
 
     if (!newAttrValue.equals(existedAttrValue)) {
-      updatedAttributes.put(userAttribute, attribute(userAttribute, newAttrValue));
-    }
-  }
-
-  private void addDelimitedAttribute(Map<UserAttribute, AttributeType> updateAttributes,
-      UserAttribute userAttribute, Set<String> newValues, UserType existedCognitoUser) {
-
-    if(newValues == null) {
-      return;
-    }
-
-    Set<String> existedValues = getDelimitedAttributeValue(existedCognitoUser, userAttribute);
-
-    if (!newValues.equals(existedValues)) {
-      updateAttributes.put(userAttribute, createDelimitedAttribute(userAttribute, newValues));
+      updatedAttributes.put(userAttribute, newAttributeCreator.apply(userAttribute, newAttrValue));
     }
   }
 
