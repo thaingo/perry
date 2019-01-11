@@ -1,4 +1,5 @@
 import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType
+import gov.ca.cwds.idm.service.cognito.util.CognitoPhoneConverter
 import org.apache.commons.lang3.StringUtils
 
 def attribute = {name -> cognitoUser.attributes?.find {it.name.equalsIgnoreCase(name)}?.value}
@@ -10,15 +11,7 @@ result.userLastModifiedDate = cognitoUser.userLastModifiedDate
 result.status = cognitoUser.userStatus
 result.email = attribute("email")
 result.racfid = attribute("custom:RACFID")
-
-def phoneNumber = attribute("phone_number")
-if(StringUtils.isNotBlank(phoneNumber)) {
-    if(phoneNumber.startsWith("+")) {
-        phoneNumber = phoneNumber.substring(1)
-    }
-    result.phoneNumber = phoneNumber
-}
-
+result.phoneNumber = CognitoPhoneConverter.fromCognitoFormat(attribute("phone_number"))
 result.phoneExtensionNumber = attribute("custom:PhoneExtension")
 
 if(StringUtils.isNotBlank(attribute("custom:Permission"))) {

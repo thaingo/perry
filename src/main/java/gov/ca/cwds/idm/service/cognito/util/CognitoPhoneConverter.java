@@ -19,4 +19,16 @@ public class CognitoPhoneConverter {
       return PLUS + input;
     }
   }
+
+  public static String fromCognitoFormat(String input) {
+    if (input == null) {
+      return null;
+    } else if (StringUtils.isBlank(input)) {
+      return "";
+    } else if (input.startsWith(PLUS)) {
+      return input.substring(1);
+    } else {
+      return input;
+    }
+  }
 }
