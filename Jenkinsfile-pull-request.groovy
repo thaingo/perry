@@ -58,6 +58,9 @@ node('dora-slave') {
             rtGradle.resolver repo: 'repo', server: serverArti
             rtGradle.useWrapper = true
         }
+        stage('Verify SemVer Label') {
+          checkForLabel("perry")
+        }
         stage('Build') {
             if (params.RELEASE_PROJECT) {
                 echo "!!!! BUILD RELEASE VERSION"
@@ -66,9 +69,6 @@ node('dora-slave') {
                 echo "!!!! BUILD SNAPSHOT VERSION"
                 buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'clean jar'
             }
-        }
-        stage('Verify SemVer Label') {
-          checkForLabel("perry")
         }
         stage('Unit Tests') {
             buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'test jacocoTestReport', switches: '--info'

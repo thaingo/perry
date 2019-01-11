@@ -1,16 +1,15 @@
 package gov.ca.cwds.idm.dto;
 
+import static gov.ca.cwds.util.Utils.DATE_TIME_FORMAT;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import java.io.Serializable;
 import java.time.LocalDateTime;
 
 
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class AuditEvent<T> implements Serializable {
-
-  private static final long serialVersionUID = 2540746831769360406L;
+public class AuditEvent<T> {
 
   private String userLogin;
   private T event;
@@ -18,7 +17,7 @@ public class AuditEvent<T> implements Serializable {
   private String eventType;
   private String eventSource;
 
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_TIME_FORMAT)
   private LocalDateTime timestamp;
 
   public String getUserLogin() {
