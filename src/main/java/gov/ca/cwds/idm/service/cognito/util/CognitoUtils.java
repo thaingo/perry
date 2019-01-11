@@ -13,6 +13,7 @@ import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.FIRST_NAME;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.LAST_NAME;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.PHONE_NUMBER;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoPhoneConverter.toCognitoFormat;
 import static gov.ca.cwds.util.Utils.toSet;
 import static gov.ca.cwds.util.Utils.toUpperCase;
 
@@ -22,7 +23,6 @@ import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.cognito.AttributesBuilder;
 import gov.ca.cwds.idm.service.cognito.UserAttribute;
 import gov.ca.cwds.util.Utils;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -120,11 +120,6 @@ public class CognitoUtils {
 
     String racfid = toUpperCase(user.getRacfid());
 
-    String phoneNumber = user.getPhoneNumber();
-    if(StringUtils.isNotBlank(phoneNumber)) {
-      phoneNumber = "+" + phoneNumber;
-    }
-
     AttributesBuilder attributesBuilder =
         new AttributesBuilder()
             .addAttribute(EMAIL, user.getEmail())
@@ -138,7 +133,7 @@ public class CognitoUtils {
             .addAttribute(EMAIL_VERIFIED, TRUE_VALUE)
             .addAttribute(createPermissionsAttribute(user.getPermissions()))
             .addAttribute(createRolesAttribute(user.getRoles()))
-            .addAttribute(PHONE_NUMBER, phoneNumber)
+            .addAttribute(PHONE_NUMBER, toCognitoFormat(user.getPhoneNumber()))
             .addAttribute(PHONE_EXTENSION, user.getPhoneExtensionNumber());
     return attributesBuilder.build();
   }

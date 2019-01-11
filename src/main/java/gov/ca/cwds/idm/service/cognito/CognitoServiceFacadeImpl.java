@@ -8,6 +8,7 @@ import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PHONE_EXTENSIO
 import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.ROLES;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.PHONE_NUMBER;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoPhoneConverter.toCognitoFormat;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.EMAIL_DELIVERY;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.attribute;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.buildCreateUserAttributes;
@@ -316,7 +317,7 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
       return;
     }
 
-    newPhoneNumber = "+" + newPhoneNumber;
+    newPhoneNumber = toCognitoFormat(newPhoneNumber);
 
     String existedPhoneNumber =
         CognitoUtils.getAttributeValue(existedCognitoUser, PHONE_NUMBER.getName());
