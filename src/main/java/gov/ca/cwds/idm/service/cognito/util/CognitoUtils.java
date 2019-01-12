@@ -151,8 +151,8 @@ public class CognitoUtils {
 
     if (newEmail != null) {
       newEmail = Utils.toLowerCase(newEmail);
-      emailAttributes.put(EMAIL, attribute(EMAIL.getName(), newEmail));
-      emailAttributes.put(EMAIL_VERIFIED, attribute(EMAIL_VERIFIED.getName(), TRUE_VALUE));
+      emailAttributes.put(EMAIL, attribute(EMAIL, newEmail));
+      emailAttributes.put(EMAIL_VERIFIED, attribute(EMAIL_VERIFIED, TRUE_VALUE));
     }
     return emailAttributes;
   }
