@@ -246,10 +246,6 @@ public class ValidationServiceImpl implements ValidationService {
     }
   }
 
-  private boolean isValidPhoneFormat(String newPhoneNumber) {
-    return true;
-  }
-
   @Autowired
   public void setCwsUserInfoService(CwsUserInfoService cwsUserInfoService) {
     this.cwsUserInfoService = cwsUserInfoService;
