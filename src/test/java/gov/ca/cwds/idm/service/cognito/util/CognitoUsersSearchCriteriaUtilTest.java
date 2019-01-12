@@ -1,11 +1,11 @@
 package gov.ca.cwds.idm.service.cognito.util;
 
-import gov.ca.cwds.idm.service.cognito.StandardUserAttribute;
+import gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import org.junit.Test;
 
-import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
-import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
+import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL;
+import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.*;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;

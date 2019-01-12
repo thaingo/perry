@@ -3,15 +3,8 @@ package gov.ca.cwds.idm.service.cognito;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.GET;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.RESEND_INVITATION_EMAIL;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
-import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PERMISSIONS;
-import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PHONE_EXTENSION;
-import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.ROLES;
-import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
-import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.PHONE_NUMBER;
-import static gov.ca.cwds.idm.service.cognito.util.CognitoPhoneConverter.toCognitoFormat;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.EMAIL_DELIVERY;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.buildCreateUserAttributes;
-import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.buildEmailAttributes;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getAttributeValue;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getEmail;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_CONNECT_TO_IDM;
@@ -52,17 +45,15 @@ import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserEnableStatusRequest;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
+import gov.ca.cwds.idm.service.cognito.attribute.UpdatedAttributesBuilder;
+import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
-import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.service.messages.MessageCode;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import javax.annotation.PostConstruct;
 import liquibase.util.StringUtils;
@@ -209,7 +200,8 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
   public boolean updateUserAttributes(
       String userId, UserType existedCognitoUser, UserUpdate updateUserDto) {
 
-    Map<UserAttribute, AttributeType> updatedAttributes = getUpdatedAttributes(existedCognitoUser, updateUserDto);
+    Map<UserAttribute, AttributeType> updatedAttributes =
+        new UpdatedAttributesBuilder(existedCognitoUser, updateUserDto).getUpdatedAttributes();
 
     if (updatedAttributes.isEmpty()) {
         return false;
@@ -233,78 +225,6 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
     }
 
     return true;
-  }
-
-  private Map<UserAttribute, AttributeType> getUpdatedAttributes(
-      UserType existedCognitoUser, UserUpdate updateUserDto) {
-
-    Map<UserAttribute, AttributeType> updatedAttributes = new LinkedHashMap<>();
-
-    addEmailAttributes(updatedAttributes, updateUserDto.getEmail(), existedCognitoUser);
-
-    addAttribute(updatedAttributes, PHONE_NUMBER,
-        toCognitoFormat(updateUserDto.getPhoneNumber()), existedCognitoUser);
-
-    addAttribute(updatedAttributes, PHONE_EXTENSION,
-        updateUserDto.getPhoneExtensionNumber(), existedCognitoUser);
-
-    addDelimitedAttribute(updatedAttributes, PERMISSIONS, updateUserDto.getPermissions(),
-        existedCognitoUser);
-
-    addDelimitedAttribute(updatedAttributes, ROLES, updateUserDto.getRoles(), existedCognitoUser);
-
-    return updatedAttributes;
-  }
-
-  private void addEmailAttributes(Map<UserAttribute, AttributeType> updatedAttributes, String newEmail,
-      UserType existedCognitoUser) {
-
-    if (newEmail == null) {
-      return;
-    }
-
-    String existedEmail = getAttributeValue(existedCognitoUser, EMAIL.getName());
-
-    if (!newEmail.equalsIgnoreCase(existedEmail)) {
-      updatedAttributes.putAll(buildEmailAttributes(newEmail));
-    }
-  }
-
-  private void addAttribute(
-      Map<UserAttribute, AttributeType> updatedAttributes,
-      UserAttribute userAttribute,
-      String newAttrValue,
-      UserType existedCognitoUser) {
-
-    addAttribute(updatedAttributes, userAttribute, newAttrValue, existedCognitoUser,
-        CognitoUtils::getAttributeValue, CognitoUtils::attribute);
-  }
-
-  private void addDelimitedAttribute(Map<UserAttribute, AttributeType> updatedAttributes,
-      UserAttribute userAttribute, Set<String> newValues, UserType existedCognitoUser) {
-
-    addAttribute(updatedAttributes, userAttribute, newValues, existedCognitoUser,
-        CognitoUtils::getDelimitedAttributeValue, CognitoUtils::createDelimitedAttribute);
-  }
-
-  private <T> void addAttribute(
-      Map<UserAttribute, AttributeType> updatedAttributes,
-      UserAttribute userAttribute,
-      T newAttrValue,
-      UserType existedCognitoUser,
-      BiFunction<UserType, UserAttribute, T> existedValueGetter,
-      BiFunction<UserAttribute, T, AttributeType> newAttributeCreator
-      ) {
-
-    if (newAttrValue == null) {
-      return;
-    }
-
-    T existedAttrValue = existedValueGetter.apply(existedCognitoUser, userAttribute);
-
-    if (!newAttrValue.equals(existedAttrValue)) {
-      updatedAttributes.put(userAttribute, newAttributeCreator.apply(userAttribute, newAttrValue));
-    }
   }
 
   /**

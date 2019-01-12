@@ -6,7 +6,7 @@ import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
-import gov.ca.cwds.idm.service.cognito.UserAttribute;
+import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;

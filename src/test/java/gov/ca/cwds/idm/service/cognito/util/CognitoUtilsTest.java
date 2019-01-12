@@ -1,9 +1,9 @@
 package gov.ca.cwds.idm.service.cognito.util;
 
-import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PERMISSIONS;
-import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.RACFID_CUSTOM;
-import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
-import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL_VERIFIED;
+import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PERMISSIONS;
+import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.RACFID_CUSTOM;
+import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL;
+import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL_VERIFIED;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.attribute;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.buildEmailAttributes;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.createPermissionsAttribute;
@@ -22,7 +22,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.UserType;
-import gov.ca.cwds.idm.service.cognito.UserAttribute;
+import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;

@@ -1,6 +1,6 @@
 package gov.ca.cwds.idm.dto;
 
-import gov.ca.cwds.idm.service.cognito.StandardUserAttribute;
+import gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute;
 import java.util.Set;
 
 public class UsersSearchCriteria {

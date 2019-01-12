@@ -1,6 +1,6 @@
 package gov.ca.cwds.idm.service.cognito.dto;
 
-import gov.ca.cwds.idm.service.cognito.StandardUserAttribute;
+import gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 

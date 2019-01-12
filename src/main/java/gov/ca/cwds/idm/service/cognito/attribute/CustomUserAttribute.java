@@ -1,4 +1,4 @@
-package gov.ca.cwds.idm.service.cognito;
+package gov.ca.cwds.idm.service.cognito.attribute;
 
 public enum CustomUserAttribute implements UserAttribute {
   PERMISSIONS("custom:Permission"),

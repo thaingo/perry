@@ -1,4 +1,4 @@
-package gov.ca.cwds.idm.service.cognito;
+package gov.ca.cwds.idm.service.cognito.attribute;
 
 import static com.google.common.base.Strings.nullToEmpty;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.attribute;
