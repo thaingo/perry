@@ -6,6 +6,7 @@ import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -32,9 +33,9 @@ public final class TestUtils {
     return java.sql.Date.valueOf((LocalDate.of(year, month, dayOfMonth)));
   }
 
-  public static AttributeType attr(String name, String value) {
+  public static AttributeType attr(UserAttribute userAttribute, String value) {
     AttributeType attr = new AttributeType();
-    attr.setName(name);
+    attr.setName(userAttribute.getName());
     attr.setValue(value);
     return attr;
   }

@@ -3,13 +3,9 @@ package gov.ca.cwds.idm.service.cognito;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.GET;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.RESEND_INVITATION_EMAIL;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
-import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PERMISSIONS;
-import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.ROLES;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.EMAIL_DELIVERY;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.buildCreateUserAttributes;
-import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.buildUpdateUserAttributes;
-import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.createDelimitedAttribute;
-import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getDelimitedAttributeValue;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getAttributeValue;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getEmail;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_CONNECT_TO_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_GET_USER_FROM_IDM;
@@ -49,13 +45,15 @@ import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserEnableStatusRequest;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
+import gov.ca.cwds.idm.service.cognito.attribute.UpdatedAttributesBuilder;
+import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.service.messages.MessageCode;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.function.Function;
 import javax.annotation.PostConstruct;
 import liquibase.util.StringUtils;
@@ -202,54 +200,31 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
   public boolean updateUserAttributes(
       String userId, UserType existedCognitoUser, UserUpdate updateUserDto) {
 
-    boolean executed = false;
+    Map<UserAttribute, AttributeType> updatedAttributes =
+        new UpdatedAttributesBuilder(existedCognitoUser, updateUserDto).getUpdatedAttributes();
 
-    List<AttributeType> updateAttributes = getUpdateAttributes(existedCognitoUser, updateUserDto);
-
-    if (!updateAttributes.isEmpty()) {
-      AdminUpdateUserAttributesRequest adminUpdateUserAttributesRequest =
-          new AdminUpdateUserAttributesRequest()
-              .withUsername(userId)
-              .withUserPoolId(properties.getUserpool())
-              .withUserAttributes(updateAttributes);
-      try {
-        identityProvider.adminUpdateUserAttributes(adminUpdateUserAttributesRequest);
-      } catch (com.amazonaws.services.cognitoidp.model.UserNotFoundException e) {
-        throw exceptionFactory.createUserNotFoundException(USER_NOT_FOUND_BY_ID_IN_IDM, e, userId);
-      } catch (com.amazonaws.services.cognitoidp.model.AliasExistsException e) {
-        throw exceptionFactory.createUserAlreadyExistsException(USER_WITH_EMAIL_EXISTS_IN_IDM, e,
-            updateUserDto.getEmail());
-      } catch (Exception e) {
-        throw exceptionFactory.createIdmException(getErrorCode(UPDATE), e, userId);
-      }
-
-      executed = true;
+    if (updatedAttributes.isEmpty()) {
+        return false;
     }
-    return executed;
-  }
 
-  private List<AttributeType> getUpdateAttributes(
-      UserType existedCognitoUser, UserUpdate updateUserDto) {
+    AdminUpdateUserAttributesRequest adminUpdateUserAttributesRequest =
+        new AdminUpdateUserAttributesRequest()
+            .withUsername(userId)
+            .withUserPoolId(properties.getUserpool())
+            .withUserAttributes(updatedAttributes.values());
 
-    List<AttributeType> updateAttributes = new ArrayList<>(
-        buildUpdateUserAttributes(updateUserDto));
-
-    addDelimitedAttribute(updateAttributes, PERMISSIONS, updateUserDto.getPermissions(),
-        existedCognitoUser);
-    addDelimitedAttribute(updateAttributes, ROLES, updateUserDto.getRoles(), existedCognitoUser);
-
-    return updateAttributes;
-  }
-
-  private void addDelimitedAttribute(List<AttributeType> updateAttributes,
-      UserAttribute userAttribute, Set<String> newValues, UserType existedCognitoUser) {
-
-    Set<String> existedValues = getDelimitedAttributeValue(existedCognitoUser, userAttribute);
-
-    if (newValues != null && !newValues.equals(existedValues)) {
-      AttributeType delimitedAttr = createDelimitedAttribute(userAttribute, newValues);
-      updateAttributes.add(delimitedAttr);
+    try {
+      identityProvider.adminUpdateUserAttributes(adminUpdateUserAttributesRequest);
+    } catch (com.amazonaws.services.cognitoidp.model.UserNotFoundException e) {
+      throw exceptionFactory.createUserNotFoundException(USER_NOT_FOUND_BY_ID_IN_IDM, e, userId);
+    } catch (com.amazonaws.services.cognitoidp.model.AliasExistsException e) {
+      throw exceptionFactory.createUserAlreadyExistsException(USER_WITH_EMAIL_EXISTS_IN_IDM, e,
+          updateUserDto.getEmail());
+    } catch (Exception e) {
+      throw exceptionFactory.createIdmException(getErrorCode(UPDATE), e, userId);
     }
+
+    return true;
   }
 
   /**

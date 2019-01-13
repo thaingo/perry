@@ -1,4 +1,5 @@
 import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType
+import gov.ca.cwds.idm.service.cognito.util.CognitoPhoneConverter
 import org.apache.commons.lang3.StringUtils
 
 def attribute = {name -> cognitoUser.attributes?.find {it.name.equalsIgnoreCase(name)}?.value}
@@ -10,6 +11,8 @@ result.userLastModifiedDate = cognitoUser.userLastModifiedDate
 result.status = cognitoUser.userStatus
 result.email = attribute("email")
 result.racfid = attribute("custom:RACFID")
+result.phoneNumber = CognitoPhoneConverter.fromCognitoFormat(attribute("phone_number"))
+result.phoneExtensionNumber = attribute("custom:PhoneExtension")
 
 if(StringUtils.isNotBlank(attribute("custom:Permission"))) {
     result.permissions = attribute("custom:Permission").split('\\s*:\\s*') as HashSet
@@ -31,8 +34,6 @@ if(cwsUser) {
     result.officeId = cwsUser.cwsOffice?.officeId
     result.officePhoneNumber = cwsUser.cwsOffice?.primaryPhoneNumber
     result.officePhoneExtensionNumber = cwsUser.cwsOffice?.primaryPhoneExtensionNumber
-    result.phoneNumber = cwsUser.staffPerson?.phoneNumber
-    result.phoneExtensionNumber = cwsUser.staffPerson?.phoneExtensionNumber
 } else {
     result.countyName = attribute("custom:County")
     result.firstName = attribute("given_name")

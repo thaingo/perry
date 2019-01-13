@@ -1,6 +1,6 @@
 package gov.ca.cwds.idm;
 
-import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
+import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.util.Utils.URL_DATETIME_FORMATTER;
 
 import gov.ca.cwds.data.persistence.auth.CwsOffice;

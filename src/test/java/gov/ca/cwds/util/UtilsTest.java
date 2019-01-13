@@ -1,6 +1,6 @@
 package gov.ca.cwds.util;
 
-import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.RACFID_CUSTOM;
+import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.RACFID_CUSTOM;
 import static gov.ca.cwds.util.Utils.healthCheckUtcTimeToPacific;
 import static gov.ca.cwds.util.Utils.isRacfidUser;
 import static gov.ca.cwds.util.Utils.isStatusHealthy;

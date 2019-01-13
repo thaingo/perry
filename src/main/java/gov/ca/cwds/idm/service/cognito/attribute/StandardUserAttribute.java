@@ -1,4 +1,4 @@
-package gov.ca.cwds.idm.service.cognito;
+package gov.ca.cwds.idm.service.cognito.attribute;
 
 public enum StandardUserAttribute implements UserAttribute {
   EMAIL("email"),
