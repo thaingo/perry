@@ -1,0 +1,6 @@
+{
+  "status": "BAD_REQUEST",
+  "technical_message": "Phone number 123-456-7890 has invalid format. Phone number should consist only from digits",
+  "user_message": "Phone number has invalid format. Phone number should consist only from digits",
+  "error_code": "CAP-065"
+}

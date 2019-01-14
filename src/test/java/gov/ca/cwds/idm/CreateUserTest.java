@@ -376,6 +376,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
     actuallySendUser.setCountyName("Napa");
     actuallySendUser.setOfficeId("TG7O51q0Ki");
     actuallySendUser.setStartDate(LocalDate.of(1998, 4, 14));
+    actuallySendUser.setPhoneNumber("4084419876");
     return actuallySendUser;
   }
 

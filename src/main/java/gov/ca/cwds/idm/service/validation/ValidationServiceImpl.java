@@ -6,6 +6,7 @@ import static gov.ca.cwds.idm.service.PossibleUserPermissionsService.CANS_PERMIS
 import static gov.ca.cwds.service.messages.MessageCode.ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.COUNTY_NAME_IS_NOT_PROVIDED;
 import static gov.ca.cwds.service.messages.MessageCode.FIRST_NAME_IS_NOT_PROVIDED;
+import static gov.ca.cwds.service.messages.MessageCode.INVALID_PHONE_FORMAT;
 import static gov.ca.cwds.service.messages.MessageCode.LAST_NAME_IS_NOT_PROVIDED;
 import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID_IN_CWSCMS;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_CREATE_NON_RACFID_USER_WITH_CANS_PERMISSION;
@@ -74,6 +75,7 @@ public class ValidationServiceImpl implements ValidationService {
 
   @Override
   public void validateUserUpdate(UserType existedCognitoUser, UserUpdate updateUserDto) {
+    validatePhoneNumber(updateUserDto);
     validateNotAllRolesAreRemovedAtUpdate(updateUserDto);
     validateNewUserRolesAreAllowedAtUpdate(updateUserDto);
     validateUpdateByCansPermission(existedCognitoUser, updateUserDto);
@@ -230,6 +232,18 @@ public class ValidationServiceImpl implements ValidationService {
     return cognitoUsers
         .stream()
         .anyMatch(userType -> Objects.equals(userType.getEnabled(), Boolean.TRUE));
+  }
+
+  private void validatePhoneNumber(UserUpdate updateUserDto) {
+    String newPhoneNumber = updateUserDto.getPhoneNumber();
+
+    if(newPhoneNumber == null) {
+      return;
+    }
+
+    if(!PhoneNumberValidator.isValid(newPhoneNumber)) {
+      throwValidationException(INVALID_PHONE_FORMAT, newPhoneNumber);
+    }
   }
 
   @Autowired

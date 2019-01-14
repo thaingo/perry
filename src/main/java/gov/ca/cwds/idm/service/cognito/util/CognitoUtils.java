@@ -1,27 +1,32 @@
 package gov.ca.cwds.idm.service.cognito.util;
 
-import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.COUNTY;
-import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.OFFICE;
-import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.PERMISSIONS;
-import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.RACFID_CUSTOM;
-import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.RACFID_CUSTOM_2;
-import static gov.ca.cwds.idm.service.cognito.CustomUserAttribute.ROLES;
-import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL;
-import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.EMAIL_VERIFIED;
-import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.FIRST_NAME;
-import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.LAST_NAME;
-import static gov.ca.cwds.idm.service.cognito.StandardUserAttribute.RACFID_STANDARD;
+import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.COUNTY;
+import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.OFFICE;
+import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PERMISSIONS;
+import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PHONE_EXTENSION;
+import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.RACFID_CUSTOM;
+import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.RACFID_CUSTOM_2;
+import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.ROLES;
+import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL;
+import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL_VERIFIED;
+import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.FIRST_NAME;
+import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.LAST_NAME;
+import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.PHONE_NUMBER;
+import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.RACFID_STANDARD;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoPhoneConverter.toCognitoFormat;
 import static gov.ca.cwds.util.Utils.toSet;
 import static gov.ca.cwds.util.Utils.toUpperCase;
 
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.dto.UserUpdate;
-import gov.ca.cwds.idm.service.cognito.AttributesBuilder;
-import gov.ca.cwds.idm.service.cognito.UserAttribute;
+import gov.ca.cwds.idm.service.cognito.attribute.AttributesBuilder;
+import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
+import gov.ca.cwds.util.Utils;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
@@ -51,6 +56,10 @@ public class CognitoUtils {
 
   public static String getAttributeValue(UserType cognitoUser, String attributeName) {
     return getAttribute(cognitoUser, attributeName).map(AttributeType::getValue).orElse(null);
+  }
+
+  public static String getAttributeValue(UserType cognitoUser, UserAttribute userAttribute) {
+    return getAttributeValue(cognitoUser, userAttribute.getName());
   }
 
   public static String getEmail(UserType cognitoUser) {
@@ -90,6 +99,10 @@ public class CognitoUtils {
     return permissionsAttr;
   }
 
+  public static AttributeType attribute(UserAttribute userAttribute, String value) {
+    return attribute(userAttribute.getName(), value);
+  }
+
   public static String getCustomDelimitedListAttributeValue(Set<String> setOfValues) {
     if (!CollectionUtils.isEmpty(setOfValues)) {
       return String.join(COGNITO_LIST_DELIMITER, setOfValues);
@@ -127,18 +140,21 @@ public class CognitoUtils {
             .addAttribute(RACFID_STANDARD, racfid)
             .addAttribute(EMAIL_VERIFIED, TRUE_VALUE)
             .addAttribute(createPermissionsAttribute(user.getPermissions()))
-            .addAttribute(createRolesAttribute(user.getRoles()));
+            .addAttribute(createRolesAttribute(user.getRoles()))
+            .addAttribute(PHONE_NUMBER, toCognitoFormat(user.getPhoneNumber()))
+            .addAttribute(PHONE_EXTENSION, user.getPhoneExtensionNumber());
     return attributesBuilder.build();
   }
 
-  public static List<AttributeType> buildUpdateUserAttributes(UserUpdate userUpdate) {
-    AttributesBuilder attributesBuilder = new AttributesBuilder();
-    if (userUpdate.getEmail() != null) {
-      attributesBuilder
-          .addAttribute(EMAIL, userUpdate.getEmail().toLowerCase())
-          .addAttribute(EMAIL_VERIFIED, TRUE_VALUE);
+  public static Map<UserAttribute, AttributeType> buildEmailAttributes(String newEmail) {
+    Map<UserAttribute, AttributeType> emailAttributes = new LinkedHashMap<>();
+
+    if (newEmail != null) {
+      newEmail = Utils.toLowerCase(newEmail);
+      emailAttributes.put(EMAIL, attribute(EMAIL, newEmail));
+      emailAttributes.put(EMAIL_VERIFIED, attribute(EMAIL_VERIFIED, TRUE_VALUE));
     }
-    return attributesBuilder.build();
+    return emailAttributes;
   }
 
   public static String getRACFId(UserType user) {
