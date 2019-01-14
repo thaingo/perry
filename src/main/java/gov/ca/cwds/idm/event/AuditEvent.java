@@ -1,4 +1,4 @@
-package gov.ca.cwds.idm.dto;
+package gov.ca.cwds.idm.event;
 
 import static gov.ca.cwds.util.Utils.DATE_TIME_FORMAT;
 
@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class AuditEvent<T> {
+public abstract class AuditEvent<T> {
 
   private String userLogin;
   private T event;

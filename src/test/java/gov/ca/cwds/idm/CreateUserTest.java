@@ -25,7 +25,7 @@ import com.amazonaws.services.cognitoidp.model.InvalidParameterException;
 import com.amazonaws.services.cognitoidp.model.UsernameExistsException;
 import com.google.common.collect.Iterables;
 import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.event.UserCreatedEvent;
+import gov.ca.cwds.idm.event.UserChangeLogEvent;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
 import gov.ca.cwds.idm.util.TestCognitoServiceFacade;
@@ -326,7 +326,8 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
     verify(cognito, times(1)).adminCreateUser(request);
     verify(spySearchService, times(1)).createUser(any(User.class));
     verifyDoraCalls(1);
-    verify(changeLogEventListener, times(1)).handleChangeLogEvent(any(UserCreatedEvent.class));
+    verify(auditLogService, times(1)).createAuditLogRecord(any(
+        UserChangeLogEvent.class));
   }
 
   private  AdminCreateUserRequest setCreateRequestAndResult(User actuallySendUser,
