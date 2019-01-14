@@ -5,7 +5,6 @@ import static gov.ca.cwds.idm.persistence.ns.OperationType.RESEND_INVITATION_EMA
 import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.EMAIL_DELIVERY;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.buildCreateUserAttributes;
-import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getAttributeValue;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getEmail;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_CONNECT_TO_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_GET_USER_FROM_IDM;
@@ -204,7 +203,7 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
         new UpdatedAttributesBuilder(existedCognitoUser, updateUserDto).getUpdatedAttributes();
 
     if (updatedAttributes.isEmpty()) {
-        return false;
+      return false;
     }
 
     AdminUpdateUserAttributesRequest adminUpdateUserAttributesRequest =

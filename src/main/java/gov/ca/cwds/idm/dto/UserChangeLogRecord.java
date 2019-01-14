@@ -4,8 +4,6 @@ package gov.ca.cwds.idm.dto;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class UserChangeLogRecord implements Serializable {
@@ -14,7 +12,7 @@ public class UserChangeLogRecord implements Serializable {
 
   private String adminRole;
   private String adminName;
-  private List<String> userRoles = new ArrayList<>();
+  private String userRoles;
   private String userId;
   private String userName;
   private String oldValue;
@@ -39,8 +37,12 @@ public class UserChangeLogRecord implements Serializable {
     this.adminName = adminName;
   }
 
-  public List<String> getUserRoles() {
+  public String getUserRoles() {
     return userRoles;
+  }
+
+  public void setUserRoles(String userRoles) {
+    this.userRoles = userRoles;
   }
 
   public String getUserId() {

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
@@ -53,4 +54,9 @@ public class Roles {
   public static List<Map<String, String>> findRoles() {
     return Roles.roleList;
   }
+
+  public static String joinRoles(Iterable<String> roles) {
+    return StringUtils.join(roles, ", ");
+  }
+
 }

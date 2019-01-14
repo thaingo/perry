@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
  * Created by Alexander Serbin on 1/11/2019
  */
 
-public abstract class UserChangeLogEvent extends AuditEvent<UserChangeLogRecord> implements Serializable {
+abstract class UserChangeLogEvent extends AuditEvent<UserChangeLogRecord> implements Serializable {
 
   private static final long serialVersionUID = -2341018571605446028L;
 
@@ -25,14 +25,50 @@ public abstract class UserChangeLogEvent extends AuditEvent<UserChangeLogRecord>
     setEventSource(CAP_EVENT_SOURCE);
     setUserLogin(getCurrentUserName());
     UserChangeLogRecord userChangeLogRecord = new UserChangeLogRecord();
-    userChangeLogRecord.setCountyName(user.getCountyName());
-    userChangeLogRecord.setOfficeId(user.getOfficeId());
-    userChangeLogRecord.setUserId(user.getId());
-    userChangeLogRecord.setUserName(user.getFirstName() + " " + user.getLastName());
     userChangeLogRecord.setAdminName(getCurrentUserFullName());
     String adminRole = UserRolesService.getStrongestAdminRole(getCurrentUser());
     userChangeLogRecord.setAdminRole(adminRole);
     setEvent(userChangeLogRecord);
+    getEvent().setCountyName(user.getCountyName());
+    getEvent().setOfficeId(user.getOfficeId());
+    getEvent().setUserId(user.getId());
+    getEvent().setUserName(user.getFirstName() + " " + user.getLastName());
+  }
+
+  protected void setAdminRole(String adminRole) {
+    getEvent().setAdminRole(adminRole);
+  }
+
+  protected void setAdminName(String adminName) {
+    getEvent().setAdminName(adminName);
+  }
+
+  protected void setUserRoles(String userRoles) {
+    getEvent().setUserRoles(userRoles);
+  }
+
+  protected void setUserId(String userId) {
+    getEvent().setUserId(userId);
+  }
+
+  protected void setUserName(String userName) {
+    getEvent().setUserName(userName);
+  }
+
+  protected void setOldValue(String oldValue) {
+    getEvent().setOldValue(oldValue);
+  }
+
+  protected void setNewValue(String newValue) {
+    getEvent().setNewValue(newValue);
+  }
+
+  protected void setOfficeId(String officeId) {
+    getEvent().setOfficeId(officeId);
+  }
+
+  protected void setCountyName(String countyName) {
+    getEvent().setCountyName(countyName);
   }
 
 }

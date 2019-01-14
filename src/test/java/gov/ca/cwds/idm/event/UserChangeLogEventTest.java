@@ -65,6 +65,15 @@ public class UserChangeLogEventTest {
     assertEquals(String.join(", ", ROLE_1, ROLE_2), userCreatedEvent.getEvent().getNewValue());
   }
 
+  @Test
+  public void testUserRoleChangedEvent() {
+    User user = mockUser();
+    UserRoleChangedEvent userRoleChangedEvent = new UserRoleChangedEvent(user,
+        Arrays.asList("New Role 1", "New Role 2"));
+    assertEquals(UserRoleChangedEvent.EVENT_TYPE_USER_ROLE_CHANGED, userRoleChangedEvent.getEventType());
+    assertEquals("New Role 1, New Role 2", userRoleChangedEvent.getEvent().getNewValue());
+  }
+
   private User mockUser() {
     User user = new User();
     user.setId(TEST_USER_ID);
