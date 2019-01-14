@@ -3,10 +3,11 @@ package gov.ca.cwds.idm.service.cognito;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.GET;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.RESEND_INVITATION_EMAIL;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
+import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.EMAIL_DELIVERY;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.buildCreateUserAttributes;
-import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getAttributeValue;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getEmail;
+import static gov.ca.cwds.service.messages.MessageCode.ERROR_AT_INVITATION_RESENDING_ON_EMAIL_CHANGE;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_CONNECT_TO_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_GET_USER_FROM_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_UPDATE_USER_IN_IDM;
@@ -31,6 +32,7 @@ import com.amazonaws.services.cognitoidp.model.AdminDisableUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminEnableUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserResult;
+import com.amazonaws.services.cognitoidp.model.AdminResetUserPasswordRequest;
 import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesRequest;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.DeliveryMediumType;
@@ -51,12 +53,15 @@ import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.service.messages.MessageCode;
+import gov.ca.cwds.service.messages.MessagesService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import javax.annotation.PostConstruct;
 import liquibase.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -66,11 +71,15 @@ import org.springframework.stereotype.Service;
 @SuppressWarnings({"fb-contrib:EXS_EXCEPTION_SOFTENING_NO_CONSTRAINTS"})
 public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(CognitoServiceFacadeImpl.class);
+
   private CognitoProperties properties;
 
   private AWSCognitoIdentityProvider identityProvider;
 
   private ExceptionFactory exceptionFactory;
+
+  private MessagesService messagesService;
 
   @PostConstruct
   public void init() {
@@ -224,7 +233,29 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
       throw exceptionFactory.createIdmException(getErrorCode(UPDATE), e, userId);
     }
 
+    if(updatedAttributes.containsKey(EMAIL)) {
+      String newEmail = updatedAttributes.get(EMAIL).getValue();
+      resendInvitationEmailOnEmailChange(userId, newEmail);
+    }
+
     return true;
+  }
+
+  private void resendInvitationEmailOnEmailChange(String userId, String newEmail){
+    try {
+      identityProvider.adminResetUserPassword(createAdminResetUserPasswordRequest(newEmail));
+    } catch (Exception e) {
+      String msg = messagesService
+          .getTechMessage(ERROR_AT_INVITATION_RESENDING_ON_EMAIL_CHANGE, userId);
+      LOGGER.error(msg, e);
+    }
+  }
+
+  @Override
+  public AdminResetUserPasswordRequest createAdminResetUserPasswordRequest(String newEmail) {
+    return new AdminResetUserPasswordRequest()
+        .withUsername(newEmail)
+        .withUserPoolId(properties.getUserpool());
   }
 
   /**
@@ -337,5 +368,10 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
   @Autowired
   public void setExceptionFactory(ExceptionFactory exceptionFactory) {
     this.exceptionFactory = exceptionFactory;
+  }
+
+  @Autowired
+  public void setMessagesService(MessagesService messagesService) {
+    this.messagesService = messagesService;
   }
 }
