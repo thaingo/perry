@@ -213,7 +213,7 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
         new UpdatedAttributesBuilder(existedCognitoUser, updateUserDto).getUpdatedAttributes();
 
     if (updatedAttributes.isEmpty()) {
-        return false;
+      return false;
     }
 
     AdminUpdateUserAttributesRequest adminUpdateUserAttributesRequest =

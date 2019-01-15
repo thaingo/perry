@@ -326,7 +326,8 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
     verify(cognito, times(1)).adminCreateUser(request);
     verify(spySearchService, times(1)).createUser(any(User.class));
     verifyDoraCalls(1);
-    verify(changeLogEventListener, times(1)).handleChangeLogEvent(any(UserCreatedEvent.class));
+    verify(auditLogService, times(1)).createAuditLogRecord(any(
+        UserCreatedEvent.class));
   }
 
   private  AdminCreateUserRequest setCreateRequestAndResult(User actuallySendUser,

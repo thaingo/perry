@@ -54,6 +54,7 @@ import gov.ca.cwds.config.LoggingRequestIdFilter;
 import gov.ca.cwds.config.LoggingUserIdFilter;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
+import gov.ca.cwds.idm.event.UserRoleChangedEvent;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
 import gov.ca.cwds.idm.util.TestCognitoServiceFacade;
@@ -120,6 +121,8 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     inOrder.verify(cognito).adminResetUserPassword(resetPasswordRequest);
     inOrder.verify(cognito).adminDisableUser(disableUserRequest);
     verifyDoraCalls(1);
+    verify(auditLogService, times(1)).createAuditLogRecord(any(
+        UserRoleChangedEvent.class));
   }
 
   @Test
@@ -178,7 +181,9 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
                 .content(asJsonString(userUpdate)))
         .andExpect(MockMvcResultMatchers.status().isNoContent())
         .andReturn();
-  }
+    verify(auditLogService, times(0)).createAuditLogRecord(any(
+        UserRoleChangedEvent.class));
+ }
 
   @Test
   @WithMockCustomUser
