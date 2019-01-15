@@ -8,7 +8,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import gov.ca.cwds.idm.event.ChangeLogEventListener;
+import gov.ca.cwds.idm.service.AuditLogService;
 import gov.ca.cwds.idm.service.IndexRestSender;
 import gov.ca.cwds.idm.service.SearchService;
 import gov.ca.cwds.idm.service.cognito.SearchProperties;
@@ -34,7 +34,7 @@ public abstract class BaseIdmIntegrationWithSearchTest extends BaseIdmIntegratio
   protected SearchProperties searchProperties;
 
   @MockBean
-  protected ChangeLogEventListener changeLogEventListener;
+  protected AuditLogService auditLogService;
 
   protected SearchService spySearchService;
 
