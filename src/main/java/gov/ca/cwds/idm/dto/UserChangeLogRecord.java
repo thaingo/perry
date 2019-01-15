@@ -7,8 +7,8 @@ import java.io.Serializable;
 
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class UserChangeLogRecord implements Serializable {
-  private static final long serialVersionUID = 8393081330310394261L;
 
+  private static final long serialVersionUID = -6845403932113735008L;
 
   private String adminRole;
   private String adminName;
