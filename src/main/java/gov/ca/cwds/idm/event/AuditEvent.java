@@ -5,11 +5,14 @@ import static gov.ca.cwds.util.Utils.DATE_TIME_FORMAT;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public abstract class AuditEvent<T> {
+public abstract class AuditEvent<T extends Serializable> implements Serializable {
+
+  private static final long serialVersionUID = 7641668299790997287L;
 
   private String userLogin;
   private T event;
