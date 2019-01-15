@@ -7,20 +7,19 @@ import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserName;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserChangeLogRecord;
 import gov.ca.cwds.idm.service.authorization.UserRolesService;
-import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
  * Created by Alexander Serbin on 1/11/2019
  */
 
-abstract class UserChangeLogEvent extends AuditEvent<UserChangeLogRecord> implements Serializable {
+abstract class UserChangeLogEvent extends AuditEvent<UserChangeLogRecord> {
 
   private static final long serialVersionUID = -2341018571605446028L;
 
   static final String CAP_EVENT_SOURCE = "CAP";
 
-  public UserChangeLogEvent(User user) {
+  UserChangeLogEvent(User user) {
     setTimestamp(LocalDateTime.now());
     setEventSource(CAP_EVENT_SOURCE);
     setUserLogin(getCurrentUserName());

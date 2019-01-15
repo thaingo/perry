@@ -13,6 +13,7 @@ import gov.ca.cwds.idm.dto.User;
 public class UserRoleChangedEvent extends UserChangeLogEvent {
 
   private static final long serialVersionUID = 1145582435628289251L;
+
   public static final String EVENT_TYPE_USER_ROLE_CHANGED = "USER'S ROLE CHANGED";
 
   public UserRoleChangedEvent(User user, Iterable<String> newRoles) {
