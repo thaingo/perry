@@ -1,6 +1,11 @@
 package gov.ca.cwds.idm.event;
 
+import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
+import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.idm.event.UserChangeLogEvent.CAP_EVENT_SOURCE;
+import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PERMISSIONS;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.ROLES;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -12,12 +17,15 @@ import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserChangeLogRecord;
 import gov.ca.cwds.idm.service.authorization.UserRolesService;
 import gov.ca.cwds.idm.service.cognito.attribute.diff.CollectionUserAttributeDiff;
+import gov.ca.cwds.idm.service.cognito.attribute.diff.RolesUserAttributeDiff;
 import gov.ca.cwds.idm.service.cognito.attribute.diff.UserAttributeDiff;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.TreeSet;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,8 +43,10 @@ public class UserChangeLogEventTest {
   private static final String TEST_LAST_NAME = "testLastName";
   private static final String TEST_COUNTY = "testCounty";
   private static final String TEST_OFFICE_ID = "testOfficeId";
-  private static final String ROLE_1 = "Role1";
-  private static final String ROLE_2 = "Role2";
+  private static final String PERMISSION_1 = "Permission1";
+  private static final String PERMISSION_2 = "Permission2";
+  private static final String PERMISSION_3 = "Permission3";
+  private static final String PERMISSION_4 = "Permission4";
   private static final String ADMIN_LOGIN = "TEST_USER_NAME";
   private static final String TEST_ADMIN_ROLE = "Test-admin";
   private static final String TEST_ADMIN_NAME = "Cherno Samba";
@@ -68,25 +78,44 @@ public class UserChangeLogEventTest {
     User user = mockUser();
     UserCreatedEvent userCreatedEvent = new UserCreatedEvent(user);
     assertEquals(UserCreatedEvent.EVENT_TYPE_USER_CREATED, userCreatedEvent.getEventType());
-    assertEquals(String.join(", ", ROLE_1, ROLE_2), userCreatedEvent.getEvent().getNewValue());
-    assertEquals(String.join(", ", ROLE_1, ROLE_2), userCreatedEvent.getEvent().getUserRoles());
+    assertEquals(String.join(", ", CWS_WORKER, CALS_ADMIN),
+        userCreatedEvent.getEvent().getNewValue());
+    assertEquals(String.join(", ", CWS_WORKER, CALS_ADMIN),
+        userCreatedEvent.getEvent().getUserRoles());
   }
 
   @Test
   public void testUserRoleChangedEvent() {
     User user = mockUser();
-    UserAttributeDiff<Set<String>> diff = new CollectionUserAttributeDiff(null,
-        new LinkedHashSet<>(user.getRoles()),
-        new LinkedHashSet<>(Arrays.asList("New Role 1", "New Role 2")));
+    UserAttributeDiff<Set<String>> diff = new RolesUserAttributeDiff(null,
+        user.getRoles(),
+        new HashSet<>(Arrays.asList(OFFICE_ADMIN, STATE_ADMIN)));
     UserRoleChangedEvent userRoleChangedEvent = new UserRoleChangedEvent(user,
         Collections.singletonMap(ROLES, diff));
     assertEquals(UserRoleChangedEvent.EVENT_TYPE_USER_ROLE_CHANGED,
         userRoleChangedEvent.getEventType());
-    assertEquals(StringUtils.join(new String[]{ROLE_1, ROLE_2}, ", "),
+    assertEquals(StringUtils.join(new String[]{"CALS Administrator", "CWS Worker"}, ", "),
         userRoleChangedEvent.getEvent().getOldValue());
-    assertEquals("New Role 1, New Role 2", userRoleChangedEvent.getEvent().getNewValue());
-    assertEquals(String.join(", ", "New Role 1", "New Role 2"),
+    assertEquals("Office Administrator, State Administrator", userRoleChangedEvent.getEvent().getNewValue());
+    assertEquals(String.join(", ", "Office Administrator", "State Administrator"),
         userRoleChangedEvent.getEvent().getUserRoles());
+  }
+
+  @Test
+  public void testPermissionsChangedEvent() {
+    User user = mockUser();
+    UserAttributeDiff<Set<String>> diff = new CollectionUserAttributeDiff(null,
+        new LinkedHashSet<>(user.getPermissions()),
+        new LinkedHashSet<>(Arrays.asList(PERMISSION_3, PERMISSION_4)));
+    PermissionsChangedEvent event = new PermissionsChangedEvent(user,
+        Collections.singletonMap(PERMISSIONS, diff));
+    assertEquals(PermissionsChangedEvent.EVENT_TYPE_PERMISSIONS_CHANGED,
+        event.getEventType());
+    assertEquals(StringUtils.join(new String[]{PERMISSION_1, PERMISSION_2}, ", "),
+        event.getEvent().getOldValue());
+    assertEquals("Permission3, Permission4", event.getEvent().getNewValue());
+    assertEquals(String.join(", ", CWS_WORKER, CALS_ADMIN),
+        event.getEvent().getUserRoles());
   }
 
   private User mockUser() {
@@ -96,8 +125,8 @@ public class UserChangeLogEventTest {
     user.setLastName(TEST_LAST_NAME);
     user.setCountyName(TEST_COUNTY);
     user.setOfficeId(TEST_OFFICE_ID);
-    user.setRoles(new LinkedHashSet<>(Arrays.asList(ROLE_1, ROLE_2)));
-
+    user.setRoles(new LinkedHashSet<>(Arrays.asList(CWS_WORKER, CALS_ADMIN)));
+    user.setPermissions(new TreeSet<>(Arrays.asList(PERMISSION_1, PERMISSION_2)));
     when(CurrentAuthenticatedUserUtil.getCurrentUserName()).thenReturn(ADMIN_LOGIN);
     when(CurrentAuthenticatedUserUtil.getCurrentUser()).thenReturn(new UniversalUserToken());
     when(UserRolesService.getStrongestAdminRole(any(UniversalUserToken.class)))

@@ -6,6 +6,7 @@ import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
 import static gov.ca.cwds.idm.service.ExecutionStatus.FAIL;
 import static gov.ca.cwds.idm.service.ExecutionStatus.SUCCESS;
 import static gov.ca.cwds.idm.service.ExecutionStatus.WAS_NOT_EXECUTED;
+import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PERMISSIONS;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.ROLES;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.RACFID_STANDARD;
@@ -42,6 +43,7 @@ import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.UserVerificationResult;
 import gov.ca.cwds.idm.dto.UsersPage;
 import gov.ca.cwds.idm.dto.UsersSearchCriteria;
+import gov.ca.cwds.idm.event.PermissionsChangedEvent;
 import gov.ca.cwds.idm.event.UserCreatedEvent;
 import gov.ca.cwds.idm.event.UserRoleChangedEvent;
 import gov.ca.cwds.idm.exception.AdminAuthorizationException;
@@ -334,14 +336,18 @@ public class IdmServiceImpl implements IdmService {
     return updateAttributesStatus;
   }
 
-  private void publishUpdateAttributesEvents(UserType existedCognitoUser, UserUpdate updateUserDto) {
+  private void publishUpdateAttributesEvents(UserType existedCognitoUser,
+      UserUpdate updateUserDto) {
     Map<UserAttribute, UserAttributeDiff> updatedAttributes =
         new UpdatedAttributesBuilder(existedCognitoUser, updateUserDto).getUpdatedAttributes();
+    User user = mappingService.toUser(existedCognitoUser);
     if (updatedAttributes.containsKey(ROLES)) {
-        User user = mappingService.toUser(existedCognitoUser);
-        auditLogService.createAuditLogRecord(new UserRoleChangedEvent(user, updatedAttributes));
-      }
+      auditLogService.createAuditLogRecord(new UserRoleChangedEvent(user, updatedAttributes));
     }
+    if (updatedAttributes.containsKey(PERMISSIONS)) {
+      auditLogService.createAuditLogRecord(new PermissionsChangedEvent(user, updatedAttributes));
+    }
+  }
 
   private void handleUpdatePartialSuccess(
       String userId,

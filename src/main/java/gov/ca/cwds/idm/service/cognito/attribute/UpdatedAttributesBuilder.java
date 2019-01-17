@@ -11,7 +11,7 @@ import static gov.ca.cwds.idm.service.cognito.util.CognitoPhoneConverter.toCogni
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.UserUpdate;
-import gov.ca.cwds.idm.service.cognito.attribute.diff.CollectionAttributeDiffBuilder;
+import gov.ca.cwds.idm.service.cognito.attribute.diff.RoleAttributeDiffBuilder;
 import gov.ca.cwds.idm.service.cognito.attribute.diff.StringAttributeDiffBuilder;
 import gov.ca.cwds.idm.service.cognito.attribute.diff.StringUserAttributeDiff;
 import gov.ca.cwds.idm.service.cognito.attribute.diff.UserAttributeDiff;
@@ -62,7 +62,7 @@ public class UpdatedAttributesBuilder {
 
   private void addCollectionAttribute(UserAttribute userAttribute, Set<String> newValues) {
     UserAttributeDiffBuilder<Set<String>> diffBuilder =
-        new CollectionAttributeDiffBuilder(existedCognitoUser, userAttribute, newValues);
+        new RoleAttributeDiffBuilder(existedCognitoUser, userAttribute, newValues);
     updateAttributes(userAttribute, diffBuilder);
   }
 

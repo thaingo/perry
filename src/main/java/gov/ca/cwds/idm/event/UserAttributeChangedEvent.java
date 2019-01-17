@@ -18,7 +18,7 @@ abstract class UserAttributeChangedEvent extends UserChangeLogEvent {
   UserAttributeChangedEvent(User user, Map<UserAttribute, UserAttributeDiff> diffMap) {
     super(user);
     if (diffMap.containsKey(ROLES)) {
-        setUserRoles(diffMap.get(ROLES).getNewValueAsString());
+      setUserRoles(diffMap.get(ROLES).getNewValueAsString());
     } else {
       setUserRoles(Roles.joinRoles(user.getRoles()));
     }

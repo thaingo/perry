@@ -2,6 +2,7 @@ package gov.ca.cwds.idm.service.cognito.attribute.diff;
 
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import java.util.Set;
+import java.util.TreeSet;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -19,11 +20,19 @@ public class CollectionUserAttributeDiff extends UserAttributeDiff<Set<String>> 
 
   @Override
   public String getOldValueAsString() {
-    return StringUtils.join(getOldValue(), ", ");
+    return getCollectionValueAsString(getOldValue());
   }
 
   @Override
   public String getNewValueAsString() {
-    return StringUtils.join(getNewValue(), ", ");
+    return getCollectionValueAsString(getNewValue());
+  }
+
+  protected static String getCollectionValueAsString(Set<String> collection) {
+    if (collection == null) {
+      return "";
+    } else {
+      return StringUtils.join(new TreeSet<>(collection), ", ");
+    }
   }
 }

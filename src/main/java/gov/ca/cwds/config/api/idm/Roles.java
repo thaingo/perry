@@ -4,6 +4,7 @@ import static gov.ca.cwds.util.Utils.toSet;
 
 import com.google.common.collect.ImmutableMap;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,6 +29,8 @@ public class Roles {
 
   private static List<Map<String, String>> roleList;
 
+  private static Map<String, String> roleListReversed = new HashMap<>(7);
+
   private Roles() {}
 
   public static Set<String> getAdminRoles() {
@@ -46,6 +49,9 @@ public class Roles {
     roleList.add(ImmutableMap.of("id", CALS_ADMIN, "name", "CALS Administrator"));
     roleList.add(ImmutableMap.of("id", CWS_WORKER, "name", "CWS Worker"));
     roleList.add(ImmutableMap.of("id", CALS_EXTERNAL_WORKER, "name", "CALS External Worker"));
+    for (Map<String, String> role: roleList) {
+      roleListReversed.put(role.get("id"), role.get("name"));
+    }
   }
 
   /**
@@ -57,6 +63,10 @@ public class Roles {
 
   public static String joinRoles(Iterable<String> roles) {
     return StringUtils.join(roles, ", ");
+  }
+
+  public static String getRoleNameById(String id) {
+    return roleListReversed.get(id) != null ? roleListReversed.get(id): id;
   }
 
 }
