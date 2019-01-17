@@ -8,11 +8,15 @@ import static gov.ca.cwds.util.LiquibaseUtils.CMS_STORE_URL;
 import static gov.ca.cwds.util.LiquibaseUtils.TOKEN_STORE_URL;
 import static gov.ca.cwds.util.LiquibaseUtils.runLiquibaseScript;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.LoggingEvent;
 import ch.qos.logback.core.Appender;
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
+import com.amazonaws.services.cognitoidp.model.AdminCreateUserRequest;
+import com.amazonaws.services.cognitoidp.model.AdminCreateUserResult;
+import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.BaseIntegrationTest;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.persistence.ns.repository.UserLogRepository;
@@ -147,6 +151,23 @@ public abstract class BaseIdmIntegrationTest extends BaseIntegrationTest {
     user.setPermissions(permissions);
     return user;
   }
+
+  protected final AdminCreateUserRequest setResendEmailRequestAndResponse(String userId) {
+    AdminCreateUserRequest request =
+        ((TestCognitoServiceFacade) cognitoServiceFacade)
+            .createResendEmailRequest(userId);
+
+    UserType user = new UserType();
+    user.setUsername(userId);
+    user.setEnabled(true);
+    user.setUserStatus("FORCE_CHANGE_PASSWORD");
+
+    AdminCreateUserResult result = new AdminCreateUserResult().withUser(user);
+    when(cognito.adminCreateUser(request)).thenReturn(result);
+
+    return request;
+  }
+
 
   @Component
   static class TestPostProcessor implements BeanPostProcessor {

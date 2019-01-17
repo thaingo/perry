@@ -105,17 +105,8 @@ public class ResendInvitationEmailTest extends BaseIdmIntegrationWithUserLogTest
   }
 
   private void assertResendEmailWorksFine() throws Exception {
-    AdminCreateUserRequest request =
-        ((TestCognitoServiceFacade) cognitoServiceFacade)
-            .createResendEmailRequest(USER_WITH_RACFID_ID_EMAIL);
 
-    UserType user = new UserType();
-    user.setUsername(USER_WITH_RACFID_ID_EMAIL);
-    user.setEnabled(true);
-    user.setUserStatus("FORCE_CHANGE_PASSWORD");
-
-    AdminCreateUserResult result = new AdminCreateUserResult().withUser(user);
-    when(cognito.adminCreateUser(request)).thenReturn(result);
+    setResendEmailRequestAndResponse(USER_WITH_RACFID_ID_EMAIL);
 
     MvcResult mvcResult =
         mockMvc

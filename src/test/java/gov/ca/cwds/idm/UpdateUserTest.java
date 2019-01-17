@@ -16,6 +16,7 @@ import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.INACTIVE_USER_WITH_ACTIVE_RACFID_IN_CMS;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.INACTIVE_USER_WITH_NO_ACTIVE_RACFID_IN_CMS;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.INACTIVE_USER_WITH_NO_RACFID;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.NEW_USER_SUCCESS_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.STATE_ADMIN_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.SUPER_ADMIN_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USERPOOL;
@@ -39,6 +40,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import ch.qos.logback.classic.spi.LoggingEvent;
+import com.amazonaws.services.cognitoidp.model.AdminCreateUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminDisableUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminDisableUserResult;
 import com.amazonaws.services.cognitoidp.model.AdminEnableUserRequest;
@@ -124,6 +126,45 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     verify(auditLogService, times(1)).createAuditLogRecord(any(
         UserRoleChangedEvent.class));
   }
+
+  @Test
+  @WithMockCustomUser(roles = {STATE_ADMIN})
+  public void testUpdateEmail_ForceChangePasswordState() throws Exception {
+
+    final String NEW_EMAIL = "newmail@mail.com";
+
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setEmail(NEW_EMAIL);
+
+    AdminUpdateUserAttributesRequest updateAttributesRequest =
+        setUpdateUserAttributesRequestAndResult(
+            NEW_USER_SUCCESS_ID,
+            attr(EMAIL, NEW_EMAIL),
+            attr(EMAIL_VERIFIED, "True")
+        );
+
+    AdminCreateUserRequest resendEmailRequest = setResendEmailRequestAndResponse(NEW_EMAIL);
+
+    setDoraSuccess();
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.patch("/idm/users/" + NEW_USER_SUCCESS_ID)
+                .contentType(JSON_CONTENT_TYPE)
+                .content(asJsonString(userUpdate)))
+        .andExpect(MockMvcResultMatchers.status().isNoContent())
+        .andReturn();
+
+    verify(cognito, times(1)).adminUpdateUserAttributes(updateAttributesRequest);
+    verify(cognito, times(1)).adminCreateUser(resendEmailRequest);
+    verify(spySearchService, times(1)).updateUser(any(User.class));
+
+    InOrder inOrder = inOrder(cognito);
+    inOrder.verify(cognito).adminUpdateUserAttributes(updateAttributesRequest);
+    inOrder.verify(cognito).adminCreateUser(resendEmailRequest);
+    verifyDoraCalls(1);
+  }
+
 
   @Test
   @WithMockCustomUser
