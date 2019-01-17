@@ -48,7 +48,6 @@ import gov.ca.cwds.service.messages.MessageCode;
 import gov.ca.cwds.service.messages.MessagesService;
 import gov.ca.cwds.service.messages.MessagesService.Messages;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -151,7 +150,7 @@ public class CognitoServiceFacadeTest {
     assertThat(request.getUsername(), is("gonzales@gmail.com"));
 
     assertThat(request.getUserPoolId(), is("userpool"));
-    assertThat(request.getDesiredDeliveryMediums(), is(Arrays.asList("EMAIL")));
+    assertThat(request.getMessageAction(), is("SUPPRESS"));
 
     List<AttributeType> attrs = request.getUserAttributes();
     assertThat(attrs.isEmpty(), is(false));
