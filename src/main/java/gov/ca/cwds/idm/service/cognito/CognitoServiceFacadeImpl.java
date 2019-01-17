@@ -6,8 +6,9 @@ import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.EMAIL_DELIVERY;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.buildCreateUserAttributes;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getAttributeValue;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getEmail;
-import static gov.ca.cwds.service.messages.MessageCode.ERROR_AT_INVITATION_RESENDING_ON_EMAIL_CHANGE;
+import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_SEND_EMAIL_NOTIFICATION_ON_EMAIL_CHANGE;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_CONNECT_TO_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_GET_USER_FROM_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_UPDATE_USER_IN_IDM;
@@ -73,8 +74,10 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CognitoServiceFacadeImpl.class);
 
-  public static final String FORCE_CHANGE_PASSWORD_USER_STATE  = "FORCE_CHANGE_PASSWORD";
+  public static final String FORCE_CHANGE_PAROLE_USER_STATE = "FORCE_CHANGE_PASSWORD";
   public static final String CONFIRMED_USER_STATE = "CONFIRMED";
+  public static final String RESET_REQUIRED_USER_STATE = "RESET_REQUIRED";
+  public static final String DISABLED_USER_STATE = "DISABLED";
 
   private CognitoProperties properties;
 
@@ -237,7 +240,10 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
     }
 
     if(updatedAttributes.containsKey(EMAIL)) {
-      String newEmail = updatedAttributes.get(EMAIL).getValue();
+      String newEmail = getUpdatedValue(updatedAttributes, EMAIL);
+      String oldEmail = getAttributeValue(existedCognitoUser, EMAIL);
+      LOGGER.info("email was changed from {} to {} for the user with id: {}",
+          oldEmail, newEmail, userId);
       resendInvitationEmailOnEmailChange(userId, newEmail, existedCognitoUser);
     }
 
@@ -250,15 +256,35 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
     String existedUserState = existedCognitoUser.getUserStatus();
 
     try {
-      if(CONFIRMED_USER_STATE.equalsIgnoreCase(existedUserState)){
-        identityProvider.adminResetUserPassword(createAdminResetUserPasswordRequest(newEmail));
-      } else if(FORCE_CHANGE_PASSWORD_USER_STATE.equalsIgnoreCase(existedUserState)){
-        identityProvider.adminCreateUser(createResendEmailRequest(newEmail));
+      switch (existedUserState) {
+        case CONFIRMED_USER_STATE:
+          identityProvider.adminResetUserPassword(createAdminResetUserPasswordRequest(newEmail));
+          break;
+        case FORCE_CHANGE_PAROLE_USER_STATE:
+          identityProvider.adminCreateUser(createResendEmailRequest(newEmail));
+          break;
+        case DISABLED_USER_STATE:
+          LOGGER.info("Email notification about changed email was not sent for the user with id {} "
+              + "because it's in DISABLED_USER state", userId, existedUserState);
+          break;
+        case RESET_REQUIRED_USER_STATE:
+        default:
+          LOGGER
+              .error("Email notification about changed email was not sent for the user with id {} "
+                  + "because it's in unsupported state: {}", userId, existedUserState);
       }
     } catch (Exception e) {
       String msg = messagesService
-          .getTechMessage(ERROR_AT_INVITATION_RESENDING_ON_EMAIL_CHANGE, userId);
+          .getTechMessage(UNABLE_TO_SEND_EMAIL_NOTIFICATION_ON_EMAIL_CHANGE, userId);
       LOGGER.error(msg, e);
+    }
+  }
+
+  private String getUpdatedValue (Map<UserAttribute, AttributeType> updatedAttributes, UserAttribute userAttribute) {
+    if(updatedAttributes.containsKey(userAttribute)) {
+      return updatedAttributes.get(userAttribute).getValue();
+    } else {
+      return null;
     }
   }
 
