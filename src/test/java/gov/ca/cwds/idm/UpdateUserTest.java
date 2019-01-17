@@ -13,6 +13,7 @@ import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EM
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.PHONE_NUMBER;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.createPermissionsAttribute;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.DISABLED_USER_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.INACTIVE_USER_WITH_ACTIVE_RACFID_IN_CMS;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.INACTIVE_USER_WITH_NO_ACTIVE_RACFID_IN_CMS;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.INACTIVE_USER_WITH_NO_RACFID;
@@ -105,13 +106,7 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
 
     setDoraSuccess();
 
-    mockMvc
-        .perform(
-            MockMvcRequestBuilders.patch("/idm/users/" + USER_NO_RACFID_ID)
-                .contentType(JSON_CONTENT_TYPE)
-                .content(asJsonString(userUpdate)))
-        .andExpect(MockMvcResultMatchers.status().isNoContent())
-        .andReturn();
+    sendUpdateRequestExpectingSuccess(USER_NO_RACFID_ID, userUpdate);
 
     verify(cognito, times(1)).adminUpdateUserAttributes(updateAttributesRequest);
     verify(cognito, times(1)).adminResetUserPassword(resetPasswordRequest);
@@ -126,45 +121,6 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     verify(auditLogService, times(1)).createAuditLogRecord(any(
         UserRoleChangedEvent.class));
   }
-
-  @Test
-  @WithMockCustomUser(roles = {STATE_ADMIN})
-  public void testUpdateEmail_ForceChangePasswordState() throws Exception {
-
-    final String NEW_EMAIL = "newmail@mail.com";
-
-    UserUpdate userUpdate = new UserUpdate();
-    userUpdate.setEmail(NEW_EMAIL);
-
-    AdminUpdateUserAttributesRequest updateAttributesRequest =
-        setUpdateUserAttributesRequestAndResult(
-            NEW_USER_SUCCESS_ID,
-            attr(EMAIL, NEW_EMAIL),
-            attr(EMAIL_VERIFIED, "True")
-        );
-
-    AdminCreateUserRequest resendEmailRequest = setResendEmailRequestAndResponse(NEW_EMAIL);
-
-    setDoraSuccess();
-
-    mockMvc
-        .perform(
-            MockMvcRequestBuilders.patch("/idm/users/" + NEW_USER_SUCCESS_ID)
-                .contentType(JSON_CONTENT_TYPE)
-                .content(asJsonString(userUpdate)))
-        .andExpect(MockMvcResultMatchers.status().isNoContent())
-        .andReturn();
-
-    verify(cognito, times(1)).adminUpdateUserAttributes(updateAttributesRequest);
-    verify(cognito, times(1)).adminCreateUser(resendEmailRequest);
-    verify(spySearchService, times(1)).updateUser(any(User.class));
-
-    InOrder inOrder = inOrder(cognito);
-    inOrder.verify(cognito).adminUpdateUserAttributes(updateAttributesRequest);
-    inOrder.verify(cognito).adminCreateUser(resendEmailRequest);
-    verifyDoraCalls(1);
-  }
-
 
   @Test
   @WithMockCustomUser
@@ -215,13 +171,8 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     setDoraSuccess();
     setDisableUserRequestAndResult(USER_NO_RACFID_ID);
 
-    mockMvc
-        .perform(
-            MockMvcRequestBuilders.patch("/idm/users/" + USER_NO_RACFID_ID)
-                .contentType(JSON_CONTENT_TYPE)
-                .content(asJsonString(userUpdate)))
-        .andExpect(MockMvcResultMatchers.status().isNoContent())
-        .andReturn();
+    sendUpdateRequestExpectingSuccess(USER_NO_RACFID_ID, userUpdate);
+
     verify(auditLogService, times(0)).createAuditLogRecord(any(
         UserRoleChangedEvent.class));
  }
@@ -416,13 +367,7 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
 
     AdminEnableUserRequest enableUserRequest = setEnableUserRequestAndResult(USER_NO_RACFID_ID);
 
-    mockMvc
-        .perform(
-            MockMvcRequestBuilders.patch("/idm/users/" + USER_NO_RACFID_ID)
-                .contentType(JSON_CONTENT_TYPE)
-                .content(asJsonString(userUpdate)))
-        .andExpect(MockMvcResultMatchers.status().isNoContent())
-        .andReturn();
+    sendUpdateRequestExpectingSuccess(USER_NO_RACFID_ID, userUpdate);
 
     verify(cognito, times(0)).adminEnableUser(enableUserRequest);
     verify(spySearchService, times(0)).createUser(any(User.class));
@@ -497,13 +442,7 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
 
     AdminDisableUserRequest disableUserRequest = setDisableUserRequestAndResult(USER_NO_RACFID_ID);
 
-    mockMvc
-        .perform(
-            MockMvcRequestBuilders.patch("/idm/users/" + USER_NO_RACFID_ID)
-                .contentType(JSON_CONTENT_TYPE)
-                .content(asJsonString(userUpdate)))
-        .andExpect(MockMvcResultMatchers.status().isNoContent())
-        .andReturn();
+    sendUpdateRequestExpectingSuccess(USER_NO_RACFID_ID, userUpdate);
 
     verify(cognito, times(1)).adminUpdateUserAttributes(updateAttributesRequest);
     verify(cognito, times(0)).adminDisableUser(disableUserRequest);
@@ -606,6 +545,64 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
         "fixtures/idm/update-user/invalid-phone-number.json");
   }
 
+  @Test
+  @WithMockCustomUser(roles = {STATE_ADMIN})
+  public void testUpdateEmail_ForceChangePasswordState() throws Exception {
+
+    final String NEW_EMAIL = "newmail@mail.com";
+
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setEmail(NEW_EMAIL);
+
+    AdminUpdateUserAttributesRequest updateAttributesRequest =
+        setUpdateUserAttributesRequestAndResult(
+            NEW_USER_SUCCESS_ID,
+            attr(EMAIL, NEW_EMAIL),
+            attr(EMAIL_VERIFIED, "True")
+        );
+
+    AdminCreateUserRequest resendEmailRequest = setResendEmailRequestAndResponse(NEW_EMAIL);
+
+    setDoraSuccess();
+
+    sendUpdateRequestExpectingSuccess(NEW_USER_SUCCESS_ID, userUpdate);
+
+    verify(cognito, times(1)).adminUpdateUserAttributes(updateAttributesRequest);
+    verify(cognito, times(1)).adminCreateUser(resendEmailRequest);
+    verify(spySearchService, times(1)).updateUser(any(User.class));
+
+    InOrder inOrder = inOrder(cognito);
+    inOrder.verify(cognito).adminUpdateUserAttributes(updateAttributesRequest);
+    inOrder.verify(cognito).adminCreateUser(resendEmailRequest);
+    verifyDoraCalls(1);
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {STATE_ADMIN})
+  public void testUpdateEmail_DisabledState() throws Exception {
+
+    final String NEW_EMAIL = "newmail@mail.com";
+
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setEmail(NEW_EMAIL);
+
+    AdminUpdateUserAttributesRequest updateAttributesRequest =
+        setUpdateUserAttributesRequestAndResult(
+            DISABLED_USER_ID,
+            attr(EMAIL, NEW_EMAIL),
+            attr(EMAIL_VERIFIED, "True")
+        );
+
+    setDoraSuccess();
+
+    sendUpdateRequestExpectingSuccess(DISABLED_USER_ID, userUpdate);
+
+    verify(cognito, times(1)).adminUpdateUserAttributes(updateAttributesRequest);
+    verify(spySearchService, times(1)).updateUser(any(User.class));
+
+    verifyDoraCalls(1);
+  }
+
   private void assertCanUpdatePermissions(String userId, Set<String> permissions) throws Exception{
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setPermissions(permissions);
@@ -620,8 +617,11 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
 
   private void assertSuccessfulUpdate(String userId, UserUpdate userUpdate) throws Exception {
     setDoraSuccess();
+    sendUpdateRequestExpectingSuccess(userId, userUpdate);
+  }
 
-    mockMvc
+  private MvcResult sendUpdateRequestExpectingSuccess(String userId, UserUpdate userUpdate) throws Exception {
+    return mockMvc
         .perform(
             MockMvcRequestBuilders.patch("/idm/users/" + userId)
                 .contentType(JSON_CONTENT_TYPE)
@@ -665,13 +665,7 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
 
     AdminEnableUserRequest enableUserRequest = setEnableUserRequestAndResult(userId);
 
-    mockMvc
-        .perform(
-            MockMvcRequestBuilders.patch("/idm/users/" + userId)
-                .contentType(JSON_CONTENT_TYPE)
-                .content(asJsonString(userUpdate)))
-        .andExpect(MockMvcResultMatchers.status().isNoContent())
-        .andReturn();
+    sendUpdateRequestExpectingSuccess(userId, userUpdate);
 
     verify(cognito, times(0)).adminUpdateUserAttributes(updateAttributesRequest);
     verify(cognito, times(0)).adminEnableUser(enableUserRequest);

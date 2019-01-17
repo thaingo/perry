@@ -70,6 +70,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
   public static final String STATE_ADMIN_ID = "2d9369b4-5855-4a2c-95f7-3617fab1496a";
   public static final String COUNTY_ADMIN_ID = "c3702f4c113f1d2415447c8bfe8321d8df2d5151";
   public static final String SUPER_ADMIN_ID = "a3427f8e-b080-4f71-9514-840c1fcb505b";
+  public static final String DISABLED_USER_ID = "7edc969a-7276-4dc1-9b90-fb43a2fe1e20";
 
   public static final String USERPOOL = "userpool";
 
@@ -352,6 +353,23 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
         WithMockCustomUser.COUNTY,
         null,
         "Super-admin",
+        null,
+        null,
+        null,
+        null);
+
+    testUser(
+        DISABLED_USER_ID,
+        Boolean.TRUE,
+        "DISABLED",
+        date(2018, 5, 4),
+        date(2018, 5, 30),
+        "dis.abled@gmail.com",
+        "Dis",
+        "Abled",
+        WithMockCustomUser.COUNTY,
+        "RFA-rollout",
+        "CWS-worker",
         null,
         null,
         null,
