@@ -1,6 +1,7 @@
 package gov.ca.cwds.idm.event;
 
 import static gov.ca.cwds.idm.event.UserChangeLogEvent.CAP_EVENT_SOURCE;
+import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.ROLES;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
@@ -10,9 +11,14 @@ import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserChangeLogRecord;
 import gov.ca.cwds.idm.service.authorization.UserRolesService;
+import gov.ca.cwds.idm.service.cognito.attribute.diff.CollectionUserAttributeDiff;
+import gov.ca.cwds.idm.service.cognito.attribute.diff.UserAttributeDiff;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.Set;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -63,15 +69,24 @@ public class UserChangeLogEventTest {
     UserCreatedEvent userCreatedEvent = new UserCreatedEvent(user);
     assertEquals(UserCreatedEvent.EVENT_TYPE_USER_CREATED, userCreatedEvent.getEventType());
     assertEquals(String.join(", ", ROLE_1, ROLE_2), userCreatedEvent.getEvent().getNewValue());
+    assertEquals(String.join(", ", ROLE_1, ROLE_2), userCreatedEvent.getEvent().getUserRoles());
   }
 
   @Test
   public void testUserRoleChangedEvent() {
     User user = mockUser();
+    UserAttributeDiff<Set<String>> diff = new CollectionUserAttributeDiff(null,
+        new LinkedHashSet<>(user.getRoles()),
+        new LinkedHashSet<>(Arrays.asList("New Role 1", "New Role 2")));
     UserRoleChangedEvent userRoleChangedEvent = new UserRoleChangedEvent(user,
-        Arrays.asList("New Role 1", "New Role 2"));
-    assertEquals(UserRoleChangedEvent.EVENT_TYPE_USER_ROLE_CHANGED, userRoleChangedEvent.getEventType());
+        Collections.singletonMap(ROLES, diff));
+    assertEquals(UserRoleChangedEvent.EVENT_TYPE_USER_ROLE_CHANGED,
+        userRoleChangedEvent.getEventType());
+    assertEquals(StringUtils.join(new String[]{ROLE_1, ROLE_2}, ", "),
+        userRoleChangedEvent.getEvent().getOldValue());
     assertEquals("New Role 1, New Role 2", userRoleChangedEvent.getEvent().getNewValue());
+    assertEquals(String.join(", ", "New Role 1", "New Role 2"),
+        userRoleChangedEvent.getEvent().getUserRoles());
   }
 
   private User mockUser() {

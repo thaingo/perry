@@ -22,11 +22,8 @@ import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.cognito.attribute.AttributesBuilder;
 import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
-import gov.ca.cwds.util.Utils;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
@@ -36,7 +33,7 @@ public class CognitoUtils {
 
   public static final String EMAIL_DELIVERY = "EMAIL";
   private static final String COGNITO_LIST_DELIMITER = ":";
-  private static final String TRUE_VALUE = "True";
+  public static final String TRUE_VALUE = "True";
 
   private CognitoUtils() {
   }
@@ -92,17 +89,6 @@ public class CognitoUtils {
     return toSet(attrStrValue.split(COGNITO_LIST_DELIMITER));
   }
 
-  public static AttributeType attribute(String name, String value) {
-    AttributeType permissionsAttr = new AttributeType();
-    permissionsAttr.setName(name);
-    permissionsAttr.setValue(value);
-    return permissionsAttr;
-  }
-
-  public static AttributeType attribute(UserAttribute userAttribute, String value) {
-    return attribute(userAttribute.getName(), value);
-  }
-
   public static String getCustomDelimitedListAttributeValue(Set<String> setOfValues) {
     if (!CollectionUtils.isEmpty(setOfValues)) {
       return String.join(COGNITO_LIST_DELIMITER, setOfValues);
@@ -121,7 +107,8 @@ public class CognitoUtils {
 
   public static AttributeType createDelimitedAttribute(UserAttribute userAttribute,
       Set<String> values) {
-    return attribute(userAttribute.getName(), getCustomDelimitedListAttributeValue(values));
+    return new AttributeType().withName(userAttribute.getName()).withValue(
+        getCustomDelimitedListAttributeValue(values));
   }
 
   public static List<AttributeType> buildCreateUserAttributes(User user) {
@@ -144,17 +131,6 @@ public class CognitoUtils {
             .addAttribute(PHONE_NUMBER, toCognitoFormat(user.getPhoneNumber()))
             .addAttribute(PHONE_EXTENSION, user.getPhoneExtensionNumber());
     return attributesBuilder.build();
-  }
-
-  public static Map<UserAttribute, AttributeType> buildEmailAttributes(String newEmail) {
-    Map<UserAttribute, AttributeType> emailAttributes = new LinkedHashMap<>();
-
-    if (newEmail != null) {
-      newEmail = Utils.toLowerCase(newEmail);
-      emailAttributes.put(EMAIL, attribute(EMAIL, newEmail));
-      emailAttributes.put(EMAIL_VERIFIED, attribute(EMAIL_VERIFIED, TRUE_VALUE));
-    }
-    return emailAttributes;
   }
 
   public static String getRACFId(UserType user) {

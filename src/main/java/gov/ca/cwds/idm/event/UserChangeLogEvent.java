@@ -28,10 +28,10 @@ abstract class UserChangeLogEvent extends AuditEvent<UserChangeLogRecord> {
     String adminRole = UserRolesService.getStrongestAdminRole(getCurrentUser());
     userChangeLogRecord.setAdminRole(adminRole);
     setEvent(userChangeLogRecord);
-    getEvent().setCountyName(user.getCountyName());
-    getEvent().setOfficeId(user.getOfficeId());
-    getEvent().setUserId(user.getId());
-    getEvent().setUserName(user.getFirstName() + " " + user.getLastName());
+    setCountyName(user.getCountyName());
+    setOfficeId(user.getOfficeId());
+    setUserId(user.getId());
+    setUserName(user.getFirstName() + " " + user.getLastName());
   }
 
   protected void setAdminRole(String adminRole) {
