@@ -93,7 +93,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
         testUser(
             USER_NO_RACFID_ID,
             Boolean.TRUE,
-            "FORCE_CHANGE_PASSWORD",
+            "CONFIRMED",
             date(2018, 5, 4),
             date(2018, 5, 30),
             "donzano@gmail.com",

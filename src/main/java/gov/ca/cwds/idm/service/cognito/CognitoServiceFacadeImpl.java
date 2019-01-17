@@ -73,6 +73,9 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(CognitoServiceFacadeImpl.class);
 
+  public static final String FORCE_CHANGE_PASSWORD_USER_STATE  = "FORCE_CHANGE_PASSWORD";
+  public static final String CONFIRMED_USER_STATE = "CONFIRMED";
+
   private CognitoProperties properties;
 
   private AWSCognitoIdentityProvider identityProvider;
@@ -235,15 +238,23 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
 
     if(updatedAttributes.containsKey(EMAIL)) {
       String newEmail = updatedAttributes.get(EMAIL).getValue();
-      resendInvitationEmailOnEmailChange(userId, newEmail);
+      resendInvitationEmailOnEmailChange(userId, newEmail, existedCognitoUser);
     }
 
     return true;
   }
 
-  private void resendInvitationEmailOnEmailChange(String userId, String newEmail){
+  private void resendInvitationEmailOnEmailChange(String userId, String newEmail,
+      UserType existedCognitoUser){
+
+    String existedUserState = existedCognitoUser.getUserStatus();
+
     try {
-      identityProvider.adminResetUserPassword(createAdminResetUserPasswordRequest(newEmail));
+      if(CONFIRMED_USER_STATE.equalsIgnoreCase(existedUserState)){
+        identityProvider.adminResetUserPassword(createAdminResetUserPasswordRequest(newEmail));
+      } else if(FORCE_CHANGE_PASSWORD_USER_STATE.equalsIgnoreCase(existedUserState)){
+        identityProvider.adminCreateUser(createResendEmailRequest(newEmail));
+      }
     } catch (Exception e) {
       String msg = messagesService
           .getTechMessage(ERROR_AT_INVITATION_RESENDING_ON_EMAIL_CHANGE, userId);

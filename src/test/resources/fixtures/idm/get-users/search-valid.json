@@ -10,7 +10,7 @@
       "user_last_modified_date": "2018-05-30",
       "last_login_date_time": "2018-09-17 05:01:12",
       "enabled": true,
-      "status": "FORCE_CHANGE_PASSWORD",
+      "status": "CONFIRMED",
       "permissions": [
         "Snapshot-rollout",
         "RFA-rollout"
