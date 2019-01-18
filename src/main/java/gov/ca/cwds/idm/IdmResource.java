@@ -49,8 +49,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 @SuppressWarnings({"squid:S1166"})
 public class IdmResource {
 
-
-
   @Autowired
   private IdmService idmService;
 
