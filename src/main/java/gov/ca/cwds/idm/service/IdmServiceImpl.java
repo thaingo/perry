@@ -43,6 +43,7 @@ import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.UserVerificationResult;
 import gov.ca.cwds.idm.dto.UsersPage;
 import gov.ca.cwds.idm.dto.UsersSearchCriteria;
+import gov.ca.cwds.idm.event.EmailChangedEvent;
 import gov.ca.cwds.idm.event.PermissionsChangedEvent;
 import gov.ca.cwds.idm.event.UserCreatedEvent;
 import gov.ca.cwds.idm.event.UserRoleChangedEvent;
@@ -346,6 +347,9 @@ public class IdmServiceImpl implements IdmService {
     }
     if (updatedAttributes.containsKey(PERMISSIONS)) {
       auditLogService.createAuditLogRecord(new PermissionsChangedEvent(user, updatedAttributes));
+    }
+    if (updatedAttributes.containsKey(StandardUserAttribute.EMAIL)) {
+      auditLogService.createAuditLogRecord(new EmailChangedEvent(user, updatedAttributes));
     }
   }
 
