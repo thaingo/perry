@@ -18,7 +18,7 @@ public class EmailChangedEvent extends UserAttributeChangedEvent {
 
   private static final long serialVersionUID = 5740708683905011516L;
 
-  public static final String EVENT_TYPE_EMAIL_CHANGED = "User's Email Address Changed";
+  public static final String EVENT_TYPE_EMAIL_CHANGED = "User Email Address Changed";
 
   public EmailChangedEvent(User user, Map<UserAttribute, UserAttributeDiff> diffMap) {
     super(user, diffMap);
