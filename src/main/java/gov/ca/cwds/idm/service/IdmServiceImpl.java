@@ -10,6 +10,8 @@ import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EM
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getRACFId;
 import static gov.ca.cwds.service.messages.MessageCode.DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS;
+import static gov.ca.cwds.service.messages.MessageCode.ERROR_DELETING_COGNITO_USER_AT_FAILED_USER_CREATE;
+import static gov.ca.cwds.service.messages.MessageCode.ERROR_SAVING_TO_DATABASE_AT_USER_CREATE;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_UPDATE_USER_ENABLED_STATUS;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_CREATE_IDM_USER_IN_ES;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_PURGE_PROCESSED_USER_LOGS;
@@ -142,7 +144,7 @@ public class IdmServiceImpl implements IdmService {
   public void deleteUser(String id) {
     User user = getUser(id);
     authorizeService.checkCanViewUser(user);
-    cognitoServiceFacade.deleteCognitoUserById(id);
+    cognitoServiceFacade.deleteCognitoUserByIdWithCapExceptions(id);
   }
 
   private User getUser(String id) {
@@ -200,10 +202,40 @@ public class IdmServiceImpl implements IdmService {
 
     UserType userType = cognitoServiceFacade.createUser(user);
     String userId = userType.getUsername();
+    LOGGER.info("user was successfully created in Cognito with id:{}", userId);
     user.setId(userId);
-    eventPublisher.publishEvent(new UserCreatedEvent(user));
-    PutInSearchExecution doraExecution = createUserInSearch(userType);
-    handleCreatePartialSuccess(userId, doraExecution);
+
+    boolean savedToDatabase = false;
+
+    try {
+      //add saving user in DB logic here. If it throws exception Cognito user has to be deleted
+      if(user.getFirstName().contains("error")) {
+        throw new RuntimeException("first name has error");
+      }
+      savedToDatabase = true;
+      LOGGER.info("user id: {} was successfully saved to database", userId);
+    } catch (Exception dbException) {
+      LOGGER.error("error at saving to the database", dbException);
+
+      try {
+        cognitoServiceFacade.deleteCognitoUserById(userId);
+        if(user.getLastName().contains("error")) {
+          throw new RuntimeException("last name has error");
+        }
+        LOGGER.info("user with id:{} was successfully deleted from Cognito", userId);
+      } catch (Exception cognitoDeleteException) {
+        LOGGER.error("error at deleting User from Cognito", cognitoDeleteException);
+        throw exceptionFactory.createPartialSuccessException(userId, CREATE,
+            ERROR_DELETING_COGNITO_USER_AT_FAILED_USER_CREATE, dbException, cognitoDeleteException);
+      }
+      throw exceptionFactory.createIdmException(ERROR_SAVING_TO_DATABASE_AT_USER_CREATE, dbException);
+    }
+
+    if(savedToDatabase) {
+      eventPublisher.publishEvent(new UserCreatedEvent(user));
+      PutInSearchExecution doraExecution = createUserInSearch(userType);
+      handleCreatePartialSuccess(userId, doraExecution);
+    }
     return userId;
   }
 

@@ -190,6 +190,12 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
   @Override
   public void deleteCognitoUserById(String id) {
     AdminDeleteUserRequest request = createAdminDeleteUserRequest(id);
+    identityProvider.adminDeleteUser(request);
+  }
+
+  @Override
+  public void deleteCognitoUserByIdWithCapExceptions(String id) {
+    AdminDeleteUserRequest request = createAdminDeleteUserRequest(id);
     executeUserOperationInCognito(identityProvider::adminDeleteUser, request, id, DELETE);
   }
 

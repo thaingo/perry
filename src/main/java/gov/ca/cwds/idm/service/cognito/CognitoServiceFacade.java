@@ -28,6 +28,8 @@ public interface CognitoServiceFacade {
 
   UserType getCognitoUserById(String id);
 
+  void deleteCognitoUserByIdWithCapExceptions(String id);
+
   void deleteCognitoUserById(String id);
 
   AdminGetUserRequest createAdminGetUserRequest(String id);
