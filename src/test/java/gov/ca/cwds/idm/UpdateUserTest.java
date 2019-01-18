@@ -54,6 +54,7 @@ import gov.ca.cwds.config.LoggingUserIdFilter;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.event.AuditEvent;
+import gov.ca.cwds.idm.event.EmailChangedEvent;
 import gov.ca.cwds.idm.event.PermissionsChangedEvent;
 import gov.ca.cwds.idm.event.UserRoleChangedEvent;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
@@ -104,11 +105,13 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     InOrder inOrder = inOrder(cognito);
     inOrder.verify(cognito).adminDisableUser(disableUserRequest);
     verifyDoraCalls(1);
-    verify(auditLogService, times(2)).createAuditLogRecord(any(AuditEvent.class));
+    verify(auditLogService, times(3)).createAuditLogRecord(any(AuditEvent.class));
     verify(auditLogService, times(1)).createAuditLogRecord(any(
         UserRoleChangedEvent.class));
     verify(auditLogService, times(1)).createAuditLogRecord(any(
         PermissionsChangedEvent.class));
+    verify(auditLogService, times(1)).createAuditLogRecord(any(
+        EmailChangedEvent.class));
   }
 
   @Test
@@ -167,9 +170,11 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
                 .content(asJsonString(userUpdate)))
         .andExpect(MockMvcResultMatchers.status().isNoContent())
         .andReturn();
-    verify(auditLogService, times(0)).createAuditLogRecord(any(
+    verify(auditLogService, never()).createAuditLogRecord(any(
         UserRoleChangedEvent.class));
- }
+    verify(auditLogService, never()).createAuditLogRecord(any(
+        EmailChangedEvent.class));
+  }
 
   @Test
   @WithMockCustomUser

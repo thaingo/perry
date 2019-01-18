@@ -57,16 +57,16 @@ public class UpdatedAttributesBuilder {
   private void addStringAttribute(UserAttribute userAttribute, String newAttrValue) {
     UserAttributeDiffBuilder<String> diffBuilder =
         new StringAttributeDiffBuilder(existedCognitoUser, userAttribute, newAttrValue);
-    updateAttributes(userAttribute, diffBuilder);
+    addAttributeDiff(userAttribute, diffBuilder);
   }
 
   private void addCollectionAttribute(UserAttribute userAttribute, Set<String> newValues) {
     UserAttributeDiffBuilder<Set<String>> diffBuilder =
         new RoleAttributeDiffBuilder(existedCognitoUser, userAttribute, newValues);
-    updateAttributes(userAttribute, diffBuilder);
+    addAttributeDiff(userAttribute, diffBuilder);
   }
 
-  private <T> void updateAttributes(UserAttribute userAttribute,
+  private <T> void addAttributeDiff(UserAttribute userAttribute,
       UserAttributeDiffBuilder<T> diffBuilder) {
     if (diffBuilder.doesDiffExist()) {
       updatedAttributes.put(userAttribute, diffBuilder.buildUserAttributeDiff());

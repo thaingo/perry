@@ -31,7 +31,6 @@ import com.amazonaws.services.cognitoidp.model.AdminEnableUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserResult;
 import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesRequest;
-import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.DeliveryMediumType;
 import com.amazonaws.services.cognitoidp.model.DescribeUserPoolRequest;
 import com.amazonaws.services.cognitoidp.model.InvalidParameterException;
@@ -52,6 +51,7 @@ import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.service.messages.MessageCode;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -198,14 +198,14 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
    * {@inheritDoc}
    */
   @Override
-  public boolean updateUserAttributes(
+  public Map<UserAttribute, UserAttributeDiff> updateUserAttributes(
       String userId, UserType existedCognitoUser, UserUpdate updateUserDto) {
 
     Map<UserAttribute, UserAttributeDiff> updatedAttributes =
         new UpdatedAttributesBuilder(existedCognitoUser, updateUserDto).getUpdatedAttributes();
 
     if (updatedAttributes.isEmpty()) {
-      return false;
+      return Collections.emptyMap();
     }
 
     AdminUpdateUserAttributesRequest adminUpdateUserAttributesRequest =
@@ -214,8 +214,7 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
             .withUserPoolId(properties.getUserpool())
             .withUserAttributes(
                 updatedAttributes.values().stream().map(UserAttributeDiff::getAttributeType)
-                    .collect(
-                        Collectors.toList()).toArray(new AttributeType[]{}));
+                    .collect(Collectors.toList()));
 
     try {
       identityProvider.adminUpdateUserAttributes(adminUpdateUserAttributesRequest);
@@ -228,7 +227,7 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
       throw exceptionFactory.createIdmException(getErrorCode(UPDATE), e, userId);
     }
 
-    return true;
+    return updatedAttributes;
   }
 
   /**

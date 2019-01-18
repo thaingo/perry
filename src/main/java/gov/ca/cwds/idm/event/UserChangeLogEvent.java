@@ -46,15 +46,15 @@ abstract class UserChangeLogEvent extends AuditEvent<UserChangeLogRecord> {
     getEvent().setUserRoles(userRoles);
   }
 
-  protected void setUserId(String userId) {
+  protected final void setUserId(String userId) {
     getEvent().setUserId(userId);
   }
 
-  protected void setUserName(String userName) {
+  protected final void setUserName(String userName) {
     getEvent().setUserName(userName);
   }
 
-  protected void setOldValue(String oldValue) {
+  protected final void setOldValue(String oldValue) {
     getEvent().setOldValue(oldValue);
   }
 
@@ -62,11 +62,11 @@ abstract class UserChangeLogEvent extends AuditEvent<UserChangeLogRecord> {
     getEvent().setNewValue(newValue);
   }
 
-  protected void setOfficeId(String officeId) {
+  protected final void setOfficeId(String officeId) {
     getEvent().setOfficeId(officeId);
   }
 
-  protected void setCountyName(String countyName) {
+  protected final void setCountyName(String countyName) {
     getEvent().setCountyName(countyName);
   }
 

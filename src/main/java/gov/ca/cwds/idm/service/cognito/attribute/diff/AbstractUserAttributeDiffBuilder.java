@@ -21,8 +21,7 @@ import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
 
   @Override
   public boolean doesDiffExist() {
-    T existedAttrValue = getAttributeValue();
-    return newValue != null && !newValue.equals(existedAttrValue);
+    return newValue != null && !newValue.equals(getAttributeValue());
   }
 
   @Override

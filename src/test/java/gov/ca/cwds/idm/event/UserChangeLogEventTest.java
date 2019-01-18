@@ -7,6 +7,7 @@ import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.idm.event.UserChangeLogEvent.CAP_EVENT_SOURCE;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PERMISSIONS;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.ROLES;
+import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
@@ -18,6 +19,7 @@ import gov.ca.cwds.idm.dto.UserChangeLogRecord;
 import gov.ca.cwds.idm.service.authorization.UserRolesService;
 import gov.ca.cwds.idm.service.cognito.attribute.diff.CollectionUserAttributeDiff;
 import gov.ca.cwds.idm.service.cognito.attribute.diff.RolesUserAttributeDiff;
+import gov.ca.cwds.idm.service.cognito.attribute.diff.StringUserAttributeDiff;
 import gov.ca.cwds.idm.service.cognito.attribute.diff.UserAttributeDiff;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import java.util.Arrays;
@@ -50,7 +52,8 @@ public class UserChangeLogEventTest {
   private static final String ADMIN_LOGIN = "TEST_USER_NAME";
   private static final String TEST_ADMIN_ROLE = "Test-admin";
   private static final String TEST_ADMIN_NAME = "Cherno Samba";
-
+  private static final String NEW_EMAIL = "newEmail@gmail.com";
+  private static final String OLD_EMAIL = "oldEmail@gmail.com";
 
   @Before
   public void before() {
@@ -118,6 +121,21 @@ public class UserChangeLogEventTest {
         event.getEvent().getUserRoles());
   }
 
+  @Test
+  public void testEmailChangedEvent() {
+    User user = mockUser();
+    UserAttributeDiff<String> diff = new StringUserAttributeDiff(null,
+        user.getEmail(), NEW_EMAIL);
+    EmailChangedEvent event = new EmailChangedEvent(user,
+        Collections.singletonMap(EMAIL, diff));
+    assertEquals(EmailChangedEvent.EVENT_TYPE_EMAIL_CHANGED,
+        event.getEventType());
+    assertEquals(OLD_EMAIL, event.getEvent().getOldValue());
+    assertEquals(NEW_EMAIL, event.getEvent().getNewValue());
+    assertEquals(String.join(", ", CWS_WORKER, CALS_ADMIN),
+        event.getEvent().getUserRoles());
+  }
+
   private User mockUser() {
     User user = new User();
     user.setId(TEST_USER_ID);
@@ -125,6 +143,7 @@ public class UserChangeLogEventTest {
     user.setLastName(TEST_LAST_NAME);
     user.setCountyName(TEST_COUNTY);
     user.setOfficeId(TEST_OFFICE_ID);
+    user.setEmail(OLD_EMAIL);
     user.setRoles(new LinkedHashSet<>(Arrays.asList(CWS_WORKER, CALS_ADMIN)));
     user.setPermissions(new TreeSet<>(Arrays.asList(PERMISSION_1, PERMISSION_2)));
     when(CurrentAuthenticatedUserUtil.getCurrentUserName()).thenReturn(ADMIN_LOGIN);

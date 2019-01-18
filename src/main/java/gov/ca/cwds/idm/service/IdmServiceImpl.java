@@ -43,6 +43,7 @@ import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.UserVerificationResult;
 import gov.ca.cwds.idm.dto.UsersPage;
 import gov.ca.cwds.idm.dto.UsersSearchCriteria;
+import gov.ca.cwds.idm.event.EmailChangedEvent;
 import gov.ca.cwds.idm.event.PermissionsChangedEvent;
 import gov.ca.cwds.idm.event.UserCreatedEvent;
 import gov.ca.cwds.idm.event.UserRoleChangedEvent;
@@ -54,7 +55,6 @@ import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
 import gov.ca.cwds.idm.service.authorization.AuthorizationService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute;
-import gov.ca.cwds.idm.service.cognito.attribute.UpdatedAttributesBuilder;
 import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
 import gov.ca.cwds.idm.service.cognito.attribute.diff.UserAttributeDiff;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
@@ -328,24 +328,25 @@ public class IdmServiceImpl implements IdmService {
   private ExecutionStatus updateUserAttributes(
       String userId, UserUpdate updateUserDto, UserType existedCognitoUser) {
     ExecutionStatus updateAttributesStatus = WAS_NOT_EXECUTED;
-
-    if (cognitoServiceFacade.updateUserAttributes(userId, existedCognitoUser, updateUserDto)) {
+    Map<UserAttribute, UserAttributeDiff> updatedAttributesMap = cognitoServiceFacade.updateUserAttributes(userId, existedCognitoUser, updateUserDto);
+    if (!updatedAttributesMap.isEmpty()) {
       updateAttributesStatus = SUCCESS;
-      publishUpdateAttributesEvents(existedCognitoUser, updateUserDto);
+      publishUpdateAttributesEvents(existedCognitoUser, updatedAttributesMap);
     }
     return updateAttributesStatus;
   }
 
   private void publishUpdateAttributesEvents(UserType existedCognitoUser,
-      UserUpdate updateUserDto) {
-    Map<UserAttribute, UserAttributeDiff> updatedAttributes =
-        new UpdatedAttributesBuilder(existedCognitoUser, updateUserDto).getUpdatedAttributes();
+      Map<UserAttribute, UserAttributeDiff> updatedAttributesMap) {
     User user = mappingService.toUser(existedCognitoUser);
-    if (updatedAttributes.containsKey(ROLES)) {
-      auditLogService.createAuditLogRecord(new UserRoleChangedEvent(user, updatedAttributes));
+    if (updatedAttributesMap.containsKey(ROLES)) {
+      auditLogService.createAuditLogRecord(new UserRoleChangedEvent(user, updatedAttributesMap));
     }
-    if (updatedAttributes.containsKey(PERMISSIONS)) {
-      auditLogService.createAuditLogRecord(new PermissionsChangedEvent(user, updatedAttributes));
+    if (updatedAttributesMap.containsKey(PERMISSIONS)) {
+      auditLogService.createAuditLogRecord(new PermissionsChangedEvent(user, updatedAttributesMap));
+    }
+    if (updatedAttributesMap.containsKey(StandardUserAttribute.EMAIL)) {
+      auditLogService.createAuditLogRecord(new EmailChangedEvent(user, updatedAttributesMap));
     }
   }
 
