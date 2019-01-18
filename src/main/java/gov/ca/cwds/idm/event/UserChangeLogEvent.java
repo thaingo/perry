@@ -4,6 +4,7 @@ import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserFullName;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserName;
 
+import gov.ca.cwds.config.api.idm.Roles;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserChangeLogRecord;
 import gov.ca.cwds.idm.service.authorization.UserRolesService;
@@ -25,7 +26,8 @@ abstract class UserChangeLogEvent extends AuditEvent<UserChangeLogRecord> {
     setUserLogin(getCurrentUserName());
     UserChangeLogRecord userChangeLogRecord = new UserChangeLogRecord();
     userChangeLogRecord.setAdminName(getCurrentUserFullName());
-    String adminRole = UserRolesService.getStrongestAdminRole(getCurrentUser());
+    String adminRole = Roles
+        .getRoleNameById(UserRolesService.getStrongestAdminRole(getCurrentUser()));
     userChangeLogRecord.setAdminRole(adminRole);
     setEvent(userChangeLogRecord);
     setCountyName(user.getCountyName());
