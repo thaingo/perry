@@ -6,9 +6,12 @@ import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserEnableStatusRequest;
 import gov.ca.cwds.idm.dto.UserUpdate;
+import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
+import gov.ca.cwds.idm.service.cognito.attribute.diff.UserAttributeDiff;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import java.util.List;
+import java.util.Map;
 import org.springframework.context.annotation.Profile;
 
 /**
@@ -32,9 +35,9 @@ public interface CognitoServiceFacade {
   void healthCheck();
 
   /**
-   @return true if Cognito operations were really executed, false otherwise
+   @return map of changed user attributes.
    */
-  boolean updateUserAttributes(
+  Map<UserAttribute, UserAttributeDiff> updateUserAttributes(
       String id, UserType existedCognitoUser, UserUpdate updateUserDto);
 
   /**
