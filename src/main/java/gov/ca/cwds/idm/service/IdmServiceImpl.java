@@ -215,16 +215,16 @@ public class IdmServiceImpl implements IdmService {
       savedToDatabase = true;
       LOGGER.info("user id: {} was successfully saved to database", userId);
     } catch (Exception dbException) {
-      LOGGER.error("error at saving to the database, user id: {}", dbException, userId);
+      LOGGER.error("error at saving to the database, user id: " + userId, dbException);
 
       try {
-        cognitoServiceFacade.deleteCognitoUserById(userId);
         if(user.getLastName().contains("error")) {
           throw new RuntimeException("last name has error");
         }
+        cognitoServiceFacade.deleteCognitoUserById(userId);
         LOGGER.info("user with id:{} was successfully deleted from Cognito", userId);
       } catch (Exception cognitoDeleteException) {
-        LOGGER.error("error at deleting User from Cognito, id:{}", cognitoDeleteException, userId);
+        LOGGER.error("error at deleting User from Cognito, id: " + userId, cognitoDeleteException);
         throw exceptionFactory.createPartialSuccessException(userId, CREATE,
             ERROR_DELETING_COGNITO_USER_AT_FAILED_USER_CREATE, dbException, cognitoDeleteException);
       }
