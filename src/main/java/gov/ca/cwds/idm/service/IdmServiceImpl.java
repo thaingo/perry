@@ -6,6 +6,8 @@ import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
 import static gov.ca.cwds.idm.service.ExecutionStatus.FAIL;
 import static gov.ca.cwds.idm.service.ExecutionStatus.SUCCESS;
 import static gov.ca.cwds.idm.service.ExecutionStatus.WAS_NOT_EXECUTED;
+import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PERMISSIONS;
+import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.ROLES;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getRACFId;
@@ -29,7 +31,6 @@ import static gov.ca.cwds.util.Utils.toLowerCase;
 import static gov.ca.cwds.util.Utils.toUpperCase;
 import static java.util.stream.Collectors.toSet;
 
-import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.data.persistence.auth.CwsOffice;
 import gov.ca.cwds.data.persistence.auth.StaffPerson;
@@ -42,6 +43,7 @@ import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.UserVerificationResult;
 import gov.ca.cwds.idm.dto.UsersPage;
 import gov.ca.cwds.idm.dto.UsersSearchCriteria;
+import gov.ca.cwds.idm.event.PermissionsChangedEvent;
 import gov.ca.cwds.idm.event.UserCreatedEvent;
 import gov.ca.cwds.idm.event.UserRoleChangedEvent;
 import gov.ca.cwds.idm.exception.AdminAuthorizationException;
@@ -51,10 +53,10 @@ import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
 import gov.ca.cwds.idm.service.authorization.AuthorizationService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
-import gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute;
 import gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute;
 import gov.ca.cwds.idm.service.cognito.attribute.UpdatedAttributesBuilder;
 import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
+import gov.ca.cwds.idm.service.cognito.attribute.diff.UserAttributeDiff;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil;
@@ -334,13 +336,16 @@ public class IdmServiceImpl implements IdmService {
     return updateAttributesStatus;
   }
 
-  private void publishUpdateAttributesEvents(UserType existedCognitoUser, UserUpdate updateUserDto) {
-    Map<UserAttribute, AttributeType> updatedAttributes =
+  private void publishUpdateAttributesEvents(UserType existedCognitoUser,
+      UserUpdate updateUserDto) {
+    Map<UserAttribute, UserAttributeDiff> updatedAttributes =
         new UpdatedAttributesBuilder(existedCognitoUser, updateUserDto).getUpdatedAttributes();
-    if (updatedAttributes.containsKey(CustomUserAttribute.ROLES)) {
-      User user = mappingService.toUser(existedCognitoUser);
-      auditLogService.createAuditLogRecord(new UserRoleChangedEvent(user,
-          updateUserDto.getRoles()));
+    User user = mappingService.toUser(existedCognitoUser);
+    if (updatedAttributes.containsKey(ROLES)) {
+      auditLogService.createAuditLogRecord(new UserRoleChangedEvent(user, updatedAttributes));
+    }
+    if (updatedAttributes.containsKey(PERMISSIONS)) {
+      auditLogService.createAuditLogRecord(new PermissionsChangedEvent(user, updatedAttributes));
     }
   }
 

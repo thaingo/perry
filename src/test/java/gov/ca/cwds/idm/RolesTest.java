@@ -5,7 +5,9 @@ import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.SUPER_ADMIN;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertStrict;
+import static org.junit.Assert.assertEquals;
 
+import gov.ca.cwds.config.api.idm.Roles;
 import gov.ca.cwds.idm.util.WithMockCustomUser;
 import org.junit.Test;
 import org.springframework.test.web.servlet.MvcResult;
@@ -48,6 +50,11 @@ public class RolesTest extends BaseIdmIntegrationTest {
   @WithMockCustomUser(roles = {OFFICE_ADMIN})
   public void testGetRolesOfficeAdmin() throws Exception {
     assertGetRolesSuccess();
+  }
+
+  @Test
+  public void getRoleNameByIdTest() {
+    assertEquals("Office Administrator", Roles.getRoleNameById(Roles.OFFICE_ADMIN));
   }
 
   private void assertGetRolesSuccess() throws Exception {

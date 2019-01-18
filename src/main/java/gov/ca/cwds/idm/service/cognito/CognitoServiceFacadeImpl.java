@@ -46,6 +46,7 @@ import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.service.cognito.attribute.UpdatedAttributesBuilder;
 import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
+import gov.ca.cwds.idm.service.cognito.attribute.diff.UserAttributeDiff;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
@@ -54,6 +55,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import liquibase.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -199,7 +201,7 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
   public boolean updateUserAttributes(
       String userId, UserType existedCognitoUser, UserUpdate updateUserDto) {
 
-    Map<UserAttribute, AttributeType> updatedAttributes =
+    Map<UserAttribute, UserAttributeDiff> updatedAttributes =
         new UpdatedAttributesBuilder(existedCognitoUser, updateUserDto).getUpdatedAttributes();
 
     if (updatedAttributes.isEmpty()) {
@@ -210,7 +212,10 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
         new AdminUpdateUserAttributesRequest()
             .withUsername(userId)
             .withUserPoolId(properties.getUserpool())
-            .withUserAttributes(updatedAttributes.values());
+            .withUserAttributes(
+                updatedAttributes.values().stream().map(UserAttributeDiff::getAttributeType)
+                    .collect(
+                        Collectors.toList()).toArray(new AttributeType[]{}));
 
     try {
       identityProvider.adminUpdateUserAttributes(adminUpdateUserAttributesRequest);
