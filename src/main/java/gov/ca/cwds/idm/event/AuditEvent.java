@@ -35,7 +35,7 @@ public abstract class AuditEvent<T extends Serializable> implements Serializable
     return event;
   }
 
-  public void setEvent(T event) {
+  public final void setEvent(T event) {
     this.event = event;
   }
 
