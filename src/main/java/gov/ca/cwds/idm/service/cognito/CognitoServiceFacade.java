@@ -1,6 +1,7 @@
 package gov.ca.cwds.idm.service.cognito;
 
 import com.amazonaws.services.cognitoidp.model.AdminCreateUserRequest;
+import com.amazonaws.services.cognitoidp.model.AdminDeleteUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserRequest;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
@@ -27,7 +28,11 @@ public interface CognitoServiceFacade {
 
   UserType getCognitoUserById(String id);
 
+  void deleteCognitoUserById(String id);
+
   AdminGetUserRequest createAdminGetUserRequest(String id);
+
+  AdminDeleteUserRequest createAdminDeleteUserRequest(String id);
 
   void healthCheck();
 

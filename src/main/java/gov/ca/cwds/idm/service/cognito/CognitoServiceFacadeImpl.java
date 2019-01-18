@@ -1,5 +1,6 @@
 package gov.ca.cwds.idm.service.cognito;
 
+import static gov.ca.cwds.idm.persistence.ns.OperationType.DELETE;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.GET;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.RESEND_INVITATION_EMAIL;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
@@ -26,6 +27,8 @@ import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProviderClientBuilder;
 import com.amazonaws.services.cognitoidp.model.AdminCreateUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminCreateUserResult;
+import com.amazonaws.services.cognitoidp.model.AdminDeleteUserRequest;
+import com.amazonaws.services.cognitoidp.model.AdminDeleteUserResult;
 import com.amazonaws.services.cognitoidp.model.AdminDisableUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminEnableUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserRequest;
@@ -184,12 +187,23 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
         .withUserStatus(agur.getUserStatus());
   }
 
+  @Override
+  public void deleteCognitoUserById(String id) {
+    AdminDeleteUserRequest request = createAdminDeleteUserRequest(id);
+    executeUserOperationInCognito(identityProvider::adminDeleteUser, request, id, DELETE);
+  }
+
   /**
    * {@inheritDoc}
    */
   @Override
   public AdminGetUserRequest createAdminGetUserRequest(String id) {
     return new AdminGetUserRequest().withUsername(id).withUserPoolId(properties.getUserpool());
+  }
+
+  @Override
+  public AdminDeleteUserRequest createAdminDeleteUserRequest(String id) {
+    return new AdminDeleteUserRequest().withUsername(id).withUserPoolId(properties.getUserpool());
   }
 
   /**

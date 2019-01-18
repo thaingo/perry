@@ -147,6 +147,25 @@ public class IdmResource {
     return ResponseEntity.ok().body(response);
   }
 
+  @RequestMapping(method = RequestMethod.DELETE, value = "/users/{id}")
+  @ApiOperation(value = "Delete User by ID")
+  @ApiResponses(
+      value = {
+          @ApiResponse(code = 401, message = "Not Authorized"),
+          @ApiResponse(code = 404, message = "Not found")
+      }
+  )
+  @PreAuthorize("@userRoleService.isAdmin(principal)")
+  public ResponseEntity deleteUser(
+      @ApiParam(required = true, value = "The unique user ID", example = "userId1")
+      @PathVariable
+      @NotNull
+          String id) {
+
+    idmService.deleteUser(id);
+    return ResponseEntity.ok().build();
+  }
+
   @RequestMapping(
       method = RequestMethod.PATCH,
       value = "/users/{id}",

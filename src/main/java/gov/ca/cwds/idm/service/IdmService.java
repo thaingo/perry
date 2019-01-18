@@ -14,6 +14,8 @@ public interface IdmService {
 
   User findUser(String id);
 
+  void deleteUser(String id);
+
   void updateUser(String id, UserUpdate updateUserDto);
 
   UserVerificationResult verifyIfUserCanBeCreated(String racfId, String email);

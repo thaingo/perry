@@ -4,5 +4,6 @@ public enum OperationType {
   CREATE,
   UPDATE,
   GET,
-  RESEND_INVITATION_EMAIL
+  RESEND_INVITATION_EMAIL,
+  DELETE
 }

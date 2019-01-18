@@ -138,6 +138,13 @@ public class IdmServiceImpl implements IdmService {
     return user;
   }
 
+  @Override
+  public void deleteUser(String id) {
+    User user = getUser(id);
+    authorizeService.checkCanViewUser(user);
+    cognitoServiceFacade.deleteCognitoUserById(id);
+  }
+
   private User getUser(String id) {
     UserType cognitoUser = cognitoServiceFacade.getCognitoUserById(id);
     return mappingService.toUser(cognitoUser);
