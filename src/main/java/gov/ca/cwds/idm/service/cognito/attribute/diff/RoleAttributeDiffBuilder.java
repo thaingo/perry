@@ -1,7 +1,7 @@
 package gov.ca.cwds.idm.service.cognito.attribute.diff;
 
 import com.amazonaws.services.cognitoidp.model.UserType;
-import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
+import gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute;
 import java.util.Set;
 
 /**
@@ -9,15 +9,13 @@ import java.util.Set;
  */
 public class RoleAttributeDiffBuilder extends CollectionAttributeDiffBuilder {
 
-  public RoleAttributeDiffBuilder(UserType userType,
-      UserAttribute userAttribute,
-      Set<String> newValue) {
-    super(userType, userAttribute, newValue);
+  public RoleAttributeDiffBuilder(UserType userType, Set<String> newValue) {
+    super(CustomUserAttribute.ROLES, userType, newValue);
   }
 
   @Override
-  UserAttributeDiff<Set<String>> createUserAttributeDiff() {
-    return new RolesUserAttributeDiff();
+  public UserAttributeDiff<Set<String>> buildDiff() {
+    return new RolesUserAttributeDiff(getUserType(), getNewValue());
   }
 
 }

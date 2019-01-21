@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -67,6 +68,11 @@ public class Roles {
 
   public static String getRoleNameById(String id) {
     return roleListReversed.get(id) != null ? roleListReversed.get(id): id;
+  }
+
+  public static Set<String> replaceRoleIdByName(Set<String> roleIds) {
+    return roleIds != null ? roleIds.stream().sorted().map(Roles::getRoleNameById)
+        .collect(Collectors.toSet()) : null;
   }
 
 }

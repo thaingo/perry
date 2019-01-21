@@ -1,9 +1,7 @@
 package gov.ca.cwds.idm.service.cognito.attribute.diff;
 
-import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
-import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
 import java.util.Set;
 
 /**
@@ -11,24 +9,20 @@ import java.util.Set;
  */
 public class CollectionAttributeDiffBuilder extends AbstractUserAttributeDiffBuilder<Set<String>> {
 
-  public CollectionAttributeDiffBuilder(UserType userType,
-      UserAttribute userAttribute,
-      Set<String> newValue) {
-    super(userType, userAttribute, newValue);
+  public CollectionAttributeDiffBuilder(
+      UserAttribute userAttribute, UserType userType, Set<String> newValue) {
+    super(userAttribute, userType, newValue);
   }
 
   @Override
-  UserAttributeDiff<Set<String>> createUserAttributeDiff() {
-    return new CollectionUserAttributeDiff();
+  public boolean doesDiffExist() {
+    return doesDiffExist(getNewValue(),
+        CollectionUserAttributeDiff.getOldValue(getUserType(), getUserAttribute()));
   }
 
   @Override
-  Set<String> getAttributeValue() {
-    return CognitoUtils.getDelimitedAttributeValue(getUserType(), getUserAttribute());
+  public UserAttributeDiff<Set<String>> buildDiff() {
+    return new CollectionUserAttributeDiff(getUserAttribute(), getUserType(), getNewValue());
   }
 
-  @Override
-  AttributeType buildAttributeType() {
-    return CognitoUtils.createDelimitedAttribute(getUserAttribute(), getNewValue());
-  }
 }

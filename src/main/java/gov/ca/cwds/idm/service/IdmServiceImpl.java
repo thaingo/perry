@@ -55,6 +55,7 @@ import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
 import gov.ca.cwds.idm.service.authorization.AuthorizationService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute;
+import gov.ca.cwds.idm.service.cognito.attribute.UpdatedAttributesBuilder;
 import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
 import gov.ca.cwds.idm.service.cognito.attribute.diff.UserAttributeDiff;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
@@ -147,14 +148,20 @@ public class IdmServiceImpl implements IdmService {
 
   @Override
   public void updateUser(String userId, UserUpdate updateUserDto) {
-
+    UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
     UserType existedCognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
+    userUpdateRequest.setExistedCognitoUser(existedCognitoUser);
+    userUpdateRequest.setUserId(userId);
+    Map<UserAttribute, UserAttributeDiff> diffMap =
+        new UpdatedAttributesBuilder(existedCognitoUser, updateUserDto).buildUpdatedAttributesMap();
+    userUpdateRequest.setUser(mappingService.toUser(existedCognitoUser));
+    userUpdateRequest.setDiffMap(diffMap);
 
     authorizeService.checkCanUpdateUser(existedCognitoUser, updateUserDto);
     validationService.validateUserUpdate(existedCognitoUser, updateUserDto);
 
     ExecutionStatus updateAttributesStatus =
-        updateUserAttributes(userId, updateUserDto, existedCognitoUser);
+        updateUserAttributes(userUpdateRequest);
 
     OptionalExecution<UserEnableStatusRequest, Boolean> updateUserEnabledExecution =
         executeUpdateEnableStatusOptionally(userId, updateUserDto, existedCognitoUser);
@@ -250,7 +257,8 @@ public class IdmServiceImpl implements IdmService {
     return new RegistrationResubmitResponse(userId, resubmitDateTime);
   }
 
-  private void saveResendInvitationMessageRequestTimeInDb(String userId, LocalDateTime resubmitTime) {
+  private void saveResendInvitationMessageRequestTimeInDb(String userId,
+      LocalDateTime resubmitTime) {
     try {
       nsUserService.saveLastRegistrationResubmitTime(userId, resubmitTime);
     } catch (Exception e) {
@@ -294,8 +302,8 @@ public class IdmServiceImpl implements IdmService {
     }
   }
 
-  private void enrichUserByCwsData(User user, CwsUserInfo cwsUser){
-    if(cwsUser != null) {
+  private void enrichUserByCwsData(User user, CwsUserInfo cwsUser) {
+    if (cwsUser != null) {
       enrichDataFromCwsOffice(cwsUser.getCwsOffice(), user);
       enrichDataFromStaffPerson(cwsUser.getStaffPerson(), user);
     }
@@ -325,28 +333,24 @@ public class IdmServiceImpl implements IdmService {
     }
   }
 
-  private ExecutionStatus updateUserAttributes(
-      String userId, UserUpdate updateUserDto, UserType existedCognitoUser) {
+  private ExecutionStatus updateUserAttributes(UserUpdateRequest userUpdateRequest) {
     ExecutionStatus updateAttributesStatus = WAS_NOT_EXECUTED;
-    Map<UserAttribute, UserAttributeDiff> updatedAttributesMap = cognitoServiceFacade.updateUserAttributes(userId, existedCognitoUser, updateUserDto);
-    if (!updatedAttributesMap.isEmpty()) {
+    if (cognitoServiceFacade.updateUserAttributes(userUpdateRequest)) {
       updateAttributesStatus = SUCCESS;
-      publishUpdateAttributesEvents(existedCognitoUser, updatedAttributesMap);
+      publishUpdateAttributesEvents(userUpdateRequest);
     }
     return updateAttributesStatus;
   }
 
-  private void publishUpdateAttributesEvents(UserType existedCognitoUser,
-      Map<UserAttribute, UserAttributeDiff> updatedAttributesMap) {
-    User user = mappingService.toUser(existedCognitoUser);
-    if (updatedAttributesMap.containsKey(ROLES)) {
-      auditLogService.createAuditLogRecord(new UserRoleChangedEvent(user, updatedAttributesMap));
+  private void publishUpdateAttributesEvents(UserUpdateRequest userUpdateRequest) {
+    if (userUpdateRequest.isAttributeChanged(ROLES)) {
+      auditLogService.createAuditLogRecord(new UserRoleChangedEvent(userUpdateRequest));
     }
-    if (updatedAttributesMap.containsKey(PERMISSIONS)) {
-      auditLogService.createAuditLogRecord(new PermissionsChangedEvent(user, updatedAttributesMap));
+    if (userUpdateRequest.isAttributeChanged(PERMISSIONS)) {
+      auditLogService.createAuditLogRecord(new PermissionsChangedEvent(userUpdateRequest));
     }
-    if (updatedAttributesMap.containsKey(StandardUserAttribute.EMAIL)) {
-      auditLogService.createAuditLogRecord(new EmailChangedEvent(user, updatedAttributesMap));
+    if (userUpdateRequest.isAttributeChanged(StandardUserAttribute.EMAIL)) {
+      auditLogService.createAuditLogRecord(new EmailChangedEvent(userUpdateRequest));
     }
   }
 
@@ -426,7 +430,8 @@ public class IdmServiceImpl implements IdmService {
 
     } else if (doraStatus == FAIL && logDbStatus == FAIL) {
       throwPartialSuccessException(
-          userId, UPDATE, USER_UPDATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS, doraException, logDbException);
+          userId, UPDATE, USER_UPDATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS, doraException,
+          logDbException);
     }
   }
 
@@ -439,7 +444,15 @@ public class IdmServiceImpl implements IdmService {
                 userId, existedCognitoUser.getEnabled(), updateUserDto.getEnabled())) {
           @Override
           protected Boolean tryMethod(UserEnableStatusRequest userEnableStatusRequest) {
-            return cognitoServiceFacade.changeUserEnabledStatus(userEnableStatusRequest);
+            boolean isUserStatusActuallyChanged =
+                cognitoServiceFacade.changeUserEnabledStatus(userEnableStatusRequest);
+/*
+            if (isUserStatusActuallyChanged) {
+              auditLogService
+                  .createAuditLogRecord(new UserAccountStatusChangedEvent(userEnableStatusRequest));
+            }
+*/
+            return isUserStatusActuallyChanged;
           }
 
           @Override
@@ -545,7 +558,6 @@ public class IdmServiceImpl implements IdmService {
     Map<String, NsUser> usernameToNsUser =
         nsUserService.findByUsernames(userNames).stream()
             .collect(Collectors.toMap(NsUser::getUsername, e -> e));
-
     return cognitoUsers
         .stream()
         .map(userType -> mappingService.toUser(
@@ -626,4 +638,5 @@ public class IdmServiceImpl implements IdmService {
   public void setValidationService(ValidationService validationService) {
     this.validationService = validationService;
   }
+
 }

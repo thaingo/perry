@@ -14,6 +14,6 @@ public interface UserAttributeDiffBuilder<T> {
   /**
    * Builds diffs with AttributeType, old and new attribute value.
    */
-  UserAttributeDiff<T> buildUserAttributeDiff();
+  UserAttributeDiff<T> buildDiff();
 
 }

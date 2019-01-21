@@ -26,7 +26,7 @@ public class UpdatedAttributesBuilderTest {
   public void testNoChanges() {
     UpdatedAttributesBuilder builder =
         new UpdatedAttributesBuilder(existedCognitoUser(), new UserUpdate());
-    Map<UserAttribute, UserAttributeDiff> updatedAttributes =  builder.getUpdatedAttributes();
+    Map<UserAttribute, UserAttributeDiff> updatedAttributes =  builder.buildUpdatedAttributesMap();
     assertThat(updatedAttributes.size(), is(0));
   }
 
@@ -41,7 +41,7 @@ public class UpdatedAttributesBuilderTest {
 
     UpdatedAttributesBuilder builder =
         new UpdatedAttributesBuilder(existedCognitoUser(), userUpdate);
-    Map<UserAttribute, UserAttributeDiff> updatedAttributes =  builder.getUpdatedAttributes();
+    Map<UserAttribute, UserAttributeDiff> updatedAttributes =  builder.buildUpdatedAttributesMap();
     assertThat(updatedAttributes.size(), is(0));
   }
 
@@ -57,11 +57,10 @@ public class UpdatedAttributesBuilderTest {
 
     UpdatedAttributesBuilder builder =
         new UpdatedAttributesBuilder(existedCognitoUser(), userUpdate);
-    Map<UserAttribute, UserAttributeDiff> updatedAttributes =  builder.getUpdatedAttributes();
-    assertThat(updatedAttributes.size(), is(6));
+    Map<UserAttribute, UserAttributeDiff> updatedAttributes =  builder.buildUpdatedAttributesMap();
+    assertThat(updatedAttributes.size(), is(5));
 
     assertAttribute(updatedAttributes, EMAIL, "admin@oci.ca.gov");
-    assertAttribute(updatedAttributes, EMAIL_VERIFIED, "True");
     assertAttribute(updatedAttributes, PHONE_NUMBER, "+0987654321");
     assertAttribute(updatedAttributes, PHONE_EXTENSION, "99");
     assertCollectionAttribute(updatedAttributes, ROLES, "County-admin", "Office-admin");
@@ -74,7 +73,7 @@ public class UpdatedAttributesBuilderTest {
     userUpdate.setEmail(null);
     UpdatedAttributesBuilder builder =
         new UpdatedAttributesBuilder(existedCognitoUser(), userUpdate);
-    Map<UserAttribute, UserAttributeDiff> updatedAttributes =  builder.getUpdatedAttributes();
+    Map<UserAttribute, UserAttributeDiff> updatedAttributes =  builder.buildUpdatedAttributesMap();
     assertThat(updatedAttributes.size(), CoreMatchers.is(0));
   }
 
@@ -93,21 +92,20 @@ public class UpdatedAttributesBuilderTest {
     userUpdate.setEmail(newEmail);
     UpdatedAttributesBuilder builder =
         new UpdatedAttributesBuilder(existedCognitoUser(), userUpdate);
-    Map<UserAttribute, UserAttributeDiff> updatedAttributes =  builder.getUpdatedAttributes();
+    Map<UserAttribute, UserAttributeDiff> updatedAttributes =  builder.buildUpdatedAttributesMap();
     assertEmailAttributes(updatedAttributes, newEmail);
   }
 
   private void assertEmailAttributes(Map<UserAttribute, UserAttributeDiff> attrMap, String email) {
     assertThat(attrMap, CoreMatchers.is(notNullValue()));
-    assertThat(attrMap.size(), CoreMatchers.is(2));
+    assertThat(attrMap.size(), CoreMatchers.is(1));
 
     assertThat(attrMap.get(EMAIL), CoreMatchers.is(notNullValue()));
-    AttributeType emailAttr = attrMap.get(EMAIL).getAttributeType();
+    AttributeType emailAttr = (AttributeType) attrMap.get(EMAIL).createAttributeTypes().get(0);
     assertThat(emailAttr.getName(), CoreMatchers.is(EMAIL.getName()));
     assertThat(emailAttr.getValue(), CoreMatchers.is(email));
 
-    assertThat(attrMap.get(EMAIL_VERIFIED), CoreMatchers.is(notNullValue()));
-    AttributeType emailVerifiedAttr = attrMap.get(EMAIL_VERIFIED).getAttributeType();
+    AttributeType emailVerifiedAttr = (AttributeType) attrMap.get(EMAIL).createAttributeTypes().get(1);
     assertThat(emailVerifiedAttr.getName(), CoreMatchers.is(EMAIL_VERIFIED.getName()));
     assertThat(emailVerifiedAttr.getValue(), CoreMatchers.is("True"));
   }
@@ -132,7 +130,7 @@ public class UpdatedAttributesBuilderTest {
 
   private void assertAttribute(
       Map<UserAttribute, UserAttributeDiff> updatedAttributes, UserAttribute userAttribute, String value) {
-    AttributeType attr = updatedAttributes.get(userAttribute).getAttributeType();
+    AttributeType attr = (AttributeType) updatedAttributes.get(userAttribute).createAttributeTypes().get(0);
     assertThat(attr, is(notNullValue()));
     assertThat(attr.getName(), is(userAttribute.getName()));
     assertThat(attr.getValue(), is(value));
@@ -140,7 +138,7 @@ public class UpdatedAttributesBuilderTest {
 
   private void assertCollectionAttribute(
       Map<UserAttribute, UserAttributeDiff> updatedAttributes, UserAttribute userAttribute, String... elements) {
-    AttributeType attr = updatedAttributes.get(userAttribute).getAttributeType();
+    AttributeType attr = (AttributeType) updatedAttributes.get(userAttribute).createAttributeTypes().get(0);
     assertThat(attr, is(notNullValue()));
     assertThat(attr.getName(), is(userAttribute.getName()));
     String value = attr.getValue();
