@@ -150,8 +150,8 @@ public class IdmServiceImpl implements IdmService {
   @Override
   public void updateUser(String userId, UserUpdate updateUserDto) {
     UserUpdateRequest userUpdateRequest = prepareUserUpdateRequest(userId, updateUserDto);
-    authorizeService.checkCanUpdateUser(userUpdateRequest.getExistedCognitoUser(), updateUserDto);
-    validationService.validateUserUpdate(userUpdateRequest.getExistedCognitoUser(), updateUserDto);
+    authorizeService.checkCanUpdateUser(userUpdateRequest.getExistedUser(), updateUserDto);
+    validationService.validateUserUpdate(userUpdateRequest.getExistedUser(), updateUserDto);
     ExecutionStatus updateAttributesStatus =
         updateUserAttributes(userUpdateRequest);
     OptionalExecution<UserUpdateRequest, Boolean> updateUserEnabledExecution =
@@ -173,7 +173,7 @@ public class IdmServiceImpl implements IdmService {
   private UserUpdateRequest prepareUserUpdateRequest(String userId, UserUpdate updateUserDto) {
     UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
     UserType existedCognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
-    userUpdateRequest.setExistedCognitoUser(existedCognitoUser);
+    userUpdateRequest.setExistedUser(existedCognitoUser);
     userUpdateRequest.setUserId(userId);
     Map<UserAttribute, UserAttributeDiff> diffMap =
         new UpdatedAttributesBuilder(existedCognitoUser, updateUserDto).buildUpdatedAttributesMap();
