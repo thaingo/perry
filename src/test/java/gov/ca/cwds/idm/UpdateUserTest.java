@@ -56,7 +56,7 @@ import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.event.AuditEvent;
 import gov.ca.cwds.idm.event.EmailChangedEvent;
 import gov.ca.cwds.idm.event.PermissionsChangedEvent;
-import gov.ca.cwds.idm.event.UserAccountStatusChangedEvent;
+import gov.ca.cwds.idm.event.UserEnabledStatusChangedEvent;
 import gov.ca.cwds.idm.event.UserRoleChangedEvent;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
@@ -114,7 +114,7 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     verify(auditLogService, times(1)).createAuditLogRecord(any(
         EmailChangedEvent.class));
     verify(auditLogService, times(1)).createAuditLogRecord(any(
-        UserAccountStatusChangedEvent.class));
+        UserEnabledStatusChangedEvent.class));
 
   }
 
@@ -383,7 +383,7 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     verify(auditLogService, never()).createAuditLogRecord(any(
         PermissionsChangedEvent.class));
     verify(auditLogService, never()).createAuditLogRecord(any(
-        UserAccountStatusChangedEvent.class));
+        UserEnabledStatusChangedEvent.class));
   }
 
   @Test

@@ -26,8 +26,8 @@ import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
 import gov.ca.cwds.idm.service.cognito.attribute.diff.CollectionUserAttributeDiff;
 import gov.ca.cwds.idm.service.cognito.attribute.diff.RolesUserAttributeDiff;
 import gov.ca.cwds.idm.service.cognito.attribute.diff.StringUserAttributeDiff;
-import gov.ca.cwds.idm.service.cognito.attribute.diff.UserAccountStatusAttributeDiff;
 import gov.ca.cwds.idm.service.cognito.attribute.diff.UserAttributeDiff;
+import gov.ca.cwds.idm.service.cognito.attribute.diff.UserEnabledStatusAttributeDiff;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import java.util.Arrays;
@@ -163,12 +163,12 @@ public class UserChangeLogEventTest {
   public void testAccountStatusChangedEvent() {
     UserType existedUser = new UserType();
     existedUser.setEnabled(Boolean.FALSE);
-    UserAttributeDiff<Boolean> diff = new UserAccountStatusAttributeDiff(existedUser, Boolean.TRUE);
+    UserAttributeDiff<Boolean> diff = new UserEnabledStatusAttributeDiff(existedUser, Boolean.TRUE);
     UserUpdateRequest userUpdateRequest = mockUserUpdateRequest(existedUser,
-        Collections.singletonMap(OtherUserAttribute.ACCOUNT_STATUS, diff));
+        Collections.singletonMap(OtherUserAttribute.ENABLED_STATUS, diff));
 
-    UserAccountStatusChangedEvent event = new UserAccountStatusChangedEvent(userUpdateRequest);
-    assertEquals(UserAccountStatusChangedEvent.USER_ACCOUNT_STATUS_CHANGED,
+    UserEnabledStatusChangedEvent event = new UserEnabledStatusChangedEvent(userUpdateRequest);
+    assertEquals(UserEnabledStatusChangedEvent.USER_ACCOUNT_STATUS_CHANGED,
         event.getEventType());
     assertEquals("false", event.getEvent().getOldValue());
     assertEquals("true", event.getEvent().getNewValue());

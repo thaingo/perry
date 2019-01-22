@@ -8,7 +8,7 @@ import static gov.ca.cwds.idm.service.ExecutionStatus.SUCCESS;
 import static gov.ca.cwds.idm.service.ExecutionStatus.WAS_NOT_EXECUTED;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PERMISSIONS;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.ROLES;
-import static gov.ca.cwds.idm.service.cognito.attribute.OtherUserAttribute.ACCOUNT_STATUS;
+import static gov.ca.cwds.idm.service.cognito.attribute.OtherUserAttribute.ENABLED_STATUS;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getRACFId;
@@ -45,8 +45,8 @@ import gov.ca.cwds.idm.dto.UsersPage;
 import gov.ca.cwds.idm.dto.UsersSearchCriteria;
 import gov.ca.cwds.idm.event.EmailChangedEvent;
 import gov.ca.cwds.idm.event.PermissionsChangedEvent;
-import gov.ca.cwds.idm.event.UserAccountStatusChangedEvent;
 import gov.ca.cwds.idm.event.UserCreatedEvent;
+import gov.ca.cwds.idm.event.UserEnabledStatusChangedEvent;
 import gov.ca.cwds.idm.event.UserRoleChangedEvent;
 import gov.ca.cwds.idm.exception.AdminAuthorizationException;
 import gov.ca.cwds.idm.exception.UserValidationException;
@@ -155,7 +155,7 @@ public class IdmServiceImpl implements IdmService {
     ExecutionStatus updateAttributesStatus =
         updateUserAttributes(userUpdateRequest);
     OptionalExecution<UserUpdateRequest, Boolean> updateUserEnabledExecution =
-        updateUserAccountStatus(userUpdateRequest);
+        updateUserEnabledStatus(userUpdateRequest);
     if (updateAttributesStatus == WAS_NOT_EXECUTED
         && updateUserEnabledExecution.getExecutionStatus() == FAIL) {
       throw (RuntimeException) updateUserEnabledExecution.getException();
@@ -182,10 +182,10 @@ public class IdmServiceImpl implements IdmService {
     return userUpdateRequest;
   }
 
-  private OptionalExecution<UserUpdateRequest, Boolean> updateUserAccountStatus(
+  private OptionalExecution<UserUpdateRequest, Boolean> updateUserEnabledStatus(
       UserUpdateRequest userUpdateRequest) {
     OptionalExecution<UserUpdateRequest, Boolean> updateUserEnabledExecution;
-    if (userUpdateRequest.isAttributeChanged(ACCOUNT_STATUS)) {
+    if (userUpdateRequest.isAttributeChanged(ENABLED_STATUS)) {
       updateUserEnabledExecution = executeUpdateEnableStatusOptionally(userUpdateRequest);
     } else {
       updateUserEnabledExecution = NoUpdateExecution.INSTANCE;
@@ -453,7 +453,7 @@ public class IdmServiceImpl implements IdmService {
           protected Boolean tryMethod(UserUpdateRequest userUpdateRequest) {
             cognitoServiceFacade.changeUserEnabledStatus(userUpdateRequest);
             auditLogService
-                .createAuditLogRecord(new UserAccountStatusChangedEvent(userUpdateRequest));
+                .createAuditLogRecord(new UserEnabledStatusChangedEvent(userUpdateRequest));
             return true;
           }
 

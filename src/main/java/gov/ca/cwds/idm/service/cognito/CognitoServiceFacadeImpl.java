@@ -6,7 +6,7 @@ import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PERMISSIONS;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PHONE_EXTENSION;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.ROLES;
-import static gov.ca.cwds.idm.service.cognito.attribute.OtherUserAttribute.ACCOUNT_STATUS;
+import static gov.ca.cwds.idm.service.cognito.attribute.OtherUserAttribute.ENABLED_STATUS;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.PHONE_NUMBER;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.EMAIL_DELIVERY;
@@ -50,8 +50,8 @@ import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.service.UserUpdateRequest;
 import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
-import gov.ca.cwds.idm.service.cognito.attribute.diff.UserAccountStatusAttributeDiff;
 import gov.ca.cwds.idm.service.cognito.attribute.diff.UserAttributeDiff;
+import gov.ca.cwds.idm.service.cognito.attribute.diff.UserEnabledStatusAttributeDiff;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
@@ -237,8 +237,8 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
    */
   @Override
   public void changeUserEnabledStatus(UserUpdateRequest userUpdateRequest) {
-    UserAccountStatusAttributeDiff diff = (UserAccountStatusAttributeDiff) userUpdateRequest.getDiffMap()
-        .get(ACCOUNT_STATUS);
+    UserEnabledStatusAttributeDiff diff = (UserEnabledStatusAttributeDiff) userUpdateRequest.getDiffMap()
+        .get(ENABLED_STATUS);
     Validate.notNull(diff);
     String id = userUpdateRequest.getUserId();
     if (diff.getNewValue()) {

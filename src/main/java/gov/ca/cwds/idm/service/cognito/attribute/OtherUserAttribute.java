@@ -5,7 +5,7 @@ package gov.ca.cwds.idm.service.cognito.attribute;
  */
 public enum OtherUserAttribute implements UserAttribute {
 
-  ACCOUNT_STATUS("account_status");
+  ENABLED_STATUS("account_status");
 
   private String name;
 

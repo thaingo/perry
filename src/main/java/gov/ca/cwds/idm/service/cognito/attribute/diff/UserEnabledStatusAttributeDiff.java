@@ -1,6 +1,6 @@
 package gov.ca.cwds.idm.service.cognito.attribute.diff;
 
-import static gov.ca.cwds.idm.service.cognito.attribute.OtherUserAttribute.ACCOUNT_STATUS;
+import static gov.ca.cwds.idm.service.cognito.attribute.OtherUserAttribute.ENABLED_STATUS;
 
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.UserType;
@@ -9,10 +9,10 @@ import java.util.List;
 /**
  * Created by Alexander Serbin on 1/21/2019
  */
-public class UserAccountStatusAttributeDiff extends UserAttributeDiff<Boolean> {
+public class UserEnabledStatusAttributeDiff extends UserAttributeDiff<Boolean> {
 
-  public UserAccountStatusAttributeDiff(UserType exitingUser, Boolean newValue) {
-    super(ACCOUNT_STATUS, exitingUser, newValue);
+  public UserEnabledStatusAttributeDiff(UserType exitingUser, Boolean newValue) {
+    super(ENABLED_STATUS, exitingUser, newValue);
   }
 
   @Override
