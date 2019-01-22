@@ -1,8 +1,9 @@
-package gov.ca.cwds.idm.service.cognito.attribute.diff;
+package gov.ca.cwds.idm.service.cognito.attribute.diff.builder;
 
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL;
 
 import com.amazonaws.services.cognitoidp.model.UserType;
+import gov.ca.cwds.idm.service.cognito.attribute.diff.EmailUserAttributeDiff;
 
 /**
  * Created by Alexander Serbin on 1/15/2019

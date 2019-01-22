@@ -1,7 +1,9 @@
-package gov.ca.cwds.idm.service.cognito.attribute.diff;
+package gov.ca.cwds.idm.service.cognito.attribute.diff.builder;
 
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute;
+import gov.ca.cwds.idm.service.cognito.attribute.diff.RolesUserAttributeDiff;
+import gov.ca.cwds.idm.service.cognito.attribute.diff.UserAttributeDiff;
 import java.util.Set;
 
 /**

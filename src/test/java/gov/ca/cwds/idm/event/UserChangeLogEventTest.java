@@ -21,10 +21,12 @@ import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserChangeLogRecord;
 import gov.ca.cwds.idm.service.UserUpdateRequest;
 import gov.ca.cwds.idm.service.authorization.UserRolesService;
+import gov.ca.cwds.idm.service.cognito.attribute.OtherUserAttribute;
 import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
 import gov.ca.cwds.idm.service.cognito.attribute.diff.CollectionUserAttributeDiff;
 import gov.ca.cwds.idm.service.cognito.attribute.diff.RolesUserAttributeDiff;
 import gov.ca.cwds.idm.service.cognito.attribute.diff.StringUserAttributeDiff;
+import gov.ca.cwds.idm.service.cognito.attribute.diff.UserAccountStatusAttributeDiff;
 import gov.ca.cwds.idm.service.cognito.attribute.diff.UserAttributeDiff;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
@@ -157,6 +159,23 @@ public class UserChangeLogEventTest {
         event.getEvent().getUserRoles());
   }
 
+  @Test
+  public void testAccountStatusChangedEvent() {
+    UserType existedUser = new UserType();
+    existedUser.setEnabled(Boolean.FALSE);
+    UserAttributeDiff<Boolean> diff = new UserAccountStatusAttributeDiff(existedUser, Boolean.TRUE);
+    UserUpdateRequest userUpdateRequest = mockUserUpdateRequest(existedUser,
+        Collections.singletonMap(OtherUserAttribute.ACCOUNT_STATUS, diff));
+
+    UserAccountStatusChangedEvent event = new UserAccountStatusChangedEvent(userUpdateRequest);
+    assertEquals(UserAccountStatusChangedEvent.USER_ACCOUNT_STATUS_CHANGED,
+        event.getEventType());
+    assertEquals("false", event.getEvent().getOldValue());
+    assertEquals("true", event.getEvent().getNewValue());
+    assertEquals(String.join(", ", CALS_ADMIN, CWS_WORKER),
+        event.getEvent().getUserRoles());
+  }
+
   private User mockUser() {
     User user = new User();
     user.setId(TEST_USER_ID);
@@ -179,12 +198,20 @@ public class UserChangeLogEventTest {
       UserType existedUser,
       AttributeType oldAttribute,
       Map<UserAttribute, UserAttributeDiff> diffMap) {
-    UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
+    UserUpdateRequest userUpdateRequest = mockUserUpdateRequest(existedUser, diffMap);
     existedUser.setAttributes(Collections.singleton(oldAttribute));
+    return userUpdateRequest;
+  }
+
+  private UserUpdateRequest mockUserUpdateRequest(
+      UserType existedUser,
+      Map<UserAttribute, UserAttributeDiff> diffMap) {
+    UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
     userUpdateRequest.setUser(mockUser());
     userUpdateRequest.setExistedCognitoUser(existedUser);
     userUpdateRequest.setDiffMap(diffMap);
     return userUpdateRequest;
   }
+
 
 }

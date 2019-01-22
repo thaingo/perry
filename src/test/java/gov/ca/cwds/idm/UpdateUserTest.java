@@ -56,6 +56,7 @@ import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.event.AuditEvent;
 import gov.ca.cwds.idm.event.EmailChangedEvent;
 import gov.ca.cwds.idm.event.PermissionsChangedEvent;
+import gov.ca.cwds.idm.event.UserAccountStatusChangedEvent;
 import gov.ca.cwds.idm.event.UserRoleChangedEvent;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
@@ -105,13 +106,16 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     InOrder inOrder = inOrder(cognito);
     inOrder.verify(cognito).adminDisableUser(disableUserRequest);
     verifyDoraCalls(1);
-    verify(auditLogService, times(3)).createAuditLogRecord(any(AuditEvent.class));
+    verify(auditLogService, times(4)).createAuditLogRecord(any(AuditEvent.class));
     verify(auditLogService, times(1)).createAuditLogRecord(any(
         UserRoleChangedEvent.class));
     verify(auditLogService, times(1)).createAuditLogRecord(any(
         PermissionsChangedEvent.class));
     verify(auditLogService, times(1)).createAuditLogRecord(any(
         EmailChangedEvent.class));
+    verify(auditLogService, times(1)).createAuditLogRecord(any(
+        UserAccountStatusChangedEvent.class));
+
   }
 
   @Test
@@ -378,6 +382,8 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     verify(spySearchService, times(0)).createUser(any(User.class));
     verify(auditLogService, never()).createAuditLogRecord(any(
         PermissionsChangedEvent.class));
+    verify(auditLogService, never()).createAuditLogRecord(any(
+        UserAccountStatusChangedEvent.class));
   }
 
   @Test

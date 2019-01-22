@@ -23,6 +23,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.AdditionalAnswers.delegatesTo;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -31,7 +32,6 @@ import static org.mockito.Mockito.when;
 
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.dto.UserEnableStatusRequest;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.UsersSearchCriteria;
 import gov.ca.cwds.idm.exception.PartialSuccessException;
@@ -364,9 +364,8 @@ public class IdmServiceImplTest {
   }
 
   private void setChangeUserEnabledStatusFail(RuntimeException error) {
-    when(cognitoServiceFacadeMock.changeUserEnabledStatus(any(UserEnableStatusRequest.class)))
-        .thenThrow(error);
-  }
+    doThrow(error).when(cognitoServiceFacadeMock).changeUserEnabledStatus(any(UserUpdateRequest.class));
+ }
 
   private void setGetCognitoUserById(String userId, UserType result) {
     when(cognitoServiceFacadeMock.getCognitoUserById(userId)).thenReturn(result);

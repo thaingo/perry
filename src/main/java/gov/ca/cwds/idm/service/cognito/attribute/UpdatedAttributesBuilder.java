@@ -3,18 +3,20 @@ package gov.ca.cwds.idm.service.cognito.attribute;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PERMISSIONS;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PHONE_EXTENSION;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.ROLES;
+import static gov.ca.cwds.idm.service.cognito.attribute.OtherUserAttribute.ACCOUNT_STATUS;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.PHONE_NUMBER;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoPhoneConverter.toCognitoFormat;
 
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.UserUpdate;
-import gov.ca.cwds.idm.service.cognito.attribute.diff.CollectionAttributeDiffBuilder;
-import gov.ca.cwds.idm.service.cognito.attribute.diff.EmailAttributeDiffBuilder;
-import gov.ca.cwds.idm.service.cognito.attribute.diff.RoleAttributeDiffBuilder;
-import gov.ca.cwds.idm.service.cognito.attribute.diff.StringAttributeDiffBuilder;
 import gov.ca.cwds.idm.service.cognito.attribute.diff.UserAttributeDiff;
-import gov.ca.cwds.idm.service.cognito.attribute.diff.UserAttributeDiffBuilder;
+import gov.ca.cwds.idm.service.cognito.attribute.diff.builder.AccountStatusDiffBuilder;
+import gov.ca.cwds.idm.service.cognito.attribute.diff.builder.CollectionAttributeDiffBuilder;
+import gov.ca.cwds.idm.service.cognito.attribute.diff.builder.EmailAttributeDiffBuilder;
+import gov.ca.cwds.idm.service.cognito.attribute.diff.builder.RoleAttributeDiffBuilder;
+import gov.ca.cwds.idm.service.cognito.attribute.diff.builder.StringAttributeDiffBuilder;
+import gov.ca.cwds.idm.service.cognito.attribute.diff.builder.UserAttributeDiffBuilder;
 import gov.ca.cwds.util.Utils;
 import java.util.HashMap;
 import java.util.Map;
@@ -52,6 +54,8 @@ public class UpdatedAttributesBuilder {
     addDiff(ROLES,
         new RoleAttributeDiffBuilder(existedCognitoUser,
             updateUserDto.getRoles()));
+    addDiff(ACCOUNT_STATUS, new AccountStatusDiffBuilder(ACCOUNT_STATUS, existedCognitoUser,
+        updateUserDto.getEnabled()));
     return updatedAttributes;
   }
 
