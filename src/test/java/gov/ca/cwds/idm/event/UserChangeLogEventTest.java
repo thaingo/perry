@@ -160,7 +160,7 @@ public class UserChangeLogEventTest {
   }
 
   @Test
-  public void testAccountStatusChangedEvent() {
+  public void testUserEnabledStatusChangedEvent() {
     UserType existedUser = new UserType();
     existedUser.setEnabled(Boolean.FALSE);
     UserAttributeDiff<Boolean> diff = new UserEnabledStatusAttributeDiff(existedUser, Boolean.TRUE);
