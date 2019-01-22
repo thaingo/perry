@@ -11,17 +11,17 @@ import java.util.Map;
  */
 public class UserUpdateRequest {
 
-  private UserType existedCognitoUser;
+  private UserType existedUser;
   private String userId;
   private Map<UserAttribute, UserAttributeDiff> diffMap;
   private User user;
 
-  public void setExistedCognitoUser(UserType existedCognitoUser) {
-    this.existedCognitoUser = existedCognitoUser;
+  public void setExistedUser(UserType existedUser) {
+    this.existedUser = existedUser;
   }
 
-  public UserType getExistedCognitoUser() {
-    return existedCognitoUser;
+  public UserType getExistedUser() {
+    return existedUser;
   }
 
   public void setUserId(String userId) {
