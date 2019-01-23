@@ -5,6 +5,8 @@ import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.idm.event.UserChangeLogEvent.CAP_EVENT_SOURCE;
+import static gov.ca.cwds.idm.event.UserEnabledStatusChangedEvent.ACTIVE;
+import static gov.ca.cwds.idm.event.UserEnabledStatusChangedEvent.INACTIVE;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PERMISSIONS;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.ROLES;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL;
@@ -19,6 +21,7 @@ import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.config.api.idm.Roles;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserChangeLogRecord;
+import gov.ca.cwds.idm.persistence.ns.entity.Permission;
 import gov.ca.cwds.idm.service.UserUpdateRequest;
 import gov.ca.cwds.idm.service.authorization.UserRolesService;
 import gov.ca.cwds.idm.service.cognito.attribute.OtherUserAttribute;
@@ -33,6 +36,7 @@ import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -59,6 +63,7 @@ public class UserChangeLogEventTest {
   private static final String PERMISSION_2 = "Permission2";
   private static final String PERMISSION_3 = "Permission3";
   private static final String PERMISSION_4 = "Permission4";
+  private static final String PERMISSION_DESCRIPTION = "description";
   private static final String ADMIN_LOGIN = "TEST_USER_NAME";
   private static final String TEST_ADMIN_ROLE = "Test-admin";
   private static final String TEST_ADMIN_NAME = "Cherno Samba";
@@ -128,15 +133,27 @@ public class UserChangeLogEventTest {
         CognitoUtils.getCustomDelimitedListAttributeValue(
             Stream.of(PERMISSION_1, PERMISSION_2).collect(
                 Collectors.toSet())));
+    List<Permission> permissions = Stream.of(
+        new Permission(PERMISSION_1, PERMISSION_1 + PERMISSION_DESCRIPTION),
+        new Permission(PERMISSION_2, PERMISSION_2 + PERMISSION_DESCRIPTION),
+        new Permission(PERMISSION_3, PERMISSION_3 + PERMISSION_DESCRIPTION),
+        new Permission(PERMISSION_4, PERMISSION_4 + PERMISSION_DESCRIPTION)
+    ).collect(Collectors.toList());
     UserUpdateRequest userUpdateRequest = mockUserUpdateRequest(existedUser,
         oldAttribute, Collections.singletonMap(PERMISSIONS, diff));
 
-    PermissionsChangedEvent event = new PermissionsChangedEvent(userUpdateRequest);
+    PermissionsChangedEvent event = new PermissionsChangedEvent(userUpdateRequest, permissions);
     assertEquals(PermissionsChangedEvent.EVENT_TYPE_PERMISSIONS_CHANGED,
         event.getEventType());
-    assertEquals(StringUtils.join(new String[]{PERMISSION_1, PERMISSION_2}, ", "),
+    assertEquals(StringUtils.join(
+        new String[]{
+            PERMISSION_1 + PERMISSION_DESCRIPTION,
+            PERMISSION_2 + PERMISSION_DESCRIPTION}, ", "),
         event.getEvent().getOldValue());
-    assertEquals("Permission3, Permission4", event.getEvent().getNewValue());
+    assertEquals(StringUtils.join(
+        new String[]{
+            PERMISSION_3 + PERMISSION_DESCRIPTION,
+            PERMISSION_4 + PERMISSION_DESCRIPTION}, ", "), event.getEvent().getNewValue());
     assertEquals(String.join(", ", CALS_ADMIN, CWS_WORKER),
         event.getEvent().getUserRoles());
   }
@@ -170,8 +187,8 @@ public class UserChangeLogEventTest {
     UserEnabledStatusChangedEvent event = new UserEnabledStatusChangedEvent(userUpdateRequest);
     assertEquals(UserEnabledStatusChangedEvent.USER_ACCOUNT_STATUS_CHANGED,
         event.getEventType());
-    assertEquals("false", event.getEvent().getOldValue());
-    assertEquals("true", event.getEvent().getNewValue());
+    assertEquals(INACTIVE, event.getEvent().getOldValue());
+    assertEquals(ACTIVE, event.getEvent().getNewValue());
     assertEquals(String.join(", ", CALS_ADMIN, CWS_WORKER),
         event.getEvent().getUserRoles());
   }
