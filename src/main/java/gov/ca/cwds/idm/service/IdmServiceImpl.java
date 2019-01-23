@@ -454,7 +454,7 @@ public class IdmServiceImpl implements IdmService {
             cognitoServiceFacade.changeUserEnabledStatus(userUpdateRequest);
             auditLogService
                 .createAuditLogRecord(new UserEnabledStatusChangedEvent(userUpdateRequest));
-            return true;
+            return Boolean.TRUE;
           }
 
           @Override
