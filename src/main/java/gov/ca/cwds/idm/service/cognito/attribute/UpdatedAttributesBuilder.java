@@ -3,73 +3,60 @@ package gov.ca.cwds.idm.service.cognito.attribute;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PERMISSIONS;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PHONE_EXTENSION;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.ROLES;
+import static gov.ca.cwds.idm.service.cognito.attribute.OtherUserAttribute.ENABLED_STATUS;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL;
-import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL_VERIFIED;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.PHONE_NUMBER;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoPhoneConverter.toCognitoFormat;
 
-import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.UserUpdate;
-import gov.ca.cwds.idm.service.cognito.attribute.diff.RoleAttributeDiffBuilder;
-import gov.ca.cwds.idm.service.cognito.attribute.diff.StringAttributeDiffBuilder;
-import gov.ca.cwds.idm.service.cognito.attribute.diff.StringUserAttributeDiff;
 import gov.ca.cwds.idm.service.cognito.attribute.diff.UserAttributeDiff;
-import gov.ca.cwds.idm.service.cognito.attribute.diff.UserAttributeDiffBuilder;
-import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
+import gov.ca.cwds.idm.service.cognito.attribute.diff.builder.CollectionAttributeDiffBuilder;
+import gov.ca.cwds.idm.service.cognito.attribute.diff.builder.EmailAttributeDiffBuilder;
+import gov.ca.cwds.idm.service.cognito.attribute.diff.builder.RoleAttributeDiffBuilder;
+import gov.ca.cwds.idm.service.cognito.attribute.diff.builder.StringAttributeDiffBuilder;
+import gov.ca.cwds.idm.service.cognito.attribute.diff.builder.UserAttributeDiffBuilder;
+import gov.ca.cwds.idm.service.cognito.attribute.diff.builder.UserEnabledStatusDiffBuilder;
 import gov.ca.cwds.util.Utils;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 public class UpdatedAttributesBuilder {
 
   private final UserType existedCognitoUser;
-  private final Map<UserAttribute, UserAttributeDiff> updatedAttributes = new LinkedHashMap<>();
+  private final UserUpdate updateUserDto;
+  private final Map<UserAttribute, UserAttributeDiff> updatedAttributes = new HashMap<>();
 
   public UpdatedAttributesBuilder(UserType existedCognitoUser, UserUpdate updateUserDto) {
     this.existedCognitoUser = existedCognitoUser;
-    addEmailDiff(updateUserDto.getEmail());
-    addStringAttribute(PHONE_NUMBER, toCognitoFormat(updateUserDto.getPhoneNumber()));
-    addStringAttribute(PHONE_EXTENSION, updateUserDto.getPhoneExtensionNumber());
-    addCollectionAttribute(PERMISSIONS, updateUserDto.getPermissions());
-    addCollectionAttribute(ROLES, updateUserDto.getRoles());
+    this.updateUserDto = updateUserDto;
   }
 
-  private void addEmailDiff(String email) {
-    StringAttributeDiffBuilder emailAttributeDiffBuilder =
-        new StringAttributeDiffBuilder(existedCognitoUser,
-            EMAIL,
-            Utils.toLowerCase(email));
-    if (emailAttributeDiffBuilder.doesDiffExist()) {
-      updatedAttributes.put(EMAIL, emailAttributeDiffBuilder.buildUserAttributeDiff());
-      updatedAttributes.put(EMAIL_VERIFIED, new StringUserAttributeDiff(
-          new AttributeType().withName(EMAIL_VERIFIED.getName()).withValue(CognitoUtils.TRUE_VALUE),
-          "",
-          CognitoUtils.TRUE_VALUE));
+  private <T> void addDiff(UserAttribute userAttribute,
+      UserAttributeDiffBuilder<T> diffBuilder) {
+    if (diffBuilder.doesDiffExist()) {
+      updatedAttributes.put(userAttribute, diffBuilder.buildDiff());
     }
   }
 
-  public Map<UserAttribute, UserAttributeDiff> getUpdatedAttributes() {
+  public Map<UserAttribute, UserAttributeDiff> buildUpdatedAttributesMap() {
+    addDiff(EMAIL, new EmailAttributeDiffBuilder(existedCognitoUser,
+        Utils.toLowerCase(updateUserDto.getEmail())));
+    addDiff(PHONE_NUMBER,
+        new StringAttributeDiffBuilder(PHONE_NUMBER, existedCognitoUser,
+            toCognitoFormat(updateUserDto.getPhoneNumber())));
+    addDiff(PHONE_EXTENSION,
+        new StringAttributeDiffBuilder(PHONE_EXTENSION, existedCognitoUser,
+            updateUserDto.getPhoneExtensionNumber()));
+    addDiff(PERMISSIONS,
+        new CollectionAttributeDiffBuilder(PERMISSIONS, existedCognitoUser,
+            updateUserDto.getPermissions()));
+    addDiff(ROLES,
+        new RoleAttributeDiffBuilder(existedCognitoUser,
+            updateUserDto.getRoles()));
+    addDiff(ENABLED_STATUS, new UserEnabledStatusDiffBuilder(ENABLED_STATUS, existedCognitoUser,
+        updateUserDto.getEnabled()));
     return updatedAttributes;
   }
 
-  private void addStringAttribute(UserAttribute userAttribute, String newAttrValue) {
-    UserAttributeDiffBuilder<String> diffBuilder =
-        new StringAttributeDiffBuilder(existedCognitoUser, userAttribute, newAttrValue);
-    addAttributeDiff(userAttribute, diffBuilder);
-  }
-
-  private void addCollectionAttribute(UserAttribute userAttribute, Set<String> newValues) {
-    UserAttributeDiffBuilder<Set<String>> diffBuilder =
-        new RoleAttributeDiffBuilder(existedCognitoUser, userAttribute, newValues);
-    addAttributeDiff(userAttribute, diffBuilder);
-  }
-
-  private <T> void addAttributeDiff(UserAttribute userAttribute,
-      UserAttributeDiffBuilder<T> diffBuilder) {
-    if (diffBuilder.doesDiffExist()) {
-      updatedAttributes.put(userAttribute, diffBuilder.buildUserAttributeDiff());
-    }
-  }
 }

@@ -4,14 +4,10 @@ import com.amazonaws.services.cognitoidp.model.AdminCreateUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserRequest;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.dto.UserEnableStatusRequest;
-import gov.ca.cwds.idm.dto.UserUpdate;
-import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
-import gov.ca.cwds.idm.service.cognito.attribute.diff.UserAttributeDiff;
+import gov.ca.cwds.idm.service.UserUpdateRequest;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import java.util.List;
-import java.util.Map;
 import org.springframework.context.annotation.Profile;
 
 /**
@@ -35,15 +31,11 @@ public interface CognitoServiceFacade {
   void healthCheck();
 
   /**
-   @return map of changed user attributes.
-   */
-  Map<UserAttribute, UserAttributeDiff> updateUserAttributes(
-      String id, UserType existedCognitoUser, UserUpdate updateUserDto);
-
-  /**
    @return true if Cognito operations were really executed, false otherwise
    */
-  boolean changeUserEnabledStatus(UserEnableStatusRequest request);
+  boolean updateUserAttributes(UserUpdateRequest userUpdateRequest);
+
+  void changeUserEnabledStatus(UserUpdateRequest userUpdateRequest);
 
   /**
    * Resend the invitation message to a user that already exists and reset the expiration limit

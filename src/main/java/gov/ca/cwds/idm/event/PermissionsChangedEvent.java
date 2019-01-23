@@ -4,10 +4,7 @@ import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PERM
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
-import gov.ca.cwds.idm.service.cognito.attribute.diff.UserAttributeDiff;
-import java.util.Map;
+import gov.ca.cwds.idm.service.UserUpdateRequest;
 import org.apache.commons.lang3.Validate;
 
 /**
@@ -20,12 +17,12 @@ public class PermissionsChangedEvent extends UserAttributeChangedEvent {
 
   public static final String EVENT_TYPE_PERMISSIONS_CHANGED = "User Permissions Changed";
 
-  public PermissionsChangedEvent(User user, Map<UserAttribute, UserAttributeDiff> diffMap) {
-    super(user, diffMap);
-    Validate.isTrue(diffMap.containsKey(PERMISSIONS));
+  public PermissionsChangedEvent(UserUpdateRequest userUpdateRequest) {
+    super(userUpdateRequest);
+    Validate.isTrue(userUpdateRequest.isAttributeChanged(PERMISSIONS));
     setEventType(EVENT_TYPE_PERMISSIONS_CHANGED);
-    setOldValue(diffMap.get(PERMISSIONS).getOldValueAsString());
-    setNewValue(diffMap.get(PERMISSIONS).getNewValueAsString());
+    setOldValue(userUpdateRequest.getOldValueAsString(PERMISSIONS));
+    setNewValue(userUpdateRequest.getNewValueAsString(PERMISSIONS));
   }
 
 }

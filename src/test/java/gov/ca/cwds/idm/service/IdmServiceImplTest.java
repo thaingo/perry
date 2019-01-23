@@ -23,7 +23,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static org.mockito.AdditionalAnswers.delegatesTo;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -32,25 +32,19 @@ import static org.mockito.Mockito.when;
 
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.dto.UserEnableStatusRequest;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.UsersSearchCriteria;
 import gov.ca.cwds.idm.exception.PartialSuccessException;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
-import gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute;
-import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
-import gov.ca.cwds.idm.service.cognito.attribute.diff.UserAttributeDiff;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil;
 import gov.ca.cwds.idm.util.WithMockCustomUser;
 import gov.ca.cwds.service.CwsUserInfoService;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -165,7 +159,7 @@ public class IdmServiceImplTest {
     existedUser.setPermissions(toSet("Hotline-rollout"));
     UserType existedUserType = userType(existedUser, USER_ID);
 
-    setUpdateUserAttributesResult(USER_ID, userUpdate);
+    setUpdateUserAttributesResult();
     setGetCognitoUserById(USER_ID, existedUserType);
 
     Exception doraError = new RuntimeException("Dora error");
@@ -199,7 +193,7 @@ public class IdmServiceImplTest {
     existedUser.setPermissions(toSet("RFA-rollout"));
     UserType existedUserType = userType(existedUser, USER_ID);
 
-    setUpdateUserAttributesResult(USER_ID, userUpdate);
+    setUpdateUserAttributesResult();
     setGetCognitoUserById(USER_ID, existedUserType);
 
     RuntimeException enableStatusError = new RuntimeException("Change Enable Status Error");
@@ -229,7 +223,7 @@ public class IdmServiceImplTest {
     existedUser.setPermissions(toSet("RFA-rollout"));
     UserType existedUserType = userType(existedUser, USER_ID);
 
-    setUpdateUserAttributesResult(USER_ID, userUpdate);
+    setUpdateUserAttributesResult();
     setGetCognitoUserById(USER_ID, existedUserType);
 
     RuntimeException enableStatusError = new RuntimeException("Change Enable Status Error");
@@ -263,7 +257,7 @@ public class IdmServiceImplTest {
     existedUser.setPermissions(toSet("RFA-rollout"));
     UserType existedUserType = userType(existedUser, USER_ID);
 
-    setUpdateUserAttributesResult(USER_ID, userUpdate);
+    setUpdateUserAttributesResult();
     setGetCognitoUserById(USER_ID, existedUserType);
 
     RuntimeException enableStatusError = new RuntimeException("Change Enable Status Error");
@@ -363,18 +357,15 @@ public class IdmServiceImplTest {
     when(cognitoServiceFacadeMock.createUser(user)).thenReturn(newUser);
   }
 
-  private void setUpdateUserAttributesResult(String userId, UserUpdate userUpdate) {
-    Map<UserAttribute, UserAttributeDiff> result = new HashMap<>();
-    result.put(CustomUserAttribute.PHONE_EXTENSION, null);
+  private void setUpdateUserAttributesResult() {
     when(cognitoServiceFacadeMock
-        .updateUserAttributes(eq(userId), any(UserType.class), eq(userUpdate)))
-        .thenReturn(result);
+        .updateUserAttributes(any(UserUpdateRequest.class)))
+        .thenReturn(true);
   }
 
   private void setChangeUserEnabledStatusFail(RuntimeException error) {
-    when(cognitoServiceFacadeMock.changeUserEnabledStatus(any(UserEnableStatusRequest.class)))
-        .thenThrow(error);
-  }
+    doThrow(error).when(cognitoServiceFacadeMock).changeUserEnabledStatus(any(UserUpdateRequest.class));
+ }
 
   private void setGetCognitoUserById(String userId, UserType result) {
     when(cognitoServiceFacadeMock.getCognitoUserById(userId)).thenReturn(result);

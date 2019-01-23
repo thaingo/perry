@@ -3,6 +3,12 @@ package gov.ca.cwds.idm.service.cognito;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.GET;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.RESEND_INVITATION_EMAIL;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
+import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PERMISSIONS;
+import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PHONE_EXTENSION;
+import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.ROLES;
+import static gov.ca.cwds.idm.service.cognito.attribute.OtherUserAttribute.ENABLED_STATUS;
+import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL;
+import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.PHONE_NUMBER;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.EMAIL_DELIVERY;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.buildCreateUserAttributes;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getEmail;
@@ -31,6 +37,7 @@ import com.amazonaws.services.cognitoidp.model.AdminEnableUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserResult;
 import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesRequest;
+import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.DeliveryMediumType;
 import com.amazonaws.services.cognitoidp.model.DescribeUserPoolRequest;
 import com.amazonaws.services.cognitoidp.model.InvalidParameterException;
@@ -40,24 +47,22 @@ import com.amazonaws.services.cognitoidp.model.MessageActionType;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import com.amazonaws.services.cognitoidp.model.UsernameExistsException;
 import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.dto.UserEnableStatusRequest;
-import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
-import gov.ca.cwds.idm.service.cognito.attribute.UpdatedAttributesBuilder;
+import gov.ca.cwds.idm.service.UserUpdateRequest;
 import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
 import gov.ca.cwds.idm.service.cognito.attribute.diff.UserAttributeDiff;
+import gov.ca.cwds.idm.service.cognito.attribute.diff.UserEnabledStatusAttributeDiff;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.service.messages.MessageCode;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import liquibase.util.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -198,66 +203,55 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
    * {@inheritDoc}
    */
   @Override
-  public Map<UserAttribute, UserAttributeDiff> updateUserAttributes(
-      String userId, UserType existedCognitoUser, UserUpdate updateUserDto) {
-
-    Map<UserAttribute, UserAttributeDiff> updatedAttributes =
-        new UpdatedAttributesBuilder(existedCognitoUser, updateUserDto).getUpdatedAttributes();
-
-    if (updatedAttributes.isEmpty()) {
-      return Collections.emptyMap();
+  public boolean updateUserAttributes(
+      UserUpdateRequest userUpdateRequest) {
+    List<AttributeType> attributeTypes = new AttributeTypesBuilder(userUpdateRequest.getDiffMap())
+        .addAttribute(EMAIL).addAttribute(PHONE_NUMBER).addAttribute(PHONE_EXTENSION)
+        .addAttribute(PERMISSIONS).addAttribute(ROLES).attributeTypes;
+    if (attributeTypes.isEmpty()) {
+      return false;
     }
-
     AdminUpdateUserAttributesRequest adminUpdateUserAttributesRequest =
         new AdminUpdateUserAttributesRequest()
-            .withUsername(userId)
+            .withUsername(userUpdateRequest.getUserId())
             .withUserPoolId(properties.getUserpool())
-            .withUserAttributes(
-                updatedAttributes.values().stream().map(UserAttributeDiff::getAttributeType)
-                    .collect(Collectors.toList()));
-
+            .withUserAttributes(attributeTypes);
     try {
       identityProvider.adminUpdateUserAttributes(adminUpdateUserAttributesRequest);
     } catch (com.amazonaws.services.cognitoidp.model.UserNotFoundException e) {
-      throw exceptionFactory.createUserNotFoundException(USER_NOT_FOUND_BY_ID_IN_IDM, e, userId);
+      throw exceptionFactory.createUserNotFoundException(USER_NOT_FOUND_BY_ID_IN_IDM, e,
+          userUpdateRequest.getUserId());
     } catch (com.amazonaws.services.cognitoidp.model.AliasExistsException e) {
       throw exceptionFactory.createUserAlreadyExistsException(USER_WITH_EMAIL_EXISTS_IN_IDM, e,
-          updateUserDto.getEmail());
+          userUpdateRequest.getOldValueAsString(EMAIL));
     } catch (Exception e) {
-      throw exceptionFactory.createIdmException(getErrorCode(UPDATE), e, userId);
+      throw exceptionFactory
+          .createIdmException(getErrorCode(UPDATE), e, userUpdateRequest.getUserId());
     }
 
-    return updatedAttributes;
+    return true;
   }
 
   /**
    * {@inheritDoc}
    */
   @Override
-  public boolean changeUserEnabledStatus(UserEnableStatusRequest request) {
-    boolean executed = false;
-
-    String id = request.getUserId();
-    Boolean existedEnabled = request.getExistedEnabled();
-    Boolean newEnabled = request.getNewEnabled();
-
-    if (newEnabled != null && !newEnabled.equals(existedEnabled)) {
-      if (newEnabled) {
-        AdminEnableUserRequest adminEnableUserRequest =
-            new AdminEnableUserRequest().withUsername(id).withUserPoolId(properties.getUserpool());
-        executeUserOperationInCognito(identityProvider::adminEnableUser, adminEnableUserRequest, id,
-            UPDATE);
-        executed = true;
-
-      } else {
-        AdminDisableUserRequest adminDisableUserRequest =
-            new AdminDisableUserRequest().withUsername(id).withUserPoolId(properties.getUserpool());
-        executeUserOperationInCognito(identityProvider::adminDisableUser, adminDisableUserRequest,
-            id, UPDATE);
-        executed = true;
-      }
+  public void changeUserEnabledStatus(UserUpdateRequest userUpdateRequest) {
+    UserEnabledStatusAttributeDiff diff = (UserEnabledStatusAttributeDiff) userUpdateRequest.getDiffMap()
+        .get(ENABLED_STATUS);
+    Validate.notNull(diff);
+    String id = userUpdateRequest.getUserId();
+    if (diff.getNewValue()) {
+      AdminEnableUserRequest adminEnableUserRequest =
+          new AdminEnableUserRequest().withUsername(id).withUserPoolId(properties.getUserpool());
+      executeUserOperationInCognito(identityProvider::adminEnableUser, adminEnableUserRequest, id,
+          UPDATE);
+    } else {
+      AdminDisableUserRequest adminDisableUserRequest =
+          new AdminDisableUserRequest().withUsername(id).withUserPoolId(properties.getUserpool());
+      executeUserOperationInCognito(identityProvider::adminDisableUser, adminDisableUserRequest,
+          id, UPDATE);
     }
-    return executed;
   }
 
   @Override
@@ -340,5 +334,24 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
   @Autowired
   public void setExceptionFactory(ExceptionFactory exceptionFactory) {
     this.exceptionFactory = exceptionFactory;
+  }
+
+  private static class AttributeTypesBuilder {
+
+    private final Map<UserAttribute, UserAttributeDiff> diffMap;
+    private final List<AttributeType> attributeTypes;
+
+    AttributeTypesBuilder(Map<UserAttribute, UserAttributeDiff> diffMap) {
+      this.diffMap = diffMap;
+      this.attributeTypes = new ArrayList<>(diffMap.size());
+    }
+
+    private AttributeTypesBuilder addAttribute(UserAttribute userAttribute) {
+      if (diffMap.containsKey(userAttribute)) {
+        attributeTypes.addAll(diffMap.get(userAttribute).createAttributeTypes());
+      }
+      return this;
+    }
+
   }
 }
