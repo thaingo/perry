@@ -5,6 +5,7 @@ import static gov.ca.cwds.idm.service.cognito.attribute.OtherUserAttribute.ENABL
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import gov.ca.cwds.idm.service.UserUpdateRequest;
+import gov.ca.cwds.idm.service.cognito.attribute.diff.UserEnabledStatusAttributeDiff;
 import org.apache.commons.lang3.Validate;
 
 /**
@@ -14,14 +15,22 @@ import org.apache.commons.lang3.Validate;
 public class UserEnabledStatusChangedEvent extends UserAttributeChangedEvent {
 
   private static final long serialVersionUID = 6929792785662167658L;
-
-  public static final String USER_ACCOUNT_STATUS_CHANGED = "User Account Status Changed";
+  static final String ACTIVE = "active";
+  static final String INACTIVE = "inactive";
+  static final String USER_ACCOUNT_STATUS_CHANGED = "User Account Status Changed";
 
   public UserEnabledStatusChangedEvent(UserUpdateRequest userUpdateRequest) {
     super(userUpdateRequest);
     setEventType(USER_ACCOUNT_STATUS_CHANGED);
     Validate.isTrue(userUpdateRequest.isAttributeChanged(ENABLED_STATUS));
-    setOldValue(userUpdateRequest.getOldValueAsString(ENABLED_STATUS));
-    setNewValue(userUpdateRequest.getNewValueAsString(ENABLED_STATUS));
+    UserEnabledStatusAttributeDiff diff = (UserEnabledStatusAttributeDiff) userUpdateRequest
+        .getDiffMap().get(ENABLED_STATUS);
+    setOldValue(getValueAsString(diff.getOldValue()));
+    setNewValue(getValueAsString(diff.getNewValue()));
   }
+
+  private static String getValueAsString(Boolean value) {
+    return value ? ACTIVE : INACTIVE;
+  }
+
 }

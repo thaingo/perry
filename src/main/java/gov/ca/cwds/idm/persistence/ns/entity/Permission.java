@@ -22,6 +22,15 @@ public class Permission {
   @Column(name = "description")
   private String description;
 
+  public Permission() {
+    //empty
+  }
+
+  public Permission(String name, String description) {
+    this.name = name;
+    this.description = description;
+  }
+
   public String getName() {
     return name;
   }

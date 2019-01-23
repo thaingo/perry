@@ -4,7 +4,14 @@ import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PERM
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import gov.ca.cwds.idm.persistence.ns.entity.Permission;
 import gov.ca.cwds.idm.service.UserUpdateRequest;
+import gov.ca.cwds.idm.service.cognito.attribute.diff.CollectionUserAttributeDiff;
+import gov.ca.cwds.util.IdToNameConverter;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 
 /**
@@ -17,12 +24,18 @@ public class PermissionsChangedEvent extends UserAttributeChangedEvent {
 
   public static final String EVENT_TYPE_PERMISSIONS_CHANGED = "User Permissions Changed";
 
-  public PermissionsChangedEvent(UserUpdateRequest userUpdateRequest) {
+  public PermissionsChangedEvent(UserUpdateRequest userUpdateRequest,
+      List<Permission> permissions) {
     super(userUpdateRequest);
-    Validate.isTrue(userUpdateRequest.isAttributeChanged(PERMISSIONS));
     setEventType(EVENT_TYPE_PERMISSIONS_CHANGED);
-    setOldValue(userUpdateRequest.getOldValueAsString(PERMISSIONS));
-    setNewValue(userUpdateRequest.getNewValueAsString(PERMISSIONS));
+    Validate.isTrue(userUpdateRequest.isAttributeChanged(PERMISSIONS));
+    CollectionUserAttributeDiff diff = (CollectionUserAttributeDiff) userUpdateRequest.getDiffMap()
+        .get(PERMISSIONS);
+    Map<String, String> permissionsHash = permissions.stream()
+        .collect(Collectors.toMap(Permission::getName, Permission::getDescription));
+    IdToNameConverter idToNameConverter = new IdToNameConverter(permissionsHash);
+    setOldValue(StringUtils.join(idToNameConverter.getNamesByIds(diff.getOldValue()), ", "));
+    setNewValue(StringUtils.join(idToNameConverter.getNamesByIds(diff.getNewValue()), ", "));
   }
 
 }

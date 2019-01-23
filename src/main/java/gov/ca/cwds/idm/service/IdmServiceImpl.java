@@ -52,6 +52,7 @@ import gov.ca.cwds.idm.exception.AdminAuthorizationException;
 import gov.ca.cwds.idm.exception.UserValidationException;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
+import gov.ca.cwds.idm.persistence.ns.entity.Permission;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
 import gov.ca.cwds.idm.service.authorization.AuthorizationService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
@@ -134,6 +135,9 @@ public class IdmServiceImpl implements IdmService {
 
   @Autowired
   private AuditLogService auditLogService;
+
+  @Autowired
+  private DictionaryProvider dictionaryProvider;
 
   @Override
   public User findUser(String id) {
@@ -358,7 +362,9 @@ public class IdmServiceImpl implements IdmService {
       auditLogService.createAuditLogRecord(new UserRoleChangedEvent(userUpdateRequest));
     }
     if (userUpdateRequest.isAttributeChanged(PERMISSIONS)) {
-      auditLogService.createAuditLogRecord(new PermissionsChangedEvent(userUpdateRequest));
+      List<Permission> permissions = dictionaryProvider.getPermissions();
+      auditLogService
+          .createAuditLogRecord(new PermissionsChangedEvent(userUpdateRequest, permissions));
     }
     if (userUpdateRequest.isAttributeChanged(StandardUserAttribute.EMAIL)) {
       auditLogService.createAuditLogRecord(new EmailChangedEvent(userUpdateRequest));
@@ -448,22 +454,22 @@ public class IdmServiceImpl implements IdmService {
 
   private OptionalExecution<UserUpdateRequest, Boolean> executeUpdateEnableStatusOptionally(
       UserUpdateRequest userUpdateRequest) {
-      return new OptionalExecution<UserUpdateRequest, Boolean>(userUpdateRequest) {
-          @Override
-          protected Boolean tryMethod(UserUpdateRequest userUpdateRequest) {
-            cognitoServiceFacade.changeUserEnabledStatus(userUpdateRequest);
-            auditLogService
-                .createAuditLogRecord(new UserEnabledStatusChangedEvent(userUpdateRequest));
-            return Boolean.TRUE;
-          }
+    return new OptionalExecution<UserUpdateRequest, Boolean>(userUpdateRequest) {
+      @Override
+      protected Boolean tryMethod(UserUpdateRequest userUpdateRequest) {
+        cognitoServiceFacade.changeUserEnabledStatus(userUpdateRequest);
+        auditLogService
+            .createAuditLogRecord(new UserEnabledStatusChangedEvent(userUpdateRequest));
+        return Boolean.TRUE;
+      }
 
-          @Override
-          protected void catchMethod(Exception e) {
-            LOGGER.error(messages
-                    .getTechMessage(ERROR_UPDATE_USER_ENABLED_STATUS, userUpdateRequest.getUserId()),
-                e);
-          }
-        };
+      @Override
+      protected void catchMethod(Exception e) {
+        LOGGER.error(messages
+                .getTechMessage(ERROR_UPDATE_USER_ENABLED_STATUS, userUpdateRequest.getUserId()),
+            e);
+      }
+    };
   }
 
   private void handleCreatePartialSuccess(String userId, PutInSearchExecution doraExecution) {
