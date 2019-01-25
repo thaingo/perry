@@ -16,7 +16,8 @@
     ],
     "roles": [
       "County-admin"
-    ]
+    ],
+    "notes": "Some notes text"
   },
   "edit_details": {
     "editable": true,
