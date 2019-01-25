@@ -1,6 +1,5 @@
 package gov.ca.cwds.idm.service;
 
-import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
 import gov.ca.cwds.idm.service.cognito.attribute.diff.UserAttributeDiff;
@@ -11,18 +10,9 @@ import java.util.Map;
  */
 public class UserUpdateRequest {
 
-  private UserType existedUser;
   private String userId;
   private Map<UserAttribute, UserAttributeDiff> diffMap;
-  private User user;
-
-  public void setExistedUser(UserType existedUser) {
-    this.existedUser = existedUser;
-  }
-
-  public UserType getExistedUser() {
-    return existedUser;
-  }
+  private User existedUser;
 
   public void setUserId(String userId) {
     this.userId = userId;
@@ -40,12 +30,12 @@ public class UserUpdateRequest {
     return diffMap;
   }
 
-  public void setUser(User user) {
-    this.user = user;
+  public void setExistedUser(User existedUser) {
+    this.existedUser = existedUser;
   }
 
-  public User getUser() {
-    return user;
+  public User getExistedUser() {
+    return existedUser;
   }
 
   public boolean isAttributeChanged(UserAttribute userAttribute) {

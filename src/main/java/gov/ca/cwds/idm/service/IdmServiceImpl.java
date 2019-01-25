@@ -153,35 +153,41 @@ public class IdmServiceImpl implements IdmService {
 
   @Override
   public void updateUser(String userId, UserUpdate updateUserDto) {
-    UserUpdateRequest userUpdateRequest = prepareUserUpdateRequest(userId, updateUserDto);
-    authorizeService.checkCanUpdateUser(userUpdateRequest.getExistedUser(), updateUserDto);
-    validationService.validateUserUpdate(userUpdateRequest.getExistedUser(), updateUserDto);
-    ExecutionStatus updateAttributesStatus =
-        updateUserAttributes(userUpdateRequest);
+    UserType existedCognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
+
+    authorizeService.checkCanUpdateUser(existedCognitoUser, updateUserDto);
+    validationService.validateUserUpdate(existedCognitoUser, updateUserDto);
+
+    UserUpdateRequest userUpdateRequest =
+        prepareUserUpdateRequest(userId, existedCognitoUser, updateUserDto);
+
+    ExecutionStatus updateAttributesStatus = updateUserAttributes(userUpdateRequest);
+
     OptionalExecution<UserUpdateRequest, Boolean> updateUserEnabledExecution =
         updateUserEnabledStatus(userUpdateRequest);
     if (updateAttributesStatus == WAS_NOT_EXECUTED
         && updateUserEnabledExecution.getExecutionStatus() == FAIL) {
       throw (RuntimeException) updateUserEnabledExecution.getException();
     }
+
     PutInSearchExecution<String> doraExecution = null;
     if (doesElasticSearchNeedUpdate(updateAttributesStatus, updateUserEnabledExecution)) {
       doraExecution = updateUserInSearch(userId);
     } else {
       LOGGER.info(messages.getTechMessage(USER_NOTHING_UPDATED, userId));
     }
+
     handleUpdatePartialSuccess(
         userId, updateAttributesStatus, updateUserEnabledExecution, doraExecution);
   }
 
-  private UserUpdateRequest prepareUserUpdateRequest(String userId, UserUpdate updateUserDto) {
+  private UserUpdateRequest prepareUserUpdateRequest(String userId, UserType existedCognitoUser,
+      UserUpdate updateUserDto) {
     UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
-    UserType existedCognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
-    userUpdateRequest.setExistedUser(existedCognitoUser);
     userUpdateRequest.setUserId(userId);
     Map<UserAttribute, UserAttributeDiff> diffMap =
         new UpdatedAttributesBuilder(existedCognitoUser, updateUserDto).buildUpdatedAttributesMap();
-    userUpdateRequest.setUser(mappingService.toUser(existedCognitoUser));
+    userUpdateRequest.setExistedUser(mappingService.toUser(existedCognitoUser));
     userUpdateRequest.setDiffMap(diffMap);
     return userUpdateRequest;
   }

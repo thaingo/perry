@@ -224,8 +224,7 @@ public class UserChangeLogEventTest {
       UserType existedUser,
       Map<UserAttribute, UserAttributeDiff> diffMap) {
     UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
-    userUpdateRequest.setUser(mockUser());
-    userUpdateRequest.setExistedUser(existedUser);
+    userUpdateRequest.setExistedUser(mockUser());
     userUpdateRequest.setDiffMap(diffMap);
     return userUpdateRequest;
   }
