@@ -13,15 +13,13 @@ public class UserCreatedEvent extends UserChangeLogEvent {
 
   private static final long serialVersionUID = 1527655053336674520L;
 
-  public static final String EVENT_TYPE_USER_CREATED = "USER CREATED";
+  public static final String EVENT_TYPE_USER_CREATED = "User Created";
 
   public UserCreatedEvent(User user) {
     super(user);
     setEventType(EVENT_TYPE_USER_CREATED);
-    if (user.getRoles() != null) {
-      setUserRoles(Roles.joinRoles(user.getRoles()));
-      setNewValue(Roles.joinRoles(user.getRoles()));
-    }
+    setNewValue(Roles.joinRoles(user.getRoles()));
+    setUserRoles(Roles.joinRoles(user.getRoles()));
   }
 
 }

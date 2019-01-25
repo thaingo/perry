@@ -3,73 +3,60 @@ package gov.ca.cwds.idm.service.cognito.attribute;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PERMISSIONS;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PHONE_EXTENSION;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.ROLES;
+import static gov.ca.cwds.idm.service.cognito.attribute.OtherUserAttribute.ENABLED_STATUS;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.PHONE_NUMBER;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoPhoneConverter.toCognitoFormat;
-import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.buildEmailAttributes;
-import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getAttributeValue;
 
-import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.UserUpdate;
-import java.util.LinkedHashMap;
+import gov.ca.cwds.idm.service.cognito.attribute.diff.UserAttributeDiff;
+import gov.ca.cwds.idm.service.cognito.attribute.diff.builder.CollectionAttributeDiffBuilder;
+import gov.ca.cwds.idm.service.cognito.attribute.diff.builder.EmailAttributeDiffBuilder;
+import gov.ca.cwds.idm.service.cognito.attribute.diff.builder.RoleAttributeDiffBuilder;
+import gov.ca.cwds.idm.service.cognito.attribute.diff.builder.StringAttributeDiffBuilder;
+import gov.ca.cwds.idm.service.cognito.attribute.diff.builder.UserAttributeDiffBuilder;
+import gov.ca.cwds.idm.service.cognito.attribute.diff.builder.UserEnabledStatusDiffBuilder;
+import gov.ca.cwds.util.Utils;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 public class UpdatedAttributesBuilder {
 
   private final UserType existedCognitoUser;
-  private final Map<UserAttribute, AttributeType> updatedAttributes = new LinkedHashMap<>();
-  private final StringAttributeHelper stringAttributeHelper = new StringAttributeHelper();
-  private final CollectionAttributeHelper collectionAttributeHelper = new CollectionAttributeHelper();
+  private final UserUpdate updateUserDto;
+  private final Map<UserAttribute, UserAttributeDiff> updatedAttributes = new HashMap<>();
 
   public UpdatedAttributesBuilder(UserType existedCognitoUser, UserUpdate updateUserDto) {
     this.existedCognitoUser = existedCognitoUser;
-
-    addEmailAttributes(updateUserDto.getEmail());
-    addAttribute(PHONE_NUMBER, toCognitoFormat(updateUserDto.getPhoneNumber()));
-    addAttribute(PHONE_EXTENSION, updateUserDto.getPhoneExtensionNumber());
-    addDelimitedAttribute(PERMISSIONS, updateUserDto.getPermissions());
-    addDelimitedAttribute(ROLES, updateUserDto.getRoles());
+    this.updateUserDto = updateUserDto;
   }
 
-  public Map<UserAttribute, AttributeType> getUpdatedAttributes() {
+  private <T> void addDiff(UserAttribute userAttribute,
+      UserAttributeDiffBuilder<T> diffBuilder) {
+    if (diffBuilder.doesDiffExist()) {
+      updatedAttributes.put(userAttribute, diffBuilder.buildDiff());
+    }
+  }
+
+  public Map<UserAttribute, UserAttributeDiff> buildUpdatedAttributesMap() {
+    addDiff(EMAIL, new EmailAttributeDiffBuilder(existedCognitoUser,
+        Utils.toLowerCase(updateUserDto.getEmail())));
+    addDiff(PHONE_NUMBER,
+        new StringAttributeDiffBuilder(PHONE_NUMBER, existedCognitoUser,
+            toCognitoFormat(updateUserDto.getPhoneNumber())));
+    addDiff(PHONE_EXTENSION,
+        new StringAttributeDiffBuilder(PHONE_EXTENSION, existedCognitoUser,
+            updateUserDto.getPhoneExtensionNumber()));
+    addDiff(PERMISSIONS,
+        new CollectionAttributeDiffBuilder(PERMISSIONS, existedCognitoUser,
+            updateUserDto.getPermissions()));
+    addDiff(ROLES,
+        new RoleAttributeDiffBuilder(existedCognitoUser,
+            updateUserDto.getRoles()));
+    addDiff(ENABLED_STATUS, new UserEnabledStatusDiffBuilder(ENABLED_STATUS, existedCognitoUser,
+        updateUserDto.getEnabled()));
     return updatedAttributes;
   }
 
-  private void addEmailAttributes(String newEmail) {
-
-    if (newEmail == null) {
-      return;
-    }
-
-    String existedEmail = getAttributeValue(existedCognitoUser, EMAIL.getName());
-
-    if (!newEmail.equalsIgnoreCase(existedEmail)) {
-      updatedAttributes.putAll(buildEmailAttributes(newEmail));
-    }
-  }
-
-  private void addAttribute(UserAttribute userAttribute, String newAttrValue) {
-    addAttribute(userAttribute, newAttrValue, stringAttributeHelper);
-  }
-
-  private void addDelimitedAttribute(UserAttribute userAttribute, Set<String> newValues) {
-    addAttribute(userAttribute, newValues, collectionAttributeHelper);
-  }
-
-  private <T> void addAttribute(
-      UserAttribute userAttribute, T newAttrValue, AttributeHelper<T> attributeHelper) {
-
-    if (newAttrValue == null) {
-      return;
-    }
-
-    T existedAttrValue = attributeHelper.getAttributeValue(existedCognitoUser, userAttribute);
-
-    if (!newAttrValue.equals(existedAttrValue)) {
-      updatedAttributes
-          .put(userAttribute, attributeHelper.createAttribute(userAttribute, newAttrValue));
-    }
-  }
 }

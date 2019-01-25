@@ -1,7 +1,6 @@
 package gov.ca.cwds.idm.service.cognito.attribute;
 
 import static com.google.common.base.Strings.nullToEmpty;
-import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.attribute;
 
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import java.util.ArrayList;
@@ -37,7 +36,7 @@ public class AttributesBuilder {
     if (userAttribute == null) {
       throw new IllegalArgumentException("UserAttribute may not be null");
     }
-    AttributeType attr = attribute(userAttribute.getName(), attrValue);
+    AttributeType attr = new AttributeType().withName(userAttribute.getName()).withValue(attrValue);
     return addAttribute(attr);
   }
 }

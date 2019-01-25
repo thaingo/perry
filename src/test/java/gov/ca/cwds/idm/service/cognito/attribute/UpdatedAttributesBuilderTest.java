@@ -6,7 +6,6 @@ import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.ROLE
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL_VERIFIED;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.PHONE_NUMBER;
-import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.attribute;
 import static gov.ca.cwds.util.Utils.toSet;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.Is.is;
@@ -16,7 +15,9 @@ import static org.junit.Assert.assertTrue;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.UserUpdate;
+import gov.ca.cwds.idm.service.cognito.attribute.diff.UserAttributeDiff;
 import java.util.Map;
+import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
 public class UpdatedAttributesBuilderTest {
@@ -25,7 +26,7 @@ public class UpdatedAttributesBuilderTest {
   public void testNoChanges() {
     UpdatedAttributesBuilder builder =
         new UpdatedAttributesBuilder(existedCognitoUser(), new UserUpdate());
-    Map<UserAttribute, AttributeType> updatedAttributes =  builder.getUpdatedAttributes();
+    Map<UserAttribute, UserAttributeDiff> updatedAttributes =  builder.buildUpdatedAttributesMap();
     assertThat(updatedAttributes.size(), is(0));
   }
 
@@ -40,7 +41,7 @@ public class UpdatedAttributesBuilderTest {
 
     UpdatedAttributesBuilder builder =
         new UpdatedAttributesBuilder(existedCognitoUser(), userUpdate);
-    Map<UserAttribute, AttributeType> updatedAttributes =  builder.getUpdatedAttributes();
+    Map<UserAttribute, UserAttributeDiff> updatedAttributes =  builder.buildUpdatedAttributesMap();
     assertThat(updatedAttributes.size(), is(0));
   }
 
@@ -56,42 +57,88 @@ public class UpdatedAttributesBuilderTest {
 
     UpdatedAttributesBuilder builder =
         new UpdatedAttributesBuilder(existedCognitoUser(), userUpdate);
-    Map<UserAttribute, AttributeType> updatedAttributes =  builder.getUpdatedAttributes();
-    assertThat(updatedAttributes.size(), is(6));
+    Map<UserAttribute, UserAttributeDiff> updatedAttributes =  builder.buildUpdatedAttributesMap();
+    assertThat(updatedAttributes.size(), is(5));
 
     assertAttribute(updatedAttributes, EMAIL, "admin@oci.ca.gov");
-    assertAttribute(updatedAttributes, EMAIL_VERIFIED, "True");
     assertAttribute(updatedAttributes, PHONE_NUMBER, "+0987654321");
     assertAttribute(updatedAttributes, PHONE_EXTENSION, "99");
     assertCollectionAttribute(updatedAttributes, ROLES, "County-admin", "Office-admin");
     assertCollectionAttribute(updatedAttributes, PERMISSIONS, "Hotline-rollout", "RFA-rollout");
   }
 
+  @Test
+  public void testBuildEmailAttributesNullEmail() {
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setEmail(null);
+    UpdatedAttributesBuilder builder =
+        new UpdatedAttributesBuilder(existedCognitoUser(), userUpdate);
+    Map<UserAttribute, UserAttributeDiff> updatedAttributes =  builder.buildUpdatedAttributesMap();
+    assertThat(updatedAttributes.size(), CoreMatchers.is(0));
+  }
+
+  @Test
+  public void testBuildEmailAttribute() {
+    testEmailAttribute("new@e.mail");
+  }
+
+  @Test
+  public void testBuildEmptyEmailAttribute() {
+    testEmailAttribute("");
+  }
+
+  private void testEmailAttribute(String newEmail) {
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setEmail(newEmail);
+    UpdatedAttributesBuilder builder =
+        new UpdatedAttributesBuilder(existedCognitoUser(), userUpdate);
+    Map<UserAttribute, UserAttributeDiff> updatedAttributes =  builder.buildUpdatedAttributesMap();
+    assertEmailAttributes(updatedAttributes, newEmail);
+  }
+
+  private void assertEmailAttributes(Map<UserAttribute, UserAttributeDiff> attrMap, String email) {
+    assertThat(attrMap, CoreMatchers.is(notNullValue()));
+    assertThat(attrMap.size(), CoreMatchers.is(1));
+
+    assertThat(attrMap.get(EMAIL), CoreMatchers.is(notNullValue()));
+    AttributeType emailAttr = (AttributeType) attrMap.get(EMAIL).createAttributeTypes().get(0);
+    assertThat(emailAttr.getName(), CoreMatchers.is(EMAIL.getName()));
+    assertThat(emailAttr.getValue(), CoreMatchers.is(email));
+
+    AttributeType emailVerifiedAttr = (AttributeType) attrMap.get(EMAIL).createAttributeTypes().get(1);
+    assertThat(emailVerifiedAttr.getName(), CoreMatchers.is(EMAIL_VERIFIED.getName()));
+    assertThat(emailVerifiedAttr.getValue(), CoreMatchers.is("True"));
+  }
+
   private UserType existedCognitoUser() {
     UserType userType = new UserType();
 
     userType.withAttributes(
-        attribute(EMAIL, "user@oci.ca.gov"),
-        attribute(EMAIL_VERIFIED, "True"),
-        attribute(PHONE_NUMBER, "+1234567890"),
-        attribute(PHONE_EXTENSION, "28"),
-        attribute(ROLES, "State-admin:County-admin"),
-        attribute(PERMISSIONS, "Snapshot-rollout:Hotline-rollout"));
+        new AttributeType().withName(((UserAttribute) EMAIL).getName())
+            .withValue("user@oci.ca.gov"),
+        new AttributeType().withName(((UserAttribute) EMAIL_VERIFIED).getName()).withValue("True"),
+        new AttributeType().withName(((UserAttribute) PHONE_NUMBER).getName())
+            .withValue("+1234567890"),
+        new AttributeType().withName(((UserAttribute) PHONE_EXTENSION).getName()).withValue("28"),
+        new AttributeType().withName(((UserAttribute) ROLES).getName())
+            .withValue("State-admin:County-admin"),
+        new AttributeType().withName(((UserAttribute) PERMISSIONS).getName())
+            .withValue("Snapshot-rollout:Hotline-rollout"));
 
     return userType;
   }
 
   private void assertAttribute(
-      Map<UserAttribute, AttributeType> updatedAttributes, UserAttribute userAttribute, String value) {
-    AttributeType attr = updatedAttributes.get(userAttribute);
+      Map<UserAttribute, UserAttributeDiff> updatedAttributes, UserAttribute userAttribute, String value) {
+    AttributeType attr = (AttributeType) updatedAttributes.get(userAttribute).createAttributeTypes().get(0);
     assertThat(attr, is(notNullValue()));
     assertThat(attr.getName(), is(userAttribute.getName()));
     assertThat(attr.getValue(), is(value));
   }
 
   private void assertCollectionAttribute(
-      Map<UserAttribute, AttributeType> updatedAttributes, UserAttribute userAttribute, String... elements) {
-    AttributeType attr = updatedAttributes.get(userAttribute);
+      Map<UserAttribute, UserAttributeDiff> updatedAttributes, UserAttribute userAttribute, String... elements) {
+    AttributeType attr = (AttributeType) updatedAttributes.get(userAttribute).createAttributeTypes().get(0);
     assertThat(attr, is(notNullValue()));
     assertThat(attr.getName(), is(userAttribute.getName()));
     String value = attr.getValue();

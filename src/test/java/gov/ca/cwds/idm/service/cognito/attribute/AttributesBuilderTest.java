@@ -1,13 +1,11 @@
 package gov.ca.cwds.idm.service.cognito.attribute;
 
-import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.attribute;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
 import com.amazonaws.services.cognitoidp.model.AttributeType;
-import gov.ca.cwds.idm.service.cognito.attribute.AttributesBuilder;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,10 +45,10 @@ public class AttributesBuilderTest {
   @Test
   public void testAddAttribute() {
     builder
-        .addAttribute(attribute("firstName", "firstValue"))
-        .addAttribute(attribute("secondName", ""))
-        .addAttribute(attribute("thirdName", "   "))
-        .addAttribute(attribute("forthName", null));
+        .addAttribute(new AttributeType().withName("firstName").withValue("firstValue"))
+        .addAttribute(new AttributeType().withName("secondName").withValue(""))
+        .addAttribute(new AttributeType().withName("thirdName").withValue("   "))
+        .addAttribute(new AttributeType().withName("forthName").withValue(null));
     List<AttributeType> attrs = builder.build();
     assertThat(attrs, hasSize(4));
 

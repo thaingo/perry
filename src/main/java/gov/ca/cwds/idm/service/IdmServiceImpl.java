@@ -6,6 +6,9 @@ import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
 import static gov.ca.cwds.idm.service.ExecutionStatus.FAIL;
 import static gov.ca.cwds.idm.service.ExecutionStatus.SUCCESS;
 import static gov.ca.cwds.idm.service.ExecutionStatus.WAS_NOT_EXECUTED;
+import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PERMISSIONS;
+import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.ROLES;
+import static gov.ca.cwds.idm.service.cognito.attribute.OtherUserAttribute.ENABLED_STATUS;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getRACFId;
@@ -29,32 +32,34 @@ import static gov.ca.cwds.util.Utils.toLowerCase;
 import static gov.ca.cwds.util.Utils.toUpperCase;
 import static java.util.stream.Collectors.toSet;
 
-import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.data.persistence.auth.CwsOffice;
 import gov.ca.cwds.data.persistence.auth.StaffPerson;
 import gov.ca.cwds.idm.dto.RegistrationResubmitResponse;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserAndOperation;
-import gov.ca.cwds.idm.dto.UserEnableStatusRequest;
 import gov.ca.cwds.idm.dto.UserIdAndOperation;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.UserVerificationResult;
 import gov.ca.cwds.idm.dto.UsersPage;
 import gov.ca.cwds.idm.dto.UsersSearchCriteria;
+import gov.ca.cwds.idm.event.EmailChangedEvent;
+import gov.ca.cwds.idm.event.PermissionsChangedEvent;
 import gov.ca.cwds.idm.event.UserCreatedEvent;
+import gov.ca.cwds.idm.event.UserEnabledStatusChangedEvent;
 import gov.ca.cwds.idm.event.UserRoleChangedEvent;
 import gov.ca.cwds.idm.exception.AdminAuthorizationException;
 import gov.ca.cwds.idm.exception.UserValidationException;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
+import gov.ca.cwds.idm.persistence.ns.entity.Permission;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
 import gov.ca.cwds.idm.service.authorization.AuthorizationService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
-import gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute;
 import gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute;
 import gov.ca.cwds.idm.service.cognito.attribute.UpdatedAttributesBuilder;
 import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
+import gov.ca.cwds.idm.service.cognito.attribute.diff.UserAttributeDiff;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil;
@@ -131,6 +136,9 @@ public class IdmServiceImpl implements IdmService {
   @Autowired
   private AuditLogService auditLogService;
 
+  @Autowired
+  private DictionaryProvider dictionaryProvider;
+
   @Override
   public User findUser(String id) {
     User user = getUser(id);
@@ -145,36 +153,52 @@ public class IdmServiceImpl implements IdmService {
 
   @Override
   public void updateUser(String userId, UserUpdate updateUserDto) {
-
-    UserType existedCognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
-
-    authorizeService.checkCanUpdateUser(existedCognitoUser, updateUserDto);
-    validationService.validateUserUpdate(existedCognitoUser, updateUserDto);
-
+    UserUpdateRequest userUpdateRequest = prepareUserUpdateRequest(userId, updateUserDto);
+    authorizeService.checkCanUpdateUser(userUpdateRequest.getExistedUser(), updateUserDto);
+    validationService.validateUserUpdate(userUpdateRequest.getExistedUser(), updateUserDto);
     ExecutionStatus updateAttributesStatus =
-        updateUserAttributes(userId, updateUserDto, existedCognitoUser);
-
-    OptionalExecution<UserEnableStatusRequest, Boolean> updateUserEnabledExecution =
-        executeUpdateEnableStatusOptionally(userId, updateUserDto, existedCognitoUser);
-
+        updateUserAttributes(userUpdateRequest);
+    OptionalExecution<UserUpdateRequest, Boolean> updateUserEnabledExecution =
+        updateUserEnabledStatus(userUpdateRequest);
     if (updateAttributesStatus == WAS_NOT_EXECUTED
         && updateUserEnabledExecution.getExecutionStatus() == FAIL) {
       throw (RuntimeException) updateUserEnabledExecution.getException();
     }
-
     PutInSearchExecution<String> doraExecution = null;
     if (doesElasticSearchNeedUpdate(updateAttributesStatus, updateUserEnabledExecution)) {
       doraExecution = updateUserInSearch(userId);
     } else {
       LOGGER.info(messages.getTechMessage(USER_NOTHING_UPDATED, userId));
     }
-
     handleUpdatePartialSuccess(
         userId, updateAttributesStatus, updateUserEnabledExecution, doraExecution);
   }
 
+  private UserUpdateRequest prepareUserUpdateRequest(String userId, UserUpdate updateUserDto) {
+    UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
+    UserType existedCognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
+    userUpdateRequest.setExistedUser(existedCognitoUser);
+    userUpdateRequest.setUserId(userId);
+    Map<UserAttribute, UserAttributeDiff> diffMap =
+        new UpdatedAttributesBuilder(existedCognitoUser, updateUserDto).buildUpdatedAttributesMap();
+    userUpdateRequest.setUser(mappingService.toUser(existedCognitoUser));
+    userUpdateRequest.setDiffMap(diffMap);
+    return userUpdateRequest;
+  }
+
+  private OptionalExecution<UserUpdateRequest, Boolean> updateUserEnabledStatus(
+      UserUpdateRequest userUpdateRequest) {
+    OptionalExecution<UserUpdateRequest, Boolean> updateUserEnabledExecution;
+    if (userUpdateRequest.isAttributeChanged(ENABLED_STATUS)) {
+      updateUserEnabledExecution = executeUpdateEnableStatusOptionally(userUpdateRequest);
+    } else {
+      updateUserEnabledExecution = NoUpdateExecution.INSTANCE;
+    }
+    return updateUserEnabledExecution;
+  }
+
   private boolean doesElasticSearchNeedUpdate(ExecutionStatus updateAttributesStatus,
-      OptionalExecution<UserEnableStatusRequest, Boolean> updateUserEnabledExecution) {
+      OptionalExecution<UserUpdateRequest, Boolean> updateUserEnabledExecution) {
     return updateAttributesStatus == SUCCESS
         || updateUserEnabledExecution.getExecutionStatus() == SUCCESS;
   }
@@ -248,7 +272,8 @@ public class IdmServiceImpl implements IdmService {
     return new RegistrationResubmitResponse(userId, resubmitDateTime);
   }
 
-  private void saveResendInvitationMessageRequestTimeInDb(String userId, LocalDateTime resubmitTime) {
+  private void saveResendInvitationMessageRequestTimeInDb(String userId,
+      LocalDateTime resubmitTime) {
     try {
       nsUserService.saveLastRegistrationResubmitTime(userId, resubmitTime);
     } catch (Exception e) {
@@ -292,8 +317,8 @@ public class IdmServiceImpl implements IdmService {
     }
   }
 
-  private void enrichUserByCwsData(User user, CwsUserInfo cwsUser){
-    if(cwsUser != null) {
+  private void enrichUserByCwsData(User user, CwsUserInfo cwsUser) {
+    if (cwsUser != null) {
       enrichDataFromCwsOffice(cwsUser.getCwsOffice(), user);
       enrichDataFromStaffPerson(cwsUser.getStaffPerson(), user);
     }
@@ -323,31 +348,33 @@ public class IdmServiceImpl implements IdmService {
     }
   }
 
-  private ExecutionStatus updateUserAttributes(
-      String userId, UserUpdate updateUserDto, UserType existedCognitoUser) {
+  private ExecutionStatus updateUserAttributes(UserUpdateRequest userUpdateRequest) {
     ExecutionStatus updateAttributesStatus = WAS_NOT_EXECUTED;
-
-    if (cognitoServiceFacade.updateUserAttributes(userId, existedCognitoUser, updateUserDto)) {
+    if (cognitoServiceFacade.updateUserAttributes(userUpdateRequest)) {
       updateAttributesStatus = SUCCESS;
-      publishUpdateAttributesEvents(existedCognitoUser, updateUserDto);
+      publishUpdateAttributesEvents(userUpdateRequest);
     }
     return updateAttributesStatus;
   }
 
-  private void publishUpdateAttributesEvents(UserType existedCognitoUser, UserUpdate updateUserDto) {
-    Map<UserAttribute, AttributeType> updatedAttributes =
-        new UpdatedAttributesBuilder(existedCognitoUser, updateUserDto).getUpdatedAttributes();
-    if (updatedAttributes.containsKey(CustomUserAttribute.ROLES)) {
-      User user = mappingService.toUser(existedCognitoUser);
-      auditLogService.createAuditLogRecord(new UserRoleChangedEvent(user,
-          updateUserDto.getRoles()));
+  private void publishUpdateAttributesEvents(UserUpdateRequest userUpdateRequest) {
+    if (userUpdateRequest.isAttributeChanged(ROLES)) {
+      auditLogService.createAuditLogRecord(new UserRoleChangedEvent(userUpdateRequest));
+    }
+    if (userUpdateRequest.isAttributeChanged(PERMISSIONS)) {
+      List<Permission> permissions = dictionaryProvider.getPermissions();
+      auditLogService
+          .createAuditLogRecord(new PermissionsChangedEvent(userUpdateRequest, permissions));
+    }
+    if (userUpdateRequest.isAttributeChanged(StandardUserAttribute.EMAIL)) {
+      auditLogService.createAuditLogRecord(new EmailChangedEvent(userUpdateRequest));
     }
   }
 
   private void handleUpdatePartialSuccess(
       String userId,
       ExecutionStatus updateAttributesStatus,
-      OptionalExecution<UserEnableStatusRequest, Boolean> updateUserEnabledExecution,
+      OptionalExecution<UserUpdateRequest, Boolean> updateUserEnabledExecution,
       PutInSearchExecution<String> doraExecution) {
 
     ExecutionStatus updateEnableStatus = updateUserEnabledExecution.getExecutionStatus();
@@ -420,33 +447,29 @@ public class IdmServiceImpl implements IdmService {
 
     } else if (doraStatus == FAIL && logDbStatus == FAIL) {
       throwPartialSuccessException(
-          userId, UPDATE, USER_UPDATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS, doraException, logDbException);
+          userId, UPDATE, USER_UPDATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS, doraException,
+          logDbException);
     }
   }
 
-  private OptionalExecution<UserEnableStatusRequest, Boolean> executeUpdateEnableStatusOptionally(
-      String userId, UserUpdate updateUserDto, UserType existedCognitoUser) {
+  private OptionalExecution<UserUpdateRequest, Boolean> executeUpdateEnableStatusOptionally(
+      UserUpdateRequest userUpdateRequest) {
+    return new OptionalExecution<UserUpdateRequest, Boolean>(userUpdateRequest) {
+      @Override
+      protected Boolean tryMethod(UserUpdateRequest userUpdateRequest) {
+        cognitoServiceFacade.changeUserEnabledStatus(userUpdateRequest);
+        auditLogService
+            .createAuditLogRecord(new UserEnabledStatusChangedEvent(userUpdateRequest));
+        return Boolean.TRUE;
+      }
 
-    OptionalExecution<UserEnableStatusRequest, Boolean> updateUserEnabledExecution =
-        new OptionalExecution<UserEnableStatusRequest, Boolean>(
-            new UserEnableStatusRequest(
-                userId, existedCognitoUser.getEnabled(), updateUserDto.getEnabled())) {
-          @Override
-          protected Boolean tryMethod(UserEnableStatusRequest userEnableStatusRequest) {
-            return cognitoServiceFacade.changeUserEnabledStatus(userEnableStatusRequest);
-          }
-
-          @Override
-          protected void catchMethod(Exception e) {
-            LOGGER.error(messages.getTechMessage(ERROR_UPDATE_USER_ENABLED_STATUS, userId), e);
-          }
-        };
-
-    if (updateUserEnabledExecution.getExecutionStatus() == SUCCESS
-        && !updateUserEnabledExecution.getResult()) {
-      updateUserEnabledExecution.setExecutionStatus(WAS_NOT_EXECUTED);
-    }
-    return updateUserEnabledExecution;
+      @Override
+      protected void catchMethod(Exception e) {
+        LOGGER.error(messages
+                .getTechMessage(ERROR_UPDATE_USER_ENABLED_STATUS, userUpdateRequest.getUserId()),
+            e);
+      }
+    };
   }
 
   private void handleCreatePartialSuccess(String userId, PutInSearchExecution doraExecution) {
@@ -539,7 +562,6 @@ public class IdmServiceImpl implements IdmService {
     Map<String, NsUser> usernameToNsUser =
         nsUserService.findByUsernames(userNames).stream()
             .collect(Collectors.toMap(NsUser::getUsername, e -> e));
-
     return cognitoUsers
         .stream()
         .map(userType -> mappingService.toUser(
@@ -620,4 +642,31 @@ public class IdmServiceImpl implements IdmService {
   public void setValidationService(ValidationService validationService) {
     this.validationService = validationService;
   }
+
+  private static class NoUpdateExecution extends
+      OptionalExecution<UserUpdateRequest, Boolean> {
+
+    private static final NoUpdateExecution INSTANCE = new NoUpdateExecution();
+
+    private NoUpdateExecution() {
+      super(null);
+    }
+
+    @Override
+    protected Boolean tryMethod(UserUpdateRequest input) {
+      return Boolean.FALSE;
+    }
+
+    @Override
+    protected void catchMethod(Exception e) {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public ExecutionStatus getExecutionStatus() {
+      return ExecutionStatus.WAS_NOT_EXECUTED;
+    }
+  }
+
+
 }

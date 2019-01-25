@@ -4,6 +4,7 @@ import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserFullName;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserName;
 
+import gov.ca.cwds.config.api.idm.Roles;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserChangeLogRecord;
 import gov.ca.cwds.idm.service.authorization.UserRolesService;
@@ -25,13 +26,14 @@ abstract class UserChangeLogEvent extends AuditEvent<UserChangeLogRecord> {
     setUserLogin(getCurrentUserName());
     UserChangeLogRecord userChangeLogRecord = new UserChangeLogRecord();
     userChangeLogRecord.setAdminName(getCurrentUserFullName());
-    String adminRole = UserRolesService.getStrongestAdminRole(getCurrentUser());
+    String adminRole = Roles
+        .getRoleNameById(UserRolesService.getStrongestAdminRole(getCurrentUser()));
     userChangeLogRecord.setAdminRole(adminRole);
     setEvent(userChangeLogRecord);
-    getEvent().setCountyName(user.getCountyName());
-    getEvent().setOfficeId(user.getOfficeId());
-    getEvent().setUserId(user.getId());
-    getEvent().setUserName(user.getFirstName() + " " + user.getLastName());
+    setCountyName(user.getCountyName());
+    setOfficeId(user.getOfficeId());
+    setUserId(user.getId());
+    setUserName(user.getFirstName() + " " + user.getLastName());
   }
 
   protected void setAdminRole(String adminRole) {
@@ -46,15 +48,15 @@ abstract class UserChangeLogEvent extends AuditEvent<UserChangeLogRecord> {
     getEvent().setUserRoles(userRoles);
   }
 
-  protected void setUserId(String userId) {
+  protected final void setUserId(String userId) {
     getEvent().setUserId(userId);
   }
 
-  protected void setUserName(String userName) {
+  protected final void setUserName(String userName) {
     getEvent().setUserName(userName);
   }
 
-  protected void setOldValue(String oldValue) {
+  protected final void setOldValue(String oldValue) {
     getEvent().setOldValue(oldValue);
   }
 
@@ -62,11 +64,11 @@ abstract class UserChangeLogEvent extends AuditEvent<UserChangeLogRecord> {
     getEvent().setNewValue(newValue);
   }
 
-  protected void setOfficeId(String officeId) {
+  protected final void setOfficeId(String officeId) {
     getEvent().setOfficeId(officeId);
   }
 
-  protected void setCountyName(String countyName) {
+  protected final void setCountyName(String countyName) {
     getEvent().setCountyName(countyName);
   }
 

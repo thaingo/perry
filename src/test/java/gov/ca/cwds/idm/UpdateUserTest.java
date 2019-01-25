@@ -34,6 +34,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -52,6 +53,10 @@ import gov.ca.cwds.config.LoggingRequestIdFilter;
 import gov.ca.cwds.config.LoggingUserIdFilter;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
+import gov.ca.cwds.idm.event.AuditEvent;
+import gov.ca.cwds.idm.event.EmailChangedEvent;
+import gov.ca.cwds.idm.event.PermissionsChangedEvent;
+import gov.ca.cwds.idm.event.UserEnabledStatusChangedEvent;
 import gov.ca.cwds.idm.event.UserRoleChangedEvent;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
@@ -101,8 +106,16 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     InOrder inOrder = inOrder(cognito);
     inOrder.verify(cognito).adminDisableUser(disableUserRequest);
     verifyDoraCalls(1);
+    verify(auditLogService, times(4)).createAuditLogRecord(any(AuditEvent.class));
     verify(auditLogService, times(1)).createAuditLogRecord(any(
         UserRoleChangedEvent.class));
+    verify(auditLogService, times(1)).createAuditLogRecord(any(
+        PermissionsChangedEvent.class));
+    verify(auditLogService, times(1)).createAuditLogRecord(any(
+        EmailChangedEvent.class));
+    verify(auditLogService, times(1)).createAuditLogRecord(any(
+        UserEnabledStatusChangedEvent.class));
+
   }
 
   @Test
@@ -161,9 +174,11 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
                 .content(asJsonString(userUpdate)))
         .andExpect(MockMvcResultMatchers.status().isNoContent())
         .andReturn();
-    verify(auditLogService, times(0)).createAuditLogRecord(any(
+    verify(auditLogService, never()).createAuditLogRecord(any(
         UserRoleChangedEvent.class));
- }
+    verify(auditLogService, never()).createAuditLogRecord(any(
+        EmailChangedEvent.class));
+  }
 
   @Test
   @WithMockCustomUser
@@ -365,6 +380,10 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
 
     verify(cognito, times(0)).adminEnableUser(enableUserRequest);
     verify(spySearchService, times(0)).createUser(any(User.class));
+    verify(auditLogService, never()).createAuditLogRecord(any(
+        PermissionsChangedEvent.class));
+    verify(auditLogService, never()).createAuditLogRecord(any(
+        UserEnabledStatusChangedEvent.class));
   }
 
   @Test
