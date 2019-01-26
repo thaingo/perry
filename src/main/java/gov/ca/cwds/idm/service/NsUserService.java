@@ -75,11 +75,6 @@ public class NsUserService {
     }
     NsUser nsUser = getOrCreateNewNsUser(userUpdateRequest.getUserId());
 
-//    if(databaseDiffMap.containsKey(NOTES)) {
-//      String newNotes = (String)(databaseDiffMap.get(NOTES).getNewValue());
-//      nsUser.setNotes(newNotes);
-//    }
-
     NsUser modifiedNsUser = new NsUserBuilder(nsUser, databaseDiffMap).build();
 
     nsUserRepository.save(modifiedNsUser);
@@ -132,13 +127,13 @@ public class NsUserService {
     }
 
     public NsUser build() {
-      setStringProperty(NOTES, nsUser::setNotes);
+      setProperty(NOTES, nsUser::setNotes);
       return nsUser;
     }
 
-    private void setStringProperty(UserAttribute userAttribute, Consumer<String> setter) {
+    private <T> void setProperty(UserAttribute userAttribute, Consumer<T> setter) {
       if(databaseDiffMap.containsKey(userAttribute)) {
-        String newValue = (String)(databaseDiffMap.get(userAttribute).getNewValue());
+        T newValue = (T)(databaseDiffMap.get(userAttribute).getNewValue());
         setter.accept(newValue);
       }
     }
