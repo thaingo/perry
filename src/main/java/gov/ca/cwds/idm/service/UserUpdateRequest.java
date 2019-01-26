@@ -2,6 +2,7 @@ package gov.ca.cwds.idm.service;
 
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
+import gov.ca.cwds.idm.service.cognito.attribute.diff.Diff;
 import gov.ca.cwds.idm.service.cognito.attribute.diff.UserAttributeDiff;
 import java.util.Map;
 
@@ -11,8 +12,10 @@ import java.util.Map;
 public class UserUpdateRequest {
 
   private String userId;
-  private Map<UserAttribute, UserAttributeDiff> diffMap;
   private User existedUser;
+  private Map<UserAttribute, UserAttributeDiff> cognitoDiffMap;
+
+  private Map<UserAttribute, Diff> databaseDiffMap;
 
   public void setUserId(String userId) {
     this.userId = userId;
@@ -22,12 +25,12 @@ public class UserUpdateRequest {
     return userId;
   }
 
-  public void setDiffMap(Map<UserAttribute, UserAttributeDiff> diffMap) {
-    this.diffMap = diffMap;
+  public void setCognitoDiffMap(Map<UserAttribute, UserAttributeDiff> cognitoDiffMap) {
+    this.cognitoDiffMap = cognitoDiffMap;
   }
 
-  public Map<UserAttribute, UserAttributeDiff> getDiffMap() {
-    return diffMap;
+  public Map<UserAttribute, UserAttributeDiff> getCognitoDiffMap() {
+    return cognitoDiffMap;
   }
 
   public void setExistedUser(User existedUser) {
@@ -39,15 +42,23 @@ public class UserUpdateRequest {
   }
 
   public boolean isAttributeChanged(UserAttribute userAttribute) {
-    return diffMap.containsKey(userAttribute);
+    return cognitoDiffMap.containsKey(userAttribute);
   }
 
   public String getOldValueAsString(UserAttribute userAttribute) {
-    return diffMap.get(userAttribute).getOldValueAsString();
+    return cognitoDiffMap.get(userAttribute).getOldValueAsString();
   }
 
   public String getNewValueAsString(UserAttribute userAttribute) {
-    return diffMap.get(userAttribute).getNewValueAsString();
+    return cognitoDiffMap.get(userAttribute).getNewValueAsString();
   }
 
+  public Map<UserAttribute, Diff> getDatabaseDiffMap() {
+    return databaseDiffMap;
+  }
+
+  public void setDatabaseDiffMap(
+      Map<UserAttribute, Diff> databaseDiffMap) {
+    this.databaseDiffMap = databaseDiffMap;
+  }
 }

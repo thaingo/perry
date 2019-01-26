@@ -205,7 +205,7 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
   @Override
   public boolean updateUserAttributes(
       UserUpdateRequest userUpdateRequest) {
-    List<AttributeType> attributeTypes = new AttributeTypesBuilder(userUpdateRequest.getDiffMap())
+    List<AttributeType> attributeTypes = new AttributeTypesBuilder(userUpdateRequest.getCognitoDiffMap())
         .addAttribute(EMAIL).addAttribute(PHONE_NUMBER).addAttribute(PHONE_EXTENSION)
         .addAttribute(PERMISSIONS).addAttribute(ROLES).attributeTypes;
     if (attributeTypes.isEmpty()) {
@@ -237,7 +237,7 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
    */
   @Override
   public void changeUserEnabledStatus(UserUpdateRequest userUpdateRequest) {
-    UserEnabledStatusAttributeDiff diff = (UserEnabledStatusAttributeDiff) userUpdateRequest.getDiffMap()
+    UserEnabledStatusAttributeDiff diff = (UserEnabledStatusAttributeDiff) userUpdateRequest.getCognitoDiffMap()
         .get(ENABLED_STATUS);
     Validate.notNull(diff);
     String id = userUpdateRequest.getUserId();

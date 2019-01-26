@@ -56,9 +56,11 @@ import gov.ca.cwds.idm.persistence.ns.entity.Permission;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
 import gov.ca.cwds.idm.service.authorization.AuthorizationService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
+import gov.ca.cwds.idm.service.cognito.attribute.DiffMapBuilder;
 import gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute;
 import gov.ca.cwds.idm.service.cognito.attribute.UpdatedAttributesBuilder;
 import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
+import gov.ca.cwds.idm.service.cognito.attribute.diff.Diff;
 import gov.ca.cwds.idm.service.cognito.attribute.diff.UserAttributeDiff;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
@@ -78,6 +80,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -139,6 +142,9 @@ public class IdmServiceImpl implements IdmService {
   @Autowired
   private DictionaryProvider dictionaryProvider;
 
+  @Autowired
+  private UserService userService;
+
   @Override
   public User findUser(String id) {
     User user = getUser(id);
@@ -184,11 +190,19 @@ public class IdmServiceImpl implements IdmService {
   private UserUpdateRequest prepareUserUpdateRequest(String userId, UserType existedCognitoUser,
       UserUpdate updateUserDto) {
     UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
+
     userUpdateRequest.setUserId(userId);
-    Map<UserAttribute, UserAttributeDiff> diffMap =
+    User existedUser = mappingService.toUser(existedCognitoUser);
+    userUpdateRequest.setExistedUser(existedUser);
+
+    Map<UserAttribute, UserAttributeDiff> cognitoDiffMap =
         new UpdatedAttributesBuilder(existedCognitoUser, updateUserDto).buildUpdatedAttributesMap();
-    userUpdateRequest.setExistedUser(mappingService.toUser(existedCognitoUser));
-    userUpdateRequest.setDiffMap(diffMap);
+    userUpdateRequest.setCognitoDiffMap(cognitoDiffMap);
+
+    Map<UserAttribute, Diff> databaseDiffMap =
+        new DiffMapBuilder(existedUser, updateUserDto).build();
+    userUpdateRequest.setDatabaseDiffMap(databaseDiffMap);
+
     return userUpdateRequest;
   }
 
@@ -356,7 +370,8 @@ public class IdmServiceImpl implements IdmService {
 
   private ExecutionStatus updateUserAttributes(UserUpdateRequest userUpdateRequest) {
     ExecutionStatus updateAttributesStatus = WAS_NOT_EXECUTED;
-    if (cognitoServiceFacade.updateUserAttributes(userUpdateRequest)) {
+
+    if(userService.updateUserAttributes(userUpdateRequest)) {
       updateAttributesStatus = SUCCESS;
       publishUpdateAttributesEvents(userUpdateRequest);
     }
@@ -647,6 +662,10 @@ public class IdmServiceImpl implements IdmService {
 
   public void setValidationService(ValidationService validationService) {
     this.validationService = validationService;
+  }
+
+  public void setUserService(UserService userService) {
+    this.userService = userService;
   }
 
   private static class NoUpdateExecution extends
