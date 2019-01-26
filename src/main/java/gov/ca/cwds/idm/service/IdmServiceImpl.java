@@ -56,7 +56,7 @@ import gov.ca.cwds.idm.persistence.ns.entity.Permission;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
 import gov.ca.cwds.idm.service.authorization.AuthorizationService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
-import gov.ca.cwds.idm.service.cognito.attribute.DiffMapBuilder;
+import gov.ca.cwds.idm.service.cognito.attribute.DatabaseDiffMapBuilder;
 import gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute;
 import gov.ca.cwds.idm.service.cognito.attribute.UpdatedAttributesBuilder;
 import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
@@ -80,7 +80,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -200,7 +199,7 @@ public class IdmServiceImpl implements IdmService {
     userUpdateRequest.setCognitoDiffMap(cognitoDiffMap);
 
     Map<UserAttribute, Diff> databaseDiffMap =
-        new DiffMapBuilder(existedUser, updateUserDto).build();
+        new DatabaseDiffMapBuilder(existedUser, updateUserDto).build();
     userUpdateRequest.setDatabaseDiffMap(databaseDiffMap);
 
     return userUpdateRequest;

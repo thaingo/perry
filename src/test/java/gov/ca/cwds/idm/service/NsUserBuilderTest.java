@@ -20,7 +20,7 @@ public class NsUserBuilderTest {
     existedUser.setNotes("Old Notes");
 
     Map<UserAttribute, Diff> databaseDiffMap = new HashMap<>();
-    databaseDiffMap.put(NOTES, new Diff( "Old Notes","New Notes"));
+    databaseDiffMap.put(NOTES, new Diff<>( "Old Notes","New Notes"));
 
     NsUser modifiedNsUser = new NsUserBuilder(existedUser, databaseDiffMap).build();
     assertThat(modifiedNsUser.getNotes(), is("New Notes"));

@@ -8,13 +8,13 @@ import gov.ca.cwds.idm.service.cognito.attribute.diff.Diff;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DiffMapBuilder {
+public class DatabaseDiffMapBuilder {
 
   private final User existedUser;
   private final UserUpdate updateUserDto;
   private final Map<UserAttribute, Diff> diffMap = new HashMap<>();
 
-  public DiffMapBuilder(User existedUser, UserUpdate updateUserDto) {
+  public DatabaseDiffMapBuilder(User existedUser, UserUpdate updateUserDto) {
     this.existedUser = existedUser;
     this.updateUserDto = updateUserDto;
   }
@@ -26,7 +26,7 @@ public class DiffMapBuilder {
 
   private <T> void addDiff(UserAttribute userAttribute, T oldValue, T newValue) {
     if (newValue != null && !newValue.equals(oldValue)) {
-      diffMap.put(userAttribute, new Diff(oldValue, newValue));
+      diffMap.put(userAttribute, new Diff<>(oldValue, newValue));
     }
   }
 }
