@@ -15,7 +15,7 @@ public class UserRoleChangedEvent extends UserAttributeChangedEvent {
 
   private static final long serialVersionUID = 1145582435628289251L;
 
-  public static final String EVENT_TYPE_USER_ROLE_CHANGED = "User Role Changed";
+  public static final String EVENT_TYPE_USER_ROLE_CHANGED = "Role";
 
   public UserRoleChangedEvent(UserUpdateRequest userUpdateRequest) {
     super(userUpdateRequest);

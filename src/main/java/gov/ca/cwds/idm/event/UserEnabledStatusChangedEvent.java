@@ -17,7 +17,7 @@ public class UserEnabledStatusChangedEvent extends UserAttributeChangedEvent {
   private static final long serialVersionUID = 6929792785662167658L;
   static final String ACTIVE = "Active";
   static final String INACTIVE = "Inactive";
-  static final String USER_ACCOUNT_STATUS_CHANGED = "User Account Status Changed";
+  static final String USER_ACCOUNT_STATUS_CHANGED = "Account Status";
 
   public UserEnabledStatusChangedEvent(UserUpdateRequest userUpdateRequest) {
     super(userUpdateRequest);
