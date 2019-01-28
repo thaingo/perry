@@ -88,6 +88,17 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     userUpdate.setPermissions(toSet("RFA-rollout", "Hotline-rollout"));
     userUpdate.setRoles(toSet("Office-admin", "CWS-worker"));
 
+    AdminUpdateUserAttributesRequest updateAttributesRequest =
+        setUpdateUserAttributesRequestAndResult(
+            USER_NO_RACFID_ID,
+            attr(EMAIL, NEW_EMAIL),
+            attr(EMAIL_VERIFIED, "True"),
+            attr(PHONE_NUMBER, "+" + NEW_PHONE),
+            attr(PHONE_EXTENSION, NEW_PHONE_EXTENSION),
+            attr(PERMISSIONS, "RFA-rollout:Hotline-rollout"),
+            attr(ROLES, "Office-admin:CWS-worker")
+        );
+
     AdminDisableUserRequest disableUserRequest = setDisableUserRequestAndResult(USER_NO_RACFID_ID);
 
     setDoraSuccess();
@@ -104,7 +115,9 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     verify(spySearchService, times(1)).updateUser(any(User.class));
 
     InOrder inOrder = inOrder(cognito);
+    inOrder.verify(cognito).adminUpdateUserAttributes(updateAttributesRequest);
     inOrder.verify(cognito).adminDisableUser(disableUserRequest);
+
     verifyDoraCalls(1);
     verify(auditLogService, times(4)).createAuditLogRecord(any(AuditEvent.class));
     verify(auditLogService, times(1)).createAuditLogRecord(any(
