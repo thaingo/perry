@@ -22,7 +22,7 @@ public class PermissionsChangedEvent extends UserAttributeChangedEvent {
 
   private static final long serialVersionUID = 5084376904261765730L;
 
-  public static final String EVENT_TYPE_PERMISSIONS_CHANGED = "User Permissions Changed";
+  public static final String EVENT_TYPE_PERMISSIONS_CHANGED = "Permission Change";
 
   public PermissionsChangedEvent(UserUpdateRequest userUpdateRequest,
       List<Permission> permissions) {
