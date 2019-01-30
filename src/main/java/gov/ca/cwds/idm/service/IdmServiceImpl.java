@@ -8,6 +8,7 @@ import static gov.ca.cwds.idm.service.ExecutionStatus.SUCCESS;
 import static gov.ca.cwds.idm.service.ExecutionStatus.WAS_NOT_EXECUTED;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PERMISSIONS;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.ROLES;
+import static gov.ca.cwds.idm.service.cognito.attribute.DatabaseUserAttribute.NOTES;
 import static gov.ca.cwds.idm.service.cognito.attribute.OtherUserAttribute.ENABLED_STATUS;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.RACFID_STANDARD;
@@ -44,6 +45,7 @@ import gov.ca.cwds.idm.dto.UserVerificationResult;
 import gov.ca.cwds.idm.dto.UsersPage;
 import gov.ca.cwds.idm.dto.UsersSearchCriteria;
 import gov.ca.cwds.idm.event.EmailChangedEvent;
+import gov.ca.cwds.idm.event.NotesChangedEvent;
 import gov.ca.cwds.idm.event.PermissionsChangedEvent;
 import gov.ca.cwds.idm.event.UserCreatedEvent;
 import gov.ca.cwds.idm.event.UserEnabledStatusChangedEvent;
@@ -378,16 +380,35 @@ public class IdmServiceImpl implements IdmService {
   }
 
   private void publishUpdateAttributesEvents(UserUpdateRequest userUpdateRequest) {
-    if (userUpdateRequest.isAttributeChanged(ROLES)) {
-      auditLogService.createAuditLogRecord(new UserRoleChangedEvent(userUpdateRequest));
+    publishUpdateRolesEvent(userUpdateRequest);
+    publishUpdatePermissionsEvent(userUpdateRequest);
+    publishUpdateEmailEvent(userUpdateRequest);
+    publishUpdateNotesEvent(userUpdateRequest);
+  }
+
+  private void publishUpdateEmailEvent(UserUpdateRequest userUpdateRequest) {
+    if (userUpdateRequest.isAttributeChanged(StandardUserAttribute.EMAIL)) {
+      auditLogService.createAuditLogRecord(new EmailChangedEvent(userUpdateRequest));
     }
+  }
+
+  private void publishUpdateNotesEvent(UserUpdateRequest userUpdateRequest) {
+    if (userUpdateRequest.isAttributeChanged(NOTES)) {
+      auditLogService.createAuditLogRecord(new NotesChangedEvent(userUpdateRequest));
+    }
+  }
+
+  private void publishUpdatePermissionsEvent(UserUpdateRequest userUpdateRequest) {
     if (userUpdateRequest.isAttributeChanged(PERMISSIONS)) {
       List<Permission> permissions = dictionaryProvider.getPermissions();
       auditLogService
           .createAuditLogRecord(new PermissionsChangedEvent(userUpdateRequest, permissions));
     }
-    if (userUpdateRequest.isAttributeChanged(StandardUserAttribute.EMAIL)) {
-      auditLogService.createAuditLogRecord(new EmailChangedEvent(userUpdateRequest));
+  }
+
+  private void publishUpdateRolesEvent(UserUpdateRequest userUpdateRequest) {
+    if (userUpdateRequest.isAttributeChanged(ROLES)) {
+      auditLogService.createAuditLogRecord(new UserRoleChangedEvent(userUpdateRequest));
     }
   }
 

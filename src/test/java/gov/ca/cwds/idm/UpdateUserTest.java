@@ -57,6 +57,7 @@ import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.event.AuditEvent;
 import gov.ca.cwds.idm.event.EmailChangedEvent;
+import gov.ca.cwds.idm.event.NotesChangedEvent;
 import gov.ca.cwds.idm.event.PermissionsChangedEvent;
 import gov.ca.cwds.idm.event.UserEnabledStatusChangedEvent;
 import gov.ca.cwds.idm.event.UserRoleChangedEvent;
@@ -73,7 +74,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
-
 
 public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
 
@@ -126,8 +126,11 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     inOrder.verify(cognito).adminUpdateUserAttributes(updateAttributesRequest);
     inOrder.verify(cognito).adminDisableUser(disableUserRequest);
 
+    NsUser updatedNsUser =  nsUserRepository.findByUsername(USER_NO_RACFID_ID).get(0);
+    assertThat(updatedNsUser.getNotes(), is(NEW_NOTES));
+
     verifyDoraCalls(1);
-    verify(auditLogService, times(4)).createAuditLogRecord(any(AuditEvent.class));
+    verify(auditLogService, times(5)).createAuditLogRecord(any(AuditEvent.class));
     verify(auditLogService, times(1)).createAuditLogRecord(any(
         UserRoleChangedEvent.class));
     verify(auditLogService, times(1)).createAuditLogRecord(any(
@@ -136,9 +139,8 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
         EmailChangedEvent.class));
     verify(auditLogService, times(1)).createAuditLogRecord(any(
         UserEnabledStatusChangedEvent.class));
-
-    NsUser updatedNsUser =  nsUserRepository.findByUsername(USER_NO_RACFID_ID).get(0);
-    assertThat(updatedNsUser.getNotes(), is(NEW_NOTES));
+    verify(auditLogService, times(1)).createAuditLogRecord(any(
+        NotesChangedEvent.class));
   }
 
   @Test

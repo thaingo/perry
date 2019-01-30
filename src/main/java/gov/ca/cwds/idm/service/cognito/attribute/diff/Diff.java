@@ -1,20 +1,12 @@
 package gov.ca.cwds.idm.service.cognito.attribute.diff;
 
-public class Diff<T> {
+public interface Diff<T> {
 
-  private T oldValue;
-  private T newValue;
+  T getNewValue();
 
-  public Diff(T oldValue, T newValue) {
-    this.oldValue = oldValue;
-    this.newValue = newValue;
-  }
+  T getOldValue();
 
-  public T getOldValue() {
-    return oldValue;
-  }
+  String getNewValueAsString();
 
-  public T getNewValue() {
-    return newValue;
-  }
+  String getOldValueAsString();
 }
