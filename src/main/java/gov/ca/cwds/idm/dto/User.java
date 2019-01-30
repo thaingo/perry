@@ -66,9 +66,6 @@ public class User implements RolesHolder, Serializable {
 
   private String notes;
 
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_TIME_FORMAT)
-  private LocalDateTime lastRegistrationResubmitDateTime;
-
   private Set<String> permissions = new LinkedHashSet<>();
 
   private Set<String> roles = new LinkedHashSet<>();
@@ -191,14 +188,6 @@ public class User implements RolesHolder, Serializable {
 
   public void setLastLoginDateTime(LocalDateTime lastLoginDateTime) {
     this.lastLoginDateTime = lastLoginDateTime;
-  }
-
-  public LocalDateTime getLastRegistrationResubmitDateTime() {
-    return lastRegistrationResubmitDateTime;
-  }
-
-  public void setLastRegistrationResubmitDateTime(LocalDateTime lastRegistrationResubmitDateTime) {
-    this.lastRegistrationResubmitDateTime = lastRegistrationResubmitDateTime;
   }
 
   public Set<String> getPermissions() {
