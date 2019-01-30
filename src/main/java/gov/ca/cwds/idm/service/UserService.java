@@ -8,9 +8,6 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- @return true if User attributes (in Cognito and database) were really updated, false otherwise
- */
 @Service
 @Profile("idm")
 public class UserService {
@@ -19,11 +16,14 @@ public class UserService {
 
   private NsUserService nsUserService;
 
+  /**
+   * @return true if User attributes (in Cognito and database) were really updated, false otherwise
+   */
   @Transactional(value = TOKEN_TRANSACTION_MANAGER)
   public boolean updateUserAttributes(UserUpdateRequest userUpdateRequest) {
     boolean isDatabaseUpdated = nsUserService.update(userUpdateRequest);
     boolean isCognitoUpdated = cognitoServiceFacade.updateUserAttributes(userUpdateRequest);
-    return(isDatabaseUpdated || isCognitoUpdated);
+    return (isDatabaseUpdated || isCognitoUpdated);
   }
 
   @Autowired

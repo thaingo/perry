@@ -46,6 +46,7 @@ import gov.ca.cwds.idm.event.EmailChangedEvent;
 import gov.ca.cwds.idm.event.PermissionsChangedEvent;
 import gov.ca.cwds.idm.event.UserCreatedEvent;
 import gov.ca.cwds.idm.event.UserEnabledStatusChangedEvent;
+import gov.ca.cwds.idm.event.UserRegistrationResentEvent;
 import gov.ca.cwds.idm.event.UserRoleChangedEvent;
 import gov.ca.cwds.idm.exception.AdminAuthorizationException;
 import gov.ca.cwds.idm.exception.UserValidationException;
@@ -154,8 +155,9 @@ public class IdmServiceImpl implements IdmService {
   @Override
   public void updateUser(String userId, UserUpdate updateUserDto) {
     UserType existedCognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
+    User user = mappingService.toUser(existedCognitoUser);
 
-    authorizeService.checkCanUpdateUser(existedCognitoUser, updateUserDto);
+    authorizeService.checkCanUpdateUser(user, updateUserDto);
     validationService.validateUserUpdate(existedCognitoUser, updateUserDto);
 
     UserUpdateRequest userUpdateRequest =
@@ -277,8 +279,10 @@ public class IdmServiceImpl implements IdmService {
 
   @Override
   public RegistrationResubmitResponse resendInvitationMessage(String userId) {
-    authorizeService.checkCanResendInvitationMessage(userId);
+    User user =  getUser(userId);
+    authorizeService.checkCanResendInvitationMessage(user);
     cognitoServiceFacade.resendInvitationMessage(userId);
+    auditLogService.createAuditLogRecord(new UserRegistrationResentEvent(user));
     return new RegistrationResubmitResponse(userId);
   }
 
