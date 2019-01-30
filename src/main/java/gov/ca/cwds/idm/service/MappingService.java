@@ -67,6 +67,7 @@ public class MappingService {
     }
     user.setLastLoginDateTime(nsUser.getLastLoginTime());
     user.setLastRegistrationResubmitDateTime(nsUser.getLastRegistrationResubmitTime());
+    user.setNotes(nsUser.getNotes());
   }
 
   private void filterMainRole(User user) {

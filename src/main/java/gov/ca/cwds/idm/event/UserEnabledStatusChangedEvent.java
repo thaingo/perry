@@ -24,7 +24,7 @@ public class UserEnabledStatusChangedEvent extends UserAttributeChangedEvent {
     setEventType(USER_ACCOUNT_STATUS_CHANGED);
     Validate.isTrue(userUpdateRequest.isAttributeChanged(ENABLED_STATUS));
     UserEnabledStatusAttributeDiff diff = (UserEnabledStatusAttributeDiff) userUpdateRequest
-        .getDiffMap().get(ENABLED_STATUS);
+        .getCognitoDiffMap().get(ENABLED_STATUS);
     setOldValue(getValueAsString(diff.getOldValue()));
     setNewValue(getValueAsString(diff.getNewValue()));
   }

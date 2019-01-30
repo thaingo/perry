@@ -29,7 +29,7 @@ public class PermissionsChangedEvent extends UserAttributeChangedEvent {
     super(userUpdateRequest);
     setEventType(EVENT_TYPE_PERMISSIONS_CHANGED);
     Validate.isTrue(userUpdateRequest.isAttributeChanged(PERMISSIONS));
-    CollectionUserAttributeDiff diff = (CollectionUserAttributeDiff) userUpdateRequest.getDiffMap()
+    CollectionUserAttributeDiff diff = (CollectionUserAttributeDiff) userUpdateRequest.getCognitoDiffMap()
         .get(PERMISSIONS);
     Map<String, String> permissionsHash = permissions.stream()
         .collect(Collectors.toMap(Permission::getName, Permission::getDescription));

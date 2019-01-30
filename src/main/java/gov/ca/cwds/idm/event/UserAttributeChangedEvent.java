@@ -13,11 +13,11 @@ abstract class UserAttributeChangedEvent extends UserChangeLogEvent {
   private static final long serialVersionUID = 897932343078261840L;
 
   UserAttributeChangedEvent(UserUpdateRequest userUpdateRequest) {
-    super(userUpdateRequest.getUser());
+    super(userUpdateRequest.getExistedUser());
     if (userUpdateRequest.isAttributeChanged(ROLES)) {
       setUserRoles(userUpdateRequest.getNewValueAsString(ROLES));
     } else {
-      setUserRoles(joinRoles(userUpdateRequest.getUser().getRoles()));
+      setUserRoles(joinRoles(userUpdateRequest.getExistedUser().getRoles()));
     }
   }
 }

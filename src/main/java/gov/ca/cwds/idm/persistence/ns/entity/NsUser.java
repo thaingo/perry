@@ -31,6 +31,9 @@ public class NsUser {
   @Column(name = "last_registration_resubmit_time")
   private LocalDateTime lastRegistrationResubmitTime;
 
+  @Column(name = "notes")
+  private String notes;
+
   public Long getId() {
     return id;
   }
@@ -61,6 +64,14 @@ public class NsUser {
 
   public void setLastRegistrationResubmitTime(LocalDateTime lastRegistrationResubmitTime) {
     this.lastRegistrationResubmitTime = lastRegistrationResubmitTime;
+  }
+
+  public String getNotes() {
+    return notes;
+  }
+
+  public void setNotes(String notes) {
+    this.notes = notes;
   }
 
   @Override
