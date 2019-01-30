@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
@@ -50,20 +49,10 @@ public class NsUserService {
 
   @Transactional(value = TOKEN_TRANSACTION_MANAGER)
   public void saveLastLoginTime(String username, LocalDateTime loginTime) {
-    setNsUserTimestampPropertyWithUpdateInSearch(
-        username, loginTime,
-        (nsUser, timestamp) -> nsUser.setLastLoginTime(timestamp)
-    );
-  }
-
-  @Transactional(value = TOKEN_TRANSACTION_MANAGER)
-  public void saveLastRegistrationResubmitTime(String username,
-      LocalDateTime registrationResubmitTime) {
-
-    setNsUserTimestampPropertyWithUpdateInSearch(
-        username, registrationResubmitTime,
-        (nsUser, timestamp) -> nsUser.setLastRegistrationResubmitTime(timestamp)
-    );
+    NsUser nsUser = getOrCreateNewNsUser(username);
+    nsUser.setLastLoginTime(loginTime);
+    nsUserRepository.save(nsUser);
+    userLogService.logUpdate(username, loginTime);
   }
 
   @Transactional(value = TOKEN_TRANSACTION_MANAGER)
@@ -79,15 +68,6 @@ public class NsUserService {
 
     nsUserRepository.save(modifiedNsUser);
     return true;
-  }
-
-  private void setNsUserTimestampPropertyWithUpdateInSearch(
-      String username, LocalDateTime timestamp, BiConsumer<NsUser, LocalDateTime> consumer) {
-
-    NsUser nsUser = getOrCreateNewNsUser(username);
-    consumer.accept(nsUser, timestamp);
-    nsUserRepository.save(nsUser);
-    userLogService.logUpdate(username, timestamp);
   }
 
   private NsUser getOrCreateNewNsUser(String username) {
