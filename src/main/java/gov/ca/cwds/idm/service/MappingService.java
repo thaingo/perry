@@ -66,7 +66,6 @@ public class MappingService {
       return;
     }
     user.setLastLoginDateTime(nsUser.getLastLoginTime());
-    user.setLastRegistrationResubmitDateTime(nsUser.getLastRegistrationResubmitTime());
     user.setNotes(nsUser.getNotes());
   }
 
