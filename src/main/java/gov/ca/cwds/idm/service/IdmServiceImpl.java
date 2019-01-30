@@ -16,7 +16,6 @@ import static gov.ca.cwds.service.messages.MessageCode.DUPLICATE_USERID_FOR_RACF
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_UPDATE_USER_ENABLED_STATUS;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_CREATE_IDM_USER_IN_ES;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_PURGE_PROCESSED_USER_LOGS;
-import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_WRITE_LAST_REGISTRATION_RESUBMIT_TIME;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_IDM_USER_IN_ES;
 import static gov.ca.cwds.service.messages.MessageCode.USER_CREATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_CREATE_SAVE_TO_SEARCH_ERROR;
@@ -265,21 +264,7 @@ public class IdmServiceImpl implements IdmService {
   public RegistrationResubmitResponse resendInvitationMessage(String userId) {
     authorizeService.checkCanResendInvitationMessage(userId);
     cognitoServiceFacade.resendInvitationMessage(userId);
-
-    LocalDateTime resubmitDateTime = LocalDateTime.now();
-    saveResendInvitationMessageRequestTimeInDb(userId, resubmitDateTime);
-
-    return new RegistrationResubmitResponse(userId, resubmitDateTime);
-  }
-
-  private void saveResendInvitationMessageRequestTimeInDb(String userId,
-      LocalDateTime resubmitTime) {
-    try {
-      nsUserService.saveLastRegistrationResubmitTime(userId, resubmitTime);
-    } catch (Exception e) {
-      String msg = messages.getTechMessage(UNABLE_TO_WRITE_LAST_REGISTRATION_RESUBMIT_TIME, userId);
-      LOGGER.error(msg, e);
-    }
+    return new RegistrationResubmitResponse(userId);
   }
 
   @Override
