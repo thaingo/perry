@@ -89,7 +89,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -130,9 +129,6 @@ public class IdmServiceImpl implements IdmService {
 
   @Autowired
   private ExceptionFactory exceptionFactory;
-
-  @Autowired
-  private ApplicationEventPublisher eventPublisher;
 
   @Autowired
   private AuditLogService auditLogService;
@@ -236,7 +232,7 @@ public class IdmServiceImpl implements IdmService {
     UserType userType = cognitoServiceFacade.createUser(user);
     String userId = userType.getUsername();
     user.setId(userId);
-    eventPublisher.publishEvent(new UserCreatedEvent(user));
+    auditLogService.createAuditLogRecord(new UserCreatedEvent(user));
     PutInSearchExecution doraExecution = createUserInSearch(userType);
     handleCreatePartialSuccess(userId, doraExecution);
     return userId;
