@@ -11,6 +11,7 @@ import gov.ca.cwds.service.sso.custom.OAuth2RequestHttpEntityFactory;
 import gov.ca.cwds.util.Utils;
 import java.io.IOException;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Date;
@@ -24,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.ResourceServerProperties;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -207,6 +209,8 @@ public class OAuth2Service implements SsoService {
   }
 
   protected String doPost(RestTemplate restTemplate, String url, String accessToken) {
+    restTemplate.getMessageConverters()
+        .add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8));
     return restTemplate.postForObject(url,
         httpEntityFactory.build(url, accessToken),
         String.class);
