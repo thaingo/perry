@@ -1,5 +1,6 @@
 package gov.ca.cwds.idm;
 
+import static gov.ca.cwds.config.TokenServiceConfiguration.TOKEN_TRANSACTION_MANAGER;
 import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
@@ -29,6 +30,7 @@ import static gov.ca.cwds.util.Utils.toSet;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -59,6 +61,7 @@ import gov.ca.cwds.idm.event.PermissionsChangedEvent;
 import gov.ca.cwds.idm.event.UserEnabledStatusChangedEvent;
 import gov.ca.cwds.idm.event.UserRoleChangedEvent;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
+import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
 import gov.ca.cwds.idm.util.WithMockCustomUser;
 import java.util.Arrays;
@@ -69,16 +72,20 @@ import org.mockito.InOrder;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.transaction.annotation.Transactional;
+
 
 public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
 
   @Test
+  @Transactional(value = TOKEN_TRANSACTION_MANAGER)
   @WithMockCustomUser(roles = {STATE_ADMIN})
   public void testUpdateUser() throws Exception {
 
     final String NEW_EMAIL = "newmail@mail.com";
     final String NEW_PHONE = "6889228010";
     final String NEW_PHONE_EXTENSION = "123";
+    final String NEW_NOTES = "New notes text";
 
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setEnabled(Boolean.FALSE);
@@ -87,6 +94,18 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     userUpdate.setPhoneExtensionNumber(NEW_PHONE_EXTENSION);
     userUpdate.setPermissions(toSet("RFA-rollout", "Hotline-rollout"));
     userUpdate.setRoles(toSet("Office-admin", "CWS-worker"));
+    userUpdate.setNotes(NEW_NOTES);
+
+    AdminUpdateUserAttributesRequest updateAttributesRequest =
+        setUpdateUserAttributesRequestAndResult(
+            USER_NO_RACFID_ID,
+            attr(EMAIL, NEW_EMAIL),
+            attr(EMAIL_VERIFIED, "True"),
+            attr(PHONE_NUMBER, "+" + NEW_PHONE),
+            attr(PHONE_EXTENSION, NEW_PHONE_EXTENSION),
+            attr(PERMISSIONS, "RFA-rollout:Hotline-rollout"),
+            attr(ROLES, "Office-admin:CWS-worker")
+        );
 
     AdminDisableUserRequest disableUserRequest = setDisableUserRequestAndResult(USER_NO_RACFID_ID);
 
@@ -104,7 +123,9 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     verify(spySearchService, times(1)).updateUser(any(User.class));
 
     InOrder inOrder = inOrder(cognito);
+    inOrder.verify(cognito).adminUpdateUserAttributes(updateAttributesRequest);
     inOrder.verify(cognito).adminDisableUser(disableUserRequest);
+
     verifyDoraCalls(1);
     verify(auditLogService, times(4)).createAuditLogRecord(any(AuditEvent.class));
     verify(auditLogService, times(1)).createAuditLogRecord(any(
@@ -116,6 +137,8 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     verify(auditLogService, times(1)).createAuditLogRecord(any(
         UserEnabledStatusChangedEvent.class));
 
+    NsUser updatedNsUser =  nsUserRepository.findByUsername(USER_NO_RACFID_ID).get(0);
+    assertThat(updatedNsUser.getNotes(), is(NEW_NOTES));
   }
 
   @Test
@@ -634,7 +657,11 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     verify(cognito, times(0)).adminUpdateUserAttributes(updateAttributesRequest);
     verify(cognito, times(0)).adminEnableUser(enableUserRequest);
     verify(spySearchService, times(0)).createUser(any(User.class));
+    verify(spyNsUserRepository, times(0)).save(any(NsUser.class));
     verifyDoraCalls(0);
+
+    NsUser updatedNsUser =  nsUserRepository.findByUsername(USER_WITH_RACFID_AND_DB_DATA_ID).get(0);
+    assertThat(updatedNsUser.getNotes(), is(nullValue()));
   }
 
   private void assertUpdateSomeUserUnauthorized() throws Exception {

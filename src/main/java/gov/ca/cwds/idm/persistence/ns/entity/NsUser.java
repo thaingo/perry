@@ -28,6 +28,9 @@ public class NsUser {
   @Column(name = "last_login_time")
   private LocalDateTime lastLoginTime;
 
+  @Column(name = "notes")
+  private String notes;
+
   public Long getId() {
     return id;
   }
@@ -50,6 +53,14 @@ public class NsUser {
 
   public void setLastLoginTime(LocalDateTime lastLoginTime) {
     this.lastLoginTime = lastLoginTime;
+  }
+
+  public String getNotes() {
+    return notes;
+  }
+
+  public void setNotes(String notes) {
+    this.notes = notes;
   }
 
   @Override

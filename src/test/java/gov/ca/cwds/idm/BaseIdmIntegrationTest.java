@@ -8,6 +8,7 @@ import static gov.ca.cwds.util.LiquibaseUtils.CMS_STORE_URL;
 import static gov.ca.cwds.util.LiquibaseUtils.TOKEN_STORE_URL;
 import static gov.ca.cwds.util.LiquibaseUtils.runLiquibaseScript;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.LoggingEvent;
@@ -15,6 +16,7 @@ import ch.qos.logback.core.Appender;
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
 import gov.ca.cwds.BaseIntegrationTest;
 import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.idm.persistence.ns.repository.NsUserRepository;
 import gov.ca.cwds.idm.persistence.ns.repository.UserLogRepository;
 import gov.ca.cwds.idm.service.IdmServiceImpl;
 import gov.ca.cwds.idm.service.SearchService;
@@ -81,6 +83,11 @@ public abstract class BaseIdmIntegrationTest extends BaseIntegrationTest {
   @Autowired
   protected UserLogRepository userLogRepository;
 
+  @Autowired
+  protected NsUserRepository nsUserRepository;
+
+  protected NsUserRepository spyNsUserRepository;
+
   protected AWSCognitoIdentityProvider cognito;
 
   protected Appender mockAppender = mock(Appender.class);
@@ -103,6 +110,8 @@ public abstract class BaseIdmIntegrationTest extends BaseIntegrationTest {
 
     Logger rootLogger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
     rootLogger.addAppender(mockAppender);
+
+    spyNsUserRepository = spy(nsUserRepository);
   }
 
   private static String prepareBasicAuthHeader() {

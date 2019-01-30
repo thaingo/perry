@@ -21,7 +21,7 @@ import org.hibernate.validator.constraints.NotBlank;
 @SuppressWarnings("squid:S3437")
 public class User implements RolesHolder, Serializable {
 
-  private static final long serialVersionUID = 2496822683156998660L;
+  private static final long serialVersionUID = -3223381407378606716L;
 
   private String id;
 
@@ -63,6 +63,8 @@ public class User implements RolesHolder, Serializable {
   private Boolean enabled;
 
   private String status;
+
+  private String notes;
 
   private Set<String> permissions = new LinkedHashSet<>();
 
@@ -231,5 +233,13 @@ public class User implements RolesHolder, Serializable {
 
   public void setPhoneExtensionNumber(String phoneExtensionNumber) {
     this.phoneExtensionNumber = phoneExtensionNumber;
+  }
+
+  public String getNotes() {
+    return notes;
+  }
+
+  public void setNotes(String notes) {
+    this.notes = notes;
   }
 }

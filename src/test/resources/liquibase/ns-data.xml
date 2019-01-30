@@ -7,6 +7,7 @@
     <insert tableName="user">
       <column name="username" value="2be3221f-8c2f-4386-8a95-a68f0282efb0"/>
       <column name="last_login_time" valueDate="2018-09-17 05:01:12"/>
+      <column name="notes" value="Some notes text"/>
     </insert>
     <insert tableName="user">
       <column name="username" value="d740ec1d-80ae-4d84-a8c4-9bed7a942f5b"/>

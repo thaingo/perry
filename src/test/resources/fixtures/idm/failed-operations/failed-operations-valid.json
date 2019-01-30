@@ -67,7 +67,8 @@
       ],
       "roles": [
         "County-admin"
-      ]
+      ],
+      "notes": "Some notes text"
     },
     "operation": "CREATE"
   }
