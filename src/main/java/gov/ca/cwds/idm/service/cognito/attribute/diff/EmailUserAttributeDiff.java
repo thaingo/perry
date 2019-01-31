@@ -5,7 +5,7 @@ import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EM
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.TRUE_VALUE;
 
 import com.amazonaws.services.cognitoidp.model.AttributeType;
-import com.amazonaws.services.cognitoidp.model.UserType;
+import gov.ca.cwds.idm.dto.User;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,8 +14,8 @@ import java.util.List;
  */
 public final class EmailUserAttributeDiff extends StringUserAttributeDiff {
 
-  public EmailUserAttributeDiff(UserType existingUser, String newValue) {
-    super(EMAIL, existingUser, newValue);
+  public EmailUserAttributeDiff(User existingUser, String oldValue, String newValue) {
+    super(EMAIL, existingUser, oldValue, newValue);
   }
 
   @Override

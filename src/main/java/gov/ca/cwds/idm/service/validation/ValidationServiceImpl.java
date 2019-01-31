@@ -74,12 +74,12 @@ public class ValidationServiceImpl implements ValidationService {
   }
 
   @Override
-  public void validateUserUpdate(UserType existedCognitoUser, UserUpdate updateUserDto) {
+  public void validateUserUpdate(User existedUser, UserUpdate updateUserDto) {
     validatePhoneNumber(updateUserDto);
     validateNotAllRolesAreRemovedAtUpdate(updateUserDto);
     validateNewUserRolesAreAllowedAtUpdate(updateUserDto);
-    validateUpdateByCansPermission(existedCognitoUser, updateUserDto);
-    validateActivateUser(existedCognitoUser, updateUserDto);
+    validateUpdateByCansPermission(existedUser, updateUserDto);
+    validateActivateUser(existedUser, updateUserDto);
   }
 
   private void validateFirstNameIsProvided(User user) {
@@ -174,9 +174,9 @@ public class ValidationServiceImpl implements ValidationService {
         UNABLE_TO_CREATE_NON_RACFID_USER_WITH_CANS_PERMISSION);
   }
 
-  private void validateUpdateByCansPermission(UserType existedCognitoUser, UserUpdate updateUserDto) {
-    validateByCansPermission(updateUserDto.getPermissions(), isRacfidUser(existedCognitoUser),
-        existedCognitoUser.getUsername(), UNABLE_TO_ASSIGN_CANS_PERMISSION_TO_NON_RACFID_USER);
+  private void validateUpdateByCansPermission(User existedUser, UserUpdate updateUserDto) {
+    validateByCansPermission(updateUserDto.getPermissions(), isRacfidUser(existedUser),
+        existedUser.getId(), UNABLE_TO_ASSIGN_CANS_PERMISSION_TO_NON_RACFID_USER);
   }
 
   private void validateByCansPermission(Collection<String> newUserPermissions, boolean isRacfidUser,
@@ -207,12 +207,12 @@ public class ValidationServiceImpl implements ValidationService {
     throw exceptionFactory.createValidationException(messageCode, args);
   }
 
-  private void validateActivateUser(UserType existedCognitoUser, UserUpdate updateUserDto) {
+  private void validateActivateUser(User existedUser, UserUpdate updateUserDto) {
     if (!canChangeToEnableActiveStatus(updateUserDto.getEnabled(),
-        existedCognitoUser.getEnabled())) {
+        existedUser.getEnabled())) {
       return;
     }
-    String racfId = CognitoUtils.getRACFId(existedCognitoUser);
+    String racfId = existedUser.getRacfid();
     if (StringUtils.isNotBlank(racfId)) {
       validateActivateUser(racfId);
     }

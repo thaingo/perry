@@ -1,7 +1,7 @@
 package gov.ca.cwds.idm.service.cognito.attribute.diff;
 
 import com.amazonaws.services.cognitoidp.model.AttributeType;
-import com.amazonaws.services.cognitoidp.model.UserType;
+import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
 import java.util.List;
 
@@ -11,11 +11,13 @@ import java.util.List;
 public abstract class UserAttributeDiff<T> implements Diff<T> {
 
   private UserAttribute userAttribute;
-  private UserType exitingUser;
+  private User exitingUser;
+  private T oldValue;
   private T newValue;
 
-  public UserAttributeDiff(UserAttribute userAttribute, UserType exitingUser, T newValue) {
+  public UserAttributeDiff(UserAttribute userAttribute, User exitingUser, T oldValue, T newValue) {
     this.userAttribute = userAttribute;
+    this.oldValue = oldValue;
     this.newValue = newValue;
     this.exitingUser = exitingUser;
   }
@@ -27,6 +29,11 @@ public abstract class UserAttributeDiff<T> implements Diff<T> {
     return newValue;
   }
 
+  @Override
+  public T getOldValue() {
+    return oldValue;
+  }
+
   public UserAttribute getUserAttribute() {
     return userAttribute;
   }
@@ -35,7 +42,7 @@ public abstract class UserAttributeDiff<T> implements Diff<T> {
     this.newValue = newValue;
   }
 
-  UserType getExitingUser() {
+  User getExitingUser() {
     return exitingUser;
   }
 

@@ -1,6 +1,6 @@
 package gov.ca.cwds.idm.service.cognito.attribute.diff.builder;
 
-import com.amazonaws.services.cognitoidp.model.UserType;
+import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
 
 /**
@@ -9,30 +9,37 @@ import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
 abstract class AbstractUserAttributeDiffBuilder<T> implements
     UserAttributeDiffBuilder<T> {
 
-  private final UserType userType;
+  private final User user;
   private final UserAttribute userAttribute;
   private final T newValue;
+  private final T oldValue;
 
-  AbstractUserAttributeDiffBuilder(UserAttribute userAttribute, UserType userType, T newValue) {
-    this.userType = userType;
+  AbstractUserAttributeDiffBuilder(UserAttribute userAttribute, User user, T oldValue, T newValue) {
+    this.user = user;
     this.userAttribute = userAttribute;
+    this.oldValue = oldValue;
     this.newValue = newValue;
   }
 
-  public UserType getUserType() {
-    return userType;
+  public User getUser() {
+    return user;
   }
 
   public UserAttribute getUserAttribute() {
     return userAttribute;
   }
 
+
   public T getNewValue() {
     return newValue;
   }
 
-  static <T> boolean doesDiffExist(T newValue, T oldValue) {
-    return newValue != null && !newValue.equals(oldValue);
+  public T getOldValue() {
+    return oldValue;
   }
 
+  @Override
+  public boolean doesDiffExist() {
+    return newValue != null && !newValue.equals(oldValue);
+  }
 }

@@ -1,6 +1,6 @@
 package gov.ca.cwds.idm.service.cognito.attribute.diff.builder;
 
-import com.amazonaws.services.cognitoidp.model.UserType;
+import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
 import gov.ca.cwds.idm.service.cognito.attribute.diff.UserAttributeDiff;
 import gov.ca.cwds.idm.service.cognito.attribute.diff.UserEnabledStatusAttributeDiff;
@@ -10,20 +10,13 @@ import gov.ca.cwds.idm.service.cognito.attribute.diff.UserEnabledStatusAttribute
  */
 public class UserEnabledStatusDiffBuilder extends AbstractUserAttributeDiffBuilder<Boolean> {
 
-  public UserEnabledStatusDiffBuilder(UserAttribute userAttribute, UserType userType,
+  public UserEnabledStatusDiffBuilder(UserAttribute userAttribute, User user, Boolean oldValue,
       Boolean newValue) {
-    super(userAttribute, userType, newValue);
-  }
-
-  @Override
-  public boolean doesDiffExist() {
-    return doesDiffExist(getNewValue(),
-        UserEnabledStatusAttributeDiff.getOldValue(getUserType()));
+    super(userAttribute, user, oldValue, newValue);
   }
 
   @Override
   public UserAttributeDiff<Boolean> buildDiff() {
-    return new UserEnabledStatusAttributeDiff(getUserType(), getNewValue());
+    return new UserEnabledStatusAttributeDiff(getUser(), getOldValue(), getNewValue());
   }
-
 }

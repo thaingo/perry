@@ -6,7 +6,6 @@ import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
-import static gov.ca.cwds.idm.util.TestHelper.userType;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.Utils.toSet;
 import static org.mockito.ArgumentMatchers.any;
@@ -14,7 +13,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
-import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
@@ -139,8 +137,9 @@ public class ValidationServiceMockTest {
 
   private void validateUpdate(UniversalUserToken admin, UserUpdate userUpdate) {
     PowerMockito.when(getCurrentUser()).thenReturn(admin);
-    UserType userType = userType(user(), USER_ID);
-    service.validateUserUpdate(userType, userUpdate);
+    User user = new User();
+    user.setId(USER_ID);
+    service.validateUserUpdate(user, userUpdate);
   }
 
   private void testAdminCanCreate(UniversalUserToken admin, User user) {

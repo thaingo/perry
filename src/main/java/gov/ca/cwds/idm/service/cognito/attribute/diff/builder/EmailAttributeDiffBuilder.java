@@ -2,7 +2,7 @@ package gov.ca.cwds.idm.service.cognito.attribute.diff.builder;
 
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL;
 
-import com.amazonaws.services.cognitoidp.model.UserType;
+import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.cognito.attribute.diff.EmailUserAttributeDiff;
 
 /**
@@ -10,13 +10,13 @@ import gov.ca.cwds.idm.service.cognito.attribute.diff.EmailUserAttributeDiff;
  */
 public class EmailAttributeDiffBuilder extends StringAttributeDiffBuilder {
 
-  public EmailAttributeDiffBuilder(UserType userType, String newValue) {
-    super(EMAIL, userType, newValue);
+  public EmailAttributeDiffBuilder(User user, String oldValue, String newValue) {
+    super(EMAIL, user, oldValue, newValue);
   }
 
   @Override
   public EmailUserAttributeDiff buildDiff() {
-    return new EmailUserAttributeDiff(getUserType(), getNewValue());
+    return new EmailUserAttributeDiff(getUser(), getOldValue(), getNewValue());
   }
   
 }

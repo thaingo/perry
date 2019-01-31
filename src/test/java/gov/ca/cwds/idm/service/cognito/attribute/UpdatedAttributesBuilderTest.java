@@ -1,5 +1,7 @@
 package gov.ca.cwds.idm.service.cognito.attribute;
 
+import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PERMISSIONS;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PHONE_EXTENSION;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.ROLES;
@@ -14,6 +16,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.UserType;
+import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.service.cognito.attribute.diff.UserAttributeDiff;
 import java.util.Map;
@@ -110,22 +113,14 @@ public class UpdatedAttributesBuilderTest {
     assertThat(emailVerifiedAttr.getValue(), CoreMatchers.is("True"));
   }
 
-  private UserType existedCognitoUser() {
-    UserType userType = new UserType();
-
-    userType.withAttributes(
-        new AttributeType().withName(((UserAttribute) EMAIL).getName())
-            .withValue("user@oci.ca.gov"),
-        new AttributeType().withName(((UserAttribute) EMAIL_VERIFIED).getName()).withValue("True"),
-        new AttributeType().withName(((UserAttribute) PHONE_NUMBER).getName())
-            .withValue("+1234567890"),
-        new AttributeType().withName(((UserAttribute) PHONE_EXTENSION).getName()).withValue("28"),
-        new AttributeType().withName(((UserAttribute) ROLES).getName())
-            .withValue("State-admin:County-admin"),
-        new AttributeType().withName(((UserAttribute) PERMISSIONS).getName())
-            .withValue("Snapshot-rollout:Hotline-rollout"));
-
-    return userType;
+  private User existedCognitoUser() {
+    User user = new User();
+    user.setEmail("user@oci.ca.gov");
+    user.setPhoneNumber("1234567890");
+    user.setPhoneExtensionNumber("28");
+    user.setRoles(toSet(STATE_ADMIN, COUNTY_ADMIN));
+    user.setPermissions(toSet("Snapshot-rollout", "Hotline-rollout"));
+    return user;
   }
 
   private void assertAttribute(

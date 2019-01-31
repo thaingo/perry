@@ -1,6 +1,6 @@
 package gov.ca.cwds.idm.service.cognito.attribute.diff.builder;
 
-import com.amazonaws.services.cognitoidp.model.UserType;
+import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
 import gov.ca.cwds.idm.service.cognito.attribute.diff.StringUserAttributeDiff;
 import gov.ca.cwds.idm.service.cognito.attribute.diff.UserAttributeDiff;
@@ -10,20 +10,15 @@ import gov.ca.cwds.idm.service.cognito.attribute.diff.UserAttributeDiff;
  */
 public class StringAttributeDiffBuilder extends AbstractUserAttributeDiffBuilder<String> {
 
-  public StringAttributeDiffBuilder(UserAttribute userAttribute, UserType userType,
+  public StringAttributeDiffBuilder(UserAttribute userAttribute, User user, String oldValue,
       String newValue) {
-    super(userAttribute, userType, newValue);
+    super(userAttribute, user, oldValue, newValue);
   }
 
-  @Override
-  public boolean doesDiffExist() {
-    return doesDiffExist(getNewValue(),
-        StringUserAttributeDiff.getOldValue(getUserType(), getUserAttribute()));
-  }
 
   @Override
   public UserAttributeDiff<String> buildDiff() {
-    return new StringUserAttributeDiff(getUserAttribute(), getUserType(), getNewValue());
+    return new StringUserAttributeDiff(getUserAttribute(), getUser(), getOldValue(), getNewValue());
   }
 
 }

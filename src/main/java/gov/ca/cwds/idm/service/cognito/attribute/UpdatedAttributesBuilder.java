@@ -8,7 +8,7 @@ import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EM
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.PHONE_NUMBER;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoPhoneConverter.toCognitoFormat;
 
-import com.amazonaws.services.cognitoidp.model.UserType;
+import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.service.cognito.attribute.diff.UserAttributeDiff;
 import gov.ca.cwds.idm.service.cognito.attribute.diff.builder.CollectionAttributeDiffBuilder;
@@ -23,12 +23,12 @@ import java.util.Map;
 
 public class UpdatedAttributesBuilder {
 
-  private final UserType existedCognitoUser;
+  private final User existedUser;
   private final UserUpdate updateUserDto;
   private final Map<UserAttribute, UserAttributeDiff> updatedAttributes = new HashMap<>();
 
-  public UpdatedAttributesBuilder(UserType existedCognitoUser, UserUpdate updateUserDto) {
-    this.existedCognitoUser = existedCognitoUser;
+  public UpdatedAttributesBuilder(User existedUser, UserUpdate updateUserDto) {
+    this.existedUser = existedUser;
     this.updateUserDto = updateUserDto;
   }
 
@@ -40,21 +40,27 @@ public class UpdatedAttributesBuilder {
   }
 
   public Map<UserAttribute, UserAttributeDiff> buildUpdatedAttributesMap() {
-    addDiff(EMAIL, new EmailAttributeDiffBuilder(existedCognitoUser,
+    addDiff(EMAIL, new EmailAttributeDiffBuilder(existedUser,
+            Utils.toLowerCase(existedUser.getEmail()),
         Utils.toLowerCase(updateUserDto.getEmail())));
     addDiff(PHONE_NUMBER,
-        new StringAttributeDiffBuilder(PHONE_NUMBER, existedCognitoUser,
+        new StringAttributeDiffBuilder(PHONE_NUMBER, existedUser,
+            toCognitoFormat(existedUser.getPhoneNumber()),
             toCognitoFormat(updateUserDto.getPhoneNumber())));
     addDiff(PHONE_EXTENSION,
-        new StringAttributeDiffBuilder(PHONE_EXTENSION, existedCognitoUser,
+        new StringAttributeDiffBuilder(PHONE_EXTENSION, existedUser,
+            existedUser.getPhoneExtensionNumber(),
             updateUserDto.getPhoneExtensionNumber()));
     addDiff(PERMISSIONS,
-        new CollectionAttributeDiffBuilder(PERMISSIONS, existedCognitoUser,
+        new CollectionAttributeDiffBuilder(PERMISSIONS, existedUser,
+            existedUser.getPermissions(),
             updateUserDto.getPermissions()));
     addDiff(ROLES,
-        new RoleAttributeDiffBuilder(existedCognitoUser,
+        new RoleAttributeDiffBuilder(existedUser,
+            existedUser.getRoles(),
             updateUserDto.getRoles()));
-    addDiff(ENABLED_STATUS, new UserEnabledStatusDiffBuilder(ENABLED_STATUS, existedCognitoUser,
+    addDiff(ENABLED_STATUS, new UserEnabledStatusDiffBuilder(ENABLED_STATUS, existedUser,
+        existedUser.getEnabled(),
         updateUserDto.getEnabled()));
     return updatedAttributes;
   }

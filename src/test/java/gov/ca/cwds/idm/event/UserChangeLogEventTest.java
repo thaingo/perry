@@ -11,6 +11,7 @@ import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PERM
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.ROLES;
 import static gov.ca.cwds.idm.service.cognito.attribute.DatabaseUserAttribute.NOTES;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL;
+import static gov.ca.cwds.util.Utils.toSet;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
@@ -117,15 +118,12 @@ public class UserChangeLogEventTest {
 
   @Test
   public void testUserRoleChangedEvent() {
-    UserType existedUser = new UserType();
+    User existedUser = new User();
+    existedUser.setRoles(toSet(CALS_ADMIN, CWS_WORKER));
     UserAttributeDiff<Set<String>> diff = new RolesUserAttributeDiff(existedUser,
+        existedUser.getRoles(),
         new HashSet<>(Arrays.asList(OFFICE_ADMIN, STATE_ADMIN)));
-    AttributeType oldAttribute = new AttributeType().withName(ROLES.getName()).withValue(
-        CognitoUtils.getCustomDelimitedListAttributeValue(
-            Stream.of(CALS_ADMIN, Roles.CWS_WORKER).collect(
-                Collectors.toSet())));
-    UserUpdateRequest userUpdateRequest = mockUserUpdateRequest(existedUser,
-        oldAttribute, Collections.singletonMap(ROLES, diff));
+    UserUpdateRequest userUpdateRequest = mockUserUpdateRequest(Collections.singletonMap(ROLES, diff));
     UserRoleChangedEvent userRoleChangedEvent = new UserRoleChangedEvent(userUpdateRequest);
     assertEquals(UserRoleChangedEvent.EVENT_TYPE_USER_ROLE_CHANGED,
         userRoleChangedEvent.getEventType());
@@ -139,21 +137,20 @@ public class UserChangeLogEventTest {
 
   @Test
   public void testPermissionsChangedEvent() {
-    UserType existedUser = new UserType();
+    User existedUser = new User();
+    existedUser.setPermissions(toSet(PERMISSION_1, PERMISSION_2));
+
     UserAttributeDiff<Set<String>> diff = new CollectionUserAttributeDiff(PERMISSIONS, existedUser,
+        existedUser.getPermissions(),
         new HashSet<>(Arrays.asList(PERMISSION_3, PERMISSION_4)));
-    AttributeType oldAttribute = new AttributeType().withName(PERMISSIONS.getName()).withValue(
-        CognitoUtils.getCustomDelimitedListAttributeValue(
-            Stream.of(PERMISSION_1, PERMISSION_2).collect(
-                Collectors.toSet())));
+
     List<Permission> permissions = Stream.of(
         new Permission(PERMISSION_1, PERMISSION_1 + PERMISSION_DESCRIPTION),
         new Permission(PERMISSION_2, PERMISSION_2 + PERMISSION_DESCRIPTION),
         new Permission(PERMISSION_3, PERMISSION_3 + PERMISSION_DESCRIPTION),
         new Permission(PERMISSION_4, PERMISSION_4 + PERMISSION_DESCRIPTION)
     ).collect(Collectors.toList());
-    UserUpdateRequest userUpdateRequest = mockUserUpdateRequest(existedUser,
-        oldAttribute, Collections.singletonMap(PERMISSIONS, diff));
+    UserUpdateRequest userUpdateRequest = mockUserUpdateRequest(Collections.singletonMap(PERMISSIONS, diff));
 
     PermissionsChangedEvent event = new PermissionsChangedEvent(userUpdateRequest, permissions);
     assertEquals(PermissionsChangedEvent.EVENT_TYPE_PERMISSIONS_CHANGED,
@@ -173,13 +170,12 @@ public class UserChangeLogEventTest {
 
   @Test
   public void testEmailChangedEvent() {
-    UserType existedUser = new UserType();
-    UserAttributeDiff<String> diff = new StringUserAttributeDiff(PERMISSIONS, existedUser,
-        NEW_EMAIL);
-    AttributeType oldAttribute = new AttributeType().withName(PERMISSIONS.getName())
-        .withValue(OLD_EMAIL);
-    UserUpdateRequest userUpdateRequest = mockUserUpdateRequest(existedUser,
-        oldAttribute, Collections.singletonMap(EMAIL, diff));
+    User existedUser = new User();
+    existedUser.setEmail(OLD_EMAIL);
+    UserAttributeDiff<String> diff = new StringUserAttributeDiff(EMAIL, existedUser,
+        OLD_EMAIL, NEW_EMAIL);
+
+    UserUpdateRequest userUpdateRequest = mockUserUpdateRequest(Collections.singletonMap(EMAIL, diff));
 
     EmailChangedEvent event = new EmailChangedEvent(userUpdateRequest);
     assertEquals(EmailChangedEvent.EVENT_TYPE_EMAIL_CHANGED,
@@ -207,10 +203,11 @@ public class UserChangeLogEventTest {
 
   @Test
   public void testUserEnabledStatusChangedEvent() {
-    UserType existedUser = new UserType();
+    User existedUser = new User();
     existedUser.setEnabled(Boolean.FALSE);
-    UserAttributeDiff<Boolean> diff = new UserEnabledStatusAttributeDiff(existedUser, Boolean.TRUE);
-    UserUpdateRequest userUpdateRequest = mockUserUpdateRequest(existedUser,
+    UserAttributeDiff<Boolean> diff =
+        new UserEnabledStatusAttributeDiff(existedUser, Boolean.FALSE, Boolean.TRUE);
+    UserUpdateRequest userUpdateRequest = mockUserUpdateRequest(
         Collections.singletonMap(OtherUserAttribute.ENABLED_STATUS, diff));
 
     UserEnabledStatusChangedEvent event = new UserEnabledStatusChangedEvent(userUpdateRequest);
@@ -241,16 +238,6 @@ public class UserChangeLogEventTest {
   }
 
   private UserUpdateRequest mockUserUpdateRequest(
-      UserType existedUser,
-      AttributeType oldAttribute,
-      Map<UserAttribute, UserAttributeDiff> diffMap) {
-    UserUpdateRequest userUpdateRequest = mockUserUpdateRequest(existedUser, diffMap);
-    existedUser.setAttributes(Collections.singleton(oldAttribute));
-    return userUpdateRequest;
-  }
-
-  private UserUpdateRequest mockUserUpdateRequest(
-      UserType existedUser,
       Map<UserAttribute, UserAttributeDiff> cognitoDiffMap) {
     UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
     userUpdateRequest.setExistedUser(mockUser());

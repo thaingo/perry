@@ -156,14 +156,13 @@ public class IdmServiceImpl implements IdmService {
 
   @Override
   public void updateUser(String userId, UserUpdate updateUserDto) {
-    UserType existedCognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
-    User user = mappingService.toUser(existedCognitoUser);
+    User existedUser = getUser(userId);
 
-    authorizeService.checkCanUpdateUser(user, updateUserDto);
-    validationService.validateUserUpdate(existedCognitoUser, updateUserDto);
+    authorizeService.checkCanUpdateUser(existedUser, updateUserDto);
+    validationService.validateUserUpdate(existedUser, updateUserDto);
 
     UserUpdateRequest userUpdateRequest =
-        prepareUserUpdateRequest(userId, existedCognitoUser, updateUserDto);
+        prepareUserUpdateRequest(existedUser, updateUserDto);
 
     ExecutionStatus updateAttributesStatus = updateUserAttributes(userUpdateRequest);
 
@@ -185,16 +184,14 @@ public class IdmServiceImpl implements IdmService {
         userId, updateAttributesStatus, updateUserEnabledExecution, doraExecution);
   }
 
-  private UserUpdateRequest prepareUserUpdateRequest(String userId, UserType existedCognitoUser,
-      UserUpdate updateUserDto) {
+  private UserUpdateRequest prepareUserUpdateRequest(User existedUser, UserUpdate updateUserDto) {
     UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
 
-    userUpdateRequest.setUserId(userId);
-    User existedUser = mappingService.toUser(existedCognitoUser);
+    userUpdateRequest.setUserId(existedUser.getId());
     userUpdateRequest.setExistedUser(existedUser);
 
     Map<UserAttribute, UserAttributeDiff> cognitoDiffMap =
-        new UpdatedAttributesBuilder(existedCognitoUser, updateUserDto).buildUpdatedAttributesMap();
+        new UpdatedAttributesBuilder(existedUser, updateUserDto).buildUpdatedAttributesMap();
     userUpdateRequest.setCognitoDiffMap(cognitoDiffMap);
 
     Map<UserAttribute, Diff> databaseDiffMap =
