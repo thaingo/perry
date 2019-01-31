@@ -7,7 +7,7 @@ import static org.junit.Assert.assertTrue;
 
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
-import gov.ca.cwds.idm.service.cognito.attribute.diff.Diff;
+import gov.ca.cwds.idm.service.diff.Diff;
 import java.util.Map;
 import org.junit.Test;
 

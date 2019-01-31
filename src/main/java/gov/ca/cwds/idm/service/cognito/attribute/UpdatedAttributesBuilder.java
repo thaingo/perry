@@ -10,13 +10,13 @@ import static gov.ca.cwds.idm.service.cognito.util.CognitoPhoneConverter.toCogni
 
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
-import gov.ca.cwds.idm.service.cognito.attribute.diff.UserAttributeDiff;
-import gov.ca.cwds.idm.service.cognito.attribute.diff.builder.CollectionAttributeDiffBuilder;
-import gov.ca.cwds.idm.service.cognito.attribute.diff.builder.EmailAttributeDiffBuilder;
-import gov.ca.cwds.idm.service.cognito.attribute.diff.builder.RoleAttributeDiffBuilder;
-import gov.ca.cwds.idm.service.cognito.attribute.diff.builder.StringAttributeDiffBuilder;
-import gov.ca.cwds.idm.service.cognito.attribute.diff.builder.UserAttributeDiffBuilder;
-import gov.ca.cwds.idm.service.cognito.attribute.diff.builder.UserEnabledStatusDiffBuilder;
+import gov.ca.cwds.idm.service.diff.UserAttributeDiff;
+import gov.ca.cwds.idm.service.diff.builder.CollectionAttributeDiffBuilder;
+import gov.ca.cwds.idm.service.diff.builder.EmailAttributeDiffBuilder;
+import gov.ca.cwds.idm.service.diff.builder.RoleAttributeDiffBuilder;
+import gov.ca.cwds.idm.service.diff.builder.StringAttributeDiffBuilder;
+import gov.ca.cwds.idm.service.diff.builder.UserAttributeDiffBuilder;
+import gov.ca.cwds.idm.service.diff.builder.UserEnabledStatusDiffBuilder;
 import gov.ca.cwds.util.Utils;
 import java.util.HashMap;
 import java.util.Map;

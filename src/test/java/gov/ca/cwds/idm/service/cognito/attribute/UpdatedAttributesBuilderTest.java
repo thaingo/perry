@@ -15,10 +15,9 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import com.amazonaws.services.cognitoidp.model.AttributeType;
-import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
-import gov.ca.cwds.idm.service.cognito.attribute.diff.UserAttributeDiff;
+import gov.ca.cwds.idm.service.diff.UserAttributeDiff;
 import java.util.Map;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;

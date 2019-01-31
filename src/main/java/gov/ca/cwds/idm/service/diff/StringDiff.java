@@ -1,4 +1,4 @@
-package gov.ca.cwds.idm.service.cognito.attribute.diff;
+package gov.ca.cwds.idm.service.diff;
 
 public class StringDiff extends BaseDiff<String> {
 

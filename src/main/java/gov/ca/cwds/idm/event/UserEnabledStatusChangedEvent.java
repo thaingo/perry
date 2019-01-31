@@ -5,7 +5,7 @@ import static gov.ca.cwds.idm.service.cognito.attribute.OtherUserAttribute.ENABL
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import gov.ca.cwds.idm.service.UserUpdateRequest;
-import gov.ca.cwds.idm.service.cognito.attribute.diff.UserEnabledStatusAttributeDiff;
+import gov.ca.cwds.idm.service.diff.UserEnabledStatusAttributeDiff;
 import org.apache.commons.lang3.Validate;
 
 /**

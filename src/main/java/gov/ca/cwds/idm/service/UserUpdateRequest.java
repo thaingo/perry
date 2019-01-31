@@ -4,8 +4,8 @@ import static java.util.Collections.emptyMap;
 
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
-import gov.ca.cwds.idm.service.cognito.attribute.diff.Diff;
-import gov.ca.cwds.idm.service.cognito.attribute.diff.UserAttributeDiff;
+import gov.ca.cwds.idm.service.diff.Diff;
+import gov.ca.cwds.idm.service.diff.UserAttributeDiff;
 import java.util.Map;
 
 /**

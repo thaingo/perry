@@ -1,11 +1,10 @@
-package gov.ca.cwds.idm.service.cognito.attribute.diff;
+package gov.ca.cwds.idm.service.diff;
 
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL_VERIFIED;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.TRUE_VALUE;
 
 import com.amazonaws.services.cognitoidp.model.AttributeType;
-import gov.ca.cwds.idm.dto.User;
 import java.util.ArrayList;
 import java.util.List;
 

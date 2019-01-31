@@ -1,4 +1,4 @@
-package gov.ca.cwds.idm.service.cognito.attribute.diff;
+package gov.ca.cwds.idm.service.diff;
 
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;

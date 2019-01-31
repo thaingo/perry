@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import gov.ca.cwds.idm.persistence.ns.entity.Permission;
 import gov.ca.cwds.idm.service.UserUpdateRequest;
-import gov.ca.cwds.idm.service.cognito.attribute.diff.CollectionUserAttributeDiff;
+import gov.ca.cwds.idm.service.diff.CollectionUserAttributeDiff;
 import gov.ca.cwds.util.IdToNameConverter;
 import java.util.List;
 import java.util.Map;

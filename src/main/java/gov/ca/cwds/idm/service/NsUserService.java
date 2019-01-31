@@ -6,7 +6,7 @@ import static gov.ca.cwds.idm.service.cognito.attribute.DatabaseUserAttribute.NO
 import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
 import gov.ca.cwds.idm.persistence.ns.repository.NsUserRepository;
 import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
-import gov.ca.cwds.idm.service.cognito.attribute.diff.Diff;
+import gov.ca.cwds.idm.service.diff.Diff;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
