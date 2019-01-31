@@ -10,13 +10,13 @@ import gov.ca.cwds.idm.service.cognito.attribute.diff.EmailUserAttributeDiff;
  */
 public class EmailAttributeDiffBuilder extends StringAttributeDiffBuilder {
 
-  public EmailAttributeDiffBuilder(User user, String oldValue, String newValue) {
-    super(EMAIL, user, oldValue, newValue);
+  public EmailAttributeDiffBuilder(String oldValue, String newValue) {
+    super(EMAIL, oldValue, newValue);
   }
 
   @Override
   public EmailUserAttributeDiff buildDiff() {
-    return new EmailUserAttributeDiff(getUser(), getOldValue(), getNewValue());
+    return new EmailUserAttributeDiff(getOldValue(), getNewValue());
   }
   
 }

@@ -11,13 +11,13 @@ import java.util.Set;
  */
 public class RoleAttributeDiffBuilder extends CollectionAttributeDiffBuilder {
 
-  public RoleAttributeDiffBuilder(User user, Set<String> oldValue, Set<String> newValue) {
-    super(CustomUserAttribute.ROLES, user, oldValue, newValue);
+  public RoleAttributeDiffBuilder(Set<String> oldValue, Set<String> newValue) {
+    super(CustomUserAttribute.ROLES, oldValue, newValue);
   }
 
   @Override
   public UserAttributeDiff<Set<String>> buildDiff() {
-    return new RolesUserAttributeDiff(getUser(), getOldValue(), getNewValue());
+    return new RolesUserAttributeDiff(getOldValue(), getNewValue());
   }
 
 }

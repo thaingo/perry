@@ -14,8 +14,8 @@ import java.util.List;
  */
 public final class EmailUserAttributeDiff extends StringUserAttributeDiff {
 
-  public EmailUserAttributeDiff(User existingUser, String oldValue, String newValue) {
-    super(EMAIL, existingUser, oldValue, newValue);
+  public EmailUserAttributeDiff(String oldValue, String newValue) {
+    super(EMAIL, oldValue, newValue);
   }
 
   @Override

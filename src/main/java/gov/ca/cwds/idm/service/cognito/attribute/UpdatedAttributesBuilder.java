@@ -40,26 +40,24 @@ public class UpdatedAttributesBuilder {
   }
 
   public Map<UserAttribute, UserAttributeDiff> buildUpdatedAttributesMap() {
-    addDiff(EMAIL, new EmailAttributeDiffBuilder(existedUser,
-            Utils.toLowerCase(existedUser.getEmail()),
+    addDiff(EMAIL, new EmailAttributeDiffBuilder(
+        Utils.toLowerCase(existedUser.getEmail()),
         Utils.toLowerCase(updateUserDto.getEmail())));
     addDiff(PHONE_NUMBER,
-        new StringAttributeDiffBuilder(PHONE_NUMBER, existedUser,
+        new StringAttributeDiffBuilder(PHONE_NUMBER,
             toCognitoFormat(existedUser.getPhoneNumber()),
             toCognitoFormat(updateUserDto.getPhoneNumber())));
     addDiff(PHONE_EXTENSION,
-        new StringAttributeDiffBuilder(PHONE_EXTENSION, existedUser,
+        new StringAttributeDiffBuilder(PHONE_EXTENSION,
             existedUser.getPhoneExtensionNumber(),
             updateUserDto.getPhoneExtensionNumber()));
     addDiff(PERMISSIONS,
-        new CollectionAttributeDiffBuilder(PERMISSIONS, existedUser,
+        new CollectionAttributeDiffBuilder(PERMISSIONS,
             existedUser.getPermissions(),
             updateUserDto.getPermissions()));
     addDiff(ROLES,
-        new RoleAttributeDiffBuilder(existedUser,
-            existedUser.getRoles(),
-            updateUserDto.getRoles()));
-    addDiff(ENABLED_STATUS, new UserEnabledStatusDiffBuilder(ENABLED_STATUS, existedUser,
+        new RoleAttributeDiffBuilder(existedUser.getRoles(), updateUserDto.getRoles()));
+    addDiff(ENABLED_STATUS, new UserEnabledStatusDiffBuilder(ENABLED_STATUS,
         existedUser.getEnabled(),
         updateUserDto.getEnabled()));
     return updatedAttributes;

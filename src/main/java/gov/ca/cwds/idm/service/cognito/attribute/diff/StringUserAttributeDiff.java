@@ -1,7 +1,6 @@
 package gov.ca.cwds.idm.service.cognito.attribute.diff;
 
 import com.amazonaws.services.cognitoidp.model.AttributeType;
-import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
 import java.util.Collections;
 import java.util.List;
@@ -11,9 +10,8 @@ import java.util.List;
  */
 public class StringUserAttributeDiff extends UserAttributeDiff<String> {
 
-  public StringUserAttributeDiff(UserAttribute userAttribute,
-      User existingUser, String oldValue, String newValue) {
-    super(userAttribute, existingUser, oldValue, newValue);
+  public StringUserAttributeDiff(UserAttribute userAttribute, String oldValue, String newValue) {
+    super(userAttribute, oldValue, newValue);
   }
 
   @Override

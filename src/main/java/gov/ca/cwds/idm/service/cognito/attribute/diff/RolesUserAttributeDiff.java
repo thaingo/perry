@@ -2,7 +2,6 @@ package gov.ca.cwds.idm.service.cognito.attribute.diff;
 
 import static gov.ca.cwds.config.api.idm.Roles.replaceRoleIdByName;
 
-import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute;
 import java.util.Set;
 
@@ -11,8 +10,8 @@ import java.util.Set;
  */
 public class RolesUserAttributeDiff extends CollectionUserAttributeDiff {
 
-  public RolesUserAttributeDiff(User existingUser, Set<String> oldValue, Set<String> newValue) {
-    super(CustomUserAttribute.ROLES, existingUser, oldValue, newValue);
+  public RolesUserAttributeDiff(Set<String> oldValue, Set<String> newValue) {
+    super(CustomUserAttribute.ROLES, oldValue, newValue);
   }
 
   @Override

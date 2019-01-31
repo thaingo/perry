@@ -17,10 +17,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.UniversalUserToken;
-import gov.ca.cwds.config.api.idm.Roles;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserChangeLogRecord;
 import gov.ca.cwds.idm.persistence.ns.entity.Permission;
@@ -35,7 +33,6 @@ import gov.ca.cwds.idm.service.cognito.attribute.diff.StringDiff;
 import gov.ca.cwds.idm.service.cognito.attribute.diff.StringUserAttributeDiff;
 import gov.ca.cwds.idm.service.cognito.attribute.diff.UserAttributeDiff;
 import gov.ca.cwds.idm.service.cognito.attribute.diff.UserEnabledStatusAttributeDiff;
-import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import java.util.Arrays;
 import java.util.Collections;
@@ -118,10 +115,8 @@ public class UserChangeLogEventTest {
 
   @Test
   public void testUserRoleChangedEvent() {
-    User existedUser = new User();
-    existedUser.setRoles(toSet(CALS_ADMIN, CWS_WORKER));
-    UserAttributeDiff<Set<String>> diff = new RolesUserAttributeDiff(existedUser,
-        existedUser.getRoles(),
+    UserAttributeDiff<Set<String>> diff = new RolesUserAttributeDiff(
+        toSet(CALS_ADMIN, CWS_WORKER),
         new HashSet<>(Arrays.asList(OFFICE_ADMIN, STATE_ADMIN)));
     UserUpdateRequest userUpdateRequest = mockUserUpdateRequest(Collections.singletonMap(ROLES, diff));
     UserRoleChangedEvent userRoleChangedEvent = new UserRoleChangedEvent(userUpdateRequest);
@@ -137,11 +132,9 @@ public class UserChangeLogEventTest {
 
   @Test
   public void testPermissionsChangedEvent() {
-    User existedUser = new User();
-    existedUser.setPermissions(toSet(PERMISSION_1, PERMISSION_2));
 
-    UserAttributeDiff<Set<String>> diff = new CollectionUserAttributeDiff(PERMISSIONS, existedUser,
-        existedUser.getPermissions(),
+    UserAttributeDiff<Set<String>> diff = new CollectionUserAttributeDiff(PERMISSIONS,
+        toSet(PERMISSION_1, PERMISSION_2),
         new HashSet<>(Arrays.asList(PERMISSION_3, PERMISSION_4)));
 
     List<Permission> permissions = Stream.of(
@@ -170,10 +163,8 @@ public class UserChangeLogEventTest {
 
   @Test
   public void testEmailChangedEvent() {
-    User existedUser = new User();
-    existedUser.setEmail(OLD_EMAIL);
-    UserAttributeDiff<String> diff = new StringUserAttributeDiff(EMAIL, existedUser,
-        OLD_EMAIL, NEW_EMAIL);
+
+    UserAttributeDiff<String> diff = new StringUserAttributeDiff(EMAIL, OLD_EMAIL, NEW_EMAIL);
 
     UserUpdateRequest userUpdateRequest = mockUserUpdateRequest(Collections.singletonMap(EMAIL, diff));
 
@@ -203,10 +194,8 @@ public class UserChangeLogEventTest {
 
   @Test
   public void testUserEnabledStatusChangedEvent() {
-    User existedUser = new User();
-    existedUser.setEnabled(Boolean.FALSE);
     UserAttributeDiff<Boolean> diff =
-        new UserEnabledStatusAttributeDiff(existedUser, Boolean.FALSE, Boolean.TRUE);
+        new UserEnabledStatusAttributeDiff(Boolean.FALSE, Boolean.TRUE);
     UserUpdateRequest userUpdateRequest = mockUserUpdateRequest(
         Collections.singletonMap(OtherUserAttribute.ENABLED_STATUS, diff));
 

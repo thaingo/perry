@@ -1,6 +1,5 @@
 package gov.ca.cwds.idm.service.cognito.attribute.diff.builder;
 
-import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
 import gov.ca.cwds.idm.service.cognito.attribute.diff.UserAttributeDiff;
 import gov.ca.cwds.idm.service.cognito.attribute.diff.UserEnabledStatusAttributeDiff;
@@ -10,13 +9,13 @@ import gov.ca.cwds.idm.service.cognito.attribute.diff.UserEnabledStatusAttribute
  */
 public class UserEnabledStatusDiffBuilder extends AbstractUserAttributeDiffBuilder<Boolean> {
 
-  public UserEnabledStatusDiffBuilder(UserAttribute userAttribute, User user, Boolean oldValue,
+  public UserEnabledStatusDiffBuilder(UserAttribute userAttribute, Boolean oldValue,
       Boolean newValue) {
-    super(userAttribute, user, oldValue, newValue);
+    super(userAttribute, oldValue, newValue);
   }
 
   @Override
   public UserAttributeDiff<Boolean> buildDiff() {
-    return new UserEnabledStatusAttributeDiff(getUser(), getOldValue(), getNewValue());
+    return new UserEnabledStatusAttributeDiff(getOldValue(), getNewValue());
   }
 }
