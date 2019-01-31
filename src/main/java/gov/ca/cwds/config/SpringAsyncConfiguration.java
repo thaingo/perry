@@ -17,7 +17,7 @@ import org.springframework.security.task.DelegatingSecurityContextAsyncTaskExecu
 public class SpringAsyncConfiguration implements AsyncConfigurer {
 
   @Override
-  @Bean(name = "auditListenerTaskExecutor")
+  @Bean(name = "auditLogTaskExecutor")
   public Executor getAsyncExecutor() {
     ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
     executor.setCorePoolSize(5);

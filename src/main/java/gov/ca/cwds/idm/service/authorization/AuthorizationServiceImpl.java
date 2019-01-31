@@ -3,12 +3,9 @@ package gov.ca.cwds.idm.service.authorization;
 import static gov.ca.cwds.service.messages.MessageCode.ADMIN_CANNOT_UPDATE_HIMSELF;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserName;
 
-import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.exception.AdminAuthorizationException;
-import gov.ca.cwds.idm.service.MappingService;
-import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.idm.service.role.implementor.AbstractAdminActionsAuthorizer;
 import gov.ca.cwds.idm.service.role.implementor.AdminRoleImplementorFactory;
@@ -31,10 +28,6 @@ public class AuthorizationServiceImpl implements AuthorizationService {
   private static final String PERMISSIONS_EDITING = "permissions editing";
   private static final String USER_UPDATE = "user update";
 
-  private CognitoServiceFacade cognitoServiceFacade;
-
-  private MappingService mappingService;
-
   private AdminRoleImplementorFactory adminRoleImplementorFactory;
 
   private ExceptionFactory exceptionFactory;
@@ -49,25 +42,23 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     getAdminActionsAuthorizer(user).checkCanCreateUser();
   }
 
-  void checkCanUpdateUser(String userId) {
-    if (userId.equals(getCurrentUserName())) {
+  void checkCanUpdateUser(User user) {
+    if (user.getId().equals(getCurrentUserName())) {
       throw exceptionFactory.createAuthorizationException(ADMIN_CANNOT_UPDATE_HIMSELF);
     }
-    User user = getUserById(userId);
-    checkCanUpdateUser(user);
+    getAdminActionsAuthorizer(user).checkCanUpdateUser();
   }
 
   @Override
-  public boolean canUpdateUser(String userId) {
-    return canAuthorizeOperation(userId, this::checkCanUpdateUser, USER_UPDATE);
+  public boolean canUpdateUser(User user) {
+    return canAuthorizeOperation(user, this::checkCanUpdateUser, USER_UPDATE);
   }
 
   @Override
-  public void checkCanUpdateUser(UserType existingUser, UserUpdate updateUserDto) {
-    if (existingUser.getUsername().equals(getCurrentUserName())) {
+  public void checkCanUpdateUser(User user, UserUpdate updateUserDto) {
+    if (user.getId().equals(getCurrentUserName())) {
       throw exceptionFactory.createAuthorizationException(ADMIN_CANNOT_UPDATE_HIMSELF);
     }
-    User user = mappingService.toUser(existingUser);
     checkCanUpdateUser(user);
     authorizeRolesUpdate(user, updateUserDto);
     authorizePermissionsUpdate(user, updateUserDto);
@@ -103,13 +94,10 @@ public class AuthorizationServiceImpl implements AuthorizationService {
         updateUserDto.getPermissions());
   }
 
-    private boolean wasActuallyEdited(Set<String> oldSet, Set<String> newSet) {
+  private boolean wasActuallyEdited(Set<String> oldSet, Set<String> newSet) {
     return !CollectionUtils.isEqualCollection(oldSet, newSet);
   }
 
-  void checkCanUpdateUser(User user) {
-    getAdminActionsAuthorizer(user).checkCanUpdateUser();
-  }
 
   private void checkCanEditRoles(User user) {
     getAdminActionsAuthorizer(user).checkCanEditRoles();
@@ -125,12 +113,13 @@ public class AuthorizationServiceImpl implements AuthorizationService {
   }
 
   @Override
-  public boolean canEditPermissions(User  user) {
+  public boolean canEditPermissions(User user) {
     return canAuthorizeOperation(user, this::checkCanEditPermissions, PERMISSIONS_EDITING);
   }
 
   private AdminActionsAuthorizer getAdminActionsAuthorizer(User user) {
-    AbstractAdminActionsAuthorizer authorizer = adminRoleImplementorFactory.getAdminActionsAuthorizer(user);
+    AbstractAdminActionsAuthorizer authorizer = adminRoleImplementorFactory
+        .getAdminActionsAuthorizer(user);
     authorizer.setExceptionFactory(exceptionFactory);
     return authorizer;
   }
@@ -149,24 +138,8 @@ public class AuthorizationServiceImpl implements AuthorizationService {
   }
 
   @Override
-  public void checkCanResendInvitationMessage(String userId) {
-    User user = getUserById(userId);
+  public void checkCanResendInvitationMessage(User user) {
     getAdminActionsAuthorizer(user).checkCanResendInvitationMessage();
-  }
-
-  private User getUserById(String userId) {
-    UserType existingCognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
-    return mappingService.toUser(existingCognitoUser);
-  }
-
-  @Autowired
-  public void setCognitoServiceFacade(CognitoServiceFacade cognitoServiceFacade) {
-    this.cognitoServiceFacade = cognitoServiceFacade;
-  }
-
-  @Autowired
-  public void setMappingService(MappingService mappingService) {
-    this.mappingService = mappingService;
   }
 
   @Autowired

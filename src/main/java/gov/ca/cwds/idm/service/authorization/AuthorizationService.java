@@ -1,6 +1,5 @@
 package gov.ca.cwds.idm.service.authorization;
 
-import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
 
@@ -10,13 +9,13 @@ public interface AuthorizationService {
 
   void checkCanCreateUser(User user);
 
-  void checkCanUpdateUser(UserType existingUser, UserUpdate updateUserDto);
+  void checkCanUpdateUser(User existingUser, UserUpdate updateUserDto);
 
-  void checkCanResendInvitationMessage(String id);
+  void checkCanResendInvitationMessage(User user);
 
-  boolean canUpdateUser(String userId);
+  boolean canUpdateUser(User user);
 
   boolean canEditRoles(User user);
 
-  boolean canEditPermissions(User  user);
+  boolean canEditPermissions(User user);
 }

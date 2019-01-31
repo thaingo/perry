@@ -24,7 +24,7 @@ public class UserEditDetailsService {
   public UserEditDetails getEditDetails(User user) {
     UserEditDetails editDetails = new UserEditDetails();
 
-    boolean canUpdateUser = authorizationService.canUpdateUser(user.getId());
+    boolean canUpdateUser = authorizationService.canUpdateUser(user);
 
     editDetails.setEditable(canUpdateUser);
     editDetails.setRoles(getRoles(user, canUpdateUser));
@@ -42,7 +42,8 @@ public class UserEditDetailsService {
 
   private ListOfValues getPermissions(User user, boolean canUpdateUser) {
     ListOfValues usersPossiblePermissions = new ListOfValues();
-    usersPossiblePermissions.setEditable(canUpdateUser && authorizationService.canEditPermissions(user));
+    usersPossiblePermissions
+        .setEditable(canUpdateUser && authorizationService.canEditPermissions(user));
 
     usersPossiblePermissions.setPossibleValues(
         possibleUserPermissionsService.getPossibleUserPermissions(isRacfidUser(user)));

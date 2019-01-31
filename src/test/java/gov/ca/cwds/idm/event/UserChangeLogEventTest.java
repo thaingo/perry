@@ -103,6 +103,14 @@ public class UserChangeLogEventTest {
   }
 
   @Test
+  public void testUserRegistrationResentEvent() {
+    User user = mockUser();
+    UserRegistrationResentEvent event = new UserRegistrationResentEvent(user);
+    assertEquals(UserRegistrationResentEvent.EVENT_TYPE_REGISTRATION_RESENT, event.getEventType());
+    assertEquals(TEST_FIRST_NAME + " " + TEST_LAST_NAME, event.getEvent().getUserName());
+  }
+
+  @Test
   public void testUserRoleChangedEvent() {
     UserType existedUser = new UserType();
     UserAttributeDiff<Set<String>> diff = new RolesUserAttributeDiff(existedUser,
@@ -163,7 +171,8 @@ public class UserChangeLogEventTest {
     UserType existedUser = new UserType();
     UserAttributeDiff<String> diff = new StringUserAttributeDiff(PERMISSIONS, existedUser,
         NEW_EMAIL);
-    AttributeType oldAttribute = new AttributeType().withName(PERMISSIONS.getName()).withValue(OLD_EMAIL);
+    AttributeType oldAttribute = new AttributeType().withName(PERMISSIONS.getName())
+        .withValue(OLD_EMAIL);
     UserUpdateRequest userUpdateRequest = mockUserUpdateRequest(existedUser,
         oldAttribute, Collections.singletonMap(EMAIL, diff));
 

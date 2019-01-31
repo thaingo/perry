@@ -26,10 +26,8 @@ import static org.mockito.Mockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.exception.AdminAuthorizationException;
-import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.idm.service.role.implementor.AdminRoleImplementorFactory;
 import gov.ca.cwds.service.messages.MessageCode;
@@ -41,7 +39,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
-import org.mockito.Mockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -63,7 +60,7 @@ public class AuthorizationServiceImplTest {
     service.setExceptionFactory(exceptionFactory);
 
     when(messagesServiceMock.getMessages(any(MessageCode.class), ArgumentMatchers.<String>any()))
-            .thenReturn(new Messages("techMsg", "userMsg"));
+        .thenReturn(new Messages("techMsg", "userMsg"));
 
     mockStatic(CurrentAuthenticatedUserUtil.class);
   }
@@ -83,7 +80,7 @@ public class AuthorizationServiceImplTest {
     assertCantUpdateRole(CALS_ADMIN);
   }
 
-  private void assertCantUpdateRole(String ... roles) {
+  private void assertCantUpdateRole(String... roles) {
     when(getCurrentUser()).thenReturn(
         admin(toSet(STATE_ADMIN), "Yolo", toSet("Yolo_2")));
     assertFalse(service.canEditRoles(user(toSet(roles), "Yolo", "Yolo_1")));
@@ -93,12 +90,9 @@ public class AuthorizationServiceImplTest {
   public void testAdminCantUpdateHimself() {
     String adminId = "someId";
     when(CurrentAuthenticatedUserUtil.getCurrentUserName()).thenReturn(adminId);
-    CognitoServiceFacade cognitoServiceFacade = mock(CognitoServiceFacade.class);
-    UserType user = new UserType();
-    user.setUsername(adminId);
-    Mockito.when(cognitoServiceFacade.getCognitoUserById(adminId)).thenReturn(user);
-    service.setCognitoServiceFacade(cognitoServiceFacade);
-    assertCanNotUpdateUser(adminId, ADMIN_CANNOT_UPDATE_HIMSELF);
+    User user = new User();
+    user.setId(adminId);
+    assertCanNotUpdateUser(user, ADMIN_CANNOT_UPDATE_HIMSELF);
   }
 
 
@@ -193,7 +187,7 @@ public class AuthorizationServiceImplTest {
         user(toSet(STATE_ADMIN), "Yolo", "Yolo_1"));
     service.checkCanViewUser(
         user(toSet(COUNTY_ADMIN), "Yolo", "Yolo_1"));
-   service.checkCanViewUser(
+    service.checkCanViewUser(
         user(toSet(STATE_ADMIN), "Yolo", "Yolo_3"));
     service.checkCanViewUser(
         user(toSet(COUNTY_ADMIN), "Yolo", "Yolo_3"));
@@ -223,10 +217,6 @@ public class AuthorizationServiceImplTest {
 
   private void assertCanNotViewUser(User user, MessageCode errorCode) {
     assertCanNot(user, errorCode, service::checkCanViewUser);
-  }
-
-  private void assertCanNotUpdateUser(String userId, MessageCode errorCode) {
-    assertCanNot(userId, errorCode, service::checkCanUpdateUser);
   }
 
   private void assertCanNotCreateUser(User user, MessageCode errorCode) {
