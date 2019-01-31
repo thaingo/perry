@@ -49,16 +49,14 @@ import com.amazonaws.services.cognitoidp.model.UsernameExistsException;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.service.UserUpdateRequest;
-import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
-import gov.ca.cwds.idm.service.diff.UserAttributeDiff;
-import gov.ca.cwds.idm.service.diff.UserEnabledStatusAttributeDiff;
+import gov.ca.cwds.idm.service.cognito.attribute.AttributeTypesBuilder;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
+import gov.ca.cwds.idm.service.diff.UserEnabledStatusAttributeDiff;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.service.messages.MessageCode;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 import javax.annotation.PostConstruct;
 import liquibase.util.StringUtils;
@@ -207,7 +205,7 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
       UserUpdateRequest userUpdateRequest) {
     List<AttributeType> attributeTypes = new AttributeTypesBuilder(userUpdateRequest.getCognitoDiffMap())
         .addAttribute(EMAIL).addAttribute(PHONE_NUMBER).addAttribute(PHONE_EXTENSION)
-        .addAttribute(PERMISSIONS).addAttribute(ROLES).attributeTypes;
+        .addAttribute(PERMISSIONS).addAttribute(ROLES).build();
     if (attributeTypes.isEmpty()) {
       return false;
     }
@@ -334,24 +332,5 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
   @Autowired
   public void setExceptionFactory(ExceptionFactory exceptionFactory) {
     this.exceptionFactory = exceptionFactory;
-  }
-
-  private static class AttributeTypesBuilder {
-
-    private final Map<UserAttribute, UserAttributeDiff> diffMap;
-    private final List<AttributeType> attributeTypes;
-
-    AttributeTypesBuilder(Map<UserAttribute, UserAttributeDiff> diffMap) {
-      this.diffMap = diffMap;
-      this.attributeTypes = new ArrayList<>(diffMap.size());
-    }
-
-    private AttributeTypesBuilder addAttribute(UserAttribute userAttribute) {
-      if (diffMap.containsKey(userAttribute)) {
-        attributeTypes.addAll(diffMap.get(userAttribute).createAttributeTypes());
-      }
-      return this;
-    }
-
   }
 }
