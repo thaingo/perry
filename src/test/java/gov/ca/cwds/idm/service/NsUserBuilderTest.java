@@ -8,6 +8,7 @@ import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
 import gov.ca.cwds.idm.service.NsUserService.NsUserBuilder;
 import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
 import gov.ca.cwds.idm.service.cognito.attribute.diff.Diff;
+import gov.ca.cwds.idm.service.cognito.attribute.diff.StringDiff;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.Test;
@@ -20,7 +21,7 @@ public class NsUserBuilderTest {
     existedUser.setNotes("Old Notes");
 
     Map<UserAttribute, Diff> databaseDiffMap = new HashMap<>();
-    databaseDiffMap.put(NOTES, new Diff<>( "Old Notes","New Notes"));
+    databaseDiffMap.put(NOTES, new StringDiff( "Old Notes","New Notes"));
 
     NsUser modifiedNsUser = new NsUserBuilder(existedUser, databaseDiffMap).build();
     assertThat(modifiedNsUser.getNotes(), is("New Notes"));

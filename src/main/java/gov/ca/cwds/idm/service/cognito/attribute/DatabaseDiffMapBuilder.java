@@ -5,6 +5,7 @@ import static gov.ca.cwds.idm.service.cognito.attribute.DatabaseUserAttribute.NO
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.service.cognito.attribute.diff.Diff;
+import gov.ca.cwds.idm.service.cognito.attribute.diff.StringDiff;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,13 +21,17 @@ public class DatabaseDiffMapBuilder {
   }
 
   public Map<UserAttribute, Diff> build() {
-    addDiff(NOTES, existedUser.getNotes(), updateUserDto.getNotes());
+    addStringDiff(NOTES, existedUser.getNotes(), updateUserDto.getNotes());
     return diffMap;
   }
 
-  private <T> void addDiff(UserAttribute userAttribute, T oldValue, T newValue) {
-    if (newValue != null && !newValue.equals(oldValue)) {
-      diffMap.put(userAttribute, new Diff<>(oldValue, newValue));
+  private void addStringDiff(UserAttribute userAttribute, String oldValue, String newValue) {
+    if (areNotEqual(oldValue, newValue)) {
+      diffMap.put(userAttribute, new StringDiff(oldValue, newValue));
     }
+  }
+
+  private <T> boolean areNotEqual(T oldValue, T newValue) {
+    return newValue != null && !newValue.equals(oldValue);
   }
 }

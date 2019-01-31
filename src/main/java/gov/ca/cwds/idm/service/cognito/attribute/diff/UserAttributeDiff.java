@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Created by Alexander Serbin on 1/15/2019
  */
-public abstract class UserAttributeDiff<T> {
+public abstract class UserAttributeDiff<T> implements Diff<T> {
 
   private UserAttribute userAttribute;
   private UserType exitingUser;
@@ -22,12 +22,7 @@ public abstract class UserAttributeDiff<T> {
 
   public abstract List<AttributeType> createAttributeTypes();
 
-  public abstract T getOldValue();
-
-  public abstract String getOldValueAsString();
-
-  public abstract String getNewValueAsString();
-
+  @Override
   public T getNewValue() {
     return newValue;
   }

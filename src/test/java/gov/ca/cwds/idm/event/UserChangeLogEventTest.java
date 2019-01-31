@@ -9,6 +9,7 @@ import static gov.ca.cwds.idm.event.UserEnabledStatusChangedEvent.ACTIVE;
 import static gov.ca.cwds.idm.event.UserEnabledStatusChangedEvent.INACTIVE;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PERMISSIONS;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.ROLES;
+import static gov.ca.cwds.idm.service.cognito.attribute.DatabaseUserAttribute.NOTES;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -27,7 +28,9 @@ import gov.ca.cwds.idm.service.authorization.UserRolesService;
 import gov.ca.cwds.idm.service.cognito.attribute.OtherUserAttribute;
 import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
 import gov.ca.cwds.idm.service.cognito.attribute.diff.CollectionUserAttributeDiff;
+import gov.ca.cwds.idm.service.cognito.attribute.diff.Diff;
 import gov.ca.cwds.idm.service.cognito.attribute.diff.RolesUserAttributeDiff;
+import gov.ca.cwds.idm.service.cognito.attribute.diff.StringDiff;
 import gov.ca.cwds.idm.service.cognito.attribute.diff.StringUserAttributeDiff;
 import gov.ca.cwds.idm.service.cognito.attribute.diff.UserAttributeDiff;
 import gov.ca.cwds.idm.service.cognito.attribute.diff.UserEnabledStatusAttributeDiff;
@@ -69,6 +72,8 @@ public class UserChangeLogEventTest {
   private static final String TEST_ADMIN_NAME = "Cherno Samba";
   private static final String NEW_EMAIL = "newEmail@gmail.com";
   private static final String OLD_EMAIL = "oldEmail@gmail.com";
+  private static final String NEW_NOTES = "new notes";
+  private static final String OLD_NOTES = "old notes";
 
   @Before
   public void before() {
@@ -186,6 +191,21 @@ public class UserChangeLogEventTest {
   }
 
   @Test
+  public void testNotesChangedEvent() {
+    UserType existedUser = new UserType();
+    StringDiff diff = new StringDiff(OLD_NOTES, NEW_NOTES);
+    UserUpdateRequest userUpdateRequest = mockUserUpdateRequestWithDbDiff(existedUser,
+         Collections.singletonMap(NOTES, diff));
+
+    NotesChangedEvent event = new NotesChangedEvent(userUpdateRequest);
+    assertEquals(NotesChangedEvent.EVENT_TYPE_NOTES_CHANGED, event.getEventType());
+    assertEquals(OLD_NOTES, event.getEvent().getOldValue());
+    assertEquals(NEW_NOTES, event.getEvent().getNewValue());
+    assertEquals(String.join(", ", CALS_ADMIN, CWS_WORKER),
+        event.getEvent().getUserRoles());
+  }
+
+  @Test
   public void testUserEnabledStatusChangedEvent() {
     UserType existedUser = new UserType();
     existedUser.setEnabled(Boolean.FALSE);
@@ -231,10 +251,19 @@ public class UserChangeLogEventTest {
 
   private UserUpdateRequest mockUserUpdateRequest(
       UserType existedUser,
-      Map<UserAttribute, UserAttributeDiff> diffMap) {
+      Map<UserAttribute, UserAttributeDiff> cognitoDiffMap) {
     UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
     userUpdateRequest.setExistedUser(mockUser());
-    userUpdateRequest.setCognitoDiffMap(diffMap);
+    userUpdateRequest.setCognitoDiffMap(cognitoDiffMap);
+    return userUpdateRequest;
+  }
+
+  private UserUpdateRequest mockUserUpdateRequestWithDbDiff(
+      UserType existedUser,
+      Map<UserAttribute, Diff> dbDiffMap) {
+    UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
+    userUpdateRequest.setExistedUser(mockUser());
+    userUpdateRequest.setDatabaseDiffMap(dbDiffMap);
     return userUpdateRequest;
   }
 }
