@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
-import org.springframework.context.event.EventListener;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -49,37 +48,36 @@ public class AuditLogService {
   @Autowired
   private IndexRestSender restSender;
 
-  @EventListener
-  @Async("auditListenerTaskExecutor")
+  @Async("auditLogTaskExecutor")
   public ResponseEntity<String> createAuditLogRecord(AuditEvent event) {
-      HttpHeaders headers = new HttpHeaders();
-      headers.setContentType(MediaType.APPLICATION_JSON);
-      HttpEntity<AuditEvent> requestEntity = new HttpEntity<>(event, headers);
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    HttpEntity<AuditEvent> requestEntity = new HttpEntity<>(event, headers);
 
-      final String eventId = UUID.randomUUID().toString();
+    final String eventId = UUID.randomUUID().toString();
 
-      Map<String, String> params = new HashMap<>();
-      params.put(DORA_URL, auditProperties.getDoraUrl());
-      params.put(ES_AUDIT_INDEX, auditProperties.getIndex());
-      params.put(ES_AUDIT_TYPE, auditProperties.getType());
-      params.put(ID, eventId);
-      params.put(SSO_TOKEN, getSsoToken());
-      ResponseEntity<String> response;
-      try {
-        response = restSender.send(CREATE_URL_TEMPLATE, requestEntity, params);
+    Map<String, String> params = new HashMap<>();
+    params.put(DORA_URL, auditProperties.getDoraUrl());
+    params.put(ES_AUDIT_INDEX, auditProperties.getIndex());
+    params.put(ES_AUDIT_TYPE, auditProperties.getType());
+    params.put(ID, eventId);
+    params.put(SSO_TOKEN, getSsoToken());
+    ResponseEntity<String> response;
+    try {
+      response = restSender.send(CREATE_URL_TEMPLATE, requestEntity, params);
 
-        if (LOGGER.isInfoEnabled()) {
-          LOGGER.info(
-              "Audit record, id:{} was successfully stored in Elastic Search index, Dora response string is:{}",
-              eventId,
-              response.getBody());
-        }
-        return response;
-      } catch (Exception e) {
-        LOGGER.error("Error while storing the audit event {} for user {}.", event.getEventType(),
-            event.getUserLogin());
-        throw e;
+      if (LOGGER.isInfoEnabled()) {
+        LOGGER.info(
+            "Audit record, id:{} was successfully stored in Elastic Search index, Dora response string is:{}",
+            eventId,
+            response.getBody());
       }
+      return response;
+    } catch (Exception e) {
+      LOGGER.error("Error while storing the audit event {} for user {}.", event.getEventType(),
+          event.getUserLogin());
+      throw e;
+    }
   }
 
   protected String getSsoToken() {

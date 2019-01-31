@@ -48,6 +48,7 @@ import gov.ca.cwds.idm.event.NotesChangedEvent;
 import gov.ca.cwds.idm.event.PermissionsChangedEvent;
 import gov.ca.cwds.idm.event.UserCreatedEvent;
 import gov.ca.cwds.idm.event.UserEnabledStatusChangedEvent;
+import gov.ca.cwds.idm.event.UserRegistrationResentEvent;
 import gov.ca.cwds.idm.event.UserRoleChangedEvent;
 import gov.ca.cwds.idm.exception.AdminAuthorizationException;
 import gov.ca.cwds.idm.exception.UserValidationException;
@@ -91,7 +92,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -134,9 +134,6 @@ public class IdmServiceImpl implements IdmService {
   private ExceptionFactory exceptionFactory;
 
   @Autowired
-  private ApplicationEventPublisher eventPublisher;
-
-  @Autowired
   private AuditLogService auditLogService;
 
   @Autowired
@@ -160,8 +157,9 @@ public class IdmServiceImpl implements IdmService {
   @Override
   public void updateUser(String userId, UserUpdate updateUserDto) {
     UserType existedCognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
+    User user = mappingService.toUser(existedCognitoUser);
 
-    authorizeService.checkCanUpdateUser(existedCognitoUser, updateUserDto);
+    authorizeService.checkCanUpdateUser(user, updateUserDto);
     validationService.validateUserUpdate(existedCognitoUser, updateUserDto);
 
     UserUpdateRequest userUpdateRequest =
@@ -238,7 +236,7 @@ public class IdmServiceImpl implements IdmService {
     UserType userType = cognitoServiceFacade.createUser(user);
     String userId = userType.getUsername();
     user.setId(userId);
-    eventPublisher.publishEvent(new UserCreatedEvent(user));
+    auditLogService.createAuditLogRecord(new UserCreatedEvent(user));
     PutInSearchExecution doraExecution = createUserInSearch(userType);
     handleCreatePartialSuccess(userId, doraExecution);
     return userId;
@@ -283,8 +281,10 @@ public class IdmServiceImpl implements IdmService {
 
   @Override
   public RegistrationResubmitResponse resendInvitationMessage(String userId) {
-    authorizeService.checkCanResendInvitationMessage(userId);
+    User user =  getUser(userId);
+    authorizeService.checkCanResendInvitationMessage(user);
     cognitoServiceFacade.resendInvitationMessage(userId);
+    auditLogService.createAuditLogRecord(new UserRegistrationResentEvent(user));
     return new RegistrationResubmitResponse(userId);
   }
 

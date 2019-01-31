@@ -7,18 +7,20 @@ import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_WITH_RACFID_ID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.amazonaws.services.cognitoidp.model.AdminCreateUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminCreateUserResult;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.RegistrationResubmitResponse;
-import gov.ca.cwds.idm.service.NsUserService;
+import gov.ca.cwds.idm.event.UserRegistrationResentEvent;
 import gov.ca.cwds.idm.util.TestCognitoServiceFacade;
 import gov.ca.cwds.idm.util.TestUtils;
 import gov.ca.cwds.idm.util.WithMockCustomUser;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -29,8 +31,6 @@ public class ResendInvitationEmailTest extends BaseIdmIntegrationWithUserLogTest
 
   private static final String USER_WITH_RACFID_ID_EMAIL = "julio@gmail.com";
 
-  @Autowired
-  private NsUserService nsUserService;
 
   @Test
   @WithMockCustomUser(county = "OtherCounty")
@@ -73,6 +73,8 @@ public class ResendInvitationEmailTest extends BaseIdmIntegrationWithUserLogTest
 
   private void assertResendEmailUnauthorized(String id, String fixtureFilePath) throws Exception {
     MvcResult result = assertResendEmailUnauthorized(id);
+    verify(auditLogService, times(0)).createAuditLogRecord(any(
+        UserRegistrationResentEvent.class));
     assertExtensible(result, fixtureFilePath);
   }
 
@@ -97,10 +99,12 @@ public class ResendInvitationEmailTest extends BaseIdmIntegrationWithUserLogTest
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andReturn();
 
-    String strResponse  = mvcResult.getResponse().getContentAsString();
+    String strResponse = mvcResult.getResponse().getContentAsString();
     RegistrationResubmitResponse registrationResubmitResponse =
         TestUtils.deserialize(strResponse, RegistrationResubmitResponse.class);
     assertThat(registrationResubmitResponse.getUserId(), is(USER_WITH_RACFID_ID));
+    verify(auditLogService, times(1)).createAuditLogRecord(any(
+        UserRegistrationResentEvent.class));
   }
 
 }
