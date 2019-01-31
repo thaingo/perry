@@ -12,7 +12,7 @@ public class NotesChangedEvent extends UserAttributeChangedEvent {
 
   private static final long serialVersionUID = 88269111887681820L;
 
-  public static final String EVENT_TYPE_NOTES_CHANGED = "User notes are changed";
+  public static final String EVENT_TYPE_NOTES_CHANGED = "Notes Changed";
 
   public NotesChangedEvent(UserUpdateRequest userUpdateRequest) {
     super(userUpdateRequest);
