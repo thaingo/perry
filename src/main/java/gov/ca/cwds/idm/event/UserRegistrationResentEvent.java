@@ -15,7 +15,6 @@ public class UserRegistrationResentEvent extends UserChangeLogEvent {
 
   public UserRegistrationResentEvent(User user) {
     super(user);
-    setUserRoles(joinRoles(user.getRoles()));
     setEventType(EVENT_TYPE_REGISTRATION_RESENT);
   }
 
