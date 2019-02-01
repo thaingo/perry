@@ -11,14 +11,14 @@ import org.apache.commons.lang3.Validate;
  * Created by Alexander Serbin on 1/11/2019
  */
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class EmailChangedEvent extends UserAttributeChangedEvent {
+public class EmailChangedEvent extends UserChangeLogEvent {
 
   private static final long serialVersionUID = 5740708683905011516L;
 
   public static final String EVENT_TYPE_EMAIL_CHANGED = "Email Address";
 
   public EmailChangedEvent(UserUpdateRequest userUpdateRequest) {
-    super(userUpdateRequest);
+    super(userUpdateRequest.getExistedUser());
     Validate.isTrue(userUpdateRequest.isAttributeChanged(EMAIL));
     setEventType(EVENT_TYPE_EMAIL_CHANGED);
     setOldValue(userUpdateRequest.getOldValueAsString(EMAIL));

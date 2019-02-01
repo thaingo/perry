@@ -12,7 +12,7 @@ import org.apache.commons.lang3.Validate;
  * Created by Alexander Serbin on 1/18/2019
  */
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class UserEnabledStatusChangedEvent extends UserAttributeChangedEvent {
+public class UserEnabledStatusChangedEvent extends UserChangeLogEvent {
 
   private static final long serialVersionUID = 6929792785662167658L;
   static final String ACTIVE = "Active";
@@ -20,7 +20,7 @@ public class UserEnabledStatusChangedEvent extends UserAttributeChangedEvent {
   static final String USER_ACCOUNT_STATUS_CHANGED = "Account Status";
 
   public UserEnabledStatusChangedEvent(UserUpdateRequest userUpdateRequest) {
-    super(userUpdateRequest);
+    super(userUpdateRequest.getExistedUser());
     setEventType(USER_ACCOUNT_STATUS_CHANGED);
     Validate.isTrue(userUpdateRequest.isAttributeChanged(ENABLED_STATUS));
     UserEnabledStatusAttributeDiff diff = (UserEnabledStatusAttributeDiff) userUpdateRequest
