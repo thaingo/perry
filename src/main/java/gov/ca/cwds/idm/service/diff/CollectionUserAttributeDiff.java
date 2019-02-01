@@ -21,12 +21,6 @@ public class CollectionUserAttributeDiff extends UserAttributeDiff<Set<String>> 
   }
 
   @Override
-  public List<AttributeType> createAttributeTypes() {
-    return Collections
-        .singletonList(CognitoUtils.createDelimitedAttribute(getUserAttribute(), getNewValue()));
-  }
-
-  @Override
   public String getOldValueAsString() {
     return getCollectionValueAsString(getOldValue());
   }

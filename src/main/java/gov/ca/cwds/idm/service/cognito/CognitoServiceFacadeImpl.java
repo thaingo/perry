@@ -203,9 +203,11 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
   @Override
   public boolean updateUserAttributes(
       UserUpdateRequest userUpdateRequest) {
-    List<AttributeType> attributeTypes = new AttributeTypesBuilder(userUpdateRequest.getCognitoDiffMap())
-        .addAttribute(EMAIL).addAttribute(PHONE_NUMBER).addAttribute(PHONE_EXTENSION)
-        .addAttribute(PERMISSIONS).addAttribute(ROLES).build();
+
+    List<AttributeType> attributeTypes =
+        new AttributeTypesBuilder(userUpdateRequest.getCognitoDiffMap())
+        .build(EMAIL, PHONE_NUMBER, PHONE_EXTENSION, PERMISSIONS, ROLES);
+
     if (attributeTypes.isEmpty()) {
       return false;
     }

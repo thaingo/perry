@@ -1,8 +1,6 @@
 package gov.ca.cwds.idm.service.diff;
 
-import com.amazonaws.services.cognitoidp.model.AttributeType;
 import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
-import java.util.List;
 
 /**
  * Created by Alexander Serbin on 1/15/2019
@@ -18,8 +16,6 @@ public abstract class UserAttributeDiff<T> implements Diff<T> {
     this.oldValue = oldValue;
     this.newValue = newValue;
   }
-
-  public abstract List<AttributeType> createAttributeTypes();
 
   @Override
   public T getNewValue() {
