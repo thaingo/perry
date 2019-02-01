@@ -8,13 +8,13 @@ import java.util.function.BiFunction;
 
 public class Differencing {
 
-  private Optional<StringDiff> emailDiff;
-  private Optional<BooleanDiff> enabledDiff;
-  private Optional<StringDiff> phoneNumberDiff;
-  private Optional<StringDiff> phoneExtensionNumberDiff;
-  private Optional<StringDiff> notesDiff;
-  private Optional<StringSetDiff> permissionsDiff;
-  private Optional<StringSetDiff> rolesDiff;
+  private StringDiff emailDiff;
+  private BooleanDiff enabledDiff;
+  private StringDiff phoneNumberDiff;
+  private StringDiff phoneExtensionNumberDiff;
+  private StringDiff notesDiff;
+  private StringSetDiff permissionsDiff;
+  private StringSetDiff rolesDiff;
 
   public Differencing(User existedUser, UserUpdate userUpdate) {
     emailDiff = createStringDiff(existedUser.getEmail(), userUpdate.getEmail());
@@ -29,24 +29,23 @@ public class Differencing {
     rolesDiff = createStringSetDiff(existedUser.getRoles(), userUpdate.getRoles());
   }
 
-  private Optional<StringDiff> createStringDiff(String oldValue, String newValue) {
+  private StringDiff createStringDiff(String oldValue, String newValue) {
     return createDiff(oldValue, newValue, StringDiff::new);
   }
 
-  private Optional<BooleanDiff> createBooleanDiff(Boolean oldValue, Boolean newValue) {
+  private BooleanDiff createBooleanDiff(Boolean oldValue, Boolean newValue) {
     return createDiff(oldValue, newValue, BooleanDiff::new);
   }
 
-  private Optional<StringSetDiff> createStringSetDiff(Set<String> oldValue, Set<String> newValue) {
+  private StringSetDiff createStringSetDiff(Set<String> oldValue, Set<String> newValue) {
     return createDiff(oldValue, newValue, StringSetDiff::new);
   }
 
-  private <T, R> Optional<R> createDiff(T oldValue, T newValue,
-      BiFunction<T, T, R> diffConstructor) {
+  private <T, R> R createDiff(T oldValue, T newValue, BiFunction<T, T, R> diffConstructor) {
     if (areNotEqual(oldValue, newValue)) {
-      return Optional.of(diffConstructor.apply(oldValue, newValue));
+      return diffConstructor.apply(oldValue, newValue);
     } else {
-      return Optional.empty();
+      return null;
     }
   }
 
@@ -55,30 +54,30 @@ public class Differencing {
   }
 
   public Optional<StringDiff> getEmailDiff() {
-    return emailDiff;
+    return Optional.ofNullable(emailDiff);
   }
 
   public Optional<BooleanDiff> getEnabledDiff() {
-    return enabledDiff;
+    return Optional.ofNullable(enabledDiff);
   }
 
   public Optional<StringDiff> getPhoneNumberDiff() {
-    return phoneNumberDiff;
+    return Optional.ofNullable(phoneNumberDiff);
   }
 
   public Optional<StringDiff> getPhoneExtensionNumberDiff() {
-    return phoneExtensionNumberDiff;
+    return Optional.ofNullable(phoneExtensionNumberDiff);
   }
 
   public Optional<StringDiff> getNotesDiff() {
-    return notesDiff;
+    return Optional.ofNullable(notesDiff);
   }
 
   public Optional<StringSetDiff> getPermissionsDiff() {
-    return permissionsDiff;
+    return Optional.ofNullable(permissionsDiff);
   }
 
   public Optional<StringSetDiff> getRolesDiff() {
-    return rolesDiff;
+    return Optional.ofNullable(rolesDiff);
   }
 }
