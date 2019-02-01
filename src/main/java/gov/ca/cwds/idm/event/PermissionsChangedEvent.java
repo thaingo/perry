@@ -18,7 +18,7 @@ import org.apache.commons.lang3.Validate;
  * Created by Alexander Serbin on 1/11/2019
  */
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class PermissionsChangedEvent extends UserAttributeChangedEvent {
+public class PermissionsChangedEvent extends UserChangeLogEvent {
 
   private static final long serialVersionUID = 5084376904261765730L;
 
@@ -26,7 +26,7 @@ public class PermissionsChangedEvent extends UserAttributeChangedEvent {
 
   public PermissionsChangedEvent(UserUpdateRequest userUpdateRequest,
       List<Permission> permissions) {
-    super(userUpdateRequest);
+    super(userUpdateRequest.getExistedUser());
     setEventType(EVENT_TYPE_PERMISSIONS_CHANGED);
     Validate.isTrue(userUpdateRequest.isAttributeChanged(PERMISSIONS));
     CollectionUserAttributeDiff diff = (CollectionUserAttributeDiff) userUpdateRequest.getCognitoDiffMap()
