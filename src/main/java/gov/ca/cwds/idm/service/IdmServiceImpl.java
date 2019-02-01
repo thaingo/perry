@@ -63,6 +63,9 @@ import gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute;
 import gov.ca.cwds.idm.service.cognito.attribute.UpdatedAttributesBuilder;
 import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
 import gov.ca.cwds.idm.service.diff.Diff;
+import gov.ca.cwds.idm.service.diff.Differencing;
+import gov.ca.cwds.idm.service.diff.StringDiff;
+import gov.ca.cwds.idm.service.diff.StringSetDiff;
 import gov.ca.cwds.idm.service.diff.UserAttributeDiff;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
@@ -197,6 +200,8 @@ public class IdmServiceImpl implements IdmService {
     Map<UserAttribute, Diff> databaseDiffMap =
         new DatabaseDiffMapBuilder(existedUser, updateUserDto).build();
     userUpdateRequest.setDatabaseDiffMap(databaseDiffMap);
+
+    userUpdateRequest.setDifferencing(new Differencing(existedUser, updateUserDto));
 
     return userUpdateRequest;
   }
@@ -362,36 +367,37 @@ public class IdmServiceImpl implements IdmService {
   }
 
   private void publishUpdateAttributesEvents(UserUpdateRequest userUpdateRequest) {
-    publishUpdateRolesEvent(userUpdateRequest);
-    publishUpdatePermissionsEvent(userUpdateRequest);
-    publishUpdateEmailEvent(userUpdateRequest);
-    publishUpdateNotesEvent(userUpdateRequest);
+    User existedUser = userUpdateRequest.getExistedUser();
+    Differencing differencing = userUpdateRequest.getDifferencing();
+
+    publishUpdateRolesEvent(existedUser, differencing.getRolesDiff());
+    publishUpdatePermissionsEvent(existedUser, differencing.getPermissionsDiff());
+    publishUpdateEmailEvent(existedUser, differencing.getEmailDiff());
+    publishUpdateNotesEvent(existedUser, differencing.getNotesDiff());
   }
 
-  private void publishUpdateEmailEvent(UserUpdateRequest userUpdateRequest) {
-    if (userUpdateRequest.isAttributeChanged(StandardUserAttribute.EMAIL)) {
-      auditLogService.createAuditLogRecord(new EmailChangedEvent(userUpdateRequest));
-    }
+  private void publishUpdateEmailEvent(User existedUser, Optional<StringDiff> optEmailDiff) {
+    optEmailDiff.ifPresent(emailDiff ->
+        auditLogService.createAuditLogRecord(new EmailChangedEvent(existedUser, emailDiff)));
   }
 
-  private void publishUpdateNotesEvent(UserUpdateRequest userUpdateRequest) {
-    if (userUpdateRequest.isAttributeChanged(NOTES)) {
-      auditLogService.createAuditLogRecord(new NotesChangedEvent(userUpdateRequest));
-    }
+  private void publishUpdateNotesEvent(User existedUser, Optional<StringDiff> optNotesDiff) {
+    optNotesDiff.ifPresent(notesDiff ->
+        auditLogService.createAuditLogRecord(new NotesChangedEvent(existedUser, notesDiff)));
   }
 
-  private void publishUpdatePermissionsEvent(UserUpdateRequest userUpdateRequest) {
-    if (userUpdateRequest.isAttributeChanged(PERMISSIONS)) {
-      List<Permission> permissions = dictionaryProvider.getPermissions();
-      auditLogService
-          .createAuditLogRecord(new PermissionsChangedEvent(userUpdateRequest, permissions));
-    }
+  private void publishUpdatePermissionsEvent(User existedUser,
+      Optional<StringSetDiff> optPermissionsDiff) {
+    List<Permission> permissions = dictionaryProvider.getPermissions();
+
+    optPermissionsDiff.ifPresent(permissionsDiff ->
+        auditLogService.createAuditLogRecord(
+            new PermissionsChangedEvent(existedUser, permissionsDiff, permissions)));
   }
 
-  private void publishUpdateRolesEvent(UserUpdateRequest userUpdateRequest) {
-    if (userUpdateRequest.isAttributeChanged(ROLES)) {
-      auditLogService.createAuditLogRecord(new UserRoleChangedEvent(userUpdateRequest));
-    }
+  private void publishUpdateRolesEvent(User existedUser, Optional<StringSetDiff> optRolesDiff) {
+    optRolesDiff.ifPresent(rolesDiff ->
+        auditLogService.createAuditLogRecord(new UserRoleChangedEvent(existedUser, rolesDiff)));
   }
 
   private void handleUpdatePartialSuccess(

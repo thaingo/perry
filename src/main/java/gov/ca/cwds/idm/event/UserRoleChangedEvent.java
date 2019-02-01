@@ -1,11 +1,9 @@
 package gov.ca.cwds.idm.event;
 
-import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.ROLES;
-
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import gov.ca.cwds.idm.service.UserUpdateRequest;
-import org.apache.commons.lang3.Validate;
+import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.idm.service.diff.Diff;
 
 /**
  * Created by Alexander Serbin on 1/11/2019
@@ -17,13 +15,11 @@ public class UserRoleChangedEvent extends UserChangeLogEvent {
 
   public static final String EVENT_TYPE_USER_ROLE_CHANGED = "Role";
 
-  public UserRoleChangedEvent(UserUpdateRequest userUpdateRequest) {
-    super(userUpdateRequest.getExistedUser());
-    Validate.isTrue(userUpdateRequest.isAttributeChanged(ROLES));
+  public UserRoleChangedEvent(User existedUser, Diff rolesDiff) {
+    super(existedUser);
     setEventType(EVENT_TYPE_USER_ROLE_CHANGED);
-    setUserRoles(userUpdateRequest.getNewValueAsString(ROLES));
-    setOldValue(userUpdateRequest.getOldValueAsString(ROLES));
-    setNewValue(userUpdateRequest.getNewValueAsString(ROLES));
+    setUserRoles(rolesDiff.getNewValueAsString());
+    setOldValue(rolesDiff.getOldValueAsString());
+    setNewValue(rolesDiff.getNewValueAsString());
   }
-
 }

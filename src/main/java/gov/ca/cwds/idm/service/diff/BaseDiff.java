@@ -30,5 +30,5 @@ public abstract class BaseDiff<T> implements Diff<T> {
     return toStringValue(newValue);
   }
 
-  abstract String toStringValue(T val);
+  abstract String toStringValue(T value);
 }

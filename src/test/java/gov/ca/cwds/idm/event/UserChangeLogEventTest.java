@@ -17,7 +17,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserChangeLogRecord;
@@ -30,6 +29,7 @@ import gov.ca.cwds.idm.service.diff.CollectionUserAttributeDiff;
 import gov.ca.cwds.idm.service.diff.Diff;
 import gov.ca.cwds.idm.service.diff.RolesUserAttributeDiff;
 import gov.ca.cwds.idm.service.diff.StringDiff;
+import gov.ca.cwds.idm.service.diff.StringSetDiff;
 import gov.ca.cwds.idm.service.diff.StringUserAttributeDiff;
 import gov.ca.cwds.idm.service.diff.UserAttributeDiff;
 import gov.ca.cwds.idm.service.diff.UserEnabledStatusAttributeDiff;
@@ -121,7 +121,7 @@ public class UserChangeLogEventTest {
         toSet(CALS_ADMIN, CWS_WORKER),
         new HashSet<>(Arrays.asList(OFFICE_ADMIN, STATE_ADMIN)));
     UserUpdateRequest userUpdateRequest = mockUserUpdateRequest(Collections.singletonMap(ROLES, diff));
-    UserRoleChangedEvent userRoleChangedEvent = new UserRoleChangedEvent(userUpdateRequest);
+    UserRoleChangedEvent userRoleChangedEvent = new UserRoleChangedEvent(userUpdateRequest.getExistedUser(), diff);
     assertEquals(UserRoleChangedEvent.EVENT_TYPE_USER_ROLE_CHANGED,
         userRoleChangedEvent.getEventType());
     assertEquals(StringUtils.join(new String[]{"CALS Administrator", "CWS Worker"}, ", "),
@@ -139,6 +139,8 @@ public class UserChangeLogEventTest {
         toSet(PERMISSION_1, PERMISSION_2),
         new HashSet<>(Arrays.asList(PERMISSION_3, PERMISSION_4)));
 
+    StringSetDiff diff2 = new StringSetDiff(toSet(PERMISSION_1, PERMISSION_2), toSet(PERMISSION_3, PERMISSION_4));
+
     List<Permission> permissions = Stream.of(
         new Permission(PERMISSION_1, PERMISSION_1 + PERMISSION_DESCRIPTION),
         new Permission(PERMISSION_2, PERMISSION_2 + PERMISSION_DESCRIPTION),
@@ -147,7 +149,7 @@ public class UserChangeLogEventTest {
     ).collect(Collectors.toList());
     UserUpdateRequest userUpdateRequest = mockUserUpdateRequest(Collections.singletonMap(PERMISSIONS, diff));
 
-    PermissionsChangedEvent event = new PermissionsChangedEvent(userUpdateRequest, permissions);
+    PermissionsChangedEvent event = new PermissionsChangedEvent(userUpdateRequest.getExistedUser(), diff2, permissions);
     assertEquals(PermissionsChangedEvent.EVENT_TYPE_PERMISSIONS_CHANGED,
         event.getEventType());
     assertEquals(StringUtils.join(
@@ -170,7 +172,7 @@ public class UserChangeLogEventTest {
 
     UserUpdateRequest userUpdateRequest = mockUserUpdateRequest(Collections.singletonMap(EMAIL, diff));
 
-    EmailChangedEvent event = new EmailChangedEvent(userUpdateRequest);
+    EmailChangedEvent event = new EmailChangedEvent(userUpdateRequest.getExistedUser(), diff);
     assertEquals(EmailChangedEvent.EVENT_TYPE_EMAIL_CHANGED,
         event.getEventType());
     assertEquals(OLD_EMAIL, event.getEvent().getOldValue());
@@ -181,12 +183,11 @@ public class UserChangeLogEventTest {
 
   @Test
   public void testNotesChangedEvent() {
-    UserType existedUser = new UserType();
     StringDiff diff = new StringDiff(OLD_NOTES, NEW_NOTES);
-    UserUpdateRequest userUpdateRequest = mockUserUpdateRequestWithDbDiff(existedUser,
-         Collections.singletonMap(NOTES, diff));
+    UserUpdateRequest userUpdateRequest =
+        mockUserUpdateRequestWithDbDiff(Collections.singletonMap(NOTES, diff));
 
-    NotesChangedEvent event = new NotesChangedEvent(userUpdateRequest);
+    NotesChangedEvent event = new NotesChangedEvent(userUpdateRequest.getExistedUser(), diff);
     assertEquals(NotesChangedEvent.EVENT_TYPE_NOTES_CHANGED, event.getEventType());
     assertEquals(OLD_NOTES, event.getEvent().getOldValue());
     assertEquals(NEW_NOTES, event.getEvent().getNewValue());
@@ -236,9 +237,7 @@ public class UserChangeLogEventTest {
     return userUpdateRequest;
   }
 
-  private UserUpdateRequest mockUserUpdateRequestWithDbDiff(
-      UserType existedUser,
-      Map<UserAttribute, Diff> dbDiffMap) {
+  private UserUpdateRequest mockUserUpdateRequestWithDbDiff(Map<UserAttribute, Diff> dbDiffMap) {
     UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
     userUpdateRequest.setExistedUser(mockUser());
     userUpdateRequest.setDatabaseDiffMap(dbDiffMap);

@@ -7,7 +7,7 @@ public class StringDiff extends BaseDiff<String> {
   }
 
   @Override
-  String toStringValue(String val) {
-    return val;
+  String toStringValue(String value) {
+    return value;
   }
 }
