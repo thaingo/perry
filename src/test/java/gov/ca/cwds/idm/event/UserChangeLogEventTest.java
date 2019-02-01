@@ -113,6 +113,8 @@ public class UserChangeLogEventTest {
     UserRegistrationResentEvent event = new UserRegistrationResentEvent(user);
     assertEquals(UserRegistrationResentEvent.EVENT_TYPE_REGISTRATION_RESENT, event.getEventType());
     assertEquals(TEST_FIRST_NAME + " " + TEST_LAST_NAME, event.getEvent().getUserName());
+    assertEquals(String.join(", ", CALS_ADMIN, CWS_WORKER),
+        event.getEvent().getUserRoles());
   }
 
   @Test
