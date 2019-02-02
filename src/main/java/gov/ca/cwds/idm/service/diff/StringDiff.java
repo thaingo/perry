@@ -1,8 +1,8 @@
 package gov.ca.cwds.idm.service.diff;
 
-public class StringDiff extends BaseDiff<String> {
+public final class StringDiff extends BaseDiff<String> {
 
-  public StringDiff(String oldValue, String newValue) {
+  public StringDiff(final String oldValue, final String newValue) {
     super(oldValue, newValue);
   }
 

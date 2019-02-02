@@ -2,10 +2,10 @@ package gov.ca.cwds.idm.service.diff;
 
 public abstract class BaseDiff<T> implements Diff<T> {
 
-  private T oldValue;
-  private T newValue;
+  protected final T oldValue;
+  protected final T newValue;
 
-  public BaseDiff(T oldValue, T newValue) {
+  public BaseDiff(final T oldValue, final T newValue) {
     this.oldValue = oldValue;
     this.newValue = newValue;
   }
@@ -21,12 +21,12 @@ public abstract class BaseDiff<T> implements Diff<T> {
   }
 
   @Override
-  public String getOldValueAsString() {
+  public final String getOldValueAsString() {
     return toStringValue(oldValue);
   }
 
   @Override
-  public String getNewValueAsString() {
+  public final String getNewValueAsString() {
     return toStringValue(newValue);
   }
 

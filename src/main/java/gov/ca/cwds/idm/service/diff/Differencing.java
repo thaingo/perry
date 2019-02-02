@@ -8,15 +8,15 @@ import java.util.function.BiFunction;
 
 public class Differencing {
 
-  private StringDiff emailDiff;
-  private BooleanDiff enabledDiff;
-  private StringDiff phoneNumberDiff;
-  private StringDiff phoneExtensionNumberDiff;
-  private StringDiff notesDiff;
-  private StringSetDiff permissionsDiff;
-  private StringSetDiff rolesDiff;
+  private final StringDiff emailDiff;
+  private final BooleanDiff enabledDiff;
+  private final StringDiff phoneNumberDiff;
+  private final StringDiff phoneExtensionNumberDiff;
+  private final StringDiff notesDiff;
+  private final StringSetDiff permissionsDiff;
+  private final StringSetDiff rolesDiff;
 
-  public Differencing(User existedUser, UserUpdate userUpdate) {
+  public Differencing(final User existedUser, final UserUpdate userUpdate) {
     emailDiff = createStringDiff(existedUser.getEmail(), userUpdate.getEmail());
     enabledDiff = createBooleanDiff(existedUser.getEnabled(), userUpdate.getEnabled());
     phoneNumberDiff = createStringDiff(existedUser.getPhoneNumber(), userUpdate.getPhoneNumber());

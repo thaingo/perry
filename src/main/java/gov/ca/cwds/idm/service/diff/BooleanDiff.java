@@ -1,8 +1,8 @@
 package gov.ca.cwds.idm.service.diff;
 
-public class BooleanDiff extends BaseDiff<Boolean> {
+public final class BooleanDiff extends BaseDiff<Boolean> {
 
-  public BooleanDiff(Boolean oldValue, Boolean newValue) {
+  public BooleanDiff(final Boolean oldValue, final Boolean newValue) {
     super(oldValue, newValue);
   }
 
