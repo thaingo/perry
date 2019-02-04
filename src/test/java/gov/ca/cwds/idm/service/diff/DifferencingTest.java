@@ -18,8 +18,8 @@ import org.junit.Test;
 
 public class DifferencingTest {
 
-  private static final String EXISTED_EMAIL = "user@oci.ca.gov";
-  private static final String NEW_EMAIL = "new@e.mail";
+  private static final String EXISTED_EMAIL = "user@OCI.CA.GOV";
+  private static final String NEW_EMAIL = "NEW@e.mail";
 
   private static final Boolean EXISTED_ENABLED = Boolean.TRUE;
   private static final Boolean NEW_ENABLED = !EXISTED_ENABLED;
@@ -50,7 +50,7 @@ public class DifferencingTest {
   @Test
   public void testNewAreTheSame() {
     UserUpdate userUpdate = new UserUpdate();
-    userUpdate.setEmail(EXISTED_EMAIL);
+    userUpdate.setEmail(EXISTED_EMAIL.toLowerCase());
     userUpdate.setEnabled(EXISTED_ENABLED);
     userUpdate.setPhoneNumber(EXISTED_PHONE);
     userUpdate.setPhoneExtensionNumber(EXISTED_PHONE_EXTENSION);
@@ -75,7 +75,7 @@ public class DifferencingTest {
 
     Differencing differencing = new Differencing(existedUser(), userUpdate);
 
-    assertStringDiff(differencing.getEmailDiff(), EXISTED_EMAIL, NEW_EMAIL);
+    assertStringDiff(differencing.getEmailDiff(), EXISTED_EMAIL.toLowerCase(), NEW_EMAIL.toLowerCase());
     assertBooleanDiff(differencing.getEnabledDiff(), EXISTED_ENABLED, NEW_ENABLED);
     assertStringDiff(differencing.getPhoneNumberDiff(), EXISTED_PHONE, NEW_PHONE);
     assertStringDiff(

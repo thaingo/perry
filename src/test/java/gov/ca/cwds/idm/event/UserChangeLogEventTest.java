@@ -8,7 +8,6 @@ import static gov.ca.cwds.idm.event.UserChangeLogEvent.CAP_EVENT_SOURCE;
 import static gov.ca.cwds.idm.event.UserEnabledStatusChangedEvent.ACTIVE;
 import static gov.ca.cwds.idm.event.UserEnabledStatusChangedEvent.INACTIVE;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PERMISSIONS;
-import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.ROLES;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.util.Utils.toSet;
 import static org.junit.Assert.assertEquals;
@@ -20,9 +19,7 @@ import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserChangeLogRecord;
 import gov.ca.cwds.idm.persistence.ns.entity.Permission;
-import gov.ca.cwds.idm.service.UserUpdateRequest;
 import gov.ca.cwds.idm.service.authorization.UserRolesService;
-import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
 import gov.ca.cwds.idm.service.diff.BooleanDiff;
 import gov.ca.cwds.idm.service.diff.CollectionUserAttributeDiff;
 import gov.ca.cwds.idm.service.diff.RolesUserAttributeDiff;
@@ -32,10 +29,8 @@ import gov.ca.cwds.idm.service.diff.StringUserAttributeDiff;
 import gov.ca.cwds.idm.service.diff.UserAttributeDiff;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -117,8 +112,8 @@ public class UserChangeLogEventTest {
     UserAttributeDiff<Set<String>> diff = new RolesUserAttributeDiff(
         toSet(CALS_ADMIN, CWS_WORKER),
         new HashSet<>(Arrays.asList(OFFICE_ADMIN, STATE_ADMIN)));
-    UserUpdateRequest userUpdateRequest = mockUserUpdateRequest(Collections.singletonMap(ROLES, diff));
-    UserRoleChangedEvent userRoleChangedEvent = new UserRoleChangedEvent(userUpdateRequest.getExistedUser(), diff);
+
+    UserRoleChangedEvent userRoleChangedEvent = new UserRoleChangedEvent(mockUser(), diff);
     assertEquals(UserRoleChangedEvent.EVENT_TYPE_USER_ROLE_CHANGED,
         userRoleChangedEvent.getEventType());
     assertEquals(StringUtils.join(new String[]{"CALS Administrator", "CWS Worker"}, ", "),
@@ -144,9 +139,8 @@ public class UserChangeLogEventTest {
         new Permission(PERMISSION_3, PERMISSION_3 + PERMISSION_DESCRIPTION),
         new Permission(PERMISSION_4, PERMISSION_4 + PERMISSION_DESCRIPTION)
     ).collect(Collectors.toList());
-    UserUpdateRequest userUpdateRequest = mockUserUpdateRequest(Collections.singletonMap(PERMISSIONS, diff));
 
-    PermissionsChangedEvent event = new PermissionsChangedEvent(userUpdateRequest.getExistedUser(), diff2, permissions);
+    PermissionsChangedEvent event = new PermissionsChangedEvent(mockUser(), diff2, permissions);
     assertEquals(PermissionsChangedEvent.EVENT_TYPE_PERMISSIONS_CHANGED,
         event.getEventType());
     assertEquals(StringUtils.join(
@@ -167,9 +161,7 @@ public class UserChangeLogEventTest {
 
     UserAttributeDiff<String> diff = new StringUserAttributeDiff(EMAIL, OLD_EMAIL, NEW_EMAIL);
 
-    UserUpdateRequest userUpdateRequest = mockUserUpdateRequest(Collections.singletonMap(EMAIL, diff));
-
-    EmailChangedEvent event = new EmailChangedEvent(userUpdateRequest.getExistedUser(), diff);
+    EmailChangedEvent event = new EmailChangedEvent(mockUser(), diff);
     assertEquals(EmailChangedEvent.EVENT_TYPE_EMAIL_CHANGED,
         event.getEventType());
     assertEquals(OLD_EMAIL, event.getEvent().getOldValue());
@@ -181,9 +173,8 @@ public class UserChangeLogEventTest {
   @Test
   public void testNotesChangedEvent() {
     StringDiff diff = new StringDiff(OLD_NOTES, NEW_NOTES);
-    UserUpdateRequest userUpdateRequest = mockUserUpdateRequest(Collections.emptyMap());
 
-    NotesChangedEvent event = new NotesChangedEvent(userUpdateRequest.getExistedUser(), diff);
+    NotesChangedEvent event = new NotesChangedEvent(mockUser(), diff);
     assertEquals(NotesChangedEvent.EVENT_TYPE_NOTES_CHANGED, event.getEventType());
     assertEquals(OLD_NOTES, event.getEvent().getOldValue());
     assertEquals(NEW_NOTES, event.getEvent().getNewValue());
@@ -220,13 +211,5 @@ public class UserChangeLogEventTest {
         .thenReturn(TEST_ADMIN_ROLE);
     when(CurrentAuthenticatedUserUtil.getCurrentUserFullName()).thenReturn(TEST_ADMIN_NAME);
     return user;
-  }
-
-  private UserUpdateRequest mockUserUpdateRequest(
-      Map<UserAttribute, UserAttributeDiff> cognitoDiffMap) {
-    UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
-    userUpdateRequest.setExistedUser(mockUser());
-    userUpdateRequest.setCognitoDiffMap(cognitoDiffMap);
-    return userUpdateRequest;
   }
 }

@@ -1,57 +1,69 @@
 package gov.ca.cwds.idm.service.cognito.attribute;
 
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PERMISSIONS;
+import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PHONE_EXTENSION;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.ROLES;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL_VERIFIED;
+import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.PHONE_NUMBER;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoPhoneConverter.toCognitoFormat;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.TRUE_VALUE;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.createDelimitedAttribute;
 
 import com.amazonaws.services.cognitoidp.model.AttributeType;
-import gov.ca.cwds.idm.service.diff.Diff;
-import gov.ca.cwds.idm.service.diff.UserAttributeDiff;
+import gov.ca.cwds.idm.service.diff.Differencing;
+import gov.ca.cwds.idm.service.diff.StringDiff;
+import gov.ca.cwds.idm.service.diff.StringSetDiff;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.Optional;
 
 public class AttributeTypesBuilder {
 
-  private final Map<UserAttribute, UserAttributeDiff> diffMap;
-  private final List<AttributeType> attributeTypes;
+  private final Differencing differencing;
+  private final List<AttributeType> attributeTypes = new ArrayList<>();
 
-  public AttributeTypesBuilder(Map<UserAttribute, UserAttributeDiff> diffMap) {
-    this.diffMap = diffMap;
-    this.attributeTypes = new ArrayList<>(diffMap.size());
+  public AttributeTypesBuilder(Differencing differencing) {
+    this.differencing = differencing;
   }
 
-  public List<AttributeType> build(UserAttribute... userAttributes) {
-    for(UserAttribute userAttribute : userAttributes) {
-      addAttribute(userAttribute);
-    }
+  public List<AttributeType> build() {
+    addEmailAttributes(differencing.getEmailDiff());
+    addPhoneAttribute(differencing.getPhoneNumberDiff());
+    addStringAttribute(PHONE_EXTENSION, differencing.getPhoneExtensionNumberDiff());
+    addStringSetAttribute(PERMISSIONS, differencing.getPermissionsDiff());
+    addStringSetAttribute(ROLES, differencing.getRolesDiff());
     return attributeTypes;
   }
 
-  private void addAttribute(UserAttribute userAttribute) {
-    if (!diffMap.containsKey(userAttribute)) {
-      return;
-    }
+  public void addStringAttribute(
+      UserAttribute userAttribute, Optional<StringDiff> optDiff) {
+    optDiff.ifPresent(diff -> addStringAttribute(userAttribute, diff.getNewValue()));
+  }
 
-    Diff diff = diffMap.get(userAttribute);
+  public AttributeTypesBuilder addStringSetAttribute(
+      UserAttribute userAttribute, Optional<StringSetDiff> optDiff) {
+    optDiff.ifPresent(
+        diff -> attributeTypes.add(createDelimitedAttribute(userAttribute, diff.getNewValue())));
+    return this;
+  }
 
-    if(userAttribute == EMAIL) {
-      addStringAttribute(EMAIL, (String)diff.getNewValue());
-      addStringAttribute(EMAIL_VERIFIED, TRUE_VALUE);
+  public void addEmailAttributes(Optional<StringDiff> optEmailDiff) {
+    optEmailDiff.ifPresent(
+        diff -> {
+          addStringAttribute(EMAIL, diff.getNewValue());
+          addStringAttribute(EMAIL_VERIFIED, TRUE_VALUE);
+        }
+    );
+  }
 
-    } else if(userAttribute == ROLES || userAttribute == PERMISSIONS) {
-      attributeTypes.add(createDelimitedAttribute(userAttribute, (Set<String>)diff.getNewValue()));
-
-    } else {
-      addStringAttribute(userAttribute, (String)diff.getNewValue());
-    }
+  public void addPhoneAttribute(Optional<StringDiff> optDiff) {
+    optDiff.ifPresent(diff -> addStringAttribute(PHONE_NUMBER, toCognitoFormat(diff.getNewValue())));
   }
 
   private void addStringAttribute(UserAttribute userAttribute, String value) {
     attributeTypes.add(new AttributeType().withName(userAttribute.getName()).withValue(value));
   }
+
+
 }

@@ -2,6 +2,7 @@ package gov.ca.cwds.idm.service.diff;
 
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
+import gov.ca.cwds.util.Utils;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
@@ -17,15 +18,23 @@ public class Differencing {
   private final StringSetDiff rolesDiff;
 
   public Differencing(final User existedUser, final UserUpdate userUpdate) {
-    emailDiff = createStringDiff(existedUser.getEmail(), userUpdate.getEmail());
+    emailDiff = createStringDiff(
+        Utils.toLowerCase(existedUser.getEmail()),
+        Utils.toLowerCase(userUpdate.getEmail()));
+
     enabledDiff = createBooleanDiff(existedUser.getEnabled(), userUpdate.getEnabled());
+
     phoneNumberDiff = createStringDiff(existedUser.getPhoneNumber(), userUpdate.getPhoneNumber());
+
     phoneExtensionNumberDiff =
         createStringDiff(existedUser.getPhoneExtensionNumber(),
             userUpdate.getPhoneExtensionNumber());
+
     notesDiff = createStringDiff(existedUser.getNotes(), userUpdate.getNotes());
+
     permissionsDiff = createStringSetDiff(existedUser.getPermissions(),
         userUpdate.getPermissions());
+
     rolesDiff = createStringSetDiff(existedUser.getRoles(), userUpdate.getRoles());
   }
 

@@ -55,8 +55,6 @@ import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
 import gov.ca.cwds.idm.service.authorization.AuthorizationService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute;
-import gov.ca.cwds.idm.service.cognito.attribute.UpdatedAttributesBuilder;
-import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil;
@@ -64,7 +62,6 @@ import gov.ca.cwds.idm.service.diff.BooleanDiff;
 import gov.ca.cwds.idm.service.diff.Differencing;
 import gov.ca.cwds.idm.service.diff.StringDiff;
 import gov.ca.cwds.idm.service.diff.StringSetDiff;
-import gov.ca.cwds.idm.service.diff.UserAttributeDiff;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.idm.service.execution.OptionalExecution;
 import gov.ca.cwds.idm.service.execution.PutInSearchExecution;
@@ -188,9 +185,9 @@ public class IdmServiceImpl implements IdmService {
     userUpdateRequest.setUserId(existedUser.getId());
     userUpdateRequest.setExistedUser(existedUser);
 
-    Map<UserAttribute, UserAttributeDiff> cognitoDiffMap =
-        new UpdatedAttributesBuilder(existedUser, updateUserDto).buildUpdatedAttributesMap();
-    userUpdateRequest.setCognitoDiffMap(cognitoDiffMap);
+//    Map<UserAttribute, UserAttributeDiff> cognitoDiffMap =
+//        new UpdatedAttributesBuilder(existedUser, updateUserDto).buildUpdatedAttributesMap();
+//    userUpdateRequest.setCognitoDiffMap(cognitoDiffMap);
 
     userUpdateRequest.setDifferencing(new Differencing(existedUser, updateUserDto));
 
