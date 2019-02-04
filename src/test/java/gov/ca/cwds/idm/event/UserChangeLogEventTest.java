@@ -23,8 +23,8 @@ import gov.ca.cwds.idm.dto.UserChangeLogRecord;
 import gov.ca.cwds.idm.persistence.ns.entity.Permission;
 import gov.ca.cwds.idm.service.UserUpdateRequest;
 import gov.ca.cwds.idm.service.authorization.UserRolesService;
-import gov.ca.cwds.idm.service.cognito.attribute.OtherUserAttribute;
 import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
+import gov.ca.cwds.idm.service.diff.BooleanDiff;
 import gov.ca.cwds.idm.service.diff.CollectionUserAttributeDiff;
 import gov.ca.cwds.idm.service.diff.Diff;
 import gov.ca.cwds.idm.service.diff.RolesUserAttributeDiff;
@@ -32,7 +32,6 @@ import gov.ca.cwds.idm.service.diff.StringDiff;
 import gov.ca.cwds.idm.service.diff.StringSetDiff;
 import gov.ca.cwds.idm.service.diff.StringUserAttributeDiff;
 import gov.ca.cwds.idm.service.diff.UserAttributeDiff;
-import gov.ca.cwds.idm.service.diff.UserEnabledStatusAttributeDiff;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import java.util.Arrays;
 import java.util.Collections;
@@ -197,12 +196,9 @@ public class UserChangeLogEventTest {
 
   @Test
   public void testUserEnabledStatusChangedEvent() {
-    UserAttributeDiff<Boolean> diff =
-        new UserEnabledStatusAttributeDiff(Boolean.FALSE, Boolean.TRUE);
-    UserUpdateRequest userUpdateRequest = mockUserUpdateRequest(
-        Collections.singletonMap(OtherUserAttribute.ENABLED_STATUS, diff));
+    BooleanDiff diff = new BooleanDiff(Boolean.FALSE, Boolean.TRUE);
 
-    UserEnabledStatusChangedEvent event = new UserEnabledStatusChangedEvent(userUpdateRequest);
+    UserEnabledStatusChangedEvent event = new UserEnabledStatusChangedEvent(mockUser(), diff);
     assertEquals(UserEnabledStatusChangedEvent.USER_ACCOUNT_STATUS_CHANGED,
         event.getEventType());
     assertEquals(INACTIVE, event.getEvent().getOldValue());

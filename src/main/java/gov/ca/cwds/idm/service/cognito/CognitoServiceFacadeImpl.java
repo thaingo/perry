@@ -236,12 +236,10 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
    * {@inheritDoc}
    */
   @Override
-  public void changeUserEnabledStatus(UserUpdateRequest userUpdateRequest) {
-    UserEnabledStatusAttributeDiff diff = (UserEnabledStatusAttributeDiff) userUpdateRequest.getCognitoDiffMap()
-        .get(ENABLED_STATUS);
-    Validate.notNull(diff);
-    String id = userUpdateRequest.getUserId();
-    if (diff.getNewValue()) {
+  public void changeUserEnabledStatus(User existedUser,  Boolean newValue) {
+
+    String id = existedUser.getId();
+    if (newValue) {
       AdminEnableUserRequest adminEnableUserRequest =
           new AdminEnableUserRequest().withUsername(id).withUserPoolId(properties.getUserpool());
       executeUserOperationInCognito(identityProvider::adminEnableUser, adminEnableUserRequest, id,

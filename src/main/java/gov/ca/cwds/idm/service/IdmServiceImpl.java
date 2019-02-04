@@ -6,10 +6,6 @@ import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
 import static gov.ca.cwds.idm.service.ExecutionStatus.FAIL;
 import static gov.ca.cwds.idm.service.ExecutionStatus.SUCCESS;
 import static gov.ca.cwds.idm.service.ExecutionStatus.WAS_NOT_EXECUTED;
-import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PERMISSIONS;
-import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.ROLES;
-import static gov.ca.cwds.idm.service.cognito.attribute.DatabaseUserAttribute.NOTES;
-import static gov.ca.cwds.idm.service.cognito.attribute.OtherUserAttribute.ENABLED_STATUS;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getRACFId;
@@ -62,14 +58,15 @@ import gov.ca.cwds.idm.service.cognito.attribute.DatabaseDiffMapBuilder;
 import gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute;
 import gov.ca.cwds.idm.service.cognito.attribute.UpdatedAttributesBuilder;
 import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
+import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
+import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
+import gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil;
+import gov.ca.cwds.idm.service.diff.BooleanDiff;
 import gov.ca.cwds.idm.service.diff.Diff;
 import gov.ca.cwds.idm.service.diff.Differencing;
 import gov.ca.cwds.idm.service.diff.StringDiff;
 import gov.ca.cwds.idm.service.diff.StringSetDiff;
 import gov.ca.cwds.idm.service.diff.UserAttributeDiff;
-import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
-import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
-import gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.idm.service.execution.OptionalExecution;
 import gov.ca.cwds.idm.service.execution.PutInSearchExecution;
@@ -169,7 +166,7 @@ public class IdmServiceImpl implements IdmService {
 
     ExecutionStatus updateAttributesStatus = updateUserAttributes(userUpdateRequest);
 
-    OptionalExecution<UserUpdateRequest, Boolean> updateUserEnabledExecution =
+    OptionalExecution<BooleanDiff, Void> updateUserEnabledExecution =
         updateUserEnabledStatus(userUpdateRequest);
     if (updateAttributesStatus == WAS_NOT_EXECUTED
         && updateUserEnabledExecution.getExecutionStatus() == FAIL) {
@@ -206,19 +203,30 @@ public class IdmServiceImpl implements IdmService {
     return userUpdateRequest;
   }
 
-  private OptionalExecution<UserUpdateRequest, Boolean> updateUserEnabledStatus(
+  private OptionalExecution<BooleanDiff, Void> updateUserEnabledStatus(
       UserUpdateRequest userUpdateRequest) {
-    OptionalExecution<UserUpdateRequest, Boolean> updateUserEnabledExecution;
-    if (userUpdateRequest.isAttributeChanged(ENABLED_STATUS)) {
-      updateUserEnabledExecution = executeUpdateEnableStatusOptionally(userUpdateRequest);
+    OptionalExecution<BooleanDiff, Void> updateUserEnabledExecution;
+
+    Optional<BooleanDiff> optEnabledDiff = userUpdateRequest.getDifferencing().getEnabledDiff();
+    User existedUser = userUpdateRequest.getExistedUser();
+
+    if(optEnabledDiff.isPresent()) {
+      updateUserEnabledExecution = executeUpdateEnableStatusOptionally(existedUser,
+          optEnabledDiff.get());
     } else {
       updateUserEnabledExecution = NoUpdateExecution.INSTANCE;
     }
+
+//    if (userUpdateRequest.isAttributeChanged(ENABLED_STATUS)) {
+//      updateUserEnabledExecution = executeUpdateEnableStatusOptionally(userUpdateRequest);
+//    } else {
+//      updateUserEnabledExecution = NoUpdateExecution.INSTANCE;
+//    }
     return updateUserEnabledExecution;
   }
 
   private boolean doesElasticSearchNeedUpdate(ExecutionStatus updateAttributesStatus,
-      OptionalExecution<UserUpdateRequest, Boolean> updateUserEnabledExecution) {
+      OptionalExecution<BooleanDiff, Void> updateUserEnabledExecution) {
     return updateAttributesStatus == SUCCESS
         || updateUserEnabledExecution.getExecutionStatus() == SUCCESS;
   }
@@ -403,7 +411,7 @@ public class IdmServiceImpl implements IdmService {
   private void handleUpdatePartialSuccess(
       String userId,
       ExecutionStatus updateAttributesStatus,
-      OptionalExecution<UserUpdateRequest, Boolean> updateUserEnabledExecution,
+      OptionalExecution<BooleanDiff, Void> updateUserEnabledExecution,
       PutInSearchExecution<String> doraExecution) {
 
     ExecutionStatus updateEnableStatus = updateUserEnabledExecution.getExecutionStatus();
@@ -481,22 +489,21 @@ public class IdmServiceImpl implements IdmService {
     }
   }
 
-  private OptionalExecution<UserUpdateRequest, Boolean> executeUpdateEnableStatusOptionally(
-      UserUpdateRequest userUpdateRequest) {
-    return new OptionalExecution<UserUpdateRequest, Boolean>(userUpdateRequest) {
+  private OptionalExecution<BooleanDiff, Void> executeUpdateEnableStatusOptionally(
+      User existedUser, BooleanDiff enabledDiff) {
+    return new OptionalExecution<BooleanDiff, Void>(enabledDiff) {
       @Override
-      protected Boolean tryMethod(UserUpdateRequest userUpdateRequest) {
-        cognitoServiceFacade.changeUserEnabledStatus(userUpdateRequest);
+      protected Void tryMethod(BooleanDiff enabledDiff) {
+        cognitoServiceFacade.changeUserEnabledStatus(existedUser, enabledDiff.getNewValue());
         auditLogService
-            .createAuditLogRecord(new UserEnabledStatusChangedEvent(userUpdateRequest));
-        return Boolean.TRUE;
+            .createAuditLogRecord(new UserEnabledStatusChangedEvent(existedUser, enabledDiff));
+        return null;
       }
 
       @Override
       protected void catchMethod(Exception e) {
-        LOGGER.error(messages
-                .getTechMessage(ERROR_UPDATE_USER_ENABLED_STATUS, userUpdateRequest.getUserId()),
-            e);
+        LOGGER.error(
+            messages.getTechMessage(ERROR_UPDATE_USER_ENABLED_STATUS, existedUser.getId()), e);
       }
     };
   }
@@ -676,8 +683,7 @@ public class IdmServiceImpl implements IdmService {
     this.userService = userService;
   }
 
-  private static class NoUpdateExecution extends
-      OptionalExecution<UserUpdateRequest, Boolean> {
+  private static class NoUpdateExecution<T> extends OptionalExecution<T, Void> {
 
     private static final NoUpdateExecution INSTANCE = new NoUpdateExecution();
 
@@ -686,8 +692,8 @@ public class IdmServiceImpl implements IdmService {
     }
 
     @Override
-    protected Boolean tryMethod(UserUpdateRequest input) {
-      return Boolean.FALSE;
+    protected Void tryMethod(T input) {
+      return null;
     }
 
     @Override
@@ -700,6 +706,4 @@ public class IdmServiceImpl implements IdmService {
       return ExecutionStatus.WAS_NOT_EXECUTED;
     }
   }
-
-
 }

@@ -364,7 +364,7 @@ public class IdmServiceImplTest {
   }
 
   private void setChangeUserEnabledStatusFail(RuntimeException error) {
-    doThrow(error).when(cognitoServiceFacadeMock).changeUserEnabledStatus(any(UserUpdateRequest.class));
+    doThrow(error).when(cognitoServiceFacadeMock).changeUserEnabledStatus(any(User.class), any(Boolean.class));
  }
 
   private void setGetCognitoUserById(String userId, UserType result) {
