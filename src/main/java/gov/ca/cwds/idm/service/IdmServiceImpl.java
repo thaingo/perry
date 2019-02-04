@@ -54,7 +54,6 @@ import gov.ca.cwds.idm.persistence.ns.entity.Permission;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
 import gov.ca.cwds.idm.service.authorization.AuthorizationService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
-import gov.ca.cwds.idm.service.cognito.attribute.DatabaseDiffMapBuilder;
 import gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute;
 import gov.ca.cwds.idm.service.cognito.attribute.UpdatedAttributesBuilder;
 import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
@@ -62,7 +61,6 @@ import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil;
 import gov.ca.cwds.idm.service.diff.BooleanDiff;
-import gov.ca.cwds.idm.service.diff.Diff;
 import gov.ca.cwds.idm.service.diff.Differencing;
 import gov.ca.cwds.idm.service.diff.StringDiff;
 import gov.ca.cwds.idm.service.diff.StringSetDiff;
@@ -194,10 +192,6 @@ public class IdmServiceImpl implements IdmService {
         new UpdatedAttributesBuilder(existedUser, updateUserDto).buildUpdatedAttributesMap();
     userUpdateRequest.setCognitoDiffMap(cognitoDiffMap);
 
-    Map<UserAttribute, Diff> databaseDiffMap =
-        new DatabaseDiffMapBuilder(existedUser, updateUserDto).build();
-    userUpdateRequest.setDatabaseDiffMap(databaseDiffMap);
-
     userUpdateRequest.setDifferencing(new Differencing(existedUser, updateUserDto));
 
     return userUpdateRequest;
@@ -216,12 +210,6 @@ public class IdmServiceImpl implements IdmService {
     } else {
       updateUserEnabledExecution = NoUpdateExecution.INSTANCE;
     }
-
-//    if (userUpdateRequest.isAttributeChanged(ENABLED_STATUS)) {
-//      updateUserEnabledExecution = executeUpdateEnableStatusOptionally(userUpdateRequest);
-//    } else {
-//      updateUserEnabledExecution = NoUpdateExecution.INSTANCE;
-//    }
     return updateUserEnabledExecution;
   }
 

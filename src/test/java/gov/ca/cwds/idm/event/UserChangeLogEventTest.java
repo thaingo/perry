@@ -9,7 +9,6 @@ import static gov.ca.cwds.idm.event.UserEnabledStatusChangedEvent.ACTIVE;
 import static gov.ca.cwds.idm.event.UserEnabledStatusChangedEvent.INACTIVE;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PERMISSIONS;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.ROLES;
-import static gov.ca.cwds.idm.service.cognito.attribute.DatabaseUserAttribute.NOTES;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.util.Utils.toSet;
 import static org.junit.Assert.assertEquals;
@@ -26,7 +25,6 @@ import gov.ca.cwds.idm.service.authorization.UserRolesService;
 import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
 import gov.ca.cwds.idm.service.diff.BooleanDiff;
 import gov.ca.cwds.idm.service.diff.CollectionUserAttributeDiff;
-import gov.ca.cwds.idm.service.diff.Diff;
 import gov.ca.cwds.idm.service.diff.RolesUserAttributeDiff;
 import gov.ca.cwds.idm.service.diff.StringDiff;
 import gov.ca.cwds.idm.service.diff.StringSetDiff;
@@ -183,8 +181,7 @@ public class UserChangeLogEventTest {
   @Test
   public void testNotesChangedEvent() {
     StringDiff diff = new StringDiff(OLD_NOTES, NEW_NOTES);
-    UserUpdateRequest userUpdateRequest =
-        mockUserUpdateRequestWithDbDiff(Collections.singletonMap(NOTES, diff));
+    UserUpdateRequest userUpdateRequest = mockUserUpdateRequest(Collections.emptyMap());
 
     NotesChangedEvent event = new NotesChangedEvent(userUpdateRequest.getExistedUser(), diff);
     assertEquals(NotesChangedEvent.EVENT_TYPE_NOTES_CHANGED, event.getEventType());
@@ -230,13 +227,6 @@ public class UserChangeLogEventTest {
     UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
     userUpdateRequest.setExistedUser(mockUser());
     userUpdateRequest.setCognitoDiffMap(cognitoDiffMap);
-    return userUpdateRequest;
-  }
-
-  private UserUpdateRequest mockUserUpdateRequestWithDbDiff(Map<UserAttribute, Diff> dbDiffMap) {
-    UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
-    userUpdateRequest.setExistedUser(mockUser());
-    userUpdateRequest.setDatabaseDiffMap(dbDiffMap);
     return userUpdateRequest;
   }
 }

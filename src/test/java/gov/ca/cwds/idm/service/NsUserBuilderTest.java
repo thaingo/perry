@@ -1,40 +1,49 @@
 package gov.ca.cwds.idm.service;
 
-import static gov.ca.cwds.idm.service.cognito.attribute.DatabaseUserAttribute.NOTES;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
+import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
-import gov.ca.cwds.idm.service.NsUserService.NsUserBuilder;
-import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
-import gov.ca.cwds.idm.service.diff.Diff;
-import gov.ca.cwds.idm.service.diff.StringDiff;
-import java.util.HashMap;
-import java.util.Map;
+import gov.ca.cwds.idm.service.diff.Differencing;
 import org.junit.Test;
 
 public class NsUserBuilderTest {
 
   @Test
   public void testAllChanged() {
-    NsUser existedUser = new NsUser();
+    User existedUser = new User();
     existedUser.setNotes("Old Notes");
 
-    Map<UserAttribute, Diff> databaseDiffMap = new HashMap<>();
-    databaseDiffMap.put(NOTES, new StringDiff( "Old Notes","New Notes"));
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setNotes("New Notes");
 
-    NsUser modifiedNsUser = new NsUserBuilder(existedUser, databaseDiffMap).build();
+    Differencing differencing = new Differencing(existedUser, userUpdate);
+
+    NsUser existedNsUser = new NsUser();
+    existedNsUser.setNotes("Old Notes");
+
+    NsUserBuilder nsUserBuilder = new NsUserBuilder(existedNsUser, differencing);
+    NsUser modifiedNsUser = nsUserBuilder.build();
+    assertTrue(nsUserBuilder.userIsUpdated());
     assertThat(modifiedNsUser.getNotes(), is("New Notes"));
   }
 
   @Test
   public void testNoChanges() {
-    NsUser existedUser = new NsUser();
+    User existedUser = new User();
     existedUser.setNotes("Old Notes");
+    Differencing differencing = new Differencing(existedUser, new UserUpdate());
 
-    Map<UserAttribute, Diff> databaseDiffMap = new HashMap<>();
+    NsUser existedNsUser = new NsUser();
+    existedNsUser.setNotes("Old Notes");
 
-    NsUser modifiedNsUser = new NsUserBuilder(existedUser, databaseDiffMap).build();
+    NsUserBuilder nsUserBuilder = new NsUserBuilder(existedNsUser, differencing);
+    NsUser modifiedNsUser = nsUserBuilder.build();
+    assertFalse(nsUserBuilder.userIsUpdated());
     assertThat(modifiedNsUser.getNotes(), is("Old Notes"));
   }
 }

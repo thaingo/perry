@@ -1,18 +1,14 @@
 package gov.ca.cwds.idm.service;
 
 import static gov.ca.cwds.config.TokenServiceConfiguration.TOKEN_TRANSACTION_MANAGER;
-import static gov.ca.cwds.idm.service.cognito.attribute.DatabaseUserAttribute.NOTES;
 
 import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
 import gov.ca.cwds.idm.persistence.ns.repository.NsUserRepository;
-import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
-import gov.ca.cwds.idm.service.diff.Diff;
+import gov.ca.cwds.idm.service.diff.Differencing;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -57,15 +53,16 @@ public class NsUserService {
 
   @Transactional(value = TOKEN_TRANSACTION_MANAGER)
   public boolean update(UserUpdateRequest userUpdateRequest) {
-    Map<UserAttribute, Diff> databaseDiffMap =  userUpdateRequest.getDatabaseDiffMap();
+    Differencing differencing =  userUpdateRequest.getDifferencing();
 
-    if(databaseDiffMap.isEmpty()){
-      return false;
-    }
     NsUser nsUser = getOrCreateNewNsUser(userUpdateRequest.getUserId());
 
-    NsUser modifiedNsUser = new NsUserBuilder(nsUser, databaseDiffMap).build();
+    NsUserBuilder nsUserBuilder = new NsUserBuilder(nsUser, differencing);
+    NsUser modifiedNsUser = nsUserBuilder.build();
 
+    if(!nsUserBuilder.userIsUpdated()) {
+      return false;
+    }
     nsUserRepository.save(modifiedNsUser);
     return true;
   }
@@ -95,27 +92,5 @@ public class NsUserService {
   @Autowired
   public void setUserLogService(UserLogService userLogService) {
     this.userLogService = userLogService;
-  }
-
-  public static class NsUserBuilder {
-    private final NsUser nsUser;
-    private final Map<UserAttribute, Diff> databaseDiffMap;
-
-    public NsUserBuilder(NsUser nsUser, Map<UserAttribute, Diff> databaseDiffMap) {
-      this.nsUser = nsUser;
-      this.databaseDiffMap = databaseDiffMap;
-    }
-
-    public NsUser build() {
-      setProperty(NOTES, nsUser::setNotes);
-      return nsUser;
-    }
-
-    private <T> void setProperty(UserAttribute userAttribute, Consumer<T> setter) {
-      if(databaseDiffMap.containsKey(userAttribute)) {
-        T newValue = (T)(databaseDiffMap.get(userAttribute).getNewValue());
-        setter.accept(newValue);
-      }
-    }
   }
 }
