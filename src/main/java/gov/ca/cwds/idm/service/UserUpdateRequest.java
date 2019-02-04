@@ -17,7 +17,6 @@ public class UserUpdateRequest {
   private String userId;
   private User existedUser;
   private Map<UserAttribute, UserAttributeDiff> cognitoDiffMap = emptyMap();
-//  private Map<UserAttribute, Diff> databaseDiffMap = emptyMap();
   private Differencing differencing;
 
   public void setUserId(String userId) {
@@ -45,7 +44,6 @@ public class UserUpdateRequest {
   }
 
   public boolean isAttributeChanged(UserAttribute userAttribute) {
-//    return cognitoDiffMap.containsKey(userAttribute) || databaseDiffMap.containsKey(userAttribute);
     return cognitoDiffMap.containsKey(userAttribute);
   }
 
@@ -58,24 +56,8 @@ public class UserUpdateRequest {
   }
 
   private Diff getDiff(UserAttribute userAttribute) {
-//    if(cognitoDiffMap.containsKey(userAttribute)) {
       return cognitoDiffMap.get(userAttribute);
-//    }
-//    else if(databaseDiffMap.containsKey(userAttribute)) {
-//      return databaseDiffMap.get(userAttribute);
-//    } else {
-//      throw new IllegalArgumentException("attribute " + userAttribute + " was not changed");
-//    }
   }
-
-//  public Map<UserAttribute, Diff> getDatabaseDiffMap() {
-//    return databaseDiffMap;
-//  }
-
-//  public void setDatabaseDiffMap(
-//      Map<UserAttribute, Diff> databaseDiffMap) {
-//    this.databaseDiffMap = databaseDiffMap;
-//  }
 
   public Differencing getDifferencing() {
     return differencing;
