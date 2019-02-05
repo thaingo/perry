@@ -39,18 +39,10 @@ import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.UserVerificationResult;
 import gov.ca.cwds.idm.dto.UsersPage;
 import gov.ca.cwds.idm.dto.UsersSearchCriteria;
-import gov.ca.cwds.idm.event.EmailChangedEvent;
-import gov.ca.cwds.idm.event.NotesChangedEvent;
-import gov.ca.cwds.idm.event.PermissionsChangedEvent;
-import gov.ca.cwds.idm.event.UserCreatedEvent;
-import gov.ca.cwds.idm.event.UserEnabledStatusChangedEvent;
-import gov.ca.cwds.idm.event.UserRegistrationResentEvent;
-import gov.ca.cwds.idm.event.UserRoleChangedEvent;
 import gov.ca.cwds.idm.exception.AdminAuthorizationException;
 import gov.ca.cwds.idm.exception.UserValidationException;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
-import gov.ca.cwds.idm.persistence.ns.entity.Permission;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
 import gov.ca.cwds.idm.service.authorization.AuthorizationService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
@@ -60,8 +52,6 @@ import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil;
 import gov.ca.cwds.idm.service.diff.BooleanDiff;
 import gov.ca.cwds.idm.service.diff.Differencing;
-import gov.ca.cwds.idm.service.diff.StringDiff;
-import gov.ca.cwds.idm.service.diff.StringSetDiff;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.idm.service.execution.OptionalExecution;
 import gov.ca.cwds.idm.service.execution.PutInSearchExecution;
@@ -129,10 +119,7 @@ public class IdmServiceImpl implements IdmService {
   private ExceptionFactory exceptionFactory;
 
   @Autowired
-  private AuditLogService auditLogService;
-
-  @Autowired
-  private DictionaryProvider dictionaryProvider;
+  private AuditServiceImpl auditService;
 
   @Autowired
   private UserService userService;
@@ -227,7 +214,7 @@ public class IdmServiceImpl implements IdmService {
     UserType userType = cognitoServiceFacade.createUser(user);
     String userId = userType.getUsername();
     user.setId(userId);
-    auditLogService.createAuditLogRecord(new UserCreatedEvent(user));
+    auditService.auditUserCreate(user);
     PutInSearchExecution doraExecution = createUserInSearch(userType);
     handleCreatePartialSuccess(userId, doraExecution);
     return userId;
@@ -275,7 +262,7 @@ public class IdmServiceImpl implements IdmService {
     User user =  getUser(userId);
     authorizeService.checkCanResendInvitationMessage(user);
     cognitoServiceFacade.resendInvitationMessage(userId);
-    auditLogService.createAuditLogRecord(new UserRegistrationResentEvent(user));
+    auditService.auditUserRegistrationResent(user);
     return new RegistrationResubmitResponse(userId);
   }
 
@@ -350,43 +337,9 @@ public class IdmServiceImpl implements IdmService {
 
     if(userService.updateUserAttributes(userUpdateRequest)) {
       updateAttributesStatus = SUCCESS;
-      publishUpdateAttributesEvents(userUpdateRequest);
+      auditService.auditUserUpdate(userUpdateRequest);
     }
     return updateAttributesStatus;
-  }
-
-  private void publishUpdateAttributesEvents(UserUpdateRequest userUpdateRequest) {
-    User existedUser = userUpdateRequest.getExistedUser();
-    Differencing differencing = userUpdateRequest.getDifferencing();
-
-    publishUpdateRolesEvent(existedUser, differencing.getRolesDiff());
-    publishUpdatePermissionsEvent(existedUser, differencing.getPermissionsDiff());
-    publishUpdateEmailEvent(existedUser, differencing.getEmailDiff());
-    publishUpdateNotesEvent(existedUser, differencing.getNotesDiff());
-  }
-
-  private void publishUpdateEmailEvent(User existedUser, Optional<StringDiff> optEmailDiff) {
-    optEmailDiff.ifPresent(emailDiff ->
-        auditLogService.createAuditLogRecord(new EmailChangedEvent(existedUser, emailDiff)));
-  }
-
-  private void publishUpdateNotesEvent(User existedUser, Optional<StringDiff> optNotesDiff) {
-    optNotesDiff.ifPresent(notesDiff ->
-        auditLogService.createAuditLogRecord(new NotesChangedEvent(existedUser, notesDiff)));
-  }
-
-  private void publishUpdatePermissionsEvent(User existedUser,
-      Optional<StringSetDiff> optPermissionsDiff) {
-    List<Permission> permissions = dictionaryProvider.getPermissions();
-
-    optPermissionsDiff.ifPresent(permissionsDiff ->
-        auditLogService.createAuditLogRecord(
-            new PermissionsChangedEvent(existedUser, permissionsDiff, permissions)));
-  }
-
-  private void publishUpdateRolesEvent(User existedUser, Optional<StringSetDiff> optRolesDiff) {
-    optRolesDiff.ifPresent(rolesDiff ->
-        auditLogService.createAuditLogRecord(new UserRoleChangedEvent(existedUser, rolesDiff)));
   }
 
   private void handleUpdatePartialSuccess(
@@ -476,8 +429,7 @@ public class IdmServiceImpl implements IdmService {
       @Override
       protected Void tryMethod(BooleanDiff enabledDiff) {
         cognitoServiceFacade.changeUserEnabledStatus(existedUser, enabledDiff.getNewValue());
-        auditLogService
-            .createAuditLogRecord(new UserEnabledStatusChangedEvent(existedUser, enabledDiff));
+        auditService.auditUserEnableStatusUpdate(existedUser, enabledDiff);
         return null;
       }
 
@@ -662,6 +614,10 @@ public class IdmServiceImpl implements IdmService {
 
   public void setUserService(UserService userService) {
     this.userService = userService;
+  }
+
+  public void setAuditService(AuditServiceImpl auditService) {
+    this.auditService = auditService;
   }
 
   private static class NoUpdateExecution<T> extends OptionalExecution<T, Void> {

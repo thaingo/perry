@@ -20,5 +20,4 @@ public class UserCreatedEvent extends UserChangeLogEvent {
     setEventType(EVENT_TYPE_USER_CREATED);
     setNewValue(Roles.joinRoles(user.getRoles()));
   }
-
 }

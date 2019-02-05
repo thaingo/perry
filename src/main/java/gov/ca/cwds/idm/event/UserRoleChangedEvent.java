@@ -5,7 +5,6 @@ import static gov.ca.cwds.config.api.idm.Roles.replaceRoleIdByName;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.service.diff.Diff;
 import gov.ca.cwds.idm.service.diff.StringSetDiff;
 import java.util.Set;
 import java.util.TreeSet;
