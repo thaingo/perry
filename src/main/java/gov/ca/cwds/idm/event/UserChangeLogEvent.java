@@ -1,6 +1,7 @@
 package gov.ca.cwds.idm.event;
 
 import static gov.ca.cwds.config.api.idm.Roles.joinRoles;
+import static gov.ca.cwds.config.api.idm.Roles.replaceRoleIdByName;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserFullName;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserName;
@@ -33,7 +34,7 @@ abstract class UserChangeLogEvent extends AuditEvent<UserChangeLogRecord> {
     setEvent(userChangeLogRecord);
     setCountyName(user.getCountyName());
     setOfficeId(user.getOfficeId());
-    setUserRoles(joinRoles(user.getRoles()));
+    setUserRoles(joinRoles(replaceRoleIdByName(user.getRoles())));
     setUserId(user.getId());
     setUserName(user.getFirstName() + " " + user.getLastName());
   }
