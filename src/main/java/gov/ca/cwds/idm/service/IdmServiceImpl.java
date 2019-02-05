@@ -185,10 +185,6 @@ public class IdmServiceImpl implements IdmService {
     userUpdateRequest.setUserId(existedUser.getId());
     userUpdateRequest.setExistedUser(existedUser);
 
-//    Map<UserAttribute, UserAttributeDiff> cognitoDiffMap =
-//        new UpdatedAttributesBuilder(existedUser, updateUserDto).buildUpdatedAttributesMap();
-//    userUpdateRequest.setCognitoDiffMap(cognitoDiffMap);
-
     userUpdateRequest.setDifferencing(new Differencing(existedUser, updateUserDto));
 
     return userUpdateRequest;
