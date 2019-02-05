@@ -18,12 +18,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class AttributeTypesBuilder {
+public class UserUpdateAttributesBuilder {
 
   private final Differencing differencing;
   private final List<AttributeType> attributeTypes = new ArrayList<>();
 
-  public AttributeTypesBuilder(Differencing differencing) {
+  public UserUpdateAttributesBuilder(Differencing differencing) {
     this.differencing = differencing;
   }
 
@@ -41,7 +41,7 @@ public class AttributeTypesBuilder {
     optDiff.ifPresent(diff -> addStringAttribute(userAttribute, diff.getNewValue()));
   }
 
-  public AttributeTypesBuilder addStringSetAttribute(
+  public UserUpdateAttributesBuilder addStringSetAttribute(
       UserAttribute userAttribute, Optional<StringSetDiff> optDiff) {
     optDiff.ifPresent(
         diff -> attributeTypes.add(createDelimitedAttribute(userAttribute, diff.getNewValue())));
