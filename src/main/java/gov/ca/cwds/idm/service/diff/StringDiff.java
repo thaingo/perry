@@ -5,9 +5,4 @@ public final class StringDiff extends BaseDiff<String> {
   public StringDiff(final String oldValue, final String newValue) {
     super(oldValue, newValue);
   }
-
-  @Override
-  String toStringValue(String value) {
-    return value;
-  }
 }

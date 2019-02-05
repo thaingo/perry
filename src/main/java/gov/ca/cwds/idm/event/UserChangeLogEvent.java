@@ -1,7 +1,6 @@
 package gov.ca.cwds.idm.event;
 
 import static gov.ca.cwds.config.api.idm.Roles.joinRoles;
-import static gov.ca.cwds.config.api.idm.Roles.replaceRoleIdByName;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserFullName;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserName;

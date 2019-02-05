@@ -5,8 +5,4 @@ public interface Diff<T> {
   T getNewValue();
 
   T getOldValue();
-
-  String getNewValueAsString();
-
-  String getOldValueAsString();
 }

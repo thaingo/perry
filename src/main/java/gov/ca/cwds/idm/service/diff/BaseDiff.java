@@ -19,16 +19,4 @@ public abstract class BaseDiff<T> implements Diff<T> {
   public T getNewValue() {
     return newValue;
   }
-
-  @Override
-  public final String getOldValueAsString() {
-    return toStringValue(oldValue);
-  }
-
-  @Override
-  public final String getNewValueAsString() {
-    return toStringValue(newValue);
-  }
-
-  abstract String toStringValue(T value);
 }
