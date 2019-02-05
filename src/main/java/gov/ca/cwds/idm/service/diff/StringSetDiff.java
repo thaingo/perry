@@ -4,7 +4,7 @@ import static java.util.Collections.unmodifiableSet;
 
 import java.util.Set;
 
-public final class StringSetDiff extends BaseDiff<Set<String>> {
+public final class StringSetDiff extends Diff<Set<String>> {
 
   public StringSetDiff(final Set<String> oldValue, final Set<String> newValue) {
     super(oldValue, newValue);

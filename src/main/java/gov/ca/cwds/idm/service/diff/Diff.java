@@ -1,8 +1,20 @@
 package gov.ca.cwds.idm.service.diff;
 
-public interface Diff<T> {
+public abstract class Diff<T> {
 
-  T getNewValue();
+  protected final T oldValue;
+  protected final T newValue;
 
-  T getOldValue();
+  public Diff(final T oldValue, final T newValue) {
+    this.oldValue = oldValue;
+    this.newValue = newValue;
+  }
+
+  public T getOldValue() {
+    return oldValue;
+  }
+
+  public T getNewValue() {
+    return newValue;
+  }
 }
