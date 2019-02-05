@@ -54,6 +54,7 @@ import gov.ca.cwds.idm.service.diff.BooleanDiff;
 import gov.ca.cwds.idm.service.diff.Differencing;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.idm.service.execution.OptionalExecution;
+import gov.ca.cwds.idm.service.execution.OptionalExecution.NoUpdateExecution;
 import gov.ca.cwds.idm.service.execution.PutInSearchExecution;
 import gov.ca.cwds.idm.service.validation.ValidationService;
 import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType;
@@ -618,29 +619,5 @@ public class IdmServiceImpl implements IdmService {
 
   public void setAuditService(AuditServiceImpl auditService) {
     this.auditService = auditService;
-  }
-
-  private static class NoUpdateExecution<T> extends OptionalExecution<T, Void> {
-
-    private static final NoUpdateExecution INSTANCE = new NoUpdateExecution();
-
-    private NoUpdateExecution() {
-      super(null);
-    }
-
-    @Override
-    protected Void tryMethod(T input) {
-      return null;
-    }
-
-    @Override
-    protected void catchMethod(Exception e) {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public ExecutionStatus getExecutionStatus() {
-      return ExecutionStatus.WAS_NOT_EXECUTED;
-    }
   }
 }
