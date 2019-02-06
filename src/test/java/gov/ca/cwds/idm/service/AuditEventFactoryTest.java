@@ -21,6 +21,7 @@ import gov.ca.cwds.idm.dto.UserChangeLogRecord;
 import gov.ca.cwds.idm.event.EmailChangedEvent;
 import gov.ca.cwds.idm.event.NotesChangedEvent;
 import gov.ca.cwds.idm.event.PermissionsChangedEvent;
+import gov.ca.cwds.idm.event.UserChangeLogEvent;
 import gov.ca.cwds.idm.event.UserCreatedEvent;
 import gov.ca.cwds.idm.event.UserEnabledStatusChangedEvent;
 import gov.ca.cwds.idm.event.UserRegistrationResentEvent;
@@ -80,27 +81,11 @@ public class AuditEventFactoryTest {
   }
 
   @Test
-  public void testSetUpUserChangeLogEvent() {
-    User user = mockUser();
-    UserCreatedEvent userCreatedEvent =
-        auditEventFactory.createUserCreateEvent(user);
-
-    UserChangeLogRecord changeLogRecord = userCreatedEvent.getEvent();
-    assertEquals(TEST_ADMIN_ROLE, changeLogRecord.getAdminRole());
-    assertEquals(TEST_ADMIN_NAME, changeLogRecord.getAdminName());
-    assertEquals(TEST_COUNTY, changeLogRecord.getCountyName());
-    assertEquals(TEST_OFFICE_ID, changeLogRecord.getOfficeId());
-    assertEquals(TEST_USER_ID, changeLogRecord.getUserId());
-    assertEquals(TEST_FIRST_NAME + " " + TEST_LAST_NAME, changeLogRecord.getUserName());
-    assertEquals(CAP_EVENT_SOURCE, userCreatedEvent.getEventSource());
-    assertEquals(ADMIN_LOGIN, userCreatedEvent.getUserLogin());
-  }
-
-  @Test
   public void testUserCreatedEvent() {
     User user = mockUser();
     UserCreatedEvent userCreatedEvent = new UserCreatedEvent(user);
 
+    assertCommonEventProperties(userCreatedEvent);
     assertEquals(UserCreatedEvent.EVENT_TYPE_USER_CREATED, userCreatedEvent.getEventType());
     assertEquals(String.join(", ", CALS_ADMIN, CWS_WORKER),
         userCreatedEvent.getEvent().getNewValue());
@@ -114,6 +99,7 @@ public class AuditEventFactoryTest {
     UserRegistrationResentEvent event =
         auditEventFactory.createUserRegistrationResentEvent(user);
 
+    assertCommonEventProperties(event);
     assertEquals(UserRegistrationResentEvent.EVENT_TYPE_REGISTRATION_RESENT, event.getEventType());
     assertEquals(TEST_FIRST_NAME + " " + TEST_LAST_NAME, event.getEvent().getUserName());
     assertEquals(String.join(", ", getRoleNameById(CWS_WORKER), getRoleNameById(CALS_ADMIN)),
@@ -128,6 +114,7 @@ public class AuditEventFactoryTest {
     UserRoleChangedEvent userRoleChangedEvent = auditEventFactory
         .createUserRoleChangedEvent(mockUser(), diff);
 
+    assertCommonEventProperties(userRoleChangedEvent);
     assertEquals(UserRoleChangedEvent.EVENT_TYPE_USER_ROLE_CHANGED,
         userRoleChangedEvent.getEventType());
     assertEquals(StringUtils.join(new String[]{"CALS Administrator", "CWS Worker"}, ", "),
@@ -154,6 +141,7 @@ public class AuditEventFactoryTest {
 
     PermissionsChangedEvent event = auditEventFactory.createUpdatePermissionsEvent(mockUser(), diff);
 
+    assertCommonEventProperties(event);
     assertEquals(PermissionsChangedEvent.EVENT_TYPE_PERMISSIONS_CHANGED,
         event.getEventType());
     assertEquals(StringUtils.join(
@@ -176,6 +164,7 @@ public class AuditEventFactoryTest {
 
     EmailChangedEvent event = auditEventFactory.createEmailChangedEvent(mockUser(), diff);
 
+    assertCommonEventProperties(event);
     assertEquals(EmailChangedEvent.EVENT_TYPE_EMAIL_CHANGED,
         event.getEventType());
     assertEquals(OLD_EMAIL, event.getEvent().getOldValue());
@@ -190,6 +179,7 @@ public class AuditEventFactoryTest {
 
     NotesChangedEvent event = auditEventFactory.createUpdateNotesEvent(mockUser(), diff);
 
+    assertCommonEventProperties(event);
     assertEquals(NotesChangedEvent.EVENT_TYPE_NOTES_CHANGED, event.getEventType());
     assertEquals(OLD_NOTES, event.getEvent().getOldValue());
     assertEquals(NEW_NOTES, event.getEvent().getNewValue());
@@ -204,13 +194,25 @@ public class AuditEventFactoryTest {
     UserEnabledStatusChangedEvent event =
         auditEventFactory.createUserEnableStatusUpdateEvent(mockUser(), diff);
 
+    assertCommonEventProperties(event);
     assertEquals(UserEnabledStatusChangedEvent.USER_ACCOUNT_STATUS_CHANGED,
         event.getEventType());
     assertEquals(INACTIVE, event.getEvent().getOldValue());
     assertEquals(ACTIVE, event.getEvent().getNewValue());
     assertEquals(String.join(", ", getRoleNameById(CWS_WORKER), getRoleNameById(CALS_ADMIN)),
         event.getEvent().getUserRoles());
+  }
 
+  private void assertCommonEventProperties(UserChangeLogEvent userCreatedEvent) {
+    UserChangeLogRecord changeLogRecord = userCreatedEvent.getEvent();
+    assertEquals(TEST_ADMIN_ROLE, changeLogRecord.getAdminRole());
+    assertEquals(TEST_ADMIN_NAME, changeLogRecord.getAdminName());
+    assertEquals(TEST_COUNTY, changeLogRecord.getCountyName());
+    assertEquals(TEST_OFFICE_ID, changeLogRecord.getOfficeId());
+    assertEquals(TEST_USER_ID, changeLogRecord.getUserId());
+    assertEquals(TEST_FIRST_NAME + " " + TEST_LAST_NAME, changeLogRecord.getUserName());
+    assertEquals(CAP_EVENT_SOURCE, userCreatedEvent.getEventSource());
+    assertEquals(ADMIN_LOGIN, userCreatedEvent.getUserLogin());
   }
 
   private User mockUser() {
