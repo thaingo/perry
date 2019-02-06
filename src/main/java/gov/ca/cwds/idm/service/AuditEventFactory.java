@@ -1,7 +1,6 @@
 package gov.ca.cwds.idm.service;
 
 import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.event.AuditEvent;
 import gov.ca.cwds.idm.event.EmailChangedEvent;
 import gov.ca.cwds.idm.event.NotesChangedEvent;
 import gov.ca.cwds.idm.event.PermissionsChangedEvent;
@@ -13,7 +12,12 @@ import gov.ca.cwds.idm.persistence.ns.entity.Permission;
 import gov.ca.cwds.idm.service.diff.BooleanDiff;
 import gov.ca.cwds.idm.service.diff.StringDiff;
 import gov.ca.cwds.idm.service.diff.StringSetDiff;
+import gov.ca.cwds.util.IdToNameConverter;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -42,7 +46,19 @@ public class AuditEventFactory {
 
   public PermissionsChangedEvent createUpdatePermissionsEvent(User existedUser, StringSetDiff permissionsDiff) {
     List<Permission> permissions = dictionaryProvider.getPermissions();
-    return new PermissionsChangedEvent(existedUser, permissionsDiff, permissions);
+
+    Map<String, String> permissionsHash = permissions.stream()
+        .collect(Collectors.toMap(Permission::getName, Permission::getDescription));
+    IdToNameConverter idToNameConverter = new IdToNameConverter(permissionsHash);
+
+    String oldStrValue = getPermissionNames(permissionsDiff.getOldValue(), idToNameConverter);
+    String newStrValue = getPermissionNames(permissionsDiff.getNewValue(), idToNameConverter);
+
+    return new PermissionsChangedEvent(existedUser, new StringDiff(oldStrValue, newStrValue));
+  }
+
+  private String getPermissionNames(Set<String> keys, IdToNameConverter idToNameConverter) {
+    return StringUtils.join(idToNameConverter.getNamesByIds(keys), ", ");
   }
 
   public UserRoleChangedEvent createUserRoleChangedEvent(User existedUser, StringSetDiff rolesDiff) {
