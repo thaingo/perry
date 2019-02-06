@@ -29,6 +29,9 @@ import org.springframework.stereotype.Service;
 @Profile("idm")
 public class AuditEventFactory {
 
+  public static final String ACTIVE = "Active";
+  public static final String INACTIVE = "Inactive";
+
   private DictionaryProvider dictionaryProvider;
 
   public UserCreatedEvent createUserCreateEvent(User user) {
@@ -40,7 +43,14 @@ public class AuditEventFactory {
   }
 
   public UserEnabledStatusChangedEvent createUserEnableStatusUpdateEvent(User existedUser, BooleanDiff enabledDiff) {
-    return new UserEnabledStatusChangedEvent(existedUser, enabledDiff);
+    String enabledOldStringValue = getEnabledValueAsString(enabledDiff.getOldValue());
+    String enabledNewStringValue = getEnabledValueAsString(enabledDiff.getNewValue());
+    StringDiff enabledStringDiff = new StringDiff(enabledOldStringValue, enabledNewStringValue);
+    return new UserEnabledStatusChangedEvent(existedUser, enabledStringDiff);
+  }
+
+  private static String getEnabledValueAsString(Boolean value) {
+    return value ? ACTIVE : INACTIVE;
   }
 
   public EmailChangedEvent createEmailChangedEvent(User existedUser, StringDiff emailDiff) {
