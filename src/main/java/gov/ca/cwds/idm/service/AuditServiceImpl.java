@@ -1,19 +1,11 @@
 package gov.ca.cwds.idm.service;
 
 import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.event.EmailChangedEvent;
-import gov.ca.cwds.idm.event.NotesChangedEvent;
-import gov.ca.cwds.idm.event.PermissionsChangedEvent;
-import gov.ca.cwds.idm.event.UserCreatedEvent;
-import gov.ca.cwds.idm.event.UserEnabledStatusChangedEvent;
-import gov.ca.cwds.idm.event.UserRegistrationResentEvent;
-import gov.ca.cwds.idm.event.UserRoleChangedEvent;
-import gov.ca.cwds.idm.persistence.ns.entity.Permission;
+import gov.ca.cwds.idm.event.AuditEvent;
 import gov.ca.cwds.idm.service.diff.BooleanDiff;
 import gov.ca.cwds.idm.service.diff.Differencing;
 import gov.ca.cwds.idm.service.diff.StringDiff;
 import gov.ca.cwds.idm.service.diff.StringSetDiff;
-import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
@@ -25,22 +17,25 @@ public class AuditServiceImpl implements AuditService {
 
   private AuditLogService auditLogService;
 
-  private DictionaryProvider dictionaryProvider;
+  private AuditEventFactory auditEventFactory;
 
   @Override
   public void auditUserCreate(User user) {
-    auditLogService.createAuditLogRecord(new UserCreatedEvent(user));
+    AuditEvent event = auditEventFactory.createAuditUserCreateEvent(user);
+    auditLogService.createAuditLogRecord(event);
   }
 
   @Override
   public void auditUserRegistrationResent(User user) {
-    auditLogService.createAuditLogRecord(new UserRegistrationResentEvent(user));
+    AuditEvent event = auditEventFactory.createUserRegistrationResentEvent(user);
+    auditLogService.createAuditLogRecord(event);
   }
 
   @Override
-  public void auditUserEnableStatusUpdate(User existedUser, BooleanDiff enabledDiff){
-    auditLogService
-        .createAuditLogRecord(new UserEnabledStatusChangedEvent(existedUser, enabledDiff));
+  public void auditUserEnableStatusUpdate(User existedUser, BooleanDiff enabledDiff) {
+    AuditEvent event =
+        auditEventFactory.createUserEnableStatusUpdateEvent(existedUser, enabledDiff);
+    auditLogService.createAuditLogRecord(event);
   }
 
   @Override
@@ -55,27 +50,34 @@ public class AuditServiceImpl implements AuditService {
   }
 
   private void publishUpdateEmailEvent(User existedUser, Optional<StringDiff> optEmailDiff) {
-    optEmailDiff.ifPresent(emailDiff ->
-        auditLogService.createAuditLogRecord(new EmailChangedEvent(existedUser, emailDiff)));
+    optEmailDiff.ifPresent(emailDiff -> {
+      AuditEvent event = auditEventFactory.createEmailChangedEvent(existedUser, emailDiff);
+      auditLogService.createAuditLogRecord(event);
+    });
   }
 
   private void publishUpdatePermissionsEvent(User existedUser,
       Optional<StringSetDiff> optPermissionsDiff) {
-    List<Permission> permissions = dictionaryProvider.getPermissions();
 
-    optPermissionsDiff.ifPresent(permissionsDiff ->
-        auditLogService.createAuditLogRecord(
-            new PermissionsChangedEvent(existedUser, permissionsDiff, permissions)));
+    optPermissionsDiff.ifPresent(permissionsDiff -> {
+      AuditEvent event =
+          auditEventFactory.createUpdatePermissionsEvent(existedUser, permissionsDiff);
+      auditLogService.createAuditLogRecord(event);
+    });
   }
 
   private void publishUpdateRolesEvent(User existedUser, Optional<StringSetDiff> optRolesDiff) {
-    optRolesDiff.ifPresent(rolesDiff ->
-        auditLogService.createAuditLogRecord(new UserRoleChangedEvent(existedUser, rolesDiff)));
+    optRolesDiff.ifPresent(rolesDiff -> {
+      AuditEvent event = auditEventFactory.createUserRoleChangedEvent(existedUser, rolesDiff);
+      auditLogService.createAuditLogRecord(event);
+    });
   }
 
   private void publishUpdateNotesEvent(User existedUser, Optional<StringDiff> optNotesDiff) {
-    optNotesDiff.ifPresent(notesDiff ->
-        auditLogService.createAuditLogRecord(new NotesChangedEvent(existedUser, notesDiff)));
+    optNotesDiff.ifPresent(notesDiff -> {
+      AuditEvent event = auditEventFactory.createUpdateNotesEvent(existedUser, notesDiff);
+      auditLogService.createAuditLogRecord(event);
+    });
   }
 
   @Autowired
@@ -84,7 +86,7 @@ public class AuditServiceImpl implements AuditService {
   }
 
   @Autowired
-  public void setDictionaryProvider(DictionaryProvider dictionaryProvider) {
-    this.dictionaryProvider = dictionaryProvider;
+  public void setAuditEventFactory(AuditEventFactory auditEventFactory) {
+    this.auditEventFactory = auditEventFactory;
   }
 }
