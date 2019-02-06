@@ -48,7 +48,7 @@ public abstract class UserChangeLogEvent extends AuditEvent<UserChangeLogRecord>
     getEvent().setAdminName(adminName);
   }
 
-  protected final void setUserRoles(String userRoles) {
+  public final void setUserRoles(String userRoles) {
     getEvent().setUserRoles(userRoles);
   }
 

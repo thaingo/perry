@@ -1,5 +1,7 @@
 package gov.ca.cwds.idm.service;
 
+import static gov.ca.cwds.config.api.idm.Roles.replaceRoleIdByName;
+
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.event.EmailChangedEvent;
 import gov.ca.cwds.idm.event.NotesChangedEvent;
@@ -16,6 +18,7 @@ import gov.ca.cwds.util.IdToNameConverter;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,11 +65,30 @@ public class AuditEventFactory {
   }
 
   public UserRoleChangedEvent createUserRoleChangedEvent(User existedUser, StringSetDiff rolesDiff) {
-    return new UserRoleChangedEvent(existedUser, rolesDiff);
+
+    String oldRolesStrValue = convertRoleKeysToNamesString(rolesDiff.getOldValue());
+    String newRolesStrValue = convertRoleKeysToNamesString(rolesDiff.getNewValue());
+
+    UserRoleChangedEvent event = new UserRoleChangedEvent(
+        existedUser, new StringDiff(oldRolesStrValue, newRolesStrValue));
+    event.setUserRoles(newRolesStrValue);
+    return event;
   }
 
   public NotesChangedEvent createUpdateNotesEvent(User existedUser, StringDiff notesDiff) {
     return new NotesChangedEvent(existedUser, notesDiff);
+  }
+
+  static String convertRoleKeysToNamesString(Set<String> roleKeys) {
+    return toCommaDelimitedString(replaceRoleIdByName(roleKeys));
+  }
+
+  static String toCommaDelimitedString(Set<String> value) {
+    if (value == null) {
+      return "";
+    } else {
+      return StringUtils.join(new TreeSet<>(value), ", ");
+    }
   }
 
   @Autowired
