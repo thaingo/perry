@@ -13,8 +13,7 @@ public class NotesChangedEvent extends UserChangeLogEvent {
   public static final String EVENT_TYPE_NOTES_CHANGED = "Notes Changed";
 
   public NotesChangedEvent(User existedUser, StringDiff notesDiff) {
-    super(existedUser);
-    setEventType(EVENT_TYPE_NOTES_CHANGED);
+    super(EVENT_TYPE_NOTES_CHANGED, existedUser);
     setOldValue(notesDiff.getOldValue());
     setNewValue(notesDiff.getNewValue());
   }

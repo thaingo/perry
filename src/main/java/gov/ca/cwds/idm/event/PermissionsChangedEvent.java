@@ -22,8 +22,7 @@ public class PermissionsChangedEvent extends UserChangeLogEvent {
   public static final String EVENT_TYPE_PERMISSIONS_CHANGED = "Permission Change";
 
   public PermissionsChangedEvent(User existedUser, StringSetDiff permissionsDiff, List<Permission> permissions) {
-    super(existedUser);
-    setEventType(EVENT_TYPE_PERMISSIONS_CHANGED);
+    super(EVENT_TYPE_PERMISSIONS_CHANGED, existedUser);
 
     Map<String, String> permissionsHash = permissions.stream()
         .collect(Collectors.toMap(Permission::getName, Permission::getDescription));

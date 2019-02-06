@@ -14,8 +14,7 @@ public class UserRegistrationResentEvent extends UserChangeLogEvent {
   public static final String EVENT_TYPE_REGISTRATION_RESENT = "Registration Resent";
 
   public UserRegistrationResentEvent(User user) {
-    super(user);
-    setEventType(EVENT_TYPE_REGISTRATION_RESENT);
+    super(EVENT_TYPE_REGISTRATION_RESENT, user);
   }
 
 }

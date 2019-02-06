@@ -16,8 +16,7 @@ public class EmailChangedEvent extends UserChangeLogEvent {
   public static final String EVENT_TYPE_EMAIL_CHANGED = "Email Address";
 
   public EmailChangedEvent(User existedUser, StringDiff emailDiff) {
-    super(existedUser);
-    setEventType(EVENT_TYPE_EMAIL_CHANGED);
+    super(EVENT_TYPE_EMAIL_CHANGED, existedUser);
     setOldValue(emailDiff.getOldValue());
     setNewValue(emailDiff.getNewValue());
   }

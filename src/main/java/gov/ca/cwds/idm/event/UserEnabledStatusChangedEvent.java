@@ -17,8 +17,7 @@ public class UserEnabledStatusChangedEvent extends UserChangeLogEvent {
   static final String USER_ACCOUNT_STATUS_CHANGED = "Account Status";
 
   public UserEnabledStatusChangedEvent(User existedUser, BooleanDiff enabledDiff) {
-    super(existedUser);
-    setEventType(USER_ACCOUNT_STATUS_CHANGED);
+    super(USER_ACCOUNT_STATUS_CHANGED, existedUser);
 
     setOldValue(getValueAsString(enabledDiff.getOldValue()));
     setNewValue(getValueAsString(enabledDiff.getNewValue()));

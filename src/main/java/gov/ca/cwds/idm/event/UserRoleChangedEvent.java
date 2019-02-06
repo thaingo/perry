@@ -21,8 +21,7 @@ public class UserRoleChangedEvent extends UserChangeLogEvent {
   public static final String EVENT_TYPE_USER_ROLE_CHANGED = "Role";
 
   public UserRoleChangedEvent(User existedUser, StringSetDiff rolesDiff) {
-    super(existedUser);
-    setEventType(EVENT_TYPE_USER_ROLE_CHANGED);
+    super(EVENT_TYPE_USER_ROLE_CHANGED, existedUser);
     setUserRoles(toStringValue(replaceRoleIdByName(rolesDiff.getNewValue())));
     setOldValue(toStringValue(replaceRoleIdByName(rolesDiff.getOldValue())));
     setNewValue(toStringValue(replaceRoleIdByName(rolesDiff.getNewValue())));

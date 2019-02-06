@@ -22,7 +22,8 @@ abstract class UserChangeLogEvent extends AuditEvent<UserChangeLogRecord> {
 
   static final String CAP_EVENT_SOURCE = "CAP";
 
-  UserChangeLogEvent(User user) {
+  UserChangeLogEvent(String type, User user) {
+    setEventType(type);
     setTimestamp(LocalDateTime.now());
     setEventSource(CAP_EVENT_SOURCE);
     setUserLogin(getCurrentUserName());
