@@ -21,7 +21,7 @@ public class AuditServiceImpl implements AuditService {
 
   @Override
   public void auditUserCreate(User user) {
-    AuditEvent event = auditEventFactory.createAuditUserCreateEvent(user);
+    AuditEvent event = auditEventFactory.createUserCreateEvent(user);
     auditLogService.createAuditLogRecord(event);
   }
 

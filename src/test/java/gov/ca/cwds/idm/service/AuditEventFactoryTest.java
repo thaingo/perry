@@ -1,4 +1,4 @@
-package gov.ca.cwds.idm.event;
+package gov.ca.cwds.idm.service;
 
 import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
@@ -11,12 +11,20 @@ import static gov.ca.cwds.idm.event.UserEnabledStatusChangedEvent.INACTIVE;
 import static gov.ca.cwds.util.Utils.toSet;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserChangeLogRecord;
+import gov.ca.cwds.idm.event.EmailChangedEvent;
+import gov.ca.cwds.idm.event.NotesChangedEvent;
+import gov.ca.cwds.idm.event.PermissionsChangedEvent;
+import gov.ca.cwds.idm.event.UserCreatedEvent;
+import gov.ca.cwds.idm.event.UserEnabledStatusChangedEvent;
+import gov.ca.cwds.idm.event.UserRegistrationResentEvent;
+import gov.ca.cwds.idm.event.UserRoleChangedEvent;
 import gov.ca.cwds.idm.persistence.ns.entity.Permission;
 import gov.ca.cwds.idm.service.authorization.UserRolesService;
 import gov.ca.cwds.idm.service.diff.BooleanDiff;
@@ -39,7 +47,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(fullyQualifiedNames = {"gov.ca.cwds.util.CurrentAuthenticatedUserUtil",
     "gov.ca.cwds.idm.service.authorization.UserRolesService"})
-public class UserChangeLogEventTest {
+public class AuditEventFactoryTest {
 
   private static final String TEST_USER_ID = "testId";
   private static final String TEST_FIRST_NAME = "testFirstName";
@@ -59,16 +67,24 @@ public class UserChangeLogEventTest {
   private static final String NEW_NOTES = "new notes";
   private static final String OLD_NOTES = "old notes";
 
+  private AuditEventFactory auditEventFactory;
+
+  private DictionaryProvider dictionaryProvider = mock(DictionaryProvider.class);
+
   @Before
   public void before() {
     mockStatic(CurrentAuthenticatedUserUtil.class);
     mockStatic(UserRolesService.class);
+    auditEventFactory = new AuditEventFactory();
+    auditEventFactory.setDictionaryProvider(dictionaryProvider);
   }
 
   @Test
   public void testSetUpUserChangeLogEvent() {
     User user = mockUser();
-    UserCreatedEvent userCreatedEvent = new UserCreatedEvent(user);
+    UserCreatedEvent userCreatedEvent =
+        auditEventFactory.createUserCreateEvent(user);
+
     UserChangeLogRecord changeLogRecord = userCreatedEvent.getEvent();
     assertEquals(TEST_ADMIN_ROLE, changeLogRecord.getAdminRole());
     assertEquals(TEST_ADMIN_NAME, changeLogRecord.getAdminName());
@@ -84,6 +100,7 @@ public class UserChangeLogEventTest {
   public void testUserCreatedEvent() {
     User user = mockUser();
     UserCreatedEvent userCreatedEvent = new UserCreatedEvent(user);
+
     assertEquals(UserCreatedEvent.EVENT_TYPE_USER_CREATED, userCreatedEvent.getEventType());
     assertEquals(String.join(", ", CALS_ADMIN, CWS_WORKER),
         userCreatedEvent.getEvent().getNewValue());
@@ -94,7 +111,9 @@ public class UserChangeLogEventTest {
   @Test
   public void testUserRegistrationResentEvent() {
     User user = mockUser();
-    UserRegistrationResentEvent event = new UserRegistrationResentEvent(user);
+    UserRegistrationResentEvent event =
+        auditEventFactory.createUserRegistrationResentEvent(user);
+
     assertEquals(UserRegistrationResentEvent.EVENT_TYPE_REGISTRATION_RESENT, event.getEventType());
     assertEquals(TEST_FIRST_NAME + " " + TEST_LAST_NAME, event.getEvent().getUserName());
     assertEquals(String.join(", ", getRoleNameById(CWS_WORKER), getRoleNameById(CALS_ADMIN)),
@@ -106,7 +125,9 @@ public class UserChangeLogEventTest {
     StringSetDiff diff = new StringSetDiff(
         toSet(CALS_ADMIN, CWS_WORKER), toSet(OFFICE_ADMIN, STATE_ADMIN));
 
-    UserRoleChangedEvent userRoleChangedEvent = new UserRoleChangedEvent(mockUser(), diff);
+    UserRoleChangedEvent userRoleChangedEvent = auditEventFactory
+        .createUserRoleChangedEvent(mockUser(), diff);
+
     assertEquals(UserRoleChangedEvent.EVENT_TYPE_USER_ROLE_CHANGED,
         userRoleChangedEvent.getEventType());
     assertEquals(StringUtils.join(new String[]{"CALS Administrator", "CWS Worker"}, ", "),
@@ -120,8 +141,6 @@ public class UserChangeLogEventTest {
   @Test
   public void testPermissionsChangedEvent() {
 
-    StringSetDiff diff = new StringSetDiff(toSet(PERMISSION_1, PERMISSION_2), toSet(PERMISSION_3, PERMISSION_4));
-
     List<Permission> permissions = Stream.of(
         new Permission(PERMISSION_1, PERMISSION_1 + PERMISSION_DESCRIPTION),
         new Permission(PERMISSION_2, PERMISSION_2 + PERMISSION_DESCRIPTION),
@@ -129,7 +148,12 @@ public class UserChangeLogEventTest {
         new Permission(PERMISSION_4, PERMISSION_4 + PERMISSION_DESCRIPTION)
     ).collect(Collectors.toList());
 
-    PermissionsChangedEvent event = new PermissionsChangedEvent(mockUser(), diff, permissions);
+    when(dictionaryProvider.getPermissions()).thenReturn(permissions);
+
+    StringSetDiff diff = new StringSetDiff(toSet(PERMISSION_1, PERMISSION_2), toSet(PERMISSION_3, PERMISSION_4));
+
+    PermissionsChangedEvent event = auditEventFactory.createUpdatePermissionsEvent(mockUser(), diff);
+
     assertEquals(PermissionsChangedEvent.EVENT_TYPE_PERMISSIONS_CHANGED,
         event.getEventType());
     assertEquals(StringUtils.join(
@@ -150,7 +174,8 @@ public class UserChangeLogEventTest {
 
     StringDiff diff = new StringDiff(OLD_EMAIL, NEW_EMAIL);
 
-    EmailChangedEvent event = new EmailChangedEvent(mockUser(), diff);
+    EmailChangedEvent event = auditEventFactory.createEmailChangedEvent(mockUser(), diff);
+
     assertEquals(EmailChangedEvent.EVENT_TYPE_EMAIL_CHANGED,
         event.getEventType());
     assertEquals(OLD_EMAIL, event.getEvent().getOldValue());
@@ -163,7 +188,8 @@ public class UserChangeLogEventTest {
   public void testNotesChangedEvent() {
     StringDiff diff = new StringDiff(OLD_NOTES, NEW_NOTES);
 
-    NotesChangedEvent event = new NotesChangedEvent(mockUser(), diff);
+    NotesChangedEvent event = auditEventFactory.createUpdateNotesEvent(mockUser(), diff);
+
     assertEquals(NotesChangedEvent.EVENT_TYPE_NOTES_CHANGED, event.getEventType());
     assertEquals(OLD_NOTES, event.getEvent().getOldValue());
     assertEquals(NEW_NOTES, event.getEvent().getNewValue());
@@ -175,7 +201,9 @@ public class UserChangeLogEventTest {
   public void testUserEnabledStatusChangedEvent() {
     BooleanDiff diff = new BooleanDiff(Boolean.FALSE, Boolean.TRUE);
 
-    UserEnabledStatusChangedEvent event = new UserEnabledStatusChangedEvent(mockUser(), diff);
+    UserEnabledStatusChangedEvent event =
+        auditEventFactory.createUserEnableStatusUpdateEvent(mockUser(), diff);
+
     assertEquals(UserEnabledStatusChangedEvent.USER_ACCOUNT_STATUS_CHANGED,
         event.getEventType());
     assertEquals(INACTIVE, event.getEvent().getOldValue());

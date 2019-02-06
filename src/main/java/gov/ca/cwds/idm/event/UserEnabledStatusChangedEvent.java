@@ -12,9 +12,9 @@ import gov.ca.cwds.idm.service.diff.BooleanDiff;
 public class UserEnabledStatusChangedEvent extends UserChangeLogEvent {
 
   private static final long serialVersionUID = 6929792785662167658L;
-  static final String ACTIVE = "Active";
-  static final String INACTIVE = "Inactive";
-  static final String USER_ACCOUNT_STATUS_CHANGED = "Account Status";
+  public static final String ACTIVE = "Active";
+  public static final String INACTIVE = "Inactive";
+  public static final String USER_ACCOUNT_STATUS_CHANGED = "Account Status";
 
   public UserEnabledStatusChangedEvent(User existedUser, BooleanDiff enabledDiff) {
     super(USER_ACCOUNT_STATUS_CHANGED, existedUser);

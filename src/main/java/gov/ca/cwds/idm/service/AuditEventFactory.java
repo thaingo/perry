@@ -24,32 +24,32 @@ public class AuditEventFactory {
 
   private DictionaryProvider dictionaryProvider;
 
-  public AuditEvent createAuditUserCreateEvent(User user) {
+  public UserCreatedEvent createUserCreateEvent(User user) {
     return new UserCreatedEvent(user);
   }
 
-  public AuditEvent createUserRegistrationResentEvent(User user) {
+  public UserRegistrationResentEvent createUserRegistrationResentEvent(User user) {
     return new UserRegistrationResentEvent(user);
   }
 
-  public AuditEvent createUserEnableStatusUpdateEvent(User existedUser, BooleanDiff enabledDiff) {
+  public UserEnabledStatusChangedEvent createUserEnableStatusUpdateEvent(User existedUser, BooleanDiff enabledDiff) {
     return new UserEnabledStatusChangedEvent(existedUser, enabledDiff);
   }
 
-  public AuditEvent createEmailChangedEvent(User existedUser, StringDiff emailDiff) {
+  public EmailChangedEvent createEmailChangedEvent(User existedUser, StringDiff emailDiff) {
     return new EmailChangedEvent(existedUser, emailDiff);
   }
 
-  public AuditEvent createUpdatePermissionsEvent(User existedUser, StringSetDiff permissionsDiff) {
+  public PermissionsChangedEvent createUpdatePermissionsEvent(User existedUser, StringSetDiff permissionsDiff) {
     List<Permission> permissions = dictionaryProvider.getPermissions();
     return new PermissionsChangedEvent(existedUser, permissionsDiff, permissions);
   }
 
-  public AuditEvent createUserRoleChangedEvent(User existedUser, StringSetDiff rolesDiff) {
+  public UserRoleChangedEvent createUserRoleChangedEvent(User existedUser, StringSetDiff rolesDiff) {
     return new UserRoleChangedEvent(existedUser, rolesDiff);
   }
 
-  public AuditEvent createUpdateNotesEvent(User existedUser, StringDiff notesDiff) {
+  public NotesChangedEvent createUpdateNotesEvent(User existedUser, StringDiff notesDiff) {
     return new NotesChangedEvent(existedUser, notesDiff);
   }
 
