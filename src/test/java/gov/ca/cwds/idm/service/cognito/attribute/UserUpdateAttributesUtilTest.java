@@ -8,6 +8,7 @@ import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.ROLE
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL_VERIFIED;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.PHONE_NUMBER;
+import static gov.ca.cwds.idm.service.cognito.attribute.UserUpdateAttributesUtil.buildUpdatedAttributesList;
 import static gov.ca.cwds.util.Utils.toSet;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.Is.is;
@@ -21,15 +22,12 @@ import gov.ca.cwds.idm.service.diff.UpdateDifference;
 import java.util.List;
 import org.junit.Test;
 
-public class UserUpdateAttributesBuilderTest {
+public class UserUpdateAttributesUtilTest {
 
   @Test
   public void testNoChanges() {
     UpdateDifference differencing = new UpdateDifference(existedCognitoUser(), new UserUpdate());
-
-    UserUpdateAttributesBuilder builder =
-        new UserUpdateAttributesBuilder(differencing);
-    List<AttributeType> updatedAttributes = builder.build();
+    List<AttributeType> updatedAttributes = buildUpdatedAttributesList(differencing);
     assertThat(updatedAttributes.size(), is(0));
   }
 
@@ -43,10 +41,7 @@ public class UserUpdateAttributesBuilderTest {
     userUpdate.setPermissions(toSet("Snapshot-rollout", "Hotline-rollout"));
 
     UpdateDifference differencing = new UpdateDifference(existedCognitoUser(), userUpdate);
-
-    UserUpdateAttributesBuilder builder =
-        new UserUpdateAttributesBuilder(differencing);
-    List<AttributeType> updatedAttributes = builder.build();
+    List<AttributeType> updatedAttributes = buildUpdatedAttributesList(differencing);
     assertThat(updatedAttributes.size(), is(0));
   }
 
@@ -61,10 +56,7 @@ public class UserUpdateAttributesBuilderTest {
     userUpdate.setPermissions(toSet("Hotline-rollout", "RFA-rollout"));
 
     UpdateDifference differencing = new UpdateDifference(existedCognitoUser(), userUpdate);
-
-    UserUpdateAttributesBuilder builder =
-        new UserUpdateAttributesBuilder(differencing);
-    List<AttributeType> updatedAttributes = builder.build();
+    List<AttributeType> updatedAttributes = buildUpdatedAttributesList(differencing);
     assertThat(updatedAttributes.size(), is(6));
 
     assertAttribute(updatedAttributes.get(0), EMAIL, "admin@oci.ca.gov");

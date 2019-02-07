@@ -3,6 +3,7 @@ package gov.ca.cwds.idm.service.cognito;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.GET;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.RESEND_INVITATION_EMAIL;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
+import static gov.ca.cwds.idm.service.cognito.attribute.UserUpdateAttributesUtil.buildUpdatedAttributesList;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.EMAIL_DELIVERY;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.buildCreateUserAttributes;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getEmail;
@@ -43,7 +44,7 @@ import com.amazonaws.services.cognitoidp.model.UsernameExistsException;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.service.UserUpdateRequest;
-import gov.ca.cwds.idm.service.cognito.attribute.UserUpdateAttributesBuilder;
+import gov.ca.cwds.idm.service.cognito.attribute.UserUpdateAttributesUtil;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.idm.service.diff.UpdateDifference;
@@ -200,7 +201,7 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
     User existedUser = userUpdateRequest.getExistedUser();
     UpdateDifference differencing = userUpdateRequest.getDifferencing();
 
-    List<AttributeType> attributeTypes = new UserUpdateAttributesBuilder(differencing).build();
+    List<AttributeType> attributeTypes = buildUpdatedAttributesList(differencing);
 
     if (attributeTypes.isEmpty()) {
       return false;
