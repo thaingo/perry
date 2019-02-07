@@ -11,7 +11,7 @@ import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.TRUE_VALUE;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.createDelimitedAttribute;
 
 import com.amazonaws.services.cognitoidp.model.AttributeType;
-import gov.ca.cwds.idm.service.diff.Differencing;
+import gov.ca.cwds.idm.service.diff.UpdateDifference;
 import gov.ca.cwds.idm.service.diff.StringDiff;
 import gov.ca.cwds.idm.service.diff.StringSetDiff;
 import java.util.ArrayList;
@@ -20,10 +20,10 @@ import java.util.Optional;
 
 public class UserUpdateAttributesBuilder {
 
-  private final Differencing differencing;
+  private final UpdateDifference differencing;
   private final List<AttributeType> attributeTypes = new ArrayList<>();
 
-  public UserUpdateAttributesBuilder(Differencing differencing) {
+  public UserUpdateAttributesBuilder(UpdateDifference differencing) {
     this.differencing = differencing;
   }
 

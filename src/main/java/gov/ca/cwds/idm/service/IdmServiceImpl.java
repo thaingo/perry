@@ -51,7 +51,7 @@ import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil;
 import gov.ca.cwds.idm.service.diff.BooleanDiff;
-import gov.ca.cwds.idm.service.diff.Differencing;
+import gov.ca.cwds.idm.service.diff.UpdateDifference;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.idm.service.execution.OptionalExecution;
 import gov.ca.cwds.idm.service.execution.OptionalExecution.NoUpdateExecution;
@@ -173,7 +173,7 @@ public class IdmServiceImpl implements IdmService {
     userUpdateRequest.setUserId(existedUser.getId());
     userUpdateRequest.setExistedUser(existedUser);
 
-    userUpdateRequest.setDifferencing(new Differencing(existedUser, updateUserDto));
+    userUpdateRequest.setDifferencing(new UpdateDifference(existedUser, updateUserDto));
 
     return userUpdateRequest;
   }

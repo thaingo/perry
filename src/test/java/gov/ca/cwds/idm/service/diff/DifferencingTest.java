@@ -43,7 +43,7 @@ public class DifferencingTest {
 
   @Test
   public void testNoChanges() {
-    Differencing differencing = new Differencing(existedUser(), new UserUpdate());
+    UpdateDifference differencing = new UpdateDifference(existedUser(), new UserUpdate());
     assertNoDiffs(differencing);
   }
 
@@ -58,7 +58,7 @@ public class DifferencingTest {
     userUpdate.setRoles(EXISTED_ROLES);
     userUpdate.setPermissions(EXISTED_PERMISSIONS);
 
-    Differencing differencing = new Differencing(existedUser(), userUpdate);
+    UpdateDifference differencing = new UpdateDifference(existedUser(), userUpdate);
     assertNoDiffs(differencing);
   }
 
@@ -73,7 +73,7 @@ public class DifferencingTest {
     userUpdate.setRoles(NEW_ROLES);
     userUpdate.setPermissions(NEW_PERMISSIONS);
 
-    Differencing differencing = new Differencing(existedUser(), userUpdate);
+    UpdateDifference differencing = new UpdateDifference(existedUser(), userUpdate);
 
     assertStringDiff(differencing.getEmailDiff(), EXISTED_EMAIL.toLowerCase(), NEW_EMAIL.toLowerCase());
     assertBooleanDiff(differencing.getEnabledDiff(), EXISTED_ENABLED, NEW_ENABLED);
@@ -109,7 +109,7 @@ public class DifferencingTest {
     assertThat(diff.getNewValue(), is(expectedNewValue));
   }
 
-  private void assertNoDiffs(Differencing differencing) {
+  private void assertNoDiffs(UpdateDifference differencing) {
     assertFalse(differencing.getEmailDiff().isPresent());
     assertFalse(differencing.getEnabledDiff().isPresent());
     assertFalse(differencing.getPhoneNumberDiff().isPresent());

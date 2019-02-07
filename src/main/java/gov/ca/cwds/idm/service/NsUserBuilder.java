@@ -2,16 +2,16 @@ package gov.ca.cwds.idm.service;
 
 import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
 import gov.ca.cwds.idm.service.diff.Diff;
-import gov.ca.cwds.idm.service.diff.Differencing;
+import gov.ca.cwds.idm.service.diff.UpdateDifference;
 import java.util.Optional;
 import java.util.function.Consumer;
 
 public class NsUserBuilder {
   private final NsUser nsUser;
-  private final Differencing differencing;
+  private final UpdateDifference differencing;
   private boolean userIsUpdated = false;
 
-  public NsUserBuilder(NsUser nsUser, Differencing differencing) {
+  public NsUserBuilder(NsUser nsUser, UpdateDifference differencing) {
     this.nsUser = nsUser;
     this.differencing = differencing;
   }

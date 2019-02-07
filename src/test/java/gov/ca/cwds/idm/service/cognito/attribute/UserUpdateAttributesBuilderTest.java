@@ -17,7 +17,7 @@ import static org.junit.Assert.assertTrue;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
-import gov.ca.cwds.idm.service.diff.Differencing;
+import gov.ca.cwds.idm.service.diff.UpdateDifference;
 import java.util.List;
 import org.junit.Test;
 
@@ -25,7 +25,7 @@ public class UserUpdateAttributesBuilderTest {
 
   @Test
   public void testNoChanges() {
-    Differencing differencing = new Differencing(existedCognitoUser(), new UserUpdate());
+    UpdateDifference differencing = new UpdateDifference(existedCognitoUser(), new UserUpdate());
 
     UserUpdateAttributesBuilder builder =
         new UserUpdateAttributesBuilder(differencing);
@@ -42,7 +42,7 @@ public class UserUpdateAttributesBuilderTest {
     userUpdate.setRoles(toSet("State-admin", "County-admin"));
     userUpdate.setPermissions(toSet("Snapshot-rollout", "Hotline-rollout"));
 
-    Differencing differencing = new Differencing(existedCognitoUser(), userUpdate);
+    UpdateDifference differencing = new UpdateDifference(existedCognitoUser(), userUpdate);
 
     UserUpdateAttributesBuilder builder =
         new UserUpdateAttributesBuilder(differencing);
@@ -60,7 +60,7 @@ public class UserUpdateAttributesBuilderTest {
     userUpdate.setRoles(toSet("County-admin", "Office-admin"));
     userUpdate.setPermissions(toSet("Hotline-rollout", "RFA-rollout"));
 
-    Differencing differencing = new Differencing(existedCognitoUser(), userUpdate);
+    UpdateDifference differencing = new UpdateDifference(existedCognitoUser(), userUpdate);
 
     UserUpdateAttributesBuilder builder =
         new UserUpdateAttributesBuilder(differencing);

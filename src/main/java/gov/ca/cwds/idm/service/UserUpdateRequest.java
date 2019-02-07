@@ -1,7 +1,7 @@
 package gov.ca.cwds.idm.service;
 
 import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.service.diff.Differencing;
+import gov.ca.cwds.idm.service.diff.UpdateDifference;
 
 /**
  * Created by Alexander Serbin on 1/20/2019
@@ -10,7 +10,7 @@ public class UserUpdateRequest {
 
   private String userId;
   private User existedUser;
-  private Differencing differencing;
+  private UpdateDifference differencing;
 
   public void setUserId(String userId) {
     this.userId = userId;
@@ -28,11 +28,11 @@ public class UserUpdateRequest {
     return existedUser;
   }
 
-  public Differencing getDifferencing() {
+  public UpdateDifference getDifferencing() {
     return differencing;
   }
 
-  public void setDifferencing(Differencing differencing) {
+  public void setDifferencing(UpdateDifference differencing) {
     this.differencing = differencing;
   }
 }

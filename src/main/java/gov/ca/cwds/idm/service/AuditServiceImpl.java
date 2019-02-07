@@ -10,7 +10,7 @@ import gov.ca.cwds.idm.event.UserRegistrationResentEvent;
 import gov.ca.cwds.idm.event.UserRoleChangedEvent;
 import gov.ca.cwds.idm.persistence.ns.entity.Permission;
 import gov.ca.cwds.idm.service.diff.BooleanDiff;
-import gov.ca.cwds.idm.service.diff.Differencing;
+import gov.ca.cwds.idm.service.diff.UpdateDifference;
 import gov.ca.cwds.idm.service.diff.StringDiff;
 import gov.ca.cwds.idm.service.diff.StringSetDiff;
 import java.util.List;
@@ -46,7 +46,7 @@ public class AuditServiceImpl implements AuditService {
   @Override
   public void auditUserUpdate(UserUpdateRequest userUpdateRequest) {
     User existedUser = userUpdateRequest.getExistedUser();
-    Differencing differencing = userUpdateRequest.getDifferencing();
+    UpdateDifference differencing = userUpdateRequest.getDifferencing();
 
     publishUpdateRolesEvent(existedUser, differencing.getRolesDiff());
     publishUpdatePermissionsEvent(existedUser, differencing.getPermissionsDiff());

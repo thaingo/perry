@@ -46,7 +46,7 @@ import gov.ca.cwds.idm.service.UserUpdateRequest;
 import gov.ca.cwds.idm.service.cognito.attribute.UserUpdateAttributesBuilder;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
-import gov.ca.cwds.idm.service.diff.Differencing;
+import gov.ca.cwds.idm.service.diff.UpdateDifference;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.service.messages.MessageCode;
 import java.util.ArrayList;
@@ -198,7 +198,7 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
       UserUpdateRequest userUpdateRequest) {
 
     User existedUser = userUpdateRequest.getExistedUser();
-    Differencing differencing = userUpdateRequest.getDifferencing();
+    UpdateDifference differencing = userUpdateRequest.getDifferencing();
 
     List<AttributeType> attributeTypes = new UserUpdateAttributesBuilder(differencing).build();
 
