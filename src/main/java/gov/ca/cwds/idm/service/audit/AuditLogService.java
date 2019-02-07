@@ -1,6 +1,7 @@
-package gov.ca.cwds.idm.service;
+package gov.ca.cwds.idm.service.audit;
 
-import gov.ca.cwds.idm.event.AuditEvent;
+import gov.ca.cwds.idm.service.audit.event.AuditEvent;
+import gov.ca.cwds.idm.service.IndexRestSender;
 import gov.ca.cwds.idm.service.cognito.AuditProperties;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import java.util.HashMap;

@@ -6,7 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import gov.ca.cwds.idm.dto.UserIdAndOperation;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
-import gov.ca.cwds.idm.service.AuditLogService;
+import gov.ca.cwds.idm.service.audit.AuditLogService;
 import gov.ca.cwds.idm.service.UserLogService;
 import java.time.LocalDateTime;
 import java.util.List;

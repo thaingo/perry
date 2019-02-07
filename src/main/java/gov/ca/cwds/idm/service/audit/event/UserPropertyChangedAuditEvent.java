@@ -1,4 +1,4 @@
-package gov.ca.cwds.idm.event;
+package gov.ca.cwds.idm.service.audit.event;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;

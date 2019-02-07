@@ -1,14 +1,15 @@
-package gov.ca.cwds.idm.service;
+package gov.ca.cwds.idm.service.audit;
 
-import static gov.ca.cwds.idm.service.AuditEventFactoryImpl.EVENT_TYPE_EMAIL_CHANGED;
-import static gov.ca.cwds.idm.service.AuditEventFactoryImpl.EVENT_TYPE_NOTES_CHANGED;
-import static gov.ca.cwds.idm.service.AuditEventFactoryImpl.EVENT_TYPE_REGISTRATION_RESENT;
-import static gov.ca.cwds.idm.service.AuditEventFactoryImpl.EVENT_TYPE_USER_CREATED;
+import static gov.ca.cwds.idm.service.audit.AuditEventFactoryImpl.EVENT_TYPE_EMAIL_CHANGED;
+import static gov.ca.cwds.idm.service.audit.AuditEventFactoryImpl.EVENT_TYPE_NOTES_CHANGED;
+import static gov.ca.cwds.idm.service.audit.AuditEventFactoryImpl.EVENT_TYPE_REGISTRATION_RESENT;
+import static gov.ca.cwds.idm.service.audit.AuditEventFactoryImpl.EVENT_TYPE_USER_CREATED;
 
 import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.event.AuditEvent;
-import gov.ca.cwds.idm.event.UserAuditEvent;
-import gov.ca.cwds.idm.event.UserPropertyChangedAuditEvent;
+import gov.ca.cwds.idm.service.audit.event.AuditEvent;
+import gov.ca.cwds.idm.service.audit.event.UserAuditEvent;
+import gov.ca.cwds.idm.service.audit.event.UserPropertyChangedAuditEvent;
+import gov.ca.cwds.idm.service.UserUpdateRequest;
 import gov.ca.cwds.idm.service.diff.BooleanDiff;
 import gov.ca.cwds.idm.service.diff.UpdateDifference;
 import gov.ca.cwds.idm.service.diff.StringDiff;

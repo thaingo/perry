@@ -1,8 +1,8 @@
-package gov.ca.cwds.idm.service;
+package gov.ca.cwds.idm.service.audit;
 
 import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.event.UserAuditEvent;
-import gov.ca.cwds.idm.event.UserPropertyChangedAuditEvent;
+import gov.ca.cwds.idm.service.audit.event.UserAuditEvent;
+import gov.ca.cwds.idm.service.audit.event.UserPropertyChangedAuditEvent;
 import gov.ca.cwds.idm.service.diff.BooleanDiff;
 import gov.ca.cwds.idm.service.diff.StringDiff;
 import gov.ca.cwds.idm.service.diff.StringSetDiff;

@@ -1,6 +1,7 @@
-package gov.ca.cwds.idm.service;
+package gov.ca.cwds.idm.service.audit;
 
 import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.idm.service.UserUpdateRequest;
 import gov.ca.cwds.idm.service.diff.BooleanDiff;
 
 public interface AuditService {

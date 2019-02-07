@@ -25,7 +25,7 @@ import com.amazonaws.services.cognitoidp.model.InvalidParameterException;
 import com.amazonaws.services.cognitoidp.model.UsernameExistsException;
 import com.google.common.collect.Iterables;
 import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.event.UserAuditEvent;
+import gov.ca.cwds.idm.service.audit.event.UserAuditEvent;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
 import gov.ca.cwds.idm.util.TestCognitoServiceFacade;

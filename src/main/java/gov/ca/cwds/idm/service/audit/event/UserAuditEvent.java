@@ -1,4 +1,4 @@
-package gov.ca.cwds.idm.event;
+package gov.ca.cwds.idm.service.audit.event;
 
 import static gov.ca.cwds.config.api.idm.Roles.joinRoles;
 import static gov.ca.cwds.config.api.idm.Roles.replaceRoleIdByName;
