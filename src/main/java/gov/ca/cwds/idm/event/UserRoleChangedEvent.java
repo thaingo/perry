@@ -28,7 +28,7 @@ public class UserRoleChangedEvent extends UserChangeLogEvent {
     setNewValue(toStringValue(replaceRoleIdByName(rolesDiff.getNewValue())));
   }
 
-  String toStringValue(Set<String> value) {
+  static String toStringValue(Set<String> value) {
     if (value == null) {
       return "";
     } else {
