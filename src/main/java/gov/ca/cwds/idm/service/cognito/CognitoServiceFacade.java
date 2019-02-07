@@ -35,7 +35,7 @@ public interface CognitoServiceFacade {
    */
   boolean updateUserAttributes(UserUpdateRequest userUpdateRequest);
 
-  void changeUserEnabledStatus(UserUpdateRequest userUpdateRequest);
+  void changeUserEnabledStatus(User existedUser,  Boolean newValue);
 
   /**
    * Resend the invitation message to a user that already exists and reset the expiration limit

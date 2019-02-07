@@ -1,12 +1,9 @@
 package gov.ca.cwds.idm.event;
 
-import static gov.ca.cwds.idm.service.cognito.attribute.OtherUserAttribute.ENABLED_STATUS;
-
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import gov.ca.cwds.idm.service.UserUpdateRequest;
-import gov.ca.cwds.idm.service.cognito.attribute.diff.UserEnabledStatusAttributeDiff;
-import org.apache.commons.lang3.Validate;
+import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.idm.service.diff.BooleanDiff;
 
 /**
  * Created by Alexander Serbin on 1/18/2019
@@ -19,18 +16,15 @@ public class UserEnabledStatusChangedEvent extends UserChangeLogEvent {
   static final String INACTIVE = "Inactive";
   static final String USER_ACCOUNT_STATUS_CHANGED = "Account Status";
 
-  public UserEnabledStatusChangedEvent(UserUpdateRequest userUpdateRequest) {
-    super(userUpdateRequest.getExistedUser());
+  public UserEnabledStatusChangedEvent(User existedUser, BooleanDiff enabledDiff) {
+    super(existedUser);
     setEventType(USER_ACCOUNT_STATUS_CHANGED);
-    Validate.isTrue(userUpdateRequest.isAttributeChanged(ENABLED_STATUS));
-    UserEnabledStatusAttributeDiff diff = (UserEnabledStatusAttributeDiff) userUpdateRequest
-        .getCognitoDiffMap().get(ENABLED_STATUS);
-    setOldValue(getValueAsString(diff.getOldValue()));
-    setNewValue(getValueAsString(diff.getNewValue()));
+
+    setOldValue(getValueAsString(enabledDiff.getOldValue()));
+    setNewValue(getValueAsString(enabledDiff.getNewValue()));
   }
 
   private static String getValueAsString(Boolean value) {
     return value ? ACTIVE : INACTIVE;
   }
-
 }

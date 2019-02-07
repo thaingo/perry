@@ -1,11 +1,9 @@
 package gov.ca.cwds.idm.event;
 
-import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL;
-
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import gov.ca.cwds.idm.service.UserUpdateRequest;
-import org.apache.commons.lang3.Validate;
+import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.idm.service.diff.StringDiff;
 
 /**
  * Created by Alexander Serbin on 1/11/2019
@@ -17,12 +15,10 @@ public class EmailChangedEvent extends UserChangeLogEvent {
 
   public static final String EVENT_TYPE_EMAIL_CHANGED = "Email Address";
 
-  public EmailChangedEvent(UserUpdateRequest userUpdateRequest) {
-    super(userUpdateRequest.getExistedUser());
-    Validate.isTrue(userUpdateRequest.isAttributeChanged(EMAIL));
+  public EmailChangedEvent(User existedUser, StringDiff emailDiff) {
+    super(existedUser);
     setEventType(EVENT_TYPE_EMAIL_CHANGED);
-    setOldValue(userUpdateRequest.getOldValueAsString(EMAIL));
-    setNewValue(userUpdateRequest.getNewValueAsString(EMAIL));
+    setOldValue(emailDiff.getOldValue());
+    setNewValue(emailDiff.getNewValue());
   }
-
 }

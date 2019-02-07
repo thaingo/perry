@@ -3,12 +3,7 @@ package gov.ca.cwds.idm.service.cognito;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.GET;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.RESEND_INVITATION_EMAIL;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
-import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PERMISSIONS;
-import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PHONE_EXTENSION;
-import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.ROLES;
-import static gov.ca.cwds.idm.service.cognito.attribute.OtherUserAttribute.ENABLED_STATUS;
-import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL;
-import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.PHONE_NUMBER;
+import static gov.ca.cwds.idm.service.cognito.attribute.UserUpdateAttributesUtil.buildUpdatedAttributesList;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.EMAIL_DELIVERY;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.buildCreateUserAttributes;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getEmail;
@@ -49,20 +44,16 @@ import com.amazonaws.services.cognitoidp.model.UsernameExistsException;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.service.UserUpdateRequest;
-import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
-import gov.ca.cwds.idm.service.cognito.attribute.diff.UserAttributeDiff;
-import gov.ca.cwds.idm.service.cognito.attribute.diff.UserEnabledStatusAttributeDiff;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
+import gov.ca.cwds.idm.service.diff.UpdateDifference;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.service.messages.MessageCode;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 import javax.annotation.PostConstruct;
 import liquibase.util.StringUtils;
-import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -205,12 +196,16 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
   @Override
   public boolean updateUserAttributes(
       UserUpdateRequest userUpdateRequest) {
-    List<AttributeType> attributeTypes = new AttributeTypesBuilder(userUpdateRequest.getCognitoDiffMap())
-        .addAttribute(EMAIL).addAttribute(PHONE_NUMBER).addAttribute(PHONE_EXTENSION)
-        .addAttribute(PERMISSIONS).addAttribute(ROLES).attributeTypes;
+
+    User existedUser = userUpdateRequest.getExistedUser();
+    UpdateDifference updateDifference = userUpdateRequest.getUpdateDifference();
+
+    List<AttributeType> attributeTypes = buildUpdatedAttributesList(updateDifference);
+
     if (attributeTypes.isEmpty()) {
       return false;
     }
+
     AdminUpdateUserAttributesRequest adminUpdateUserAttributesRequest =
         new AdminUpdateUserAttributesRequest()
             .withUsername(userUpdateRequest.getUserId())
@@ -223,7 +218,7 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
           userUpdateRequest.getUserId());
     } catch (com.amazonaws.services.cognitoidp.model.AliasExistsException e) {
       throw exceptionFactory.createUserAlreadyExistsException(USER_WITH_EMAIL_EXISTS_IN_IDM, e,
-          userUpdateRequest.getOldValueAsString(EMAIL));
+          existedUser.getEmail());
     } catch (Exception e) {
       throw exceptionFactory
           .createIdmException(getErrorCode(UPDATE), e, userUpdateRequest.getUserId());
@@ -236,12 +231,10 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
    * {@inheritDoc}
    */
   @Override
-  public void changeUserEnabledStatus(UserUpdateRequest userUpdateRequest) {
-    UserEnabledStatusAttributeDiff diff = (UserEnabledStatusAttributeDiff) userUpdateRequest.getCognitoDiffMap()
-        .get(ENABLED_STATUS);
-    Validate.notNull(diff);
-    String id = userUpdateRequest.getUserId();
-    if (diff.getNewValue()) {
+  public void changeUserEnabledStatus(User existedUser,  Boolean newValue) {
+
+    String id = existedUser.getId();
+    if (newValue) {
       AdminEnableUserRequest adminEnableUserRequest =
           new AdminEnableUserRequest().withUsername(id).withUserPoolId(properties.getUserpool());
       executeUserOperationInCognito(identityProvider::adminEnableUser, adminEnableUserRequest, id,
@@ -334,24 +327,5 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
   @Autowired
   public void setExceptionFactory(ExceptionFactory exceptionFactory) {
     this.exceptionFactory = exceptionFactory;
-  }
-
-  private static class AttributeTypesBuilder {
-
-    private final Map<UserAttribute, UserAttributeDiff> diffMap;
-    private final List<AttributeType> attributeTypes;
-
-    AttributeTypesBuilder(Map<UserAttribute, UserAttributeDiff> diffMap) {
-      this.diffMap = diffMap;
-      this.attributeTypes = new ArrayList<>(diffMap.size());
-    }
-
-    private AttributeTypesBuilder addAttribute(UserAttribute userAttribute) {
-      if (diffMap.containsKey(userAttribute)) {
-        attributeTypes.addAll(diffMap.get(userAttribute).createAttributeTypes());
-      }
-      return this;
-    }
-
   }
 }

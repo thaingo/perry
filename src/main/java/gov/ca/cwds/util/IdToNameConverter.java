@@ -24,5 +24,4 @@ public class IdToNameConverter {
     return ids.stream().map(idNameHash::get).sorted()
         .collect(Collectors.toCollection(LinkedHashSet::new));
   }
-
 }

@@ -71,4 +71,28 @@ public abstract class OptionalExecution<T, R> {
   public R getResult() {
     return result;
   }
+
+  public static class NoUpdateExecution<T> extends OptionalExecution<T, Void> {
+
+    public static final NoUpdateExecution INSTANCE = new NoUpdateExecution();
+
+    private NoUpdateExecution() {
+      super(null);
+    }
+
+    @Override
+    protected Void tryMethod(T input) {
+      return null;
+    }
+
+    @Override
+    protected void catchMethod(Exception e) {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public ExecutionStatus getExecutionStatus() {
+      return ExecutionStatus.WAS_NOT_EXECUTED;
+    }
+  }
 }
