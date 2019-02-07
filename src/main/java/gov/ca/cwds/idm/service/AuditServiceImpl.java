@@ -1,7 +1,14 @@
 package gov.ca.cwds.idm.service;
 
+import static gov.ca.cwds.idm.service.AuditEventFactoryImpl.EVENT_TYPE_EMAIL_CHANGED;
+import static gov.ca.cwds.idm.service.AuditEventFactoryImpl.EVENT_TYPE_NOTES_CHANGED;
+import static gov.ca.cwds.idm.service.AuditEventFactoryImpl.EVENT_TYPE_REGISTRATION_RESENT;
+import static gov.ca.cwds.idm.service.AuditEventFactoryImpl.EVENT_TYPE_USER_CREATED;
+
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.event.AuditEvent;
+import gov.ca.cwds.idm.event.UserAuditEvent;
+import gov.ca.cwds.idm.event.UserPropertyChangedAuditEvent;
 import gov.ca.cwds.idm.service.diff.BooleanDiff;
 import gov.ca.cwds.idm.service.diff.UpdateDifference;
 import gov.ca.cwds.idm.service.diff.StringDiff;
@@ -21,19 +28,19 @@ public class AuditServiceImpl implements AuditService {
 
   @Override
   public void auditUserCreate(User user) {
-    AuditEvent event = auditEventFactory.createUserCreateEvent(user);
+    UserAuditEvent event = auditEventFactory.createUserEvent(EVENT_TYPE_USER_CREATED, user);
     auditLogService.createAuditLogRecord(event);
   }
 
   @Override
   public void auditUserRegistrationResent(User user) {
-    AuditEvent event = auditEventFactory.createUserRegistrationResentEvent(user);
+    UserAuditEvent event = auditEventFactory.createUserEvent(EVENT_TYPE_REGISTRATION_RESENT, user);
     auditLogService.createAuditLogRecord(event);
   }
 
   @Override
   public void auditUserEnableStatusUpdate(User existedUser, BooleanDiff enabledDiff) {
-    AuditEvent event =
+    UserPropertyChangedAuditEvent event =
         auditEventFactory.createUserEnableStatusUpdateEvent(existedUser, enabledDiff);
     auditLogService.createAuditLogRecord(event);
   }
@@ -51,7 +58,8 @@ public class AuditServiceImpl implements AuditService {
 
   private void publishUpdateEmailEvent(User existedUser, Optional<StringDiff> optEmailDiff) {
     optEmailDiff.ifPresent(emailDiff -> {
-      AuditEvent event = auditEventFactory.createEmailChangedEvent(existedUser, emailDiff);
+      AuditEvent event = auditEventFactory
+              .createUserPropertyChangedEvent(EVENT_TYPE_EMAIL_CHANGED, existedUser, emailDiff);
       auditLogService.createAuditLogRecord(event);
     });
   }
@@ -75,7 +83,8 @@ public class AuditServiceImpl implements AuditService {
 
   private void publishUpdateNotesEvent(User existedUser, Optional<StringDiff> optNotesDiff) {
     optNotesDiff.ifPresent(notesDiff -> {
-      AuditEvent event = auditEventFactory.createUpdateNotesEvent(existedUser, notesDiff);
+      AuditEvent event = auditEventFactory
+          .createUserPropertyChangedEvent(EVENT_TYPE_NOTES_CHANGED, existedUser, notesDiff);
       auditLogService.createAuditLogRecord(event);
     });
   }

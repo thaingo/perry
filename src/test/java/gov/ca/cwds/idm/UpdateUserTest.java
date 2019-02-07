@@ -6,6 +6,11 @@ import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.SUPER_ADMIN;
+import static gov.ca.cwds.idm.service.AuditEventFactoryImpl.EVENT_TYPE_EMAIL_CHANGED;
+import static gov.ca.cwds.idm.service.AuditEventFactoryImpl.EVENT_TYPE_NOTES_CHANGED;
+import static gov.ca.cwds.idm.service.AuditEventFactoryImpl.EVENT_TYPE_PERMISSIONS_CHANGED;
+import static gov.ca.cwds.idm.service.AuditEventFactoryImpl.EVENT_TYPE_USER_ENABLED_STATUS_CHANGED;
+import static gov.ca.cwds.idm.service.AuditEventFactoryImpl.EVENT_TYPE_USER_ROLE_CHANGED;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PERMISSIONS;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PHONE_EXTENSION;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.ROLES;
@@ -34,6 +39,7 @@ import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
@@ -55,12 +61,7 @@ import gov.ca.cwds.config.LoggingRequestIdFilter;
 import gov.ca.cwds.config.LoggingUserIdFilter;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
-import gov.ca.cwds.idm.event.AuditEvent;
-import gov.ca.cwds.idm.event.EmailChangedEvent;
-import gov.ca.cwds.idm.event.NotesChangedEvent;
-import gov.ca.cwds.idm.event.PermissionsChangedEvent;
-import gov.ca.cwds.idm.event.UserEnabledStatusChangedEvent;
-import gov.ca.cwds.idm.event.UserRoleChangedEvent;
+import gov.ca.cwds.idm.event.UserPropertyChangedAuditEvent;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
@@ -130,17 +131,15 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     assertThat(updatedNsUser.getNotes(), is(NEW_NOTES));
 
     verifyDoraCalls(1);
-    verify(auditLogService, times(5)).createAuditLogRecord(any(AuditEvent.class));
-    verify(auditLogService, times(1)).createAuditLogRecord(any(
-        UserRoleChangedEvent.class));
-    verify(auditLogService, times(1)).createAuditLogRecord(any(
-        PermissionsChangedEvent.class));
-    verify(auditLogService, times(1)).createAuditLogRecord(any(
-        EmailChangedEvent.class));
-    verify(auditLogService, times(1)).createAuditLogRecord(any(
-        UserEnabledStatusChangedEvent.class));
-    verify(auditLogService, times(1)).createAuditLogRecord(any(
-        NotesChangedEvent.class));
+
+    verify(auditLogService, times(5))
+        .createAuditLogRecord(any(UserPropertyChangedAuditEvent.class));
+
+    assertAuditEvent(EVENT_TYPE_USER_ROLE_CHANGED, 1);
+    assertAuditEvent(EVENT_TYPE_PERMISSIONS_CHANGED, 1);
+    assertAuditEvent(EVENT_TYPE_EMAIL_CHANGED, 1);
+    assertAuditEvent(EVENT_TYPE_USER_ENABLED_STATUS_CHANGED, 1);
+    assertAuditEvent(EVENT_TYPE_NOTES_CHANGED, 1);
   }
 
   @Test
@@ -199,10 +198,9 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
                 .content(asJsonString(userUpdate)))
         .andExpect(MockMvcResultMatchers.status().isNoContent())
         .andReturn();
-    verify(auditLogService, never()).createAuditLogRecord(any(
-        UserRoleChangedEvent.class));
-    verify(auditLogService, never()).createAuditLogRecord(any(
-        EmailChangedEvent.class));
+
+    verify(auditLogService, never()).createAuditLogRecord(
+        argThat(event -> event.getEventType().equals(EVENT_TYPE_USER_ROLE_CHANGED)));
   }
 
   @Test
@@ -406,9 +404,7 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     verify(cognito, times(0)).adminEnableUser(enableUserRequest);
     verify(spySearchService, times(0)).createUser(any(User.class));
     verify(auditLogService, never()).createAuditLogRecord(any(
-        PermissionsChangedEvent.class));
-    verify(auditLogService, never()).createAuditLogRecord(any(
-        UserEnabledStatusChangedEvent.class));
+        UserPropertyChangedAuditEvent.class));
   }
 
   @Test
@@ -727,5 +723,10 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     AdminEnableUserResult result = new AdminEnableUserResult();
     when(cognito.adminEnableUser(request)).thenReturn(result);
     return request;
+  }
+
+  private void assertAuditEvent(String type, int times) {
+    verify(auditLogService, times(times)).createAuditLogRecord(
+        argThat(event -> event.getEventType().equals(type)));
   }
 }

@@ -5,9 +5,14 @@ import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.getRoleNameById;
-import static gov.ca.cwds.idm.event.UserChangeLogEvent.CAP_EVENT_SOURCE;
-import static gov.ca.cwds.idm.service.AuditEventFactory.ACTIVE;
-import static gov.ca.cwds.idm.service.AuditEventFactory.INACTIVE;
+import static gov.ca.cwds.idm.event.UserAuditEvent.CAP_EVENT_SOURCE;
+import static gov.ca.cwds.idm.service.AuditEventFactoryImpl.ACTIVE;
+import static gov.ca.cwds.idm.service.AuditEventFactoryImpl.EVENT_TYPE_EMAIL_CHANGED;
+import static gov.ca.cwds.idm.service.AuditEventFactoryImpl.EVENT_TYPE_PERMISSIONS_CHANGED;
+import static gov.ca.cwds.idm.service.AuditEventFactoryImpl.EVENT_TYPE_REGISTRATION_RESENT;
+import static gov.ca.cwds.idm.service.AuditEventFactoryImpl.EVENT_TYPE_USER_ENABLED_STATUS_CHANGED;
+import static gov.ca.cwds.idm.service.AuditEventFactoryImpl.EVENT_TYPE_USER_ROLE_CHANGED;
+import static gov.ca.cwds.idm.service.AuditEventFactoryImpl.INACTIVE;
 import static gov.ca.cwds.util.Utils.toSet;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -18,14 +23,8 @@ import static org.powermock.api.mockito.PowerMockito.when;
 import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserChangeLogRecord;
-import gov.ca.cwds.idm.event.EmailChangedEvent;
-import gov.ca.cwds.idm.event.NotesChangedEvent;
-import gov.ca.cwds.idm.event.PermissionsChangedEvent;
-import gov.ca.cwds.idm.event.UserChangeLogEvent;
-import gov.ca.cwds.idm.event.UserCreatedEvent;
-import gov.ca.cwds.idm.event.UserEnabledStatusChangedEvent;
-import gov.ca.cwds.idm.event.UserRegistrationResentEvent;
-import gov.ca.cwds.idm.event.UserRoleChangedEvent;
+import gov.ca.cwds.idm.event.UserAuditEvent;
+import gov.ca.cwds.idm.event.UserPropertyChangedAuditEvent;
 import gov.ca.cwds.idm.persistence.ns.entity.Permission;
 import gov.ca.cwds.idm.service.authorization.UserRolesService;
 import gov.ca.cwds.idm.service.diff.BooleanDiff;
@@ -65,10 +64,8 @@ public class AuditEventFactoryTest {
   private static final String TEST_ADMIN_NAME = "Cherno Samba";
   private static final String NEW_EMAIL = "newEmail@gmail.com";
   private static final String OLD_EMAIL = "oldEmail@gmail.com";
-  private static final String NEW_NOTES = "new notes";
-  private static final String OLD_NOTES = "old notes";
 
-  private AuditEventFactory auditEventFactory;
+  private AuditEventFactoryImpl auditEventFactory;
 
   private DictionaryProvider dictionaryProvider = mock(DictionaryProvider.class);
 
@@ -76,34 +73,19 @@ public class AuditEventFactoryTest {
   public void before() {
     mockStatic(CurrentAuthenticatedUserUtil.class);
     mockStatic(UserRolesService.class);
-    auditEventFactory = new AuditEventFactory();
+    auditEventFactory = new AuditEventFactoryImpl();
     auditEventFactory.setDictionaryProvider(dictionaryProvider);
   }
 
   @Test
-  public void testUserCreatedEvent() {
+  public void testCreateUserEvent() {
     User user = mockUser();
-    UserCreatedEvent userCreatedEvent = new UserCreatedEvent(user);
-
-    assertCommonEventProperties(userCreatedEvent);
-    assertEquals(UserCreatedEvent.EVENT_TYPE_USER_CREATED, userCreatedEvent.getEventType());
-    assertEquals(String.join(", ", CALS_ADMIN, CWS_WORKER),
-        userCreatedEvent.getEvent().getNewValue());
-    assertEquals(String.join(", ", getRoleNameById(CWS_WORKER), getRoleNameById(CALS_ADMIN)),
-        userCreatedEvent.getEvent().getUserRoles());
-  }
-
-  @Test
-  public void testUserRegistrationResentEvent() {
-    User user = mockUser();
-    UserRegistrationResentEvent event =
-        auditEventFactory.createUserRegistrationResentEvent(user);
+    UserAuditEvent event =
+        auditEventFactory.createUserEvent(EVENT_TYPE_REGISTRATION_RESENT, user);
 
     assertCommonEventProperties(event);
-    assertEquals(UserRegistrationResentEvent.EVENT_TYPE_REGISTRATION_RESENT, event.getEventType());
-    assertEquals(TEST_FIRST_NAME + " " + TEST_LAST_NAME, event.getEvent().getUserName());
-    assertEquals(String.join(", ", getRoleNameById(CWS_WORKER), getRoleNameById(CALS_ADMIN)),
-        event.getEvent().getUserRoles());
+    assertOldRoles(event);
+    assertEquals(EVENT_TYPE_REGISTRATION_RESENT, event.getEventType());
   }
 
   @Test
@@ -111,11 +93,11 @@ public class AuditEventFactoryTest {
     StringSetDiff diff = new StringSetDiff(
         toSet(CALS_ADMIN, CWS_WORKER), toSet(OFFICE_ADMIN, STATE_ADMIN));
 
-    UserRoleChangedEvent userRoleChangedEvent = auditEventFactory
+    UserPropertyChangedAuditEvent userRoleChangedEvent = auditEventFactory
         .createUserRoleChangedEvent(mockUser(), diff);
 
     assertCommonEventProperties(userRoleChangedEvent);
-    assertEquals(UserRoleChangedEvent.EVENT_TYPE_USER_ROLE_CHANGED,
+    assertEquals(EVENT_TYPE_USER_ROLE_CHANGED,
         userRoleChangedEvent.getEventType());
     assertEquals(StringUtils.join(new String[]{"CALS Administrator", "CWS Worker"}, ", "),
         userRoleChangedEvent.getEvent().getOldValue());
@@ -139,10 +121,11 @@ public class AuditEventFactoryTest {
 
     StringSetDiff diff = new StringSetDiff(toSet(PERMISSION_1, PERMISSION_2), toSet(PERMISSION_3, PERMISSION_4));
 
-    PermissionsChangedEvent event = auditEventFactory.createUpdatePermissionsEvent(mockUser(), diff);
+    UserPropertyChangedAuditEvent event = auditEventFactory.createUpdatePermissionsEvent(mockUser(), diff);
 
     assertCommonEventProperties(event);
-    assertEquals(PermissionsChangedEvent.EVENT_TYPE_PERMISSIONS_CHANGED,
+    assertOldRoles(event);
+    assertEquals(EVENT_TYPE_PERMISSIONS_CHANGED,
         event.getEventType());
     assertEquals(StringUtils.join(
         new String[]{
@@ -153,66 +136,51 @@ public class AuditEventFactoryTest {
         new String[]{
             PERMISSION_3 + PERMISSION_DESCRIPTION,
             PERMISSION_4 + PERMISSION_DESCRIPTION}, ", "), event.getEvent().getNewValue());
-    assertEquals(String.join(", ", getRoleNameById(CWS_WORKER), getRoleNameById(CALS_ADMIN)),
-        event.getEvent().getUserRoles());
   }
 
   @Test
-  public void testEmailChangedEvent() {
-
+  public void testCreateUserPropertyChangedEvent() {
     StringDiff diff = new StringDiff(OLD_EMAIL, NEW_EMAIL);
 
-    EmailChangedEvent event = auditEventFactory.createEmailChangedEvent(mockUser(), diff);
+    UserPropertyChangedAuditEvent event = auditEventFactory
+        .createUserPropertyChangedEvent(EVENT_TYPE_EMAIL_CHANGED, mockUser(), diff);
 
     assertCommonEventProperties(event);
-    assertEquals(EmailChangedEvent.EVENT_TYPE_EMAIL_CHANGED,
-        event.getEventType());
+    assertOldRoles(event);
+    assertEquals(EVENT_TYPE_EMAIL_CHANGED, event.getEventType());
     assertEquals(OLD_EMAIL, event.getEvent().getOldValue());
     assertEquals(NEW_EMAIL, event.getEvent().getNewValue());
-    assertEquals(String.join(", ", getRoleNameById(CWS_WORKER), getRoleNameById(CALS_ADMIN)),
-        event.getEvent().getUserRoles());
-  }
-
-  @Test
-  public void testNotesChangedEvent() {
-    StringDiff diff = new StringDiff(OLD_NOTES, NEW_NOTES);
-
-    NotesChangedEvent event = auditEventFactory.createUpdateNotesEvent(mockUser(), diff);
-
-    assertCommonEventProperties(event);
-    assertEquals(NotesChangedEvent.EVENT_TYPE_NOTES_CHANGED, event.getEventType());
-    assertEquals(OLD_NOTES, event.getEvent().getOldValue());
-    assertEquals(NEW_NOTES, event.getEvent().getNewValue());
-    assertEquals(String.join(", ", getRoleNameById(CWS_WORKER), getRoleNameById(CALS_ADMIN)),
-        event.getEvent().getUserRoles());
   }
 
   @Test
   public void testUserEnabledStatusChangedEvent() {
     BooleanDiff diff = new BooleanDiff(Boolean.FALSE, Boolean.TRUE);
 
-    UserEnabledStatusChangedEvent event =
+    UserPropertyChangedAuditEvent event =
         auditEventFactory.createUserEnableStatusUpdateEvent(mockUser(), diff);
 
     assertCommonEventProperties(event);
-    assertEquals(UserEnabledStatusChangedEvent.USER_ACCOUNT_STATUS_CHANGED,
-        event.getEventType());
+    assertOldRoles(event);
+    assertEquals(EVENT_TYPE_USER_ENABLED_STATUS_CHANGED, event.getEventType());
     assertEquals(INACTIVE, event.getEvent().getOldValue());
     assertEquals(ACTIVE, event.getEvent().getNewValue());
-    assertEquals(String.join(", ", getRoleNameById(CWS_WORKER), getRoleNameById(CALS_ADMIN)),
-        event.getEvent().getUserRoles());
   }
 
-  private void assertCommonEventProperties(UserChangeLogEvent userCreatedEvent) {
-    UserChangeLogRecord changeLogRecord = userCreatedEvent.getEvent();
+  private void assertCommonEventProperties(UserAuditEvent userAuditEvent) {
+    UserChangeLogRecord changeLogRecord = userAuditEvent.getEvent();
     assertEquals(TEST_ADMIN_ROLE, changeLogRecord.getAdminRole());
     assertEquals(TEST_ADMIN_NAME, changeLogRecord.getAdminName());
     assertEquals(TEST_COUNTY, changeLogRecord.getCountyName());
     assertEquals(TEST_OFFICE_ID, changeLogRecord.getOfficeId());
     assertEquals(TEST_USER_ID, changeLogRecord.getUserId());
     assertEquals(TEST_FIRST_NAME + " " + TEST_LAST_NAME, changeLogRecord.getUserName());
-    assertEquals(CAP_EVENT_SOURCE, userCreatedEvent.getEventSource());
-    assertEquals(ADMIN_LOGIN, userCreatedEvent.getUserLogin());
+    assertEquals(CAP_EVENT_SOURCE, userAuditEvent.getEventSource());
+    assertEquals(ADMIN_LOGIN, userAuditEvent.getUserLogin());
+  }
+
+  private void assertOldRoles(UserAuditEvent userAuditEvent) {
+    assertEquals(String.join(", ", getRoleNameById(CWS_WORKER), getRoleNameById(CALS_ADMIN)),
+        userAuditEvent.getEvent().getUserRoles());
   }
 
   private User mockUser() {

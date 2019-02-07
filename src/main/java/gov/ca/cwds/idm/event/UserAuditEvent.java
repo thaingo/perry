@@ -16,13 +16,13 @@ import java.time.LocalDateTime;
  * Created by Alexander Serbin on 1/11/2019
  */
 
-public abstract class UserChangeLogEvent extends AuditEvent<UserChangeLogRecord> {
+public class UserAuditEvent extends AuditEvent<UserChangeLogRecord> {
 
   private static final long serialVersionUID = -2341018571605446028L;
 
   public static final String CAP_EVENT_SOURCE = "CAP";
 
-  UserChangeLogEvent(String type, User user) {
+  public UserAuditEvent(String type, User user) {
     setEventType(type);
     setTimestamp(LocalDateTime.now());
     setEventSource(CAP_EVENT_SOURCE);

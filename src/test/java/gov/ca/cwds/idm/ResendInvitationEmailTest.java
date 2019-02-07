@@ -16,7 +16,7 @@ import com.amazonaws.services.cognitoidp.model.AdminCreateUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminCreateUserResult;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.RegistrationResubmitResponse;
-import gov.ca.cwds.idm.event.UserRegistrationResentEvent;
+import gov.ca.cwds.idm.event.UserAuditEvent;
 import gov.ca.cwds.idm.util.TestCognitoServiceFacade;
 import gov.ca.cwds.idm.util.TestUtils;
 import gov.ca.cwds.idm.util.WithMockCustomUser;
@@ -73,8 +73,7 @@ public class ResendInvitationEmailTest extends BaseIdmIntegrationWithUserLogTest
 
   private void assertResendEmailUnauthorized(String id, String fixtureFilePath) throws Exception {
     MvcResult result = assertResendEmailUnauthorized(id);
-    verify(auditLogService, times(0)).createAuditLogRecord(any(
-        UserRegistrationResentEvent.class));
+    verify(auditLogService, times(0)).createAuditLogRecord(any(UserAuditEvent.class));
     assertExtensible(result, fixtureFilePath);
   }
 
@@ -104,7 +103,7 @@ public class ResendInvitationEmailTest extends BaseIdmIntegrationWithUserLogTest
         TestUtils.deserialize(strResponse, RegistrationResubmitResponse.class);
     assertThat(registrationResubmitResponse.getUserId(), is(USER_WITH_RACFID_ID));
     verify(auditLogService, times(1)).createAuditLogRecord(any(
-        UserRegistrationResentEvent.class));
+        UserAuditEvent.class));
   }
 
 }
