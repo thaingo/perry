@@ -26,8 +26,8 @@ public class UserUpdateAttributesUtilTest {
 
   @Test
   public void testNoChanges() {
-    UpdateDifference differencing = new UpdateDifference(existedCognitoUser(), new UserUpdate());
-    List<AttributeType> updatedAttributes = buildUpdatedAttributesList(differencing);
+    UpdateDifference updateDifference = new UpdateDifference(existedCognitoUser(), new UserUpdate());
+    List<AttributeType> updatedAttributes = buildUpdatedAttributesList(updateDifference);
     assertThat(updatedAttributes.size(), is(0));
   }
 
@@ -40,8 +40,8 @@ public class UserUpdateAttributesUtilTest {
     userUpdate.setRoles(toSet("State-admin", "County-admin"));
     userUpdate.setPermissions(toSet("Snapshot-rollout", "Hotline-rollout"));
 
-    UpdateDifference differencing = new UpdateDifference(existedCognitoUser(), userUpdate);
-    List<AttributeType> updatedAttributes = buildUpdatedAttributesList(differencing);
+    UpdateDifference updateDifference = new UpdateDifference(existedCognitoUser(), userUpdate);
+    List<AttributeType> updatedAttributes = buildUpdatedAttributesList(updateDifference);
     assertThat(updatedAttributes.size(), is(0));
   }
 
@@ -55,8 +55,8 @@ public class UserUpdateAttributesUtilTest {
     userUpdate.setRoles(toSet("County-admin", "Office-admin"));
     userUpdate.setPermissions(toSet("Hotline-rollout", "RFA-rollout"));
 
-    UpdateDifference differencing = new UpdateDifference(existedCognitoUser(), userUpdate);
-    List<AttributeType> updatedAttributes = buildUpdatedAttributesList(differencing);
+    UpdateDifference updateDifference = new UpdateDifference(existedCognitoUser(), userUpdate);
+    List<AttributeType> updatedAttributes = buildUpdatedAttributesList(updateDifference);
     assertThat(updatedAttributes.size(), is(6));
 
     assertAttribute(updatedAttributes.get(0), EMAIL, "admin@oci.ca.gov");

@@ -46,12 +46,12 @@ public class AuditServiceImpl implements AuditService {
   @Override
   public void auditUserUpdate(UserUpdateRequest userUpdateRequest) {
     User existedUser = userUpdateRequest.getExistedUser();
-    UpdateDifference differencing = userUpdateRequest.getDifferencing();
+    UpdateDifference updateDifference = userUpdateRequest.getUpdateDifference();
 
-    publishUpdateRolesEvent(existedUser, differencing.getRolesDiff());
-    publishUpdatePermissionsEvent(existedUser, differencing.getPermissionsDiff());
-    publishUpdateEmailEvent(existedUser, differencing.getEmailDiff());
-    publishUpdateNotesEvent(existedUser, differencing.getNotesDiff());
+    publishUpdateRolesEvent(existedUser, updateDifference.getRolesDiff());
+    publishUpdatePermissionsEvent(existedUser, updateDifference.getPermissionsDiff());
+    publishUpdateEmailEvent(existedUser, updateDifference.getEmailDiff());
+    publishUpdateNotesEvent(existedUser, updateDifference.getNotesDiff());
   }
 
   private void publishUpdateEmailEvent(User existedUser, Optional<StringDiff> optEmailDiff) {

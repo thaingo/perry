@@ -23,14 +23,14 @@ public class UserUpdateAttributesUtil {
   private UserUpdateAttributesUtil() {
   }
 
-  public static List<AttributeType> buildUpdatedAttributesList(UpdateDifference differencing) {
+  public static List<AttributeType> buildUpdatedAttributesList(UpdateDifference updateDifference) {
     List<AttributeType> attrs = new ArrayList<>();
 
-    addEmailAttributes(differencing.getEmailDiff(), attrs);
-    addPhoneAttribute(differencing.getPhoneNumberDiff(), attrs);
-    addStringAttribute(PHONE_EXTENSION, differencing.getPhoneExtensionNumberDiff(), attrs);
-    addStringSetAttribute(PERMISSIONS, differencing.getPermissionsDiff(), attrs);
-    addStringSetAttribute(ROLES, differencing.getRolesDiff(), attrs);
+    addEmailAttributes(updateDifference.getEmailDiff(), attrs);
+    addPhoneAttribute(updateDifference.getPhoneNumberDiff(), attrs);
+    addStringAttribute(PHONE_EXTENSION, updateDifference.getPhoneExtensionNumberDiff(), attrs);
+    addStringSetAttribute(PERMISSIONS, updateDifference.getPermissionsDiff(), attrs);
+    addStringSetAttribute(ROLES, updateDifference.getRolesDiff(), attrs);
     return attrs;
   }
 

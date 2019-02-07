@@ -8,12 +8,12 @@ import java.util.function.Consumer;
 
 public class NsUserBuilder {
   private final NsUser nsUser;
-  private final UpdateDifference differencing;
+  private final UpdateDifference updateDifference;
   private boolean userIsUpdated = false;
 
-  public NsUserBuilder(NsUser nsUser, UpdateDifference differencing) {
+  public NsUserBuilder(NsUser nsUser, UpdateDifference updateDifference) {
     this.nsUser = nsUser;
-    this.differencing = differencing;
+    this.updateDifference = updateDifference;
   }
 
   public boolean userIsUpdated() {
@@ -21,7 +21,7 @@ public class NsUserBuilder {
   }
 
   public NsUser build() {
-    setProperty(differencing.getNotesDiff(), nsUser::setNotes);
+    setProperty(updateDifference.getNotesDiff(), nsUser::setNotes);
     return nsUser;
   }
 

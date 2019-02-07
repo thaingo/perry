@@ -53,11 +53,11 @@ public class NsUserService {
 
   @Transactional(value = TOKEN_TRANSACTION_MANAGER)
   public boolean update(UserUpdateRequest userUpdateRequest) {
-    UpdateDifference differencing =  userUpdateRequest.getDifferencing();
+    UpdateDifference updateDifference =  userUpdateRequest.getUpdateDifference();
 
     NsUser nsUser = getOrCreateNewNsUser(userUpdateRequest.getUserId());
 
-    NsUserBuilder nsUserBuilder = new NsUserBuilder(nsUser, differencing);
+    NsUserBuilder nsUserBuilder = new NsUserBuilder(nsUser, updateDifference);
     NsUser modifiedNsUser = nsUserBuilder.build();
 
     if(!nsUserBuilder.userIsUpdated()) {

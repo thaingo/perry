@@ -173,7 +173,7 @@ public class IdmServiceImpl implements IdmService {
     userUpdateRequest.setUserId(existedUser.getId());
     userUpdateRequest.setExistedUser(existedUser);
 
-    userUpdateRequest.setDifferencing(new UpdateDifference(existedUser, updateUserDto));
+    userUpdateRequest.setUpdateDifference(new UpdateDifference(existedUser, updateUserDto));
 
     return userUpdateRequest;
   }
@@ -182,7 +182,7 @@ public class IdmServiceImpl implements IdmService {
       UserUpdateRequest userUpdateRequest) {
     OptionalExecution<BooleanDiff, Void> updateUserEnabledExecution;
 
-    Optional<BooleanDiff> optEnabledDiff = userUpdateRequest.getDifferencing().getEnabledDiff();
+    Optional<BooleanDiff> optEnabledDiff = userUpdateRequest.getUpdateDifference().getEnabledDiff();
     User existedUser = userUpdateRequest.getExistedUser();
 
     if(optEnabledDiff.isPresent()) {

@@ -44,7 +44,6 @@ import com.amazonaws.services.cognitoidp.model.UsernameExistsException;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.service.UserUpdateRequest;
-import gov.ca.cwds.idm.service.cognito.attribute.UserUpdateAttributesUtil;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.idm.service.diff.UpdateDifference;
@@ -199,9 +198,9 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
       UserUpdateRequest userUpdateRequest) {
 
     User existedUser = userUpdateRequest.getExistedUser();
-    UpdateDifference differencing = userUpdateRequest.getDifferencing();
+    UpdateDifference updateDifference = userUpdateRequest.getUpdateDifference();
 
-    List<AttributeType> attributeTypes = buildUpdatedAttributesList(differencing);
+    List<AttributeType> attributeTypes = buildUpdatedAttributesList(updateDifference);
 
     if (attributeTypes.isEmpty()) {
       return false;
