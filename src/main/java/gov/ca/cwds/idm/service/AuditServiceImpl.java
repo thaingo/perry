@@ -3,7 +3,7 @@ package gov.ca.cwds.idm.service;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.event.AuditEvent;
 import gov.ca.cwds.idm.service.diff.BooleanDiff;
-import gov.ca.cwds.idm.service.diff.Differencing;
+import gov.ca.cwds.idm.service.diff.UpdateDifference;
 import gov.ca.cwds.idm.service.diff.StringDiff;
 import gov.ca.cwds.idm.service.diff.StringSetDiff;
 import java.util.Optional;
@@ -41,12 +41,12 @@ public class AuditServiceImpl implements AuditService {
   @Override
   public void auditUserUpdate(UserUpdateRequest userUpdateRequest) {
     User existedUser = userUpdateRequest.getExistedUser();
-    Differencing differencing = userUpdateRequest.getDifferencing();
+    UpdateDifference updateDifference = userUpdateRequest.getUpdateDifference();
 
-    publishUpdateRolesEvent(existedUser, differencing.getRolesDiff());
-    publishUpdatePermissionsEvent(existedUser, differencing.getPermissionsDiff());
-    publishUpdateEmailEvent(existedUser, differencing.getEmailDiff());
-    publishUpdateNotesEvent(existedUser, differencing.getNotesDiff());
+    publishUpdateRolesEvent(existedUser, updateDifference.getRolesDiff());
+    publishUpdatePermissionsEvent(existedUser, updateDifference.getPermissionsDiff());
+    publishUpdateEmailEvent(existedUser, updateDifference.getEmailDiff());
+    publishUpdateNotesEvent(existedUser, updateDifference.getNotesDiff());
   }
 
   private void publishUpdateEmailEvent(User existedUser, Optional<StringDiff> optEmailDiff) {

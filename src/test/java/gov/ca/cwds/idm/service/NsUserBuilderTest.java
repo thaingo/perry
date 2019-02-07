@@ -8,7 +8,7 @@ import static org.junit.Assert.assertTrue;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
-import gov.ca.cwds.idm.service.diff.Differencing;
+import gov.ca.cwds.idm.service.diff.UpdateDifference;
 import org.junit.Test;
 
 public class NsUserBuilderTest {
@@ -21,12 +21,12 @@ public class NsUserBuilderTest {
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setNotes("New Notes");
 
-    Differencing differencing = new Differencing(existedUser, userUpdate);
+    UpdateDifference updateDifference = new UpdateDifference(existedUser, userUpdate);
 
     NsUser existedNsUser = new NsUser();
     existedNsUser.setNotes("Old Notes");
 
-    NsUserBuilder nsUserBuilder = new NsUserBuilder(existedNsUser, differencing);
+    NsUserBuilder nsUserBuilder = new NsUserBuilder(existedNsUser, updateDifference);
     NsUser modifiedNsUser = nsUserBuilder.build();
     assertTrue(nsUserBuilder.userIsUpdated());
     assertThat(modifiedNsUser.getNotes(), is("New Notes"));
@@ -36,12 +36,12 @@ public class NsUserBuilderTest {
   public void testNoChanges() {
     User existedUser = new User();
     existedUser.setNotes("Old Notes");
-    Differencing differencing = new Differencing(existedUser, new UserUpdate());
+    UpdateDifference updateDifference = new UpdateDifference(existedUser, new UserUpdate());
 
     NsUser existedNsUser = new NsUser();
     existedNsUser.setNotes("Old Notes");
 
-    NsUserBuilder nsUserBuilder = new NsUserBuilder(existedNsUser, differencing);
+    NsUserBuilder nsUserBuilder = new NsUserBuilder(existedNsUser, updateDifference);
     NsUser modifiedNsUser = nsUserBuilder.build();
     assertFalse(nsUserBuilder.userIsUpdated());
     assertThat(modifiedNsUser.getNotes(), is("Old Notes"));

@@ -43,8 +43,8 @@ public class DifferencingTest {
 
   @Test
   public void testNoChanges() {
-    Differencing differencing = new Differencing(existedUser(), new UserUpdate());
-    assertNoDiffs(differencing);
+    UpdateDifference updateDifference = new UpdateDifference(existedUser(), new UserUpdate());
+    assertNoDiffs(updateDifference);
   }
 
   @Test
@@ -58,8 +58,8 @@ public class DifferencingTest {
     userUpdate.setRoles(EXISTED_ROLES);
     userUpdate.setPermissions(EXISTED_PERMISSIONS);
 
-    Differencing differencing = new Differencing(existedUser(), userUpdate);
-    assertNoDiffs(differencing);
+    UpdateDifference updateDifference = new UpdateDifference(existedUser(), userUpdate);
+    assertNoDiffs(updateDifference);
   }
 
   @Test
@@ -73,16 +73,16 @@ public class DifferencingTest {
     userUpdate.setRoles(NEW_ROLES);
     userUpdate.setPermissions(NEW_PERMISSIONS);
 
-    Differencing differencing = new Differencing(existedUser(), userUpdate);
+    UpdateDifference updateDifference = new UpdateDifference(existedUser(), userUpdate);
 
-    assertStringDiff(differencing.getEmailDiff(), EXISTED_EMAIL.toLowerCase(), NEW_EMAIL.toLowerCase());
-    assertBooleanDiff(differencing.getEnabledDiff(), EXISTED_ENABLED, NEW_ENABLED);
-    assertStringDiff(differencing.getPhoneNumberDiff(), EXISTED_PHONE, NEW_PHONE);
+    assertStringDiff(updateDifference.getEmailDiff(), EXISTED_EMAIL.toLowerCase(), NEW_EMAIL.toLowerCase());
+    assertBooleanDiff(updateDifference.getEnabledDiff(), EXISTED_ENABLED, NEW_ENABLED);
+    assertStringDiff(updateDifference.getPhoneNumberDiff(), EXISTED_PHONE, NEW_PHONE);
     assertStringDiff(
-        differencing.getPhoneExtensionNumberDiff(), EXISTED_PHONE_EXTENSION, NEW_PHONE_EXTENSION);
-    assertStringDiff(differencing.getNotesDiff(), EXISTED_NOTES, NEW_NOTES);
-    assertStringSetDiff(differencing.getRolesDiff(), EXISTED_ROLES, NEW_ROLES);
-    assertStringSetDiff(differencing.getPermissionsDiff(), EXISTED_PERMISSIONS, NEW_PERMISSIONS);
+        updateDifference.getPhoneExtensionNumberDiff(), EXISTED_PHONE_EXTENSION, NEW_PHONE_EXTENSION);
+    assertStringDiff(updateDifference.getNotesDiff(), EXISTED_NOTES, NEW_NOTES);
+    assertStringSetDiff(updateDifference.getRolesDiff(), EXISTED_ROLES, NEW_ROLES);
+    assertStringSetDiff(updateDifference.getPermissionsDiff(), EXISTED_PERMISSIONS, NEW_PERMISSIONS);
   }
 
   private void assertStringDiff(Optional<StringDiff> optDiff, String expectedOldValue,
@@ -109,14 +109,14 @@ public class DifferencingTest {
     assertThat(diff.getNewValue(), is(expectedNewValue));
   }
 
-  private void assertNoDiffs(Differencing differencing) {
-    assertFalse(differencing.getEmailDiff().isPresent());
-    assertFalse(differencing.getEnabledDiff().isPresent());
-    assertFalse(differencing.getPhoneNumberDiff().isPresent());
-    assertFalse(differencing.getPhoneExtensionNumberDiff().isPresent());
-    assertFalse(differencing.getNotesDiff().isPresent());
-    assertFalse(differencing.getRolesDiff().isPresent());
-    assertFalse(differencing.getPermissionsDiff().isPresent());
+  private void assertNoDiffs(UpdateDifference updateDifference) {
+    assertFalse(updateDifference.getEmailDiff().isPresent());
+    assertFalse(updateDifference.getEnabledDiff().isPresent());
+    assertFalse(updateDifference.getPhoneNumberDiff().isPresent());
+    assertFalse(updateDifference.getPhoneExtensionNumberDiff().isPresent());
+    assertFalse(updateDifference.getNotesDiff().isPresent());
+    assertFalse(updateDifference.getRolesDiff().isPresent());
+    assertFalse(updateDifference.getPermissionsDiff().isPresent());
   }
 
   private static User existedUser() {

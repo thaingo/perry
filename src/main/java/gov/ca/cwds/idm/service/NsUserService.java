@@ -4,7 +4,7 @@ import static gov.ca.cwds.config.TokenServiceConfiguration.TOKEN_TRANSACTION_MAN
 
 import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
 import gov.ca.cwds.idm.persistence.ns.repository.NsUserRepository;
-import gov.ca.cwds.idm.service.diff.Differencing;
+import gov.ca.cwds.idm.service.diff.UpdateDifference;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -53,11 +53,11 @@ public class NsUserService {
 
   @Transactional(value = TOKEN_TRANSACTION_MANAGER)
   public boolean update(UserUpdateRequest userUpdateRequest) {
-    Differencing differencing =  userUpdateRequest.getDifferencing();
+    UpdateDifference updateDifference =  userUpdateRequest.getUpdateDifference();
 
     NsUser nsUser = getOrCreateNewNsUser(userUpdateRequest.getUserId());
 
-    NsUserBuilder nsUserBuilder = new NsUserBuilder(nsUser, differencing);
+    NsUserBuilder nsUserBuilder = new NsUserBuilder(nsUser, updateDifference);
     NsUser modifiedNsUser = nsUserBuilder.build();
 
     if(!nsUserBuilder.userIsUpdated()) {

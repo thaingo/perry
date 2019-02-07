@@ -7,7 +7,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
 
-public class Differencing {
+public class UpdateDifference {
 
   private final StringDiff emailDiff;
   private final BooleanDiff enabledDiff;
@@ -17,7 +17,7 @@ public class Differencing {
   private final StringSetDiff permissionsDiff;
   private final StringSetDiff rolesDiff;
 
-  public Differencing(final User existedUser, final UserUpdate userUpdate) {
+  public UpdateDifference(final User existedUser, final UserUpdate userUpdate) {
     emailDiff = createStringDiff(
         Utils.toLowerCase(existedUser.getEmail()),
         Utils.toLowerCase(userUpdate.getEmail()));

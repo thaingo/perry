@@ -5,9 +5,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.diff.StringDiff;
 
-/**
- * Created by Alexander Serbin on 1/11/2019
- */
+
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class EmailChangedEvent extends UserChangeLogEvent {
 
