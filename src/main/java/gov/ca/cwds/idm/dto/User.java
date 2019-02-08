@@ -21,7 +21,7 @@ import org.hibernate.validator.constraints.NotBlank;
 @SuppressWarnings("squid:S3437")
 public class User implements RolesHolder, Serializable {
 
-  private static final long serialVersionUID = -3223381407378606716L;
+  private static final long serialVersionUID = -3129911507646832123L;
 
   private String id;
 
@@ -50,6 +50,8 @@ public class User implements RolesHolder, Serializable {
   private String phoneNumber;
 
   private String phoneExtensionNumber;
+
+  private boolean locked;
 
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_FORMAT)
   private Date userCreateDate;
@@ -241,5 +243,13 @@ public class User implements RolesHolder, Serializable {
 
   public void setNotes(String notes) {
     this.notes = notes;
+  }
+
+  public boolean isLocked() {
+    return locked;
+  }
+
+  public void setLocked(boolean locked) {
+    this.locked = locked;
   }
 }
