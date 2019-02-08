@@ -51,7 +51,7 @@ public class AuditEventFactoryImpl implements AuditEventFactory {
   }
 
   @Override
-  public UserPropertyChangedAuditEvent createUserEnableStatusUpdateEvent(User existedUser,
+  public UserPropertyChangedAuditEvent createUserEnableStatusChangedEvent(User existedUser,
       BooleanDiff enabledDiff) {
     String enabledOldStringValue = getEnabledValueAsString(enabledDiff.getOldValue());
     String enabledNewStringValue = getEnabledValueAsString(enabledDiff.getNewValue());
@@ -64,7 +64,7 @@ public class AuditEventFactoryImpl implements AuditEventFactory {
   }
 
   @Override
-  public UserPropertyChangedAuditEvent createUpdatePermissionsEvent(User existedUser,
+  public UserPropertyChangedAuditEvent createUserPermissionsChangedEvent(User existedUser,
       StringSetDiff permissionsDiff) {
     List<Permission> permissions = dictionaryProvider.getPermissions();
 

@@ -127,7 +127,7 @@ public class AuditEventFactoryImplTest {
 
     StringSetDiff diff = new StringSetDiff(toSet(PERMISSION_1, PERMISSION_2), toSet(PERMISSION_3, PERMISSION_4));
 
-    UserPropertyChangedAuditEvent event = auditEventFactory.createUpdatePermissionsEvent(mockUser(), diff);
+    UserPropertyChangedAuditEvent event = auditEventFactory.createUserPermissionsChangedEvent(mockUser(), diff);
 
     assertCommonEventProperties(event);
     assertOldRoles(event);
@@ -163,7 +163,7 @@ public class AuditEventFactoryImplTest {
     BooleanDiff diff = new BooleanDiff(Boolean.FALSE, Boolean.TRUE);
 
     UserPropertyChangedAuditEvent event =
-        auditEventFactory.createUserEnableStatusUpdateEvent(mockUser(), diff);
+        auditEventFactory.createUserEnableStatusChangedEvent(mockUser(), diff);
 
     assertCommonEventProperties(event);
     assertOldRoles(event);

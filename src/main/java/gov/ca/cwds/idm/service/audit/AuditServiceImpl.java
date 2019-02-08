@@ -42,7 +42,7 @@ public class AuditServiceImpl implements AuditService {
   @Override
   public void auditUserEnableStatusUpdate(User existedUser, BooleanDiff enabledDiff) {
     UserPropertyChangedAuditEvent event =
-        auditEventFactory.createUserEnableStatusUpdateEvent(existedUser, enabledDiff);
+        auditEventFactory.createUserEnableStatusChangedEvent(existedUser, enabledDiff);
     auditLogService.createAuditLogRecord(event);
   }
 
@@ -70,7 +70,7 @@ public class AuditServiceImpl implements AuditService {
 
     optPermissionsDiff.ifPresent(permissionsDiff -> {
       AuditEvent event =
-          auditEventFactory.createUpdatePermissionsEvent(existedUser, permissionsDiff);
+          auditEventFactory.createUserPermissionsChangedEvent(existedUser, permissionsDiff);
       auditLogService.createAuditLogRecord(event);
     });
   }

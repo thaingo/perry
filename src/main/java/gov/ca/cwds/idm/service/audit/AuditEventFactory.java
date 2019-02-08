@@ -14,10 +14,10 @@ public interface AuditEventFactory {
   UserPropertyChangedAuditEvent createUserStringPropertyChangedEvent(
       String type, User existedUser, StringDiff strPropertyDiff);
 
-  UserPropertyChangedAuditEvent createUserEnableStatusUpdateEvent(User existedUser,
+  UserPropertyChangedAuditEvent createUserEnableStatusChangedEvent(User existedUser,
       BooleanDiff enabledDiff);
 
-  UserPropertyChangedAuditEvent createUpdatePermissionsEvent(User existedUser,
+  UserPropertyChangedAuditEvent createUserPermissionsChangedEvent(User existedUser,
       StringSetDiff permissionsDiff);
 
   UserPropertyChangedAuditEvent createUserRoleChangedEvent(User existedUser,
