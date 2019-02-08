@@ -152,7 +152,7 @@ public class CognitoServiceFacadeTest {
     assertThat(request.getUsername(), is("gonzales@gmail.com"));
 
     assertThat(request.getUserPoolId(), is("userpool"));
-    assertThat(request.getDesiredDeliveryMediums(), is(Arrays.asList("EMAIL")));
+    assertThat(request.getMessageAction(), is("SUPPRESS"));
 
     List<AttributeType> attrs = request.getUserAttributes();
     assertThat(attrs.isEmpty(), is(false));
