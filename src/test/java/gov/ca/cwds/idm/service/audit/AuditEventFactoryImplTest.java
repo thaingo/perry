@@ -32,14 +32,12 @@ import gov.ca.cwds.idm.service.DictionaryProvider;
 import gov.ca.cwds.idm.service.audit.event.UserAuditEvent;
 import gov.ca.cwds.idm.service.audit.event.UserPropertyChangedAuditEvent;
 import gov.ca.cwds.idm.persistence.ns.entity.Permission;
-import gov.ca.cwds.idm.service.audit.AuditEventFactoryImpl;
 import gov.ca.cwds.idm.service.authorization.UserRolesService;
 import gov.ca.cwds.idm.service.diff.BooleanDiff;
 import gov.ca.cwds.idm.service.diff.StringDiff;
 import gov.ca.cwds.idm.service.diff.StringSetDiff;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.TreeSet;
@@ -147,11 +145,11 @@ public class AuditEventFactoryImplTest {
   }
 
   @Test
-  public void testCreateUserPropertyChangedEvent() {
+  public void testCreateUserStringPropertyChangedEvent() {
     StringDiff diff = new StringDiff(OLD_EMAIL, NEW_EMAIL);
 
     UserPropertyChangedAuditEvent event = auditEventFactory
-        .createUserPropertyChangedEvent(EVENT_TYPE_EMAIL_CHANGED, mockUser(), diff);
+        .createUserStringPropertyChangedEvent(EVENT_TYPE_EMAIL_CHANGED, mockUser(), diff);
 
     assertCommonEventProperties(event);
     assertOldRoles(event);

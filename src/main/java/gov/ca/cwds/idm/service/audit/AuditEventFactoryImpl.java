@@ -45,7 +45,7 @@ public class AuditEventFactoryImpl implements AuditEventFactory {
   }
 
   @Override
-  public UserPropertyChangedAuditEvent createUserPropertyChangedEvent(
+  public UserPropertyChangedAuditEvent createUserStringPropertyChangedEvent(
       String type, User existedUser, StringDiff strPropertyDiff) {
     return new UserPropertyChangedAuditEvent(type, existedUser, strPropertyDiff);
   }

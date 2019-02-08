@@ -60,7 +60,7 @@ public class AuditServiceImpl implements AuditService {
   private void publishUpdateEmailEvent(User existedUser, Optional<StringDiff> optEmailDiff) {
     optEmailDiff.ifPresent(emailDiff -> {
       AuditEvent event = auditEventFactory
-              .createUserPropertyChangedEvent(EVENT_TYPE_EMAIL_CHANGED, existedUser, emailDiff);
+          .createUserStringPropertyChangedEvent(EVENT_TYPE_EMAIL_CHANGED, existedUser, emailDiff);
       auditLogService.createAuditLogRecord(event);
     });
   }
@@ -85,7 +85,7 @@ public class AuditServiceImpl implements AuditService {
   private void publishUpdateNotesEvent(User existedUser, Optional<StringDiff> optNotesDiff) {
     optNotesDiff.ifPresent(notesDiff -> {
       AuditEvent event = auditEventFactory
-          .createUserPropertyChangedEvent(EVENT_TYPE_NOTES_CHANGED, existedUser, notesDiff);
+          .createUserStringPropertyChangedEvent(EVENT_TYPE_NOTES_CHANGED, existedUser, notesDiff);
       auditLogService.createAuditLogRecord(event);
     });
   }

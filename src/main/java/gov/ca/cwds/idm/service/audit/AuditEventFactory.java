@@ -11,7 +11,7 @@ public interface AuditEventFactory {
 
   UserAuditEvent createUserEvent(String type, User user);
 
-  UserPropertyChangedAuditEvent createUserPropertyChangedEvent(
+  UserPropertyChangedAuditEvent createUserStringPropertyChangedEvent(
       String type, User existedUser, StringDiff strPropertyDiff);
 
   UserPropertyChangedAuditEvent createUserEnableStatusUpdateEvent(User existedUser,
