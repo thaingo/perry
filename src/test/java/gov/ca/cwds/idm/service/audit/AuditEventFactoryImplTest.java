@@ -1,10 +1,11 @@
-package gov.ca.cwds.idm.service;
+package gov.ca.cwds.idm.service.audit;
 
 import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.getRoleNameById;
+import static gov.ca.cwds.idm.service.audit.AuditEventFactoryImpl.convertRoleKeysToNamesString;
 import static gov.ca.cwds.idm.service.audit.event.UserAuditEvent.CAP_EVENT_SOURCE;
 import static gov.ca.cwds.idm.service.audit.AuditEventFactoryImpl.ACTIVE;
 import static gov.ca.cwds.idm.service.audit.AuditEventFactoryImpl.EVENT_TYPE_EMAIL_CHANGED;
@@ -14,7 +15,11 @@ import static gov.ca.cwds.idm.service.audit.AuditEventFactoryImpl.EVENT_TYPE_USE
 import static gov.ca.cwds.idm.service.audit.AuditEventFactoryImpl.EVENT_TYPE_USER_ROLE_CHANGED;
 import static gov.ca.cwds.idm.service.audit.AuditEventFactoryImpl.INACTIVE;
 import static gov.ca.cwds.util.Utils.toSet;
+import static java.util.Collections.emptySet;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
@@ -23,6 +28,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
 import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserChangeLogRecord;
+import gov.ca.cwds.idm.service.DictionaryProvider;
 import gov.ca.cwds.idm.service.audit.event.UserAuditEvent;
 import gov.ca.cwds.idm.service.audit.event.UserPropertyChangedAuditEvent;
 import gov.ca.cwds.idm.persistence.ns.entity.Permission;
@@ -33,6 +39,7 @@ import gov.ca.cwds.idm.service.diff.StringDiff;
 import gov.ca.cwds.idm.service.diff.StringSetDiff;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.TreeSet;
@@ -48,7 +55,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(fullyQualifiedNames = {"gov.ca.cwds.util.CurrentAuthenticatedUserUtil",
     "gov.ca.cwds.idm.service.authorization.UserRolesService"})
-public class AuditEventFactoryTest {
+public class AuditEventFactoryImplTest {
 
   private static final String TEST_USER_ID = "testId";
   private static final String TEST_FIRST_NAME = "testFirstName";
@@ -165,6 +172,15 @@ public class AuditEventFactoryTest {
     assertEquals(EVENT_TYPE_USER_ENABLED_STATUS_CHANGED, event.getEventType());
     assertEquals(INACTIVE, event.getEvent().getOldValue());
     assertEquals(ACTIVE, event.getEvent().getNewValue());
+  }
+
+  @Test
+  public void testConvertRoleKeysToNamesString() {
+    assertThat(convertRoleKeysToNamesString(null), is(""));
+    assertThat(convertRoleKeysToNamesString(emptySet()), is(""));
+    assertThat(convertRoleKeysToNamesString(toSet(CWS_WORKER)), is("CWS Worker"));
+    assertThat(convertRoleKeysToNamesString(toSet(OFFICE_ADMIN, STATE_ADMIN, CWS_WORKER)),
+        is("CWS Worker, Office Administrator, State Administrator"));
   }
 
   private void assertCommonEventProperties(UserAuditEvent userAuditEvent) {

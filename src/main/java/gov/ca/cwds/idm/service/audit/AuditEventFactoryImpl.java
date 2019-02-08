@@ -102,7 +102,7 @@ public class AuditEventFactoryImpl implements AuditEventFactory {
     return toCommaDelimitedString(replaceRoleIdByName(roleKeys));
   }
 
-  static String toCommaDelimitedString(Set<String> value) {
+  private static String toCommaDelimitedString(Set<String> value) {
     if (value == null) {
       return "";
     } else {
