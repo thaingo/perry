@@ -263,7 +263,9 @@ public class CognitoServiceFacadeTest {
   @Test
   public void testCreateAdminDeleteUserRequest() {
     final String USER_ID = "user-id";
+
     AdminDeleteUserRequest request = facade.createAdminDeleteUserRequest(USER_ID);
+
     assertThat(request, is(notNullValue()));
     assertThat(request.getUsername(), is(USER_ID));
     assertThat(request.getUserPoolId(), is("userpool"));
@@ -273,8 +275,34 @@ public class CognitoServiceFacadeTest {
   public void testDeleteCognitoUserById() {
     final String USER_ID = "user-id";
     AdminDeleteUserRequest expectedRequest = facade.createAdminDeleteUserRequest(USER_ID);
+
     facade.deleteCognitoUserById(USER_ID);
+
     verify(identityProvider, times(1)).adminDeleteUser(expectedRequest);
+  }
+
+  @Test
+  public void testCreateResendEmailRequest() {
+    final String USER_EMAIL = "USER@EMAIL.com";
+
+    AdminCreateUserRequest request = facade.createResendEmailRequest(USER_EMAIL);
+
+    assertThat(request, is(notNullValue()));
+    assertThat(request.getUsername(), is("user@email.com"));
+    assertThat(request.getUserPoolId(), is("userpool"));
+    assertThat(request.getMessageAction(), is("RESEND"));
+    assertThat(request.getDesiredDeliveryMediums(), is(Arrays.asList("EMAIL")));
+  }
+
+  @Test
+  public void testSendInvitationMessageByEmail() {
+    final String USER_EMAIL = "user@email.com";
+    AdminCreateUserRequest expectedRequest = facade.createResendEmailRequest(USER_EMAIL);
+    when(identityProvider.adminCreateUser(expectedRequest)).thenReturn(new AdminCreateUserResult());
+
+    facade.sendInvitationMessageByEmail(USER_EMAIL);
+
+    verify(identityProvider, times(1)).adminCreateUser(expectedRequest);
   }
 
   private ListUsersRequest setListUsersRequestAndResponse(

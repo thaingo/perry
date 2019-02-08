@@ -248,6 +248,19 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
     }
   }
 
+  /**
+   * Creates the request for resending email.
+   *
+   * @param email email address of the user.
+   */
+  public AdminCreateUserRequest createResendEmailRequest(String email) {
+    return new AdminCreateUserRequest()
+        .withUsername(toLowerCase(email))
+        .withUserPoolId(properties.getUserpool())
+        .withMessageAction(MessageActionType.RESEND)
+        .withDesiredDeliveryMediums(DeliveryMediumType.EMAIL);
+  }
+
   @Override
   public UserType resendInvitationMessage(String userId) {
     UserType cognitoUser = getCognitoUserById(userId);
@@ -260,6 +273,12 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
   }
 
   @Override
+  public UserType sendInvitationMessageByEmail(String email) {
+    AdminCreateUserRequest request = createResendEmailRequest(email);
+    return identityProvider.adminCreateUser(request).getUser();
+  }
+
+  @Override
   public AdminDeleteUserRequest createAdminDeleteUserRequest(String id) {
     return new AdminDeleteUserRequest().withUsername(id).withUserPoolId(properties.getUserpool());
   }
@@ -268,19 +287,6 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
   public void deleteCognitoUserById(String id) {
     AdminDeleteUserRequest request = createAdminDeleteUserRequest(id);
     identityProvider.adminDeleteUser(request);
-  }
-
-  /**
-   * Creates the request for resending email.
-   *
-   * @param email email address of the user.
-   */
-  public AdminCreateUserRequest createResendEmailRequest(String email) {
-    return new AdminCreateUserRequest()
-        .withUsername(toLowerCase(email))
-        .withUserPoolId(properties.getUserpool())
-        .withMessageAction(MessageActionType.RESEND)
-        .withDesiredDeliveryMediums(DeliveryMediumType.EMAIL);
   }
 
   public ListUsersRequest composeListUsersRequest(CognitoUsersSearchCriteria criteria) {
