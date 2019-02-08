@@ -1,6 +1,7 @@
 package gov.ca.cwds.idm.service.cognito;
 
 import com.amazonaws.services.cognitoidp.model.AdminCreateUserRequest;
+import com.amazonaws.services.cognitoidp.model.AdminDeleteUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserRequest;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
@@ -43,4 +44,8 @@ public interface CognitoServiceFacade {
    * @param email email address of the user.
    */
   UserType resendInvitationMessage(String email);
-  }
+
+  AdminDeleteUserRequest createAdminDeleteUserRequest(String id);
+
+  void deleteCognitoUserById(String id);
+}

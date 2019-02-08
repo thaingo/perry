@@ -27,6 +27,7 @@ import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProviderClientBuilder;
 import com.amazonaws.services.cognitoidp.model.AdminCreateUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminCreateUserResult;
+import com.amazonaws.services.cognitoidp.model.AdminDeleteUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminDisableUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminEnableUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserRequest;
@@ -256,6 +257,17 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
         executeUserOperationInCognito(identityProvider::adminCreateUser, request, userId,
             RESEND_INVITATION_EMAIL);
     return result.getUser();
+  }
+
+  @Override
+  public AdminDeleteUserRequest createAdminDeleteUserRequest(String id) {
+    return new AdminDeleteUserRequest().withUsername(id).withUserPoolId(properties.getUserpool());
+  }
+
+  @Override
+  public void deleteCognitoUserById(String id) {
+    AdminDeleteUserRequest request = createAdminDeleteUserRequest(id);
+    identityProvider.adminDeleteUser(request);
   }
 
   /**

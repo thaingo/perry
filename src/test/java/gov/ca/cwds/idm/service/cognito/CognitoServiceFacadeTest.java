@@ -32,6 +32,7 @@ import static org.mockito.Mockito.when;
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
 import com.amazonaws.services.cognitoidp.model.AdminCreateUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminCreateUserResult;
+import com.amazonaws.services.cognitoidp.model.AdminDeleteUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserResult;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
@@ -257,6 +258,23 @@ public class CognitoServiceFacadeTest {
     UserType UserType = facade.resendInvitationMessage(userId);
     verify(identityProvider, times(1)).adminCreateUser(expectedRequest);
     assertThat(UserType.getUsername(), is(userEmail));
+  }
+
+  @Test
+  public void testCreateAdminDeleteUserRequest() {
+    final String USER_ID = "user-id";
+    AdminDeleteUserRequest request = facade.createAdminDeleteUserRequest(USER_ID);
+    assertThat(request, is(notNullValue()));
+    assertThat(request.getUsername(), is(USER_ID));
+    assertThat(request.getUserPoolId(), is("userpool"));
+  }
+
+  @Test
+  public void testDeleteCognitoUserById() {
+    final String USER_ID = "user-id";
+    AdminDeleteUserRequest expectedRequest = facade.createAdminDeleteUserRequest(USER_ID);
+    facade.deleteCognitoUserById(USER_ID);
+    verify(identityProvider, times(1)).adminDeleteUser(expectedRequest);
   }
 
   private ListUsersRequest setListUsersRequestAndResponse(
