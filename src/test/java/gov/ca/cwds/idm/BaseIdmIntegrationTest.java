@@ -7,8 +7,11 @@ import static gov.ca.cwds.idm.BaseIdmIntegrationTest.IDM_BASIC_AUTH_USER;
 import static gov.ca.cwds.util.LiquibaseUtils.CMS_STORE_URL;
 import static gov.ca.cwds.util.LiquibaseUtils.TOKEN_STORE_URL;
 import static gov.ca.cwds.util.LiquibaseUtils.runLiquibaseScript;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.LoggingEvent;
@@ -20,6 +23,7 @@ import gov.ca.cwds.idm.persistence.ns.repository.NsUserRepository;
 import gov.ca.cwds.idm.persistence.ns.repository.UserLogRepository;
 import gov.ca.cwds.idm.service.IdmServiceImpl;
 import gov.ca.cwds.idm.service.SearchService;
+import gov.ca.cwds.idm.service.audit.AuditLogService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.idm.util.TestCognitoServiceFacade;
@@ -39,6 +43,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.ActiveProfiles;
@@ -85,6 +90,9 @@ public abstract class BaseIdmIntegrationTest extends BaseIntegrationTest {
 
   @Autowired
   protected NsUserRepository nsUserRepository;
+
+  @MockBean
+  protected AuditLogService auditLogService;
 
   protected NsUserRepository spyNsUserRepository;
 
@@ -155,6 +163,11 @@ public abstract class BaseIdmIntegrationTest extends BaseIntegrationTest {
     User user = racfIdUser(email, racfId, roles);
     user.setPermissions(permissions);
     return user;
+  }
+
+  protected final void assertAuditEvent(String type, int times) {
+    verify(auditLogService, times(times)).createAuditLogRecord(
+        argThat(event -> event.getEventType().equals(type)));
   }
 
   @Component

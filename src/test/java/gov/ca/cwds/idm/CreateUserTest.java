@@ -6,6 +6,7 @@ import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.SUPER_ADMIN;
 import static gov.ca.cwds.idm.service.PossibleUserPermissionsService.CANS_PERMISSION_NAME;
+import static gov.ca.cwds.idm.service.audit.AuditEventFactoryImpl.EVENT_TYPE_USER_CREATED;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.ES_ERROR_CREATE_USER_EMAIL;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.NEW_USER_ES_FAIL_ID;
@@ -326,8 +327,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
     verify(cognito, times(1)).adminCreateUser(request);
     verify(spySearchService, times(1)).createUser(any(User.class));
     verifyDoraCalls(1);
-    verify(auditLogService, times(1)).createAuditLogRecord(any(
-        UserAuditEvent.class));
+    assertAuditEvent(EVENT_TYPE_USER_CREATED,1);
   }
 
   private  AdminCreateUserRequest setCreateRequestAndResult(User actuallySendUser,

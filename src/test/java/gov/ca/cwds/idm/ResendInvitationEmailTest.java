@@ -3,6 +3,7 @@ package gov.ca.cwds.idm;
 import static gov.ca.cwds.config.TokenServiceConfiguration.TOKEN_TRANSACTION_MANAGER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
+import static gov.ca.cwds.idm.service.audit.AuditEventFactoryImpl.EVENT_TYPE_REGISTRATION_RESENT;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_WITH_RACFID_ID;
 import static org.hamcrest.CoreMatchers.is;
@@ -74,6 +75,7 @@ public class ResendInvitationEmailTest extends BaseIdmIntegrationWithUserLogTest
   private void assertResendEmailUnauthorized(String id, String fixtureFilePath) throws Exception {
     MvcResult result = assertResendEmailUnauthorized(id);
     verify(auditLogService, times(0)).createAuditLogRecord(any(UserAuditEvent.class));
+    assertAuditEvent(EVENT_TYPE_REGISTRATION_RESENT, 0);
     assertExtensible(result, fixtureFilePath);
   }
 
@@ -102,8 +104,6 @@ public class ResendInvitationEmailTest extends BaseIdmIntegrationWithUserLogTest
     RegistrationResubmitResponse registrationResubmitResponse =
         TestUtils.deserialize(strResponse, RegistrationResubmitResponse.class);
     assertThat(registrationResubmitResponse.getUserId(), is(USER_WITH_RACFID_ID));
-    verify(auditLogService, times(1)).createAuditLogRecord(any(
-        UserAuditEvent.class));
+    assertAuditEvent(EVENT_TYPE_REGISTRATION_RESENT, 1);
   }
-
 }

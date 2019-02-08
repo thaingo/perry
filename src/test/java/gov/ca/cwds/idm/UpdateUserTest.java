@@ -724,9 +724,4 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     when(cognito.adminEnableUser(request)).thenReturn(result);
     return request;
   }
-
-  private void assertAuditEvent(String type, int times) {
-    verify(auditLogService, times(times)).createAuditLogRecord(
-        argThat(event -> event.getEventType().equals(type)));
-  }
 }
