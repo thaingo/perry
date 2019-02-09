@@ -13,6 +13,7 @@ import static gov.ca.cwds.service.messages.MessageCode.DUPLICATE_USERID_FOR_RACF
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_UPDATE_USER_ENABLED_STATUS;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_CREATE_IDM_USER_IN_ES;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_PURGE_PROCESSED_USER_LOGS;
+import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_SEND_INVITATION_EMAIL_AT_USER_CREATION;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_IDM_USER_IN_ES;
 import static gov.ca.cwds.service.messages.MessageCode.USER_CREATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_CREATE_SAVE_TO_SEARCH_ERROR;
@@ -205,7 +206,8 @@ public class IdmServiceImpl implements IdmService {
     CwsUserInfo cwsUser = getCwsUserData(user);
     enrichUserByCwsData(user, cwsUser);
 
-    user.setEmail(toLowerCase(user.getEmail()));
+    String email = toLowerCase(user.getEmail());
+    user.setEmail(email);
     String racfId = toUpperCase(user.getRacfid());
     user.setRacfid(racfId);
 
@@ -215,10 +217,27 @@ public class IdmServiceImpl implements IdmService {
     UserType userType = cognitoServiceFacade.createUser(user);
     String userId = userType.getUsername();
     user.setId(userId);
+    LOGGER.info("New user was successfully created in Cognito with id:{}", userId);
+
+    sendInvitationEmail(email, userId);
+
     auditService.auditUserCreate(user);
     PutInSearchExecution doraExecution = createUserInSearch(userType);
     handleCreatePartialSuccess(userId, doraExecution);
     return userId;
+  }
+
+  private void sendInvitationEmail(String email, String userId) {
+    try {
+      cognitoServiceFacade.sendInvitationMessageByEmail(email);
+    } catch (Exception invitationEmailException) {
+      LOGGER.error(
+          "error at sending invitation email for new user with id:" + userId + ", email:" + email,
+          invitationEmailException);
+      cognitoServiceFacade.deleteCognitoUserById(userId);
+      throw exceptionFactory.createIdmException(
+          UNABLE_TO_SEND_INVITATION_EMAIL_AT_USER_CREATION, invitationEmailException, email);
+    }
   }
 
   @Override

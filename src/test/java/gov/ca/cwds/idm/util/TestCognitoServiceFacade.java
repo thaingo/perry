@@ -564,7 +564,8 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
     return request;
   }
 
-  public AdminCreateUserRequest setCreateUserResult(AdminCreateUserRequest request, String newId) {
+  public AdminCreateUserRequest setCreateUserResult(
+      AdminCreateUserRequest request, String newId, String email) {
 
     UserType newUser = new UserType();
     newUser.setUsername(newId);
@@ -574,7 +575,11 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
 
     AdminCreateUserResult result = new AdminCreateUserResult().withUser(newUser);
     when(cognito.adminCreateUser(request)).thenReturn(result);
-    return request;
+
+    AdminCreateUserRequest sentInvitationRequest = createResendEmailRequest(email);
+    when(cognito.adminCreateUser(sentInvitationRequest)).thenReturn(result);
+
+    return sentInvitationRequest;
   }
 
   ListUsersRequest setSearchByRacfidRequestAndResult(TestUser testUser) {
