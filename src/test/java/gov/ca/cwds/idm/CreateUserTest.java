@@ -7,7 +7,9 @@ import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.SUPER_ADMIN;
 import static gov.ca.cwds.idm.service.PossibleUserPermissionsService.CANS_PERMISSION_NAME;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.EMAIL_ERROR_CREATE_USER_EMAIL;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.ES_ERROR_CREATE_USER_EMAIL;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.NEW_USER_EMAIL_FAIL_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.NEW_USER_ES_FAIL_ID;
 import static gov.ca.cwds.idm.util.TestUtils.asJsonString;
 import static gov.ca.cwds.util.Utils.toSet;
@@ -21,6 +23,8 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 
 import com.amazonaws.services.cognitoidp.model.AdminCreateUserRequest;
+import com.amazonaws.services.cognitoidp.model.AdminCreateUserResult;
+import com.amazonaws.services.cognitoidp.model.AdminDeleteUserRequest;
 import com.amazonaws.services.cognitoidp.model.InvalidParameterException;
 import com.amazonaws.services.cognitoidp.model.UsernameExistsException;
 import com.google.common.collect.Iterables;
@@ -104,6 +108,46 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
     assertTrue(lastUserLog.getOperationType() == OperationType.CREATE);
     assertThat(lastUserLog.getUsername(), is(NEW_USER_ES_FAIL_ID));
   }
+
+  @Test
+  @WithMockCustomUser
+  public void testCreateUserInvitationEmailFail() throws Exception {
+
+    int oldUserLogsSize = Iterables.size(userLogRepository.findAll());
+
+    User user = user();
+    user.setEmail(EMAIL_ERROR_CREATE_USER_EMAIL);
+
+    setDoraError();
+
+    CognitoCreateRequests requests = setCreateRequestAndResultWithEmailError(user,
+        NEW_USER_EMAIL_FAIL_ID);
+    AdminCreateUserRequest request = requests.createRequest;
+    AdminCreateUserRequest invitationRequest = requests.invitationRequest;
+    AdminDeleteUserRequest deleteRequest =
+        cognitoServiceFacade.createAdminDeleteUserRequest(NEW_USER_EMAIL_FAIL_ID);
+
+    MvcResult result =
+        mockMvc
+            .perform(
+                MockMvcRequestBuilders.post("/idm/users")
+                    .contentType(JSON_CONTENT_TYPE)
+                    .content(asJsonString(user)))
+            .andExpect(MockMvcResultMatchers.status().isInternalServerError())
+            .andReturn();
+
+    assertExtensible(result, "fixtures/idm/create-user/email-fail.json");
+
+    verify(cognito, times(1)).adminCreateUser(request);
+    verify(cognito, times(1)).adminCreateUser(invitationRequest);
+    verify(cognito, times(1)).adminDeleteUser(deleteRequest);
+    verify(spySearchService, times(0)).createUser(any(User.class));
+
+    Iterable<UserLog> userLogs = userLogRepository.findAll();
+    int newUserLogsSize = Iterables.size(userLogs);
+    assertThat(newUserLogsSize, is(oldUserLogsSize));
+  }
+
 
   @Test
   @WithMockCustomUser
@@ -344,9 +388,24 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
 
   private  CognitoCreateRequests setCreateRequestAndResult(User actuallySendUser,
       String newUserId) {
+    TestCognitoServiceFacade testCognitoServiceFacade = (TestCognitoServiceFacade) cognitoServiceFacade;
+
     AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(actuallySendUser);
-    AdminCreateUserRequest invitationEmailRequest = ((TestCognitoServiceFacade) cognitoServiceFacade)
-        .setCreateUserResult(request, newUserId, actuallySendUser.getEmail());
+    AdminCreateUserResult result = testCognitoServiceFacade.setCreateUserResult(request, newUserId);
+    AdminCreateUserRequest invitationEmailRequest = testCognitoServiceFacade
+        .setCreateUserInvitationRequest(actuallySendUser.getEmail(), result);
+
+    return new CognitoCreateRequests(request, invitationEmailRequest);
+  }
+
+  private  CognitoCreateRequests setCreateRequestAndResultWithEmailError(User actuallySendUser,
+      String newUserId) {
+    TestCognitoServiceFacade testCognitoServiceFacade = (TestCognitoServiceFacade) cognitoServiceFacade;
+
+    AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(actuallySendUser);
+    testCognitoServiceFacade.setCreateUserResult(request, newUserId);
+    AdminCreateUserRequest invitationEmailRequest = testCognitoServiceFacade
+        .setCreateUserInvitationRequestWithEmailError(actuallySendUser.getEmail());
     return new CognitoCreateRequests(request, invitationEmailRequest);
   }
 
