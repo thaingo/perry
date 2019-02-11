@@ -25,6 +25,9 @@ public class NsUser {
   @Column(name = "username")
   private String username;
 
+  @Column(name = "racfid")
+  private String racfid;
+
   @Column(name = "last_login_time")
   private LocalDateTime lastLoginTime;
 
@@ -45,6 +48,14 @@ public class NsUser {
 
   public void setUsername(String username) {
     this.username = username;
+  }
+
+  public String getRacfid() {
+    return racfid;
+  }
+
+  public void setRacfid(String racfid) {
+    this.racfid = racfid;
   }
 
   public LocalDateTime getLastLoginTime() {
