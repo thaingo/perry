@@ -55,9 +55,11 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
   public static final String USER_WITH_NO_PHONE_EXTENSION = "d740ec1d-66ae-4d84-a8c4-8bed7a942f5b";
   public static final String NEW_USER_SUCCESS_ID = "17067e4e-270f-4623-b86c-b4d4fa527a34";
   public static final String NEW_USER_ES_FAIL_ID = "08e14c57-6e5e-48dd-8172-e8949c2a7f76";
+  public static final String NEW_USER_DELETE_FAIL_ID = "fcdba3ee-dffa-4e8c-ab3a-933d0e80f80b";
   public static final String NEW_USER_EMAIL_FAIL_ID = "1a9e2ffd-7b9c-4813-b44a-99573e204ca7";
   public static final String ES_ERROR_CREATE_USER_EMAIL = "es.error@create.com";
   public static final String EMAIL_ERROR_CREATE_USER_EMAIL = "email.error@create.com";
+  public static final String DELETE_ERROR_CREATE_USER_EMAIL = "delete.error@create.com";
   public static final String SOME_PAGINATION_TOKEN = "somePaginationToken";
   public static final String ABSENT_USER_ID = "absentUserId";
   public static final String ERROR_USER_ID = "errorUserId";

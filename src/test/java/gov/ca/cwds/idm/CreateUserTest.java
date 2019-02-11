@@ -7,8 +7,10 @@ import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.SUPER_ADMIN;
 import static gov.ca.cwds.idm.service.PossibleUserPermissionsService.CANS_PERMISSION_NAME;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.DELETE_ERROR_CREATE_USER_EMAIL;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.EMAIL_ERROR_CREATE_USER_EMAIL;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.ES_ERROR_CREATE_USER_EMAIL;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.NEW_USER_DELETE_FAIL_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.NEW_USER_EMAIL_FAIL_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.NEW_USER_ES_FAIL_ID;
 import static gov.ca.cwds.idm.util.TestUtils.asJsonString;
@@ -146,6 +148,44 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
     assertThat(newUserLogsSize, is(oldUserLogsSize));
   }
 
+  @Test
+  @WithMockCustomUser
+  public void testCreateUserDeleteFail() throws Exception {
+
+    int oldUserLogsSize = Iterables.size(userLogRepository.findAll());
+
+    User user = user();
+    user.setEmail(DELETE_ERROR_CREATE_USER_EMAIL);
+
+    CognitoCreateRequests requests = setCreateRequestAndResultWithEmailError(user, NEW_USER_DELETE_FAIL_ID);
+    AdminCreateUserRequest request = requests.createRequest;
+    AdminCreateUserRequest invitationRequest = requests.invitationRequest;
+
+    AdminDeleteUserRequest deleteRequest =
+        cognitoServiceFacade.createAdminDeleteUserRequest(NEW_USER_DELETE_FAIL_ID);
+    when(cognito.adminDeleteUser(deleteRequest))
+        .thenThrow(new RuntimeException("Cognito delete error"));
+
+    MvcResult result =
+        mockMvc
+            .perform(
+                MockMvcRequestBuilders.post("/idm/users")
+                    .contentType(JSON_CONTENT_TYPE)
+                    .content(asJsonString(user)))
+            .andExpect(MockMvcResultMatchers.status().isInternalServerError())
+            .andReturn();
+
+    assertExtensible(result, "fixtures/idm/create-user/delete-fail.json");
+
+    verify(cognito, times(1)).adminCreateUser(request);
+    verify(cognito, times(1)).adminCreateUser(invitationRequest);
+    verify(cognito, times(1)).adminDeleteUser(deleteRequest);
+    verify(spySearchService, times(0)).createUser(any(User.class));
+
+    Iterable<UserLog> userLogs = userLogRepository.findAll();
+    int newUserLogsSize = Iterables.size(userLogs);
+    assertThat(newUserLogsSize, is(oldUserLogsSize));
+  }
 
   @Test
   @WithMockCustomUser
