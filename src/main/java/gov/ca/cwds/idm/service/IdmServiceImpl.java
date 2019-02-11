@@ -12,6 +12,7 @@ import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getRACFId;
 import static gov.ca.cwds.service.messages.MessageCode.DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_UPDATE_USER_ENABLED_STATUS;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_CREATE_IDM_USER_IN_ES;
+import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_DELETE_USER_AT_USER_CREATION_FAIL;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_PURGE_PROCESSED_USER_LOGS;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_SEND_INVITATION_EMAIL_AT_USER_CREATION;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_IDM_USER_IN_ES;
@@ -234,7 +235,15 @@ public class IdmServiceImpl implements IdmService {
       LOGGER.error(
           "error at sending invitation email for new user with id:" + userId + ", email:" + email,
           invitationEmailException);
-      cognitoServiceFacade.deleteCognitoUserById(userId);
+      try {
+        cognitoServiceFacade.deleteCognitoUserById(userId);
+      } catch (Exception cognitoUserDeleteException) {
+        LOGGER.error("error at attempt to delete new user with id:" + userId,
+            cognitoUserDeleteException);
+        throw exceptionFactory.createPartialSuccessException(
+            userId, OperationType.CREATE, UNABLE_TO_DELETE_USER_AT_USER_CREATION_FAIL,
+            invitationEmailException, cognitoUserDeleteException);
+      }
       throw exceptionFactory.createIdmException(
           UNABLE_TO_SEND_INVITATION_EMAIL_AT_USER_CREATION, invitationEmailException, email);
     }

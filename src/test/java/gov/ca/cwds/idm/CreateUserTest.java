@@ -118,8 +118,6 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
     User user = user();
     user.setEmail(EMAIL_ERROR_CREATE_USER_EMAIL);
 
-    setDoraError();
-
     CognitoCreateRequests requests = setCreateRequestAndResultWithEmailError(user,
         NEW_USER_EMAIL_FAIL_ID);
     AdminCreateUserRequest request = requests.createRequest;
