@@ -33,6 +33,7 @@ public class NsUserMapperTest {
     final String PHONE_NUMBER = "1234567890";
     final String PHONE_EXTENSION = "48";
     final String FIRST_NAME = "John";
+    final String LAST_NAME = "Smith";
 
     User user = new User();
     user.setId(USER_ID);
@@ -41,6 +42,7 @@ public class NsUserMapperTest {
     user.setPhoneNumber(PHONE_NUMBER);
     user.setPhoneExtensionNumber(PHONE_EXTENSION);
     user.setFirstName(FIRST_NAME);
+    user.setLastName(LAST_NAME);
 
     NsUser nsUser = mapper.toNsUser(user);
 
@@ -50,5 +52,6 @@ public class NsUserMapperTest {
     assertThat(nsUser.getPhoneNumber(), is(PHONE_NUMBER));
     assertThat(nsUser.getPhoneExtensionNumber(), is(PHONE_EXTENSION));
     assertThat(nsUser.getFirstName(), is(FIRST_NAME));
+    assertThat(nsUser.getLastName(), is(LAST_NAME));
   }
 }

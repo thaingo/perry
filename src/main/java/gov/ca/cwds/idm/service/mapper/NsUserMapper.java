@@ -18,6 +18,7 @@ public class NsUserMapper {
     nsUser.setPhoneNumber(user.getPhoneNumber());
     nsUser.setPhoneExtensionNumber(user.getPhoneExtensionNumber());
     nsUser.setFirstName(user.getFirstName());
+    nsUser.setLastName(user.getLastName());
 
     return nsUser;
   }
