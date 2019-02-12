@@ -322,7 +322,7 @@ public class IdmServiceImplTest {
 
   @Test
   public void testSearchUsersNoResult() {
-    NsUserService spyNsUserService = mock(NsUserService.class, delegatesTo(nsUserService));
+    NsUserService spyNsUserService = mock(NsUserServiceImpl.class, delegatesTo(nsUserService));
     service.setNsUserService(spyNsUserService);
     String racfIdUserAbsent1 = "NORACF";
     String racfIdUserAbsent2 = "NORAC1";
