@@ -15,6 +15,7 @@ import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.PH
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.DEFAULT_PAGESIZE;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByAttribute;
+import static gov.ca.cwds.PerryProperties.IdentityManagerConfiguration.numberOfFailedLoginsToLock;
 import static gov.ca.cwds.idm.util.TestUtils.attr;
 import static gov.ca.cwds.idm.util.TestUtils.date;
 import static org.mockito.Mockito.mock;
@@ -51,10 +52,10 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
   public static final String USER_WITH_RACFID_ID = "24051d54-9321-4dd2-a92f-6425d6c455be";
   public static final String USER_WITH_RACFID_AND_DB_DATA_ID =
       "d740ec1d-80ae-4d84-a8c4-9bed7a942f5b";
-  public static final String USER_WITH_ONE_LOGIN_FAILURE_UNLOCKED = "24932d54-9321-4dd2-a92f-7425q6c411be";
+  public static final String USER_WITH_LESS_THEN_MAX_LOGIN_FAILURES_UNLOCKED = "24932d54-9321-4dd2-a92f-7425q6c411be";
   public static final String USER_WITH_NO_LOGIN_FAILURE_UNLOCKED = "24732d50-9421-4dd2-a92f-7425q6c411bx";
-  public static final String USER_WITH_FIVE_LOGIN_FAILURES_LOCKED = "44732d50-9425-4rd2-a92f-7425q0c411bw";
-  public static final String USER_WITH_THREE_LOGIN_FAILURES_LOCKED = "94732b50-9125-4rd2-a22f-7425q0c433bw";
+  public static final String USER_WITH_MORE_THEN_MAX_FAILURES_LOCKED = "44732d50-9425-4rd2-a92f-7425q0c411bw";
+  public static final String USER_WITH_EXACT_NUMBER_LOGIN_FAILURES_LOCKED = "94732b50-9125-4rd2-a22f-7425q0c433bw";
   public static final String USER_WITH_RACFID_AND_INVALID_COUNTY_IN_COGNITO =
       "145614ce-0168-4950-9b47-7ba0cdf1f299";
   public static final String USER_WITH_NO_PHONE_EXTENSION = "d740ec1d-66ae-4d84-a8c4-8bed7a942f5b";
@@ -350,7 +351,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
         null);
 
     testUser(
-        USER_WITH_ONE_LOGIN_FAILURE_UNLOCKED,
+        USER_WITH_LESS_THEN_MAX_LOGIN_FAILURES_UNLOCKED,
         Boolean.TRUE,
         "CONFIRMED",
         date(2018, 5, 4),
@@ -365,7 +366,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
         null,
         null,
         null,
-        "1");
+        String.valueOf(numberOfFailedLoginsToLock - 1));
 
     testUser(
         USER_WITH_NO_LOGIN_FAILURE_UNLOCKED,
@@ -386,7 +387,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
         null);
 
     testUser(
-        USER_WITH_FIVE_LOGIN_FAILURES_LOCKED,
+        USER_WITH_MORE_THEN_MAX_FAILURES_LOCKED,
         Boolean.TRUE,
         "CONFIRMED",
         date(2018, 5, 4),
@@ -401,10 +402,10 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
         null,
         null,
         null,
-        "5");
+        String.valueOf(numberOfFailedLoginsToLock + 1));
 
     testUser(
-        USER_WITH_THREE_LOGIN_FAILURES_LOCKED,
+        USER_WITH_EXACT_NUMBER_LOGIN_FAILURES_LOCKED,
         Boolean.TRUE,
         "CONFIRMED",
         date(2018, 5, 4),
@@ -419,7 +420,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
         null,
         null,
         null,
-        "3");
+        String.valueOf(numberOfFailedLoginsToLock));
 
     testUser(
         NEW_USER_SUCCESS_ID,

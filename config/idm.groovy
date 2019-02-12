@@ -1,5 +1,6 @@
 import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType
 import gov.ca.cwds.idm.service.cognito.util.CognitoPhoneConverter
+import static gov.ca.cwds.PerryProperties.IdentityManagerConfiguration.numberOfFailedLoginsToLock
 import org.apache.commons.lang3.StringUtils
 
 def attribute = {name -> cognitoUser.attributes?.find {it.name.equalsIgnoreCase(name)}?.value}
@@ -20,7 +21,7 @@ if(StringUtils.isNotBlank(attribute("custom:Permission"))) {
 
 failedLoginsCount = attribute("custom:lockout_count");
 if (StringUtils.isNotBlank(failedLoginsCount) && failedLoginsCount.isInteger()) {
-    result.locked = Integer.parseInt(failedLoginsCount) > 2 ;
+    result.locked = Integer.parseInt(failedLoginsCount) >= numberOfFailedLoginsToLock ;
 }
 
 if(StringUtils.isNotBlank(attribute("custom:Role"))) {
