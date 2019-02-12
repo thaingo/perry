@@ -1,5 +1,6 @@
 package gov.ca.cwds.idm.util;
 
+import static gov.ca.cwds.PerryProperties.IdentityManagerConfiguration.NUMBER_OF_FAILED_LOGINS_TO_LOCK;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.COUNTY;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.FAILED_LOGINS_COUNT;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.OFFICE;
@@ -15,7 +16,6 @@ import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.PH
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.DEFAULT_PAGESIZE;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByAttribute;
-import static gov.ca.cwds.PerryProperties.IdentityManagerConfiguration.numberOfFailedLoginsToLock;
 import static gov.ca.cwds.idm.util.TestUtils.attr;
 import static gov.ca.cwds.idm.util.TestUtils.date;
 import static org.mockito.Mockito.mock;
@@ -366,7 +366,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
         null,
         null,
         null,
-        String.valueOf(numberOfFailedLoginsToLock - 1));
+        String.valueOf(NUMBER_OF_FAILED_LOGINS_TO_LOCK - 1));
 
     testUser(
         USER_WITH_NO_LOGIN_FAILURE_UNLOCKED,
@@ -402,7 +402,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
         null,
         null,
         null,
-        String.valueOf(numberOfFailedLoginsToLock + 1));
+        String.valueOf(NUMBER_OF_FAILED_LOGINS_TO_LOCK + 1));
 
     testUser(
         USER_WITH_EXACT_NUMBER_LOGIN_FAILURES_LOCKED,
@@ -420,7 +420,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
         null,
         null,
         null,
-        String.valueOf(numberOfFailedLoginsToLock));
+        String.valueOf(NUMBER_OF_FAILED_LOGINS_TO_LOCK));
 
     testUser(
         NEW_USER_SUCCESS_ID,

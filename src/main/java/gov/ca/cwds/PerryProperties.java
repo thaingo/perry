@@ -87,7 +87,7 @@ public class PerryProperties {
   public static class IdentityManagerConfiguration {
 
     private IdmMappingScript idmMapping;
-    public static final int numberOfFailedLoginsToLock = 3;
+    public static final int NUMBER_OF_FAILED_LOGINS_TO_LOCK = 3;
 
     public IdmMappingScript getIdmMapping() {
       return idmMapping;
