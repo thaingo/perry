@@ -18,6 +18,11 @@ if(StringUtils.isNotBlank(attribute("custom:Permission"))) {
     result.permissions = attribute("custom:Permission").split('\\s*:\\s*') as HashSet
 }
 
+failedLoginsCount = attribute("custom:lockout_count");
+if (StringUtils.isNotBlank(failedLoginsCount) && failedLoginsCount.isInteger()) {
+    result.locked = Integer.parseInt(failedLoginsCount) > 2 ;
+}
+
 if(StringUtils.isNotBlank(attribute("custom:Role"))) {
     result.roles = attribute("custom:Role").split('\\s*:\\s*') as HashSet
 }
