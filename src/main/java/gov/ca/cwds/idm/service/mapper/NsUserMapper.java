@@ -16,6 +16,7 @@ public class NsUserMapper {
     nsUser.setRacfid(user.getRacfid());
     nsUser.setNotes(user.getNotes());
     nsUser.setPhoneNumber(user.getPhoneNumber());
+    nsUser.setPhoneExtensionNumber(user.getPhoneExtensionNumber());
 
     return nsUser;
   }

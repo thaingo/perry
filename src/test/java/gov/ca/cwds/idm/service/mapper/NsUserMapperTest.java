@@ -31,12 +31,14 @@ public class NsUserMapperTest {
     final String RACFID = "racfid";
     final String NOTES = "notes";
     final String PHONE_NUMBER = "1234567890";
+    final String PHONE_EXTENSION = "48";
 
     User user = new User();
     user.setId(USER_ID);
     user.setRacfid(RACFID);
     user.setNotes(NOTES);
     user.setPhoneNumber(PHONE_NUMBER);
+    user.setPhoneExtensionNumber(PHONE_EXTENSION);
 
     NsUser nsUser = mapper.toNsUser(user);
 
@@ -44,5 +46,6 @@ public class NsUserMapperTest {
     assertThat(nsUser.getRacfid(), is(RACFID));
     assertThat(nsUser.getNotes(), is(NOTES));
     assertThat(nsUser.getPhoneNumber(), is(PHONE_NUMBER));
+    assertThat(nsUser.getPhoneExtensionNumber(), is(PHONE_EXTENSION));
   }
 }
