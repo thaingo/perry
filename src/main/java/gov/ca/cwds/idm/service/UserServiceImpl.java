@@ -1,11 +1,12 @@
 package gov.ca.cwds.idm.service;
 
 import static gov.ca.cwds.config.TokenServiceConfiguration.TOKEN_TRANSACTION_MANAGER;
-import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_DELETE_USER_AT_USER_CREATION_FAIL;
-import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_SEND_INVITATION_EMAIL_AT_USER_CREATION;
+import static gov.ca.cwds.service.messages.MessageCode.UNABLE_CREATE_NEW_USER;
+import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_DELETE_IDM_USER_AT_USER_CREATION_FAIL;
 
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
+import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import org.slf4j.Logger;
@@ -34,23 +35,31 @@ public class UserServiceImpl implements UserService {
     String userId = user.getId();
 
     try {
+      NsUser nsUser = mapToNsUser(user);
+      nsUserService.create(nsUser);
       cognitoServiceFacade.sendInvitationMessageByEmail(email);
-    } catch (Exception invitationEmailException) {
-      LOGGER.error(
-          "error at sending invitation email for new user with id:" + userId + ", email:" + email,
-          invitationEmailException);
+
+    } catch (Exception userCreateException) {
       try {
         cognitoServiceFacade.deleteCognitoUserById(userId);
       } catch (Exception cognitoUserDeleteException) {
-        LOGGER.error("error at attempt to delete new user with id:" + userId,
+        LOGGER.error("error at attempt to delete new user in Cognito with username: " + userId,
             cognitoUserDeleteException);
         throw exceptionFactory.createPartialSuccessException(
-            userId, OperationType.CREATE, UNABLE_TO_DELETE_USER_AT_USER_CREATION_FAIL,
-            invitationEmailException, cognitoUserDeleteException);
+            userId, OperationType.CREATE, UNABLE_TO_DELETE_IDM_USER_AT_USER_CREATION_FAIL,
+            userCreateException, cognitoUserDeleteException);
       }
       throw exceptionFactory.createIdmException(
-          UNABLE_TO_SEND_INVITATION_EMAIL_AT_USER_CREATION, invitationEmailException, email);
+          UNABLE_CREATE_NEW_USER, userCreateException, email);
     }
+  }
+
+  static NsUser mapToNsUser(User user) {
+    NsUser nsUser = new NsUser();
+    nsUser.setUsername(user.getId());
+    nsUser.setRacfid(user.getRacfid());
+    nsUser.setNotes(user.getNotes());
+    return nsUser;
   }
 
   /**

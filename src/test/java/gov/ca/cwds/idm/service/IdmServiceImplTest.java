@@ -45,6 +45,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.UUID;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -65,7 +66,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 })
 public class IdmServiceImplTest {
 
-  private static final String USER_ID = "17067e4e-270f-4623-b86c-b4d4fa527a34";
+//  private static final String USER_ID = "17067e4e-270f-4623-b86c-b4d4fa527a34";
 
   @Autowired
   private IdmServiceImpl service;
@@ -95,6 +96,7 @@ public class IdmServiceImplTest {
   @WithMockCustomUser
   public void testCreateUserSuccess() {
     User user = user();
+    String USER_ID = user.getId();
     setCreateUserResult(user, USER_ID);
 
     String id = service.createUser(user);
@@ -105,6 +107,7 @@ public class IdmServiceImplTest {
   @WithMockCustomUser
   public void testCreateUser_SearchFail() {
     User user = user();
+    String USER_ID = user.getId();
     setCreateUserResult(user, USER_ID);
 
     Exception doraError = new RuntimeException("Dora error");
@@ -127,6 +130,7 @@ public class IdmServiceImplTest {
   @WithMockCustomUser
   public void testCreateUser_SearchAndDbLogFail() {
     User user = user();
+    String USER_ID = user.getId();
     setCreateUserResult(user, USER_ID);
 
     Exception doraError = new RuntimeException("Dora error");
@@ -156,8 +160,9 @@ public class IdmServiceImplTest {
     userUpdate.setPermissions(toSet("Snapshot-rollout"));
 
     User existedUser = user();
+    String USER_ID = existedUser.getId();
     existedUser.setPermissions(toSet("Hotline-rollout"));
-    UserType existedUserType = userType(existedUser, USER_ID);
+    UserType existedUserType = userType(existedUser);
 
     setUpdateUserAttributesResult();
     setGetCognitoUserById(USER_ID, existedUserType);
@@ -190,8 +195,9 @@ public class IdmServiceImplTest {
     userUpdate.setEnabled(Boolean.FALSE);
 
     User existedUser = user();
+    String USER_ID = existedUser.getId();
     existedUser.setPermissions(toSet("RFA-rollout"));
-    UserType existedUserType = userType(existedUser, USER_ID);
+    UserType existedUserType = userType(existedUser);
 
     setUpdateUserAttributesResult();
     setGetCognitoUserById(USER_ID, existedUserType);
@@ -220,8 +226,9 @@ public class IdmServiceImplTest {
     userUpdate.setEnabled(Boolean.FALSE);
 
     User existedUser = user();
+    String USER_ID = existedUser.getId();
     existedUser.setPermissions(toSet("RFA-rollout"));
-    UserType existedUserType = userType(existedUser, USER_ID);
+    UserType existedUserType = userType(existedUser);
 
     setUpdateUserAttributesResult();
     setGetCognitoUserById(USER_ID, existedUserType);
@@ -254,8 +261,9 @@ public class IdmServiceImplTest {
     userUpdate.setEnabled(Boolean.FALSE);
 
     User existedUser = user();
+    String USER_ID = existedUser.getId();
     existedUser.setPermissions(toSet("RFA-rollout"));
-    UserType existedUserType = userType(existedUser, USER_ID);
+    UserType existedUserType = userType(existedUser);
 
     setUpdateUserAttributesResult();
     setGetCognitoUserById(USER_ID, existedUserType);
@@ -291,8 +299,9 @@ public class IdmServiceImplTest {
     userUpdate.setEnabled(Boolean.FALSE);
 
     User existedUser = user();
+    String USER_ID = existedUser.getId();
     existedUser.setPermissions(toSet("old permission"));
-    UserType existedUserType = userType(existedUser, USER_ID);
+    UserType existedUserType = userType(existedUser);
 
     setGetCognitoUserById(USER_ID, existedUserType);
 
@@ -344,7 +353,7 @@ public class IdmServiceImplTest {
     when(cognitoServiceFacadeMock.searchAllPages(cognitoSearchCriteriaUserAbsent2))
         .thenReturn(Collections.emptyList());
     when(cognitoServiceFacadeMock.searchAllPages(cognitoSearchCriteriaUserPresent))
-        .thenReturn(Collections.singletonList(userType(user(), USER_ID)));
+        .thenReturn(Collections.singletonList(userType(user())));
 
     service.searchUsers(searchCriteriaUsersAbsent);
     verify(spyNsUserService, never()).findByUsernames(any());
@@ -353,7 +362,7 @@ public class IdmServiceImplTest {
   }
 
   private void setCreateUserResult(User user, String newId) {
-    UserType newUser = userType(user, newId);
+    UserType newUser = userType(user);
     when(cognitoServiceFacadeMock.createUser(user)).thenReturn(newUser);
   }
 
