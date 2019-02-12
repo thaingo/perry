@@ -438,6 +438,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
     assertThat(newNsUser.getUsername(), is(newUserId));
     assertThat(newNsUser.getRacfid(), is(actuallySendUser.getRacfid()));
     assertThat(newNsUser.getNotes(), is(actuallySendUser.getNotes()));
+    assertThat(newNsUser.getPhoneNumber(), is(actuallySendUser.getPhoneNumber()));
   }
 
   private  CognitoCreateRequests setCreateRequestAndResult(User actuallySendUser,

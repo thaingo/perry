@@ -30,16 +30,19 @@ public class NsUserMapperTest {
     final String USER_ID = "id";
     final String RACFID = "racfid";
     final String NOTES = "notes";
+    final String PHONE_NUMBER = "1234567890";
 
     User user = new User();
     user.setId(USER_ID);
     user.setRacfid(RACFID);
     user.setNotes(NOTES);
+    user.setPhoneNumber(PHONE_NUMBER);
 
     NsUser nsUser = mapper.toNsUser(user);
 
     assertThat(nsUser.getUsername(), is(USER_ID));
     assertThat(nsUser.getRacfid(), is(RACFID));
     assertThat(nsUser.getNotes(), is(NOTES));
+    assertThat(nsUser.getPhoneNumber(), is(PHONE_NUMBER));
   }
 }

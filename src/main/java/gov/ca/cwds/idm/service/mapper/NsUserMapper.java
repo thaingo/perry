@@ -15,6 +15,7 @@ public class NsUserMapper {
     nsUser.setUsername(user.getId());
     nsUser.setRacfid(user.getRacfid());
     nsUser.setNotes(user.getNotes());
+    nsUser.setPhoneNumber(user.getPhoneNumber());
 
     return nsUser;
   }
