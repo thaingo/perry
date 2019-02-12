@@ -28,6 +28,9 @@ public class NsUser {
   @Column(name = "racfid")
   private String racfid;
 
+  @Column(name = "first_name")
+  private String firstName;
+
   @Column(name = "phone_number")
   private String phoneNumber;
 
@@ -62,6 +65,14 @@ public class NsUser {
 
   public void setRacfid(String racfid) {
     this.racfid = racfid;
+  }
+
+  public String getFirstName() {
+    return firstName;
+  }
+
+  public void setFirstName(String firstName) {
+    this.firstName = firstName;
   }
 
   public String getPhoneNumber() {
