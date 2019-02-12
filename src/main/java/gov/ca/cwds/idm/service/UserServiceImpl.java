@@ -9,6 +9,7 @@ import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
+import gov.ca.cwds.idm.service.mapper.NsUserMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,9 @@ public class UserServiceImpl implements UserService {
     String userId = user.getId();
 
     try {
-      NsUser nsUser = mapToNsUser(user);
+      NsUserMapper nsUserMapper = new NsUserMapper();
+      NsUser nsUser = nsUserMapper.toNsUser(user);
+
       nsUserService.create(nsUser);
       cognitoServiceFacade.sendInvitationMessageByEmail(email);
 
@@ -52,14 +55,6 @@ public class UserServiceImpl implements UserService {
       throw exceptionFactory.createIdmException(
           UNABLE_CREATE_NEW_USER, userCreateException, email);
     }
-  }
-
-  static NsUser mapToNsUser(User user) {
-    NsUser nsUser = new NsUser();
-    nsUser.setUsername(user.getId());
-    nsUser.setRacfid(user.getRacfid());
-    nsUser.setNotes(user.getNotes());
-    return nsUser;
   }
 
   /**
