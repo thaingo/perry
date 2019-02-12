@@ -192,16 +192,4 @@ public class GetUserTest extends BaseIdmIntegrationTest {
     MvcResult result = assertGetUserUnauthorized(userId);
     assertExtensible(result, fixturePath);
   }
-
-  private void testGetValidUser(String userId, String fixtureFilePath) throws Exception {
-
-    MvcResult result =
-        mockMvc
-            .perform(MockMvcRequestBuilders.get("/idm/users/" + userId))
-            .andExpect(MockMvcResultMatchers.status().isOk())
-            .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
-            .andReturn();
-
-    assertNonStrict(result, fixtureFilePath);
-  }
 }

@@ -34,4 +34,12 @@
     </insert>
   </changeSet>
 
+  <changeSet id="data_for_ns_db-2" author="Dmytro.Sorych">
+    <insert tableName="user">
+      <column name="username" value="24932d54-9321-4dd2-a92f-7425q6c411be"/>
+      <column name="last_login_time" valueDate="2018-10-17 07:01:12"/>
+    </insert>
+  </changeSet>
+
+
 </databaseChangeLog>

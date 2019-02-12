@@ -1,0 +1,41 @@
+{
+  "user": {
+    "id": "44732d50-9425-4rd2-a92f-7425q0c411bw",
+    "first_name": "Julio",
+    "last_name": "Iglecias",
+    "county_name": "Yolo",
+    "email": "julio77@gmail.com",
+    "user_create_date": "2018-05-04",
+    "user_last_modified_date": "2018-05-29",
+    "enabled": true,
+    "locked": true,
+    "status": "CONFIRMED",
+    "racfid": "YOLOD",
+    "permissions": [
+      "Hotline-rollout"
+    ],
+    "roles": [
+      "County-admin"
+    ]
+  },
+  "edit_details": {
+    "editable": true,
+    "roles": {
+      "editable": false,
+      "possible_values": [
+        "CWS-worker",
+        "Office-admin"
+      ]
+    },
+    "permissions": {
+      "editable": true,
+      "possible_values": [
+        "CANS-rollout",
+        "Facility-search-rollout",
+        "Hotline-rollout",
+        "RFA-rollout",
+        "Snapshot-rollout"
+      ]
+    }
+  }
+}

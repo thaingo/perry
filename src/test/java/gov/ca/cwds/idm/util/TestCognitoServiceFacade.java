@@ -1,6 +1,7 @@
 package gov.ca.cwds.idm.util;
 
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.COUNTY;
+import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.FAILED_LOGINS_COUNT;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.OFFICE;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PERMISSIONS;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PHONE_EXTENSION;
@@ -50,6 +51,10 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
   public static final String USER_WITH_RACFID_ID = "24051d54-9321-4dd2-a92f-6425d6c455be";
   public static final String USER_WITH_RACFID_AND_DB_DATA_ID =
       "d740ec1d-80ae-4d84-a8c4-9bed7a942f5b";
+  public static final String USER_WITH_ONE_LOGIN_FAILURE_UNLOCKED = "24932d54-9321-4dd2-a92f-7425q6c411be";
+  public static final String USER_WITH_NO_LOGIN_FAILURE_UNLOCKED = "24732d50-9421-4dd2-a92f-7425q6c411bx";
+  public static final String USER_WITH_FIVE_LOGIN_FAILURES_LOCKED = "44732d50-9425-4rd2-a92f-7425q0c411bw";
+  public static final String USER_WITH_THREE_LOGIN_FAILURES_LOCKED = "94732b50-9125-4rd2-a22f-7425q0c433bw";
   public static final String USER_WITH_RACFID_AND_INVALID_COUNTY_IN_COGNITO =
       "145614ce-0168-4950-9b47-7ba0cdf1f299";
   public static final String USER_WITH_NO_PHONE_EXTENSION = "d740ec1d-66ae-4d84-a8c4-8bed7a942f5b";
@@ -93,6 +98,8 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
     setProperties(properties);
     setIdentityProvider(cognito);
 
+    initUsers();
+
     TestUser userWithoutRacfid =
         testUser(
             USER_NO_RACFID_ID,
@@ -106,6 +113,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
             WithMockCustomUser.COUNTY,
             "RFA-rollout:Snapshot-rollout:",
             "CWS-worker:County-admin",
+            null,
             null,
             null,
             null,
@@ -127,6 +135,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
             null,
             null,
             null,
+            null,
             null);
 
     TestUser userWithRacfid =
@@ -143,6 +152,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
             "Hotline-rollout",
             "CWS-worker:County-admin",
             "YOLOD",
+            null,
             null,
             null,
             null);
@@ -163,24 +173,8 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
             "SMITHBO",
             WithMockCustomUser.OFFICE_ID,
             "+4646888777",
-            "7");
-
-    testUser(
-        USER_WITH_RACFID_AND_INVALID_COUNTY_IN_COGNITO,
-        Boolean.TRUE,
-        "CONFIRMED",
-        date(2017, 5, 22),
-        date(2018, 12, 3),
-        "stan.hailen@osi.ca.gav",
-        "Stan",
-        "Hailen",
-        "Lake",
-        "Facility-search-rollout",
-        "CWS-worker",
-        "HAILES",
-        WithMockCustomUser.OFFICE_ID,
-        "+9167777777",
-        "777");
+            "7",
+            null);
 
     TestUser userWithNoPhoneExtension =
         testUser(
@@ -198,42 +192,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
             "SMITHB2",
             null,
             "+4646888777",
-            "7");
-
-    //countyAdminUser =
-        testUser(
-            COUNTY_ADMIN_ID,
-            Boolean.TRUE,
-            "CONFIRMED",
-            date(2018, 5, 3),
-            date(2018, 5, 31),
-            "jkuser@gmail.com",
-            "Reddy",
-            "Jkuser",
-            WithMockCustomUser.COUNTY,
-            "test",
-            "County-admin",
-            "MCALLUM",
-            WithMockCustomUser.OFFICE_ID,
-            "+7680797987",
-            null);
-
-    //stateAdminUser =
-        testUser(
-            STATE_ADMIN_ID,
-            Boolean.TRUE,
-            "CONFIRMED",
-            date(2018, 5, 3),
-            date(2018, 5, 31),
-            "yull@gmail.com",
-            "Christina",
-            "Yull",
-            WithMockCustomUser.COUNTY,
-            "test",
-            "State-admin",
-            "YULLC",
-            WithMockCustomUser.OFFICE_ID,
-            "+3254545345",
+            "7",
             null);
 
     TestUser userWithEnableStatusInactiveInCognito =
@@ -252,7 +211,8 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
             "SMITHB3",
             null,
             "+4646888777",
-            "7");
+            "7",
+            null);
 
     TestUser userWithNoActiveRacfIdInCms =
         testUser(
@@ -270,7 +230,8 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
             "NOIDCMS",
             null,
             "+7186888777",
-            "7");
+            "7",
+            null);
 
     TestUser userWithActiveRacfIdAInCms =
         testUser(
@@ -288,7 +249,8 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
             "SMITHBO",
             null,
             "+4646888777",
-            "7");
+            "7",
+            null);
 
     TestUser inactiveUserWithNoRacfId =
         testUser(
@@ -306,60 +268,8 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
             null,
             null,
             null,
-            null);
-
-    TestUser newSuccessUser =
-        testUser(
-            NEW_USER_SUCCESS_ID,
-            Boolean.TRUE,
-            "FORCE_CHANGE_PASSWORD",
-            date(2018, 5, 4),
-            date(2018, 5, 30),
-            "gonzales@gmail.com",
-            "Garcia",
-            "Gonzales",
-            WithMockCustomUser.COUNTY,
-            null,
-            null,
-            null,
-            null,
             null,
             null);
-
-    TestUser doraFailUser =
-        testUser(
-            NEW_USER_ES_FAIL_ID,
-            Boolean.TRUE,
-            "FORCE_CHANGE_PASSWORD",
-            date(2018, 5, 4),
-            date(2018, 5, 30),
-            ES_ERROR_CREATE_USER_EMAIL,
-            "Garcia",
-            "Gonzales",
-            WithMockCustomUser.COUNTY,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null);
-
-    testUser(
-        SUPER_ADMIN_ID,
-        Boolean.TRUE,
-        "CONFIRMED",
-        date(2018, 9, 14),
-        date(2018, 10, 3),
-        "maygosh@gmail.com",
-        "May",
-        "Gosh",
-        WithMockCustomUser.COUNTY,
-        null,
-        "Super-admin",
-        null,
-        null,
-        null,
-        null);
 
     setUpGetAbsentUserRequestAndResult();
 
@@ -386,7 +296,211 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
     setSearchByRacfidRequestAndReturnResults(userWithActiveRacfIdAInCms, userWithRacfidAndDbData);
   }
 
-  void setListUsersRequestAndResult(String paginationToken, TestUser... testUsers) {
+  private void initUsers() {
+
+    testUser(
+        USER_CALS_EXTERNAL,
+        Boolean.TRUE,
+        "FORCE_CHANGE_PASSWORD",
+        date(2018, 5, 4),
+        date(2018, 5, 30),
+        "donzano@gmail.com",
+        "Don",
+        "Manzano",
+        WithMockCustomUser.COUNTY,
+        "RFA-rollout:Snapshot-rollout:",
+        "CALS-external-worker",
+        null,
+        null,
+        null,
+        null,
+        null);
+
+    testUser(
+        USER_WITH_RACFID_AND_INVALID_COUNTY_IN_COGNITO,
+        Boolean.TRUE,
+        "CONFIRMED",
+        date(2017, 5, 22),
+        date(2018, 12, 3),
+        "stan.hailen@osi.ca.gav",
+        "Stan",
+        "Hailen",
+        "Lake",
+        "Facility-search-rollout",
+        "CWS-worker",
+        "HAILES",
+        WithMockCustomUser.OFFICE_ID,
+        "+9167777777",
+        "777",
+        null);
+
+    //countyAdminUser =
+    testUser(
+        COUNTY_ADMIN_ID,
+        Boolean.TRUE,
+        "CONFIRMED",
+        date(2018, 5, 3),
+        date(2018, 5, 31),
+        "jkuser@gmail.com",
+        "Reddy",
+        "Jkuser",
+        WithMockCustomUser.COUNTY,
+        "test",
+        "County-admin",
+        "MCALLUM",
+        WithMockCustomUser.OFFICE_ID,
+        "+7680797987",
+        null,
+        null);
+
+    //stateAdminUser =
+    testUser(
+        STATE_ADMIN_ID,
+        Boolean.TRUE,
+        "CONFIRMED",
+        date(2018, 5, 3),
+        date(2018, 5, 31),
+        "yull@gmail.com",
+        "Christina",
+        "Yull",
+        WithMockCustomUser.COUNTY,
+        "test",
+        "State-admin",
+        "YULLC",
+        WithMockCustomUser.OFFICE_ID,
+        "+3254545345",
+        null,
+        null);
+
+    testUser(
+        USER_WITH_ONE_LOGIN_FAILURE_UNLOCKED,
+        Boolean.TRUE,
+        "CONFIRMED",
+        date(2018, 5, 4),
+        date(2018, 5, 29),
+        "julio1@gmail.com",
+        "Julio",
+        "Iglecias",
+        WithMockCustomUser.COUNTY,
+        "Hotline-rollout",
+        "CWS-worker:County-admin",
+        "YOLOD",
+        null,
+        null,
+        null,
+        "1");
+
+    testUser(
+        USER_WITH_NO_LOGIN_FAILURE_UNLOCKED,
+        Boolean.TRUE,
+        "CONFIRMED",
+        date(2018, 5, 4),
+        date(2018, 5, 29),
+        "julio2@gmail.com",
+        "Julio",
+        "Iglecias",
+        WithMockCustomUser.COUNTY,
+        "Hotline-rollout",
+        "CWS-worker:County-admin",
+        "YOLOD",
+        null,
+        null,
+        null,
+        null);
+
+    testUser(
+        USER_WITH_FIVE_LOGIN_FAILURES_LOCKED,
+        Boolean.TRUE,
+        "CONFIRMED",
+        date(2018, 5, 4),
+        date(2018, 5, 29),
+        "julio77@gmail.com",
+        "Julio",
+        "Iglecias",
+        WithMockCustomUser.COUNTY,
+        "Hotline-rollout",
+        "CWS-worker:County-admin",
+        "YOLOD",
+        null,
+        null,
+        null,
+        "5");
+
+    testUser(
+        USER_WITH_THREE_LOGIN_FAILURES_LOCKED,
+        Boolean.TRUE,
+        "CONFIRMED",
+        date(2018, 5, 4),
+        date(2018, 5, 29),
+        "julio78@gmail.com",
+        "Julio",
+        "Iglecias",
+        WithMockCustomUser.COUNTY,
+        "Hotline-rollout",
+        "CWS-worker:County-admin",
+        "YOLOD",
+        null,
+        null,
+        null,
+        "3");
+
+    testUser(
+        NEW_USER_SUCCESS_ID,
+        Boolean.TRUE,
+        "FORCE_CHANGE_PASSWORD",
+        date(2018, 5, 4),
+        date(2018, 5, 30),
+        "gonzales@gmail.com",
+        "Garcia",
+        "Gonzales",
+        WithMockCustomUser.COUNTY,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null);
+
+    testUser(
+        NEW_USER_ES_FAIL_ID,
+        Boolean.TRUE,
+        "FORCE_CHANGE_PASSWORD",
+        date(2018, 5, 4),
+        date(2018, 5, 30),
+        ES_ERROR_CREATE_USER_EMAIL,
+        "Garcia",
+        "Gonzales",
+        WithMockCustomUser.COUNTY,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null);
+
+    testUser(
+        SUPER_ADMIN_ID,
+        Boolean.TRUE,
+        "CONFIRMED",
+        date(2018, 9, 14),
+        date(2018, 10, 3),
+        "maygosh@gmail.com",
+        "May",
+        "Gosh",
+        WithMockCustomUser.COUNTY,
+        null,
+        "Super-admin",
+        null,
+        null,
+        null,
+        null,
+        null);
+
+  }
+
+  private void setListUsersRequestAndResult(String paginationToken, TestUser... testUsers) {
     ListUsersRequest request =
         new ListUsersRequest().withUserPoolId(USERPOOL).withLimit(DEFAULT_PAGESIZE);
 
@@ -419,7 +533,8 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
       String racfId,
       String officeId,
       String phoneNumber,
-      String phoneExtension) {
+      String phoneExtension,
+      String failedLoginsCount) {
 
     TestUser testUser =
         new TestUser(
@@ -437,7 +552,8 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
             racfId,
             officeId,
             phoneNumber,
-            phoneExtension);
+            phoneExtension,
+            failedLoginsCount);
 
     setUpGetUserRequestAndResult(testUser);
 
@@ -478,6 +594,9 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
     }
     if (testUser.getPhoneExtension() != null) {
       attrs.add(attr(PHONE_EXTENSION, testUser.getPhoneExtension()));
+    }
+    if (testUser.getFailedLoginsCount() != null) {
+      attrs.add(attr(FAILED_LOGINS_COUNT, testUser.getFailedLoginsCount()));
     }
     return attrs;
   }
@@ -568,8 +687,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
     return request;
   }
 
-  public AdminCreateUserResult setCreateUserResult(
-      AdminCreateUserRequest request, String newId) {
+  public void setCreateUserResult(AdminCreateUserRequest request, String newId) {
 
     UserType newUser = new UserType();
     newUser.setUsername(newId);
@@ -579,7 +697,6 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
 
     AdminCreateUserResult result = new AdminCreateUserResult().withUser(newUser);
     when(cognito.adminCreateUser(request)).thenReturn(result);
-    return result;
   }
 
   public AdminCreateUserRequest setCreateUserInvitationRequest(String email, AdminCreateUserResult result) {
@@ -595,11 +712,12 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
     return sentInvitationRequest;
   }
 
-  ListUsersRequest setSearchByRacfidRequestAndResult(TestUser testUser) {
-    return setSearchByRacfidRequestAndResult(testUser.getRacfId(), userType(testUser));
+  private void setSearchByRacfidRequestAndResult(TestUser testUser) {
+    setSearchByRacfidRequestAndResult(testUser.getRacfId(), userType(testUser));
   }
 
-  public ListUsersRequest setSearchByRacfidRequestAndResult(String racfid, UserType... responseUsers) {
+  public void setSearchByRacfidRequestAndResult(String racfid,
+      UserType... responseUsers) {
 
     ListUsersRequest request =
         composeListUsersRequest(
@@ -608,21 +726,19 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
     ListUsersResult result = new ListUsersResult().withUsers(responseUsers);
 
     when(cognito.listUsers(request)).thenReturn(result);
-
-    return request;
   }
 
-  ListUsersRequest setSearchByRacfidRequestAndReturnResults(TestUser testUser1, TestUser testUser2) {
+  private void setSearchByRacfidRequestAndReturnResults(TestUser testUser1,
+      TestUser testUser2) {
 
     ListUsersRequest request =
         composeListUsersRequest(
             composeToGetFirstPageByAttribute(RACFID_STANDARD, testUser1.getRacfId()));
 
-    ListUsersResult result = new ListUsersResult().withUsers(userType(testUser1), userType(testUser2));
+    ListUsersResult result = new ListUsersResult()
+        .withUsers(userType(testUser1), userType(testUser2));
 
     when(cognito.listUsers(request)).thenReturn(result);
-
-    return request;
   }
 
   static class TestUser {
@@ -642,6 +758,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
     private String officeId;
     private String phoneNumber;
     private String phoneExtension;
+    private String failedLoginsCount;
 
     TestUser(
         String id,
@@ -658,7 +775,8 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
         String racfId,
         String officeId,
         String phoneNumber,
-        String phneExtension) {
+        String phneExtension,
+        String failedLoginsCount) {
       this.id = id;
       this.enabled = enabled;
       this.status = status;
@@ -674,6 +792,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
       this.officeId = officeId;
       this.phoneNumber = phoneNumber;
       this.phoneExtension = phneExtension;
+      this.failedLoginsCount = failedLoginsCount;
     }
 
     public String getId() {
@@ -734,6 +853,10 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
 
     public String getPhoneExtension() {
       return phoneExtension;
+    }
+
+    public String getFailedLoginsCount() {
+      return failedLoginsCount;
     }
   }
 }
