@@ -17,6 +17,7 @@ import static gov.ca.cwds.idm.util.TestUtils.asJsonString;
 import static gov.ca.cwds.util.Utils.toSet;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -33,10 +34,12 @@ import com.google.common.collect.Iterables;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.event.UserCreatedEvent;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
+import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
 import gov.ca.cwds.idm.util.TestCognitoServiceFacade;
 import gov.ca.cwds.idm.util.WithMockCustomUser;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 import org.junit.Test;
 import org.springframework.test.web.servlet.MvcResult;
@@ -109,6 +112,8 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
     UserLog lastUserLog = Iterables.getLast(userLogs);
     assertTrue(lastUserLog.getOperationType() == OperationType.CREATE);
     assertThat(lastUserLog.getUsername(), is(NEW_USER_ES_FAIL_ID));
+
+    assertNsUserInDb(NEW_USER_ES_FAIL_ID);
   }
 
   @Test
@@ -146,6 +151,8 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
     Iterable<UserLog> userLogs = userLogRepository.findAll();
     int newUserLogsSize = Iterables.size(userLogs);
     assertThat(newUserLogsSize, is(oldUserLogsSize));
+
+    assertNoNsUserInDb(NEW_USER_EMAIL_FAIL_ID);
   }
 
   @Test
@@ -185,6 +192,8 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
     Iterable<UserLog> userLogs = userLogRepository.findAll();
     int newUserLogsSize = Iterables.size(userLogs);
     assertThat(newUserLogsSize, is(oldUserLogsSize));
+
+    assertNoNsUserInDb(NEW_USER_DELETE_FAIL_ID);
   }
 
   @Test
@@ -402,6 +411,8 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
 
   private void assertCreateUserSuccess(User user, User actuallySendUser, String newUserId) throws Exception {
 
+    assertNoNsUserInDb(newUserId);
+
     CognitoCreateRequests requests = setCreateRequestAndResult(actuallySendUser, newUserId);
     AdminCreateUserRequest request = requests.createRequest;
     AdminCreateUserRequest invitationRequest = requests.invitationRequest;
@@ -422,6 +433,11 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
     verifyDoraCalls(1);
     verify(auditLogService, times(1)).createAuditLogRecord(any(
         UserCreatedEvent.class));
+
+    NsUser newNsUser = assertNsUserInDb(newUserId);
+    assertThat(newNsUser.getUsername(), is(newUserId));
+    assertThat(newNsUser.getRacfid(), is(actuallySendUser.getRacfid()));
+    assertThat(newNsUser.getNotes(), is(actuallySendUser.getNotes()));
   }
 
   private  CognitoCreateRequests setCreateRequestAndResult(User actuallySendUser,
@@ -518,6 +534,17 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
 
     verify(cognito, times(0)).adminCreateUser(request);
     verify(spySearchService, times(0)).createUser(any(User.class));
+  }
+
+  private void assertNoNsUserInDb(String userId) {
+    List<NsUser> newNsUsers = nsUserRepository.findByUsername(userId);
+    assertThat(newNsUsers, empty());
+  }
+
+  private NsUser assertNsUserInDb(String userId) {
+    List<NsUser> newNsUsers = nsUserRepository.findByUsername(userId);
+    assertThat(newNsUsers.size(), is(1));
+    return newNsUsers.get(0);
   }
 
   private static final class CognitoCreateRequests {
