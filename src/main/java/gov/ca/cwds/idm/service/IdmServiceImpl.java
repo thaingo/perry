@@ -214,8 +214,8 @@ public class IdmServiceImpl implements IdmService {
     authorizeService.checkCanCreateUser(user);
 
     UserType userType = cognitoServiceFacade.createUser(user);
-    String userId = userType.getUsername();
-    user.setId(userId);
+    enrichUserByCognitoData(user, userType);
+    String userId = user.getId();
     LOGGER.info("New user was successfully created in Cognito with id:{}", userId);
 
     userService.createUserInDbWithInvitationEmail(user);
@@ -311,6 +311,14 @@ public class IdmServiceImpl implements IdmService {
     if (cwsUser != null) {
       enrichDataFromCwsOffice(cwsUser.getCwsOffice(), user);
       enrichDataFromStaffPerson(cwsUser.getStaffPerson(), user);
+    }
+  }
+
+  private void enrichUserByCognitoData(User user, UserType cognitoUser) {
+    if (cognitoUser != null) {
+      user.setId(cognitoUser.getUsername());
+      user.setUserCreateDate(cognitoUser.getUserCreateDate());
+      user.setUserLastModifiedDate(cognitoUser.getUserLastModifiedDate());
     }
   }
 

@@ -40,6 +40,9 @@ public class NsUser {
   @Column(name = "phone_extension")
   private String phoneExtensionNumber;
 
+  @Column(name = "last_modified_time")
+  private LocalDateTime lastModifiedTime;
+
   @Column(name = "last_login_time")
   private LocalDateTime lastLoginTime;
 
@@ -100,6 +103,14 @@ public class NsUser {
 
   public void setPhoneExtensionNumber(String phoneExtensionNumber) {
     this.phoneExtensionNumber = phoneExtensionNumber;
+  }
+
+  public LocalDateTime getLastModifiedTime() {
+    return lastModifiedTime;
+  }
+
+  public void setLastModifiedTime(LocalDateTime lastModifiedTime) {
+    this.lastModifiedTime = lastModifiedTime;
   }
 
   public LocalDateTime getLastLoginTime() {
