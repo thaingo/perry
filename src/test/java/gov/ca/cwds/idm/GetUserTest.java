@@ -13,6 +13,10 @@ import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.STATE_ADMIN_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.SUPER_ADMIN_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_CALS_EXTERNAL;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_NO_RACFID_ID;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_WITH_EXACT_NUMBER_LOGIN_FAILURES_LOCKED;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_WITH_LESS_THEN_MAX_LOGIN_FAILURES_UNLOCKED;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_WITH_MORE_THEN_MAX_FAILURES_LOCKED;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_WITH_NO_LOGIN_FAILURE_UNLOCKED;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_WITH_NO_PHONE_EXTENSION;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_WITH_RACFID_AND_DB_DATA_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_WITH_RACFID_AND_INVALID_COUNTY_IN_COGNITO;
@@ -181,6 +185,38 @@ public class GetUserTest extends BaseIdmIntegrationTest {
     testGetValidUser(STATE_ADMIN_ID, "fixtures/idm/get-user/state-admin-by-super-admin.json");
   }
 
+  //Locking feature tests
+  @Test
+  @WithMockCustomUser
+  public void testGetUserLessThenMaxFailedLoginsShouldBeUnlocked() throws Exception {
+    testGetValidUser(USER_WITH_LESS_THEN_MAX_LOGIN_FAILURES_UNLOCKED,
+        "fixtures/idm/get-user/less-then-max-failed-logins-unlocked.json");
+  }
+
+  //no login failure value available
+  @Test
+  @WithMockCustomUser
+  public void testGetUserNoFailedLoginValueShouldBeUnlocked() throws Exception {
+    testGetValidUser(USER_WITH_NO_LOGIN_FAILURE_UNLOCKED,
+        "fixtures/idm/get-user/no-failed-login-value-unlocked.json");
+  }
+
+  //more then max failed logins to lock
+  @Test
+  @WithMockCustomUser
+  public void testGetUserMoreThanMaxFailedLoginShouldBeLocked() throws Exception {
+    testGetValidUser(USER_WITH_MORE_THEN_MAX_FAILURES_LOCKED,
+        "fixtures/idm/get-user/more-then-max-failed-logins-locked.json");
+  }
+
+  //exact number of failed logins to lock
+  @Test
+  @WithMockCustomUser
+  public void testGetUserExactNumberOfFailedLoginShouldBeLocked() throws Exception {
+    testGetValidUser(USER_WITH_EXACT_NUMBER_LOGIN_FAILURES_LOCKED,
+        "fixtures/idm/get-user/exact-number-failed-logins-locked.json");
+  }
+
   private MvcResult assertGetUserUnauthorized(String userId) throws Exception {
     return mockMvc
         .perform(MockMvcRequestBuilders.get("/idm/users/" + userId))
@@ -191,5 +227,17 @@ public class GetUserTest extends BaseIdmIntegrationTest {
   private void assertGetUserUnauthorized(String userId, String fixturePath) throws Exception {
     MvcResult result = assertGetUserUnauthorized(userId);
     assertExtensible(result, fixturePath);
+  }
+
+  private void testGetValidUser(String userId, String fixtureFilePath) throws Exception {
+
+    MvcResult result =
+        mockMvc
+            .perform(MockMvcRequestBuilders.get("/idm/users/" + userId))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
+            .andReturn();
+
+    assertNonStrict(result, fixtureFilePath);
   }
 }
