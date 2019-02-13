@@ -3,7 +3,7 @@ package gov.ca.cwds.idm.persistence.ns.entity;
 import static javax.persistence.FetchType.EAGER;
 
 import java.time.LocalDateTime;
-import java.util.LinkedHashSet;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 import javax.persistence.CollectionTable;
@@ -59,12 +59,12 @@ public class NsUser {
   @ElementCollection(fetch = EAGER)
   @CollectionTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"))
   @Column(name = "role_key")
-  private Set<String> roles = new LinkedHashSet<>();
+  private Set<String> roles = new HashSet<>();
 
   @ElementCollection(fetch = EAGER)
   @CollectionTable(name = "user_permission", joinColumns = @JoinColumn(name = "user_id"))
   @Column(name = "permission_name")
-  private Set<String> permissions = new LinkedHashSet<>();
+  private Set<String> permissions = new HashSet<>();
 
   public Long getId() {
     return id;
