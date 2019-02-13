@@ -1,7 +1,7 @@
 package gov.ca.cwds.idm.util;
 
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.COUNTY;
-import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.FAILED_LOGINS_COUNT;
+import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.IS_LOCKED;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.OFFICE;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PERMISSIONS;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PHONE_EXTENSION;
@@ -51,10 +51,9 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
   public static final String USER_WITH_RACFID_ID = "24051d54-9321-4dd2-a92f-6425d6c455be";
   public static final String USER_WITH_RACFID_AND_DB_DATA_ID =
       "d740ec1d-80ae-4d84-a8c4-9bed7a942f5b";
-  public static final String USER_WITH_ONE_LOGIN_FAILURE_UNLOCKED = "24932d54-9321-4dd2-a92f-7425q6c411be";
-  public static final String USER_WITH_NO_LOGIN_FAILURE_UNLOCKED = "24732d50-9421-4dd2-a92f-7425q6c411bx";
-  public static final String USER_WITH_FIVE_LOGIN_FAILURES_LOCKED = "44732d50-9425-4rd2-a92f-7425q0c411bw";
-  public static final String USER_WITH_THREE_LOGIN_FAILURES_LOCKED = "94732b50-9125-4rd2-a22f-7425q0c433bw";
+  public static final String UNLOCKED_USER = "24932d54-9321-4dd2-a92f-7425q6c411be";
+  public static final String USER_WITH_NO_LOCKED_VALUE_UNLOCKED = "24732d50-9421-4dd2-a92f-7425q6c411bx";
+  public static final String LOCKED_USER = "44732d50-9425-4rd2-a92f-7425q0c411bw";
   public static final String USER_WITH_RACFID_AND_INVALID_COUNTY_IN_COGNITO =
       "145614ce-0168-4950-9b47-7ba0cdf1f299";
   public static final String USER_WITH_NO_PHONE_EXTENSION = "d740ec1d-66ae-4d84-a8c4-8bed7a942f5b";
@@ -373,7 +372,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
         null);
 
     testUser(
-        USER_WITH_ONE_LOGIN_FAILURE_UNLOCKED,
+        UNLOCKED_USER,
         Boolean.TRUE,
         "CONFIRMED",
         date(2018, 5, 4),
@@ -388,10 +387,10 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
         null,
         null,
         null,
-        "1");
+        "0");
 
     testUser(
-        USER_WITH_NO_LOGIN_FAILURE_UNLOCKED,
+        USER_WITH_NO_LOCKED_VALUE_UNLOCKED,
         Boolean.TRUE,
         "CONFIRMED",
         date(2018, 5, 4),
@@ -409,7 +408,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
         null);
 
     testUser(
-        USER_WITH_FIVE_LOGIN_FAILURES_LOCKED,
+        LOCKED_USER,
         Boolean.TRUE,
         "CONFIRMED",
         date(2018, 5, 4),
@@ -424,25 +423,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
         null,
         null,
         null,
-        "5");
-
-    testUser(
-        USER_WITH_THREE_LOGIN_FAILURES_LOCKED,
-        Boolean.TRUE,
-        "CONFIRMED",
-        date(2018, 5, 4),
-        date(2018, 5, 29),
-        "julio78@gmail.com",
-        "Julio",
-        "Iglecias",
-        WithMockCustomUser.COUNTY,
-        "Hotline-rollout",
-        "CWS-worker:County-admin",
-        "YOLOD",
-        null,
-        null,
-        null,
-        "3");
+        "1");
 
     testUser(
         NEW_USER_SUCCESS_ID,
@@ -534,7 +515,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
       String officeId,
       String phoneNumber,
       String phoneExtension,
-      String failedLoginsCount) {
+      String locked) {
 
     TestUser testUser =
         new TestUser(
@@ -553,7 +534,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
             officeId,
             phoneNumber,
             phoneExtension,
-            failedLoginsCount);
+            locked);
 
     setUpGetUserRequestAndResult(testUser);
 
@@ -595,8 +576,8 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
     if (testUser.getPhoneExtension() != null) {
       attrs.add(attr(PHONE_EXTENSION, testUser.getPhoneExtension()));
     }
-    if (testUser.getFailedLoginsCount() != null) {
-      attrs.add(attr(FAILED_LOGINS_COUNT, testUser.getFailedLoginsCount()));
+    if (testUser.getLocked() != null) {
+      attrs.add(attr(IS_LOCKED, testUser.getLocked()));
     }
     return attrs;
   }
@@ -758,7 +739,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
     private String officeId;
     private String phoneNumber;
     private String phoneExtension;
-    private String failedLoginsCount;
+    private String locked;
 
     TestUser(
         String id,
@@ -776,7 +757,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
         String officeId,
         String phoneNumber,
         String phneExtension,
-        String failedLoginsCount) {
+        String locked) {
       this.id = id;
       this.enabled = enabled;
       this.status = status;
@@ -792,7 +773,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
       this.officeId = officeId;
       this.phoneNumber = phoneNumber;
       this.phoneExtension = phneExtension;
-      this.failedLoginsCount = failedLoginsCount;
+      this.locked = locked;
     }
 
     public String getId() {
@@ -855,8 +836,8 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
       return phoneExtension;
     }
 
-    public String getFailedLoginsCount() {
-      return failedLoginsCount;
+    public String getLocked() {
+      return locked;
     }
   }
 }
