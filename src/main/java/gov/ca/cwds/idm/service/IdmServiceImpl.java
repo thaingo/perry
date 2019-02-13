@@ -216,9 +216,10 @@ public class IdmServiceImpl implements IdmService {
     UserType userType = cognitoServiceFacade.createUser(user);
     enrichUserByCognitoData(user, userType);
     String userId = user.getId();
-    LOGGER.info("New user was successfully created in Cognito with id:{}", userId);
+    LOGGER.info("New user with username:{} was successfully created in Cognito", userId);
 
     userService.createUserInDbWithInvitationEmail(user);
+    LOGGER.info("New user with username:{} was successfully created in database", userId);
 
     auditService.auditUserCreate(user);
     PutInSearchExecution doraExecution = createUserInSearch(userType);

@@ -43,9 +43,14 @@ public class NsUserMapperTest {
     final String FIRST_NAME = "John";
     final String LAST_NAME = "Smith";
     final Date LAST_MODIFIED_TIME = new Date(1000000);
+
     final Set<String> ROLES = new LinkedHashSet<>();
     ROLES.add(OFFICE_ADMIN);
     ROLES.add(CWS_WORKER);
+
+    final Set<String> PERMISSIONS = new LinkedHashSet<>();
+    PERMISSIONS.add("RFA-rollout");
+    PERMISSIONS.add("Hotline-rollout");
 
     User user = new User();
     user.setId(USER_ID);
@@ -57,6 +62,7 @@ public class NsUserMapperTest {
     user.setLastName(LAST_NAME);
     user.setUserLastModifiedDate(LAST_MODIFIED_TIME);
     user.setRoles(ROLES);
+    user.setPermissions(PERMISSIONS);
 
     NsUser nsUser = mapper.toNsUser(user);
 
@@ -68,8 +74,13 @@ public class NsUserMapperTest {
     assertThat(nsUser.getFirstName(), is(FIRST_NAME));
     assertThat(nsUser.getLastName(), is(LAST_NAME));
     assertThat(nsUser.getLastModifiedTime(), is(fromDate(LAST_MODIFIED_TIME)));
+
     Set<String> roles = nsUser.getRoles();
     assertThat(roles, notNullValue());
     assertThat(roles, equalTo(ROLES));
+
+    Set<String> permissions = nsUser.getPermissions();
+    assertThat(permissions, notNullValue());
+    assertThat(permissions, equalTo(PERMISSIONS));
   }
 }

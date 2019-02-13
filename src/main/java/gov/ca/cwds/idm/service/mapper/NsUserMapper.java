@@ -23,6 +23,7 @@ public class NsUserMapper {
     nsUser.setLastName(user.getLastName());
     nsUser.setLastModifiedTime(fromDate(user.getUserLastModifiedDate()));
     nsUser.setRoles(user.getRoles());
+    nsUser.setPermissions(user.getPermissions());
 
     return nsUser;
   }

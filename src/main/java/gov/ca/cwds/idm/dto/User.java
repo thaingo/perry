@@ -195,7 +195,10 @@ public class User implements RolesHolder, Serializable {
   }
 
   public void setPermissions(Set<String> permissions) {
-    this.permissions = permissions;
+    this.permissions.clear();
+    if(permissions != null) {
+      this.permissions.addAll(permissions);
+    }
   }
 
   @Override

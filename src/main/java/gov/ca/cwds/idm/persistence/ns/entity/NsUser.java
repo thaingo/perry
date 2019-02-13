@@ -61,6 +61,11 @@ public class NsUser {
   @Column(name = "role_key")
   private Set<String> roles = new LinkedHashSet<>();
 
+  @ElementCollection(fetch = EAGER)
+  @CollectionTable(name = "user_permission", joinColumns = @JoinColumn(name = "user_id"))
+  @Column(name = "permission_name")
+  private Set<String> permissions = new LinkedHashSet<>();
+
   public Long getId() {
     return id;
   }
@@ -149,6 +154,17 @@ public class NsUser {
     this.roles.clear();
     if(roles != null) {
       this.roles.addAll(roles);
+    }
+  }
+
+  public Set<String> getPermissions() {
+    return permissions;
+  }
+
+  public void setPermissions(Set<String> permissions) {
+    this.permissions.clear();
+    if(permissions != null) {
+      this.permissions.addAll(permissions);
     }
   }
 
