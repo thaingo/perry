@@ -1,12 +1,19 @@
 package gov.ca.cwds.idm.persistence.ns.entity;
 
+import static javax.persistence.FetchType.EAGER;
+
 import java.time.LocalDateTime;
+import java.util.LinkedHashSet;
 import java.util.Objects;
+import java.util.Set;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -48,6 +55,11 @@ public class NsUser {
 
   @Column(name = "notes")
   private String notes;
+
+  @ElementCollection(fetch = EAGER)
+  @CollectionTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"))
+  @Column(name = "role_key")
+  private Set<String> roles = new LinkedHashSet<>();
 
   public Long getId() {
     return id;
@@ -127,6 +139,17 @@ public class NsUser {
 
   public void setNotes(String notes) {
     this.notes = notes;
+  }
+
+  public Set<String> getRoles() {
+    return roles;
+  }
+
+  public void setRoles(Set<String> roles) {
+    this.roles.clear();
+    if(roles != null) {
+      this.roles.addAll(roles);
+    }
   }
 
   @Override

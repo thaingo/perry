@@ -15,6 +15,7 @@ import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.NEW_USER_EMAIL_FAIL_
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.NEW_USER_ES_FAIL_ID;
 import static gov.ca.cwds.idm.util.TestUtils.asJsonString;
 import static gov.ca.cwds.util.Utils.toSet;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
@@ -442,6 +443,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
     assertThat(newNsUser.getPhoneExtensionNumber(), is(actuallySendUser.getPhoneExtensionNumber()));
     assertThat(newNsUser.getFirstName(), is(actuallySendUser.getFirstName()));
     assertThat(newNsUser.getLastName(), is(actuallySendUser.getLastName()));
+    assertThat(newNsUser.getRoles(), equalTo(actuallySendUser.getRoles()));
   }
 
   private  CognitoCreateRequests setCreateRequestAndResult(User actuallySendUser,

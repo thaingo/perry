@@ -1,13 +1,19 @@
 package gov.ca.cwds.idm.service.mapper;
 
+import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
+import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.util.Utils.fromDate;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
 import java.util.Date;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -37,6 +43,9 @@ public class NsUserMapperTest {
     final String FIRST_NAME = "John";
     final String LAST_NAME = "Smith";
     final Date LAST_MODIFIED_TIME = new Date(1000000);
+    final Set<String> ROLES = new LinkedHashSet<>();
+    ROLES.add(OFFICE_ADMIN);
+    ROLES.add(CWS_WORKER);
 
     User user = new User();
     user.setId(USER_ID);
@@ -47,6 +56,7 @@ public class NsUserMapperTest {
     user.setFirstName(FIRST_NAME);
     user.setLastName(LAST_NAME);
     user.setUserLastModifiedDate(LAST_MODIFIED_TIME);
+    user.setRoles(ROLES);
 
     NsUser nsUser = mapper.toNsUser(user);
 
@@ -58,5 +68,8 @@ public class NsUserMapperTest {
     assertThat(nsUser.getFirstName(), is(FIRST_NAME));
     assertThat(nsUser.getLastName(), is(LAST_NAME));
     assertThat(nsUser.getLastModifiedTime(), is(fromDate(LAST_MODIFIED_TIME)));
+    Set<String> roles = nsUser.getRoles();
+    assertThat(roles, notNullValue());
+    assertThat(roles, equalTo(ROLES));
   }
 }
