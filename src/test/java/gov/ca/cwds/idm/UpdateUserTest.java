@@ -544,12 +544,6 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
   }
 
   @Test
-  @WithMockCustomUser
-  public void testUpdate_NonStandardPermission() throws Exception {
-    assertCanUpdatePermissions(USER_NO_RACFID_ID, toSet("ArbitraryPermission"));
-  }
-
-  @Test
   @WithMockCustomUser(roles = {SUPER_ADMIN})
   public void testSuperAdminCanUpdateStateAdminPermissions() throws Exception {
     assertCanUpdatePermissions(STATE_ADMIN_ID, toSet("Hotline-rollout"));

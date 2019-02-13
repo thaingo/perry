@@ -21,7 +21,11 @@ public class NsUserBuilder {
   }
 
   public NsUser build() {
+    setProperty(updateDifference.getPhoneNumberDiff(), nsUser::setPhoneNumber);
+    setProperty(updateDifference.getPhoneExtensionNumberDiff(), nsUser::setPhoneExtensionNumber);
     setProperty(updateDifference.getNotesDiff(), nsUser::setNotes);
+    setProperty(updateDifference.getRolesDiff(), nsUser::setRoles);
+    setProperty(updateDifference.getPermissionsDiff(), nsUser::setPermissions);
     return nsUser;
   }
 
