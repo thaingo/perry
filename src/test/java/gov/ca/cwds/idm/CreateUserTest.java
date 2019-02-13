@@ -354,14 +354,6 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
     assertCreateUserSuccess(user, actuallySendUser, "new_cans_racfid_user_success_id");
   }
 
-  @Ignore//TODO: Find out if this test or constraint in database has to be removed
-  @Test
-  @WithMockCustomUser
-  public void testCreateUser_NonStandardPermission() throws Exception {
-    User user = user("test4@test.com", toSet(CWS_WORKER), toSet("ArbitraryPermission"));
-    assertCreateUserSuccess(user, "non_standard_permission_user_success_id");
-  }
-
   @Test
   @WithMockCustomUser
   public void testCreateUser_EmptyRoles() throws Exception {
