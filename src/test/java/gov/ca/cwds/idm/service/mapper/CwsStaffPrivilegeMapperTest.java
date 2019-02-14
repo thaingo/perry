@@ -9,7 +9,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.ca.cwds.data.persistence.auth.StaffAuthorityPrivilege;
 import gov.ca.cwds.idm.dto.CwsStaffPrivilege;
-import gov.ca.cwds.idm.service.mapper.CwsStaffPrivilegeMapper;
 import io.dropwizard.jackson.Jackson;
 import java.time.LocalDate;
 import java.time.LocalTime;

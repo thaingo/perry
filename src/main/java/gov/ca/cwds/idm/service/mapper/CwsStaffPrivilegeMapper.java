@@ -6,6 +6,7 @@ import gov.ca.cwds.data.persistence.auth.CmsUserAuthPrivilege;
 import gov.ca.cwds.data.persistence.auth.StaffAuthorityPrivilege;
 import gov.ca.cwds.idm.dto.CwsStaffPrivilege;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -21,6 +22,7 @@ public class CwsStaffPrivilegeMapper {
     return Optional.ofNullable(privileges).orElseGet(Collections::emptySet).stream()
         .filter(priv -> "P".equals(priv.getLevelOfAuthPrivilegeCode()))
         .filter(priv -> priv.getEndDate() == null)
+        .filter(priv -> Objects.nonNull(priv.getLevelOfAuthPrivilegeType()))
         .filter(priv -> isActiveUserAuthPriv(priv.getLevelOfAuthPrivilegeType()))
         .map(this::mapToCwsStaffPrivilegeService)
         .collect(Collectors.toSet());
