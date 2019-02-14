@@ -9,9 +9,7 @@ import java.io.Serializable;
 import java.util.Objects;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-/**
- * DTO class representing a CWS Staff Person Authority Privilege.
- */
+/** DTO class representing a CWS Staff Person Authority Privilege. */
 @ApiModel
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class CwsStaffPrivilege implements Serializable {
@@ -48,8 +46,12 @@ public class CwsStaffPrivilege implements Serializable {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof CwsStaffPrivilege)) {
+      return false;
+    }
     CwsStaffPrivilege that = (CwsStaffPrivilege) o;
     return category.equals(that.category) && privilege.equals(that.privilege);
   }
