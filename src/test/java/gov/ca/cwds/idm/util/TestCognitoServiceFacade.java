@@ -668,7 +668,8 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
     return request;
   }
 
-  public void setCreateUserResult(AdminCreateUserRequest request, String newId) {
+  public AdminCreateUserResult setCreateUserResult(
+      AdminCreateUserRequest request, String newId) {
 
     UserType newUser = new UserType();
     newUser.setUsername(newId);
@@ -678,6 +679,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
 
     AdminCreateUserResult result = new AdminCreateUserResult().withUser(newUser);
     when(cognito.adminCreateUser(request)).thenReturn(result);
+    return result;
   }
 
   public AdminCreateUserRequest setCreateUserInvitationRequest(String email, AdminCreateUserResult result) {
