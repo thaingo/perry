@@ -7,7 +7,8 @@ public enum CustomUserAttribute implements UserAttribute {
   COUNTY("custom:County"),
   RACFID_CUSTOM("custom:RACFID"),
   RACFID_CUSTOM_2("custom:RACFId"),
-  PHONE_EXTENSION("custom:PhoneExtension");
+  PHONE_EXTENSION("custom:PhoneExtension"),
+  IS_LOCKED("custom:locked");
 
   private String name;
 
