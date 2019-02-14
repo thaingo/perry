@@ -30,6 +30,7 @@ public class TransactionalUserService {
   private ExceptionFactory exceptionFactory;
 
   @Transactional(value = TOKEN_TRANSACTION_MANAGER)
+  @SuppressWarnings({"fb-contrib:LEST_LOST_EXCEPTION_STACK_TRACE"})//exception with custom constructor is used
   public void createUserInDbWithInvitationEmail(User user) {
     String email = user.getEmail();
     String userId = user.getId();
