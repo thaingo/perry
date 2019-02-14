@@ -12,6 +12,7 @@
       "office_phone_number": "4646464646",
       "office_phone_extension_number": "11",
       "permissions": [],
+      "locked": false,
       "start_date": "1980-08-08",
       "roles": ["CWS-worker"]
     }
