@@ -48,7 +48,11 @@ public class Utils {
   }
 
   public static LocalDateTime fromDate(Date date) {
-    return new Timestamp(date.getTime()).toLocalDateTime();
+    if (date != null) {
+      return new Timestamp(date.getTime()).toLocalDateTime();
+    } else {
+      return null;
+    }
   }
 
   @SuppressWarnings("unchecked")
