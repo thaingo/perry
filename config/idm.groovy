@@ -14,6 +14,10 @@ result.racfid = attribute("custom:RACFID")
 result.phoneNumber = CognitoPhoneConverter.fromCognitoFormat(attribute("phone_number"))
 result.phoneExtensionNumber = attribute("custom:PhoneExtension")
 
+if(StringUtils.isNotBlank(attribute("custom:locked"))) {
+    result.locked = attribute("custom:locked").toBoolean()
+}
+
 if(StringUtils.isNotBlank(attribute("custom:Permission"))) {
     result.permissions = attribute("custom:Permission").split('\\s*:\\s*') as HashSet
 }

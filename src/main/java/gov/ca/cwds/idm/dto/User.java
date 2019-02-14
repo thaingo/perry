@@ -52,6 +52,8 @@ public class User implements RolesHolder, Serializable {
 
   private String phoneExtensionNumber;
 
+  private boolean locked;
+
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_FORMAT)
   private Date userCreateDate;
 
@@ -254,5 +256,13 @@ public class User implements RolesHolder, Serializable {
 
   public void setNotes(String notes) {
     this.notes = notes;
+  }
+
+  public boolean isLocked() {
+    return locked;
+  }
+
+  public void setLocked(boolean locked) {
+    this.locked = locked;
   }
 }

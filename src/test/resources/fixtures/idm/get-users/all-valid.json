@@ -20,7 +20,8 @@
       ],
       "cws_privileges": [
       ],
-      "notes": "Some notes text"
+      "notes": "Some notes text",
+      "locked": false
     },
     {
       "id": "24051d54-9321-4dd2-a92f-6425d6c455be",
@@ -34,6 +35,7 @@
       "enabled": true,
       "status": "CONFIRMED",
       "racfid": "YOLOD",
+      "locked": false,
       "permissions": [
         "Hotline-rollout"
       ],
@@ -61,6 +63,7 @@
       "enabled": true,
       "status": "CONFIRMED",
       "racfid": "SMITHBO",
+      "locked": false,
       "permissions": [
         "Hotline-rollout"
       ],

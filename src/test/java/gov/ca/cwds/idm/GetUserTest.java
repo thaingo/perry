@@ -9,10 +9,13 @@ import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.ABSENT_USER_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.COUNTY_ADMIN_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.ERROR_USER_ID;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.LOCKED_USER;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.STATE_ADMIN_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.SUPER_ADMIN_ID;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.UNLOCKED_USER;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_CALS_EXTERNAL;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_NO_RACFID_ID;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_WITH_NO_LOCKED_VALUE_UNLOCKED;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_WITH_NO_PHONE_EXTENSION;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_WITH_RACFID_AND_CWS_STAFF_AUTHORITY_PRVILIGES;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_WITH_RACFID_AND_DB_DATA_ID;
@@ -188,6 +191,29 @@ public class GetUserTest extends BaseIdmIntegrationTest {
   @WithMockCustomUser(roles = {SUPER_ADMIN})
   public void testGetStateAdminBySuperAdmin() throws Exception {
     testGetValidUser(STATE_ADMIN_ID, "fixtures/idm/get-user/state-admin-by-super-admin.json");
+  }
+
+  //LOCKING FEATURE TESTS:
+
+  @Test
+  @WithMockCustomUser
+  public void testGetUserShouldBeUnlocked() throws Exception {
+    testGetValidUser(UNLOCKED_USER,
+        "fixtures/idm/get-user/unlocked_user.json");
+  }
+
+  @Test
+  @WithMockCustomUser
+  public void testGetUserNoLockedValueShouldBeUnlocked() throws Exception {
+    testGetValidUser(USER_WITH_NO_LOCKED_VALUE_UNLOCKED,
+        "fixtures/idm/get-user/no-locked-value-unlocked.json");
+  }
+
+  @Test
+  @WithMockCustomUser
+  public void testGetUserShouldBeLocked() throws Exception {
+    testGetValidUser(LOCKED_USER,
+        "fixtures/idm/get-user/locked-user.json");
   }
 
   private MvcResult assertGetUserUnauthorized(String userId) throws Exception {
