@@ -1,33 +1,44 @@
 {
   "user": {
-    "id": "d740ec1d-80ae-4d84-a8c4-9bed7a942f5b",
-    "first_name": "Win",
-    "last_name": "Staff",
+    "id": "145614ce-0168-4950-9b47-7ba0cdf1f589",
+    "first_name": "Han",
+    "last_name": "Solo",
     "county_name": "Yolo",
-    "start_date": "1980-08-08",
-    "office_id": "JzoGSkE05I",
+    "start_date": "1984-03-08",
+    "office_id": "JzoGSkE07I",
     "office_phone_number": "4646464646",
     "office_phone_extension_number": "11",
-    "phone_number": "4646888777",
-    "phone_extension_number": "7",
-    "email": "garcia@gmail.com",
-    "user_create_date": "2018-05-03",
-    "user_last_modified_date": "2018-05-31",
-    "last_login_date_time": "2018-09-17 05:01:12",
+    "phone_number": "9167777777",
+    "phone_extension_number": "777",
+    "email": "han.solo@osi.ca.gav",
+    "user_create_date": "2019-01-03",
+    "user_last_modified_date": "2019-02-08",
     "enabled": true,
     "locked": false,
     "status": "CONFIRMED",
-    "racfid": "SMITHBO",
+    "racfid": "CWSPRV",
     "permissions": [
-      "Hotline-rollout"
+      "Facility-search-rollout"
     ],
     "roles": [
       "CWS-worker"
     ],
     "cws_privileges": [
       {
+        "category": "Override Authority",
+        "privilege": "Statewide Read"
+      },
+      {
+        "category": "Interface Authority",
+        "privilege": "LIS"
+      },
+      {
         "category": "Limited Access Authority",
         "privilege": "Sealed"
+      },
+      {
+        "category": "Access Authority",
+        "privilege": "Adoptions"
       },
       {
         "category": "Override Authority",
@@ -36,6 +47,14 @@
       {
         "category": "Limited Access Authority",
         "privilege": "Sensitive Persons"
+      },
+      {
+        "category": "Interface Authority",
+        "privilege": "CDS Client Index"
+      },
+      {
+        "category": "Interface Authority",
+        "privilege": "MEDS"
       }
     ]
   },
@@ -44,8 +63,8 @@
     "roles": {
       "editable": true,
       "possible_values": [
-        "CWS-worker",
-        "Office-admin"
+        "Office-admin",
+        "CWS-worker"
       ]
     },
     "permissions": {

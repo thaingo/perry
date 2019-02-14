@@ -66,6 +66,58 @@
       <column name="SYS_DMC" valueNumeric="5394"/>
     </insert>
 
+    <insert tableName="STF_PVLT">
+      <column name="IDENTIFIER" value="STfPvlt100"/>
+      <column name="START_DT" valueDate="2009-04-10"/>
+      <column name="END_DT"/>
+      <column name="END_TIME"/>
+      <column name="LVL_PRVC" valueNumeric="5391"/>
+      <column name="ATH_PRVC" value="P"/>
+      <column name="START_TIME" valueDate="10:10:00"/>
+      <column name="LST_UPD_ID" value="3KD"/>
+      <column name="LST_UPD_TS" valueDate="2009-08-10 13:36:43.375"/>
+      <column name="FKUSERID_T" value="AakC6Jm05I"/>
+      <column name="CNTY_SPFCD" value="57"/>
+    </insert>
+    <insert tableName="STF_PVLT">
+      <column name="IDENTIFIER" value="STfPvlt101"/>
+      <column name="START_DT" valueDate="2011-02-13"/>
+      <column name="END_DT"/>
+      <column name="END_TIME"/>
+      <column name="LVL_PRVC" valueNumeric="1482"/>
+      <column name="ATH_PRVC" value="P"/>
+      <column name="START_TIME" valueDate="10:10:00"/>
+      <column name="LST_UPD_ID" value="DF4"/>
+      <column name="LST_UPD_TS" valueDate="2010-02-10 13:54:43.379"/>
+      <column name="FKUSERID_T" value="AakC6Jm05I"/>
+      <column name="CNTY_SPFCD" value="57"/>
+    </insert>
+    <insert tableName="STF_PVLT">
+      <column name="IDENTIFIER" value="STfPvlt102"/>
+      <column name="START_DT" valueDate="2009-04-10"/>
+      <column name="END_DT"/>
+      <column name="END_TIME"/>
+      <column name="LVL_PRVC" valueNumeric="1481"/>
+      <column name="ATH_PRVC" value="P"/>
+      <column name="START_TIME" valueDate="11:11:00"/>
+      <column name="LST_UPD_ID" value="HF5"/>
+      <column name="LST_UPD_TS" valueDate="2011-02-10 13:36:43.375"/>
+      <column name="FKUSERID_T" value="AakC6Jm05I"/>
+      <column name="CNTY_SPFCD" value="57"/>
+    </insert>
+    <insert tableName="STF_PVLT">
+      <column name="IDENTIFIER" value="STfPvlt103"/>
+      <column name="START_DT" valueDate="2011-07-10"/>
+      <column name="END_DT"/>
+      <column name="END_TIME"/>
+      <column name="LVL_PRVC" valueNumeric="1485"/>
+      <column name="ATH_PRVC" value="P"/>
+      <column name="START_TIME" valueDate="12:03:00"/>
+      <column name="LST_UPD_ID" value="SC3"/>
+      <column name="LST_UPD_TS" valueDate="2012-03-10 13:36:43.375"/>
+      <column name="FKUSERID_T" value="AakC6Jm05I"/>
+      <column name="CNTY_SPFCD" value="57"/>
+    </insert>
   </changeSet>
   <changeSet id="data_for_cms_db_2" author="Dmytro.Sorych">
     <insert tableName="CWS_OFFT">
@@ -1171,6 +1223,212 @@
       <column name="FKFPSTFPRT"/>
       <column name="FKSTFPERST" value="aa8"/>
       <column name="SYS_DMC" valueNumeric="5051"/>
+    </insert>
+  </changeSet>
+
+  <changeSet id="data_for_cms_db_9" author="Pradip.Karki">
+    <insert tableName="STFPERST">
+      <column name="IDENTIFIER" value="a10"/>
+      <column name="END_DT"/>
+      <column name="FIRST_NM" value="Han                "/>
+      <column name="JOB_TL_DSC" value="Star Wars Actor                   "/>
+      <column name="LAST_NM" value="Solo                 "/>
+      <column name="MID_INI_NM" value=" "/>
+      <column name="NMPRFX_DSC" value="Win   "/>
+      <column name="PHONE_NO" valueNumeric="4644589123"/>
+      <column name="TEL_EXT_NO" valueNumeric="9"/>
+      <column name="START_DT" valueDate="1984-03-08"/>
+      <column name="SUFX_TLDSC" value="    "/>
+      <column name="TLCMTR_IND" value="Y"/>
+      <column name="LST_UPD_ID" value="00D"/>
+      <column name="LST_UPD_TS" valueDate="2006-01-06 12:47:12.570402"/>
+      <column name="FKCWS_OFFT" value="JzoGSkE07I"/>
+      <column name="AVLOC_DSC" value="Availability / Location Description                                                                                                                             "/>
+      <column name="SSRS_WKRID" value="1594"/>
+      <column name="CNTY_SPFCD" value="57"/>
+      <column name="DTYWKR_IND" value="N"/>
+      <column name="FKCWSADDRT" value="QW16FeOq38"/>
+      <column name="EMAIL_ADDR"/>
+    </insert>
+    <insert tableName="USERID_T">
+      <column name="IDENTIFIER" value="AakC6Jm07J"/>
+      <column name="LOGON_ID" value="CWSPRV  "/>
+      <column name="END_DT"/>
+      <column name="END_TM"/>
+      <column name="LST_UPD_ID" value="x58"/>
+      <column name="LST_UPD_TS" valueDate="2009-05-18 17:10:43.010371"/>
+      <column name="FKFPSTFPRT"/>
+      <column name="FKSTFPERST" value="a10"/>
+      <column name="SYS_DMC" valueNumeric="5394"/>
+    </insert>
+    <insert tableName="STF_PVLT">
+      <column name="IDENTIFIER" value="STfPvlt0Q0"/>
+      <column name="START_DT" valueDate="2004-02-10"/>
+      <column name="END_DT"/>
+      <column name="END_TIME"/>
+      <column name="LVL_PRVC" valueNumeric="1479"/>
+      <column name="ATH_PRVC" value="P"/>
+      <column name="START_TIME" valueDate="10:10:00"/>
+      <column name="LST_UPD_ID" value="0Rv"/>
+      <column name="LST_UPD_TS" valueDate="2004-02-10 10:10:43.375"/>
+      <column name="FKUSERID_T" value="AakC6Jm07J"/>
+      <column name="CNTY_SPFCD" value="57"/>
+    </insert>
+    <insert tableName="STF_PVLT">
+      <column name="IDENTIFIER" value="STfPvlt0Q1"/>
+      <column name="START_DT" valueDate="2002-02-10"/>
+      <column name="END_DT"/>
+      <column name="END_TIME"/>
+      <column name="LVL_PRVC" valueNumeric="1464"/>
+      <column name="ATH_PRVC" value="P"/>
+      <column name="START_TIME" valueDate="13:36:00"/>
+      <column name="LST_UPD_ID" value="SDF"/>
+      <column name="LST_UPD_TS" valueDate="2002-02-10 13:36:43.375"/>
+      <column name="FKUSERID_T" value="AakC6Jm07J"/>
+      <column name="CNTY_SPFCD" value="57"/>
+    </insert>
+    <insert tableName="STF_PVLT">
+      <column name="IDENTIFIER" value="STfPvlt0Q2"/>
+      <column name="START_DT" valueDate="2007-02-10"/>
+      <column name="END_DT"/>
+      <column name="END_TIME"/>
+      <column name="LVL_PRVC" valueNumeric="1475"/>
+      <column name="ATH_PRVC" value="P"/>
+      <column name="START_TIME" valueDate="13:36:00"/>
+      <column name="LST_UPD_ID" value="WK7"/>
+      <column name="LST_UPD_TS" valueDate="2007-02-10 13:36:43.375"/>
+      <column name="FKUSERID_T" value="AakC6Jm07J"/>
+      <column name="CNTY_SPFCD" value="57"/>
+    </insert>
+    <insert tableName="STF_PVLT">
+      <column name="IDENTIFIER" value="STfPvlt0Q3"/>
+      <column name="START_DT" valueDate="2004-04-10"/>
+      <column name="END_DT"/>
+      <column name="END_TIME"/>
+      <column name="LVL_PRVC" valueNumeric="1476"/>
+      <column name="ATH_PRVC" value="P"/>
+      <column name="START_TIME" valueDate="11:10:00"/>
+      <column name="LST_UPD_ID" value="DO7"/>
+      <column name="LST_UPD_TS" valueDate="2004-04-10 11:31:43.375"/>
+      <column name="FKUSERID_T" value="AakC6Jm07J"/>
+      <column name="CNTY_SPFCD" value="57"/>
+    </insert>
+    <insert tableName="STF_PVLT">
+      <column name="IDENTIFIER" value="STfPvlt0Q4"/>
+      <column name="START_DT" valueDate="2004-02-11"/>
+      <column name="END_DT"/>
+      <column name="END_TIME"/>
+      <column name="LVL_PRVC" valueNumeric="2182"/>
+      <column name="ATH_PRVC" value="P"/>
+      <column name="START_TIME" valueDate="10:10:00"/>
+      <column name="LST_UPD_ID" value="DS2"/>
+      <column name="LST_UPD_TS" valueDate="2004-02-11 14:44:43.375"/>
+      <column name="FKUSERID_T" value="AakC6Jm07J"/>
+      <column name="CNTY_SPFCD" value="57"/>
+    </insert>
+    <insert tableName="STF_PVLT">
+      <column name="IDENTIFIER" value="STfPvlt0Q5"/>
+      <column name="START_DT" valueDate="2001-03-10"/>
+      <column name="END_DT"/>
+      <column name="END_TIME"/>
+      <column name="LVL_PRVC" valueNumeric="1481"/>
+      <column name="ATH_PRVC" value="P"/>
+      <column name="START_TIME" valueDate="12:10:00"/>
+      <column name="LST_UPD_ID" value="Od9"/>
+      <column name="LST_UPD_TS" valueDate="2001-03-10 13:36:43.375"/>
+      <column name="FKUSERID_T" value="AakC6Jm07J"/>
+      <column name="CNTY_SPFCD" value="57"/>
+    </insert>
+    <insert tableName="STF_PVLT">
+      <column name="IDENTIFIER" value="STfPvlt0Q6"/>
+      <column name="START_DT" valueDate="2010-02-10"/>
+      <column name="END_DT"/>
+      <column name="END_TIME"/>
+      <column name="LVL_PRVC" valueNumeric="1482"/>
+      <column name="ATH_PRVC" value="P"/>
+      <column name="START_TIME" valueDate="10:10:00"/>
+      <column name="LST_UPD_ID" value="Pd8"/>
+      <column name="LST_UPD_TS" valueDate="2010-02-10 13:54:43.375"/>
+      <column name="FKUSERID_T" value="AakC6Jm07J"/>
+      <column name="CNTY_SPFCD" value="57"/>
+    </insert>
+    <insert tableName="STF_PVLT">
+      <column name="IDENTIFIER" value="STfPvlt0Q7"/>
+      <column name="START_DT" valueDate="2012-02-10"/>
+      <column name="END_DT"/>
+      <column name="END_TIME"/>
+      <column name="LVL_PRVC" valueNumeric="1481"/>
+      <column name="ATH_PRVC" value="P"/>
+      <column name="START_TIME" valueDate="10:11:00"/>
+      <column name="LST_UPD_ID" value="Pb8"/>
+      <column name="LST_UPD_TS" valueDate="2012-02-10 13:36:43.375"/>
+      <column name="FKUSERID_T" value="AakC6Jm07J"/>
+      <column name="CNTY_SPFCD" value="57"/>
+    </insert>
+    <insert tableName="STF_PVLT">
+      <column name="IDENTIFIER" value="STfPvlt0Q8"/>
+      <column name="START_DT" valueDate="2004-01-10"/>
+      <column name="END_DT"/>
+      <column name="END_TIME"/>
+      <column name="LVL_PRVC" valueNumeric="1485"/>
+      <column name="ATH_PRVC" value="P"/>
+      <column name="START_TIME" valueDate="12:10:00"/>
+      <column name="LST_UPD_ID" value="Df3"/>
+      <column name="LST_UPD_TS" valueDate="2004-01-10 13:36:43.375"/>
+      <column name="FKUSERID_T" value="AakC6Jm07J"/>
+      <column name="CNTY_SPFCD" value="57"/>
+    </insert>
+    <insert tableName="STF_PVLT">
+      <column name="IDENTIFIER" value="STfPvlt0Q9"/>
+      <column name="START_DT" valueDate="2009-02-10"/>
+      <column name="END_DT"/>
+      <column name="END_TIME"/>
+      <column name="LVL_PRVC" valueNumeric="1486"/>
+      <column name="ATH_PRVC" value="P"/>
+      <column name="START_TIME" valueDate="13:10:00"/>
+      <column name="LST_UPD_ID" value="Fd3"/>
+      <column name="LST_UPD_TS" valueDate="2009-02-10 13:36:43.375"/>
+      <column name="FKUSERID_T" value="AakC6Jm07J"/>
+      <column name="CNTY_SPFCD" value="57"/>
+    </insert>
+    <insert tableName="STF_PVLT">
+      <column name="IDENTIFIER" value="STfPvlt010"/>
+      <column name="START_DT" valueDate="2013-07-10"/>
+      <column name="END_DT"/>
+      <column name="END_TIME"/>
+      <column name="LVL_PRVC" valueNumeric="6072"/>
+      <column name="ATH_PRVC" value="L"/>
+      <column name="START_TIME" valueDate="10:36:00"/>
+      <column name="LST_UPD_ID" value="F34"/>
+      <column name="LST_UPD_TS" valueDate="2013-07-10 13:36:43.375"/>
+      <column name="FKUSERID_T" value="AakC6Jm07J"/>
+      <column name="CNTY_SPFCD" value="57"/>
+    </insert>
+    <insert tableName="STF_PVLT">
+      <column name="IDENTIFIER" value="STfPvlt011"/>
+      <column name="START_DT" valueDate="2009-08-10"/>
+      <column name="END_DT"/>
+      <column name="END_TIME"/>
+      <column name="LVL_PRVC" valueNumeric="5391"/>
+      <column name="ATH_PRVC" value="P"/>
+      <column name="START_TIME" valueDate="10:10:00"/>
+      <column name="LST_UPD_ID" value="34F"/>
+      <column name="LST_UPD_TS" valueDate="2009-08-10 13:36:43.375"/>
+      <column name="FKUSERID_T" value="AakC6Jm07J"/>
+      <column name="CNTY_SPFCD" value="57"/>
+    </insert>
+    <insert tableName="STF_PVLT">
+      <column name="IDENTIFIER" value="STfPvlt012"/>
+      <column name="START_DT" valueDate="2014-03-11"/>
+      <column name="END_DT"/>
+      <column name="END_TIME"/>
+      <column name="LVL_PRVC" valueNumeric="1480"/>
+      <column name="ATH_PRVC" value="P"/>
+      <column name="START_TIME" valueDate="10:11:00"/>
+      <column name="LST_UPD_ID" value="34X"/>
+      <column name="LST_UPD_TS" valueDate="2014-03-11 12:36:43.375"/>
+      <column name="FKUSERID_T" value="AakC6Jm07J"/>
+      <column name="CNTY_SPFCD" value="57"/>
     </insert>
   </changeSet>
 

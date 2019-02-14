@@ -7,6 +7,7 @@ import gov.ca.cwds.data.auth.UserIdDao;
 import gov.ca.cwds.data.persistence.auth.CwsOffice;
 import gov.ca.cwds.data.persistence.auth.StaffPerson;
 import gov.ca.cwds.data.persistence.auth.UserId;
+import gov.ca.cwds.idm.service.mapper.CwsStaffPrivilegeMapper;
 import gov.ca.cwds.rest.api.domain.auth.StaffAuthorityPrivilege;
 import gov.ca.cwds.rest.api.domain.auth.StaffUnitAuthority;
 import gov.ca.cwds.service.dto.CwsUserInfo;
@@ -121,6 +122,8 @@ public class CwsUserInfoService {
         .withRacfId(userId.getLogonId())
         .withCwsOffice(office)
         .withStaffPerson(userId.getStaffPerson())
+        .withCwsStaffPrivs(
+            new CwsStaffPrivilegeMapper().toCwsStaffPrivilege(userId.getPrivileges()))
         .build();
   }
 
