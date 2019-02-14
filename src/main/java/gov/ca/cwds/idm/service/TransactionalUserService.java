@@ -19,9 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Profile("idm")
-public class UserService {
+public class TransactionalUserService {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(UserService.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(TransactionalUserService.class);
 
   private CognitoServiceFacade cognitoServiceFacade;
 
