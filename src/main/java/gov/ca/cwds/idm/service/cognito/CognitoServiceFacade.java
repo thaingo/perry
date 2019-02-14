@@ -1,6 +1,7 @@
 package gov.ca.cwds.idm.service.cognito;
 
 import com.amazonaws.services.cognitoidp.model.AdminCreateUserRequest;
+import com.amazonaws.services.cognitoidp.model.AdminDeleteUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserRequest;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
@@ -38,9 +39,21 @@ public interface CognitoServiceFacade {
   void changeUserEnabledStatus(User existedUser,  Boolean newValue);
 
   /**
-   * Resend the invitation message to a user that already exists and reset the expiration limit
-   * on the user's account by admin.
+   * Send the invitation message to the user that was just created.
+   *
    * @param email email address of the user.
    */
-  UserType resendInvitationMessage(String email);
-  }
+  UserType sendInvitationMessageByEmail(String email);
+
+  /**
+   * Resend the invitation message to a user that already exists
+   * and reset the expiration limit on the user's account by admin.
+   *
+   * @param userId Cognito username of the user.
+   */
+  UserType resendInvitationMessage(String userId);
+
+  AdminDeleteUserRequest createAdminDeleteUserRequest(String id);
+
+  void deleteCognitoUserById(String id);
+}

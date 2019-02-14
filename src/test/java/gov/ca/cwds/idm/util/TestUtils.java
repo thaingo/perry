@@ -13,6 +13,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.UUID;
 
 public final class TestUtils {
 
@@ -60,4 +61,7 @@ public final class TestUtils {
     return LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), ZoneId.systemDefault());
   }
 
+  public static String generateId() {
+    return UUID.randomUUID().toString();
+  }
 }

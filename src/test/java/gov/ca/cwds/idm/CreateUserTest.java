@@ -7,12 +7,18 @@ import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.SUPER_ADMIN;
 import static gov.ca.cwds.idm.service.PossibleUserPermissionsService.CANS_PERMISSION_NAME;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.DELETE_ERROR_CREATE_USER_EMAIL;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.EMAIL_ERROR_CREATE_USER_EMAIL;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.ES_ERROR_CREATE_USER_EMAIL;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.NEW_USER_DELETE_FAIL_ID;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.NEW_USER_EMAIL_FAIL_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.NEW_USER_ES_FAIL_ID;
 import static gov.ca.cwds.idm.util.TestUtils.asJsonString;
 import static gov.ca.cwds.util.Utils.toSet;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -21,17 +27,22 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 
 import com.amazonaws.services.cognitoidp.model.AdminCreateUserRequest;
+import com.amazonaws.services.cognitoidp.model.AdminCreateUserResult;
+import com.amazonaws.services.cognitoidp.model.AdminDeleteUserRequest;
 import com.amazonaws.services.cognitoidp.model.InvalidParameterException;
 import com.amazonaws.services.cognitoidp.model.UsernameExistsException;
 import com.google.common.collect.Iterables;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.event.UserCreatedEvent;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
+import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
 import gov.ca.cwds.idm.util.TestCognitoServiceFacade;
 import gov.ca.cwds.idm.util.WithMockCustomUser;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -74,7 +85,9 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
 
     setDoraError();
 
-    AdminCreateUserRequest request = setCreateRequestAndResult(user, NEW_USER_ES_FAIL_ID);
+    CognitoCreateRequests requests = setCreateRequestAndResult(user, NEW_USER_ES_FAIL_ID);
+    AdminCreateUserRequest request = requests.createRequest;
+    AdminCreateUserRequest invitationRequest = requests.invitationRequest;
 
     MvcResult result =
         mockMvc
@@ -90,6 +103,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
     assertExtensible(result, "fixtures/idm/partial-success-user-create/log-success.json");
 
     verify(cognito, times(1)).adminCreateUser(request);
+    verify(cognito, times(1)).adminCreateUser(invitationRequest);
     verify(spySearchService, times(1)).createUser(any(User.class));
     verifyDoraCalls(DORA_WS_MAX_ATTEMPTS);
 
@@ -100,6 +114,88 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
     UserLog lastUserLog = Iterables.getLast(userLogs);
     assertTrue(lastUserLog.getOperationType() == OperationType.CREATE);
     assertThat(lastUserLog.getUsername(), is(NEW_USER_ES_FAIL_ID));
+
+    assertNsUserInDb(NEW_USER_ES_FAIL_ID);
+  }
+
+  @Test
+  @WithMockCustomUser
+  public void testCreateUserInvitationEmailFail() throws Exception {
+
+    int oldUserLogsSize = Iterables.size(userLogRepository.findAll());
+
+    User user = user();
+    user.setEmail(EMAIL_ERROR_CREATE_USER_EMAIL);
+
+    CognitoCreateRequests requests = setCreateRequestAndResultWithEmailError(user,
+        NEW_USER_EMAIL_FAIL_ID);
+    AdminCreateUserRequest request = requests.createRequest;
+    AdminCreateUserRequest invitationRequest = requests.invitationRequest;
+    AdminDeleteUserRequest deleteRequest =
+        cognitoServiceFacade.createAdminDeleteUserRequest(NEW_USER_EMAIL_FAIL_ID);
+
+    MvcResult result =
+        mockMvc
+            .perform(
+                MockMvcRequestBuilders.post("/idm/users")
+                    .contentType(JSON_CONTENT_TYPE)
+                    .content(asJsonString(user)))
+            .andExpect(MockMvcResultMatchers.status().isInternalServerError())
+            .andReturn();
+
+    assertExtensible(result, "fixtures/idm/create-user/email-fail.json");
+
+    verify(cognito, times(1)).adminCreateUser(request);
+    verify(cognito, times(1)).adminCreateUser(invitationRequest);
+    verify(cognito, times(1)).adminDeleteUser(deleteRequest);
+    verify(spySearchService, times(0)).createUser(any(User.class));
+
+    Iterable<UserLog> userLogs = userLogRepository.findAll();
+    int newUserLogsSize = Iterables.size(userLogs);
+    assertThat(newUserLogsSize, is(oldUserLogsSize));
+
+    assertNoNsUserInDb(NEW_USER_EMAIL_FAIL_ID);
+  }
+
+  @Test
+  @WithMockCustomUser
+  public void testCreateUserDeleteFail() throws Exception {
+
+    int oldUserLogsSize = Iterables.size(userLogRepository.findAll());
+
+    User user = user();
+    user.setEmail(DELETE_ERROR_CREATE_USER_EMAIL);
+
+    CognitoCreateRequests requests = setCreateRequestAndResultWithEmailError(user, NEW_USER_DELETE_FAIL_ID);
+    AdminCreateUserRequest request = requests.createRequest;
+    AdminCreateUserRequest invitationRequest = requests.invitationRequest;
+
+    AdminDeleteUserRequest deleteRequest =
+        cognitoServiceFacade.createAdminDeleteUserRequest(NEW_USER_DELETE_FAIL_ID);
+    when(cognito.adminDeleteUser(deleteRequest))
+        .thenThrow(new RuntimeException("Cognito delete error"));
+
+    MvcResult result =
+        mockMvc
+            .perform(
+                MockMvcRequestBuilders.post("/idm/users")
+                    .contentType(JSON_CONTENT_TYPE)
+                    .content(asJsonString(user)))
+            .andExpect(MockMvcResultMatchers.status().isInternalServerError())
+            .andReturn();
+
+    assertExtensible(result, "fixtures/idm/create-user/delete-fail.json");
+
+    verify(cognito, times(1)).adminCreateUser(request);
+    verify(cognito, times(1)).adminCreateUser(invitationRequest);
+    verify(cognito, times(1)).adminDeleteUser(deleteRequest);
+    verify(spySearchService, times(0)).createUser(any(User.class));
+
+    Iterable<UserLog> userLogs = userLogRepository.findAll();
+    int newUserLogsSize = Iterables.size(userLogs);
+    assertThat(newUserLogsSize, is(oldUserLogsSize));
+
+    assertNoNsUserInDb(NEW_USER_DELETE_FAIL_ID);
   }
 
   @Test
@@ -199,8 +295,9 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
   @Test
   @WithMockCustomUser(roles = {STATE_ADMIN})
   public void testCreateRacfidUser() throws Exception {
-    User user = racfidUserNotExistingInCognito(toSet(CWS_WORKER), toSet("Hotline-rollout"));
-    User actuallySendUser = actuallySendRacfidUserNotExistingInCognito(
+    String email = "Test@Test.com";
+    User user = racfidUserNotExistingInCognito(email, toSet(CWS_WORKER), toSet("Hotline-rollout"));
+    User actuallySendUser = actuallySendRacfidUserNotExistingInCognito(email.toLowerCase(),
         toSet(CWS_WORKER), toSet("Hotline-rollout"));
 
     assertCreateUserSuccess(user, actuallySendUser, "new_user_success_id_4");
@@ -209,13 +306,16 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
   @Test
   @WithMockCustomUser
   public void testCreateRacfidUserUnauthorized() throws Exception {
-    User user = racfidUserNotExistingInCognito(toSet(CWS_WORKER), toSet("Hotline-rollout"));
-    User actuallySendUser = actuallySendRacfidUserNotExistingInCognito(
+    String email = "Test2@Test.com";
+    User user = racfidUserNotExistingInCognito(email, toSet(CWS_WORKER), toSet("Hotline-rollout"));
+    User actuallySendUser = actuallySendRacfidUserNotExistingInCognito(email,
         toSet(CWS_WORKER), toSet("Hotline-rollout"));
 
-    AdminCreateUserRequest request = setCreateRequestAndResult(actuallySendUser, "new_user_success_id_5");
+    CognitoCreateRequests requests = setCreateRequestAndResult(actuallySendUser, "new_user_success_id_5");
+    AdminCreateUserRequest request = requests.createRequest;
+    AdminCreateUserRequest invitationRequest = requests.invitationRequest;
 
-    MvcResult result = mockMvc
+        MvcResult result = mockMvc
         .perform(
             MockMvcRequestBuilders.post("/idm/users")
                 .contentType(JSON_CONTENT_TYPE)
@@ -224,6 +324,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
         .andReturn();
 
     verify(cognito, times(0)).adminCreateUser(request);
+    verify(cognito, times(0)).adminCreateUser(invitationRequest);
     assertExtensible(result, "fixtures/idm/create-user/racfid-user-unauthorized.json");
   }
 
@@ -245,18 +346,12 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
   @Test
   @WithMockCustomUser(roles = {STATE_ADMIN})
   public void testCreateRacfidUser_CansPermission() throws Exception {
-    User user = racfidUserNotExistingInCognito(toSet(CWS_WORKER), toSet(CANS_PERMISSION_NAME));
-    User actuallySendUser = actuallySendRacfidUserNotExistingInCognito(
+    String email = "Test3@Test.com";
+    User user = racfidUserNotExistingInCognito(email, toSet(CWS_WORKER), toSet(CANS_PERMISSION_NAME));
+    User actuallySendUser = actuallySendRacfidUserNotExistingInCognito(email,
         toSet(CWS_WORKER), toSet(CANS_PERMISSION_NAME));
 
     assertCreateUserSuccess(user, actuallySendUser, "new_cans_racfid_user_success_id");
-  }
-
-  @Test
-  @WithMockCustomUser
-  public void testCreateUser_NonStandardPermission() throws Exception {
-    User user = user("test@test.com", toSet(CWS_WORKER), toSet("ArbitraryPermission"));
-    assertCreateUserSuccess(user, "non_standard_permission_user_success_id");
   }
 
   @Test
@@ -311,7 +406,11 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
 
   private void assertCreateUserSuccess(User user, User actuallySendUser, String newUserId) throws Exception {
 
-    AdminCreateUserRequest request = setCreateRequestAndResult(actuallySendUser, newUserId);
+    assertNoNsUserInDb(newUserId);
+
+    CognitoCreateRequests requests = setCreateRequestAndResult(actuallySendUser, newUserId);
+    AdminCreateUserRequest request = requests.createRequest;
+    AdminCreateUserRequest invitationRequest = requests.invitationRequest;
     setDoraSuccess();
 
     mockMvc
@@ -324,17 +423,45 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
         .andReturn();
 
     verify(cognito, times(1)).adminCreateUser(request);
+    verify(cognito, times(1)).adminCreateUser(invitationRequest);
     verify(spySearchService, times(1)).createUser(any(User.class));
     verifyDoraCalls(1);
     verify(auditLogService, times(1)).createAuditLogRecord(any(
         UserCreatedEvent.class));
+
+    NsUser newNsUser = assertNsUserInDb(newUserId);
+    assertThat(newNsUser.getUsername(), is(newUserId));
+    assertThat(newNsUser.getRacfid(), is(actuallySendUser.getRacfid()));
+    assertThat(newNsUser.getNotes(), is(actuallySendUser.getNotes()));
+    assertThat(newNsUser.getPhoneNumber(), is(actuallySendUser.getPhoneNumber()));
+    assertThat(newNsUser.getPhoneExtensionNumber(), is(actuallySendUser.getPhoneExtensionNumber()));
+    assertThat(newNsUser.getFirstName(), is(actuallySendUser.getFirstName()));
+    assertThat(newNsUser.getLastName(), is(actuallySendUser.getLastName()));
+    assertThat(newNsUser.getRoles(), equalTo(actuallySendUser.getRoles()));
+    assertThat(newNsUser.getPermissions(), equalTo(actuallySendUser.getPermissions()));
   }
 
-  private  AdminCreateUserRequest setCreateRequestAndResult(User actuallySendUser,
+  private  CognitoCreateRequests setCreateRequestAndResult(User actuallySendUser,
       String newUserId) {
+    TestCognitoServiceFacade testCognitoServiceFacade = (TestCognitoServiceFacade) cognitoServiceFacade;
+
     AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(actuallySendUser);
-    ((TestCognitoServiceFacade) cognitoServiceFacade).setCreateUserResult(request, newUserId);
-    return request;
+    AdminCreateUserResult result = testCognitoServiceFacade.setCreateUserResult(request, newUserId);
+    AdminCreateUserRequest invitationEmailRequest = testCognitoServiceFacade
+        .setCreateUserInvitationRequest(actuallySendUser.getEmail(), result);
+
+    return new CognitoCreateRequests(request, invitationEmailRequest);
+  }
+
+  private  CognitoCreateRequests setCreateRequestAndResultWithEmailError(User actuallySendUser,
+      String newUserId) {
+    TestCognitoServiceFacade testCognitoServiceFacade = (TestCognitoServiceFacade) cognitoServiceFacade;
+
+    AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(actuallySendUser);
+    testCognitoServiceFacade.setCreateUserResult(request, newUserId);
+    AdminCreateUserRequest invitationEmailRequest = testCognitoServiceFacade
+        .setCreateUserInvitationRequestWithEmailError(actuallySendUser.getEmail());
+    return new CognitoCreateRequests(request, invitationEmailRequest);
   }
 
   private MvcResult assertCreateUserUnauthorized() throws Exception {
@@ -361,15 +488,14 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
     assertExtensible(result, fixturePath);
   }
 
-  private User racfidUserNotExistingInCognito(Set<String> roles, Set<String> permissions) {
-    return racfIdUser("Test@Test.com", "elroyda", roles, permissions);
+  private User racfidUserNotExistingInCognito(String email, Set<String> roles, Set<String> permissions) {
+    return racfIdUser(email, "elroyda", roles, permissions);
   }
 
-  private User actuallySendRacfidUserNotExistingInCognito(Set<String> roles, Set<String> permissions) {
+  private User actuallySendRacfidUserNotExistingInCognito(String email, Set<String> roles, Set<String> permissions) {
     ((TestCognitoServiceFacade) cognitoServiceFacade).setSearchByRacfidRequestAndResult("ELROYDA");
 
-    User actuallySendUser = racfidUserNotExistingInCognito(roles, permissions);
-    actuallySendUser.setEmail("test@test.com");
+    User actuallySendUser = racfidUserNotExistingInCognito(email.toLowerCase(), roles, permissions);
     actuallySendUser.setRacfid("ELROYDA");
     actuallySendUser.setFirstName("Donna");
     actuallySendUser.setLastName("Elroy");
@@ -409,5 +535,29 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
 
     verify(cognito, times(0)).adminCreateUser(request);
     verify(spySearchService, times(0)).createUser(any(User.class));
+  }
+
+  private void assertNoNsUserInDb(String userId) {
+    List<NsUser> newNsUsers = nsUserRepository.findByUsername(userId);
+    assertThat(newNsUsers, empty());
+  }
+
+  private NsUser assertNsUserInDb(String userId) {
+    List<NsUser> newNsUsers = nsUserRepository.findByUsername(userId);
+    assertThat(newNsUsers.size(), is(1));
+    return newNsUsers.get(0);
+  }
+
+  private static final class CognitoCreateRequests {
+
+    private final AdminCreateUserRequest createRequest;
+    private final AdminCreateUserRequest invitationRequest;
+
+    CognitoCreateRequests(
+        AdminCreateUserRequest createRequest,
+        AdminCreateUserRequest invitationRequest) {
+      this.createRequest = createRequest;
+      this.invitationRequest = invitationRequest;
+    }
   }
 }

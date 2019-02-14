@@ -195,7 +195,10 @@ public class User implements RolesHolder, Serializable {
   }
 
   public void setPermissions(Set<String> permissions) {
-    this.permissions = permissions;
+    this.permissions.clear();
+    if(permissions != null) {
+      this.permissions.addAll(permissions);
+    }
   }
 
   @Override
@@ -204,10 +207,9 @@ public class User implements RolesHolder, Serializable {
   }
 
   public void setRoles(Set<String> roles) {
-    if(roles == null) {
-      this.roles.clear();
-    } else {
-      this.roles = roles;
+    this.roles.clear();
+    if(roles != null) {
+      this.roles.addAll(roles);
     }
   }
 

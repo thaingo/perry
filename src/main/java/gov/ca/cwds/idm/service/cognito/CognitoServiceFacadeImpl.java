@@ -4,7 +4,6 @@ import static gov.ca.cwds.idm.persistence.ns.OperationType.GET;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.RESEND_INVITATION_EMAIL;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
 import static gov.ca.cwds.idm.service.cognito.attribute.UserUpdateAttributesUtil.buildUpdatedAttributesList;
-import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.EMAIL_DELIVERY;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.buildCreateUserAttributes;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getEmail;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_CONNECT_TO_IDM;
@@ -27,6 +26,7 @@ import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProviderClientBuilder;
 import com.amazonaws.services.cognitoidp.model.AdminCreateUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminCreateUserResult;
+import com.amazonaws.services.cognitoidp.model.AdminDeleteUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminDisableUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminEnableUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserRequest;
@@ -114,7 +114,7 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
         new AdminCreateUserRequest()
             .withUsername(user.getEmail())
             .withUserPoolId(properties.getUserpool())
-            .withDesiredDeliveryMediums(EMAIL_DELIVERY)
+            .withMessageAction(MessageActionType.SUPPRESS)
             .withUserAttributes(buildCreateUserAttributes(user));
   }
 
@@ -247,17 +247,6 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
     }
   }
 
-  @Override
-  public UserType resendInvitationMessage(String userId) {
-    UserType cognitoUser = getCognitoUserById(userId);
-    String email = getEmail(cognitoUser);
-    AdminCreateUserRequest request = createResendEmailRequest(email);
-    AdminCreateUserResult result =
-        executeUserOperationInCognito(identityProvider::adminCreateUser, request, userId,
-            RESEND_INVITATION_EMAIL);
-    return result.getUser();
-  }
-
   /**
    * Creates the request for resending email.
    *
@@ -269,6 +258,34 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
         .withUserPoolId(properties.getUserpool())
         .withMessageAction(MessageActionType.RESEND)
         .withDesiredDeliveryMediums(DeliveryMediumType.EMAIL);
+  }
+
+  @Override
+  public UserType resendInvitationMessage(String userId) {
+    UserType cognitoUser = getCognitoUserById(userId);
+    String email = getEmail(cognitoUser);
+    AdminCreateUserRequest request = createResendEmailRequest(email);
+    AdminCreateUserResult result =
+        executeUserOperationInCognito(identityProvider::adminCreateUser, request, userId,
+            RESEND_INVITATION_EMAIL);
+    return result.getUser();
+  }
+
+  @Override
+  public UserType sendInvitationMessageByEmail(String email) {
+    AdminCreateUserRequest request = createResendEmailRequest(email);
+    return identityProvider.adminCreateUser(request).getUser();
+  }
+
+  @Override
+  public AdminDeleteUserRequest createAdminDeleteUserRequest(String id) {
+    return new AdminDeleteUserRequest().withUsername(id).withUserPoolId(properties.getUserpool());
+  }
+
+  @Override
+  public void deleteCognitoUserById(String id) {
+    AdminDeleteUserRequest request = createAdminDeleteUserRequest(id);
+    identityProvider.adminDeleteUser(request);
   }
 
   public ListUsersRequest composeListUsersRequest(CognitoUsersSearchCriteria criteria) {
