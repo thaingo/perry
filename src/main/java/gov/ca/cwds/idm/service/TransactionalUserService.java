@@ -19,9 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Profile("idm")
-public class UserServiceImpl implements UserService {
+public class TransactionalUserService {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(TransactionalUserService.class);
 
   private CognitoServiceFacade cognitoServiceFacade;
 
@@ -29,7 +29,6 @@ public class UserServiceImpl implements UserService {
 
   private ExceptionFactory exceptionFactory;
 
-  @Override
   @Transactional(value = TOKEN_TRANSACTION_MANAGER)
   public void createUserInDbWithInvitationEmail(User user) {
     String email = user.getEmail();
@@ -60,7 +59,6 @@ public class UserServiceImpl implements UserService {
   /**
    * @return true if User attributes (in Cognito and database) were really updated, false otherwise
    */
-  @Override
   @Transactional(value = TOKEN_TRANSACTION_MANAGER)
   public boolean updateUserAttributes(UserUpdateRequest userUpdateRequest) {
     boolean isDatabaseUpdated = nsUserService.update(userUpdateRequest);

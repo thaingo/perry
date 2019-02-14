@@ -123,7 +123,7 @@ public class IdmServiceImpl implements IdmService {
   private AuditServiceImpl auditService;
 
   @Autowired
-  private UserService userService;
+  private TransactionalUserService transactionalUserService;
 
   @Override
   public User findUser(String id) {
@@ -218,7 +218,7 @@ public class IdmServiceImpl implements IdmService {
     String userId = user.getId();
     LOGGER.info("New user with username:{} was successfully created in Cognito", userId);
 
-    userService.createUserInDbWithInvitationEmail(user);
+    transactionalUserService.createUserInDbWithInvitationEmail(user);
     LOGGER.info("New user with username:{} was successfully created in database", userId);
 
     auditService.auditUserCreate(user);
@@ -350,7 +350,7 @@ public class IdmServiceImpl implements IdmService {
   private ExecutionStatus updateUserAttributes(UserUpdateRequest userUpdateRequest) {
     ExecutionStatus updateAttributesStatus = WAS_NOT_EXECUTED;
 
-    if(userService.updateUserAttributes(userUpdateRequest)) {
+    if(transactionalUserService.updateUserAttributes(userUpdateRequest)) {
       updateAttributesStatus = SUCCESS;
       auditService.auditUserUpdate(userUpdateRequest);
     }
@@ -627,8 +627,8 @@ public class IdmServiceImpl implements IdmService {
     this.validationService = validationService;
   }
 
-  public void setUserService(UserService userService) {
-    this.userService = userService;
+  public void setTransactionalUserService(TransactionalUserService transactionalUserService) {
+    this.transactionalUserService = transactionalUserService;
   }
 
   public void setAuditService(AuditServiceImpl auditService) {

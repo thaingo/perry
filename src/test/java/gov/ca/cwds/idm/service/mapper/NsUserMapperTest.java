@@ -3,6 +3,7 @@ package gov.ca.cwds.idm.service.mapper;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.util.Utils.fromDate;
+import static gov.ca.cwds.util.Utils.toSet;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -43,14 +44,8 @@ public class NsUserMapperTest {
     final String FIRST_NAME = "John";
     final String LAST_NAME = "Smith";
     final Date LAST_MODIFIED_TIME = new Date(1000000);
-
-    final Set<String> ROLES = new LinkedHashSet<>();
-    ROLES.add(OFFICE_ADMIN);
-    ROLES.add(CWS_WORKER);
-
-    final Set<String> PERMISSIONS = new LinkedHashSet<>();
-    PERMISSIONS.add("RFA-rollout");
-    PERMISSIONS.add("Hotline-rollout");
+    final Set<String> ROLES = toSet(OFFICE_ADMIN, CWS_WORKER);
+    final Set<String> PERMISSIONS = toSet("RFA-rollout", "Hotline-rollout");
 
     User user = new User();
     user.setId(USER_ID);
