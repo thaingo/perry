@@ -13,6 +13,7 @@
       "office_phone_extension_number": "11",
       "permissions": [],
       "start_date": "1980-08-08",
-      "roles": ["CWS-worker"]
+      "roles": ["CWS-worker"],
+      "cws_privileges": []
     }
   }

@@ -12,6 +12,8 @@
     "permissions": [],
     "roles": [
       "Super-admin"
+    ],
+    "cws_privileges": [
     ]
   },
   "edit_details": {

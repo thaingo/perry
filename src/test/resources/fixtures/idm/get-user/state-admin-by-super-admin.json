@@ -20,6 +20,8 @@
     ],
     "roles": [
       "State-admin"
+    ],
+    "cws_privileges": [
     ]
   },
   "edit_details": {
