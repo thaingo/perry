@@ -55,7 +55,7 @@ node('dora-slave') {
     try {
         stage('Preparation') {
             cleanWs()
-            checkout([$class: 'GitSCM', branches: [[name: '$branch']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '433ac100-b3c2-4519-b4d6-207c029a103b', refspec: '$refspec', url: 'git@github.com:ca-cwds/perry.git']]])
+            checkout scm
             checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: '$ansible_branch']], doGenerateSubmoduleConfigurations: false, extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'ansible']], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '433ac100-b3c2-4519-b4d6-207c029a103b', url: 'git@github.com:ca-cwds/de-ansible.git']]]
             rtGradle.tool = "Gradle_35"
             rtGradle.resolver repo: 'repo', server: serverArti
@@ -71,9 +71,7 @@ node('dora-slave') {
             buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'test jacocoTestReport', switches: "--info -DnewVersion=${newTag}".toString()
         }
         stage('SonarQube analysis') {
-            withSonarQubeEnv('Core-SonarQube') {
-                buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: "sonarqube -DnewVersion=${newTag}".toString()
-            }
+          lint(rtGradle)
         }
         stage('License Report') {
             buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'downloadLicenses'
