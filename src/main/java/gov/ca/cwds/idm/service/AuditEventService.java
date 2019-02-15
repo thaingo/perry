@@ -22,6 +22,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.persistence.PersistenceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
@@ -44,18 +45,18 @@ public class AuditEventService {
   @Autowired
   private AuditEventIndexService auditEventIndexService;
 
-  @Transactional(value = TOKEN_TRANSACTION_MANAGER)
+  @Transactional(TOKEN_TRANSACTION_MANAGER)
   public <T extends AuditEvent> void saveAuditEventsToDb(
       T auditEvent) {
-    try {
-      NsAuditEvent nsAuditEvent = new NsAuditEvent();
-      nsAuditEvent.setId(auditEvent.getId());
-      nsAuditEvent.setEventTimestamp(auditEvent.getTimestamp());
-      nsAuditEvent.setAuditEvent(objectMapper.writeValueAsString(auditEvent));
-      nsAuditEventRepository.save(nsAuditEvent);
-    } catch (JsonProcessingException e) {
-      throw new PersistenceException("Can't transform event to string", e);
-    }
+    nsAuditEventRepository.save(mapToNsAuditEvent(auditEvent));
+  }
+
+  @Transactional(TOKEN_TRANSACTION_MANAGER)
+  public void saveAuditEventsToDb(
+      List<? extends AuditEvent> auditEvents) {
+    List<NsAuditEvent> nsAuditEvents = auditEvents.stream().map(this::mapToNsAuditEvent)
+        .collect(Collectors.toList());
+    nsAuditEventRepository.save(nsAuditEvents);
   }
 
   public <T extends AuditEvent> void sendAuditEventToEsIndex(T event) {
@@ -100,6 +101,18 @@ public class AuditEventService {
       T auditEvent) {
     auditEvent.setId(UUID.randomUUID().toString());
     return auditEvent;
+  }
+
+  private <T extends AuditEvent> NsAuditEvent mapToNsAuditEvent(T auditEvent) {
+    try {
+      NsAuditEvent nsAuditEvent = new NsAuditEvent();
+      nsAuditEvent.setId(auditEvent.getId());
+      nsAuditEvent.setEventTimestamp(auditEvent.getTimestamp());
+      nsAuditEvent.setAuditEvent(objectMapper.writeValueAsString(auditEvent));
+      return nsAuditEvent;
+    } catch (JsonProcessingException e) {
+      throw new PersistenceException("Can't transform event to string", e);
+    }
   }
 
   public void setNsAuditEventRepository(

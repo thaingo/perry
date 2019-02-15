@@ -18,7 +18,6 @@ import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
 import java.util.Set;
-import java.util.UUID;
 
 public final class TestHelper {
 

@@ -214,27 +214,21 @@ public class IdmServiceImpl implements IdmService {
   public String createUser(User user) {
     CwsUserInfo cwsUser = getCwsUserData(user);
     enrichUserByCwsData(user, cwsUser);
-
     String email = toLowerCase(user.getEmail());
     user.setEmail(email);
     String racfId = toUpperCase(user.getRacfid());
     user.setRacfid(racfId);
-
     validationService.validateUserCreate(user, cwsUser != null);
     authorizeService.checkCanCreateUser(user);
-
     UserType userType = cognitoServiceFacade.createUser(user);
     enrichUserByCognitoData(user, userType);
-    String userId = user.getId();
-    LOGGER.info("New user with username:{} was successfully created in Cognito", userId);
-
+    LOGGER.info("New user with username:{} was successfully created in Cognito", user.getId());
     transactionalUserService.createUserInDbWithInvitationEmail(user);
-    LOGGER.info("New user with username:{} was successfully created in database", userId);
-
-    auditService.auditUserCreate(user);
-    PutInSearchExecution doraExecution = createUserInSearch(userType);
-    handleCreatePartialSuccess(userId, doraExecution);
-    return userId;
+    LOGGER.info("New user with username:{} was successfully created in database", user.getId());
+    issueUserCreatedEvent(user);
+    PutInSearchExecution doraExecution = createUserInSearch(user);
+    handleCreatePartialSuccess(user, doraExecution);
+    return user.getId();
   }
 
   @Override
@@ -283,12 +277,9 @@ public class IdmServiceImpl implements IdmService {
 
   @Transactional(TOKEN_TRANSACTION_MANAGER)
   public void resendInvitationMessage(User user) {
-    UserRegistrationResentEvent event = auditService
-        .createResendInvitationEvent(user);
-    auditService.saveAuditEventsToDb(event);
     authorizeService.checkCanResendInvitationMessage(user);
     cognitoServiceFacade.resendInvitationMessage(user.getId());
-    auditService.sendAuditEventToEsIndex(event);
+    issueResendInvitationEvent(user);
   }
 
   @Override
@@ -370,7 +361,7 @@ public class IdmServiceImpl implements IdmService {
 
     if(transactionalUserService.updateUserAttributes(userUpdateRequest)) {
       updateAttributesStatus = SUCCESS;
-      userUpdateRequest.getAuditEvents().forEach(auditService::sendAuditEventToEsIndex);
+      issueUserUpdatedEvents(userUpdateRequest);
     }
     return updateAttributesStatus;
   }
@@ -462,11 +453,8 @@ public class IdmServiceImpl implements IdmService {
 
       @Override
       public Void tryMethod(BooleanDiff enabledDiff) {
-        UserEnabledStatusChangedEvent event =
-            auditService.createUserEnableStatusUpdate(existedUser, enabledDiff);
-        auditService.saveAuditEventsToDb(event);
         cognitoServiceFacade.changeUserEnabledStatus(existedUser, enabledDiff.getNewValue());
-        auditService.sendAuditEventToEsIndex(event);
+        issueChangeEnabledStatusEvent(existedUser, enabledDiff);
         return null;
       }
 
@@ -610,6 +598,31 @@ public class IdmServiceImpl implements IdmService {
         setUserLogExecution(userLogService.logCreate(user.getId()));
       }
     };
+  }
+
+  private void issueUserCreatedEvent(User user) {
+    UserCreatedEvent event = auditService.createUserCreatedEvent(user);
+    auditService.saveAuditEventsToDb(event);
+    auditService.sendAuditEventToEsIndex(event);
+  }
+
+  private void issueUserUpdatedEvents(UserUpdateRequest userUpdateRequest) {
+    auditService.saveAuditEventsToDb(userUpdateRequest.getAuditEvents());
+    userUpdateRequest.getAuditEvents().forEach(auditService::sendAuditEventToEsIndex);
+  }
+
+  private void issueResendInvitationEvent(User user) {
+    UserRegistrationResentEvent event = auditService
+        .createResendInvitationEvent(user);
+    auditService.saveAuditEventsToDb(event);
+    auditService.sendAuditEventToEsIndex(event);
+  }
+
+  private void issueChangeEnabledStatusEvent(User user, BooleanDiff enabledDiff) {
+    UserEnabledStatusChangedEvent event =
+        auditService.createUserEnableStatusUpdate(user, enabledDiff);
+    auditService.saveAuditEventsToDb(event);
+    auditService.sendAuditEventToEsIndex(event);
   }
 
   public void setSearchService(SearchService searchService) {

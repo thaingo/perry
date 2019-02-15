@@ -31,6 +31,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsNull.nullValue;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -111,6 +112,8 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
 
     setDoraSuccess();
 
+    long previousEventCount = nsAuditEventRepository.count();
+
     mockMvc
         .perform(
             MockMvcRequestBuilders.patch("/idm/users/" + USER_NO_RACFID_ID)
@@ -129,6 +132,7 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     NsUser updatedNsUser =  nsUserRepository.findByUsername(USER_NO_RACFID_ID).get(0);
     assertThat(updatedNsUser.getNotes(), is(NEW_NOTES));
 
+    assertEquals(5, nsAuditEventRepository.count() - previousEventCount);
     verifyDoraCalls(1);
     verify(auditEventIndexService, times(5)).sendAuditEventToEsIndex(any(AuditEvent.class));
     verify(auditEventIndexService, times(1)).sendAuditEventToEsIndex(any(
@@ -646,8 +650,8 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
             attr(ROLES, "CWS-worker")
         );
 
-    AdminEnableUserRequest enableUserRequest = setEnableUserRequestAndResult(userId);
-
+   AdminEnableUserRequest enableUserRequest = setEnableUserRequestAndResult(userId);
+   long previousEventsCount = nsAuditEventRepository.count();
     mockMvc
         .perform(
             MockMvcRequestBuilders.patch("/idm/users/" + userId)
@@ -656,6 +660,7 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
         .andExpect(MockMvcResultMatchers.status().isNoContent())
         .andReturn();
 
+    assertEquals(0, previousEventsCount - nsAuditEventRepository.count());
     verify(cognito, times(0)).adminUpdateUserAttributes(updateAttributesRequest);
     verify(cognito, times(0)).adminEnableUser(enableUserRequest);
     verify(spySearchService, times(0)).createUser(any(User.class));
