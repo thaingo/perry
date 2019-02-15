@@ -93,7 +93,7 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     userUpdate.setPhoneNumber(NEW_PHONE);
     userUpdate.setPhoneExtensionNumber(NEW_PHONE_EXTENSION);
     userUpdate.setPermissions(toSet("RFA-rollout", "Hotline-rollout"));
-    userUpdate.setRoles(toSet("Office-admin", "CWS-worker"));
+    userUpdate.setRoles(toSet(OFFICE_ADMIN, CWS_WORKER));
     userUpdate.setNotes(NEW_NOTES);
 
     AdminUpdateUserAttributesRequest updateAttributesRequest =
@@ -127,6 +127,12 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     inOrder.verify(cognito).adminDisableUser(disableUserRequest);
 
     NsUser updatedNsUser =  nsUserRepository.findByUsername(USER_NO_RACFID_ID).get(0);
+
+    assertThat(updatedNsUser.getUsername(), is(USER_NO_RACFID_ID));
+    assertThat(updatedNsUser.getPhoneNumber(), is(NEW_PHONE));
+    assertThat(updatedNsUser.getPhoneExtensionNumber(), is(NEW_PHONE_EXTENSION));
+    assertThat(updatedNsUser.getRoles(), is(toSet(OFFICE_ADMIN, CWS_WORKER)));
+    assertThat(updatedNsUser.getPermissions(), is(toSet("RFA-rollout", "Hotline-rollout")));
     assertThat(updatedNsUser.getNotes(), is(NEW_NOTES));
 
     verifyDoraCalls(1);
