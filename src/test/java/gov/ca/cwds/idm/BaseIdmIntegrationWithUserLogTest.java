@@ -6,7 +6,8 @@ import static org.junit.Assert.assertTrue;
 
 import gov.ca.cwds.idm.dto.UserIdAndOperation;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
-import gov.ca.cwds.idm.service.AuditLogService;
+import gov.ca.cwds.idm.service.AuditEventIndexService;
+import gov.ca.cwds.idm.service.AuditEventService;
 import gov.ca.cwds.idm.service.UserLogService;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,8 +19,11 @@ public abstract class BaseIdmIntegrationWithUserLogTest extends BaseIdmIntegrati
   @Autowired
   protected UserLogService userLogService;
 
+  @Autowired
+  protected AuditEventService auditEventService;
+
   @MockBean
-  protected AuditLogService auditLogService;
+  protected AuditEventIndexService auditEventIndexService;
 
   protected final void assertLastUserLog(LocalDateTime startTime, String expectedUserName, OperationType expectedOperation) {
     List<UserIdAndOperation> UserIdAndOperations =

@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
  * Created by Alexander Serbin on 1/11/2019
  */
 
-abstract class UserChangeLogEvent extends AuditEvent<UserChangeLogRecord> {
+public abstract class UserChangeLogEvent extends AuditEvent<UserChangeLogRecord> {
 
   private static final long serialVersionUID = -2341018571605446028L;
 

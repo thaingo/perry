@@ -73,7 +73,7 @@ public class ResendInvitationEmailTest extends BaseIdmIntegrationWithUserLogTest
 
   private void assertResendEmailUnauthorized(String id, String fixtureFilePath) throws Exception {
     MvcResult result = assertResendEmailUnauthorized(id);
-    verify(auditLogService, times(0)).createAuditLogRecord(any(
+    verify(auditEventIndexService, times(0)).sendAuditEventToEsIndex(any(
         UserRegistrationResentEvent.class));
     assertExtensible(result, fixtureFilePath);
   }
@@ -103,7 +103,7 @@ public class ResendInvitationEmailTest extends BaseIdmIntegrationWithUserLogTest
     RegistrationResubmitResponse registrationResubmitResponse =
         TestUtils.deserialize(strResponse, RegistrationResubmitResponse.class);
     assertThat(registrationResubmitResponse.getUserId(), is(USER_WITH_RACFID_ID));
-    verify(auditLogService, times(1)).createAuditLogRecord(any(
+    verify(auditEventIndexService, times(1)).sendAuditEventToEsIndex(any(
         UserRegistrationResentEvent.class));
   }
 

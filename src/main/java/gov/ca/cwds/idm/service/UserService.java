@@ -16,11 +16,14 @@ public class UserService {
 
   private NsUserService nsUserService;
 
+  private AuditEventService auditEventService;
+
   /**
    * @return true if User attributes (in Cognito and database) were really updated, false otherwise
    */
   @Transactional(value = TOKEN_TRANSACTION_MANAGER)
   public boolean updateUserAttributes(UserUpdateRequest userUpdateRequest) {
+    userUpdateRequest.getAuditEvents().forEach(auditEventService::saveAuditEventsToDb);
     boolean isDatabaseUpdated = nsUserService.update(userUpdateRequest);
     boolean isCognitoUpdated = cognitoServiceFacade.updateUserAttributes(userUpdateRequest);
     return (isDatabaseUpdated || isCognitoUpdated);
@@ -35,4 +38,10 @@ public class UserService {
   public void setNsUserService(NsUserService nsUserService) {
     this.nsUserService = nsUserService;
   }
+
+  @Autowired
+  public void setAuditEventService(AuditEventService auditEventService) {
+    this.auditEventService = auditEventService;
+  }
+
 }

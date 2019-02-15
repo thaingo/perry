@@ -130,16 +130,16 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     assertThat(updatedNsUser.getNotes(), is(NEW_NOTES));
 
     verifyDoraCalls(1);
-    verify(auditLogService, times(5)).createAuditLogRecord(any(AuditEvent.class));
-    verify(auditLogService, times(1)).createAuditLogRecord(any(
+    verify(auditEventIndexService, times(5)).sendAuditEventToEsIndex(any(AuditEvent.class));
+    verify(auditEventIndexService, times(1)).sendAuditEventToEsIndex(any(
         UserRoleChangedEvent.class));
-    verify(auditLogService, times(1)).createAuditLogRecord(any(
+    verify(auditEventIndexService, times(1)).sendAuditEventToEsIndex(any(
         PermissionsChangedEvent.class));
-    verify(auditLogService, times(1)).createAuditLogRecord(any(
+    verify(auditEventIndexService, times(1)).sendAuditEventToEsIndex(any(
         EmailChangedEvent.class));
-    verify(auditLogService, times(1)).createAuditLogRecord(any(
+    verify(auditEventIndexService, times(1)).sendAuditEventToEsIndex(any(
         UserEnabledStatusChangedEvent.class));
-    verify(auditLogService, times(1)).createAuditLogRecord(any(
+    verify(auditEventIndexService, times(1)).sendAuditEventToEsIndex(any(
         NotesChangedEvent.class));
   }
 
@@ -199,9 +199,9 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
                 .content(asJsonString(userUpdate)))
         .andExpect(MockMvcResultMatchers.status().isNoContent())
         .andReturn();
-    verify(auditLogService, never()).createAuditLogRecord(any(
+    verify(auditEventIndexService, never()).sendAuditEventToEsIndex(any(
         UserRoleChangedEvent.class));
-    verify(auditLogService, never()).createAuditLogRecord(any(
+    verify(auditEventIndexService, never()).sendAuditEventToEsIndex(any(
         EmailChangedEvent.class));
   }
 
@@ -405,9 +405,9 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
 
     verify(cognito, times(0)).adminEnableUser(enableUserRequest);
     verify(spySearchService, times(0)).createUser(any(User.class));
-    verify(auditLogService, never()).createAuditLogRecord(any(
+    verify(auditEventIndexService, never()).sendAuditEventToEsIndex(any(
         PermissionsChangedEvent.class));
-    verify(auditLogService, never()).createAuditLogRecord(any(
+    verify(auditEventIndexService, never()).sendAuditEventToEsIndex(any(
         UserEnabledStatusChangedEvent.class));
   }
 

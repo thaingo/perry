@@ -3,10 +3,13 @@ package gov.ca.cwds.idm.event;
 import static gov.ca.cwds.util.Utils.DATE_TIME_FORMAT;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
@@ -14,6 +17,8 @@ public abstract class AuditEvent<T extends Serializable> implements Serializable
 
   private static final long serialVersionUID = 7641668299790997287L;
 
+  @JsonIgnore
+  private String id;
   private String userLogin;
   private T event;
   private String comment;
@@ -70,5 +75,46 @@ public abstract class AuditEvent<T extends Serializable> implements Serializable
   public void setTimestamp(LocalDateTime timestamp) {
     this.timestamp = timestamp;
   }
-  
+
+  public String getId() {
+    return id;
+  }
+
+  public void setId(String id) {
+    this.id = id;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
+    }
+
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+
+    AuditEvent<?> that = (AuditEvent<?>) o;
+
+    return new EqualsBuilder()
+        .append(userLogin, that.userLogin)
+        .append(event, that.event)
+        .append(comment, that.comment)
+        .append(eventType, that.eventType)
+        .append(eventSource, that.eventSource)
+        .append(timestamp, that.timestamp)
+        .isEquals();
+  }
+
+  @Override
+  public int hashCode() {
+    return new HashCodeBuilder(17, 37)
+        .append(userLogin)
+        .append(event)
+        .append(comment)
+        .append(eventType)
+        .append(eventSource)
+        .append(timestamp)
+        .toHashCode();
+  }
 }
