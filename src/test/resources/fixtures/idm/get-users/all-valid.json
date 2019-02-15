@@ -18,6 +18,8 @@
       "roles": [
         "County-admin"
       ],
+      "cws_privileges": [
+      ],
       "notes": "Some notes text",
       "locked": false
     },
@@ -39,6 +41,8 @@
       ],
       "roles": [
         "County-admin"
+      ],
+      "cws_privileges": [
       ]
     },
     {
@@ -63,8 +67,22 @@
       "permissions": [
         "Hotline-rollout"
       ],
-      "roles":[
+      "roles": [
         "CWS-worker"
+      ],
+      "cws_privileges": [
+        {
+          "category": "Limited Access Authority",
+          "privilege": "Sealed"
+        },
+        {
+          "category": "Override Authority",
+          "privilege": "Officewide Read/Write"
+        },
+        {
+          "category": "Limited Access Authority",
+          "privilege": "Sensitive Persons"
+        }
       ]
     }
   ]

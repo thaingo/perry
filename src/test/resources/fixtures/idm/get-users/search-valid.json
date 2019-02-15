@@ -19,6 +19,8 @@
       "roles": [
         "County-admin"
       ],
+      "cws_privileges": [
+      ],
       "notes": "Some notes text"
     }
   ]

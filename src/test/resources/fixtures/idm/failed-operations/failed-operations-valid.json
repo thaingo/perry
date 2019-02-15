@@ -24,6 +24,20 @@
       ],
       "roles": [
         "CWS-worker"
+      ],
+      "cws_privileges": [
+        {
+          "category": "Limited Access Authority",
+          "privilege": "Sealed"
+        },
+        {
+          "category": "Override Authority",
+          "privilege": "Officewide Read/Write"
+        },
+        {
+          "category": "Limited Access Authority",
+          "privilege": "Sensitive Persons"
+        }
       ]
     },
     "operation": "UPDATE"
@@ -47,6 +61,8 @@
       ],
       "roles": [
         "County-admin"
+      ],
+      "cws_privileges": [
       ]
     },
     "operation": "UPDATE"
@@ -70,6 +86,8 @@
       ],
       "roles": [
         "County-admin"
+      ],
+      "cws_privileges": [
       ],
       "notes": "Some notes text"
     },

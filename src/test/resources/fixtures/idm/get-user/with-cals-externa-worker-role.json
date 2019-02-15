@@ -17,6 +17,8 @@
     ],
     "roles": [
       "CALS-external-worker"
+    ],
+    "cws_privileges": [
     ]
   },
   "edit_details": {

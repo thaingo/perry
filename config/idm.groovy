@@ -38,6 +38,7 @@ if(cwsUser) {
     result.officeId = cwsUser.cwsOffice?.officeId
     result.officePhoneNumber = cwsUser.cwsOffice?.primaryPhoneNumber
     result.officePhoneExtensionNumber = cwsUser.cwsOffice?.primaryPhoneExtensionNumber
+    result.cwsPrivileges = cwsUser.cwsStaffPrivs
 } else {
     result.countyName = attribute("custom:County")
     result.firstName = attribute("given_name")

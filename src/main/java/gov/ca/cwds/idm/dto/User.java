@@ -12,6 +12,7 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import org.hibernate.validator.constraints.NotBlank;
@@ -21,7 +22,7 @@ import org.hibernate.validator.constraints.NotBlank;
 @SuppressWarnings("squid:S3437")
 public class User implements RolesHolder, Serializable {
 
-  private static final long serialVersionUID = -3129911507646832123L;
+  private static final long serialVersionUID = -3223381407378606717L;
 
   private String id;
 
@@ -71,6 +72,8 @@ public class User implements RolesHolder, Serializable {
   private Set<String> permissions = new LinkedHashSet<>();
 
   private Set<String> roles = new LinkedHashSet<>();
+
+  private Set<CwsStaffPrivilege> cwsPrivileges = new HashSet<>();
 
   public String getId() {
     return id;
@@ -213,6 +216,14 @@ public class User implements RolesHolder, Serializable {
     if(roles != null) {
       this.roles.addAll(roles);
     }
+  }
+
+  public Set<CwsStaffPrivilege> getCwsPrivileges() {
+    return cwsPrivileges;
+  }
+
+  public void setCwsPrivileges(Set<CwsStaffPrivilege> cwsPrivileges) {
+    this.cwsPrivileges = cwsPrivileges;
   }
 
   public String getOfficePhoneExtensionNumber() {

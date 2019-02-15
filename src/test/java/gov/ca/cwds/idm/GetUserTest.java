@@ -17,6 +17,7 @@ import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_CALS_EXTERNAL;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_NO_RACFID_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_WITH_NO_LOCKED_VALUE_UNLOCKED;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_WITH_NO_PHONE_EXTENSION;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_WITH_RACFID_AND_CWS_STAFF_AUTHORITY_PRVILIGES;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_WITH_RACFID_AND_DB_DATA_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_WITH_RACFID_AND_INVALID_COUNTY_IN_COGNITO;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_WITH_RACFID_ID;
@@ -83,6 +84,14 @@ public class GetUserTest extends BaseIdmIntegrationTest {
     testGetValidUser(
         USER_WITH_RACFID_AND_INVALID_COUNTY_IN_COGNITO,
         "fixtures/idm/get-user/with-racfid-and-db-data-invalid-county-in-cognito.json");
+  }
+
+  @Test
+  @WithMockCustomUser
+  public void testGetUserWithRacfIdAndCwsStaffPrivileges() throws Exception {
+    testGetValidUser(
+        USER_WITH_RACFID_AND_CWS_STAFF_AUTHORITY_PRVILIGES,
+        "fixtures/idm/get-user/with-racfid-and-cws-staff-privs.json");
   }
 
   @Test

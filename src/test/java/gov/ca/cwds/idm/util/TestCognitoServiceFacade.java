@@ -56,6 +56,8 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
   public static final String LOCKED_USER = "44732d50-9425-4rd2-a92f-7425q0c411bw";
   public static final String USER_WITH_RACFID_AND_INVALID_COUNTY_IN_COGNITO =
       "145614ce-0168-4950-9b47-7ba0cdf1f299";
+  public static final String USER_WITH_RACFID_AND_CWS_STAFF_AUTHORITY_PRVILIGES =
+      "145614ce-0168-4950-9b47-7ba0cdf1f589";
   public static final String USER_WITH_NO_PHONE_EXTENSION = "d740ec1d-66ae-4d84-a8c4-8bed7a942f5b";
   public static final String NEW_USER_SUCCESS_ID = "17067e4e-270f-4623-b86c-b4d4fa527a34";
   public static final String NEW_USER_ES_FAIL_ID = "08e14c57-6e5e-48dd-8172-e8949c2a7f76";
@@ -174,6 +176,24 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
             "+4646888777",
             "7",
             null);
+
+    testUser(
+        USER_WITH_RACFID_AND_CWS_STAFF_AUTHORITY_PRVILIGES,
+        Boolean.TRUE,
+        "CONFIRMED",
+        date(2019, 1, 3),
+        date(2019, 2, 8),
+        "han.solo@osi.ca.gav",
+        "Han",
+        "Solo",
+        "Yolo",
+        "Facility-search-rollout",
+        "CWS-worker",
+        "CWSPRV",
+        WithMockCustomUser.OFFICE_ID,
+        "+9167777777",
+        "777",
+        null);
 
     TestUser userWithNoPhoneExtension =
         testUser(

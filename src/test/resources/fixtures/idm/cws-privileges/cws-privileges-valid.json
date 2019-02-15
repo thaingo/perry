@@ -1,0 +1,14 @@
+[
+  {
+    "category": "Interface Authority",
+    "privilege": "LIS"
+  },
+  {
+    "category": "Access Authority",
+    "privilege": "Create Service Provider"
+  },
+  {
+    "category": "Limited Access Authority",
+    "privilege": "Sensitive Persons"
+  }
+]
