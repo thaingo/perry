@@ -91,7 +91,7 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     final String NEW_PHONE_EXTENSION = "123";
     final String NEW_NOTES = "New notes text";
 
-    NsUser existedNsUser =  nsUserRepository.findByUsername(USER_NO_RACFID_ID).get(0);
+    NsUser existedNsUser = assertNsUserInDb(USER_NO_RACFID_ID);
     LocalDateTime oldLastModifiedTime = existedNsUser.getLastModifiedTime();
 
     UserUpdate userUpdate = new UserUpdate();
@@ -133,8 +133,7 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     inOrder.verify(cognito).adminUpdateUserAttributes(updateAttributesRequest);
     inOrder.verify(cognito).adminDisableUser(disableUserRequest);
 
-    NsUser updatedNsUser =  nsUserRepository.findByUsername(USER_NO_RACFID_ID).get(0);
-
+    NsUser updatedNsUser =  assertNsUserInDb(USER_NO_RACFID_ID);
     assertThat(updatedNsUser.getUsername(), is(USER_NO_RACFID_ID));
     assertThat(updatedNsUser.getPhoneNumber(), is(NEW_PHONE));
     assertThat(updatedNsUser.getPhoneExtensionNumber(), is(NEW_PHONE_EXTENSION));
@@ -313,6 +312,10 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
 
     verify(cognito, times(1)).adminUpdateUserAttributes(updateAttributesRequest);
     verify(cognito, times(1)).adminDisableUser(disableUserRequest);
+
+    NsUser updatedNsUser =  assertNsUserInDb(USER_WITH_RACFID_ID);
+    assertThat(updatedNsUser.getPermissions(), equalTo(toSet("RFA-rollout", "Hotline-rollout")));
+
     verify(spySearchService, times(1)).updateUser(any(User.class));
     verifyDoraCalls(DORA_WS_MAX_ATTEMPTS);
 
@@ -362,6 +365,10 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
 
     verify(cognito, times(1)).adminUpdateUserAttributes(updateAttributesRequest);
     verify(cognito, times(1)).adminDisableUser(disableUserRequest);
+
+    NsUser updatedNsUser =  assertNsUserInDb(USER_WITH_RACFID_AND_DB_DATA_ID);
+    assertThat(updatedNsUser.getPermissions(), equalTo(toSet("RFA-rollout", "Hotline-rollout")));
+
     verify(spySearchService, times(1)).updateUser(any(User.class));
     verifyDoraCalls(1);
 
