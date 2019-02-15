@@ -18,7 +18,6 @@ import static gov.ca.cwds.util.Utils.toSet;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -40,9 +39,7 @@ import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
 import gov.ca.cwds.idm.util.TestCognitoServiceFacade;
 import gov.ca.cwds.idm.util.WithMockCustomUser;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Set;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -535,17 +532,6 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
 
     verify(cognito, times(0)).adminCreateUser(request);
     verify(spySearchService, times(0)).createUser(any(User.class));
-  }
-
-  private void assertNoNsUserInDb(String userId) {
-    List<NsUser> newNsUsers = nsUserRepository.findByUsername(userId);
-    assertThat(newNsUsers, empty());
-  }
-
-  private NsUser assertNsUserInDb(String userId) {
-    List<NsUser> newNsUsers = nsUserRepository.findByUsername(userId);
-    assertThat(newNsUsers.size(), is(1));
-    return newNsUsers.get(0);
   }
 
   private static final class CognitoCreateRequests {

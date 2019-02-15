@@ -28,8 +28,11 @@ import static gov.ca.cwds.idm.util.TestUtils.attr;
 import static gov.ca.cwds.idm.util.WithMockCustomUserSecurityContextFactory.ADMIN_ID;
 import static gov.ca.cwds.util.Utils.toSet;
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -65,6 +68,7 @@ import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
 import gov.ca.cwds.idm.util.WithMockCustomUser;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
@@ -87,13 +91,16 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     final String NEW_PHONE_EXTENSION = "123";
     final String NEW_NOTES = "New notes text";
 
+    NsUser existedNsUser = assertNsUserInDb(USER_NO_RACFID_ID);
+    LocalDateTime oldLastModifiedTime = existedNsUser.getLastModifiedTime();
+
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setEnabled(Boolean.FALSE);
     userUpdate.setEmail(NEW_EMAIL);
     userUpdate.setPhoneNumber(NEW_PHONE);
     userUpdate.setPhoneExtensionNumber(NEW_PHONE_EXTENSION);
     userUpdate.setPermissions(toSet("RFA-rollout", "Hotline-rollout"));
-    userUpdate.setRoles(toSet("Office-admin", "CWS-worker"));
+    userUpdate.setRoles(toSet(OFFICE_ADMIN, CWS_WORKER));
     userUpdate.setNotes(NEW_NOTES);
 
     AdminUpdateUserAttributesRequest updateAttributesRequest =
@@ -126,8 +133,17 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     inOrder.verify(cognito).adminUpdateUserAttributes(updateAttributesRequest);
     inOrder.verify(cognito).adminDisableUser(disableUserRequest);
 
-    NsUser updatedNsUser =  nsUserRepository.findByUsername(USER_NO_RACFID_ID).get(0);
+    NsUser updatedNsUser =  assertNsUserInDb(USER_NO_RACFID_ID);
+    assertThat(updatedNsUser.getUsername(), is(USER_NO_RACFID_ID));
+    assertThat(updatedNsUser.getPhoneNumber(), is(NEW_PHONE));
+    assertThat(updatedNsUser.getPhoneExtensionNumber(), is(NEW_PHONE_EXTENSION));
+    assertThat(updatedNsUser.getRoles(), is(toSet(OFFICE_ADMIN, CWS_WORKER)));
+    assertThat(updatedNsUser.getPermissions(), is(toSet("RFA-rollout", "Hotline-rollout")));
     assertThat(updatedNsUser.getNotes(), is(NEW_NOTES));
+
+    LocalDateTime newLastModifiedTime = updatedNsUser.getLastModifiedTime();
+    assertThat(newLastModifiedTime, is(notNullValue()));
+    assertThat(newLastModifiedTime, is(not(equalTo(oldLastModifiedTime))));
 
     verifyDoraCalls(1);
     verify(auditLogService, times(5)).createAuditLogRecord(any(AuditEvent.class));
@@ -296,6 +312,10 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
 
     verify(cognito, times(1)).adminUpdateUserAttributes(updateAttributesRequest);
     verify(cognito, times(1)).adminDisableUser(disableUserRequest);
+
+    NsUser updatedNsUser =  assertNsUserInDb(USER_WITH_RACFID_ID);
+    assertThat(updatedNsUser.getPermissions(), equalTo(toSet("RFA-rollout", "Hotline-rollout")));
+
     verify(spySearchService, times(1)).updateUser(any(User.class));
     verifyDoraCalls(DORA_WS_MAX_ATTEMPTS);
 
@@ -345,6 +365,10 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
 
     verify(cognito, times(1)).adminUpdateUserAttributes(updateAttributesRequest);
     verify(cognito, times(1)).adminDisableUser(disableUserRequest);
+
+    NsUser updatedNsUser =  assertNsUserInDb(USER_WITH_RACFID_AND_DB_DATA_ID);
+    assertThat(updatedNsUser.getPermissions(), equalTo(toSet("RFA-rollout", "Hotline-rollout")));
+
     verify(spySearchService, times(1)).updateUser(any(User.class));
     verifyDoraCalls(1);
 
@@ -541,12 +565,6 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
   @WithMockCustomUser
   public void testUpdateRacfidUser_CansPermission() throws Exception {
     assertCanUpdatePermissions(USER_WITH_RACFID_AND_DB_DATA_ID, toSet("CANS-rollout"));
-  }
-
-  @Test
-  @WithMockCustomUser
-  public void testUpdate_NonStandardPermission() throws Exception {
-    assertCanUpdatePermissions(USER_NO_RACFID_ID, toSet("ArbitraryPermission"));
   }
 
   @Test

@@ -69,11 +69,13 @@ public class NsUserServiceImpl implements NsUserService {
     NsUserBuilder nsUserBuilder = new NsUserBuilder(nsUser, updateDifference);
     NsUser modifiedNsUser = nsUserBuilder.build();
 
-    if(!nsUserBuilder.userIsUpdated()) {
+    if (nsUserBuilder.userIsUpdated()) {
+      modifiedNsUser.setLastModifiedTime(LocalDateTime.now());
+      nsUserRepository.save(modifiedNsUser);
+      return true;
+    } else {
       return false;
     }
-    nsUserRepository.save(modifiedNsUser);
-    return true;
   }
 
   private NsUser getOrCreateNewNsUser(String username) {
