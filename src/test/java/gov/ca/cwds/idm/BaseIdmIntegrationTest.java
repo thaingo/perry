@@ -7,6 +7,9 @@ import static gov.ca.cwds.idm.BaseIdmIntegrationTest.IDM_BASIC_AUTH_USER;
 import static gov.ca.cwds.util.LiquibaseUtils.CMS_STORE_URL;
 import static gov.ca.cwds.util.LiquibaseUtils.TOKEN_STORE_URL;
 import static gov.ca.cwds.util.LiquibaseUtils.runLiquibaseScript;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
@@ -16,6 +19,7 @@ import ch.qos.logback.core.Appender;
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
 import gov.ca.cwds.BaseIntegrationTest;
 import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
 import gov.ca.cwds.idm.persistence.ns.repository.NsUserRepository;
 import gov.ca.cwds.idm.persistence.ns.repository.UserLogRepository;
 import gov.ca.cwds.idm.service.IdmServiceImpl;
@@ -27,6 +31,7 @@ import gov.ca.cwds.idm.util.WithMockCustomUser;
 import gov.ca.cwds.service.messages.MessagesService;
 import gov.ca.cwds.util.Utils;
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.Set;
 import org.apache.commons.codec.binary.Base64;
 import org.junit.Before;
@@ -155,6 +160,17 @@ public abstract class BaseIdmIntegrationTest extends BaseIntegrationTest {
     User user = racfIdUser(email, racfId, roles);
     user.setPermissions(permissions);
     return user;
+  }
+
+  protected void assertNoNsUserInDb(String userId) {
+    List<NsUser> newNsUsers = nsUserRepository.findByUsername(userId);
+    assertThat(newNsUsers, empty());
+  }
+
+  protected NsUser assertNsUserInDb(String userId) {
+    List<NsUser> newNsUsers = nsUserRepository.findByUsername(userId);
+    assertThat(newNsUsers.size(), is(1));
+    return newNsUsers.get(0);
   }
 
   @Component
