@@ -28,8 +28,11 @@ import static gov.ca.cwds.idm.util.TestUtils.attr;
 import static gov.ca.cwds.idm.util.WithMockCustomUserSecurityContextFactory.ADMIN_ID;
 import static gov.ca.cwds.util.Utils.toSet;
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -65,6 +68,7 @@ import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
 import gov.ca.cwds.idm.util.WithMockCustomUser;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
@@ -86,6 +90,9 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     final String NEW_PHONE = "6889228010";
     final String NEW_PHONE_EXTENSION = "123";
     final String NEW_NOTES = "New notes text";
+
+    NsUser existedNsUser =  nsUserRepository.findByUsername(USER_NO_RACFID_ID).get(0);
+    LocalDateTime oldLastModifiedTime = existedNsUser.getLastModifiedTime();
 
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setEnabled(Boolean.FALSE);
@@ -134,6 +141,10 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     assertThat(updatedNsUser.getRoles(), is(toSet(OFFICE_ADMIN, CWS_WORKER)));
     assertThat(updatedNsUser.getPermissions(), is(toSet("RFA-rollout", "Hotline-rollout")));
     assertThat(updatedNsUser.getNotes(), is(NEW_NOTES));
+
+    LocalDateTime newLastModifiedTime = updatedNsUser.getLastModifiedTime();
+    assertThat(newLastModifiedTime, is(notNullValue()));
+    assertThat(newLastModifiedTime, is(not(equalTo(oldLastModifiedTime))));
 
     verifyDoraCalls(1);
     verify(auditLogService, times(5)).createAuditLogRecord(any(AuditEvent.class));
