@@ -14,6 +14,10 @@ result.racfid = attribute("custom:RACFID")
 result.phoneNumber = CognitoPhoneConverter.fromCognitoFormat(attribute("phone_number"))
 result.phoneExtensionNumber = attribute("custom:PhoneExtension")
 
+if(StringUtils.isNotBlank(attribute("custom:locked"))) {
+    result.locked = attribute("custom:locked").toBoolean()
+}
+
 if(StringUtils.isNotBlank(attribute("custom:Permission"))) {
     result.permissions = attribute("custom:Permission").split('\\s*:\\s*') as HashSet
 }
@@ -34,6 +38,7 @@ if(cwsUser) {
     result.officeId = cwsUser.cwsOffice?.officeId
     result.officePhoneNumber = cwsUser.cwsOffice?.primaryPhoneNumber
     result.officePhoneExtensionNumber = cwsUser.cwsOffice?.primaryPhoneExtensionNumber
+    result.cwsPrivileges = cwsUser.cwsStaffPrivs
 } else {
     result.countyName = attribute("custom:County")
     result.firstName = attribute("given_name")

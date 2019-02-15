@@ -18,7 +18,10 @@
       "roles": [
         "County-admin"
       ],
-      "notes": "Some notes text"
+      "cws_privileges": [
+      ],
+      "notes": "Some notes text",
+      "locked": false
     },
     {
       "id": "24051d54-9321-4dd2-a92f-6425d6c455be",
@@ -32,11 +35,14 @@
       "enabled": true,
       "status": "CONFIRMED",
       "racfid": "YOLOD",
+      "locked": false,
       "permissions": [
         "Hotline-rollout"
       ],
       "roles": [
         "County-admin"
+      ],
+      "cws_privileges": [
       ]
     },
     {
@@ -57,11 +63,26 @@
       "enabled": true,
       "status": "CONFIRMED",
       "racfid": "SMITHBO",
+      "locked": false,
       "permissions": [
         "Hotline-rollout"
       ],
-      "roles":[
+      "roles": [
         "CWS-worker"
+      ],
+      "cws_privileges": [
+        {
+          "category": "Limited Access Authority",
+          "privilege": "Sealed"
+        },
+        {
+          "category": "Override Authority",
+          "privilege": "Officewide Read/Write"
+        },
+        {
+          "category": "Limited Access Authority",
+          "privilege": "Sensitive Persons"
+        }
       ]
     }
   ]

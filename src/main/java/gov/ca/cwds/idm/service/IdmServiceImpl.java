@@ -129,7 +129,7 @@ public class IdmServiceImpl implements IdmService {
   private AuditEventService auditService;
 
   @Autowired
-  private UserService userService;
+  private TransactionalUserService transactionalUserService;
 
   @Autowired
   private NsAuditEventRepository auditEventRepository;
@@ -211,23 +211,30 @@ public class IdmServiceImpl implements IdmService {
   }
 
   @Override
-  public String createUser(User userToCreate) {
-      CwsUserInfo cwsUser = getCwsUserData(userToCreate);
-      enrichUserByCwsData(userToCreate, cwsUser);
+  public String createUser(User user) {
+    CwsUserInfo cwsUser = getCwsUserData(user);
+    enrichUserByCwsData(user, cwsUser);
 
-      userToCreate.setEmail(toLowerCase(userToCreate.getEmail()));
-      String racfId = toUpperCase(userToCreate.getRacfid());
-      userToCreate.setRacfid(racfId);
-      validationService.validateUserCreate(userToCreate, cwsUser != null);
-      authorizeService.checkCanCreateUser(userToCreate);
-      UserCreatedEvent event = auditService.createUserCreatedEvent(userToCreate);
-      auditService.saveAuditEventsToDb(event);
-      UserType createdUser1 = cognitoServiceFacade.createUser(userToCreate);
-      User createdUser = mappingService.toUser(createdUser1);
-      auditService.sendAuditEventToEsIndex(event);
-      PutInSearchExecution doraExecution = createUserInSearch(createdUser);
-      handleCreatePartialSuccess(createdUser, doraExecution);
-      return createdUser.getId();
+    String email = toLowerCase(user.getEmail());
+    user.setEmail(email);
+    String racfId = toUpperCase(user.getRacfid());
+    user.setRacfid(racfId);
+
+    validationService.validateUserCreate(user, cwsUser != null);
+    authorizeService.checkCanCreateUser(user);
+
+    UserType userType = cognitoServiceFacade.createUser(user);
+    enrichUserByCognitoData(user, userType);
+    String userId = user.getId();
+    LOGGER.info("New user with username:{} was successfully created in Cognito", userId);
+
+    transactionalUserService.createUserInDbWithInvitationEmail(user);
+    LOGGER.info("New user with username:{} was successfully created in database", userId);
+
+    auditService.auditUserCreate(user);
+    PutInSearchExecution doraExecution = createUserInSearch(userType);
+    handleCreatePartialSuccess(userId, doraExecution);
+    return userId;
   }
 
   @Override
@@ -326,6 +333,14 @@ public class IdmServiceImpl implements IdmService {
     }
   }
 
+  private void enrichUserByCognitoData(User user, UserType cognitoUser) {
+    if (cognitoUser != null) {
+      user.setId(cognitoUser.getUsername());
+      user.setUserCreateDate(cognitoUser.getUserCreateDate());
+      user.setUserLastModifiedDate(cognitoUser.getUserLastModifiedDate());
+    }
+  }
+
   private void enrichDataFromStaffPerson(StaffPerson staffPerson, final User user) {
     if (staffPerson != null) {
       user.setFirstName(staffPerson.getFirstName());
@@ -353,7 +368,7 @@ public class IdmServiceImpl implements IdmService {
   private ExecutionStatus updateUserAttributes(UserUpdateRequest userUpdateRequest) {
     ExecutionStatus updateAttributesStatus = WAS_NOT_EXECUTED;
 
-    if (userService.updateUserAttributes(userUpdateRequest)) {
+    if(transactionalUserService.updateUserAttributes(userUpdateRequest)) {
       updateAttributesStatus = SUCCESS;
       userUpdateRequest.getAuditEvents().forEach(auditService::sendAuditEventToEsIndex);
     }
@@ -634,8 +649,8 @@ public class IdmServiceImpl implements IdmService {
     this.validationService = validationService;
   }
 
-  public void setUserService(UserService userService) {
-    this.userService = userService;
+  public void setTransactionalUserService(TransactionalUserService transactionalUserService) {
+    this.transactionalUserService = transactionalUserService;
   }
 
   public void setAuditService(AuditEventService auditService) {

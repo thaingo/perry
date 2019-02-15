@@ -12,6 +12,7 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import org.hibernate.validator.constraints.NotBlank;
@@ -21,7 +22,7 @@ import org.hibernate.validator.constraints.NotBlank;
 @SuppressWarnings("squid:S3437")
 public class User implements RolesHolder, Serializable {
 
-  private static final long serialVersionUID = -3223381407378606716L;
+  private static final long serialVersionUID = -3223381407378606717L;
 
   private String id;
 
@@ -51,6 +52,8 @@ public class User implements RolesHolder, Serializable {
 
   private String phoneExtensionNumber;
 
+  private boolean locked;
+
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_FORMAT)
   private Date userCreateDate;
 
@@ -69,6 +72,8 @@ public class User implements RolesHolder, Serializable {
   private Set<String> permissions = new LinkedHashSet<>();
 
   private Set<String> roles = new LinkedHashSet<>();
+
+  private Set<CwsStaffPrivilege> cwsPrivileges = new HashSet<>();
 
   public String getId() {
     return id;
@@ -195,7 +200,10 @@ public class User implements RolesHolder, Serializable {
   }
 
   public void setPermissions(Set<String> permissions) {
-    this.permissions = permissions;
+    this.permissions.clear();
+    if(permissions != null) {
+      this.permissions.addAll(permissions);
+    }
   }
 
   @Override
@@ -204,11 +212,18 @@ public class User implements RolesHolder, Serializable {
   }
 
   public void setRoles(Set<String> roles) {
-    if(roles == null) {
-      this.roles.clear();
-    } else {
-      this.roles = roles;
+    this.roles.clear();
+    if(roles != null) {
+      this.roles.addAll(roles);
     }
+  }
+
+  public Set<CwsStaffPrivilege> getCwsPrivileges() {
+    return cwsPrivileges;
+  }
+
+  public void setCwsPrivileges(Set<CwsStaffPrivilege> cwsPrivileges) {
+    this.cwsPrivileges = cwsPrivileges;
   }
 
   public String getOfficePhoneExtensionNumber() {
@@ -241,5 +256,13 @@ public class User implements RolesHolder, Serializable {
 
   public void setNotes(String notes) {
     this.notes = notes;
+  }
+
+  public boolean isLocked() {
+    return locked;
+  }
+
+  public void setLocked(boolean locked) {
+    this.locked = locked;
   }
 }

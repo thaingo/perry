@@ -17,6 +17,8 @@
       "roles": [
         "County-admin",
         "CWS-worker"
+      ],
+      "cws_privileges": [
       ]
     },
     "operation": "UPDATE"
@@ -39,6 +41,8 @@
       "roles": [
         "County-admin",
         "CWS-worker"
+      ],
+      "cws_privileges": [
       ]
     },
     "operation": "CREATE"

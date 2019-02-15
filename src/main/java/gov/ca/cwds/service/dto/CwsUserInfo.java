@@ -2,6 +2,7 @@ package gov.ca.cwds.service.dto;
 
 import gov.ca.cwds.data.persistence.auth.CwsOffice;
 import gov.ca.cwds.data.persistence.auth.StaffPerson;
+import gov.ca.cwds.idm.dto.CwsStaffPrivilege;
 import gov.ca.cwds.rest.api.domain.auth.StaffAuthorityPrivilege;
 import gov.ca.cwds.rest.api.domain.auth.StaffUnitAuthority;
 
@@ -12,6 +13,7 @@ public class CwsUserInfo {
   private String racfId;
   private boolean socialWorker;
   private Set<StaffAuthorityPrivilege> userAuthPrivs;
+  private Set<CwsStaffPrivilege> cwsStaffPrivs;
   private Set<StaffUnitAuthority> staffUnitAuths;
   private StaffPerson staffPerson;
   private CwsOffice cwsOffice;
@@ -31,6 +33,14 @@ public class CwsUserInfo {
 
   public void setUserAuthPrivs(Set<StaffAuthorityPrivilege> userAuthPrivs) {
     this.userAuthPrivs = userAuthPrivs;
+  }
+
+  public Set<CwsStaffPrivilege> getCwsStaffPrivs() {
+    return cwsStaffPrivs;
+  }
+
+  public void setCwsStaffPrivs(Set<CwsStaffPrivilege> cwsStaffPrivs) {
+    this.cwsStaffPrivs = cwsStaffPrivs;
   }
 
   public Set<StaffUnitAuthority> getStaffUnitAuths() {
@@ -79,6 +89,7 @@ public class CwsUserInfo {
         "racfId='" + racfId + '\'' +
         ", socialWorker=" + socialWorker +
         ", userAuthPrivs=" + userAuthPrivs +
+        ", cwsStaffPrivs=" + cwsStaffPrivs +
         ", staffUnitAuths=" + staffUnitAuths +
         ", staffPerson=" + staffPerson +
         ", cwsOffice=" + cwsOffice +
@@ -90,6 +101,7 @@ public class CwsUserInfo {
     private String racfId;
     private boolean socialWorker;
     private Set<StaffAuthorityPrivilege> userAuthPrivs;
+    private Set<CwsStaffPrivilege> cwsStaffPrivs;
     private Set<StaffUnitAuthority> staffUnitAuths;
     private StaffPerson staffPerson;
     private CwsOffice cwsOffice;
@@ -113,6 +125,11 @@ public class CwsUserInfo {
 
     public CwsUserInfoBuilder withUserAuthPrivs(Set<StaffAuthorityPrivilege> userAuthPrivs) {
       this.userAuthPrivs = userAuthPrivs;
+      return this;
+
+    }
+    public CwsUserInfoBuilder withCwsStaffPrivs(Set<CwsStaffPrivilege> cwsStaffPrivs) {
+      this.cwsStaffPrivs = cwsStaffPrivs;
       return this;
     }
 
@@ -141,6 +158,7 @@ public class CwsUserInfo {
       cwsUserInfo.setRacfId(racfId);
       cwsUserInfo.setSocialWorker(socialWorker);
       cwsUserInfo.setUserAuthPrivs(userAuthPrivs);
+      cwsUserInfo.setCwsStaffPrivs(cwsStaffPrivs);
       cwsUserInfo.setStaffUnitAuths(staffUnitAuths);
       cwsUserInfo.setStaffPerson(staffPerson);
       cwsUserInfo.setCwsOffice(cwsOffice);

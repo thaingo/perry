@@ -1,13 +1,13 @@
 {
   "user": {
-    "id": "24051d54-9321-4dd2-a92f-6425d6c455be",
+    "id": "24932d54-9321-4dd2-a92f-7425q6c411be",
     "first_name": "Julio",
     "last_name": "Iglecias",
     "county_name": "Yolo",
-    "email": "julio@gmail.com",
+    "email": "julio1@gmail.com",
     "user_create_date": "2018-05-04",
     "user_last_modified_date": "2018-05-29",
-    "last_login_date_time": "2018-09-17 05:01:12",
+    "last_login_date_time": "2018-10-17 07:01:12",
     "enabled": true,
     "locked": false,
     "status": "CONFIRMED",
@@ -24,11 +24,10 @@
   "edit_details": {
     "editable": true,
     "roles": {
-      "editable": true,
+      "editable": false,
       "possible_values": [
         "CWS-worker",
-        "Office-admin",
-        "County-admin"
+        "Office-admin"
       ]
     },
     "permissions": {
