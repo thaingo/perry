@@ -18,7 +18,7 @@
     "status": "CONFIRMED",
     "racfid": "SMITHB2",
     "permissions": [
-      "test"
+      "Hotline-rollout"
     ],
     "roles": [
       "CWS-worker"
