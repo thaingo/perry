@@ -50,6 +50,7 @@ public class AuditEventIndexService {
 
   @Async("auditLogTaskExecutor")
   public <T extends AuditEvent> void sendAuditEventToEsIndex(T event) {
+    String eventId = event.getId();
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
     HttpEntity<AuditEvent> requestEntity = new HttpEntity<>(event, headers);
@@ -58,7 +59,7 @@ public class AuditEventIndexService {
     params.put(DORA_URL, auditProperties.getDoraUrl());
     params.put(ES_AUDIT_INDEX, auditProperties.getIndex());
     params.put(ES_AUDIT_TYPE, auditProperties.getType());
-    params.put(ID, event.getId());
+    params.put(ID, eventId);
     params.put(SSO_TOKEN, getSsoToken());
     ResponseEntity<String> response;
     try {
@@ -67,7 +68,7 @@ public class AuditEventIndexService {
       if (LOGGER.isInfoEnabled()) {
         LOGGER.info(
             "Audit record, id:{} was successfully stored in Elastic Search index, Dora response string is:{}",
-            event.getId(),
+            eventId,
             response.getBody());
       }
     } catch (Exception e) {
