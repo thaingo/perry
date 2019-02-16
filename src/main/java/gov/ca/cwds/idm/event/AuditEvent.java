@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.UUID;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -15,7 +16,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public abstract class AuditEvent<T extends Serializable> implements Serializable {
 
-  private static final long serialVersionUID = 7641668299790997287L;
+  private static final long serialVersionUID = -6291870477321292779L;
 
   @JsonIgnore
   private String id;
@@ -27,6 +28,10 @@ public abstract class AuditEvent<T extends Serializable> implements Serializable
 
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_TIME_FORMAT)
   private LocalDateTime timestamp;
+
+  public AuditEvent() {
+    this.id = UUID.randomUUID().toString();
+  }
 
   public String getUserLogin() {
     return userLogin;
