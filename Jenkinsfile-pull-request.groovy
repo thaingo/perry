@@ -42,8 +42,6 @@ node('dora-slave') {
     parameters([
                   string(defaultValue: 'SNAPSHOT', description: 'Release version (if not SNAPSHOT will be released to lib-release repository)', name: 'VERSION'),
                   string(defaultValue: 'latest', description: '', name: 'APP_VERSION'),
-                  string(defaultValue: 'master', description: '', name: 'branch'),
-                  string(defaultValue: '', description: 'Used for mergerequest default is empty', name: 'refspec'),
                   booleanParam(defaultValue: true, description: 'Default release version template is: <majorVersion>_<buildNumber>-RC', name: 'RELEASE_PROJECT'),
                   string(defaultValue: "", description: 'Fill this field if need to specify custom version ', name: 'OVERRIDE_VERSION'),
                   booleanParam(defaultValue: true, description: 'Enable NewRelic APM', name: 'USE_NEWRELIC'),
@@ -53,7 +51,7 @@ node('dora-slave') {
     try {
         stage('Preparation') {
             cleanWs()
-            checkout([$class: 'GitSCM', branches: [[name: '$branch']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: '433ac100-b3c2-4519-b4d6-207c029a103b', refspec: '$refspec', url: 'git@github.com:ca-cwds/perry.git']]])
+            checkout scm
             rtGradle.tool = "Gradle_35"
             rtGradle.resolver repo: 'repo', server: serverArti
             rtGradle.useWrapper = true
@@ -74,9 +72,7 @@ node('dora-slave') {
             buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'test jacocoTestReport', switches: '--info'
         }
         stage('SonarQube analysis') {
-            withSonarQubeEnv('Core-SonarQube') {
-                buildInfo = rtGradle.run buildFile: 'build.gradle', switches: '--info', tasks: 'sonarqube'
-            }
+          lint(rtGradle)
         }
         stage('License Report') {
             buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'downloadLicenses'
