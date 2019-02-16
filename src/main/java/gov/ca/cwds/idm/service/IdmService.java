@@ -26,5 +26,5 @@ public interface IdmService {
 
   List<UserAndOperation> getFailedOperations(LocalDateTime lastJobTime);
 
-  RegistrationResubmitResponse resendInvitationMessage(String id);
+  RegistrationResubmitResponse resendInvitationMessage(User user);
 }

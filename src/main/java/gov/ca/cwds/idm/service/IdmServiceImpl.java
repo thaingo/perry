@@ -1,5 +1,6 @@
 package gov.ca.cwds.idm.service;
 
+import static gov.ca.cwds.config.TokenServiceConfiguration.TOKEN_TRANSACTION_MANAGER;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.CREATE;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
@@ -39,10 +40,19 @@ import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.UserVerificationResult;
 import gov.ca.cwds.idm.dto.UsersPage;
 import gov.ca.cwds.idm.dto.UsersSearchCriteria;
+import gov.ca.cwds.idm.event.AuditEvent;
+import gov.ca.cwds.idm.event.EmailChangedEvent;
+import gov.ca.cwds.idm.event.NotesChangedEvent;
+import gov.ca.cwds.idm.event.PermissionsChangedEvent;
+import gov.ca.cwds.idm.event.UserCreatedEvent;
+import gov.ca.cwds.idm.event.UserEnabledStatusChangedEvent;
+import gov.ca.cwds.idm.event.UserRegistrationResentEvent;
+import gov.ca.cwds.idm.event.UserRoleChangedEvent;
 import gov.ca.cwds.idm.exception.AdminAuthorizationException;
 import gov.ca.cwds.idm.exception.UserValidationException;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
+import gov.ca.cwds.idm.persistence.ns.entity.Permission;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
 import gov.ca.cwds.idm.service.authorization.AuthorizationService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
@@ -81,6 +91,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Profile("idm")
@@ -88,6 +99,9 @@ import org.springframework.stereotype.Service;
 public class IdmServiceImpl implements IdmService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(IdmServiceImpl.class);
+
+  @Autowired
+  private UserService userService;
 
   @Autowired
   private CognitoServiceFacade cognitoServiceFacade;
@@ -120,26 +134,24 @@ public class IdmServiceImpl implements IdmService {
   private ExceptionFactory exceptionFactory;
 
   @Autowired
-  private AuditServiceImpl auditService;
+  private AuditEventService auditService;
 
   @Autowired
   private TransactionalUserService transactionalUserService;
 
+  @Autowired
+  private DictionaryProvider dictionaryProvider;
+
   @Override
   public User findUser(String id) {
-    User user = getUser(id);
+    User user = userService.getUser(id);
     authorizeService.checkCanViewUser(user);
     return user;
   }
 
-  private User getUser(String id) {
-    UserType cognitoUser = cognitoServiceFacade.getCognitoUserById(id);
-    return mappingService.toUser(cognitoUser);
-  }
-
   @Override
   public void updateUser(String userId, UserUpdate updateUserDto) {
-    User existedUser = getUser(userId);
+    User existedUser = userService.getUser(userId);
 
     authorizeService.checkCanUpdateUser(existedUser, updateUserDto);
     validationService.validateUserUpdate(existedUser, updateUserDto);
@@ -172,10 +184,32 @@ public class IdmServiceImpl implements IdmService {
 
     userUpdateRequest.setUserId(existedUser.getId());
     userUpdateRequest.setExistedUser(existedUser);
-
-    userUpdateRequest.setUpdateDifference(new UpdateDifference(existedUser, updateUserDto));
-
+    UpdateDifference updateDifference = new UpdateDifference(existedUser, updateUserDto);
+    userUpdateRequest.setUpdateDifference(updateDifference);
+    userUpdateRequest
+        .addAuditEvents(createUserUpdateEvents(existedUser, updateDifference));
     return userUpdateRequest;
+  }
+
+  private List<AuditEvent> createUserUpdateEvents(User existedUser,
+      UpdateDifference updateDifference) {
+    List<AuditEvent> auditEvents = new ArrayList<>(4);
+    updateDifference.getRolesDiff().ifPresent(rolesDiff ->
+        auditEvents.add(
+            new UserRoleChangedEvent(existedUser, rolesDiff)));
+    updateDifference.getNotesDiff().ifPresent(notesDiff ->
+        auditEvents.add(new NotesChangedEvent(existedUser, notesDiff)));
+    updateDifference.getPermissionsDiff().ifPresent(permissionsDiff -> {
+          List<Permission> permissions = dictionaryProvider.getPermissions();
+          auditEvents.add(
+              new PermissionsChangedEvent(existedUser, permissionsDiff, permissions));
+        }
+    );
+    updateDifference.getEmailDiff().ifPresent(emailDiff ->
+        auditEvents.add(new EmailChangedEvent(existedUser, emailDiff))
+    );
+
+    return auditEvents;
   }
 
   private OptionalExecution<BooleanDiff, Void> updateUserEnabledStatus(
@@ -185,7 +219,7 @@ public class IdmServiceImpl implements IdmService {
     Optional<BooleanDiff> optEnabledDiff = userUpdateRequest.getUpdateDifference().getEnabledDiff();
     User existedUser = userUpdateRequest.getExistedUser();
 
-    if(optEnabledDiff.isPresent()) {
+    if (optEnabledDiff.isPresent()) {
       updateUserEnabledExecution = executeUpdateEnableStatusOptionally(existedUser,
           optEnabledDiff.get());
     } else {
@@ -204,27 +238,21 @@ public class IdmServiceImpl implements IdmService {
   public String createUser(User user) {
     CwsUserInfo cwsUser = getCwsUserData(user);
     enrichUserByCwsData(user, cwsUser);
-
     String email = toLowerCase(user.getEmail());
     user.setEmail(email);
     String racfId = toUpperCase(user.getRacfid());
     user.setRacfid(racfId);
-
     validationService.validateUserCreate(user, cwsUser != null);
     authorizeService.checkCanCreateUser(user);
-
     UserType userType = cognitoServiceFacade.createUser(user);
     enrichUserByCognitoData(user, userType);
-    String userId = user.getId();
-    LOGGER.info("New user with username:{} was successfully created in Cognito", userId);
-
+    LOGGER.info("New user with username:{} was successfully created in Cognito", user.getId());
     transactionalUserService.createUserInDbWithInvitationEmail(user);
-    LOGGER.info("New user with username:{} was successfully created in database", userId);
-
-    auditService.auditUserCreate(user);
-    PutInSearchExecution doraExecution = createUserInSearch(userType);
-    handleCreatePartialSuccess(userId, doraExecution);
-    return userId;
+    LOGGER.info("New user with username:{} was successfully created in database", user.getId());
+    issueUserCreatedEvent(user);
+    PutInSearchExecution doraExecution = createUserInSearch(user);
+    handleCreatePartialSuccess(user, doraExecution);
+    return user.getId();
   }
 
   @Override
@@ -260,17 +288,17 @@ public class IdmServiceImpl implements IdmService {
 
     return filterIdAndOperationList(dbList)
         .stream()
-        .map(e -> new UserAndOperation(getUser(e.getId()), e.getOperation()))
+        .map(e -> new UserAndOperation(userService.getUser(e.getId()), e.getOperation()))
         .collect(Collectors.toList());
   }
 
   @Override
-  public RegistrationResubmitResponse resendInvitationMessage(String userId) {
-    User user =  getUser(userId);
+  @Transactional(TOKEN_TRANSACTION_MANAGER)
+  public RegistrationResubmitResponse resendInvitationMessage(User user) {
     authorizeService.checkCanResendInvitationMessage(user);
-    cognitoServiceFacade.resendInvitationMessage(userId);
-    auditService.auditUserRegistrationResent(user);
-    return new RegistrationResubmitResponse(userId);
+    cognitoServiceFacade.resendInvitationMessage(user.getId());
+    issueResendInvitationEvent(user);
+    return new RegistrationResubmitResponse(user.getId());
   }
 
   @Override
@@ -352,7 +380,7 @@ public class IdmServiceImpl implements IdmService {
 
     if(transactionalUserService.updateUserAttributes(userUpdateRequest)) {
       updateAttributesStatus = SUCCESS;
-      auditService.auditUserUpdate(userUpdateRequest);
+      issueUserUpdatedEvents(userUpdateRequest);
     }
     return updateAttributesStatus;
   }
@@ -441,10 +469,11 @@ public class IdmServiceImpl implements IdmService {
   private OptionalExecution<BooleanDiff, Void> executeUpdateEnableStatusOptionally(
       User existedUser, BooleanDiff enabledDiff) {
     return new OptionalExecution<BooleanDiff, Void>(enabledDiff) {
+
       @Override
-      protected Void tryMethod(BooleanDiff enabledDiff) {
+      public Void tryMethod(BooleanDiff enabledDiff) {
         cognitoServiceFacade.changeUserEnabledStatus(existedUser, enabledDiff.getNewValue());
-        auditService.auditUserEnableStatusUpdate(existedUser, enabledDiff);
+        issueChangeEnabledStatusEvent(existedUser, enabledDiff);
         return null;
       }
 
@@ -456,15 +485,16 @@ public class IdmServiceImpl implements IdmService {
     };
   }
 
-  private void handleCreatePartialSuccess(String userId, PutInSearchExecution doraExecution) {
+  private void handleCreatePartialSuccess(User user, PutInSearchExecution doraExecution) {
     if (doraExecution.getExecutionStatus() == FAIL) {
       OptionalExecution dbLogExecution = doraExecution.getUserLogExecution();
 
       if (dbLogExecution.getExecutionStatus() == SUCCESS) {
-        throwPartialSuccessException(userId, CREATE, USER_CREATE_SAVE_TO_SEARCH_ERROR,
+        throwPartialSuccessException(user.getId(), CREATE, USER_CREATE_SAVE_TO_SEARCH_ERROR,
             doraExecution.getException());
       } else { // logging in db failed
-        throwPartialSuccessException(userId, CREATE, USER_CREATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS,
+        throwPartialSuccessException(user.getId(), CREATE,
+            USER_CREATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS,
             doraExecution.getException(), dbLogExecution.getException());
       }
     }
@@ -573,21 +603,44 @@ public class IdmServiceImpl implements IdmService {
     };
   }
 
-  private PutInSearchExecution createUserInSearch(UserType userType) {
-    return new PutInSearchExecution<UserType>(userType) {
+  private PutInSearchExecution createUserInSearch(User user) {
+    return new PutInSearchExecution<User>(user) {
       @Override
-      protected ResponseEntity<String> tryMethod(UserType userType) {
-        User user = mappingService.toUser(userType);
+      protected ResponseEntity<String> tryMethod(User user) {
         return searchService.createUser(user);
       }
 
       @Override
       protected void catchMethod(Exception e) {
-        String msg = messages.getTechMessage(UNABLE_CREATE_IDM_USER_IN_ES, userType.getUsername());
+        String msg = messages.getTechMessage(UNABLE_CREATE_IDM_USER_IN_ES, user.getId());
         LOGGER.error(msg, e);
-        setUserLogExecution(userLogService.logCreate(userType.getUsername()));
+        setUserLogExecution(userLogService.logCreate(user.getId()));
       }
     };
+  }
+
+  private void issueUserCreatedEvent(User user) {
+    UserCreatedEvent event = new UserCreatedEvent(user);
+    auditService.saveAuditEventsToDb(event);
+    auditService.sendAuditEventToEsIndex(event);
+  }
+
+  private void issueUserUpdatedEvents(UserUpdateRequest userUpdateRequest) {
+    auditService.saveAuditEventsToDb(userUpdateRequest.getAuditEvents());
+    userUpdateRequest.getAuditEvents().forEach(auditService::sendAuditEventToEsIndex);
+  }
+
+  private void issueResendInvitationEvent(User user) {
+    UserRegistrationResentEvent event = new UserRegistrationResentEvent(user);
+    auditService.saveAuditEventsToDb(event);
+    auditService.sendAuditEventToEsIndex(event);
+  }
+
+  private void issueChangeEnabledStatusEvent(User user, BooleanDiff enabledDiff) {
+    UserEnabledStatusChangedEvent event =
+        new UserEnabledStatusChangedEvent(user, enabledDiff);
+    auditService.saveAuditEventsToDb(event);
+    auditService.sendAuditEventToEsIndex(event);
   }
 
   public void setSearchService(SearchService searchService) {
@@ -631,7 +684,12 @@ public class IdmServiceImpl implements IdmService {
     this.transactionalUserService = transactionalUserService;
   }
 
-  public void setAuditService(AuditServiceImpl auditService) {
+  public void setAuditService(AuditEventService auditService) {
     this.auditService = auditService;
   }
+
+  public void setUserService(UserService userService) {
+    this.userService = userService;
+  }
+
 }

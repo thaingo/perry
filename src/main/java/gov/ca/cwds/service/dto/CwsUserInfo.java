@@ -5,7 +5,6 @@ import gov.ca.cwds.data.persistence.auth.StaffPerson;
 import gov.ca.cwds.idm.dto.CwsStaffPrivilege;
 import gov.ca.cwds.rest.api.domain.auth.StaffAuthorityPrivilege;
 import gov.ca.cwds.rest.api.domain.auth.StaffUnitAuthority;
-
 import java.util.Set;
 
 public class CwsUserInfo {

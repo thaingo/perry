@@ -6,6 +6,7 @@ import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_WITH_RACFID_ID;
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -73,7 +74,7 @@ public class ResendInvitationEmailTest extends BaseIdmIntegrationWithUserLogTest
 
   private void assertResendEmailUnauthorized(String id, String fixtureFilePath) throws Exception {
     MvcResult result = assertResendEmailUnauthorized(id);
-    verify(auditLogService, times(0)).createAuditLogRecord(any(
+    verify(auditEventIndexService, times(0)).sendAuditEventToEsIndex(any(
         UserRegistrationResentEvent.class));
     assertExtensible(result, fixtureFilePath);
   }
@@ -87,7 +88,7 @@ public class ResendInvitationEmailTest extends BaseIdmIntegrationWithUserLogTest
     user.setUsername(USER_WITH_RACFID_ID_EMAIL);
     user.setEnabled(true);
     user.setUserStatus("FORCE_CHANGE_PASSWORD");
-
+    long priorAuditEventsCount = nsAuditEventRepository.count();
     AdminCreateUserResult result = new AdminCreateUserResult().withUser(user);
     when(cognito.adminCreateUser(request)).thenReturn(result);
 
@@ -99,11 +100,12 @@ public class ResendInvitationEmailTest extends BaseIdmIntegrationWithUserLogTest
             .andExpect(MockMvcResultMatchers.status().isOk())
             .andReturn();
 
+    assertEquals(1, nsAuditEventRepository.count() - priorAuditEventsCount);
     String strResponse = mvcResult.getResponse().getContentAsString();
     RegistrationResubmitResponse registrationResubmitResponse =
         TestUtils.deserialize(strResponse, RegistrationResubmitResponse.class);
     assertThat(registrationResubmitResponse.getUserId(), is(USER_WITH_RACFID_ID));
-    verify(auditLogService, times(1)).createAuditLogRecord(any(
+    verify(auditEventIndexService, times(1)).sendAuditEventToEsIndex(any(
         UserRegistrationResentEvent.class));
   }
 

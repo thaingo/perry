@@ -18,6 +18,7 @@ import gov.ca.cwds.idm.service.DictionaryProvider;
 import gov.ca.cwds.idm.service.IdmService;
 import gov.ca.cwds.idm.service.OfficeService;
 import gov.ca.cwds.idm.service.UserEditDetailsService;
+import gov.ca.cwds.idm.service.UserService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -51,6 +52,9 @@ public class IdmResource {
 
   @Autowired
   private IdmService idmService;
+
+  @Autowired
+  private UserService userService;
 
   @Autowired
   private DictionaryProvider dictionaryProvider;
@@ -288,8 +292,8 @@ public class IdmResource {
       @NotNull
       @PathVariable("id")
           String id) {
-
-    RegistrationResubmitResponse response = idmService.resendInvitationMessage(id);
+    User user = userService.getUser(id);
+    RegistrationResubmitResponse response = idmService.resendInvitationMessage(user);
     return ResponseEntity.ok().body(response);
   }
 

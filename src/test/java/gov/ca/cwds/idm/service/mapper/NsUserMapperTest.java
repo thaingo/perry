@@ -13,7 +13,6 @@ import static org.junit.Assert.assertThat;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
 import java.util.Date;
-import java.util.LinkedHashSet;
 import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;

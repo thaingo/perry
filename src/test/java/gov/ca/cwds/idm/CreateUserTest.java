@@ -18,8 +18,10 @@ import static gov.ca.cwds.util.Utils.toSet;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -409,7 +411,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
     AdminCreateUserRequest request = requests.createRequest;
     AdminCreateUserRequest invitationRequest = requests.invitationRequest;
     setDoraSuccess();
-
+    long previousEventCount = nsAuditEventRepository.count();
     mockMvc
         .perform(
             MockMvcRequestBuilders.post("/idm/users")
@@ -419,11 +421,12 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
         .andExpect(header().string("location", "http://localhost/idm/users/" + newUserId))
         .andReturn();
 
+    assertEquals(1, nsAuditEventRepository.count() - previousEventCount);
     verify(cognito, times(1)).adminCreateUser(request);
     verify(cognito, times(1)).adminCreateUser(invitationRequest);
     verify(spySearchService, times(1)).createUser(any(User.class));
     verifyDoraCalls(1);
-    verify(auditLogService, times(1)).createAuditLogRecord(any(
+    verify(auditEventIndexService, times(1)).sendAuditEventToEsIndex(any(
         UserCreatedEvent.class));
 
     NsUser newNsUser = assertNsUserInDb(newUserId);
@@ -521,6 +524,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
   private void testCreateUserValidationError(User user) throws Exception {
 
     AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
+    long previousEventCount = nsAuditEventRepository.count();
 
     mockMvc
         .perform(
@@ -530,8 +534,10 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
         .andExpect(MockMvcResultMatchers.status().isBadRequest())
         .andReturn();
 
+    assertEquals(previousEventCount, nsAuditEventRepository.count());
     verify(cognito, times(0)).adminCreateUser(request);
     verify(spySearchService, times(0)).createUser(any(User.class));
+    verify(auditEventIndexService, never()).sendAuditEventToEsIndex(any());
   }
 
   private static final class CognitoCreateRequests {

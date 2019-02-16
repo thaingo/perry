@@ -1,11 +1,11 @@
 package gov.ca.cwds.idm.service;
 
+
 import gov.ca.cwds.idm.event.AuditEvent;
 import gov.ca.cwds.idm.service.cognito.AuditProperties;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,11 +17,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-@Service(value = "auditLogService")
+@Service
 @Profile("idm")
-public class AuditLogService {
+public class AuditEventIndexService {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(AuditLogService.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(AuditEventIndexService.class);
 
   private static final String DORA_URL = "doraUrl";
   private static final String ES_AUDIT_INDEX = "esUserIndex";
@@ -49,12 +49,11 @@ public class AuditLogService {
   private IndexRestSender restSender;
 
   @Async("auditLogTaskExecutor")
-  public ResponseEntity<String> createAuditLogRecord(AuditEvent event) {
+  public <T extends AuditEvent> void sendAuditEventToEsIndex(T event) {
+    String eventId = event.getId();
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
     HttpEntity<AuditEvent> requestEntity = new HttpEntity<>(event, headers);
-
-    final String eventId = UUID.randomUUID().toString();
 
     Map<String, String> params = new HashMap<>();
     params.put(DORA_URL, auditProperties.getDoraUrl());
@@ -72,9 +71,9 @@ public class AuditLogService {
             eventId,
             response.getBody());
       }
-      return response;
     } catch (Exception e) {
-      LOGGER.error("Error while storing the audit event {} for user {}.", event.getEventType(),
+      LOGGER.error("Error while storing the audit event {} for user {}.",
+          event.getEventType(),
           event.getUserLogin());
       throw e;
     }

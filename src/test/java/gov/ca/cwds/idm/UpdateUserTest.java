@@ -34,6 +34,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -118,6 +119,8 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
 
     setDoraSuccess();
 
+    long previousEventCount = nsAuditEventRepository.count();
+
     mockMvc
         .perform(
             MockMvcRequestBuilders.patch("/idm/users/" + USER_NO_RACFID_ID)
@@ -141,21 +144,22 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     assertThat(updatedNsUser.getPermissions(), is(toSet("RFA-rollout", "Hotline-rollout")));
     assertThat(updatedNsUser.getNotes(), is(NEW_NOTES));
 
+    assertEquals(5, nsAuditEventRepository.count() - previousEventCount);
     LocalDateTime newLastModifiedTime = updatedNsUser.getLastModifiedTime();
     assertThat(newLastModifiedTime, is(notNullValue()));
     assertThat(newLastModifiedTime, is(not(equalTo(oldLastModifiedTime))));
 
     verifyDoraCalls(1);
-    verify(auditLogService, times(5)).createAuditLogRecord(any(AuditEvent.class));
-    verify(auditLogService, times(1)).createAuditLogRecord(any(
+    verify(auditEventIndexService, times(5)).sendAuditEventToEsIndex(any(AuditEvent.class));
+    verify(auditEventIndexService, times(1)).sendAuditEventToEsIndex(any(
         UserRoleChangedEvent.class));
-    verify(auditLogService, times(1)).createAuditLogRecord(any(
+    verify(auditEventIndexService, times(1)).sendAuditEventToEsIndex(any(
         PermissionsChangedEvent.class));
-    verify(auditLogService, times(1)).createAuditLogRecord(any(
+    verify(auditEventIndexService, times(1)).sendAuditEventToEsIndex(any(
         EmailChangedEvent.class));
-    verify(auditLogService, times(1)).createAuditLogRecord(any(
+    verify(auditEventIndexService, times(1)).sendAuditEventToEsIndex(any(
         UserEnabledStatusChangedEvent.class));
-    verify(auditLogService, times(1)).createAuditLogRecord(any(
+    verify(auditEventIndexService, times(1)).sendAuditEventToEsIndex(any(
         NotesChangedEvent.class));
   }
 
@@ -215,9 +219,9 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
                 .content(asJsonString(userUpdate)))
         .andExpect(MockMvcResultMatchers.status().isNoContent())
         .andReturn();
-    verify(auditLogService, never()).createAuditLogRecord(any(
+    verify(auditEventIndexService, never()).sendAuditEventToEsIndex(any(
         UserRoleChangedEvent.class));
-    verify(auditLogService, never()).createAuditLogRecord(any(
+    verify(auditEventIndexService, never()).sendAuditEventToEsIndex(any(
         EmailChangedEvent.class));
   }
 
@@ -429,9 +433,9 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
 
     verify(cognito, times(0)).adminEnableUser(enableUserRequest);
     verify(spySearchService, times(0)).createUser(any(User.class));
-    verify(auditLogService, never()).createAuditLogRecord(any(
+    verify(auditEventIndexService, never()).sendAuditEventToEsIndex(any(
         PermissionsChangedEvent.class));
-    verify(auditLogService, never()).createAuditLogRecord(any(
+    verify(auditEventIndexService, never()).sendAuditEventToEsIndex(any(
         UserEnabledStatusChangedEvent.class));
   }
 
@@ -664,8 +668,8 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
             attr(ROLES, "CWS-worker")
         );
 
-    AdminEnableUserRequest enableUserRequest = setEnableUserRequestAndResult(userId);
-
+   AdminEnableUserRequest enableUserRequest = setEnableUserRequestAndResult(userId);
+   long previousEventsCount = nsAuditEventRepository.count();
     mockMvc
         .perform(
             MockMvcRequestBuilders.patch("/idm/users/" + userId)
@@ -674,6 +678,7 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
         .andExpect(MockMvcResultMatchers.status().isNoContent())
         .andReturn();
 
+    assertEquals(0, previousEventsCount - nsAuditEventRepository.count());
     verify(cognito, times(0)).adminUpdateUserAttributes(updateAttributesRequest);
     verify(cognito, times(0)).adminEnableUser(enableUserRequest);
     verify(spySearchService, times(0)).createUser(any(User.class));
