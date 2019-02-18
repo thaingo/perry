@@ -8,7 +8,7 @@
       "county_name": "Yolo",
       "racfid": "YOLOD",
       "user_create_date": "2018-05-04",
-      "user_last_modified_date": "2018-05-29",
+      "user_last_modified_date": "2018-05-29 05:01:12",
       "enabled": true,
       "status": "CONFIRMED",
       "permissions": [
@@ -31,7 +31,7 @@
       "last_name": "Manzano",
       "county_name": "Yolo",
       "user_create_date": "2018-05-04",
-      "user_last_modified_date": "2018-05-30",
+      "user_last_modified_date": "2018-05-30 05:01:12",
       "enabled": true,
       "status": "FORCE_CHANGE_PASSWORD",
       "permissions": [
