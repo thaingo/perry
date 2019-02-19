@@ -5,9 +5,9 @@ import gov.ca.cwds.idm.dto.UserUpdate;
 
 public interface ValidationService {
 
-  void validateUserCreate(User enrichedUser, boolean activeUserExistsInCws);
+  void validateUserCreate(User enrichedUser);
 
-  void validateVerifyIfUserCanBeCreated(User enrichedUser, boolean activeUserExistsInCws);
+  void validateVerifyIfUserCanBeCreated(User enrichedUser);
 
   void validateUserUpdate(User existedUser, UserUpdate updateUserDto);
 }

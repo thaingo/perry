@@ -153,7 +153,7 @@ public class ValidationServiceMockTest {
 
   private void validateCreate(UniversalUserToken admin, User user) {
     PowerMockito.when(getCurrentUser()).thenReturn(admin);
-    service.validateUserCreate(user, false);
+    service.validateUserCreate(user);
   }
 
   private static UniversalUserToken admin(String... roles) {

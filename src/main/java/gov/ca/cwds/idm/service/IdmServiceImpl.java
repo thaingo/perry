@@ -9,8 +9,6 @@ import static gov.ca.cwds.idm.service.ExecutionStatus.SUCCESS;
 import static gov.ca.cwds.idm.service.ExecutionStatus.WAS_NOT_EXECUTED;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.RACFID_STANDARD;
-import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getRACFId;
-import static gov.ca.cwds.service.messages.MessageCode.DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_UPDATE_USER_ENABLED_STATUS;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_CREATE_IDM_USER_IN_ES;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_PURGE_PROCESSED_USER_LOGS;
@@ -24,14 +22,10 @@ import static gov.ca.cwds.service.messages.MessageCode.USER_PARTIAL_UPDATE_AND_S
 import static gov.ca.cwds.service.messages.MessageCode.USER_UPDATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_UPDATE_SAVE_TO_SEARCH_ERROR;
 import static gov.ca.cwds.util.Utils.URL_DATETIME_FORMATTER;
-import static gov.ca.cwds.util.Utils.isRacfidUser;
 import static gov.ca.cwds.util.Utils.toLowerCase;
 import static gov.ca.cwds.util.Utils.toUpperCase;
 import static java.util.stream.Collectors.toSet;
 
-import com.amazonaws.services.cognitoidp.model.UserType;
-import gov.ca.cwds.data.persistence.auth.CwsOffice;
-import gov.ca.cwds.data.persistence.auth.StaffPerson;
 import gov.ca.cwds.idm.dto.RegistrationResubmitResponse;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserAndOperation;
@@ -51,15 +45,11 @@ import gov.ca.cwds.idm.event.UserRoleChangedEvent;
 import gov.ca.cwds.idm.exception.AdminAuthorizationException;
 import gov.ca.cwds.idm.exception.UserValidationException;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
-import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
 import gov.ca.cwds.idm.persistence.ns.entity.Permission;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
 import gov.ca.cwds.idm.service.authorization.AuthorizationService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute;
-import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
-import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
-import gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil;
 import gov.ca.cwds.idm.service.diff.BooleanDiff;
 import gov.ca.cwds.idm.service.diff.UpdateDifference;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
@@ -67,16 +57,11 @@ import gov.ca.cwds.idm.service.execution.OptionalExecution;
 import gov.ca.cwds.idm.service.execution.OptionalExecution.NoUpdateExecution;
 import gov.ca.cwds.idm.service.execution.PutInSearchExecution;
 import gov.ca.cwds.idm.service.validation.ValidationService;
-import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType;
-import gov.ca.cwds.service.CwsUserInfoService;
-import gov.ca.cwds.service.dto.CwsUserInfo;
 import gov.ca.cwds.service.messages.MessageCode;
 import gov.ca.cwds.service.messages.MessagesService;
 import gov.ca.cwds.util.Utils;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,7 +69,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,9 +91,6 @@ public class IdmServiceImpl implements IdmService {
   private CognitoServiceFacade cognitoServiceFacade;
 
   @Autowired
-  private CwsUserInfoService cwsUserInfoService;
-
-  @Autowired
   private MessagesService messages;
 
   @Autowired
@@ -122,13 +103,7 @@ public class IdmServiceImpl implements IdmService {
   private AuthorizationService authorizeService;
 
   @Autowired
-  private MappingService mappingService;
-
-  @Autowired
   private ValidationService validationService;
-
-  @Autowired
-  private NsUserService nsUserService;
 
   @Autowired
   private ExceptionFactory exceptionFactory;
@@ -236,47 +211,31 @@ public class IdmServiceImpl implements IdmService {
 
   @Override
   public String createUser(User user) {
-    CwsUserInfo cwsUser = getCwsUserData(user);
-    enrichUserByCwsData(user, cwsUser);
+    user = userService.enrichWithCwsData(user);
     String email = toLowerCase(user.getEmail());
     user.setEmail(email);
     String racfId = toUpperCase(user.getRacfid());
     user.setRacfid(racfId);
-    validationService.validateUserCreate(user, cwsUser != null);
+    validationService.validateUserCreate(user);
     authorizeService.checkCanCreateUser(user);
-    UserType userType = cognitoServiceFacade.createUser(user);
-    enrichUserByCognitoData(user, userType);
+    User createdUser = userService.createUser(user);
     LOGGER.info("New user with username:{} was successfully created in Cognito", user.getId());
     transactionalUserService.createUserInDbWithInvitationEmail(user);
     LOGGER.info("New user with username:{} was successfully created in database", user.getId());
-    issueUserCreatedEvent(user);
-    PutInSearchExecution doraExecution = createUserInSearch(user);
-    handleCreatePartialSuccess(user, doraExecution);
+    issueUserCreatedEvent(createdUser);
+    PutInSearchExecution doraExecution = createUserInSearch(createdUser);
+    handleCreatePartialSuccess(createdUser, doraExecution);
     return user.getId();
   }
 
   @Override
   public UsersPage getUserPage(String paginationToken) {
-    CognitoUserPage userPage =
-        cognitoServiceFacade.searchPage(
-            CognitoUsersSearchCriteriaUtil.composeToGetPage(paginationToken));
-    List<User> users = enrichCognitoUsers(userPage.getUsers());
-    return new UsersPage(users, userPage.getPaginationToken());
+    return userService.getUserPage(paginationToken);
   }
 
   @Override
   public List<User> searchUsers(UsersSearchCriteria criteria) {
-    StandardUserAttribute searchAttr = criteria.getSearchAttr();
-    Set<String> values = transformSearchValues(criteria.getValues(), searchAttr);
-
-    List<UserType> cognitoUsers = new ArrayList<>();
-
-    for (String value : values) {
-      CognitoUsersSearchCriteria cognitoSearchCriteria =
-          CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByAttribute(searchAttr, value);
-      cognitoUsers.addAll(cognitoServiceFacade.searchAllPages(cognitoSearchCriteria));
-    }
-    return enrichCognitoUsers(cognitoUsers);
+    return userService.searchUsers(criteria);
   }
 
   @Override
@@ -309,11 +268,10 @@ public class IdmServiceImpl implements IdmService {
     user.setRacfid(toUpperCase(racfId));
     user.setRoles(Utils.toSet(CWS_WORKER));
 
-    CwsUserInfo cwsUser = getCwsUserData(user);
-    enrichUserByCwsData(user, cwsUser);
+    user = userService.enrichWithCwsData(user);
 
     try {
-      validationService.validateVerifyIfUserCanBeCreated(user, cwsUser != null);
+      validationService.validateVerifyIfUserCanBeCreated(user);
       authorizeService.checkCanCreateUser(user);
     } catch (UserValidationException | AdminAuthorizationException e) {
       return buildUserVerificationErrorResult(e.getErrorCode(), e.getUserMessage());
@@ -328,57 +286,10 @@ public class IdmServiceImpl implements IdmService {
         .withVerificationFailed(code.getValue(), msg).build();
   }
 
-  private CwsUserInfo getCwsUserData(User user) {
-    if (isRacfidUser(user)) {
-      return cwsUserInfoService.getCwsUserByRacfId(user.getRacfid());
-    } else {
-      return null;
-    }
-  }
-
-  private void enrichUserByCwsData(User user, CwsUserInfo cwsUser) {
-    if (cwsUser != null) {
-      enrichDataFromCwsOffice(cwsUser.getCwsOffice(), user);
-      enrichDataFromStaffPerson(cwsUser.getStaffPerson(), user);
-    }
-  }
-
-  private void enrichUserByCognitoData(User user, UserType cognitoUser) {
-    if (cognitoUser != null) {
-      user.setId(cognitoUser.getUsername());
-      user.setUserCreateDate(cognitoUser.getUserCreateDate());
-      user.setUserLastModifiedDate(cognitoUser.getUserLastModifiedDate());
-    }
-  }
-
-  private void enrichDataFromStaffPerson(StaffPerson staffPerson, final User user) {
-    if (staffPerson != null) {
-      user.setFirstName(staffPerson.getFirstName());
-      user.setLastName(staffPerson.getLastName());
-      user.setEndDate(staffPerson.getEndDate());
-      user.setStartDate(staffPerson.getStartDate());
-      user.setPhoneNumber(staffPerson.getPhoneNumber());
-      user.setPhoneExtensionNumber(staffPerson.getPhoneExtensionNumber());
-    }
-  }
-
-  private void enrichDataFromCwsOffice(CwsOffice office, final User user) {
-    if (office != null) {
-      user.setOfficeId(office.getOfficeId());
-      Optional.ofNullable(office.getPrimaryPhoneNumber())
-          .ifPresent(e -> user.setOfficePhoneNumber(e.toString()));
-      Optional.ofNullable(office.getPrimaryPhoneExtensionNumber())
-          .ifPresent(user::setOfficePhoneExtensionNumber);
-      Optional.ofNullable(office.getGovernmentEntityType())
-          .ifPresent(
-              x -> user.setCountyName((GovernmentEntityType.findBySysId(x)).getDescription()));
-    }
-  }
-
   private ExecutionStatus updateUserAttributes(UserUpdateRequest userUpdateRequest) {
     ExecutionStatus updateAttributesStatus = WAS_NOT_EXECUTED;
 
-    if(transactionalUserService.updateUserAttributes(userUpdateRequest)) {
+    if (transactionalUserService.updateUserAttributes(userUpdateRequest)) {
       updateAttributesStatus = SUCCESS;
       issueUserUpdatedEvents(userUpdateRequest);
     }
@@ -472,7 +383,8 @@ public class IdmServiceImpl implements IdmService {
 
       @Override
       public Void tryMethod(BooleanDiff enabledDiff) {
-        cognitoServiceFacade.changeUserEnabledStatus(existedUser, enabledDiff.getNewValue());
+        cognitoServiceFacade
+            .changeUserEnabledStatus(existedUser.getId(), enabledDiff.getNewValue());
         issueChangeEnabledStatusEvent(existedUser, enabledDiff);
         return null;
       }
@@ -554,37 +466,6 @@ public class IdmServiceImpl implements IdmService {
     return values.stream().map(function).collect(toSet());
   }
 
-  private List<User> enrichCognitoUsers(Collection<UserType> cognitoUsers) {
-    if (CollectionUtils.isEmpty(cognitoUsers)) {
-      return Collections.emptyList();
-    }
-    Map<String, String> userNameToRacfId = new HashMap<>(cognitoUsers.size());
-    for (UserType userType : cognitoUsers) {
-      userNameToRacfId.put(userType.getUsername(), getRACFId(userType));
-    }
-    Set<String> userNames = userNameToRacfId.keySet();
-    Collection<String> racfIds = userNameToRacfId.values();
-
-    Map<String, CwsUserInfo> racfidToCmsUser = cwsUserInfoService.findUsers(racfIds)
-        .stream().collect(
-            Collectors.toMap(CwsUserInfo::getRacfId, e -> e, (user1, user2) -> {
-              LOGGER.warn(messages
-                  .getTechMessage(DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS, user1.getRacfId()));
-              return user1;
-            }));
-
-    Map<String, NsUser> usernameToNsUser =
-        nsUserService.findByUsernames(userNames).stream()
-            .collect(Collectors.toMap(NsUser::getUsername, e -> e));
-    return cognitoUsers
-        .stream()
-        .map(userType -> mappingService.toUser(
-            userType,
-            racfidToCmsUser.get(userNameToRacfId.get(userType.getUsername())),
-            usernameToNsUser.get(userType.getUsername())
-            )
-        ).collect(Collectors.toList());
-  }
 
   private PutInSearchExecution<String> updateUserInSearch(String id) {
     return new PutInSearchExecution<String>(id) {
@@ -652,14 +533,6 @@ public class IdmServiceImpl implements IdmService {
     this.cognitoServiceFacade = cognitoServiceFacade;
   }
 
-  public void setNsUserService(NsUserService nsUserService) {
-    this.nsUserService = nsUserService;
-  }
-
-  public void setCwsUserInfoService(CwsUserInfoService cwsUserInfoService) {
-    this.cwsUserInfoService = cwsUserInfoService;
-  }
-
   public void setUserLogService(UserLogService userLogService) {
     this.userLogService = userLogService;
   }
@@ -670,10 +543,6 @@ public class IdmServiceImpl implements IdmService {
 
   public void setAuthorizeService(AuthorizationService authorizeService) {
     this.authorizeService = authorizeService;
-  }
-
-  public void setMappingService(MappingService mappingService) {
-    this.mappingService = mappingService;
   }
 
   public void setValidationService(ValidationService validationService) {

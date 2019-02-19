@@ -36,7 +36,7 @@ public interface CognitoServiceFacade {
    */
   boolean updateUserAttributes(UserUpdateRequest userUpdateRequest);
 
-  void changeUserEnabledStatus(User existedUser,  Boolean newValue);
+  void changeUserEnabledStatus(String userId,  Boolean newValue);
 
   /**
    * Send the invitation message to the user that was just created.
