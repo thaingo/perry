@@ -36,11 +36,11 @@ public interface CognitoServiceFacade {
   void healthCheck();
 
   /**
-   @return true if Cognito operations were really executed, false otherwise
+   * @return true if Cognito operations were really executed, false otherwise
    */
   boolean updateUserAttributes(UserUpdateRequest userUpdateRequest);
 
-  void changeUserEnabledStatus(String userId,  Boolean newValue);
+  void changeUserEnabledStatus(String userId, Boolean newValue);
 
   /**
    * Send the invitation message to the user that was just created.
@@ -50,8 +50,8 @@ public interface CognitoServiceFacade {
   UserType sendInvitationMessageByEmail(String email);
 
   /**
-   * Resend the invitation message to a user that already exists
-   * and reset the expiration limit on the user's account by admin.
+   * Resend the invitation message to a user that already exists and reset the expiration limit on
+   * the user's account by admin.
    *
    * @param userId Cognito username of the user.
    */

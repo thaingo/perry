@@ -251,7 +251,7 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
    * {@inheritDoc}
    */
   @Override
-  public void changeUserEnabledStatus(String id,  Boolean newValue) {
+  public void changeUserEnabledStatus(String id, Boolean newValue) {
     if (newValue) {
       AdminEnableUserRequest adminEnableUserRequest =
           new AdminEnableUserRequest().withUsername(id).withUserPoolId(properties.getUserpool());

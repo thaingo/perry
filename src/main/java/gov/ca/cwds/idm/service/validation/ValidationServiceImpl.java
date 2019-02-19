@@ -19,7 +19,6 @@ import static gov.ca.cwds.util.Utils.toCommaDelimitedString;
 
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
-import gov.ca.cwds.idm.service.UserService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.idm.service.role.implementor.AdminRoleImplementorFactory;
