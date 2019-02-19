@@ -82,33 +82,20 @@ public class UserService {
     return new UsersPage(users, userPage.getPaginationToken());
   }
 
-  public User enrichWithCwsData(final User user) {
-    CwsUserInfo cwsUser = getCwsUserData(user);
-    enrichUserByCwsData(user, cwsUser);
-    return user;
+  public User enrichWithCwsData(final User userDto) {
+    CwsUserInfo cwsUser = getCwsUserData(userDto);
+    enrichUserByCwsData(userDto, cwsUser);
+    return userDto;
   }
 
-  public boolean isActiveRacfIdPresentInCognito(String racfId) {
-    Collection<UserType> cognitoUsersByRacfId =
-        cognitoServiceFacade.searchAllPages(composeToGetFirstPageByRacfId(toUpperCase(racfId)));
-    return !CollectionUtils.isEmpty(cognitoUsersByRacfId)
-        && isActiveUserPresent(cognitoUsersByRacfId);
-  }
-
-  public User createUser(User user) {
-    UserType cognitoUser = cognitoServiceFacade.createUser(user);
+  public User createUser(User userDto) {
+    UserType cognitoUser = cognitoServiceFacade.createUser(userDto);
     if (cognitoUser != null) {
-      user.setId(cognitoUser.getUsername());
-      user.setUserCreateDate(cognitoUser.getUserCreateDate());
-      user.setUserLastModifiedDate(cognitoUser.getUserLastModifiedDate());
+      userDto.setId(cognitoUser.getUsername());
+      userDto.setUserCreateDate(cognitoUser.getUserCreateDate());
+      userDto.setUserLastModifiedDate(cognitoUser.getUserLastModifiedDate());
     }
-    return user;
-  }
-
-  public boolean doesUserWithEmailExistInCognito(String email) {
-    Collection<UserType> cognitoUsers =
-        cognitoServiceFacade.searchPage(composeToGetFirstPageByEmail(email)).getUsers();
-    return !CollectionUtils.isEmpty(cognitoUsers);
+    return userDto;
   }
 
   public List<User> searchUsers(UsersSearchCriteria criteria) {
@@ -123,12 +110,6 @@ public class UserService {
       cognitoUsers.addAll(cognitoServiceFacade.searchAllPages(cognitoSearchCriteria));
     }
     return enrichCognitoUsers(cognitoUsers);
-  }
-
-  private static boolean isActiveUserPresent(Collection<UserType> cognitoUsers) {
-    return cognitoUsers
-        .stream()
-        .anyMatch(userType -> Objects.equals(userType.getEnabled(), Boolean.TRUE));
   }
 
   private List<User> enrichCognitoUsers(Collection<UserType> cognitoUsers) {

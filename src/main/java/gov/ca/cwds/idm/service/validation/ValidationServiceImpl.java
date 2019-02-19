@@ -20,6 +20,7 @@ import static gov.ca.cwds.util.Utils.toCommaDelimitedString;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.service.UserService;
+import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.idm.service.role.implementor.AdminRoleImplementorFactory;
 import gov.ca.cwds.service.CwsUserInfoService;
@@ -37,11 +38,11 @@ public class ValidationServiceImpl implements ValidationService {
 
   private CwsUserInfoService cwsUserInfoService;
 
-  private UserService userService;
-
   private AdminRoleImplementorFactory adminRoleImplementorFactory;
 
   private ExceptionFactory exceptionFactory;
+
+  private CognitoServiceFacade cognitoServiceFacade;
 
   @Override
   public void validateUserCreate(User enrichedUser) {
@@ -182,11 +183,11 @@ public class ValidationServiceImpl implements ValidationService {
   }
 
   private boolean isActiveRacfIdPresentInCognito(String racfId) {
-    return userService.isActiveRacfIdPresentInCognito(racfId);
+    return cognitoServiceFacade.isActiveRacfIdPresentInCognito(racfId);
   }
 
   private boolean userWithEmailExistsInCognito(String email) {
-    return userService.doesUserWithEmailExistInCognito(email);
+    return cognitoServiceFacade.doesUserWithEmailExistInCognito(email);
 
   }
 
@@ -232,8 +233,9 @@ public class ValidationServiceImpl implements ValidationService {
   }
 
   @Autowired
-  public void setUserService(UserService userService) {
-    this.userService = userService;
+  public void setCognitoServiceFacade(
+      CognitoServiceFacade cognitoServiceFacade) {
+    this.cognitoServiceFacade = cognitoServiceFacade;
   }
 
   @Autowired

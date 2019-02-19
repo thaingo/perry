@@ -29,6 +29,10 @@ public interface CognitoServiceFacade {
 
   AdminGetUserRequest createAdminGetUserRequest(String id);
 
+  boolean isActiveRacfIdPresentInCognito(String racfId);
+
+  boolean doesUserWithEmailExistInCognito(String email);
+
   void healthCheck();
 
   /**

@@ -154,78 +154,23 @@ public class IdmServiceImpl implements IdmService {
         userId, updateAttributesStatus, updateUserEnabledExecution, doraExecution);
   }
 
-  private UserUpdateRequest prepareUserUpdateRequest(User existedUser, UserUpdate updateUserDto) {
-    UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
-
-    userUpdateRequest.setUserId(existedUser.getId());
-    userUpdateRequest.setExistedUser(existedUser);
-    UpdateDifference updateDifference = new UpdateDifference(existedUser, updateUserDto);
-    userUpdateRequest.setUpdateDifference(updateDifference);
-    userUpdateRequest
-        .addAuditEvents(createUserUpdateEvents(existedUser, updateDifference));
-    return userUpdateRequest;
-  }
-
-  private List<AuditEvent> createUserUpdateEvents(User existedUser,
-      UpdateDifference updateDifference) {
-    List<AuditEvent> auditEvents = new ArrayList<>(4);
-    updateDifference.getRolesDiff().ifPresent(rolesDiff ->
-        auditEvents.add(
-            new UserRoleChangedEvent(existedUser, rolesDiff)));
-    updateDifference.getNotesDiff().ifPresent(notesDiff ->
-        auditEvents.add(new NotesChangedEvent(existedUser, notesDiff)));
-    updateDifference.getPermissionsDiff().ifPresent(permissionsDiff -> {
-          List<Permission> permissions = dictionaryProvider.getPermissions();
-          auditEvents.add(
-              new PermissionsChangedEvent(existedUser, permissionsDiff, permissions));
-        }
-    );
-    updateDifference.getEmailDiff().ifPresent(emailDiff ->
-        auditEvents.add(new EmailChangedEvent(existedUser, emailDiff))
-    );
-
-    return auditEvents;
-  }
-
-  private OptionalExecution<BooleanDiff, Void> updateUserEnabledStatus(
-      UserUpdateRequest userUpdateRequest) {
-    OptionalExecution<BooleanDiff, Void> updateUserEnabledExecution;
-
-    Optional<BooleanDiff> optEnabledDiff = userUpdateRequest.getUpdateDifference().getEnabledDiff();
-    User existedUser = userUpdateRequest.getExistedUser();
-
-    if (optEnabledDiff.isPresent()) {
-      updateUserEnabledExecution = executeUpdateEnableStatusOptionally(existedUser,
-          optEnabledDiff.get());
-    } else {
-      updateUserEnabledExecution = NoUpdateExecution.INSTANCE;
-    }
-    return updateUserEnabledExecution;
-  }
-
-  private boolean doesElasticSearchNeedUpdate(ExecutionStatus updateAttributesStatus,
-      OptionalExecution<BooleanDiff, Void> updateUserEnabledExecution) {
-    return updateAttributesStatus == SUCCESS
-        || updateUserEnabledExecution.getExecutionStatus() == SUCCESS;
-  }
-
   @Override
-  public String createUser(User user) {
-    user = userService.enrichWithCwsData(user);
-    String email = toLowerCase(user.getEmail());
-    user.setEmail(email);
-    String racfId = toUpperCase(user.getRacfid());
-    user.setRacfid(racfId);
-    validationService.validateUserCreate(user);
-    authorizeService.checkCanCreateUser(user);
-    User createdUser = userService.createUser(user);
-    LOGGER.info("New user with username:{} was successfully created in Cognito", user.getId());
-    transactionalUserService.createUserInDbWithInvitationEmail(user);
-    LOGGER.info("New user with username:{} was successfully created in database", user.getId());
+  public String createUser(User userDto) {
+    userDto = userService.enrichWithCwsData(userDto);
+    String email = toLowerCase(userDto.getEmail());
+    userDto.setEmail(email);
+    String racfId = toUpperCase(userDto.getRacfid());
+    userDto.setRacfid(racfId);
+    validationService.validateUserCreate(userDto);
+    authorizeService.checkCanCreateUser(userDto);
+    User createdUser = userService.createUser(userDto);
+    LOGGER.info("New user with username:{} was successfully created in Cognito", userDto.getId());
+    transactionalUserService.createUserInDbWithInvitationEmail(userDto);
+    LOGGER.info("New user with username:{} was successfully created in database", userDto.getId());
     issueUserCreatedEvent(createdUser);
     PutInSearchExecution doraExecution = createUserInSearch(createdUser);
     handleCreatePartialSuccess(createdUser, doraExecution);
-    return user.getId();
+    return userDto.getId();
   }
 
   @Override
@@ -263,21 +208,21 @@ public class IdmServiceImpl implements IdmService {
   @Override
   @SuppressWarnings({"squid:S1166"})//Validation exceptions are already logged by ValidationService
   public UserVerificationResult verifyIfUserCanBeCreated(String racfId, String email) {
-    User user = new User();
-    user.setEmail(toLowerCase(email));
-    user.setRacfid(toUpperCase(racfId));
-    user.setRoles(Utils.toSet(CWS_WORKER));
+    User userDto = new User();
+    userDto.setEmail(toLowerCase(email));
+    userDto.setRacfid(toUpperCase(racfId));
+    userDto.setRoles(Utils.toSet(CWS_WORKER));
 
-    user = userService.enrichWithCwsData(user);
+    userDto = userService.enrichWithCwsData(userDto);
 
     try {
-      validationService.validateVerifyIfUserCanBeCreated(user);
-      authorizeService.checkCanCreateUser(user);
+      validationService.validateVerifyIfUserCanBeCreated(userDto);
+      authorizeService.checkCanCreateUser(userDto);
     } catch (UserValidationException | AdminAuthorizationException e) {
       return buildUserVerificationErrorResult(e.getErrorCode(), e.getUserMessage());
     }
 
-    return UserVerificationResult.Builder.anUserVerificationResult().withUser(user)
+    return UserVerificationResult.Builder.anUserVerificationResult().withUser(userDto)
         .withVerificationPassed().build();
   }
 
@@ -522,6 +467,61 @@ public class IdmServiceImpl implements IdmService {
         new UserEnabledStatusChangedEvent(user, enabledDiff);
     auditService.saveAuditEventsToDb(event);
     auditService.sendAuditEventToEsIndex(event);
+  }
+
+  private UserUpdateRequest prepareUserUpdateRequest(User existedUser, UserUpdate updateUserDto) {
+    UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
+
+    userUpdateRequest.setUserId(existedUser.getId());
+    userUpdateRequest.setExistedUser(existedUser);
+    UpdateDifference updateDifference = new UpdateDifference(existedUser, updateUserDto);
+    userUpdateRequest.setUpdateDifference(updateDifference);
+    userUpdateRequest
+        .addAuditEvents(createUserUpdateEvents(existedUser, updateDifference));
+    return userUpdateRequest;
+  }
+
+  private List<AuditEvent> createUserUpdateEvents(User existedUser,
+      UpdateDifference updateDifference) {
+    List<AuditEvent> auditEvents = new ArrayList<>(4);
+    updateDifference.getRolesDiff().ifPresent(rolesDiff ->
+        auditEvents.add(
+            new UserRoleChangedEvent(existedUser, rolesDiff)));
+    updateDifference.getNotesDiff().ifPresent(notesDiff ->
+        auditEvents.add(new NotesChangedEvent(existedUser, notesDiff)));
+    updateDifference.getPermissionsDiff().ifPresent(permissionsDiff -> {
+          List<Permission> permissions = dictionaryProvider.getPermissions();
+          auditEvents.add(
+              new PermissionsChangedEvent(existedUser, permissionsDiff, permissions));
+        }
+    );
+    updateDifference.getEmailDiff().ifPresent(emailDiff ->
+        auditEvents.add(new EmailChangedEvent(existedUser, emailDiff))
+    );
+
+    return auditEvents;
+  }
+
+  private OptionalExecution<BooleanDiff, Void> updateUserEnabledStatus(
+      UserUpdateRequest userUpdateRequest) {
+    OptionalExecution<BooleanDiff, Void> updateUserEnabledExecution;
+
+    Optional<BooleanDiff> optEnabledDiff = userUpdateRequest.getUpdateDifference().getEnabledDiff();
+    User existedUser = userUpdateRequest.getExistedUser();
+
+    if (optEnabledDiff.isPresent()) {
+      updateUserEnabledExecution = executeUpdateEnableStatusOptionally(existedUser,
+          optEnabledDiff.get());
+    } else {
+      updateUserEnabledExecution = NoUpdateExecution.INSTANCE;
+    }
+    return updateUserEnabledExecution;
+  }
+
+  private boolean doesElasticSearchNeedUpdate(ExecutionStatus updateAttributesStatus,
+      OptionalExecution<BooleanDiff, Void> updateUserEnabledExecution) {
+    return updateAttributesStatus == SUCCESS
+        || updateUserEnabledExecution.getExecutionStatus() == SUCCESS;
   }
 
   public void setSearchService(SearchService searchService) {
