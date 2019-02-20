@@ -1,7 +1,5 @@
 package gov.ca.cwds.idm.service.validation;
 
-import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByEmail;
-import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByRacfId;
 import static gov.ca.cwds.idm.service.PossibleUserPermissionsService.CANS_PERMISSION_NAME;
 import static gov.ca.cwds.service.messages.MessageCode.ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.COUNTY_NAME_IS_NOT_PROVIDED;
@@ -9,29 +7,24 @@ import static gov.ca.cwds.service.messages.MessageCode.FIRST_NAME_IS_NOT_PROVIDE
 import static gov.ca.cwds.service.messages.MessageCode.INVALID_PHONE_FORMAT;
 import static gov.ca.cwds.service.messages.MessageCode.LAST_NAME_IS_NOT_PROVIDED;
 import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID_IN_CWSCMS;
+import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_ASSIGN_CANS_PERMISSION_TO_NON_RACFID_USER;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_CREATE_NON_RACFID_USER_WITH_CANS_PERMISSION;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_CREATE_USER_WITHOUT_ROLES;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_CREATE_USER_WITH_UNALLOWED_ROLES;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_REMOVE_ALL_ROLES;
-import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_ASSIGN_CANS_PERMISSION_TO_NON_RACFID_USER;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_UNALLOWED_ROLES;
 import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
 import static gov.ca.cwds.util.Utils.isRacfidUser;
 import static gov.ca.cwds.util.Utils.toCommaDelimitedString;
-import static gov.ca.cwds.util.Utils.toUpperCase;
 
-import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
-import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.idm.service.role.implementor.AdminRoleImplementorFactory;
 import gov.ca.cwds.service.CwsUserInfoService;
-import gov.ca.cwds.service.dto.CwsUserInfo;
 import gov.ca.cwds.service.messages.MessageCode;
 import java.util.Collection;
-import java.util.Objects;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,14 +37,14 @@ public class ValidationServiceImpl implements ValidationService {
 
   private CwsUserInfoService cwsUserInfoService;
 
-  private CognitoServiceFacade cognitoServiceFacade;
-
   private AdminRoleImplementorFactory adminRoleImplementorFactory;
 
   private ExceptionFactory exceptionFactory;
 
+  private CognitoServiceFacade cognitoServiceFacade;
+
   @Override
-  public void validateUserCreate(User enrichedUser, boolean activeUserExistsInCws) {
+  public void validateUserCreate(User enrichedUser) {
 
     validateFirstNameIsProvided(enrichedUser);
     validateLastNameIsProvided(enrichedUser);
@@ -62,13 +55,13 @@ public class ValidationServiceImpl implements ValidationService {
 
     validateCreateByCansPermission(enrichedUser);
 
-    validateActiveRacfidUserExistsInCws(activeUserExistsInCws, enrichedUser.getRacfid());
+    validateActiveRacfidUserExistsInCws(enrichedUser.getRacfid());
     validateRacfidDoesNotExistInCognito(enrichedUser.getRacfid());
   }
 
   @Override
-  public void validateVerifyIfUserCanBeCreated(User enrichedUser, boolean activeUserExistsInCws) {
-    validateActiveRacfidUserExistsInCws(activeUserExistsInCws, enrichedUser.getRacfid());
+  public void validateVerifyIfUserCanBeCreated(User enrichedUser) {
+    validateActiveRacfidUserExistsInCws(enrichedUser.getRacfid());
     validateEmailDoesNotExistInCognito(enrichedUser.getEmail());
     validateRacfidDoesNotExistInCognito(enrichedUser.getRacfid());
   }
@@ -100,20 +93,18 @@ public class ValidationServiceImpl implements ValidationService {
     }
   }
 
-  private void validateActiveRacfidUserExistsInCws(boolean activeUserExistsInCws, String racfId) {
-    if(!isRacfidUser(racfId)){
+  private void validateActiveRacfidUserExistsInCws(String racfId) {
+    if (!isRacfidUser(racfId)) {
       return;
     }
 
-    if (!activeUserExistsInCws) {
+    if (cwsUserInfoService.getCwsUserByRacfId(racfId) == null) {
       throwValidationException(NO_USER_WITH_RACFID_IN_CWSCMS, racfId);
     }
   }
 
   private void validateUserRolesExistAtCreate(User user) {
-    Collection<String> roles = user.getRoles();
-
-    if(roles == null || roles.isEmpty()) {
+    if (CollectionUtils.isEmpty(user.getRoles())) {
       throwValidationException(UNABLE_TO_CREATE_USER_WITHOUT_ROLES);
     }
   }
@@ -123,7 +114,7 @@ public class ValidationServiceImpl implements ValidationService {
   }
 
   void validateRacfidDoesNotExistInCognito(String racfId) {
-    if(!isRacfidUser(racfId)){
+    if (!isRacfidUser(racfId)) {
       return;
     }
 
@@ -191,16 +182,12 @@ public class ValidationServiceImpl implements ValidationService {
   }
 
   private boolean isActiveRacfIdPresentInCognito(String racfId) {
-    Collection<UserType> cognitoUsersByRacfId =
-        cognitoServiceFacade.searchAllPages(composeToGetFirstPageByRacfId(toUpperCase(racfId)));
-    return !CollectionUtils.isEmpty(cognitoUsersByRacfId)
-        && isActiveUserPresent(cognitoUsersByRacfId);
+    return cognitoServiceFacade.isActiveRacfIdPresentInCognito(racfId);
   }
 
   private boolean userWithEmailExistsInCognito(String email) {
-    Collection<UserType> cognitoUsers =
-        cognitoServiceFacade.searchPage(composeToGetFirstPageByEmail(email)).getUsers();
-    return !CollectionUtils.isEmpty(cognitoUsers);
+    return cognitoServiceFacade.doesUserWithEmailExistInCognito(email);
+
   }
 
   private void throwValidationException(MessageCode messageCode, String... args) {
@@ -222,26 +209,19 @@ public class ValidationServiceImpl implements ValidationService {
     return newEnabled != null && !newEnabled.equals(currentEnabled) && newEnabled;
   }
 
-  void validateActivateUser(String racfId ) {
-    CwsUserInfo cwsUser = cwsUserInfoService.getCwsUserByRacfId(racfId);
-    validateActiveRacfidUserExistsInCws(cwsUser != null, racfId);
+  private void validateActivateUser(String racfId) {
+    validateActiveRacfidUserExistsInCws(racfId);
     validateRacfidDoesNotExistInCognito(racfId);
-  }
-
-  private static boolean isActiveUserPresent(Collection<UserType> cognitoUsers) {
-    return cognitoUsers
-        .stream()
-        .anyMatch(userType -> Objects.equals(userType.getEnabled(), Boolean.TRUE));
   }
 
   private void validatePhoneNumber(UserUpdate updateUserDto) {
     String newPhoneNumber = updateUserDto.getPhoneNumber();
 
-    if(newPhoneNumber == null) {
+    if (newPhoneNumber == null) {
       return;
     }
 
-    if(!PhoneNumberValidator.isValid(newPhoneNumber)) {
+    if (!PhoneNumberValidator.isValid(newPhoneNumber)) {
       throwValidationException(INVALID_PHONE_FORMAT, newPhoneNumber);
     }
   }

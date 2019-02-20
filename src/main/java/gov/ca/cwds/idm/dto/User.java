@@ -57,7 +57,7 @@ public class User implements RolesHolder, Serializable {
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_FORMAT)
   private Date userCreateDate;
 
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_FORMAT)
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_TIME_FORMAT)
   private Date userLastModifiedDate;
 
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_TIME_FORMAT)

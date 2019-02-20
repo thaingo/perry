@@ -4,6 +4,8 @@ import static gov.ca.cwds.idm.persistence.ns.OperationType.GET;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.RESEND_INVITATION_EMAIL;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
 import static gov.ca.cwds.idm.service.cognito.attribute.UserUpdateAttributesUtil.buildUpdatedAttributesList;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByEmail;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByRacfId;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.buildCreateUserAttributes;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getEmail;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_CONNECT_TO_IDM;
@@ -15,6 +17,7 @@ import static gov.ca.cwds.service.messages.MessageCode.IDM_USER_VALIDATION_FAILE
 import static gov.ca.cwds.service.messages.MessageCode.USER_NOT_FOUND_BY_ID_IN_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
 import static gov.ca.cwds.util.Utils.toLowerCase;
+import static gov.ca.cwds.util.Utils.toUpperCase;
 
 import com.amazonaws.AmazonWebServiceRequest;
 import com.amazonaws.AmazonWebServiceResult;
@@ -50,10 +53,13 @@ import gov.ca.cwds.idm.service.diff.UpdateDifference;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.service.messages.MessageCode;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 import javax.annotation.PostConstruct;
 import liquibase.util.StringUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -190,6 +196,20 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
     return new AdminGetUserRequest().withUsername(id).withUserPoolId(properties.getUserpool());
   }
 
+  @Override
+  public boolean isActiveRacfIdPresentInCognito(String racfId) {
+    Collection<UserType> cognitoUsersByRacfId =
+        searchAllPages(composeToGetFirstPageByRacfId(toUpperCase(racfId)));
+    return !CollectionUtils.isEmpty(cognitoUsersByRacfId)
+        && isActiveUserPresent(cognitoUsersByRacfId);
+  }
+
+  @Override
+  public boolean doesUserWithEmailExistInCognito(String email) {
+    Collection<UserType> cognitoUsers = searchPage(composeToGetFirstPageByEmail(email)).getUsers();
+    return !CollectionUtils.isEmpty(cognitoUsers);
+  }
+
   /**
    * {@inheritDoc}
    */
@@ -231,9 +251,7 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
    * {@inheritDoc}
    */
   @Override
-  public void changeUserEnabledStatus(User existedUser,  Boolean newValue) {
-
-    String id = existedUser.getId();
+  public void changeUserEnabledStatus(String id, Boolean newValue) {
     if (newValue) {
       AdminEnableUserRequest adminEnableUserRequest =
           new AdminEnableUserRequest().withUsername(id).withUserPoolId(properties.getUserpool());
@@ -326,6 +344,12 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
     } else {
       return IDM_GENERIC_ERROR;
     }
+  }
+
+  private static boolean isActiveUserPresent(Collection<UserType> cognitoUsers) {
+    return cognitoUsers
+        .stream()
+        .anyMatch(userType -> Objects.equals(userType.getEnabled(), Boolean.TRUE));
   }
 
   @Autowired

@@ -1,6 +1,5 @@
 package gov.ca.cwds.idm.service;
 
-import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getRACFId;
 import static gov.ca.cwds.service.messages.MessageCode.IDM_MAPPING_SCRIPT_ERROR;
 
 import com.amazonaws.services.cognitoidp.model.UserType;
@@ -9,7 +8,6 @@ import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.idm.service.filter.MainRoleFilter;
-import gov.ca.cwds.service.CwsUserInfoService;
 import gov.ca.cwds.service.dto.CwsUserInfo;
 import java.util.Set;
 import javax.script.ScriptException;
@@ -24,41 +22,18 @@ public class MappingService {
 
   private PerryProperties configuration;
 
-  private CwsUserInfoService cwsUserInfoService;
-
-  private NsUserService nsUserService;
-
   private ExceptionFactory exceptionFactory;
-
-  public User toUser(UserType cognitoUser) {
-    String userId = cognitoUser.getUsername();
-    String racfId = getRACFId(cognitoUser);
-
-    CwsUserInfo cwsUser = cwsUserInfoService.getCwsUserByRacfId(racfId);
-    NsUser nsUser = nsUserService.findByUsername(userId).orElse(null);
-
-    return toUser(cognitoUser, cwsUser, nsUser);
-  }
 
   public User toUser(UserType cognitoUser, CwsUserInfo cwsUser, NsUser nsUser) {
     User user;
     try {
-      user =  configuration.getIdentityManager().getIdmMapping().map(cognitoUser, cwsUser);
+      user = configuration.getIdentityManager().getIdmMapping().map(cognitoUser, cwsUser);
     } catch (ScriptException e) {
       throw exceptionFactory.createIdmException(IDM_MAPPING_SCRIPT_ERROR, e);
     }
     enrichWithNsUser(user, nsUser);
     filterMainRole(user);
     return user;
-  }
-
-  public User toUserWithoutDbData(UserType cognitoUser) {
-    return toUser(cognitoUser, null, null);
-  }
-
-  @Autowired
-  public void setConfiguration(PerryProperties configuration) {
-    this.configuration = configuration;
   }
 
   private void enrichWithNsUser(User user, NsUser nsUser) {
@@ -77,13 +52,8 @@ public class MappingService {
   }
 
   @Autowired
-  public void setCwsUserInfoService(CwsUserInfoService cwsUserInfoService) {
-    this.cwsUserInfoService = cwsUserInfoService;
-  }
-
-  @Autowired
-  public void setNsUserService(NsUserService nsUserService) {
-    this.nsUserService = nsUserService;
+  public void setConfiguration(PerryProperties configuration) {
+    this.configuration = configuration;
   }
 
   @Autowired

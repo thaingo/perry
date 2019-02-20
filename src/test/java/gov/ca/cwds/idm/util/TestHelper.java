@@ -13,10 +13,8 @@ import static gov.ca.cwds.util.UniversalUserTokenDeserializer.ADMIN_OFFICE_IDS_P
 import static gov.ca.cwds.util.UniversalUserTokenDeserializer.COUNTY_NAME_PARAM;
 import static gov.ca.cwds.util.Utils.toSet;
 
-import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.service.cognito.util.CognitoUtils;
 import java.util.Set;
 
 public final class TestHelper {
@@ -55,15 +53,6 @@ public final class TestHelper {
     return user;
   }
 
-  public static UserType userType(User user) {
-    UserType userType = new UserType();
-    userType.setUsername(user.getId());
-    userType.setEnabled(true);
-    userType.setUserStatus("FORCE_CHANGE_PASSWORD");
-    userType.withAttributes(CognitoUtils.buildCreateUserAttributes(user));
-    return userType;
-  }
-
   static User withRole(String role) {
     User user = new User();
     user.getRoles().add(role);
@@ -91,11 +80,11 @@ public final class TestHelper {
   }
 
   public static User stateAdmin() {
-    return user(toSet(STATE_ADMIN),COUNTY_NAME, OFFICE_ID);
+    return user(toSet(STATE_ADMIN), COUNTY_NAME, OFFICE_ID);
   }
 
   public static User countyAdmin() {
-    return user(toSet(COUNTY_ADMIN),COUNTY_NAME, OFFICE_ID);
+    return user(toSet(COUNTY_ADMIN), COUNTY_NAME, OFFICE_ID);
   }
 
   public static User officeAdmin() {
@@ -103,7 +92,7 @@ public final class TestHelper {
   }
 
   public static User calsAdmin() {
-    return TestHelper.user(toSet(CALS_ADMIN),COUNTY_NAME, OFFICE_ID);
+    return TestHelper.user(toSet(CALS_ADMIN), COUNTY_NAME, OFFICE_ID);
   }
 
   public static User cwsWorker() {

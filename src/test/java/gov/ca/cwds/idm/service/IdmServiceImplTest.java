@@ -8,7 +8,6 @@ import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EM
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.FIRST_NAME;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.idm.util.TestHelper.user;
-import static gov.ca.cwds.idm.util.TestHelper.userType;
 import static gov.ca.cwds.service.messages.MessageCode.USER_CREATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_CREATE_SAVE_TO_SEARCH_ERROR;
 import static gov.ca.cwds.service.messages.MessageCode.USER_PARTIAL_UPDATE;
@@ -21,29 +20,16 @@ import static gov.ca.cwds.util.Utils.toSet;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
-import static org.mockito.AdditionalAnswers.delegatesTo;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
-import gov.ca.cwds.idm.dto.UsersSearchCriteria;
 import gov.ca.cwds.idm.exception.PartialSuccessException;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
-import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
-import gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil;
 import gov.ca.cwds.idm.util.WithMockCustomUser;
-import gov.ca.cwds.service.CwsUserInfoService;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -74,13 +60,10 @@ public class IdmServiceImplTest {
   private CognitoServiceFacade cognitoServiceFacadeMock;
 
   @MockBean
-  private CwsUserInfoService cwsUserInfoServiceMock;
-
-  @MockBean
   private UserLogTransactionalService userLogTransactionalServiceMock;
 
-  @Autowired
-  private NsUserService nsUserService;
+  @MockBean
+  private UserService userServiceMock;
 
   @MockBean
   private SearchService searchServiceMock;
@@ -96,8 +79,7 @@ public class IdmServiceImplTest {
   public void testCreateUserSuccess() {
     User user = user();
     String USER_ID = user.getId();
-    setCreateUserResult(user, USER_ID);
-
+    mockUserService(user);
     String id = service.createUser(user);
     assertThat(id, is(USER_ID));
   }
@@ -107,9 +89,8 @@ public class IdmServiceImplTest {
   public void testCreateUser_SearchFail() {
     User user = user();
     String USER_ID = user.getId();
-    setCreateUserResult(user, USER_ID);
-
     Exception doraError = new RuntimeException("Dora error");
+    mockUserService(user);
     when(searchServiceMock.createUser(any(User.class))).thenThrow(doraError);
 
     try {
@@ -130,7 +111,7 @@ public class IdmServiceImplTest {
   public void testCreateUser_SearchAndDbLogFail() {
     User user = user();
     String USER_ID = user.getId();
-    setCreateUserResult(user, USER_ID);
+    mockUserService(user);
 
     Exception doraError = new RuntimeException("Dora error");
     when(searchServiceMock.createUser(any(User.class))).thenThrow(doraError);
@@ -161,10 +142,8 @@ public class IdmServiceImplTest {
     User existedUser = user();
     String USER_ID = existedUser.getId();
     existedUser.setPermissions(toSet("Hotline-rollout"));
-    UserType existedUserType = userType(existedUser);
 
-    setUpdateUserAttributesResult();
-    setGetCognitoUserById(USER_ID, existedUserType);
+    setGetUserById(USER_ID, existedUser);
 
     Exception doraError = new RuntimeException("Dora error");
     when(searchServiceMock.updateUser(any(User.class))).thenThrow(doraError);
@@ -196,10 +175,8 @@ public class IdmServiceImplTest {
     User existedUser = user();
     String USER_ID = existedUser.getId();
     existedUser.setPermissions(toSet("RFA-rollout"));
-    UserType existedUserType = userType(existedUser);
 
-    setUpdateUserAttributesResult();
-    setGetCognitoUserById(USER_ID, existedUserType);
+    setGetUserById(USER_ID, existedUser);
 
     RuntimeException enableStatusError = new RuntimeException("Change Enable Status Error");
     setChangeUserEnabledStatusFail(enableStatusError);
@@ -227,10 +204,8 @@ public class IdmServiceImplTest {
     User existedUser = user();
     String USER_ID = existedUser.getId();
     existedUser.setPermissions(toSet("RFA-rollout"));
-    UserType existedUserType = userType(existedUser);
 
-    setUpdateUserAttributesResult();
-    setGetCognitoUserById(USER_ID, existedUserType);
+    setGetUserById(USER_ID, existedUser);
 
     RuntimeException enableStatusError = new RuntimeException("Change Enable Status Error");
     setChangeUserEnabledStatusFail(enableStatusError);
@@ -262,10 +237,8 @@ public class IdmServiceImplTest {
     User existedUser = user();
     String USER_ID = existedUser.getId();
     existedUser.setPermissions(toSet("RFA-rollout"));
-    UserType existedUserType = userType(existedUser);
 
-    setUpdateUserAttributesResult();
-    setGetCognitoUserById(USER_ID, existedUserType);
+    setGetUserById(USER_ID, existedUser);
 
     RuntimeException enableStatusError = new RuntimeException("Change Enable Status Error");
     setChangeUserEnabledStatusFail(enableStatusError);
@@ -300,9 +273,8 @@ public class IdmServiceImplTest {
     User existedUser = user();
     String USER_ID = existedUser.getId();
     existedUser.setPermissions(toSet("old permission"));
-    UserType existedUserType = userType(existedUser);
 
-    setGetCognitoUserById(USER_ID, existedUserType);
+    setGetUserById(USER_ID, existedUser);
 
     RuntimeException enableStatusError = new RuntimeException("Change Enable Status Error");
     setChangeUserEnabledStatusFail(enableStatusError);
@@ -328,54 +300,16 @@ public class IdmServiceImplTest {
         is(toSet("John", "JOHN", "john")));
   }
 
-  @Test
-  public void testSearchUsersNoResult() {
-    NsUserService spyNsUserService = mock(NsUserServiceImpl.class, delegatesTo(nsUserService));
-    service.setNsUserService(spyNsUserService);
-    String racfIdUserAbsent1 = "NORACF";
-    String racfIdUserAbsent2 = "NORAC1";
-    String racfIdUserPresent = "ROOBLA";
-    UsersSearchCriteria searchCriteriaUsersAbsent = new UsersSearchCriteria(RACFID_STANDARD,
-        new HashSet<>(
-            Arrays.asList(racfIdUserAbsent1, racfIdUserAbsent2)));
-    UsersSearchCriteria searchCriteriaUserPresent = new UsersSearchCriteria(RACFID_STANDARD,
-        new HashSet<>(
-            Collections.singletonList(racfIdUserPresent)));
-    CognitoUsersSearchCriteria cognitoSearchCriteriaUserAbsent1 = CognitoUsersSearchCriteriaUtil
-        .composeToGetFirstPageByAttribute(RACFID_STANDARD, racfIdUserAbsent1);
-    CognitoUsersSearchCriteria cognitoSearchCriteriaUserAbsent2 = CognitoUsersSearchCriteriaUtil
-        .composeToGetFirstPageByAttribute(RACFID_STANDARD, racfIdUserAbsent2);
-    CognitoUsersSearchCriteria cognitoSearchCriteriaUserPresent = CognitoUsersSearchCriteriaUtil
-        .composeToGetFirstPageByAttribute(RACFID_STANDARD, racfIdUserPresent);
-    when(cognitoServiceFacadeMock.searchAllPages(cognitoSearchCriteriaUserAbsent1))
-        .thenReturn(Collections.emptyList());
-    when(cognitoServiceFacadeMock.searchAllPages(cognitoSearchCriteriaUserAbsent2))
-        .thenReturn(Collections.emptyList());
-    when(cognitoServiceFacadeMock.searchAllPages(cognitoSearchCriteriaUserPresent))
-        .thenReturn(Collections.singletonList(userType(user())));
-
-    service.searchUsers(searchCriteriaUsersAbsent);
-    verify(spyNsUserService, never()).findByUsernames(any());
-    service.searchUsers(searchCriteriaUserPresent);
-    verify(spyNsUserService, times(1)).findByUsernames(any());
-  }
-
-  private void setCreateUserResult(User user, String newId) {
-    UserType newUser = userType(user);
-    when(cognitoServiceFacadeMock.createUser(user)).thenReturn(newUser);
-  }
-
-  private void setUpdateUserAttributesResult() {
-    when(cognitoServiceFacadeMock
-        .updateUserAttributes(any(UserUpdateRequest.class)))
-        .thenReturn(true);
+  private void mockUserService(User user) {
+    when(userServiceMock.enrichWithCwsData(user)).thenReturn(user);
+    when(userServiceMock.createUser(user)).thenReturn(user);
   }
 
   private void setChangeUserEnabledStatusFail(RuntimeException error) {
-    doThrow(error).when(cognitoServiceFacadeMock).changeUserEnabledStatus(any(User.class), any(Boolean.class));
+    doThrow(error).when(cognitoServiceFacadeMock).changeUserEnabledStatus(any(String.class), any(Boolean.class));
  }
 
-  private void setGetCognitoUserById(String userId, UserType result) {
-    when(cognitoServiceFacadeMock.getCognitoUserById(userId)).thenReturn(result);
+  private void setGetUserById(String userId, User result) {
+    when(userServiceMock.getUser(userId)).thenReturn(result);
   }
 }
