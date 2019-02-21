@@ -45,7 +45,7 @@ public class TransactionalUserService {
       NsUserMapper nsUserMapper = new NsUserMapper();
       NsUser nsUser = nsUserMapper.toNsUser(user);
       nsUserService.create(nsUser);
-      entityManager.flush();
+      entityManager.flush();//to prevent sending invitation email if data cannot be saved in DB
 
       cognitoServiceFacade.sendInvitationMessageByEmail(email);
 
