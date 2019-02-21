@@ -34,6 +34,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 public class TokenServiceConfiguration {
 
   public static final String TOKEN_TRANSACTION_MANAGER = "tokenTransactionManager";
+  public static final String TOKEN_PERSISTENCE_UNIT_NAME = "token";
 
   @Bean("tokenStoreDatasourceProperties")
   @ConfigurationProperties("perry.tokenStore.datasource")
@@ -88,7 +89,7 @@ public class TokenServiceConfiguration {
     em.setJpaPropertyMap(tokenJpaProperties().getHibernateProperties(tokenDataSource()));
     em.setPackagesToScan("gov.ca.cwds.data.reissue.model",
         "gov.ca.cwds.idm.persistence.ns");
-    em.setPersistenceUnitName("token");
+    em.setPersistenceUnitName(TOKEN_PERSISTENCE_UNIT_NAME);
     em.setJpaVendorAdapter(tokenJpaVendorAdapter());
     return em;
   }
