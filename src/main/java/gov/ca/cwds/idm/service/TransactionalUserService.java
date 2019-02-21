@@ -91,4 +91,12 @@ public class TransactionalUserService {
   public void setExceptionFactory(ExceptionFactory exceptionFactory) {
     this.exceptionFactory = exceptionFactory;
   }
+
+  public void setEntityManager(EntityManager entityManager) {
+    this.entityManager = entityManager;
+  }
+
+  public EntityManager getEntityManager() {
+    return entityManager;
+  }
 }

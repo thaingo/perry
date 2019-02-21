@@ -7,9 +7,11 @@ import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.SUPER_ADMIN;
 import static gov.ca.cwds.idm.service.PossibleUserPermissionsService.CANS_PERMISSION_NAME;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.DB_ERROR_CREATE_USER_EMAIL;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.DELETE_ERROR_CREATE_USER_EMAIL;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.EMAIL_ERROR_CREATE_USER_EMAIL;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.ES_ERROR_CREATE_USER_EMAIL;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.NEW_USER_DB_FAIL_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.NEW_USER_DELETE_FAIL_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.NEW_USER_EMAIL_FAIL_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.NEW_USER_ES_FAIL_ID;
@@ -21,7 +23,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -38,16 +42,34 @@ import gov.ca.cwds.idm.event.UserCreatedEvent;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
+import gov.ca.cwds.idm.service.TransactionalUserService;
 import gov.ca.cwds.idm.util.TestCognitoServiceFacade;
 import gov.ca.cwds.idm.util.WithMockCustomUser;
 import java.time.LocalDate;
 import java.util.Set;
+import javax.persistence.EntityManager;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
+
+//  @PersistenceContext(unitName = TOKEN_PERSISTENCE_UNIT_NAME)
+//  private EntityManager entityManager;
+
+  @Autowired
+  private TransactionalUserService transactionalUserService;
+
+//  private EntityManager spyEntityManager;
+
+//  @Before
+//  public void before() {
+//    super.before();
+//
+//    spyEntityManager = spy(transactionalUserService.getEntityManager());
+//  }
 
   @Test
   @WithMockCustomUser
@@ -154,6 +176,53 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
     assertThat(newUserLogsSize, is(oldUserLogsSize));
 
     assertNoNsUserInDb(NEW_USER_EMAIL_FAIL_ID);
+  }
+
+  @Test
+  @WithMockCustomUser
+  public void testCreateUserSavingInDbFail() throws Exception {
+
+    int oldUserLogsSize = Iterables.size(userLogRepository.findAll());
+
+    User user = user();
+    user.setEmail(DB_ERROR_CREATE_USER_EMAIL);
+
+    CognitoCreateRequests requests = setCreateRequestAndResult(user, NEW_USER_DB_FAIL_ID);
+    AdminCreateUserRequest request = requests.createRequest;
+    AdminCreateUserRequest invitationRequest = requests.invitationRequest;
+    AdminDeleteUserRequest deleteRequest =
+        cognitoServiceFacade.createAdminDeleteUserRequest(NEW_USER_DB_FAIL_ID);
+
+    EntityManager entityManager = transactionalUserService.getEntityManager();
+    EntityManager spyEntityManager = spy(transactionalUserService.getEntityManager());
+    transactionalUserService.setEntityManager(spyEntityManager);
+    doThrow(new RuntimeException("DB error")).when(spyEntityManager).flush();
+
+    MvcResult result;
+    try {
+      result = mockMvc
+          .perform(
+              MockMvcRequestBuilders.post("/idm/users")
+                  .contentType(JSON_CONTENT_TYPE)
+                  .content(asJsonString(user)))
+          .andExpect(MockMvcResultMatchers.status().isInternalServerError())
+          .andReturn();
+    } finally {
+      transactionalUserService.setEntityManager(entityManager);
+    }
+
+    assertExtensible(result, "fixtures/idm/create-user/db-fail.json");
+
+    verify(cognito, times(1)).adminCreateUser(request);
+    verify(cognito, times(0)).adminCreateUser(invitationRequest);
+    verify(cognito, times(1)).adminDeleteUser(deleteRequest);
+    verify(spySearchService, times(0)).createUser(any(User.class));
+
+    Iterable<UserLog> userLogs = userLogRepository.findAll();
+    int newUserLogsSize = Iterables.size(userLogs);
+    assertThat(newUserLogsSize, is(oldUserLogsSize));
+
+    assertNoNsUserInDb(NEW_USER_DB_FAIL_ID);
   }
 
   @Test
