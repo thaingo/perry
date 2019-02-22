@@ -63,14 +63,12 @@ public class UserService {
   @Autowired
   private ExceptionFactory exceptionFactory;
 
-  public User getUser(String id) {
-    UserType cognitoUser = cognitoServiceFacade.getCognitoUserById(id);
-    String userId = cognitoUser.getUsername();
-    String racfId = getRACFId(cognitoUser);
-
+  public User getUser(String userId) {
     NsUser nsUser = nsUserService.findByUsername(userId).orElseThrow(()->
-      exceptionFactory.createIdmException(USER_NOT_FOUND_BY_ID_IN_NS_DATABASE, userId)
+        exceptionFactory.createUserNotFoundException(USER_NOT_FOUND_BY_ID_IN_NS_DATABASE, userId)
     );
+    UserType cognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
+    String racfId = nsUser.getRacfid();
     CwsUserInfo cwsUser = cwsUserInfoService.getCwsUserByRacfId(racfId);
 
     return mappingService.toUser(cognitoUser, cwsUser, nsUser);
@@ -136,6 +134,7 @@ public class UserService {
     Map<String, NsUser> usernameToNsUser =
         nsUserService.findByUsernames(userNames).stream()
             .collect(Collectors.toMap(NsUser::getUsername, e -> e));
+
     return cognitoUsers
         .stream()
         .map(userType -> mappingService.toUser(

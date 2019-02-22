@@ -281,16 +281,16 @@
     </insert>
 
     <insert tableName="user">
-    <column name="id" value="14"/>
-    <column name="username" value="24732d50-9421-4dd2-a92f-7425q6c411bx"/>
-    <column name="last_login_time" valueDate="2018-10-17 07:01:12"/>
-    <column name="racfid" value="YOLOD"/>
-    <column name="phone_number"/>
-    <column name="phone_extension"/>
-    <column name="last_modified_time" valueDate="2018-05-29"/>
-    <column name="first_name" value="Julio"/>
-    <column name="last_name" value="Iglecias"/>
-  </insert>
+      <column name="id" value="14"/>
+      <column name="username" value="24732d50-9421-4dd2-a92f-7425q6c411bx"/>
+      <column name="last_login_time" valueDate="2018-10-17 07:01:12"/>
+      <column name="racfid" value="YOLOD"/>
+      <column name="phone_number"/>
+      <column name="phone_extension"/>
+      <column name="last_modified_time" valueDate="2018-05-29"/>
+      <column name="first_name" value="Julio"/>
+      <column name="last_name" value="Iglecias"/>
+    </insert>
     <insert tableName="user_role">
       <column name="user_id" value="14"/>
       <column name="role_key" value="CWS-worker"/>
@@ -334,6 +334,22 @@
     <insert tableName="user_permission">
       <column name="user_id" value="16"/>
       <column name="permission_name" value="Hotline-rollout"/>
+    </insert>
+
+    <insert tableName="user">
+      <column name="id" value="17"/>
+      <column name="username" value="errorUserId"/>
+      <column name="last_login_time" valueDate="2018-10-17 07:01:12"/>
+      <column name="racfid"/>
+      <column name="phone_number"/>
+      <column name="phone_extension"/>
+      <column name="last_modified_time" valueDate="2018-05-31"/>
+      <column name="first_name" value="Incognito"/>
+      <column name="last_name" value="Offshorer"/>
+    </insert>
+    <insert tableName="user_role">
+      <column name="user_id" value="17"/>
+      <column name="role_key" value="CWS-worker"/>
     </insert>
 
   </changeSet>

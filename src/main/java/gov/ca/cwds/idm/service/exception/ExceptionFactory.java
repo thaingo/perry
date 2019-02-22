@@ -33,6 +33,10 @@ public class ExceptionFactory {
     return createExceptionWithCause(UserNotFoundException::new, cause, messageCode, args);
   }
 
+  public UserNotFoundException createUserNotFoundException(MessageCode messageCode, String... args) {
+    return createException(UserNotFoundException::new, messageCode, args);
+  }
+
   public UserAlreadyExistsException createUserAlreadyExistsException(MessageCode messageCode,
       Throwable cause, String... args) {
     return createExceptionWithCause(UserAlreadyExistsException::new, cause, messageCode, args);
