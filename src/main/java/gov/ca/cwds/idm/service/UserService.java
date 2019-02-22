@@ -66,12 +66,13 @@ public class UserService {
   public User getUser(String id) {
     UserType cognitoUser = cognitoServiceFacade.getCognitoUserById(id);
     String userId = cognitoUser.getUsername();
+    String racfId = getRACFId(cognitoUser);
 
     NsUser nsUser = nsUserService.findByUsername(userId).orElseThrow(()->
       exceptionFactory.createIdmException(USER_NOT_FOUND_BY_ID_IN_NS_DATABASE, userId)
     );
-    String racfId = nsUser.getRacfid();
     CwsUserInfo cwsUser = cwsUserInfoService.getCwsUserByRacfId(racfId);
+
     return mappingService.toUser(cognitoUser, cwsUser, nsUser);
   }
 
