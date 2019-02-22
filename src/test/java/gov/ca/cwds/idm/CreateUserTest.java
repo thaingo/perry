@@ -21,6 +21,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -424,7 +425,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
     assertEquals(1, nsAuditEventRepository.count() - previousEventCount);
     verify(cognito, times(1)).adminCreateUser(request);
     verify(cognito, times(1)).adminCreateUser(invitationRequest);
-    verify(spySearchService, times(1)).createUser(any(User.class));
+    verify(spySearchService, times(1)).createUser(argThat(usr -> Boolean.TRUE.equals(usr.getEnabled())));
     verifyDoraCalls(1);
     verify(auditEventIndexService, times(1)).sendAuditEventToEsIndex(any(
         UserCreatedEvent.class));
