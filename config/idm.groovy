@@ -13,6 +13,8 @@ result.email = attribute("email")
 result.racfid = attribute("custom:RACFID")
 result.phoneNumber = CognitoPhoneConverter.fromCognitoFormat(attribute("phone_number"))
 result.phoneExtensionNumber = attribute("custom:PhoneExtension")
+result.lastLoginDateTime = nsUser.lastLoginTime
+result.notes = nsUser.notes
 
 if(StringUtils.isNotBlank(attribute("custom:locked"))) {
     result.locked = attribute("custom:locked").toBoolean()

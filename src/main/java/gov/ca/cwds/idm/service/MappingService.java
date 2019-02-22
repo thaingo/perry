@@ -27,21 +27,12 @@ public class MappingService {
   public User toUser(UserType cognitoUser, CwsUserInfo cwsUser, NsUser nsUser) {
     User user;
     try {
-      user = configuration.getIdentityManager().getIdmMapping().map(cognitoUser, cwsUser);
+      user = configuration.getIdentityManager().getIdmMapping().map(cognitoUser, cwsUser, nsUser);
     } catch (ScriptException e) {
       throw exceptionFactory.createIdmException(IDM_MAPPING_SCRIPT_ERROR, e);
     }
-    enrichWithNsUser(user, nsUser);
     filterMainRole(user);
     return user;
-  }
-
-  private void enrichWithNsUser(User user, NsUser nsUser) {
-    if (nsUser == null) {
-      return;
-    }
-    user.setLastLoginDateTime(nsUser.getLastLoginTime());
-    user.setNotes(nsUser.getNotes());
   }
 
   private void filterMainRole(User user) {
