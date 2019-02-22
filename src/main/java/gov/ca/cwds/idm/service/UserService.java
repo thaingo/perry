@@ -89,6 +89,7 @@ public class UserService {
     if (cognitoUser != null) {
       userDto.setId(cognitoUser.getUsername());
       userDto.setUserCreateDate(cognitoUser.getUserCreateDate());
+      userDto.setEnabled(cognitoUser.getEnabled());
       userDto.setUserLastModifiedDate(cognitoUser.getUserLastModifiedDate());
     }
     return userDto;
