@@ -164,13 +164,13 @@ public class IdmServiceImpl implements IdmService {
     validationService.validateUserCreate(userDto);
     authorizeService.checkCanCreateUser(userDto);
     User createdUser = userService.createUser(userDto);
-    LOGGER.info("New user with username:{} was successfully created in Cognito", userDto.getId());
-    transactionalUserService.createUserInDbWithInvitationEmail(userDto);
-    LOGGER.info("New user with username:{} was successfully created in database", userDto.getId());
+    LOGGER.info("New user with username:{} was successfully created in Cognito", createdUser.getId());
+    transactionalUserService.createUserInDbWithInvitationEmail(createdUser);
+    LOGGER.info("New user with username:{} was successfully created in database", createdUser.getId());
     issueUserCreatedEvent(createdUser);
     PutInSearchExecution doraExecution = createUserInSearch(createdUser);
     handleCreatePartialSuccess(createdUser, doraExecution);
-    return userDto.getId();
+    return createdUser.getId();
   }
 
   @Override

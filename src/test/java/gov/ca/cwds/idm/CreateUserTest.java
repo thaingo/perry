@@ -7,6 +7,8 @@ import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.SUPER_ADMIN;
 import static gov.ca.cwds.idm.service.PossibleUserPermissionsService.CANS_PERMISSION_NAME;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.COGNITO_USER_ENABLED_ON_CREATE;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.COGNITO_USER_STATUS_ON_CREATE;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.DELETE_ERROR_CREATE_USER_EMAIL;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.EMAIL_ERROR_CREATE_USER_EMAIL;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.ES_ERROR_CREATE_USER_EMAIL;
@@ -21,6 +23,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -43,6 +46,7 @@ import gov.ca.cwds.idm.util.WithMockCustomUser;
 import java.time.LocalDate;
 import java.util.Set;
 import org.junit.Test;
+import org.mockito.ArgumentMatcher;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -424,7 +428,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
     assertEquals(1, nsAuditEventRepository.count() - previousEventCount);
     verify(cognito, times(1)).adminCreateUser(request);
     verify(cognito, times(1)).adminCreateUser(invitationRequest);
-    verify(spySearchService, times(1)).createUser(any(User.class));
+    verify(spySearchService, times(1)).createUser(argThat(new UserMatcher()));
     verifyDoraCalls(1);
     verify(auditEventIndexService, times(1)).sendAuditEventToEsIndex(any(
         UserCreatedEvent.class));
@@ -550,6 +554,15 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
         AdminCreateUserRequest invitationRequest) {
       this.createRequest = createRequest;
       this.invitationRequest = invitationRequest;
+    }
+  }
+
+  private class UserMatcher implements ArgumentMatcher<User> {
+
+    @Override
+    public boolean matches(User user) {
+      return COGNITO_USER_ENABLED_ON_CREATE.equals(user.getEnabled()) &&
+          COGNITO_USER_STATUS_ON_CREATE.equals(user.getStatus());
     }
   }
 }
