@@ -83,7 +83,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
 
   public static final String USERPOOL = "userpool";
   public static final String COGNITO_USER_STATUS_ON_CREATE = "FORCE_CHANGE_PASSWORD";
-  public static final Boolean COGNITO_USER_ENABLED__ON_CREATE = Boolean.TRUE;
+  public static final Boolean COGNITO_USER_ENABLED_ON_CREATE = Boolean.TRUE;
 
   private AWSCognitoIdentityProvider cognito;
 
@@ -695,7 +695,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
 
     UserType newUser = new UserType();
     newUser.setUsername(newId);
-    newUser.setEnabled(COGNITO_USER_ENABLED__ON_CREATE);
+    newUser.setEnabled(COGNITO_USER_ENABLED_ON_CREATE);
     newUser.setUserStatus(COGNITO_USER_STATUS_ON_CREATE);
     newUser.withAttributes(request.getUserAttributes());
 

@@ -7,7 +7,7 @@ import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.SUPER_ADMIN;
 import static gov.ca.cwds.idm.service.PossibleUserPermissionsService.CANS_PERMISSION_NAME;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
-import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.COGNITO_USER_ENABLED__ON_CREATE;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.COGNITO_USER_ENABLED_ON_CREATE;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.COGNITO_USER_STATUS_ON_CREATE;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.DELETE_ERROR_CREATE_USER_EMAIL;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.EMAIL_ERROR_CREATE_USER_EMAIL;
@@ -561,7 +561,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
 
     @Override
     public boolean matches(User user) {
-      return COGNITO_USER_ENABLED__ON_CREATE.equals(user.getEnabled()) &&
+      return COGNITO_USER_ENABLED_ON_CREATE.equals(user.getEnabled()) &&
           COGNITO_USER_STATUS_ON_CREATE.equals(user.getStatus());
     }
   }
