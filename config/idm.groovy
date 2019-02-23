@@ -4,23 +4,19 @@ import gov.ca.cwds.util.Utils
 
 def cognitoUserAttribute = {name -> cognitoUser.attributes?.find {it.name.equalsIgnoreCase(name)}?.value}
 
-result.id = cognitoUser.username
-result.enabled = cognitoUser.enabled
-result.userCreateDate = cognitoUser.userCreateDate
-result.status = cognitoUser.userStatus
-result.email = cognitoUserAttribute("email")
-
+result.id = nsUser.username
 result.racfid = nsUser.racfid
 result.phoneNumber = nsUser.phoneNumber
 result.phoneExtensionNumber = nsUser.phoneExtensionNumber
 result.lastLoginDateTime = nsUser.lastLoginTime
 result.notes = nsUser.notes
 
-Date cognitoModifiedTime = cognitoUser.userLastModifiedDate
-Date nsDbModifiedTime = Utils.fromLocalDateTime(nsUser.lastModifiedTime)
-long cognitoModifiedMillis = cognitoModifiedTime?.time?:0
-long nsDbModifiedMillis = nsDbModifiedTime?.time?:0
-result.userLastModifiedDate = nsDbModifiedMillis > cognitoModifiedMillis ? nsDbModifiedTime : cognitoModifiedTime
+result.userLastModifiedDate = lastDate(Utils.toDate(nsUser.lastModifiedTime), cognitoUser.userLastModifiedDate)
+
+result.enabled = cognitoUser.enabled
+result.userCreateDate = cognitoUser.userCreateDate
+result.status = cognitoUser.userStatus
+result.email = cognitoUserAttribute("email")
 
 if(StringUtils.isNotBlank(cognitoUserAttribute("custom:locked"))) {
     result.locked = cognitoUserAttribute("custom:locked").toBoolean()
@@ -54,4 +50,8 @@ if(cwsUser) {
     result.officeId = cognitoUserAttribute("custom:Office")
 }
 
-
+static Date lastDate(Date firstDate, Date secondDate) {
+    long firstDateMillis = firstDate?.time?:0
+    long secondDateMillis = secondDate?.time?:0
+    return firstDateMillis > secondDateMillis ? firstDate : secondDate
+}

@@ -1,6 +1,6 @@
 package gov.ca.cwds.idm.service.mapper;
 
-import static gov.ca.cwds.util.Utils.fromDate;
+import static gov.ca.cwds.util.Utils.toLocalDateTime;
 
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
@@ -21,7 +21,7 @@ public class NsUserMapper {
     nsUser.setPhoneExtensionNumber(user.getPhoneExtensionNumber());
     nsUser.setFirstName(user.getFirstName());
     nsUser.setLastName(user.getLastName());
-    nsUser.setLastModifiedTime(fromDate(user.getUserLastModifiedDate()));
+    nsUser.setLastModifiedTime(toLocalDateTime(user.getUserLastModifiedDate()));
     nsUser.setRoles(user.getRoles());
     nsUser.setPermissions(user.getPermissions());
 

@@ -45,7 +45,7 @@ public class Utils {
     return (T) SerializationUtils.deserialize(data);
   }
 
-  public static LocalDateTime fromDate(Date date) {
+  public static LocalDateTime toLocalDateTime(Date date) {
     if (date != null) {
       return new Timestamp(date.getTime()).toLocalDateTime();
     } else {
@@ -53,7 +53,7 @@ public class Utils {
     }
   }
 
-  public static Date fromLocalDateTime(LocalDateTime ldt) {
+  public static Date toDate(LocalDateTime ldt) {
     if (ldt != null) {
       return Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant());
     } else {
