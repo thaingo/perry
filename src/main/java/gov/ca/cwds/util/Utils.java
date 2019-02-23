@@ -53,6 +53,14 @@ public class Utils {
     }
   }
 
+  public static Date fromLocalDateTime(LocalDateTime ldt) {
+    if (ldt != null) {
+      return Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant());
+    } else {
+      return null;
+    }
+  }
+
   @SuppressWarnings("unchecked")
   public static <T> T unwrap(T bean) {
     try {

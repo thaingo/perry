@@ -1,13 +1,13 @@
 import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType
 import gov.ca.cwds.idm.service.cognito.util.CognitoPhoneConverter
 import org.apache.commons.lang3.StringUtils
+import gov.ca.cwds.util.Utils
 
 def attribute = {name -> cognitoUser.attributes?.find {it.name.equalsIgnoreCase(name)}?.value}
 
 result.id = cognitoUser.username
 result.enabled = cognitoUser.enabled
 result.userCreateDate = cognitoUser.userCreateDate
-result.userLastModifiedDate = cognitoUser.userLastModifiedDate
 result.status = cognitoUser.userStatus
 result.email = attribute("email")
 result.racfid = attribute("custom:RACFID")
@@ -15,6 +15,12 @@ result.phoneNumber = CognitoPhoneConverter.fromCognitoFormat(attribute("phone_nu
 result.phoneExtensionNumber = attribute("custom:PhoneExtension")
 result.lastLoginDateTime = nsUser.lastLoginTime
 result.notes = nsUser.notes
+
+Date cognitoModifiedTime = cognitoUser.userLastModifiedDate
+Date nsDbModifiedTime = Utils.fromLocalDateTime(nsUser.lastModifiedTime)
+long cognitoModifiedMillis = cognitoModifiedTime?.time?:0
+long nsDbModifiedMillis = nsDbModifiedTime?.time?:0
+result.userLastModifiedDate = nsDbModifiedMillis > cognitoModifiedMillis ? nsDbModifiedTime : cognitoModifiedTime
 
 if(StringUtils.isNotBlank(attribute("custom:locked"))) {
     result.locked = attribute("custom:locked").toBoolean()
