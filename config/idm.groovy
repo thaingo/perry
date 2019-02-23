@@ -1,5 +1,4 @@
 import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType
-import gov.ca.cwds.idm.service.cognito.util.CognitoPhoneConverter
 import org.apache.commons.lang3.StringUtils
 import gov.ca.cwds.util.Utils
 
@@ -10,10 +9,10 @@ result.enabled = cognitoUser.enabled
 result.userCreateDate = cognitoUser.userCreateDate
 result.status = cognitoUser.userStatus
 result.email = cognitoUserAttribute("email")
-result.phoneNumber = CognitoPhoneConverter.fromCognitoFormat(cognitoUserAttribute("phone_number"))
 result.phoneExtensionNumber = cognitoUserAttribute("custom:PhoneExtension")
 
 result.racfid = nsUser.racfid
+result.phoneNumber = nsUser.phoneNumber
 result.lastLoginDateTime = nsUser.lastLoginTime
 result.notes = nsUser.notes
 
