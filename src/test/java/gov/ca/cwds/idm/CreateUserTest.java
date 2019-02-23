@@ -44,6 +44,7 @@ import gov.ca.cwds.idm.util.WithMockCustomUser;
 import java.time.LocalDate;
 import java.util.Set;
 import org.junit.Test;
+import org.mockito.ArgumentMatcher;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -425,7 +426,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
     assertEquals(1, nsAuditEventRepository.count() - previousEventCount);
     verify(cognito, times(1)).adminCreateUser(request);
     verify(cognito, times(1)).adminCreateUser(invitationRequest);
-    verify(spySearchService, times(1)).createUser(argThat(usr -> Boolean.TRUE.equals(usr.getEnabled())));
+    verify(spySearchService, times(1)).createUser(argThat(new UserMatcher()));
     verifyDoraCalls(1);
     verify(auditEventIndexService, times(1)).sendAuditEventToEsIndex(any(
         UserCreatedEvent.class));
@@ -551,6 +552,14 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
         AdminCreateUserRequest invitationRequest) {
       this.createRequest = createRequest;
       this.invitationRequest = invitationRequest;
+    }
+  }
+
+  private class UserMatcher implements ArgumentMatcher<User> {
+
+    @Override
+    public boolean matches(User user) {
+      return Boolean.TRUE.equals(user.getEnabled()) && user.getStatus() != null;
     }
   }
 }
