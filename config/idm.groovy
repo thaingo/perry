@@ -1,8 +1,12 @@
-import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType
-import org.apache.commons.lang3.StringUtils
-import gov.ca.cwds.util.Utils
+import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.*
+import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.*
 
-def cognitoUserAttribute = {name -> cognitoUser.attributes?.find {it.name.equalsIgnoreCase(name)}?.value}
+import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType
+import gov.ca.cwds.util.Utils
+import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute
+import org.apache.commons.lang3.StringUtils
+
+def cognitoUserAttribute = {UserAttribute attr -> cognitoUser.attributes?.find {it.name.equalsIgnoreCase(attr.name)}?.value}
 
 result.id = nsUser.username
 result.racfid = nsUser.racfid
@@ -18,10 +22,10 @@ result.userLastModifiedDate = lastDate(Utils.toDate(nsUser.lastModifiedTime), co
 result.enabled = cognitoUser.enabled
 result.userCreateDate = cognitoUser.userCreateDate
 result.status = cognitoUser.userStatus
-result.email = cognitoUserAttribute("email")
+result.email = cognitoUserAttribute(EMAIL)
 
-if(StringUtils.isNotBlank(cognitoUserAttribute("custom:locked"))) {
-    result.locked = cognitoUserAttribute("custom:locked").toBoolean()
+if(StringUtils.isNotBlank(cognitoUserAttribute(IS_LOCKED))) {
+    result.locked = cognitoUserAttribute(IS_LOCKED).toBoolean()
 }
 
 if(cwsUser) {
@@ -40,8 +44,8 @@ if(cwsUser) {
 } else {
     result.firstName = nsUser.firstName
     result.lastName = nsUser.lastName
-    result.countyName = cognitoUserAttribute("custom:County")
-    result.officeId = cognitoUserAttribute("custom:Office")
+    result.countyName = cognitoUserAttribute(COUNTY)
+    result.officeId = cognitoUserAttribute(OFFICE)
 }
 
 static Date lastDate(Date firstDate, Date secondDate) {
