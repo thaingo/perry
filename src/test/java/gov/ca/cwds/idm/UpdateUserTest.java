@@ -80,10 +80,10 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
 
+@Transactional(value = TOKEN_TRANSACTION_MANAGER)
 public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
 
   @Test
-  @Transactional(value = TOKEN_TRANSACTION_MANAGER)
   @WithMockCustomUser(roles = {STATE_ADMIN})
   public void testUpdateUser() throws Exception {
 

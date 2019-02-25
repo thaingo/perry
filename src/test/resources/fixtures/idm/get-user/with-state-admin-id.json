@@ -17,7 +17,7 @@
     "office_phone_extension_number": "11",
     "phone_number": "3254545345",
     "permissions": [
-      "test"
+      "Hotline-rollout"
     ],
     "roles": [
       "State-admin"

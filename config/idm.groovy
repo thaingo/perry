@@ -10,6 +10,7 @@ result.phoneNumber = nsUser.phoneNumber
 result.phoneExtensionNumber = nsUser.phoneExtensionNumber
 result.lastLoginDateTime = nsUser.lastLoginTime
 result.notes = nsUser.notes
+result.permissions = nsUser.permissions
 
 result.userLastModifiedDate = lastDate(Utils.toDate(nsUser.lastModifiedTime), cognitoUser.userLastModifiedDate)
 
@@ -22,9 +23,10 @@ if(StringUtils.isNotBlank(cognitoUserAttribute("custom:locked"))) {
     result.locked = cognitoUserAttribute("custom:locked").toBoolean()
 }
 
-if(StringUtils.isNotBlank(cognitoUserAttribute("custom:Permission"))) {
-    result.permissions = cognitoUserAttribute("custom:Permission").split('\\s*:\\s*') as HashSet
-}
+//if(StringUtils.isNotBlank(cognitoUserAttribute("custom:Permission"))) {
+//    result.permissions = cognitoUserAttribute("custom:Permission").split('\\s*:\\s*') as HashSet
+//}
+
 
 if(StringUtils.isNotBlank(cognitoUserAttribute("custom:Role"))) {
     result.roles = cognitoUserAttribute("custom:Role").split('\\s*:\\s*') as HashSet
