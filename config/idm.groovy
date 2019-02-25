@@ -44,9 +44,9 @@ if(cwsUser) {
     result.officePhoneExtensionNumber = cwsUser.cwsOffice?.primaryPhoneExtensionNumber
     result.cwsPrivileges = cwsUser.cwsStaffPrivs
 } else {
+    result.firstName = nsUser.firstName
+    result.lastName = nsUser.lastName
     result.countyName = cognitoUserAttribute("custom:County")
-    result.firstName = cognitoUserAttribute("given_name")
-    result.lastName = cognitoUserAttribute("family_name")
     result.officeId = cognitoUserAttribute("custom:Office")
 }
 
