@@ -6,7 +6,8 @@ import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.SUPER_ADMIN;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
-import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.ABSENT_USER_ID;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.ABSENT_IN_IDM_USER_ID;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.ABSENT_IN_NS_DB_USER_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.COUNTY_ADMIN_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.ERROR_USER_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.LOCKED_USER;
@@ -104,13 +105,25 @@ public class GetUserTest extends BaseIdmIntegrationTest {
 
   @Test
   @WithMockCustomUser
-  public void testGetAbsentUser() throws Exception {
+  public void testGetAbsentInNsDbUser() throws Exception {
 
-    mockMvc
-        .perform(MockMvcRequestBuilders.get("/idm/users/" + ABSENT_USER_ID))
+    MvcResult result = mockMvc
+        .perform(MockMvcRequestBuilders.get("/idm/users/" + ABSENT_IN_NS_DB_USER_ID))
         .andExpect(MockMvcResultMatchers.status().isNotFound())
         .andReturn();
+    assertExtensible(result, "fixtures/idm/get-user/absent-in-ns-db.json");
   }
+
+//  @Test
+//  @WithMockCustomUser
+//  public void testGetAbsentInIdmUser() throws Exception {
+//
+//    MvcResult result = mockMvc
+//        .perform(MockMvcRequestBuilders.get("/idm/users/" + ABSENT_IN_IDM_USER_ID))
+//        .andExpect(MockMvcResultMatchers.status().isNotFound())
+//        .andReturn();
+//    assertExtensible(result, "fixtures/idm/get-user/absent-in-idm.json");
+//  }
 
   @Test
   @WithMockCustomUser

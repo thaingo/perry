@@ -352,5 +352,21 @@
       <column name="role_key" value="CWS-worker"/>
     </insert>
 
+    <insert tableName="user">
+      <column name="id" value="18"/>
+      <column name="username" value="absentInIdmUserId"/>
+      <column name="last_login_time" valueDate="2018-10-17 07:01:12"/>
+      <column name="racfid"/>
+      <column name="phone_number"/>
+      <column name="phone_extension"/>
+      <column name="last_modified_time" valueDate="2018-05-31"/>
+      <column name="first_name" value="Nonfound"/>
+      <column name="last_name" value="Disappearer"/>
+    </insert>
+    <insert tableName="user_role">
+      <column name="user_id" value="18"/>
+      <column name="role_key" value="CWS-worker"/>
+    </insert>
+
   </changeSet>
 </databaseChangeLog>

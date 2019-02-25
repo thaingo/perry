@@ -67,7 +67,8 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
   public static final String EMAIL_ERROR_CREATE_USER_EMAIL = "email.error@create.com";
   public static final String DELETE_ERROR_CREATE_USER_EMAIL = "delete.error@create.com";
   public static final String SOME_PAGINATION_TOKEN = "somePaginationToken";
-  public static final String ABSENT_USER_ID = "absentUserId";
+  public static final String ABSENT_IN_NS_DB_USER_ID = "absentInNsDbUserId";
+  public static final String ABSENT_IN_IDM_USER_ID = "absentInIdmUserId";
   public static final String ERROR_USER_ID = "errorUserId";
   public static final String INACTIVE_USER_WITH_NO_ACTIVE_RACFID_IN_CMS =
       "17067e4e-270f-4623-b86c-b4d4fa527z79";
@@ -661,7 +662,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
   private void setUpGetAbsentUserRequestAndResult() {
 
     AdminGetUserRequest getUserRequest =
-        new AdminGetUserRequest().withUsername(ABSENT_USER_ID).withUserPoolId(USERPOOL);
+        new AdminGetUserRequest().withUsername(ABSENT_IN_NS_DB_USER_ID).withUserPoolId(USERPOOL);
 
     when(cognito.adminGetUser(getUserRequest))
         .thenThrow(new UserNotFoundException("user not found"));
