@@ -18,6 +18,7 @@ security:
      logoutTokenUri: ${SAF_LOGOUT_URI:}
 spring:
       datasource:
+          type: com.zaxxer.hikari.HikariDataSource
           driver-class-name: com.ibm.db2.jcc.DB2Driver
           url: ${DB_CMS_JDBC_URL:jdbc:db2://localhost:50000/DB0TDEV}
           username: ${DB_CMS_USER:db2inst1}
