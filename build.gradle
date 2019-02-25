@@ -32,7 +32,7 @@ apply plugin: 'docker'
 project.ext {
     projectGroup = 'gov.ca.cwds.api'
     configPath = "$rootProject.projectDir/config/"
-    springVersion = "1.5.13.RELEASE"
+    springVersion = "1.5.19.RELEASE"
     springfoxSwaggerVersion = "2.9.0"
     projectMajorVersion = '4.1.0'
     mainclass = 'gov.ca.cwds.PerryApplication'
