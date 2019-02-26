@@ -9,47 +9,65 @@ import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EM
 import static gov.ca.cwds.idm.util.TestUtils.attr;
 import static gov.ca.cwds.idm.util.TestUtils.dateTime;
 import static gov.ca.cwds.idm.util.TestUtils.toMillis;
+import static gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType.MADERA;
 import static gov.ca.cwds.util.Utils.toSet;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import com.amazonaws.services.cognitoidp.model.UserStatusType;
 import com.amazonaws.services.cognitoidp.model.UserType;
+import gov.ca.cwds.data.persistence.auth.CwsOffice;
+import gov.ca.cwds.data.persistence.auth.StaffPerson;
+import gov.ca.cwds.idm.dto.CwsStaffPrivilege;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
+import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType;
+import gov.ca.cwds.service.dto.CwsUserInfo;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
 public class IdmMappingScriptTest {
 
-  static String NS_USER_USERNAME = "NS_USER_USERNAME";
-  static String NS_USER_RACFID = "NS_USER_RACFID";
-  static String NS_USER_NOTES = "NS_USER_NOTES";
-  static String NS_USER_PHONE_NUMBER = "1234567890";
-  static String NS_USER_PHONE_EXTENSION_NUMBER = "678";
-  static long NS_USER_LAST_LOGIN_TIME_MILLIS = 110000000L;
-  static LocalDateTime NS_USER_LAST_LOGIN_TIME = dateTime(NS_USER_LAST_LOGIN_TIME_MILLIS);
-  static Set<String> NS_USER_ROLES = toSet(CWS_WORKER, COUNTY_ADMIN);
-  static Set<String> NS_USER_PERMISSIONS = toSet("Hotline-rollout", "RFA-rollout");
-  static long NS_USER_LAST_MODIFIED_TIME_MILLIS = 130000000L;
-  static String NS_USER_FIRST_NAME = "NS_USER_FIRST_NAME";
-  static String NS_USER_LAST_NAME = "NS_USER_FIRST_NAME";
+  private static final String NS_USER_USERNAME = "NS_USER_USERNAME";
+  private static final String NS_USER_RACFID = "NS_USER_RACFID";
+  private static final String NS_USER_NOTES = "NS_USER_NOTES";
+  private static final String NS_USER_PHONE_NUMBER = "1234567890";
+  private static final String NS_USER_PHONE_EXTENSION_NUMBER = "678";
+  private static final long NS_USER_LAST_LOGIN_TIME_MILLIS = 110000000L;
+  private static final LocalDateTime NS_USER_LAST_LOGIN_TIME = dateTime(NS_USER_LAST_LOGIN_TIME_MILLIS);
+  private static final Set<String> NS_USER_ROLES = toSet(CWS_WORKER, COUNTY_ADMIN);
+  private static final Set<String> NS_USER_PERMISSIONS = toSet("Hotline-rollout", "RFA-rollout");
+  private static final long NS_USER_LAST_MODIFIED_TIME_MILLIS = 130000000L;
+  private static final String NS_USER_FIRST_NAME = "NS_USER_FIRST_NAME";
+  private static final String NS_USER_LAST_NAME = "NS_USER_FIRST_NAME";
 
-  static long IDM_USER_LAST_MODIFIED_TIME_MILLIS = 120000000L;
-  static Boolean IDM_USER_ENABLED = Boolean.TRUE;
-  static long IDM_USER_CREATED_TIME_MILLIS = 100000000L;
-  static UserStatusType IDM_USER_STATUS = UserStatusType.CONFIRMED;
-  static String IDM_USER_EMAIL = "idm.cognito@gmail.com";
-  static String IDM_LOCKED = "false";
-  static String IDM_COUNTY_NAME = "IDM_COUNTY_NAME";
-  static String IDM_OFFICE_ID = "IDM_OFFICE_ID";
+  private static final long IDM_USER_LAST_MODIFIED_TIME_MILLIS = 120000000L;
+  private static final Boolean IDM_USER_ENABLED = Boolean.TRUE;
+  private static final long IDM_USER_CREATED_TIME_MILLIS = 100000000L;
+  private static final UserStatusType IDM_USER_STATUS = UserStatusType.CONFIRMED;
+  private static final String IDM_USER_EMAIL = "idm.cognito@gmail.com";
+  private static final String IDM_LOCKED = "false";
+  private static final String IDM_COUNTY_NAME = "IDM_COUNTY_NAME";
+  private static final String IDM_OFFICE_ID = "IDM_OFFICE_ID";
 
+  private static final String CWS_FIRST_NAME = "CWS_FIRST_NAME";
+  private static final String CWS_LAST_NAME = "CWS_LAST_NAME";
+  private static final GovernmentEntityType CWS_COUNTY = MADERA;
+  private static final String CWS_OFFICE_ID = "CWS_OFFICE_ID";
+  private static final LocalDate CWS_USER_START_DATE = LocalDate.of(2007, 4, 25);
+  private static final Long CWS_OFFICE_PHONE_NUMBER = 9876543210L;
+  private static final String CWS_OFFICE_PHONE_EXTENSION = "987";
+  private static final String CWS_STAFF_PRIVILEGE_CATEGORY = "CWS_STAFF_PRIVILEGE_CATEGORY";
+  private static final String CWS_STAFF_PRIVILEGE_DESC = "CWS_STAFF_PRIVILEGE_DESC";
 
   private IdmMappingScript idpMappingScript;
 
@@ -57,6 +75,46 @@ public class IdmMappingScriptTest {
   public void before() throws Exception {
     String path = Paths.get(getClass().getResource("/scripts/cognito/idm.groovy").toURI()).toString();
     idpMappingScript = new IdmMappingScript(path);
+  }
+
+  @Test
+  public void testRacfidUser() throws Exception {
+    CwsUserInfo cwsUser = cwsUser();
+
+    User user = idpMappingScript.map(cognitoUser(), cwsUser, nsUser());
+
+    assertThat(user, notNullValue());
+    assertThat(user.getId(), is(NS_USER_USERNAME));
+    assertThat(user.getRacfid(), is(NS_USER_RACFID));
+    assertThat(user.getPhoneNumber(), is(NS_USER_PHONE_NUMBER));
+    assertThat(user.getPhoneExtensionNumber(), is(NS_USER_PHONE_EXTENSION_NUMBER));
+    assertThat(toMillis(user.getLastLoginDateTime()), is(NS_USER_LAST_LOGIN_TIME_MILLIS));
+    assertThat(user.getNotes(), is(NS_USER_NOTES));
+    assertThat(user.getRoles(), is(NS_USER_ROLES));
+    assertThat(user.getPermissions(), is(NS_USER_PERMISSIONS));
+
+    assertThat(user.getUserLastModifiedDate().getTime(), is(NS_USER_LAST_MODIFIED_TIME_MILLIS));
+
+    assertThat(user.getEnabled(), is(IDM_USER_ENABLED));
+    assertThat(user.getUserCreateDate().getTime(), is(IDM_USER_CREATED_TIME_MILLIS));
+    assertThat(user.getStatus(), is(IDM_USER_STATUS.toString()));
+    assertThat(user.getEmail(), is(IDM_USER_EMAIL));
+    assertThat(user.isLocked(), is(false));
+
+    assertThat(user.getFirstName(), is(CWS_FIRST_NAME));
+    assertThat(user.getLastName(), is(CWS_LAST_NAME));
+    assertThat(user.getCountyName(), is(CWS_COUNTY.getDescription()));
+    assertThat(user.getOfficeId(), is(CWS_OFFICE_ID));
+    assertThat(user.getStartDate(), is(CWS_USER_START_DATE));
+    assertThat(user.getEndDate(), is(nullValue()));
+    assertThat(user.getOfficePhoneNumber(), is(CWS_OFFICE_PHONE_NUMBER.toString()));
+    assertThat(user.getOfficePhoneExtensionNumber(), is(CWS_OFFICE_PHONE_EXTENSION));
+
+    Set<CwsStaffPrivilege> cwsStaffPrivileges = user.getCwsPrivileges();
+    assertThat(cwsStaffPrivileges.size(), is(1));
+    CwsStaffPrivilege cwsStaffPrivilege = cwsStaffPrivileges.iterator().next();
+    assertThat(cwsStaffPrivilege.getCategory(), is(CWS_STAFF_PRIVILEGE_CATEGORY));
+    assertThat(cwsStaffPrivilege.getPrivilege(), is(CWS_STAFF_PRIVILEGE_DESC));
   }
 
   @Test
@@ -85,6 +143,11 @@ public class IdmMappingScriptTest {
     assertThat(user.getLastName(), is(NS_USER_LAST_NAME));
     assertThat(user.getCountyName(), is(IDM_COUNTY_NAME));
     assertThat(user.getOfficeId(), is(IDM_OFFICE_ID));
+    assertThat(user.getStartDate(), is(nullValue()));
+    assertThat(user.getEndDate(), is(nullValue()));
+    assertThat(user.getOfficePhoneNumber(), is(nullValue()));
+    assertThat(user.getOfficePhoneExtensionNumber(), is(nullValue()));
+    assertTrue(user.getCwsPrivileges().isEmpty());
   }
 
   @Test
@@ -176,5 +239,31 @@ public class IdmMappingScriptTest {
         attr(OFFICE, IDM_OFFICE_ID)
     );
     return cognitoUser;
+  }
+
+  private CwsUserInfo cwsUser() {
+    CwsUserInfo cwsUser = new CwsUserInfo();
+
+    StaffPerson staffPerson = new StaffPerson();
+    staffPerson.setFirstName(CWS_FIRST_NAME);
+    staffPerson.setLastName(CWS_LAST_NAME);
+    staffPerson.setStartDate(CWS_USER_START_DATE);
+    staffPerson.setEndDate(null);
+    cwsUser.setStaffPerson(staffPerson);
+
+    CwsOffice cwsOffice = new CwsOffice();
+    cwsOffice.setGovernmentEntityType((short)CWS_COUNTY.getSysId());
+    cwsOffice.setOfficeId(CWS_OFFICE_ID);
+    cwsOffice.setPrimaryPhoneNumber(CWS_OFFICE_PHONE_NUMBER);
+    cwsOffice.setPrimaryPhoneExtensionNumber(CWS_OFFICE_PHONE_EXTENSION);
+    cwsUser.setCwsOffice(cwsOffice);
+
+    Set<CwsStaffPrivilege> cwsStaffPrivileges = new HashSet<>();
+    CwsStaffPrivilege cwsStaffPrivilege = new CwsStaffPrivilege(CWS_STAFF_PRIVILEGE_CATEGORY,
+        CWS_STAFF_PRIVILEGE_DESC);
+    cwsStaffPrivileges.add(cwsStaffPrivilege);
+    cwsUser.setCwsStaffPrivs(cwsStaffPrivileges);
+
+    return cwsUser;
   }
 }
