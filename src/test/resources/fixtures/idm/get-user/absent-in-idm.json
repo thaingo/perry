@@ -2,5 +2,6 @@
   "status": "NOT_FOUND",
   "technical_message": "User with id: absentInIdmUserId is not found in IDM",
   "user_message": "User with id: absentInIdmUserId is not found in IDM",
-  "error_code": "CAP-008"
+  "error_code": "CAP-008",
+  "causes": ["user not found (Service: null; Status Code: 0; Error Code: null; Request ID: null)"]
 }

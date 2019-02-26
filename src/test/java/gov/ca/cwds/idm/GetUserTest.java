@@ -114,16 +114,16 @@ public class GetUserTest extends BaseIdmIntegrationTest {
     assertExtensible(result, "fixtures/idm/get-user/absent-in-ns-db.json");
   }
 
-//  @Test
-//  @WithMockCustomUser
-//  public void testGetAbsentInIdmUser() throws Exception {
-//
-//    MvcResult result = mockMvc
-//        .perform(MockMvcRequestBuilders.get("/idm/users/" + ABSENT_IN_IDM_USER_ID))
-//        .andExpect(MockMvcResultMatchers.status().isNotFound())
-//        .andReturn();
-//    assertExtensible(result, "fixtures/idm/get-user/absent-in-idm.json");
-//  }
+  @Test
+  @WithMockCustomUser
+  public void testGetAbsentInIdmUser() throws Exception {
+
+    MvcResult result = mockMvc
+        .perform(MockMvcRequestBuilders.get("/idm/users/" + ABSENT_IN_IDM_USER_ID))
+        .andExpect(MockMvcResultMatchers.status().isNotFound())
+        .andReturn();
+    assertExtensible(result, "fixtures/idm/get-user/absent-in-idm.json");
+  }
 
   @Test
   @WithMockCustomUser

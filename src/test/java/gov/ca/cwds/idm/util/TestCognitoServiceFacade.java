@@ -664,7 +664,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
   private void setUpGetAbsentUserRequestAndResult() {
 
     AdminGetUserRequest getUserRequest =
-        new AdminGetUserRequest().withUsername(ABSENT_IN_NS_DB_USER_ID).withUserPoolId(USERPOOL);
+        new AdminGetUserRequest().withUsername(ABSENT_IN_IDM_USER_ID).withUserPoolId(USERPOOL);
 
     when(cognito.adminGetUser(getUserRequest))
         .thenThrow(new UserNotFoundException("user not found"));
