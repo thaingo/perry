@@ -1,5 +1,7 @@
 package gov.ca.cwds.config;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import gov.ca.cwds.data.auth.UserIdDao;
 import gov.ca.cwds.data.persistence.auth.AssignmentUnit;
 import gov.ca.cwds.idm.persistence.cwscms.repository.OfficeRepository;
@@ -35,9 +37,15 @@ public class CMSConfiguration {
 
   @Bean
   @Primary
-  @ConfigurationProperties("spring.datasource")
-  public DataSource dataSource() {
-    return dataSourceProperties().initializeDataSourceBuilder().build();
+  public DataSource dataSource(HikariConfig properties) {
+    return new HikariDataSource(properties);
+  }
+
+  @Bean
+  @Primary
+  @ConfigurationProperties(prefix = "spring.datasource.hikari")
+  public HikariConfig hikariConfig() {
+    return new HikariConfig();
   }
 
   @Bean
