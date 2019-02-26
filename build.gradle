@@ -39,6 +39,7 @@ project.ext {
     targetDockerHubOrganization = System.env.DOCKERHUB_ORG ?: 'cwds'
     cwdsModelVersion = '0.11.2_724-RC'
     powerMockVersion = "1.7.3"
+    hikariCPVersion = "3.3.1"
 
     // assume that Windows users use the Docker Toolbox
     buildEnv = 'JENKINS'
@@ -142,14 +143,10 @@ def buildTime() {
 dependencies {
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-security', version: springVersion
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version:springVersion
-    //compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa', version:springVersion
-
     compile ('org.springframework.boot:spring-boot-starter-data-jpa:' + springVersion) {
         exclude group: 'org.apache.tomcat', module: 'tomcat-jdbc'
     }
-
-    compile group: 'com.zaxxer', name: 'HikariCP', version: '3.3.1'
-
+    compile group: 'com.zaxxer', name: 'HikariCP', version: hikariCPVersion
     compile group: 'org.springframework.boot', name: 'spring-boot-starter-thymeleaf', version:springVersion
     compile group:"org.springframework.boot", name:"spring-boot-starter-actuator", version:springVersion
     compile group:"org.springframework.boot", name:"spring-boot-starter-data-redis", version:springVersion
