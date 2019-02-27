@@ -100,7 +100,7 @@ public class IdmResource {
   public List<User> searchUsersByRacfid(
       @ApiParam(required = true, name = "RACFIDs", value = "List of RACFIDs") @NotNull @RequestBody
           Set<String> racfids) {
-    return idmService.searchUsersInIdm(new UsersSearchCriteria(RACFID_STANDARD, racfids));
+    return idmService.searchUsersByRacfids(racfids);
   }
 
   @RequestMapping(

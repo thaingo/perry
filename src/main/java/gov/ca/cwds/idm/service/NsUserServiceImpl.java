@@ -96,6 +96,12 @@ public class NsUserServiceImpl implements NsUserService {
     return nsUserRepository.findByUsernames(usernames);
   }
 
+  @Override
+  @Transactional(value = TOKEN_TRANSACTION_MANAGER, readOnly = true)
+  public List<NsUser> findByRacfids(Set<String> racfids) {
+    return nsUserRepository.findByRacfids(racfids);
+  }
+
   @Autowired
   public void setNsUserRepository(NsUserRepository nsUserRepository) {
     this.nsUserRepository = nsUserRepository;

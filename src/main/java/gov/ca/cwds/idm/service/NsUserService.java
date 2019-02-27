@@ -17,4 +17,6 @@ public interface NsUserService {
   Optional<NsUser> findByUsername(String username);
 
   List<NsUser> findByUsernames(Set<String> usernames);
+
+  List<NsUser> findByRacfids(Set<String> racfids);
 }

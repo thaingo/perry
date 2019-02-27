@@ -4,6 +4,7 @@ import static gov.ca.cwds.idm.service.IdmServiceImpl.transformSearchValues;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getRACFId;
 import static gov.ca.cwds.service.messages.MessageCode.DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_NOT_FOUND_BY_ID_IN_NS_DATABASE;
+import static gov.ca.cwds.util.Utils.applyFunctionToValues;
 import static gov.ca.cwds.util.Utils.isRacfidUser;
 
 import com.amazonaws.services.cognitoidp.model.UserType;
@@ -23,6 +24,7 @@ import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType;
 import gov.ca.cwds.service.CwsUserInfoService;
 import gov.ca.cwds.service.dto.CwsUserInfo;
 import gov.ca.cwds.service.messages.MessagesService;
+import gov.ca.cwds.util.Utils;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -125,13 +127,7 @@ public class UserService {
     Set<String> userNames = userNameToRacfId.keySet();
     Collection<String> racfIds = userNameToRacfId.values();
 
-    Map<String, CwsUserInfo> racfidToCmsUser = cwsUserInfoService.findUsers(racfIds)
-        .stream().collect(
-            Collectors.toMap(CwsUserInfo::getRacfId, e -> e, (user1, user2) -> {
-              LOGGER.warn(messages
-                  .getTechMessage(DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS, user1.getRacfId()));
-              return user1;
-            }));
+    Map<String, CwsUserInfo> racfidToCmsUser = getRacfidToCmsUserMap(racfIds);
 
     Map<String, NsUser> usernameToNsUser =
         nsUserService.findByUsernames(userNames).stream()
@@ -145,6 +141,40 @@ public class UserService {
             usernameToNsUser.get(userType.getUsername())
             )
         ).collect(Collectors.toList());
+  }
+
+  public List<User> searchUsersByRacfids(Set<String> racfids) {
+    Set<String> upperCaseRacfids = applyFunctionToValues(racfids, Utils::toUpperCase);
+    List<NsUser> nsUsers = nsUserService.findByRacfids(upperCaseRacfids);
+    return enrichNsUsers(nsUsers);
+  }
+
+  private List<User> enrichNsUsers(Collection<NsUser> nsUsers) {
+    if (CollectionUtils.isEmpty(nsUsers)) {
+      return Collections.emptyList();
+    }
+    Set<String> racfIds = nsUsers.stream().map(NsUser::getRacfid).collect(Collectors.toSet());
+
+    Map<String, CwsUserInfo> racfidToCmsUser = getRacfidToCmsUserMap(racfIds);
+
+    return nsUsers
+        .stream()
+        .map(nsUser -> mappingService.toUser(
+            cognitoServiceFacade.getCognitoUserById(nsUser.getUsername()),
+            racfidToCmsUser.get(nsUser.getRacfid()),
+            nsUser
+            )
+        ).collect(Collectors.toList());
+  }
+
+  private Map<String, CwsUserInfo> getRacfidToCmsUserMap(Collection<String> racfIds) {
+    return cwsUserInfoService.findUsers(racfIds)
+        .stream().collect(
+            Collectors.toMap(CwsUserInfo::getRacfId, e -> e, (user1, user2) -> {
+              LOGGER.warn(messages
+                  .getTechMessage(DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS, user1.getRacfId()));
+              return user1;
+            }));
   }
 
   private void enrichUserByCwsData(User user, CwsUserInfo cwsUser) {
