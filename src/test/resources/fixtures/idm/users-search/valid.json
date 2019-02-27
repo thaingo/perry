@@ -1,37 +1,44 @@
-[{
-  "id": "d740ec1d-80ae-4d84-a8c4-9bed7a942f5b",
-  "email": "garcia@gmail.com",
-  "first_name": "Win",
-  "last_name": "Staff",
-  "county_name": "Yolo",
-  "racfid": "SMITHBO",
-  "start_date": "1980-08-08",
-  "office_id": "JzoGSkE05I",
-  "office_phone_number": "4646464646",
-  "office_phone_extension_number": "11",
-  "phone_number": "4646888777",
-  "phone_extension_number": "7",
-  "locked": false,
-  "user_create_date": "2018-05-03",
-  "user_last_modified_date": "2018-05-31",
-  "last_login_date_time": "2018-09-17 05:01:12",
-  "enabled": true,
-  "status": "CONFIRMED",
-  "permissions": ["Hotline-rollout"],
-  "roles": ["CWS-worker"],
-  "cws_privileges": [{
-    "category": "Limited Access Authority",
-    "privilege": "Sealed"
+[
+  {
+    "id": "d740ec1d-80ae-4d84-a8c4-9bed7a942f5b",
+    "email": "garcia@gmail.com",
+    "first_name": "Win",
+    "last_name": "Staff",
+    "county_name": "Yolo",
+    "racfid": "SMITHBO",
+    "start_date": "1980-08-08",
+    "office_id": "JzoGSkE05I",
+    "office_phone_number": "4646464646",
+    "office_phone_extension_number": "11",
+    "phone_number": "4646888777",
+    "phone_extension_number": "7",
+    "locked": false,
+    "user_create_date": "2018-05-03",
+    "user_last_modified_date": "2018-05-31",
+    "last_login_date_time": "2018-09-17 05:01:12",
+    "enabled": true,
+    "status": "CONFIRMED",
+    "permissions": [
+      "Hotline-rollout"
+    ],
+    "roles": [
+      "CWS-worker"
+    ],
+    "cws_privileges": [
+      {
+        "category": "Limited Access Authority",
+        "privilege": "Sealed"
+      },
+      {
+        "category": "Override Authority",
+        "privilege": "Officewide Read/Write"
+      },
+      {
+        "category": "Limited Access Authority",
+        "privilege": "Sensitive Persons"
+      }
+    ]
   },
-    {
-      "category": "Override Authority",
-      "privilege": "Officewide Read/Write"
-    },
-    {
-      "category": "Limited Access Authority",
-      "privilege": "Sensitive Persons"
-    }]
-},
   {
     "id": "17067e4e-270f-4623-b86c-b4d4fa524f38",
     "email": "smith5th@gmail.com",
@@ -51,12 +58,15 @@
     "last_login_date_time": "2018-09-17 05:01:12",
     "enabled": false,
     "status": "CONFIRMED",
-    "permissions": ["Hotline-rollout"],
+    "permissions": [
+      "Hotline-rollout"
+    ],
     "roles": [],
-    "cws_privileges": [{
-      "category": "Limited Access Authority",
-      "privilege": "Sealed"
-    },
+    "cws_privileges": [
+      {
+        "category": "Limited Access Authority",
+        "privilege": "Sealed"
+      },
       {
         "category": "Override Authority",
         "privilege": "Officewide Read/Write"
@@ -64,7 +74,8 @@
       {
         "category": "Limited Access Authority",
         "privilege": "Sensitive Persons"
-      }]
+      }
+    ]
   },
   {
     "id": "24051d54-9321-4dd2-a92f-6425d6c455be",
@@ -79,8 +90,12 @@
     "last_login_date_time": "2018-09-17 05:01:12",
     "enabled": true,
     "status": "CONFIRMED",
-    "permissions": ["Hotline-rollout"],
-    "roles": ["County-admin"],
+    "permissions": [
+      "Hotline-rollout"
+    ],
+    "roles": [
+      "County-admin"
+    ],
     "cws_privileges": []
   },
   {
@@ -94,10 +109,14 @@
     "user_create_date": "2018-05-04",
     "user_last_modified_date": "2018-05-29",
     "last_login_date_time": "2018-10-17 07:01:12",
-    "enabled": true,
+    "enabled": false,
     "status": "CONFIRMED",
-    "permissions": ["Hotline-rollout"],
-    "roles": ["County-admin"],
+    "permissions": [
+      "Hotline-rollout"
+    ],
+    "roles": [
+      "County-admin"
+    ],
     "cws_privileges": []
   },
   {
@@ -111,10 +130,14 @@
     "user_create_date": "2018-05-04",
     "user_last_modified_date": "2018-05-29",
     "last_login_date_time": "2018-10-17 07:01:12",
-    "enabled": true,
+    "enabled": false,
     "status": "CONFIRMED",
-    "permissions": ["Hotline-rollout"],
-    "roles": ["County-admin"],
+    "permissions": [
+      "Hotline-rollout"
+    ],
+    "roles": [
+      "County-admin"
+    ],
     "cws_privileges": []
   },
   {
@@ -128,9 +151,14 @@
     "user_create_date": "2018-05-04",
     "user_last_modified_date": "2018-05-29",
     "last_login_date_time": "2018-10-17 07:01:12",
-    "enabled": true,
+    "enabled": false,
     "status": "CONFIRMED",
-    "permissions": ["Hotline-rollout"],
-    "roles": ["County-admin"],
+    "permissions": [
+      "Hotline-rollout"
+    ],
+    "roles": [
+      "County-admin"
+    ],
     "cws_privileges": []
-  }]
+  }
+]

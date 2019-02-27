@@ -396,7 +396,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
 
     testUser(
         UNLOCKED_USER,
-        Boolean.TRUE,
+        Boolean.FALSE,
         "CONFIRMED",
         date(2018, 5, 4),
         date(2018, 5, 29),
@@ -414,7 +414,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
 
     testUser(
         USER_WITH_NO_LOCKED_VALUE_UNLOCKED,
-        Boolean.TRUE,
+        Boolean.FALSE,
         "CONFIRMED",
         date(2018, 5, 4),
         date(2018, 5, 29),
@@ -432,7 +432,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
 
     testUser(
         LOCKED_USER,
-        Boolean.TRUE,
+        Boolean.FALSE,
         "CONFIRMED",
         date(2018, 5, 4),
         date(2018, 5, 29),

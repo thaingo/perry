@@ -1,20 +1,25 @@
-[{
-  "id": "24051d54-9321-4dd2-a92f-6425d6c455be",
-  "email": "julio@gmail.com",
-  "first_name": "Julio",
-  "last_name": "Iglecias",
-  "county_name": "Yolo",
-  "racfid": "YOLOD",
-  "locked": false,
-  "user_create_date": "2018-05-04",
-  "user_last_modified_date": "2018-05-29",
-  "last_login_date_time": "2018-09-17 05:01:12",
-  "enabled": true,
-  "status": "CONFIRMED",
-  "permissions": ["Hotline-rollout"],
-  "roles": ["County-admin"],
-  "cws_privileges": []
-},
+[
+  {
+    "id": "24051d54-9321-4dd2-a92f-6425d6c455be",
+    "email": "julio@gmail.com",
+    "first_name": "Julio",
+    "last_name": "Iglecias",
+    "county_name": "Yolo",
+    "racfid": "YOLOD",
+    "locked": false,
+    "user_create_date": "2018-05-04",
+    "user_last_modified_date": "2018-05-29",
+    "last_login_date_time": "2018-09-17 05:01:12",
+    "enabled": true,
+    "status": "CONFIRMED",
+    "permissions": [
+      "Hotline-rollout"
+    ],
+    "roles": [
+      "County-admin"
+    ],
+    "cws_privileges": []
+  },
   {
     "id": "24932d54-9321-4dd2-a92f-7425q6c411be",
     "email": "julio1@gmail.com",
@@ -26,10 +31,14 @@
     "user_create_date": "2018-05-04",
     "user_last_modified_date": "2018-05-29",
     "last_login_date_time": "2018-10-17 07:01:12",
-    "enabled": true,
+    "enabled": false,
     "status": "CONFIRMED",
-    "permissions": ["Hotline-rollout"],
-    "roles": ["County-admin"],
+    "permissions": [
+      "Hotline-rollout"
+    ],
+    "roles": [
+      "County-admin"
+    ],
     "cws_privileges": []
   },
   {
@@ -43,10 +52,14 @@
     "user_create_date": "2018-05-04",
     "user_last_modified_date": "2018-05-29",
     "last_login_date_time": "2018-10-17 07:01:12",
-    "enabled": true,
+    "enabled": false,
     "status": "CONFIRMED",
-    "permissions": ["Hotline-rollout"],
-    "roles": ["County-admin"],
+    "permissions": [
+      "Hotline-rollout"
+    ],
+    "roles": [
+      "County-admin"
+    ],
     "cws_privileges": []
   },
   {
@@ -60,9 +73,14 @@
     "user_create_date": "2018-05-04",
     "user_last_modified_date": "2018-05-29",
     "last_login_date_time": "2018-10-17 07:01:12",
-    "enabled": true,
+    "enabled": false,
     "status": "CONFIRMED",
-    "permissions": ["Hotline-rollout"],
-    "roles": ["County-admin"],
+    "permissions": [
+      "Hotline-rollout"
+    ],
+    "roles": [
+      "County-admin"
+    ],
     "cws_privileges": []
-  }]
+  }
+]
