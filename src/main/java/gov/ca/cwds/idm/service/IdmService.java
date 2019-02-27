@@ -22,7 +22,7 @@ public interface IdmService {
 
   String createUser(User user);
 
-  List<User> searchUsers(UsersSearchCriteria usersSearchCriteria);
+  List<User> searchUsersInIdm(UsersSearchCriteria usersSearchCriteria);
 
   List<UserAndOperation> getFailedOperations(LocalDateTime lastJobTime);
 

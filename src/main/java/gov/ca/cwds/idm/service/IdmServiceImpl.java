@@ -179,7 +179,7 @@ public class IdmServiceImpl implements IdmService {
   }
 
   @Override
-  public List<User> searchUsers(UsersSearchCriteria criteria) {
+  public List<User> searchUsersInIdm(UsersSearchCriteria criteria) {
     return userService.searchUsers(criteria);
   }
 
