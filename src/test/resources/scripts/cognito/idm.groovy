@@ -49,7 +49,5 @@ if(cwsUser) {
 }
 
 static Date lastDate(Date firstDate, Date secondDate) {
-    long firstDateMillis = firstDate? firstDate.time : 0
-    long secondDateMillis = secondDate ? secondDate.time : 0
-    return firstDateMillis > secondDateMillis ? firstDate : secondDate
+    return firstDate > secondDate ? firstDate : secondDate
 }
