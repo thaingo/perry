@@ -1,6 +1,8 @@
 package gov.ca.cwds.web;
 
 import static gov.ca.cwds.util.LiquibaseUtils.CMS_STORE_URL;
+import static gov.ca.cwds.util.LiquibaseUtils.SPRING_BOOT_H2_PASSWORD;
+import static gov.ca.cwds.util.LiquibaseUtils.SPRING_BOOT_H2_USER;
 import static gov.ca.cwds.util.LiquibaseUtils.TOKEN_STORE_URL;
 import static gov.ca.cwds.util.LiquibaseUtils.runLiquibaseScript;
 import static gov.ca.cwds.web.MockOAuth2Service.EXPECTED_SSO_TOKEN;
@@ -46,7 +48,9 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
     "spring.jpa.hibernate.ddl-auto=none",
     "perry.identityManager.idmMapping=config/idm.groovy",
     "perry.tokenStore.datasource.url=" + TOKEN_STORE_URL,
-    "spring.datasource.url=" + CMS_STORE_URL,
+    "spring.datasource.hikari.jdbcUrl=" + CMS_STORE_URL,
+    "spring.datasource.hikari.username=" + SPRING_BOOT_H2_USER,
+    "spring.datasource.hikari.password=" + SPRING_BOOT_H2_PASSWORD,
     "perry.whiteList=*",
     "perry.identityProvider.idpMapping=config/cognito.groovy",
     "perry.serviceProviders.default.identityMapping=config/default.groovy",

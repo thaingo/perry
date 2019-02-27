@@ -14,7 +14,11 @@ import static gov.ca.cwds.service.messages.MessageCode.USER_PARTIAL_UPDATE;
 import static gov.ca.cwds.service.messages.MessageCode.USER_PARTIAL_UPDATE_AND_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_PARTIAL_UPDATE_AND_SAVE_TO_SEARCH_ERRORS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_UPDATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
+import static gov.ca.cwds.util.LiquibaseUtils.CMS_STORE_URL;
+import static gov.ca.cwds.util.LiquibaseUtils.SPRING_BOOT_H2_PASSWORD;
+import static gov.ca.cwds.util.LiquibaseUtils.SPRING_BOOT_H2_USER;
 import static gov.ca.cwds.util.LiquibaseUtils.TOKEN_STORE_URL;
+import static gov.ca.cwds.util.LiquibaseUtils.createCmsDatabase;
 import static gov.ca.cwds.util.LiquibaseUtils.createTokenStoreDatabase;
 import static gov.ca.cwds.util.Utils.toSet;
 import static org.hamcrest.CoreMatchers.is;
@@ -48,6 +52,9 @@ import org.springframework.test.context.junit4.SpringRunner;
     "perry.identityManager.idmMapping=config/idm.groovy",
     "spring.jpa.hibernate.ddl-auto=none",
     "perry.tokenStore.datasource.url=" + TOKEN_STORE_URL,
+    "spring.datasource.hikari.jdbcUrl=" + CMS_STORE_URL,
+    "spring.datasource.hikari.username=" + SPRING_BOOT_H2_USER,
+    "spring.datasource.hikari.password=" + SPRING_BOOT_H2_PASSWORD,
 })
 public class IdmServiceImplTest {
 
@@ -72,6 +79,7 @@ public class IdmServiceImplTest {
   public static void prepareDatabases() throws Exception {
     Class.forName(H2_DRIVER_CLASS_NAME);
     createTokenStoreDatabase();
+    createCmsDatabase();
   }
 
   @Test
