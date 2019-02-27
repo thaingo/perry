@@ -4,6 +4,8 @@ import static gov.ca.cwds.idm.BaseIdmIntegrationTest.DORA_WS_MAX_ATTEMPTS;
 import static gov.ca.cwds.idm.BaseIdmIntegrationTest.IDM_BASIC_AUTH_PASS;
 import static gov.ca.cwds.idm.BaseIdmIntegrationTest.IDM_BASIC_AUTH_USER;
 import static gov.ca.cwds.util.LiquibaseUtils.CMS_STORE_URL;
+import static gov.ca.cwds.util.LiquibaseUtils.SPRING_BOOT_H2_PASSWORD;
+import static gov.ca.cwds.util.LiquibaseUtils.SPRING_BOOT_H2_USER;
 import static gov.ca.cwds.util.LiquibaseUtils.TOKEN_STORE_URL;
 import static gov.ca.cwds.util.LiquibaseUtils.runLiquibaseScript;
 import static org.mockito.Mockito.mock;
@@ -49,7 +51,9 @@ import org.springframework.test.context.junit4.SpringRunner;
         "perry.identityManager.idmMapping=config/idm.groovy",
         "spring.jpa.hibernate.ddl-auto=none",
         "perry.tokenStore.datasource.url=" + TOKEN_STORE_URL,
-        "spring.datasource.url=" + CMS_STORE_URL,
+        "spring.datasource.hikari.jdbcUrl=" + CMS_STORE_URL,
+        "spring.datasource.hikari.username=" + SPRING_BOOT_H2_USER,
+        "spring.datasource.hikari.password=" + SPRING_BOOT_H2_PASSWORD,
         "perry.doraWsMaxAttempts=" + DORA_WS_MAX_ATTEMPTS,
         "perry.doraWsRetryDelayMs=500"
     }
