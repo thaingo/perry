@@ -1,6 +1,8 @@
 package gov.ca.cwds.web;
 
 import static gov.ca.cwds.util.LiquibaseUtils.CMS_STORE_URL;
+import static gov.ca.cwds.util.LiquibaseUtils.SPRING_BOOT_H2_PASSWORD;
+import static gov.ca.cwds.util.LiquibaseUtils.SPRING_BOOT_H2_USER;
 import static gov.ca.cwds.util.LiquibaseUtils.TOKEN_STORE_URL;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertThat;
@@ -32,7 +34,9 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
     "spring.jpa.hibernate.ddl-auto=none",
     "perry.identityManager.idmMapping=config/idm.groovy",
     "perry.tokenStore.datasource.url=" + TOKEN_STORE_URL,
-    "spring.datasource.url=" + CMS_STORE_URL,
+    "spring.datasource.hikari.jdbcUrl=" + CMS_STORE_URL,
+    "spring.datasource.hikari.username=" + SPRING_BOOT_H2_USER,
+    "spring.datasource.hikari.password=" + SPRING_BOOT_H2_PASSWORD,
     "perry.whiteList=*",
     "perry.identityProvider.idpMapping=config/cognito.groovy",
     "perry.serviceProviders.default.identityMapping=config/dev.groovy",
@@ -44,7 +48,7 @@ public class PerryDevModeTest extends BaseIntegrationTest {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(PerryDevModeTest.class);
   private static final ObjectMapper MAPPER = Jackson.newObjectMapper();
-  
+
   private static final String REDIS_HEALTHCHECK = "redis";
 
   @Test
@@ -95,7 +99,8 @@ public class PerryDevModeTest extends BaseIntegrationTest {
     result = mockMvc
         .perform(get("/authn/validate?token=" + token))
         .andExpect(MockMvcResultMatchers.status().isOk())
-        .andExpect(MockMvcResultMatchers.content().json(FixtureHelpers.fixture("fixtures/mfa/auth.json")))
+        .andExpect(
+            MockMvcResultMatchers.content().json(FixtureHelpers.fixture("fixtures/mfa/auth.json")))
         .andReturn();
     String perryJson = result.getResponse().getContentAsString();
     LOGGER.info("Perry JSON: {}", perryJson);
