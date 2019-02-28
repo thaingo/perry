@@ -9,10 +9,12 @@ import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserAndOperation;
 import gov.ca.cwds.idm.dto.UserByIdResponse;
 import gov.ca.cwds.idm.dto.UserEditDetails;
+import gov.ca.cwds.idm.dto.UserLockedStatus;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.UserVerificationResult;
 import gov.ca.cwds.idm.dto.UsersPage;
 import gov.ca.cwds.idm.dto.UsersSearchCriteria;
+import gov.ca.cwds.idm.lifecycle.UserLockService;
 import gov.ca.cwds.idm.persistence.ns.entity.Permission;
 import gov.ca.cwds.idm.service.DictionaryProvider;
 import gov.ca.cwds.idm.service.IdmService;
@@ -52,6 +54,9 @@ public class IdmResource {
 
   @Autowired
   private IdmService idmService;
+
+  @Autowired
+  private UserLockService userLockService;
 
   @Autowired
   private UserService userService;
@@ -314,5 +319,53 @@ public class IdmResource {
       " !@userRoleService.isCalsAdminStrongestRole(principal)")
   public ResponseEntity getAdminOffices() {
     return ResponseEntity.ok().body(officeService.getOfficesByAdmin());
+  }
+
+  @RequestMapping(
+      method = RequestMethod.DELETE,
+      value = "/users/{id}/lock"
+  )
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @ApiResponses(
+      value = {
+          @ApiResponse(code = 204, message = "No Content"),
+          @ApiResponse(code = 400, message = "Bad Request"),
+          @ApiResponse(code = 401, message = "Not Authorized"),
+          @ApiResponse(code = 404, message = "Not found")
+      }
+  )
+  @ApiOperation(value = "Unlock User")
+  @PreAuthorize("@userRoleService.isAdmin(principal) &&  " +
+      " !@userRoleService.isCalsAdminStrongestRole(principal)")
+  public ResponseEntity unlockUser(
+      @ApiParam(required = true, value = "The unique user ID", example = "userId1")
+      @PathVariable
+      @NotNull
+          String id) {
+    return ResponseEntity.noContent().build();
+  }
+
+
+  @RequestMapping(
+      method = RequestMethod.GET,
+      value = "/users/{id}/lock",
+      produces = "application/json"
+  )
+  @ApiResponses(value = {
+      @ApiResponse(code = 401, message = "Not Authorized"),
+      @ApiResponse(code = 404, message = "Not found")
+  })
+  @ApiOperation(
+      value = "Get the lock status of the user",
+      response = UserLockedStatus.class
+  )
+  @PreAuthorize("@userRoleService.isAdmin(principal) &&  " +
+      " !@userRoleService.isCalsAdminStrongestRole(principal)")
+  public ResponseEntity getUserLockStatus(
+      @ApiParam(required = true, value = "The unique user ID", example = "userId1")
+      @PathVariable
+      @NotNull
+          String id) {
+    return ResponseEntity.ok().body(new UserLockedStatus(false));
   }
 }
