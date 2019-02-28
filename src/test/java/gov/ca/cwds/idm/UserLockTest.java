@@ -1,12 +1,11 @@
-package gov.ca.cwds.idm.service.cognito;
+package gov.ca.cwds.idm;
 
 import static gov.ca.cwds.config.TokenServiceConfiguration.TOKEN_TRANSACTION_MANAGER;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
-import static gov.ca.cwds.idm.service.cognito.TestCognitoServiceFacade.LOCKED_USER;
-import static gov.ca.cwds.idm.service.cognito.TestCognitoServiceFacade.UNLOCKED_USER;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.LOCKED_USER;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.UNLOCKED_USER;
 import static org.junit.Assert.assertFalse;
 
-import gov.ca.cwds.idm.BaseIdmIntegrationWithUserLogTest;
 import gov.ca.cwds.idm.dto.UserLockedStatus;
 import gov.ca.cwds.idm.util.TestUtils;
 import gov.ca.cwds.idm.util.WithMockCustomUser;

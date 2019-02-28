@@ -14,7 +14,6 @@ import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.UserVerificationResult;
 import gov.ca.cwds.idm.dto.UsersPage;
 import gov.ca.cwds.idm.dto.UsersSearchCriteria;
-import gov.ca.cwds.idm.lifecycle.UserLockService;
 import gov.ca.cwds.idm.persistence.ns.entity.Permission;
 import gov.ca.cwds.idm.service.DictionaryProvider;
 import gov.ca.cwds.idm.service.IdmService;
@@ -54,9 +53,6 @@ public class IdmResource {
 
   @Autowired
   private IdmService idmService;
-
-  @Autowired
-  private UserLockService userLockService;
 
   @Autowired
   private UserService userService;
