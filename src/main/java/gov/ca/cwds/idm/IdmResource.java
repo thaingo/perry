@@ -313,4 +313,29 @@ public class IdmResource {
   public ResponseEntity getAdminOffices() {
     return ResponseEntity.ok().body(officeService.getOfficesByAdmin());
   }
+
+  @RequestMapping(
+      method = RequestMethod.DELETE,
+      value = "/users/{id}/lock"
+  )
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @ApiResponses(
+      value = {
+          @ApiResponse(code = 204, message = "No Content"),
+          @ApiResponse(code = 400, message = "Bad Request"),
+          @ApiResponse(code = 401, message = "Not Authorized"),
+          @ApiResponse(code = 404, message = "Not found")
+      }
+  )
+  @ApiOperation(value = "Unlock User")
+  @PreAuthorize("@userRoleService.isAdmin(principal) &&  " +
+      " !@userRoleService.isCalsAdminStrongestRole(principal)")
+  public ResponseEntity unlockUser(
+      @ApiParam(required = true, value = "The unique user ID", example = "userId1")
+      @PathVariable
+      @NotNull
+          String id) {
+    return ResponseEntity.noContent().build();
+  }
+
 }
