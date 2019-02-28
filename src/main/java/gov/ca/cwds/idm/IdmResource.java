@@ -1,6 +1,5 @@
 package gov.ca.cwds.idm;
 
-import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.util.Utils.URL_DATETIME_FORMATTER;
 
 import gov.ca.cwds.data.persistence.auth.CwsOffice;
@@ -12,7 +11,6 @@ import gov.ca.cwds.idm.dto.UserEditDetails;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.UserVerificationResult;
 import gov.ca.cwds.idm.dto.UsersPage;
-import gov.ca.cwds.idm.dto.UsersSearchCriteria;
 import gov.ca.cwds.idm.persistence.ns.entity.Permission;
 import gov.ca.cwds.idm.service.DictionaryProvider;
 import gov.ca.cwds.idm.service.IdmService;
