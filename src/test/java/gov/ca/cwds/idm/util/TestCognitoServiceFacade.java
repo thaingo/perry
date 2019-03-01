@@ -13,6 +13,7 @@ import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.FI
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.LAST_NAME;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.PHONE_NUMBER;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.RACFID_STANDARD;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoRequestHelper.createResendEmailRequest;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.DEFAULT_PAGESIZE;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByAttribute;
 import static gov.ca.cwds.idm.util.TestUtils.attr;
@@ -705,13 +706,13 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
   }
 
   public AdminCreateUserRequest setCreateUserInvitationRequest(String email, AdminCreateUserResult result) {
-    AdminCreateUserRequest sentInvitationRequest = createResendEmailRequest(email);
+    AdminCreateUserRequest sentInvitationRequest = createResendEmailRequest(email, USERPOOL);
     when(cognito.adminCreateUser(sentInvitationRequest)).thenReturn(result);
     return sentInvitationRequest;
   }
 
   public AdminCreateUserRequest setCreateUserInvitationRequestWithEmailError(String email) {
-    AdminCreateUserRequest sentInvitationRequest = createResendEmailRequest(email);
+    AdminCreateUserRequest sentInvitationRequest = createResendEmailRequest(email, USERPOOL);
     when(cognito.adminCreateUser(sentInvitationRequest))
         .thenThrow(new RuntimeException("Cognito email error"));
     return sentInvitationRequest;

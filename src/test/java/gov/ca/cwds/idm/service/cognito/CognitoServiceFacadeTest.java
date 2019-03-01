@@ -3,6 +3,7 @@ package gov.ca.cwds.idm.service.cognito;
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.COUNTY;
+import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.IS_LOCKED;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.OFFICE;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PERMISSIONS;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PHONE_EXTENSION;
@@ -15,6 +16,14 @@ import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.FI
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.LAST_NAME;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.PHONE_NUMBER;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.RACFID_STANDARD;
+import static gov.ca.cwds.idm.service.cognito.attribute.UserLockStatus.FALSE;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoRequestHelper.createAdminCreateUserRequest;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoRequestHelper.createAdminDeleteUserRequest;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoRequestHelper.createAdminGetUserRequest;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoRequestHelper.createAdminUpdateUserAttributesRequest;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoRequestHelper.createLockedAttributeType;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoRequestHelper.createResendEmailRequest;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USERPOOL;
 import static gov.ca.cwds.idm.util.TestUtils.attr;
 import static gov.ca.cwds.util.Utils.toSet;
 import static org.hamcrest.CoreMatchers.is;
@@ -35,6 +44,7 @@ import com.amazonaws.services.cognitoidp.model.AdminCreateUserResult;
 import com.amazonaws.services.cognitoidp.model.AdminDeleteUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserResult;
+import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesRequest;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.ListUsersRequest;
 import com.amazonaws.services.cognitoidp.model.ListUsersResult;
@@ -54,6 +64,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
@@ -110,7 +122,7 @@ public class CognitoServiceFacadeTest {
 
     UserType UserType = facade.getCognitoUserById("id");
     AdminGetUserRequest expectedRequest = new AdminGetUserRequest().withUsername("id")
-        .withUserPoolId("userpool");
+        .withUserPoolId(USERPOOL);
     verify(identityProvider, times(1)).adminGetUser(expectedRequest);
     assertThat(UserType.getUsername(), is("id"));
     assertThat(UserType.getEnabled(), is(Boolean.TRUE));
@@ -147,11 +159,11 @@ public class CognitoServiceFacadeTest {
     user.setPhoneNumber("1234567890");
     user.setPhoneExtensionNumber("54321");
 
-    AdminCreateUserRequest request = facade.createAdminCreateUserRequest(user);
+    AdminCreateUserRequest request = createAdminCreateUserRequest(user, USERPOOL);
 
     assertThat(request.getUsername(), is("gonzales@gmail.com"));
 
-    assertThat(request.getUserPoolId(), is("userpool"));
+    assertThat(request.getUserPoolId(), is(USERPOOL));
     assertThat(request.getMessageAction(), is("SUPPRESS"));
 
     List<AttributeType> attrs = request.getUserAttributes();
@@ -180,7 +192,7 @@ public class CognitoServiceFacadeTest {
     User user = user();
     user.setRacfid("rubblba ");
 
-    AdminCreateUserRequest request = facade.createAdminCreateUserRequest(user);
+    AdminCreateUserRequest request = createAdminCreateUserRequest(user, USERPOOL);
     Map<String, String> attrMap = attrMap(request.getUserAttributes());
     assertAttr(attrMap, RACFID_CUSTOM, "RUBBLBA");
     assertAttr(attrMap, RACFID_STANDARD, "RUBBLBA");
@@ -241,7 +253,7 @@ public class CognitoServiceFacadeTest {
     String userId = "amzon-id-user-1";
     String userEmail = "user@email";
 
-    AdminGetUserRequest expectedGetUserRequest = facade.createAdminGetUserRequest(userId);
+    AdminGetUserRequest expectedGetUserRequest = createAdminGetUserRequest(userId, USERPOOL);
     AdminGetUserResult mockGetUserResult = new AdminGetUserResult();
     mockGetUserResult.setUsername(userId);
     Collection<AttributeType> attrs = new ArrayList<>();
@@ -249,7 +261,7 @@ public class CognitoServiceFacadeTest {
     mockGetUserResult.withUserAttributes(attrs);
     when(identityProvider.adminGetUser(expectedGetUserRequest)).thenReturn(mockGetUserResult);
 
-    AdminCreateUserRequest expectedRequest = facade.createResendEmailRequest(userEmail);
+    AdminCreateUserRequest expectedRequest = createResendEmailRequest(userEmail, USERPOOL);
     AdminCreateUserResult mockResult = new AdminCreateUserResult();
     UserType userType = userType(userEmail);
     mockResult.setUser(userType);
@@ -264,7 +276,7 @@ public class CognitoServiceFacadeTest {
   public void testCreateAdminDeleteUserRequest() {
     final String USER_ID = "user-id";
 
-    AdminDeleteUserRequest request = facade.createAdminDeleteUserRequest(USER_ID);
+    AdminDeleteUserRequest request = createAdminDeleteUserRequest(USER_ID, USERPOOL);
 
     assertThat(request, is(notNullValue()));
     assertThat(request.getUsername(), is(USER_ID));
@@ -274,7 +286,7 @@ public class CognitoServiceFacadeTest {
   @Test
   public void testDeleteCognitoUserById() {
     final String USER_ID = "user-id";
-    AdminDeleteUserRequest expectedRequest = facade.createAdminDeleteUserRequest(USER_ID);
+    AdminDeleteUserRequest expectedRequest = createAdminDeleteUserRequest(USER_ID, USERPOOL);
 
     facade.deleteCognitoUserById(USER_ID);
 
@@ -282,14 +294,45 @@ public class CognitoServiceFacadeTest {
   }
 
   @Test
+  public void testCreateUserUnlockUpdateRequest() {
+    final String USER_ID = "user-id";
+
+    AdminUpdateUserAttributesRequest request =
+        createAdminUpdateUserAttributesRequest(USER_ID, USERPOOL, createLockedAttributeType());
+
+    assertThat(request, is(notNullValue()));
+    assertThat(request.getUsername(), is(USER_ID));
+    assertThat(request.getUserPoolId(), is(USERPOOL));
+    assertThat(request.getUserAttributes(), is(createLockedAttributeType()));
+    final Optional<AttributeType> lockedAttributeType =
+        request.getUserAttributes().stream()
+            .filter(attributeType -> Objects.equals(attributeType.getName(), IS_LOCKED.getName()))
+            .findAny();
+    assertTrue(lockedAttributeType.isPresent());
+    assertThat(
+        lockedAttributeType.get().getValue(), is(String.valueOf(FALSE.getValue())));
+  }
+
+  @Test
+  public void testUnlockUserById() {
+    final String USER_ID = "user-id";
+    AdminUpdateUserAttributesRequest expectedRequest =
+        createAdminUpdateUserAttributesRequest(USER_ID, USERPOOL, createLockedAttributeType());
+
+    facade.unlockUser(USER_ID);
+
+    verify(identityProvider, times(1)).adminUpdateUserAttributes(expectedRequest);
+  }
+
+  @Test
   public void testCreateResendEmailRequest() {
     final String USER_EMAIL = "USER@EMAIL.com";
 
-    AdminCreateUserRequest request = facade.createResendEmailRequest(USER_EMAIL);
+    AdminCreateUserRequest request = createResendEmailRequest(USER_EMAIL, USERPOOL);
 
     assertThat(request, is(notNullValue()));
     assertThat(request.getUsername(), is("user@email.com"));
-    assertThat(request.getUserPoolId(), is("userpool"));
+    assertThat(request.getUserPoolId(), is(USERPOOL));
     assertThat(request.getMessageAction(), is("RESEND"));
     assertThat(request.getDesiredDeliveryMediums(), is(Arrays.asList("EMAIL")));
   }
@@ -297,7 +340,7 @@ public class CognitoServiceFacadeTest {
   @Test
   public void testSendInvitationMessageByEmail() {
     final String USER_EMAIL = "user@email.com";
-    AdminCreateUserRequest expectedRequest = facade.createResendEmailRequest(USER_EMAIL);
+    AdminCreateUserRequest expectedRequest = createResendEmailRequest(USER_EMAIL, USERPOOL);
     when(identityProvider.adminCreateUser(expectedRequest)).thenReturn(new AdminCreateUserResult());
 
     facade.sendInvitationMessageByEmail(USER_EMAIL);

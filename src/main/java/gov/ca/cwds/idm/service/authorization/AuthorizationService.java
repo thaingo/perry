@@ -11,6 +11,8 @@ public interface AuthorizationService {
 
   void checkCanUpdateUser(User existingUser, UserUpdate updateUserDto);
 
+  void checkCanUnlockUser(User user);
+
   void checkCanResendInvitationMessage(User user);
 
   boolean canUpdateUser(User user);

@@ -3,7 +3,9 @@ package gov.ca.cwds.idm;
 import static gov.ca.cwds.config.TokenServiceConfiguration.TOKEN_TRANSACTION_MANAGER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoRequestHelper.createResendEmailRequest;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USERPOOL;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_WITH_RACFID_ID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
@@ -18,7 +20,6 @@ import com.amazonaws.services.cognitoidp.model.AdminCreateUserResult;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.RegistrationResubmitResponse;
 import gov.ca.cwds.idm.event.UserRegistrationResentEvent;
-import gov.ca.cwds.idm.util.TestCognitoServiceFacade;
 import gov.ca.cwds.idm.util.TestUtils;
 import gov.ca.cwds.idm.util.WithMockCustomUser;
 import org.junit.Test;
@@ -80,9 +81,7 @@ public class ResendInvitationEmailTest extends BaseIdmIntegrationWithUserLogTest
   }
 
   private void assertResendEmailWorksFine() throws Exception {
-    AdminCreateUserRequest request =
-        ((TestCognitoServiceFacade) cognitoServiceFacade)
-            .createResendEmailRequest(USER_WITH_RACFID_ID_EMAIL);
+    AdminCreateUserRequest request = createResendEmailRequest(USER_WITH_RACFID_ID_EMAIL, USERPOOL);
 
     UserType user = new UserType();
     user.setUsername(USER_WITH_RACFID_ID_EMAIL);

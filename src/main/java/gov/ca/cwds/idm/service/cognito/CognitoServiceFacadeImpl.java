@@ -4,9 +4,14 @@ import static gov.ca.cwds.idm.persistence.ns.OperationType.GET;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.RESEND_INVITATION_EMAIL;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
 import static gov.ca.cwds.idm.service.cognito.attribute.UserUpdateAttributesUtil.buildUpdatedAttributesList;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoRequestHelper.createAdminCreateUserRequest;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoRequestHelper.createAdminDeleteUserRequest;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoRequestHelper.createAdminGetUserRequest;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoRequestHelper.createAdminUpdateUserAttributesRequest;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoRequestHelper.createLockedAttributeType;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoRequestHelper.createResendEmailRequest;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByEmail;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByRacfId;
-import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.buildCreateUserAttributes;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getEmail;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_CONNECT_TO_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_GET_USER_FROM_IDM;
@@ -16,7 +21,6 @@ import static gov.ca.cwds.service.messages.MessageCode.IDM_GENERIC_ERROR;
 import static gov.ca.cwds.service.messages.MessageCode.IDM_USER_VALIDATION_FAILED;
 import static gov.ca.cwds.service.messages.MessageCode.USER_NOT_FOUND_BY_ID_IN_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
-import static gov.ca.cwds.util.Utils.toLowerCase;
 import static gov.ca.cwds.util.Utils.toUpperCase;
 
 import com.amazonaws.AmazonWebServiceRequest;
@@ -36,12 +40,10 @@ import com.amazonaws.services.cognitoidp.model.AdminGetUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserResult;
 import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesRequest;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
-import com.amazonaws.services.cognitoidp.model.DeliveryMediumType;
 import com.amazonaws.services.cognitoidp.model.DescribeUserPoolRequest;
 import com.amazonaws.services.cognitoidp.model.InvalidParameterException;
 import com.amazonaws.services.cognitoidp.model.ListUsersRequest;
 import com.amazonaws.services.cognitoidp.model.ListUsersResult;
-import com.amazonaws.services.cognitoidp.model.MessageActionType;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import com.amazonaws.services.cognitoidp.model.UsernameExistsException;
 import gov.ca.cwds.idm.dto.User;
@@ -93,7 +95,8 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
   @Override
   public UserType createUser(User user) {
 
-    AdminCreateUserRequest request = createAdminCreateUserRequest(user);
+    AdminCreateUserRequest request =
+        createAdminCreateUserRequest(user, properties.getUserpool());
 
     try {
       AdminCreateUserResult result = identityProvider.adminCreateUser(request);
@@ -105,23 +108,6 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
     } catch (InvalidParameterException e) {
       throw exceptionFactory.createValidationException(IDM_USER_VALIDATION_FAILED, e);
     }
-  }
-
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public AdminCreateUserRequest createAdminCreateUserRequest(User user) {
-
-    user.setEmail(toLowerCase(user.getEmail()));
-
-    return
-        new AdminCreateUserRequest()
-            .withUsername(user.getEmail())
-            .withUserPoolId(properties.getUserpool())
-            .withMessageAction(MessageActionType.SUPPRESS)
-            .withUserAttributes(buildCreateUserAttributes(user));
   }
 
   /**
@@ -174,7 +160,8 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
    */
   @Override
   public UserType getCognitoUserById(String id) {
-    AdminGetUserRequest request = createAdminGetUserRequest(id);
+    AdminGetUserRequest request =
+        createAdminGetUserRequest(id, properties.getUserpool());
     AdminGetUserResult agur;
 
     agur = executeUserOperationInCognito(identityProvider::adminGetUser, request, id, GET);
@@ -186,14 +173,6 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
         .withUserCreateDate(agur.getUserCreateDate())
         .withUserLastModifiedDate(agur.getUserLastModifiedDate())
         .withUserStatus(agur.getUserStatus());
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  @Override
-  public AdminGetUserRequest createAdminGetUserRequest(String id) {
-    return new AdminGetUserRequest().withUsername(id).withUserPoolId(properties.getUserpool());
   }
 
   @Override
@@ -227,10 +206,8 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
     }
 
     AdminUpdateUserAttributesRequest adminUpdateUserAttributesRequest =
-        new AdminUpdateUserAttributesRequest()
-            .withUsername(userUpdateRequest.getUserId())
-            .withUserPoolId(properties.getUserpool())
-            .withUserAttributes(attributeTypes);
+        createAdminUpdateUserAttributesRequest(
+            userUpdateRequest.getUserId(), properties.getUserpool(), attributeTypes);
     try {
       identityProvider.adminUpdateUserAttributes(adminUpdateUserAttributesRequest);
     } catch (com.amazonaws.services.cognitoidp.model.UserNotFoundException e) {
@@ -265,24 +242,11 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
     }
   }
 
-  /**
-   * Creates the request for resending email.
-   *
-   * @param email email address of the user.
-   */
-  public AdminCreateUserRequest createResendEmailRequest(String email) {
-    return new AdminCreateUserRequest()
-        .withUsername(toLowerCase(email))
-        .withUserPoolId(properties.getUserpool())
-        .withMessageAction(MessageActionType.RESEND)
-        .withDesiredDeliveryMediums(DeliveryMediumType.EMAIL);
-  }
-
   @Override
   public UserType resendInvitationMessage(String userId) {
     UserType cognitoUser = getCognitoUserById(userId);
     String email = getEmail(cognitoUser);
-    AdminCreateUserRequest request = createResendEmailRequest(email);
+    AdminCreateUserRequest request = createResendEmailRequest(email, properties.getUserpool());
     AdminCreateUserResult result =
         executeUserOperationInCognito(identityProvider::adminCreateUser, request, userId,
             RESEND_INVITATION_EMAIL);
@@ -290,19 +254,26 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
   }
 
   @Override
+  public void unlockUser(String userId) {
+    List<AttributeType> attributeTypes = createLockedAttributeType();
+    AdminUpdateUserAttributesRequest adminUpdateUserAttributesRequest =
+        createAdminUpdateUserAttributesRequest(userId, properties.getUserpool(), attributeTypes);
+    executeUserOperationInCognito(
+        identityProvider::adminUpdateUserAttributes,
+        adminUpdateUserAttributesRequest,
+        userId,
+        UPDATE);
+  }
+
+  @Override
   public UserType sendInvitationMessageByEmail(String email) {
-    AdminCreateUserRequest request = createResendEmailRequest(email);
+    AdminCreateUserRequest request = createResendEmailRequest(email, properties.getUserpool());
     return identityProvider.adminCreateUser(request).getUser();
   }
 
   @Override
-  public AdminDeleteUserRequest createAdminDeleteUserRequest(String id) {
-    return new AdminDeleteUserRequest().withUsername(id).withUserPoolId(properties.getUserpool());
-  }
-
-  @Override
   public void deleteCognitoUserById(String id) {
-    AdminDeleteUserRequest request = createAdminDeleteUserRequest(id);
+    AdminDeleteUserRequest request = createAdminDeleteUserRequest(id, properties.getUserpool());
     identityProvider.adminDeleteUser(request);
   }
 
