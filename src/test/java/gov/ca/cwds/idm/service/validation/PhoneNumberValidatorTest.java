@@ -9,14 +9,18 @@ public class PhoneNumberValidatorTest {
 
   @Test
   public void testIsValid() {
-    assertFalse(PhoneNumberValidator.isValid("+0123456789"));
-    assertFalse(PhoneNumberValidator.isValid("012 345 6789"));
-    assertFalse(PhoneNumberValidator.isValid("012-345-6789"));
-    assertFalse(PhoneNumberValidator.isValid("(012) 345-6789"));
+    assertFalse(PhoneNumberFormatValidator.isValid("+0123456789"));
+    assertFalse(PhoneNumberFormatValidator.isValid("012 345 6789"));
+    assertFalse(PhoneNumberFormatValidator.isValid("012-345-6789"));
+    assertFalse(PhoneNumberFormatValidator.isValid("(012) 345-6789"));
+    assertFalse(PhoneNumberFormatValidator.isValid(null));
+    assertFalse(PhoneNumberFormatValidator.isValid(""));
+    assertFalse(PhoneNumberFormatValidator.isValid("  "));
+    assertFalse(PhoneNumberFormatValidator.isValid("0123456789"));
+    assertFalse(PhoneNumberFormatValidator.isValid("0"));
 
-    assertTrue(PhoneNumberValidator.isValid(null));
-    assertTrue(PhoneNumberValidator.isValid(""));
-    assertTrue(PhoneNumberValidator.isValid("  "));
-    assertTrue(PhoneNumberValidator.isValid("0123456789"));
+    assertTrue(PhoneNumberFormatValidator.isValid("1234567890"));
+    assertTrue(PhoneNumberFormatValidator.isValid("45678"));
+    assertTrue(PhoneNumberFormatValidator.isValid("1"));
   }
 }

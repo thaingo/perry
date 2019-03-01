@@ -6,8 +6,13 @@ import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
+import static gov.ca.cwds.service.messages.MessageCode.INVALID_PHONE_FORMAT;
+import static gov.ca.cwds.service.messages.MessageCode.USER_PHONE_IS_NOT_PROVIDED;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.Utils.toSet;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -124,6 +129,69 @@ public class ValidationServiceMockTest {
     testAdminCanNotCreate(admin(OFFICE_ADMIN), user());
     testAdminCanNotCreate(admin(OFFICE_ADMIN), user(CALS_ADMIN));
     testAdminCanNotCreate(admin(OFFICE_ADMIN), user(CALS_EXTERNAL_WORKER));
+  }
+
+  @Test
+  public void canNotUpdate_emptyPhoneNumber() {
+    canNotUpdatePhoneNumber("", USER_PHONE_IS_NOT_PROVIDED);
+  }
+
+  @Test
+  public void canNotUpdate_blankPhoneNumber() {
+    canNotUpdatePhoneNumber("   ", USER_PHONE_IS_NOT_PROVIDED);
+  }
+
+  @Test
+  public void canNotUpdate_phoneNumberWithDigits() {
+    canNotUpdatePhoneNumber("abc-456789", INVALID_PHONE_FORMAT);
+  }
+
+  @Test
+  public void canNotUpdate_phoneNumberWithMoreThenTenChars() {
+    canNotUpdatePhoneNumber("12345678901", INVALID_PHONE_FORMAT);
+  }
+
+  @Test
+  public void canNotUpdatep_phoneNumberStartingWithZero(){
+    canNotUpdatePhoneNumber("0123456789", INVALID_PHONE_FORMAT);
+  }
+
+  @Test
+  public void canUpdate_phoneNumberWithLessThenTenChars() {
+    canUpdatePhoneNumber("123");
+  }
+  @Test
+  public void canUpdate_phoneNumberWithTenChars(){
+    canUpdatePhoneNumber("1234567890");
+  }
+
+  private void canNotUpdatePhoneNumber(String newPhoneNumber, MessageCode messageCode) {
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setPhoneNumber(newPhoneNumber);
+    canNotUpdate(userUpdate, messageCode);
+  }
+
+  private void canUpdatePhoneNumber(String newPhoneNumber){
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setPhoneNumber(newPhoneNumber);
+    canUpdate(userUpdate);
+  }
+
+  private void canNotUpdate(UserUpdate userUpdate , MessageCode messageCode) {
+    try {
+      service.validateUserUpdate(user(), userUpdate);
+      fail("UserValidationException should be thrown");
+    } catch (UserValidationException e) {
+      assertThat(e.getErrorCode(), is(messageCode));
+    }
+  }
+
+  private void canUpdate(UserUpdate userUpdate) {
+    try {
+      service.validateUserUpdate(user(), userUpdate);
+    } catch (UserValidationException e) {
+      fail("UserValidationException should not be thrown");
+    }
   }
 
   private void testAdminCanUpdate(UniversalUserToken admin, UserUpdate userUpdate) {

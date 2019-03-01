@@ -13,6 +13,7 @@ import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_CREATE_USER_WIT
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_CREATE_USER_WITH_UNALLOWED_ROLES;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_REMOVE_ALL_ROLES;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_UNALLOWED_ROLES;
+import static gov.ca.cwds.service.messages.MessageCode.USER_PHONE_IS_NOT_PROVIDED;
 import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
 import static gov.ca.cwds.util.Utils.isRacfidUser;
 import static gov.ca.cwds.util.Utils.toCommaDelimitedString;
@@ -68,7 +69,7 @@ public class ValidationServiceImpl implements ValidationService {
 
   @Override
   public void validateUserUpdate(User existedUser, UserUpdate updateUserDto) {
-    validatePhoneNumber(updateUserDto);
+    validatePhoneNumber(updateUserDto.getPhoneNumber());
     validateNotAllRolesAreRemovedAtUpdate(updateUserDto);
     validateNewUserRolesAreAllowedAtUpdate(updateUserDto);
     validateUpdateByCansPermission(existedUser, updateUserDto);
@@ -214,14 +215,16 @@ public class ValidationServiceImpl implements ValidationService {
     validateRacfidDoesNotExistInCognito(racfId);
   }
 
-  private void validatePhoneNumber(UserUpdate updateUserDto) {
-    String newPhoneNumber = updateUserDto.getPhoneNumber();
-
-    if (newPhoneNumber == null) {
+  private void validatePhoneNumber(String newPhoneNumber) {
+    if (newPhoneNumber == null) {//no phone number editing
       return;
     }
 
-    if (!PhoneNumberValidator.isValid(newPhoneNumber)) {
+    if(StringUtils.isBlank(newPhoneNumber)){
+      throwValidationException(USER_PHONE_IS_NOT_PROVIDED);
+    }
+
+    if (!PhoneNumberFormatValidator.isValid(newPhoneNumber)) {
       throwValidationException(INVALID_PHONE_FORMAT, newPhoneNumber);
     }
   }
