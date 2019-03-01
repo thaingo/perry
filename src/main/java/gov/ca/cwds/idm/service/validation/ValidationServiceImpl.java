@@ -27,6 +27,7 @@ import gov.ca.cwds.idm.service.role.implementor.AdminRoleImplementorFactory;
 import gov.ca.cwds.service.CwsUserInfoService;
 import gov.ca.cwds.service.messages.MessageCode;
 import java.util.Collection;
+import java.util.regex.Pattern;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,8 @@ import org.springframework.stereotype.Service;
 @Service
 @Profile("idm")
 public class ValidationServiceImpl implements ValidationService {
+
+  static final Pattern PHONE_EXTENSION_PATTERN = Pattern.compile("\\d{0,7}");
 
   private CwsUserInfoService cwsUserInfoService;
 
@@ -232,9 +235,22 @@ public class ValidationServiceImpl implements ValidationService {
   }
 
   void validatePhoneExtension(String newPhoneExtension) {
-    if (!PhoneExtensionFormatValidator.isValid(newPhoneExtension)) {
-      throwValidationException(INVALID_PHONE_EXTENSION_FORMAT, newPhoneExtension);
+    validateOptionalStringProperty(newPhoneExtension, PHONE_EXTENSION_PATTERN,
+        INVALID_PHONE_EXTENSION_FORMAT);
+  }
+
+  private void validateOptionalStringProperty(String value, Pattern pattern, MessageCode errCode) {
+    OptionalPropertyPatternValidator validator = new OptionalPropertyPatternValidator(pattern);
+    if (!validator.isValid(value)) {
+      throwValidationException(errCode, value);
     }
+  }
+
+  private static boolean isValidOptional(String phoneNumber, Pattern pattern) {
+    if(StringUtils.isBlank(phoneNumber)){
+      return true;
+    }
+    return pattern.matcher(phoneNumber).matches();
   }
 
   @Autowired
