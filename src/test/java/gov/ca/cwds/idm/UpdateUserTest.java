@@ -611,6 +611,26 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
         "fixtures/idm/update-user/invalid-phone-number.json");
   }
 
+  @Test
+  @WithMockCustomUser
+  public void testValidationUpdateClearPhoneNumber() throws Exception {
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setPhoneNumber("");
+
+    assertUpdateBadRequest(USER_NO_RACFID_ID, userUpdate,
+        "fixtures/idm/update-user/clear-phone-number.json");
+  }
+
+  @Test
+  @WithMockCustomUser
+  public void testValidationUpdateInvalidPhoneExtension() throws Exception {
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setPhoneExtensionNumber("abc");
+
+    assertUpdateBadRequest(USER_NO_RACFID_ID, userUpdate,
+        "fixtures/idm/update-user/invalid-phone-extension.json");
+  }
+
   private void assertCanUpdatePermissions(String userId, Set<String> permissions) throws Exception{
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setPermissions(permissions);

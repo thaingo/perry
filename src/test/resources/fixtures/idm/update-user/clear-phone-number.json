@@ -1,0 +1,6 @@
+{
+  "status": "BAD_REQUEST",
+  "technical_message": "User's phone number is not provided",
+  "user_message": "User's phone number is not provided",
+  "error_code": "CAP-067"
+}
