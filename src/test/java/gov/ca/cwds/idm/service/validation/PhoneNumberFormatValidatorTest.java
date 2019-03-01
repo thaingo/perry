@@ -5,7 +5,7 @@ import static org.junit.Assert.assertFalse;
 
 import org.junit.Test;
 
-public class PhoneNumberValidatorTest {
+public class PhoneNumberFormatValidatorTest {
 
   @Test
   public void testIsValid() {

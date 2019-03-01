@@ -6,6 +6,7 @@ import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
+import static gov.ca.cwds.service.messages.MessageCode.INVALID_PHONE_EXTENSION_FORMAT;
 import static gov.ca.cwds.service.messages.MessageCode.INVALID_PHONE_FORMAT;
 import static gov.ca.cwds.service.messages.MessageCode.USER_PHONE_IS_NOT_PROVIDED;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
@@ -29,6 +30,7 @@ import gov.ca.cwds.service.messages.MessageCode;
 import gov.ca.cwds.service.messages.MessagesService;
 import gov.ca.cwds.service.messages.MessagesService.Messages;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
+import java.util.function.Consumer;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -142,7 +144,7 @@ public class ValidationServiceMockTest {
   }
 
   @Test
-  public void canNotUpdate_phoneNumberWithDigits() {
+  public void canNotUpdate_phoneNumberWithNonDigits() {
     canNotUpdatePhoneNumber("abc-456789", INVALID_PHONE_FORMAT);
   }
 
@@ -160,35 +162,69 @@ public class ValidationServiceMockTest {
   public void canUpdate_phoneNumberWithLessThenTenChars() {
     canUpdatePhoneNumber("123");
   }
+
   @Test
   public void canUpdate_phoneNumberWithTenChars(){
     canUpdatePhoneNumber("1234567890");
   }
 
+  @Test
+  public void canUpdate_emptyPhoneExtension() {
+    canUpdatePhoneExtension("");
+  }
+
+  @Test
+  public void canUpdate_blankPhoneExtension() {
+    canUpdatePhoneExtension("   ");
+  }
+
+  @Test
+  public void canNotUpdate_phoneExtensionWithNonDigits() {
+    canNotUpdatePhoneExtension("a-45", INVALID_PHONE_EXTENSION_FORMAT);
+  }
+
+  @Test
+  public void canNotUpdate_phoneExtensionWithMoreThenSevenChars() {
+    canNotUpdatePhoneExtension("12345678", INVALID_PHONE_EXTENSION_FORMAT);
+  }
+
+  @Test
+  public void canUpdate_phoneExtenionWithLessThenSevenChars() {
+    canUpdatePhoneExtension("123");
+  }
+  @Test
+  public void canUpdate_phoneExtensionWithSevenChars(){
+    canUpdatePhoneExtension("1234567");
+  }
+
   private void canNotUpdatePhoneNumber(String newPhoneNumber, MessageCode messageCode) {
-    UserUpdate userUpdate = new UserUpdate();
-    userUpdate.setPhoneNumber(newPhoneNumber);
-    canNotUpdate(userUpdate, messageCode);
+    canNotUpdate(newPhoneNumber, messageCode, service::validatePhoneNumber);
   }
 
   private void canUpdatePhoneNumber(String newPhoneNumber){
-    UserUpdate userUpdate = new UserUpdate();
-    userUpdate.setPhoneNumber(newPhoneNumber);
-    canUpdate(userUpdate);
+    canUpdate(newPhoneNumber, service::validatePhoneNumber);
   }
 
-  private void canNotUpdate(UserUpdate userUpdate , MessageCode messageCode) {
+  private void canNotUpdatePhoneExtension(String newPhoneExtension, MessageCode messageCode) {
+    canNotUpdate(newPhoneExtension, messageCode, service::validatePhoneExtension);
+  }
+
+  private void canUpdatePhoneExtension(String newPhoneExtension){
+    canUpdate(newPhoneExtension, service::validatePhoneExtension);
+  }
+
+  private <T> void canNotUpdate(T validatedValue , MessageCode messageCode, Consumer<T> validateMethod) {
     try {
-      service.validateUserUpdate(user(), userUpdate);
+      validateMethod.accept(validatedValue);
       fail("UserValidationException should be thrown");
     } catch (UserValidationException e) {
       assertThat(e.getErrorCode(), is(messageCode));
     }
   }
 
-  private void canUpdate(UserUpdate userUpdate) {
+  private <T> void canUpdate(T validatedValue, Consumer<T> validateMethod) {
     try {
-      service.validateUserUpdate(user(), userUpdate);
+      validateMethod.accept(validatedValue);
     } catch (UserValidationException e) {
       fail("UserValidationException should not be thrown");
     }

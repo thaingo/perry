@@ -5,8 +5,8 @@ import org.apache.commons.lang3.StringUtils;
 
 public class PhoneNumberFormatValidator {
 
-  private static final  String PHONE_PATTERN_STRING = "[1-9]\\d{0,9}";
-  private static final  Pattern PHONE_PATTERN = Pattern.compile(PHONE_PATTERN_STRING);
+  private static final String PHONE_PATTERN_STRING = "[1-9]\\d{0,9}";
+  private static final Pattern PHONE_PATTERN = Pattern.compile(PHONE_PATTERN_STRING);
 
   private PhoneNumberFormatValidator(){}
 
