@@ -27,7 +27,6 @@ import gov.ca.cwds.idm.service.role.implementor.AdminRoleImplementorFactory;
 import gov.ca.cwds.service.CwsUserInfoService;
 import gov.ca.cwds.service.messages.MessageCode;
 import java.util.Collection;
-import java.util.regex.Pattern;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +37,8 @@ import org.springframework.stereotype.Service;
 @Profile("idm")
 public class ValidationServiceImpl implements ValidationService {
 
-  static final Pattern PHONE_EXTENSION_PATTERN = Pattern.compile("\\d{0,7}");
+  static final PatternValidator PHONE_PATTERN_VALIDATOR = new PatternValidator("[1-9]\\d{0,9}");
+  static final PatternValidator PHONE_EXTENSION_PATTERN_VALIDATOR = new PatternValidator("\\d{0,7}");
 
   private CwsUserInfoService cwsUserInfoService;
 
@@ -221,36 +221,51 @@ public class ValidationServiceImpl implements ValidationService {
   }
 
   void validatePhoneNumber(String newPhoneNumber) {
-    if (newPhoneNumber == null) {//no phone number editing
-      return;
-    }
-
-    if(StringUtils.isBlank(newPhoneNumber)){
-      throwValidationException(USER_PHONE_IS_NOT_PROVIDED);
-    }
-
-    if (!PhoneNumberFormatValidator.isValid(newPhoneNumber)) {
-      throwValidationException(INVALID_PHONE_FORMAT, newPhoneNumber);
-    }
+    validateRequiredStringProperty(
+        newPhoneNumber,
+        PHONE_PATTERN_VALIDATOR,
+        USER_PHONE_IS_NOT_PROVIDED,
+        INVALID_PHONE_FORMAT
+    );
   }
 
   void validatePhoneExtension(String newPhoneExtension) {
-    validateOptionalStringProperty(newPhoneExtension, PHONE_EXTENSION_PATTERN,
+    validateOptionalStringProperty(
+        newPhoneExtension,
+        PHONE_EXTENSION_PATTERN_VALIDATOR,
         INVALID_PHONE_EXTENSION_FORMAT);
   }
 
-  private void validateOptionalStringProperty(String value, Pattern pattern, MessageCode errCode) {
-    OptionalPropertyPatternValidator validator = new OptionalPropertyPatternValidator(pattern);
-    if (!validator.isValid(value)) {
-      throwValidationException(errCode, value);
+  private void validateRequiredStringProperty(
+      String newValue,
+      PatternValidator patternValidator,
+      MessageCode absenceErrCode,
+      MessageCode formatErrCode) {
+
+    if (newValue == null) {
+      return;
+    }
+
+    if(StringUtils.isBlank(newValue)){
+      throwValidationException(absenceErrCode);
+    }
+
+    if (!patternValidator.isValid(newValue)) {
+      throwValidationException(formatErrCode, newValue);
     }
   }
 
-  private static boolean isValidOptional(String phoneNumber, Pattern pattern) {
-    if(StringUtils.isBlank(phoneNumber)){
-      return true;
+  private void validateOptionalStringProperty(
+      String value,
+      PatternValidator patternValidator,
+      MessageCode errCode) {
+
+    if (StringUtils.isBlank(value)) {
+      return;
     }
-    return pattern.matcher(phoneNumber).matches();
+    if (!patternValidator.isValid(value)) {
+      throwValidationException(errCode, value);
+    }
   }
 
   @Autowired
