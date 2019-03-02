@@ -231,12 +231,34 @@ public class IdmServiceImpl implements IdmService {
         .withVerificationFailed(code.getValue(), msg).build();
   }
 
+  private List<AuditEvent> createUserUpdateEvents(UserUpdateRequest userUpdateRequest) {
+    User existedUser = userUpdateRequest.getExistedUser();
+    UpdateDifference updateDifference = userUpdateRequest.getUpdateDifference();
+    List<AuditEvent> auditEvents = new ArrayList<>(4);
+    updateDifference.getRolesDiff().ifPresent(rolesDiff ->
+        auditEvents.add(
+            new UserRoleChangedEvent(existedUser, rolesDiff)));
+    updateDifference.getNotesDiff().ifPresent(notesDiff ->
+        auditEvents.add(new NotesChangedEvent(existedUser, notesDiff)));
+    updateDifference.getPermissionsDiff().ifPresent(permissionsDiff -> {
+          List<Permission> permissions = dictionaryProvider.getPermissions();
+          auditEvents.add(
+              new PermissionsChangedEvent(existedUser, permissionsDiff, permissions));
+        }
+    );
+    updateDifference.getEmailDiff().ifPresent(emailDiff ->
+        auditEvents.add(new EmailChangedEvent(existedUser, emailDiff))
+    );
+
+    return auditEvents;
+  }
+
   private ExecutionStatus updateUserAttributes(UserUpdateRequest userUpdateRequest) {
     ExecutionStatus updateAttributesStatus = WAS_NOT_EXECUTED;
 
     if (transactionalUserService.updateUserAttributes(userUpdateRequest)) {
       updateAttributesStatus = SUCCESS;
-      auditService.saveAuditEvents(userUpdateRequest.getAuditEvents());
+      auditService.saveAuditEvents(createUserUpdateEvents(userUpdateRequest));
     }
     return updateAttributesStatus;
   }
@@ -448,35 +470,11 @@ public class IdmServiceImpl implements IdmService {
 
   private UserUpdateRequest prepareUserUpdateRequest(User existedUser, UserUpdate updateUserDto) {
     UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
-
     userUpdateRequest.setUserId(existedUser.getId());
     userUpdateRequest.setExistedUser(existedUser);
     UpdateDifference updateDifference = new UpdateDifference(existedUser, updateUserDto);
     userUpdateRequest.setUpdateDifference(updateDifference);
-    userUpdateRequest
-        .addAuditEvents(createUserUpdateEvents(existedUser, updateDifference));
     return userUpdateRequest;
-  }
-
-  private List<AuditEvent> createUserUpdateEvents(User existedUser,
-      UpdateDifference updateDifference) {
-    List<AuditEvent> auditEvents = new ArrayList<>(4);
-    updateDifference.getRolesDiff().ifPresent(rolesDiff ->
-        auditEvents.add(
-            new UserRoleChangedEvent(existedUser, rolesDiff)));
-    updateDifference.getNotesDiff().ifPresent(notesDiff ->
-        auditEvents.add(new NotesChangedEvent(existedUser, notesDiff)));
-    updateDifference.getPermissionsDiff().ifPresent(permissionsDiff -> {
-          List<Permission> permissions = dictionaryProvider.getPermissions();
-          auditEvents.add(
-              new PermissionsChangedEvent(existedUser, permissionsDiff, permissions));
-        }
-    );
-    updateDifference.getEmailDiff().ifPresent(emailDiff ->
-        auditEvents.add(new EmailChangedEvent(existedUser, emailDiff))
-    );
-
-    return auditEvents;
   }
 
   private OptionalExecution<BooleanDiff, Void> updateUserEnabledStatus(
