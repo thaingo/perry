@@ -16,7 +16,7 @@ public class UserLockedEvent extends SystemCausedChangeLogEvent {
   public UserLockedEvent(User user) {
     super(user);
     setEventType(EVENT_TYPE_USER_LOCKED);
-    setOldValue(user.isLocked() ? LOCKED : UNLOCKED );
+    setOldValue(UNLOCKED); // this action is external, we cannot know for sure
     setNewValue(LOCKED);
   }
 }
