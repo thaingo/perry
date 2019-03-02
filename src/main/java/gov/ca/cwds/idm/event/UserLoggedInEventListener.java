@@ -4,6 +4,7 @@ import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_WRITE_LAST_LOGI
 
 import gov.ca.cwds.event.UserLoggedInEvent;
 import gov.ca.cwds.idm.service.NsUserService;
+import gov.ca.cwds.idm.service.UserLogService;
 import gov.ca.cwds.service.messages.MessagesService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,9 +13,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-/**
- * Created by Alexander Serbin on 9/14/2018
- */
+
 @Component
 @Profile("idm")
 public class UserLoggedInEventListener {
@@ -27,6 +26,9 @@ public class UserLoggedInEventListener {
   @Autowired
   private MessagesService messagesService;
 
+  @Autowired
+  private UserLogService userLogService;
+
   @EventListener
   public void handleUserLoggedInEvent(UserLoggedInEvent event) {
     String userId = event.getUserId();
@@ -38,6 +40,7 @@ public class UserLoggedInEventListener {
       }
       LOGGER.debug("Handling \"user logged in\" event for user {}", userId);
       nsUserService.saveLastLoginTime(userId, event.getLoginTime());
+      userLogService.logUpdate(userId, event.getLoginTime());
 
     } catch (Exception e) {
       String msg = messagesService.getTechMessage(UNABLE_TO_WRITE_LAST_LOGIN_TIME, userId);

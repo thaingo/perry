@@ -4,7 +4,7 @@ import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CALS_EXTERNAL_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
-import static gov.ca.cwds.config.api.idm.Roles.IDM_JOB;
+import static gov.ca.cwds.config.api.idm.Roles.EXTERNAL_APP;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.SUPER_ADMIN;
@@ -73,7 +73,7 @@ public final class TestHelper {
 
   public static UniversalUserToken idmJob() {
     UniversalUserToken admin = new UniversalUserToken();
-    admin.setRoles(toSet(IDM_JOB));
+    admin.setRoles(toSet(EXTERNAL_APP));
     return admin;
   }
 

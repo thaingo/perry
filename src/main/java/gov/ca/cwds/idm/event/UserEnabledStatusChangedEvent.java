@@ -5,11 +5,8 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.diff.BooleanDiff;
 
-/**
- * Created by Alexander Serbin on 1/18/2019
- */
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class UserEnabledStatusChangedEvent extends UserChangeLogEvent {
+public class UserEnabledStatusChangedEvent extends AdminCausedChangeLogEvent {
 
   private static final long serialVersionUID = 6929792785662167658L;
   static final String ACTIVE = "Active";
@@ -19,7 +16,6 @@ public class UserEnabledStatusChangedEvent extends UserChangeLogEvent {
   public UserEnabledStatusChangedEvent(User existedUser, BooleanDiff enabledDiff) {
     super(existedUser);
     setEventType(USER_ACCOUNT_STATUS_CHANGED);
-
     setOldValue(getValueAsString(enabledDiff.getOldValue()));
     setNewValue(getValueAsString(enabledDiff.getNewValue()));
   }
