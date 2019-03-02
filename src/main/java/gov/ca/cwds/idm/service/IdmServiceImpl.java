@@ -167,7 +167,7 @@ public class IdmServiceImpl implements IdmService {
     LOGGER.info("New user with username:{} was successfully created in Cognito", createdUser.getId());
     transactionalUserService.createUserInDbWithInvitationEmail(createdUser);
     LOGGER.info("New user with username:{} was successfully created in database", createdUser.getId());
-    issueUserCreatedEvent(createdUser);
+    auditService.saveAuditEvent(new UserCreatedEvent(createdUser));
     PutInSearchExecution doraExecution = createUserInSearch(createdUser);
     handleCreatePartialSuccess(createdUser, doraExecution);
     return createdUser.getId();
@@ -201,7 +201,7 @@ public class IdmServiceImpl implements IdmService {
   public RegistrationResubmitResponse resendInvitationMessage(User user) {
     authorizeService.checkCanResendInvitationMessage(user);
     cognitoServiceFacade.resendInvitationMessage(user.getId());
-    issueResendInvitationEvent(user);
+    auditService.saveAuditEvent(new UserRegistrationResentEvent(user));
     return new RegistrationResubmitResponse(user.getId());
   }
 
@@ -236,7 +236,7 @@ public class IdmServiceImpl implements IdmService {
 
     if (transactionalUserService.updateUserAttributes(userUpdateRequest)) {
       updateAttributesStatus = SUCCESS;
-      issueUserUpdatedEvents(userUpdateRequest);
+      auditService.saveAuditEvents(userUpdateRequest.getAuditEvents());
     }
     return updateAttributesStatus;
   }
@@ -330,7 +330,8 @@ public class IdmServiceImpl implements IdmService {
       public Void tryMethod(BooleanDiff enabledDiff) {
         cognitoServiceFacade
             .changeUserEnabledStatus(existedUser.getId(), enabledDiff.getNewValue());
-        issueChangeEnabledStatusEvent(existedUser, enabledDiff);
+        auditService.saveAuditEvent(
+            new UserEnabledStatusChangedEvent(existedUser, enabledDiff));
         return null;
       }
 
@@ -443,30 +444,6 @@ public class IdmServiceImpl implements IdmService {
         setUserLogExecution(userLogService.logCreate(user.getId()));
       }
     };
-  }
-
-  private void issueUserCreatedEvent(User user) {
-    UserCreatedEvent event = new UserCreatedEvent(user);
-    auditService.saveAuditEventsToDb(event);
-    auditService.sendAuditEventToEsIndex(event);
-  }
-
-  private void issueUserUpdatedEvents(UserUpdateRequest userUpdateRequest) {
-    auditService.saveAuditEventsToDb(userUpdateRequest.getAuditEvents());
-    userUpdateRequest.getAuditEvents().forEach(auditService::sendAuditEventToEsIndex);
-  }
-
-  private void issueResendInvitationEvent(User user) {
-    UserRegistrationResentEvent event = new UserRegistrationResentEvent(user);
-    auditService.saveAuditEventsToDb(event);
-    auditService.sendAuditEventToEsIndex(event);
-  }
-
-  private void issueChangeEnabledStatusEvent(User user, BooleanDiff enabledDiff) {
-    UserEnabledStatusChangedEvent event =
-        new UserEnabledStatusChangedEvent(user, enabledDiff);
-    auditService.saveAuditEventsToDb(event);
-    auditService.sendAuditEventToEsIndex(event);
   }
 
   private UserUpdateRequest prepareUserUpdateRequest(User existedUser, UserUpdate updateUserDto) {
