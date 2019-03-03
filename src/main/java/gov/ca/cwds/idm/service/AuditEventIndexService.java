@@ -14,7 +14,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -48,7 +47,6 @@ public class AuditEventIndexService {
   @Autowired
   private IndexRestSender restSender;
 
-  @Async("auditLogTaskExecutor")
   public <T extends AuditEvent> void sendAuditEventToEsIndex(T event) {
     String eventId = event.getId();
     HttpHeaders headers = new HttpHeaders();
