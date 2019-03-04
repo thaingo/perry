@@ -1,6 +1,6 @@
 package gov.ca.cwds.config.api.idm;
 
-import static gov.ca.cwds.config.api.idm.Roles.IDM_JOB;
+import static gov.ca.cwds.config.api.idm.Roles.EXTERNAL_APP;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -32,7 +32,7 @@ public class IdmBasicAuthenticationProvider implements AuthenticationProvider {
       return new UsernamePasswordAuthenticationToken(
           auth.getPrincipal(),
           "",
-          Collections.singletonList(new SimpleGrantedAuthority(IDM_JOB)));
+          Collections.singletonList(new SimpleGrantedAuthority(EXTERNAL_APP)));
     }
     return auth;
   }

@@ -2,6 +2,7 @@ package gov.ca.cwds.idm.service.exception;
 
 import gov.ca.cwds.idm.exception.AdminAuthorizationException;
 import gov.ca.cwds.idm.exception.IdmException;
+import gov.ca.cwds.idm.exception.OperationNotSupportedException;
 import gov.ca.cwds.idm.exception.PartialSuccessException;
 import gov.ca.cwds.idm.exception.UserAlreadyExistsException;
 import gov.ca.cwds.idm.exception.UserNotFoundException;
@@ -37,6 +38,11 @@ public class ExceptionFactory {
   public UserValidationException createValidationException(MessageCode messageCode,
       String... args) {
     return createException(UserValidationException::new, messageCode, args);
+  }
+
+  public OperationNotSupportedException createOperationNotSupportedException(MessageCode messageCode,
+      String... args) {
+    return createException(OperationNotSupportedException::new, messageCode, args);
   }
 
   public UserValidationException createValidationException(MessageCode messageCode, Throwable cause,

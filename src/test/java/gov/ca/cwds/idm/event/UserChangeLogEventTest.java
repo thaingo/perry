@@ -5,9 +5,12 @@ import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.getRoleNameById;
+import static gov.ca.cwds.idm.event.SystemCausedChangeLogEvent.SYSTEM_USER_LOGIN;
 import static gov.ca.cwds.idm.event.UserChangeLogEvent.CAP_EVENT_SOURCE;
 import static gov.ca.cwds.idm.event.UserEnabledStatusChangedEvent.ACTIVE;
 import static gov.ca.cwds.idm.event.UserEnabledStatusChangedEvent.INACTIVE;
+import static gov.ca.cwds.idm.event.UserLockedEvent.LOCKED;
+import static gov.ca.cwds.idm.event.UserLockedEvent.UNLOCKED;
 import static gov.ca.cwds.util.Utils.toSet;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -120,7 +123,8 @@ public class UserChangeLogEventTest {
   @Test
   public void testPermissionsChangedEvent() {
 
-    StringSetDiff diff = new StringSetDiff(toSet(PERMISSION_1, PERMISSION_2), toSet(PERMISSION_3, PERMISSION_4));
+    StringSetDiff diff = new StringSetDiff(toSet(PERMISSION_1, PERMISSION_2),
+        toSet(PERMISSION_3, PERMISSION_4));
 
     List<Permission> permissions = Stream.of(
         new Permission(PERMISSION_1, PERMISSION_1 + PERMISSION_DESCRIPTION),
@@ -182,6 +186,17 @@ public class UserChangeLogEventTest {
     assertEquals(ACTIVE, event.getEvent().getNewValue());
     assertEquals(String.join(", ", getRoleNameById(CWS_WORKER), getRoleNameById(CALS_ADMIN)),
         event.getEvent().getUserRoles());
+
+  }
+
+  @Test
+  public void testUserLockedEvent() {
+    UserLockedEvent event = new UserLockedEvent(mockUser());
+    assertEquals(UserLockedEvent.EVENT_TYPE_USER_LOCKED,
+        event.getEventType());
+    assertEquals(UNLOCKED, event.getEvent().getOldValue());
+    assertEquals(LOCKED, event.getEvent().getNewValue());
+    assertEquals(SYSTEM_USER_LOGIN, event.getUserLogin());
 
   }
 
