@@ -2,12 +2,9 @@ package gov.ca.cwds.idm;
 
 import static gov.ca.cwds.config.TokenServiceConfiguration.TOKEN_TRANSACTION_MANAGER;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
-import static gov.ca.cwds.idm.service.cognito.util.CognitoRequestHelper.createAdminUpdateUserAttributesRequest;
-import static gov.ca.cwds.idm.service.cognito.util.CognitoRequestHelper.createLockedAttributeType;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.LOCKED_USER;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.UNLOCKED_USER;
-import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USERPOOL;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_WITH_NO_LOCKED_VALUE_UNLOCKED;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -58,8 +55,8 @@ public class UserLockTest extends BaseIdmIntegrationWithSearchTest {
       county = "Madera")
   public void testUnlockUserHappyPath() throws Exception {
     when(cognito.adminUpdateUserAttributes(
-            createAdminUpdateUserAttributesRequest(
-                LOCKED_USER, USERPOOL, createLockedAttributeType())))
+        cognitoRequestHelper.getAdminUpdateUserAttributesRequest(
+                LOCKED_USER, cognitoRequestHelper.getLockedAttributeType())))
         .thenReturn(new AdminUpdateUserAttributesResult());
 
     mockMvc
@@ -81,7 +78,7 @@ public class UserLockTest extends BaseIdmIntegrationWithSearchTest {
   }
 
   private AdminUpdateUserAttributesRequest getUnlockUserUpdateRequest(String lockedUserId) {
-    return createAdminUpdateUserAttributesRequest(
-        lockedUserId, USERPOOL, createLockedAttributeType());
+    return cognitoRequestHelper.getAdminUpdateUserAttributesRequest(
+        lockedUserId, cognitoRequestHelper.getLockedAttributeType());
   }
 }

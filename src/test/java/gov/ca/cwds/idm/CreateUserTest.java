@@ -6,8 +6,6 @@ import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.SUPER_ADMIN;
 import static gov.ca.cwds.idm.service.PossibleUserPermissionsService.CANS_PERMISSION_NAME;
-import static gov.ca.cwds.idm.service.cognito.util.CognitoRequestHelper.createAdminCreateUserRequest;
-import static gov.ca.cwds.idm.service.cognito.util.CognitoRequestHelper.createAdminDeleteUserRequest;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.COGNITO_USER_ENABLED_ON_CREATE;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.COGNITO_USER_STATUS_ON_CREATE;
@@ -17,7 +15,6 @@ import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.ES_ERROR_CREATE_USER
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.NEW_USER_DELETE_FAIL_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.NEW_USER_EMAIL_FAIL_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.NEW_USER_ES_FAIL_ID;
-import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USERPOOL;
 import static gov.ca.cwds.idm.util.TestUtils.asJsonString;
 import static gov.ca.cwds.util.Utils.toSet;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -138,7 +135,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
     AdminCreateUserRequest request = requests.createRequest;
     AdminCreateUserRequest invitationRequest = requests.invitationRequest;
     AdminDeleteUserRequest deleteRequest =
-        createAdminDeleteUserRequest(NEW_USER_EMAIL_FAIL_ID, USERPOOL);
+        cognitoRequestHelper.getAdminDeleteUserRequest(NEW_USER_EMAIL_FAIL_ID);
 
     MvcResult result =
         mockMvc
@@ -177,7 +174,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
     AdminCreateUserRequest invitationRequest = requests.invitationRequest;
 
     AdminDeleteUserRequest deleteRequest =
-        createAdminDeleteUserRequest(NEW_USER_DELETE_FAIL_ID, USERPOOL);
+        cognitoRequestHelper.getAdminDeleteUserRequest(NEW_USER_DELETE_FAIL_ID);
     when(cognito.adminDeleteUser(deleteRequest))
         .thenThrow(new RuntimeException("Cognito delete error"));
 
@@ -210,7 +207,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
     User user = user();
     user.setEmail("some.existing@email");
 
-    AdminCreateUserRequest request = createAdminCreateUserRequest(user, USERPOOL);
+    AdminCreateUserRequest request = cognitoRequestHelper.getAdminCreateUserRequest(user);
     when(cognito.adminCreateUser(request))
         .thenThrow(new UsernameExistsException("user already exists"));
 
@@ -275,7 +272,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
   public void testCreateUserCognitoValidationError() throws Exception {
     User user = user();
     user.setOfficeId("long_string_invalid_id");
-    AdminCreateUserRequest request = createAdminCreateUserRequest(user, USERPOOL);
+    AdminCreateUserRequest request = cognitoRequestHelper.getAdminCreateUserRequest(user);
     when(cognito.adminCreateUser(request))
         .thenThrow(new InvalidParameterException("invalid parameter"));
 
@@ -452,7 +449,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
       String newUserId) {
     TestCognitoServiceFacade testCognitoServiceFacade = (TestCognitoServiceFacade) cognitoServiceFacade;
 
-    AdminCreateUserRequest request = createAdminCreateUserRequest(actuallySendUser, USERPOOL);
+    AdminCreateUserRequest request = cognitoRequestHelper.getAdminCreateUserRequest(actuallySendUser);
     AdminCreateUserResult result = testCognitoServiceFacade.setCreateUserResult(request, newUserId);
     AdminCreateUserRequest invitationEmailRequest = testCognitoServiceFacade
         .setCreateUserInvitationRequest(actuallySendUser.getEmail(), result);
@@ -464,7 +461,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
       String newUserId) {
     TestCognitoServiceFacade testCognitoServiceFacade = (TestCognitoServiceFacade) cognitoServiceFacade;
 
-    AdminCreateUserRequest request = createAdminCreateUserRequest(actuallySendUser, USERPOOL);
+    AdminCreateUserRequest request = cognitoRequestHelper.getAdminCreateUserRequest(actuallySendUser);
     testCognitoServiceFacade.setCreateUserResult(request, newUserId);
     AdminCreateUserRequest invitationEmailRequest = testCognitoServiceFacade
         .setCreateUserInvitationRequestWithEmailError(actuallySendUser.getEmail());
@@ -475,7 +472,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
     User user = user();
     user.setEmail("unauthorized@gmail.com");
 
-    AdminCreateUserRequest request = createAdminCreateUserRequest(user, USERPOOL);
+    AdminCreateUserRequest request = cognitoRequestHelper.getAdminCreateUserRequest(user);
 
     MvcResult result = mockMvc
         .perform(
@@ -514,7 +511,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
   }
 
   private void assertCreateUserBadRequest(User user, String fixturePath) throws Exception {
-    AdminCreateUserRequest request = createAdminCreateUserRequest(user, USERPOOL);
+    AdminCreateUserRequest request = cognitoRequestHelper.getAdminCreateUserRequest(user);
 
     MvcResult result = mockMvc
         .perform(
@@ -530,7 +527,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
 
   private void testCreateUserValidationError(User user) throws Exception {
 
-    AdminCreateUserRequest request = createAdminCreateUserRequest(user, USERPOOL);
+    AdminCreateUserRequest request = cognitoRequestHelper.getAdminCreateUserRequest(user);
     long previousEventCount = nsAuditEventRepository.count();
 
     mockMvc
