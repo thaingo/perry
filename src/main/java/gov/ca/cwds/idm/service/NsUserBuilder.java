@@ -25,7 +25,8 @@ public class NsUserBuilder {
 
   public NsUser build() {
     setProperty(updateDifference.getPhoneNumberDiff(), nsUser::setPhoneNumber);
-    setNullableStringProperty(updateDifference.getPhoneExtensionNumberDiff(), nsUser::setPhoneExtensionNumber);
+    setNullableStringProperty(
+        updateDifference.getPhoneExtensionNumberDiff(), nsUser::setPhoneExtensionNumber);
     setProperty(updateDifference.getNotesDiff(), nsUser::setNotes);
     setProperty(updateDifference.getRolesDiff(), nsUser::setRoles);
     setProperty(updateDifference.getPermissionsDiff(), nsUser::setPermissions);
@@ -41,10 +42,6 @@ public class NsUserBuilder {
   }
 
   private  void setNullableStringProperty(Optional<StringDiff> diff, Consumer<String> setter) {
-    if(diff.isPresent()) {
-      String newValue = diff.get().getNewValue();
-      setter.accept(blankToNull(newValue));
-      userIsUpdated = true;
-    }
+    setProperty(diff, str -> setter.accept(blankToNull(str)));
   }
 }
