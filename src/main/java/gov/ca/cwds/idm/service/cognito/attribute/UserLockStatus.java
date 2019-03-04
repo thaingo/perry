@@ -1,8 +1,8 @@
 package gov.ca.cwds.idm.service.cognito.attribute;
 
 public enum UserLockStatus {
-  TRUE("1"),
-  FALSE("0");
+  TRUE("true"),
+  FALSE("false");
 
   private final String value;
 
