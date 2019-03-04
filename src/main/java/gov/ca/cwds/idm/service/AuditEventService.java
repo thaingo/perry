@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import javax.persistence.PersistenceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,21 +30,29 @@ public class AuditEventService {
   private AuditEventIndexService auditEventIndexService;
 
   @Transactional(TOKEN_TRANSACTION_MANAGER)
-  public <T extends AuditEvent> void saveAuditEventsToDb(
+  @Async("auditLogTaskExecutor")
+  public <T extends AuditEvent> void saveAuditEvent(
       T auditEvent) {
     nsAuditEventRepository.save(mapToNsAuditEvent(auditEvent));
+    sendAuditEventToEsIndex(auditEvent);
   }
 
   @Transactional(TOKEN_TRANSACTION_MANAGER)
-  public void saveAuditEventsToDb(
+  @Async("auditLogTaskExecutor")
+  public void saveAuditEvents(
       List<? extends AuditEvent> auditEvents) {
     List<NsAuditEvent> nsAuditEvents = auditEvents.stream().map(this::mapToNsAuditEvent)
         .collect(Collectors.toList());
     nsAuditEventRepository.save(nsAuditEvents);
+    sendAuditEventsToEsIndex(auditEvents);
   }
 
-  public <T extends AuditEvent> void sendAuditEventToEsIndex(T event) {
+  private <T extends AuditEvent> void sendAuditEventToEsIndex(T event) {
     auditEventIndexService.sendAuditEventToEsIndex(event);
+  }
+
+  private <T extends AuditEvent> void sendAuditEventsToEsIndex(List<T> events) {
+    events.forEach(auditEventIndexService::sendAuditEventToEsIndex);
   }
 
   private <T extends AuditEvent> NsAuditEvent mapToNsAuditEvent(T auditEvent) {

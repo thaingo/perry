@@ -13,8 +13,8 @@ import liquibase.resource.ClassLoaderResourceAccessor;
 
 public final class LiquibaseUtils {
 
-  private static final String SPRING_BOOT_H2_USER = "sa";
-  private static final String SPRING_BOOT_H2_PASSWORD = "";
+  public static final String SPRING_BOOT_H2_USER = "sa";
+  public static final String SPRING_BOOT_H2_PASSWORD = "";
 
   private static final String TOKEN_STORE_CHANGE_LOG = "liquibase/perry_database_master.xml";
   private static final String CMS_CHANGE_LOG = "liquibase/cwscms_database_base_with_lookups.xml";

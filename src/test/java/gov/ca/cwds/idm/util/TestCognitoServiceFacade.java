@@ -84,6 +84,8 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
   public static final String SUPER_ADMIN_ID = "a3427f8e-b080-4f71-9514-840c1fcb505b";
 
   public static final String USERPOOL = "userpool";
+  public static final String COGNITO_USER_STATUS_ON_CREATE = "FORCE_CHANGE_PASSWORD";
+  public static final Boolean COGNITO_USER_ENABLED_ON_CREATE = Boolean.TRUE;
 
   private AWSCognitoIdentityProvider cognito;
 
@@ -695,8 +697,8 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
 
     UserType newUser = new UserType();
     newUser.setUsername(newId);
-    newUser.setEnabled(true);
-    newUser.setUserStatus("FORCE_CHANGE_PASSWORD");
+    newUser.setEnabled(COGNITO_USER_ENABLED_ON_CREATE);
+    newUser.setUserStatus(COGNITO_USER_STATUS_ON_CREATE);
     newUser.withAttributes(request.getUserAttributes());
 
     AdminCreateUserResult result = new AdminCreateUserResult().withUser(newUser);
