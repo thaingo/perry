@@ -410,7 +410,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
         null,
         null,
         null,
-        "0");
+        "false");
 
     testUser(
         USER_WITH_NO_LOCKED_VALUE_UNLOCKED,
@@ -446,7 +446,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
         null,
         null,
         null,
-        "1");
+        "true");
 
     testUser(
         NEW_USER_SUCCESS_ID,

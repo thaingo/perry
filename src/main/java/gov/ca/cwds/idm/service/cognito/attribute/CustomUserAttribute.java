@@ -8,7 +8,7 @@ public enum CustomUserAttribute implements UserAttribute {
   RACFID_CUSTOM("custom:RACFID"),
   RACFID_CUSTOM_2("custom:RACFId"),
   PHONE_EXTENSION("custom:PhoneExtension"),
-  IS_LOCKED("custom:locked");
+  IS_LOCKED("custom:accountLocked");
 
   private String name;
 
