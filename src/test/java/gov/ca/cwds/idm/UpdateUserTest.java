@@ -71,9 +71,11 @@ import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
 import gov.ca.cwds.idm.util.WithMockCustomUser;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -119,8 +121,6 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
 
     setDoraSuccess();
 
-    long previousEventCount = nsAuditEventRepository.count();
-
     mockMvc
         .perform(
             MockMvcRequestBuilders.patch("/idm/users/" + USER_NO_RACFID_ID)
@@ -144,23 +144,22 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     assertThat(updatedNsUser.getPermissions(), is(toSet("RFA-rollout", "Hotline-rollout")));
     assertThat(updatedNsUser.getNotes(), is(NEW_NOTES));
 
-    assertEquals(5, nsAuditEventRepository.count() - previousEventCount);
+//    assertEquals(5, nsAuditEventRepository.count() - previousEventCount);
     LocalDateTime newLastModifiedTime = updatedNsUser.getLastModifiedTime();
     assertThat(newLastModifiedTime, is(notNullValue()));
     assertThat(newLastModifiedTime, is(not(equalTo(oldLastModifiedTime))));
 
     verifyDoraCalls(1);
-    verify(auditEventIndexService, times(5)).sendAuditEventToEsIndex(any(AuditEvent.class));
-    verify(auditEventIndexService, times(1)).sendAuditEventToEsIndex(any(
-        UserRoleChangedEvent.class));
-    verify(auditEventIndexService, times(1)).sendAuditEventToEsIndex(any(
-        PermissionsChangedEvent.class));
-    verify(auditEventIndexService, times(1)).sendAuditEventToEsIndex(any(
-        EmailChangedEvent.class));
-    verify(auditEventIndexService, times(1)).sendAuditEventToEsIndex(any(
-        UserEnabledStatusChangedEvent.class));
-    verify(auditEventIndexService, times(1)).sendAuditEventToEsIndex(any(
-        NotesChangedEvent.class));
+    ArgumentCaptor<List<? extends AuditEvent>> captor = ArgumentCaptor.forClass(List.class);
+    verify(auditEventService, times(1)).saveAuditEvents(captor.capture());
+    List<? extends AuditEvent> events = captor.getValue();
+    assertEquals(4, events.size());
+    assertTrue(events.stream().anyMatch(e -> e instanceof UserRoleChangedEvent));
+    assertTrue(events.stream().anyMatch(e -> e instanceof PermissionsChangedEvent));
+    assertTrue(events.stream().anyMatch(e -> e instanceof EmailChangedEvent));
+    assertTrue(events.stream().anyMatch(e -> e instanceof NotesChangedEvent));
+    verify(auditEventService, times(1))
+        .saveAuditEvent(any(UserEnabledStatusChangedEvent.class));
   }
 
   @Test
@@ -219,9 +218,9 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
                 .content(asJsonString(userUpdate)))
         .andExpect(MockMvcResultMatchers.status().isNoContent())
         .andReturn();
-    verify(auditEventIndexService, never()).sendAuditEventToEsIndex(any(
+    verify(auditEventService, never()).saveAuditEvent(any(
         UserRoleChangedEvent.class));
-    verify(auditEventIndexService, never()).sendAuditEventToEsIndex(any(
+    verify(auditEventService, never()).saveAuditEvent(any(
         EmailChangedEvent.class));
   }
 
@@ -433,9 +432,9 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
 
     verify(cognito, times(0)).adminEnableUser(enableUserRequest);
     verify(spySearchService, times(0)).createUser(any(User.class));
-    verify(auditEventIndexService, never()).sendAuditEventToEsIndex(any(
+    verify(auditEventService, never()).saveAuditEvent(any(
         PermissionsChangedEvent.class));
-    verify(auditEventIndexService, never()).sendAuditEventToEsIndex(any(
+    verify(auditEventService, never()).saveAuditEvent(any(
         UserEnabledStatusChangedEvent.class));
   }
 
@@ -669,7 +668,6 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
         );
 
    AdminEnableUserRequest enableUserRequest = setEnableUserRequestAndResult(userId);
-   long previousEventsCount = nsAuditEventRepository.count();
     mockMvc
         .perform(
             MockMvcRequestBuilders.patch("/idm/users/" + userId)
@@ -678,7 +676,7 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
         .andExpect(MockMvcResultMatchers.status().isNoContent())
         .andReturn();
 
-    assertEquals(0, previousEventsCount - nsAuditEventRepository.count());
+    verify(auditEventService, never()).saveAuditEvent(any());
     verify(cognito, times(0)).adminUpdateUserAttributes(updateAttributesRequest);
     verify(cognito, times(0)).adminEnableUser(enableUserRequest);
     verify(spySearchService, times(0)).createUser(any(User.class));
