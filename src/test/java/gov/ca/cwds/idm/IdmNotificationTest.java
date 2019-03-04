@@ -29,7 +29,6 @@ public class IdmNotificationTest extends BaseIdmIntegrationWithSearchTest {
   public void testNotifyUserWasLocked() throws Exception {
 
     IdmNotification notification = new IdmNotification(NEW_USER_SUCCESS_ID, USER_LOCKED);
-    long previousEventCount = nsAuditEventRepository.count();
     int oldUserLogsSize = Iterables.size(userLogRepository.findAll());
 
     mockMvc
@@ -40,8 +39,7 @@ public class IdmNotificationTest extends BaseIdmIntegrationWithSearchTest {
         .andExpect(MockMvcResultMatchers.status().isAccepted())
         .andReturn();
 
-    assertEquals(1, nsAuditEventRepository.count() - previousEventCount);
-    verify(auditEventIndexService, times(1)).sendAuditEventToEsIndex(any(
+    verify(auditEventService, times(1)).saveAuditEvent(any(
         UserLockedEvent.class));
     int newUserLogsSize = Iterables.size(userLogRepository.findAll());
     assertThat(newUserLogsSize, is(oldUserLogsSize + 1));

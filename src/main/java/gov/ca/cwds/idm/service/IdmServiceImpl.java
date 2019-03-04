@@ -211,12 +211,10 @@ public class IdmServiceImpl implements IdmService {
 
   @Override
   public void processNotification(IdmNotification notification) {
-    switch (notification.getActionType()) {
+    switch (notification.getActionType().toLowerCase()) {
       case USER_LOCKED:
         User user = userService.getUser(notification.getUserId());
-        UserLockedEvent event = new UserLockedEvent(user);
-        auditService.saveAuditEventsToDb(event);
-        auditService.sendAuditEventToEsIndex(event);
+        auditService.saveAuditEvent(new UserLockedEvent(user));
         userLogService.logUpdate(notification.getUserId(), LocalDateTime.now());
         break;
       default:
