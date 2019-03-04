@@ -1,8 +1,5 @@
 package gov.ca.cwds.idm.service.cognito;
 
-import com.amazonaws.services.cognitoidp.model.AdminCreateUserRequest;
-import com.amazonaws.services.cognitoidp.model.AdminDeleteUserRequest;
-import com.amazonaws.services.cognitoidp.model.AdminGetUserRequest;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.UserUpdateRequest;
@@ -19,15 +16,11 @@ public interface CognitoServiceFacade {
 
   UserType createUser(User user);
 
-  AdminCreateUserRequest createAdminCreateUserRequest(User user);
-
   CognitoUserPage searchPage(CognitoUsersSearchCriteria searchCriteria);
 
   List<UserType> searchAllPages(CognitoUsersSearchCriteria searchCriteria);
 
   UserType getCognitoUserById(String id);
-
-  AdminGetUserRequest createAdminGetUserRequest(String id);
 
   boolean isActiveRacfIdPresentInCognito(String racfId);
 
@@ -41,6 +34,8 @@ public interface CognitoServiceFacade {
   boolean updateUserAttributes(UserUpdateRequest userUpdateRequest);
 
   void changeUserEnabledStatus(String userId, Boolean newValue);
+
+  void unlockUser(String userId);
 
   /**
    * Send the invitation message to the user that was just created.
@@ -56,8 +51,6 @@ public interface CognitoServiceFacade {
    * @param userId Cognito username of the user.
    */
   UserType resendInvitationMessage(String userId);
-
-  AdminDeleteUserRequest createAdminDeleteUserRequest(String id);
 
   void deleteCognitoUserById(String id);
 }

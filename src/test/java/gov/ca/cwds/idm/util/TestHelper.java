@@ -8,6 +8,7 @@ import static gov.ca.cwds.config.api.idm.Roles.IDM_JOB;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.SUPER_ADMIN;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USERPOOL;
 import static gov.ca.cwds.idm.util.TestUtils.generateId;
 import static gov.ca.cwds.util.UniversalUserTokenDeserializer.ADMIN_OFFICE_IDS_PARAM;
 import static gov.ca.cwds.util.UniversalUserTokenDeserializer.COUNTY_NAME_PARAM;
@@ -15,6 +16,7 @@ import static gov.ca.cwds.util.Utils.toSet;
 
 import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.idm.service.cognito.CognitoProperties;
 import java.util.Set;
 
 public final class TestHelper {
@@ -73,6 +75,15 @@ public final class TestHelper {
     UniversalUserToken admin = new UniversalUserToken();
     admin.setRoles(toSet(IDM_JOB));
     return admin;
+  }
+
+  public static CognitoProperties getTestCognitoProperties() {
+    CognitoProperties properties = new CognitoProperties();
+    properties.setIamAccessKeyId("iamAccessKeyId");
+    properties.setIamSecretKey("iamSecretKey");
+    properties.setUserpool(USERPOOL);
+    properties.setRegion("us-east-2");
+    return properties;
   }
 
   public static User superAdmin() {
