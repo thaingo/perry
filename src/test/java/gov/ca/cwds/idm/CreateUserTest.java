@@ -20,7 +20,6 @@ import static gov.ca.cwds.util.Utils.toSet;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -415,7 +414,6 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
     AdminCreateUserRequest request = requests.createRequest;
     AdminCreateUserRequest invitationRequest = requests.invitationRequest;
     setDoraSuccess();
-    long previousEventCount = nsAuditEventRepository.count();
     mockMvc
         .perform(
             MockMvcRequestBuilders.post("/idm/users")
@@ -425,12 +423,11 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
         .andExpect(header().string("location", "http://localhost/idm/users/" + newUserId))
         .andReturn();
 
-    assertEquals(1, nsAuditEventRepository.count() - previousEventCount);
     verify(cognito, times(1)).adminCreateUser(request);
     verify(cognito, times(1)).adminCreateUser(invitationRequest);
     verify(spySearchService, times(1)).createUser(argThat(new UserMatcher()));
     verifyDoraCalls(1);
-    verify(auditEventIndexService, times(1)).sendAuditEventToEsIndex(any(
+    verify(auditEventService, times(1)).saveAuditEvent(any(
         UserCreatedEvent.class));
 
     NsUser newNsUser = assertNsUserInDb(newUserId);
@@ -528,7 +525,6 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
   private void testCreateUserValidationError(User user) throws Exception {
 
     AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
-    long previousEventCount = nsAuditEventRepository.count();
 
     mockMvc
         .perform(
@@ -538,10 +534,9 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
         .andExpect(MockMvcResultMatchers.status().isBadRequest())
         .andReturn();
 
-    assertEquals(previousEventCount, nsAuditEventRepository.count());
     verify(cognito, times(0)).adminCreateUser(request);
     verify(spySearchService, times(0)).createUser(any(User.class));
-    verify(auditEventIndexService, never()).sendAuditEventToEsIndex(any());
+    verify(auditEventService, never()).saveAuditEvent(any());
   }
 
   private static final class CognitoCreateRequests {
