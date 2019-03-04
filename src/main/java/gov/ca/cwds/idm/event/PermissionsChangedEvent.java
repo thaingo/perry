@@ -11,24 +11,24 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 
-/**
- * Created by Alexander Serbin on 1/11/2019
- */
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class PermissionsChangedEvent extends UserChangeLogEvent {
+public class PermissionsChangedEvent extends AdminCausedChangeLogEvent {
 
   private static final long serialVersionUID = 5084376904261765730L;
 
   public static final String EVENT_TYPE_PERMISSIONS_CHANGED = "Permission Change";
 
-  public PermissionsChangedEvent(User existedUser, StringSetDiff permissionsDiff, List<Permission> permissions) {
+  public PermissionsChangedEvent(User existedUser, StringSetDiff permissionsDiff,
+      List<Permission> permissions) {
     super(existedUser);
     setEventType(EVENT_TYPE_PERMISSIONS_CHANGED);
 
     Map<String, String> permissionsHash = permissions.stream()
         .collect(Collectors.toMap(Permission::getName, Permission::getDescription));
     IdToNameConverter idToNameConverter = new IdToNameConverter(permissionsHash);
-    setOldValue(StringUtils.join(idToNameConverter.getNamesByIds(permissionsDiff.getOldValue()), ", "));
-    setNewValue(StringUtils.join(idToNameConverter.getNamesByIds(permissionsDiff.getNewValue()), ", "));
+    setOldValue(
+        StringUtils.join(idToNameConverter.getNamesByIds(permissionsDiff.getOldValue()), ", "));
+    setNewValue(
+        StringUtils.join(idToNameConverter.getNamesByIds(permissionsDiff.getNewValue()), ", "));
   }
 }

@@ -1,14 +1,16 @@
 package gov.ca.cwds.idm.dto;
 
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import java.io.Serializable;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class UserChangeLogRecord implements Serializable {
 
-  private static final long serialVersionUID = -6845403932113735008L;
+  private static final long serialVersionUID = -7979006410150569985L;
 
   private String adminRole;
   private String adminName;
