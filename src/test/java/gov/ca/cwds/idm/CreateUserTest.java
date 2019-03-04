@@ -56,20 +56,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
 
-//  @PersistenceContext(unitName = TOKEN_PERSISTENCE_UNIT_NAME)
-//  private EntityManager entityManager;
-
   @Autowired
   private TransactionalUserService transactionalUserService;
-
-//  private EntityManager spyEntityManager;
-
-//  @Before
-//  public void before() {
-//    super.before();
-//
-//    spyEntityManager = spy(transactionalUserService.getEntityManager());
-//  }
 
   @Test
   @WithMockCustomUser
