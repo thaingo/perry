@@ -407,7 +407,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
         null,
         null,
         null,
-        "0");
+        "false");
 
     testUser(
         USER_WITH_NO_LOCKED_VALUE_UNLOCKED,
@@ -443,7 +443,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
         null,
         null,
         null,
-        "1");
+        "true");
 
     testUser(
         NEW_USER_SUCCESS_ID,
@@ -702,14 +702,17 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
     return result;
   }
 
-  public AdminCreateUserRequest setCreateUserInvitationRequest(String email, AdminCreateUserResult result) {
-    AdminCreateUserRequest sentInvitationRequest = getCognitoRequestHelper().getResendEmailRequest(email);
+  public AdminCreateUserRequest setCreateUserInvitationRequest(
+      String email, AdminCreateUserResult result) {
+    AdminCreateUserRequest sentInvitationRequest =
+        getCognitoRequestHelper().getResendEmailRequest(email);
     when(cognito.adminCreateUser(sentInvitationRequest)).thenReturn(result);
     return sentInvitationRequest;
   }
 
   public AdminCreateUserRequest setCreateUserInvitationRequestWithEmailError(String email) {
-    AdminCreateUserRequest sentInvitationRequest = getCognitoRequestHelper().getResendEmailRequest(email);
+    AdminCreateUserRequest sentInvitationRequest =
+        getCognitoRequestHelper().getResendEmailRequest(email);
     when(cognito.adminCreateUser(sentInvitationRequest))
         .thenThrow(new RuntimeException("Cognito email error"));
     return sentInvitationRequest;

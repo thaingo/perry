@@ -8,8 +8,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import gov.ca.cwds.idm.persistence.ns.repository.NsAuditEventRepository;
-import gov.ca.cwds.idm.service.AuditEventIndexService;
 import gov.ca.cwds.idm.service.AuditEventService;
 import gov.ca.cwds.idm.service.IndexRestSender;
 import gov.ca.cwds.idm.service.SearchService;
@@ -35,14 +33,8 @@ public abstract class BaseIdmIntegrationWithSearchTest extends BaseIdmIntegratio
   @Autowired
   protected SearchProperties searchProperties;
 
-  @Autowired
-  protected AuditEventService auditEventService;
-
-  @Autowired
-  protected NsAuditEventRepository nsAuditEventRepository;
-
   @MockBean
-  protected AuditEventIndexService auditEventIndexService;
+  protected AuditEventService auditEventService;
 
   protected SearchService spySearchService;
 
