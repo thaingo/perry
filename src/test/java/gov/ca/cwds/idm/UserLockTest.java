@@ -6,12 +6,15 @@ import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.LOCKED_USER;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.UNLOCKED_USER;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_WITH_NO_LOCKED_VALUE_UNLOCKED;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesRequest;
 import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesResult;
+import gov.ca.cwds.idm.event.UserUnlockedEvent;
 import gov.ca.cwds.idm.util.WithMockCustomUser;
 import org.junit.Test;
 import org.springframework.test.web.servlet.MvcResult;
@@ -31,6 +34,7 @@ public class UserLockTest extends BaseIdmIntegrationWithSearchTest {
             .andExpect(MockMvcResultMatchers.status().isUnauthorized())
             .andReturn();
     verify(cognito, times(0)).adminUpdateUserAttributes(getUnlockUserUpdateRequest(LOCKED_USER));
+    verify(auditEventService, never()).saveAuditEvent(any(UserUnlockedEvent.class));
     assertExtensible(
         result, "fixtures/idm/user-lock-status/unlock-user-with-different-county.json");
   }
@@ -65,6 +69,7 @@ public class UserLockTest extends BaseIdmIntegrationWithSearchTest {
         .andReturn();
 
     verify(cognito, times(1)).adminUpdateUserAttributes(getUnlockUserUpdateRequest(LOCKED_USER));
+    verify(auditEventService, times(1)).saveAuditEvent(any(UserUnlockedEvent.class));
   }
 
   private void assertUnlockUserBadRequest(String userId, String fixture) throws Exception {
@@ -74,6 +79,7 @@ public class UserLockTest extends BaseIdmIntegrationWithSearchTest {
             .andExpect(MockMvcResultMatchers.status().isBadRequest())
             .andReturn();
     verify(cognito, times(0)).adminUpdateUserAttributes(getUnlockUserUpdateRequest(userId));
+    verify(auditEventService, never()).saveAuditEvent(any(UserUnlockedEvent.class));
     assertExtensible(result, fixture);
   }
 
