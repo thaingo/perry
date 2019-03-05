@@ -182,7 +182,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
     AdminCreateUserRequest request = requests.createRequest;
     AdminCreateUserRequest invitationRequest = requests.invitationRequest;
     AdminDeleteUserRequest deleteRequest =
-        cognitoServiceFacade.createAdminDeleteUserRequest(NEW_USER_DB_FAIL_ID);
+        cognitoRequestHelper.getAdminDeleteUserRequest(NEW_USER_DB_FAIL_ID);
 
     EntityManager entityManager = transactionalUserService.getEntityManager();
     EntityManager spyEntityManager = spy(transactionalUserService.getEntityManager());
