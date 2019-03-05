@@ -1,0 +1,6 @@
+{
+  "status": "BAD_REQUEST",
+  "technical_message": "Phone extension 'abc' has invalid format. Phone extension may consist only from digits (no more then 7) or be empty",
+  "user_message": "Phone extension has invalid format. Phone extension may consist only from digits (no more then 7) or be empty",
+  "error_code": "CAP-070"
+}

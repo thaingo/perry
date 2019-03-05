@@ -200,6 +200,14 @@ public class UserChangeLogEventTest {
 
   }
 
+  @Test
+  public void testUserUnlockedEvent() {
+    UserUnlockedEvent event = new UserUnlockedEvent(mockUser());
+    assertEquals(UserUnlockedEvent.EVENT_TYPE_USER_UNLOCKED, event.getEventType());
+    assertEquals(LOCKED, event.getEvent().getOldValue());
+    assertEquals(UNLOCKED, event.getEvent().getNewValue());
+  }
+
   private User mockUser() {
     User user = new User();
     user.setId(TEST_USER_ID);
