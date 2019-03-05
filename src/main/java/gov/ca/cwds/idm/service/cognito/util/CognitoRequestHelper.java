@@ -1,6 +1,7 @@
 package gov.ca.cwds.idm.service.cognito.util;
 
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.IS_LOCKED;
+import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.MAX_LOGIN_ATTEMPTS;
 import static gov.ca.cwds.idm.service.cognito.attribute.UserLockStatus.FALSE;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.buildCreateUserAttributes;
 import static gov.ca.cwds.util.Utils.toLowerCase;
@@ -19,7 +20,7 @@ import com.amazonaws.services.cognitoidp.model.MessageActionType;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.cognito.CognitoProperties;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
@@ -29,6 +30,7 @@ import org.springframework.stereotype.Service;
 @Profile("idm")
 public final class CognitoRequestHelper {
 
+  public static final String RESET_MAX_LOGIN_ATTEMPTS_COUNT = "0";
   private CognitoProperties properties;
 
   @Autowired
@@ -37,8 +39,17 @@ public final class CognitoRequestHelper {
   }
 
   public List<AttributeType> getLockedAttributeType() {
-    return Collections.singletonList(
-        new AttributeType().withName(IS_LOCKED.getName()).withValue(FALSE.getValue()));
+    final AttributeType isLockedAttributeType =
+        new AttributeType()
+            .withName(IS_LOCKED.getName())
+            .withValue(FALSE.getValue());
+
+    final AttributeType loginAttemptsAttributeType =
+        new AttributeType()
+            .withName(MAX_LOGIN_ATTEMPTS.getName())
+            .withValue(RESET_MAX_LOGIN_ATTEMPTS_COUNT);
+
+    return Arrays.asList(isLockedAttributeType, loginAttemptsAttributeType);
   }
 
   public AdminUpdateUserAttributesRequest getAdminUpdateUserAttributesRequest(
