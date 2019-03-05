@@ -10,4 +10,6 @@ public interface ValidationService {
   void validateVerifyIfUserCanBeCreated(User enrichedUser);
 
   void validateUserUpdate(User existedUser, UserUpdate updateUserDto);
+
+  void validateUnlockUser(User existedUser, boolean newLocked);
 }

@@ -21,6 +21,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jetty.util.StringUtil;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.boot.actuate.health.Status;
@@ -156,6 +157,10 @@ public class Utils {
       return null;
     }
     return "[" + String.join(", ", collection) + "]";
+  }
+
+  public static String blankToNull(String str) {
+    return StringUtil.isBlank(str)? null : str;
   }
 
   public static Set<String> applyFunctionToValues(Set<String> values,

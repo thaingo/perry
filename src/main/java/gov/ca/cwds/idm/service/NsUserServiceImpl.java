@@ -20,8 +20,6 @@ public class NsUserServiceImpl implements NsUserService {
 
   private NsUserRepository nsUserRepository;
 
-  private UserLogService userLogService;
-
   @Override
   @Transactional(value = TOKEN_TRANSACTION_MANAGER)
   public void create(NsUser nsUser) {
@@ -32,18 +30,18 @@ public class NsUserServiceImpl implements NsUserService {
   @Transactional(value = TOKEN_TRANSACTION_MANAGER, readOnly = true)
   public Optional<NsUser> findByUsername(String username) {
 
-    if(username == null) {
+    if (username == null) {
       throw new IllegalArgumentException("username is null");
     }
 
-    List<NsUser> userList =  nsUserRepository.findByUsername(username);
+    List<NsUser> userList = nsUserRepository.findByUsername(username);
 
-    if(userList.size() > 1) {
+    if (userList.size() > 1) {
       throw new IllegalStateException(
           "more then one user with username " + username + " are found");
     }
 
-    if(userList.isEmpty()) {
+    if (userList.isEmpty()) {
       return Optional.empty();
     }
 
@@ -56,13 +54,12 @@ public class NsUserServiceImpl implements NsUserService {
     NsUser nsUser = getOrCreateNewNsUser(username);
     nsUser.setLastLoginTime(loginTime);
     nsUserRepository.save(nsUser);
-    userLogService.logUpdate(username, loginTime);
   }
 
   @Override
   @Transactional(value = TOKEN_TRANSACTION_MANAGER)
   public boolean update(UserUpdateRequest userUpdateRequest) {
-    UpdateDifference updateDifference =  userUpdateRequest.getUpdateDifference();
+    UpdateDifference updateDifference = userUpdateRequest.getUpdateDifference();
 
     NsUser nsUser = getOrCreateNewNsUser(userUpdateRequest.getUserId());
 
@@ -81,7 +78,7 @@ public class NsUserServiceImpl implements NsUserService {
   private NsUser getOrCreateNewNsUser(String username) {
     Optional<NsUser> nsUserOpt = findByUsername(username);
 
-    if(nsUserOpt.isPresent()) {
+    if (nsUserOpt.isPresent()) {
       return nsUserOpt.get();
     } else {
       NsUser nsUser = new NsUser();
@@ -105,10 +102,5 @@ public class NsUserServiceImpl implements NsUserService {
   @Autowired
   public void setNsUserRepository(NsUserRepository nsUserRepository) {
     this.nsUserRepository = nsUserRepository;
-  }
-
-  @Autowired
-  public void setUserLogService(UserLogService userLogService) {
-    this.userLogService = userLogService;
   }
 }

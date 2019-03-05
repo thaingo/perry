@@ -1,5 +1,6 @@
 package gov.ca.cwds.util;
 
+import static gov.ca.cwds.util.Utils.blankToNull;
 import static gov.ca.cwds.util.Utils.healthCheckUtcTimeToPacific;
 import static gov.ca.cwds.util.Utils.isRacfidUser;
 import static gov.ca.cwds.util.Utils.isStatusHealthy;
@@ -72,5 +73,13 @@ public class UtilsTest {
     assertThat(toCommaDelimitedString(new ArrayList<>()), is(equalTo("[]")));
     assertThat(toCommaDelimitedString(Arrays.asList("one")), is(equalTo("[one]")));
     assertThat(toCommaDelimitedString(Arrays.asList("one", "two")), is(equalTo("[one, two]")));
+  }
+
+  @Test
+  public void testBlankToNull() {
+    assertThat(blankToNull(null), nullValue());
+    assertThat(blankToNull(""), nullValue());
+    assertThat(blankToNull("  "), nullValue());
+    assertThat(blankToNull("abc"), is("abc"));
   }
 }

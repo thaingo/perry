@@ -3,7 +3,7 @@ package gov.ca.cwds.idm.service.authorization;
 import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CALS_EXTERNAL_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
-import static gov.ca.cwds.config.api.idm.Roles.IDM_JOB;
+import static gov.ca.cwds.config.api.idm.Roles.EXTERNAL_APP;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.SUPER_ADMIN;
@@ -42,7 +42,7 @@ public class UserRolesService {
   }
 
   public static <T extends RolesHolder> boolean isIdmJob(T user) {
-    return hasRole(user, IDM_JOB);
+    return hasRole(user, EXTERNAL_APP);
   }
 
   public static <T extends RolesHolder> boolean isCalsAdmin(T user) {

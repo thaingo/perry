@@ -17,7 +17,6 @@ import com.amazonaws.services.cognitoidp.model.AdminCreateUserResult;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.RegistrationResubmitResponse;
 import gov.ca.cwds.idm.event.UserRegistrationResentEvent;
-import gov.ca.cwds.idm.util.TestCognitoServiceFacade;
 import gov.ca.cwds.idm.util.TestUtils;
 import gov.ca.cwds.idm.util.WithMockCustomUser;
 import org.junit.Test;
@@ -80,8 +79,7 @@ public class ResendInvitationEmailTest extends BaseIdmIntegrationWithUserLogTest
 
   private void assertResendEmailWorksFine() throws Exception {
     AdminCreateUserRequest request =
-        ((TestCognitoServiceFacade) cognitoServiceFacade)
-            .createResendEmailRequest(USER_WITH_RACFID_ID_EMAIL);
+        cognitoRequestHelper.getResendEmailRequest(USER_WITH_RACFID_ID_EMAIL);
 
     UserType user = new UserType();
     user.setUsername(USER_WITH_RACFID_ID_EMAIL);

@@ -15,6 +15,7 @@ import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.PH
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.DEFAULT_PAGESIZE;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByAttribute;
+import static gov.ca.cwds.idm.util.TestHelper.getTestCognitoProperties;
 import static gov.ca.cwds.idm.util.TestUtils.attr;
 import static gov.ca.cwds.idm.util.TestUtils.date;
 import static org.mockito.Mockito.mock;
@@ -35,6 +36,7 @@ import com.amazonaws.services.cognitoidp.model.UserNotFoundException;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.service.cognito.CognitoProperties;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacadeImpl;
+import gov.ca.cwds.idm.service.cognito.util.CognitoRequestHelper;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -69,6 +71,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
   public static final String SOME_PAGINATION_TOKEN = "somePaginationToken";
   public static final String ABSENT_IN_NS_DB_USER_ID = "absentInNsDbUserId";
   public static final String ABSENT_IN_IDM_USER_ID = "absentInIdmUserId";
+  public static final String ABSENT_USER_ID = "absentUserId";
   public static final String ERROR_USER_ID = "errorUserId";
   public static final String INACTIVE_USER_WITH_NO_ACTIVE_RACFID_IN_CMS =
       "17067e4e-270f-4623-b86c-b4d4fa527z79";
@@ -93,14 +96,10 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
   public void init() {
     cognito = mock(AWSCognitoIdentityProvider.class);
 
-    CognitoProperties properties = new CognitoProperties();
-    properties.setIamAccessKeyId("iamAccessKeyId");
-    properties.setIamSecretKey("iamSecretKey");
-    properties.setUserpool(USERPOOL);
-    properties.setRegion("us-east-2");
-
+    final CognitoProperties properties = getTestCognitoProperties();
     setProperties(properties);
     setIdentityProvider(cognito);
+    setCognitoRequestHelper(new CognitoRequestHelper(properties));
 
     initUsers();
 
@@ -705,14 +704,17 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
     return result;
   }
 
-  public AdminCreateUserRequest setCreateUserInvitationRequest(String email, AdminCreateUserResult result) {
-    AdminCreateUserRequest sentInvitationRequest = createResendEmailRequest(email);
+  public AdminCreateUserRequest setCreateUserInvitationRequest(
+      String email, AdminCreateUserResult result) {
+    AdminCreateUserRequest sentInvitationRequest =
+        getCognitoRequestHelper().getResendEmailRequest(email);
     when(cognito.adminCreateUser(sentInvitationRequest)).thenReturn(result);
     return sentInvitationRequest;
   }
 
   public AdminCreateUserRequest setCreateUserInvitationRequestWithEmailError(String email) {
-    AdminCreateUserRequest sentInvitationRequest = createResendEmailRequest(email);
+    AdminCreateUserRequest sentInvitationRequest =
+        getCognitoRequestHelper().getResendEmailRequest(email);
     when(cognito.adminCreateUser(sentInvitationRequest))
         .thenThrow(new RuntimeException("Cognito email error"));
     return sentInvitationRequest;
@@ -726,7 +728,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
       UserType... responseUsers) {
 
     ListUsersRequest request =
-        composeListUsersRequest(
+        getCognitoRequestHelper().composeListUsersRequest(
             composeToGetFirstPageByAttribute(RACFID_STANDARD, racfid));
 
     ListUsersResult result = new ListUsersResult().withUsers(responseUsers);
@@ -738,7 +740,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
       TestUser testUser2) {
 
     ListUsersRequest request =
-        composeListUsersRequest(
+        getCognitoRequestHelper().composeListUsersRequest(
             composeToGetFirstPageByAttribute(RACFID_STANDARD, testUser1.getRacfId()));
 
     ListUsersResult result = new ListUsersResult()
