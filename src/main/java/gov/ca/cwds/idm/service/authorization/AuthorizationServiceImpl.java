@@ -142,6 +142,11 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     getAdminActionsAuthorizer(user).checkCanResendInvitationMessage();
   }
 
+  @Override
+  public void checkCanUnlockUser(User user) {
+    getAdminActionsAuthorizer(user).checkCanUpdateUser();
+  }
+
   @Autowired
   public void setAdminRoleImplementorFactory(
       AdminRoleImplementorFactory adminRoleImplementorFactory) {

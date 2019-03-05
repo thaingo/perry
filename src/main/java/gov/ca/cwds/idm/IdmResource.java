@@ -4,6 +4,7 @@ import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.RA
 import static gov.ca.cwds.util.Utils.URL_DATETIME_FORMATTER;
 
 import gov.ca.cwds.data.persistence.auth.CwsOffice;
+import gov.ca.cwds.idm.dto.IdmNotification;
 import gov.ca.cwds.idm.dto.RegistrationResubmitResponse;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserAndOperation;
@@ -13,6 +14,7 @@ import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.dto.UserVerificationResult;
 import gov.ca.cwds.idm.dto.UsersPage;
 import gov.ca.cwds.idm.dto.UsersSearchCriteria;
+import gov.ca.cwds.idm.lifecycle.UserLockService;
 import gov.ca.cwds.idm.persistence.ns.entity.Permission;
 import gov.ca.cwds.idm.service.DictionaryProvider;
 import gov.ca.cwds.idm.service.IdmService;
@@ -54,6 +56,9 @@ public class IdmResource {
   private IdmService idmService;
 
   @Autowired
+  private UserLockService userLockService;
+
+  @Autowired
   private UserService userService;
 
   @Autowired
@@ -75,7 +80,7 @@ public class IdmResource {
               + "in a responce. Use it as a parameter to get a next page."
   )
   @ApiResponses(value = {@ApiResponse(code = 401, message = "Not Authorized")})
-  @PreAuthorize("hasAuthority(T(gov.ca.cwds.config.api.idm.Roles).IDM_JOB)")
+  @PreAuthorize("hasAuthority(T(gov.ca.cwds.config.api.idm.Roles).EXTERNAL_APP)")
   public UsersPage getUsers(
       @ApiParam(name = "paginationToken", value = "paginationToken for the next page")
       @RequestParam(name = "paginationToken", required = false)
@@ -96,7 +101,7 @@ public class IdmResource {
       responseContainer = "List",
       notes = "This service is used by batch job to build the ES index. The client of this service should have 'IDM-job' role."
   )
-  @PreAuthorize("hasAuthority(T(gov.ca.cwds.config.api.idm.Roles).IDM_JOB)")
+  @PreAuthorize("hasAuthority(T(gov.ca.cwds.config.api.idm.Roles).EXTERNAL_APP)")
   public List<User> searchUsersByRacfid(
       @ApiParam(required = true, name = "RACFIDs", value = "List of RACFIDs") @NotNull @RequestBody
           Set<String> racfids) {
@@ -118,7 +123,7 @@ public class IdmResource {
       responseContainer = "List",
       notes = "This service is used by batch job to build the ES index. The client of this service should have 'IDM-job' role."
   )
-  @PreAuthorize("hasAuthority(T(gov.ca.cwds.config.api.idm.Roles).IDM_JOB)")
+  @PreAuthorize("hasAuthority(T(gov.ca.cwds.config.api.idm.Roles).EXTERNAL_APP)")
   public ResponseEntity getFailedOperations(
       @ApiParam(required = true, name = "date",
           value = "Last date of successful batch job execution in yyyy-MM-dd-HH.mm.ss.SSS format")
@@ -337,7 +342,32 @@ public class IdmResource {
       @PathVariable
       @NotNull
           String id) {
+    userLockService.unlockUser(id);
     return ResponseEntity.noContent().build();
+  }
+
+  @RequestMapping(
+      method = RequestMethod.POST,
+      value = "/notifications"
+  )
+  @ApiResponses(
+      value = {
+          @ApiResponse(code = 204, message = "No Content"),
+          @ApiResponse(code = 400, message = "Bad Request"),
+          @ApiResponse(code = 401, message = "Not Authorized"),
+          @ApiResponse(code = 404, message = "Not found")
+      }
+  )
+  @ApiOperation(value = "Notify Perry about external action on user")
+  @PreAuthorize("hasAuthority(T(gov.ca.cwds.config.api.idm.Roles).EXTERNAL_APP)")
+  public ResponseEntity notify(
+      @ApiParam(required = true, name = "Notification", value = "Notification data")
+      @NotNull
+      @Valid
+      @RequestBody
+          IdmNotification notification) {
+    idmService.processNotification(notification);
+    return ResponseEntity.accepted().build();
   }
 
 }

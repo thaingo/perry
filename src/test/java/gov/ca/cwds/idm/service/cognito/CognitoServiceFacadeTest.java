@@ -3,6 +3,7 @@ package gov.ca.cwds.idm.service.cognito;
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.COUNTY;
+import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.IS_LOCKED;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.OFFICE;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PERMISSIONS;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PHONE_EXTENSION;
@@ -15,6 +16,9 @@ import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.FI
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.LAST_NAME;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.PHONE_NUMBER;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.RACFID_STANDARD;
+import static gov.ca.cwds.idm.service.cognito.attribute.UserLockStatus.FALSE;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USERPOOL;
+import static gov.ca.cwds.idm.util.TestHelper.getTestCognitoProperties;
 import static gov.ca.cwds.idm.util.TestUtils.attr;
 import static gov.ca.cwds.util.Utils.toSet;
 import static org.hamcrest.CoreMatchers.is;
@@ -35,6 +39,7 @@ import com.amazonaws.services.cognitoidp.model.AdminCreateUserResult;
 import com.amazonaws.services.cognitoidp.model.AdminDeleteUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserResult;
+import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesRequest;
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.ListUsersRequest;
 import com.amazonaws.services.cognitoidp.model.ListUsersResult;
@@ -44,6 +49,7 @@ import gov.ca.cwds.idm.exception.IdmException;
 import gov.ca.cwds.idm.exception.UserNotFoundException;
 import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
+import gov.ca.cwds.idm.service.cognito.util.CognitoRequestHelper;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.service.messages.MessageCode;
 import gov.ca.cwds.service.messages.MessagesService;
@@ -54,6 +60,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
@@ -70,11 +78,7 @@ public class CognitoServiceFacadeTest {
 
   @Before
   public void before() {
-    CognitoProperties properties = new CognitoProperties();
-    properties.setIamAccessKeyId("iamAccessKeyId");
-    properties.setIamSecretKey("iamSecretKey");
-    properties.setUserpool("userpool");
-    properties.setRegion("us-east-2");
+    final CognitoProperties properties = getTestCognitoProperties();
 
     facade = new CognitoServiceFacadeImpl();
     ExceptionFactory exceptionFactory = new ExceptionFactory();
@@ -83,6 +87,7 @@ public class CognitoServiceFacadeTest {
     facade.setProperties(properties);
     facade.setIdentityProvider(identityProvider);
     facade.setExceptionFactory(exceptionFactory);
+    facade.setCognitoRequestHelper(new CognitoRequestHelper(properties));
 
     when(messagesService.getMessages(any(MessageCode.class), ArgumentMatchers.<String>any()))
         .thenReturn(new Messages("", ""));
@@ -110,7 +115,7 @@ public class CognitoServiceFacadeTest {
 
     UserType UserType = facade.getCognitoUserById("id");
     AdminGetUserRequest expectedRequest = new AdminGetUserRequest().withUsername("id")
-        .withUserPoolId("userpool");
+        .withUserPoolId(USERPOOL);
     verify(identityProvider, times(1)).adminGetUser(expectedRequest);
     assertThat(UserType.getUsername(), is("id"));
     assertThat(UserType.getEnabled(), is(Boolean.TRUE));
@@ -147,11 +152,11 @@ public class CognitoServiceFacadeTest {
     user.setPhoneNumber("1234567890");
     user.setPhoneExtensionNumber("54321");
 
-    AdminCreateUserRequest request = facade.createAdminCreateUserRequest(user);
+    AdminCreateUserRequest request = getCognitoRequestHelper().getAdminCreateUserRequest(user);
 
     assertThat(request.getUsername(), is("gonzales@gmail.com"));
 
-    assertThat(request.getUserPoolId(), is("userpool"));
+    assertThat(request.getUserPoolId(), is(USERPOOL));
     assertThat(request.getMessageAction(), is("SUPPRESS"));
 
     List<AttributeType> attrs = request.getUserAttributes();
@@ -180,7 +185,7 @@ public class CognitoServiceFacadeTest {
     User user = user();
     user.setRacfid("rubblba ");
 
-    AdminCreateUserRequest request = facade.createAdminCreateUserRequest(user);
+    AdminCreateUserRequest request = getCognitoRequestHelper().getAdminCreateUserRequest(user);
     Map<String, String> attrMap = attrMap(request.getUserAttributes());
     assertAttr(attrMap, RACFID_CUSTOM, "RUBBLBA");
     assertAttr(attrMap, RACFID_STANDARD, "RUBBLBA");
@@ -232,7 +237,7 @@ public class CognitoServiceFacadeTest {
   public void testComposeListUsersRequest(){
     CognitoUsersSearchCriteria criteria = new CognitoUsersSearchCriteria();
     criteria.setSearchAttr(RACFID_STANDARD, "ABC");
-    ListUsersRequest request = facade.composeListUsersRequest(criteria);
+    ListUsersRequest request = getCognitoRequestHelper().composeListUsersRequest(criteria);
     assertThat(request.getFilter(), is(RACFID_STANDARD.getName() + " = \"ABC\""));
   }
 
@@ -241,7 +246,7 @@ public class CognitoServiceFacadeTest {
     String userId = "amzon-id-user-1";
     String userEmail = "user@email";
 
-    AdminGetUserRequest expectedGetUserRequest = facade.createAdminGetUserRequest(userId);
+    AdminGetUserRequest expectedGetUserRequest = getCognitoRequestHelper().getAdminGetUserRequest(userId);
     AdminGetUserResult mockGetUserResult = new AdminGetUserResult();
     mockGetUserResult.setUsername(userId);
     Collection<AttributeType> attrs = new ArrayList<>();
@@ -249,7 +254,7 @@ public class CognitoServiceFacadeTest {
     mockGetUserResult.withUserAttributes(attrs);
     when(identityProvider.adminGetUser(expectedGetUserRequest)).thenReturn(mockGetUserResult);
 
-    AdminCreateUserRequest expectedRequest = facade.createResendEmailRequest(userEmail);
+    AdminCreateUserRequest expectedRequest = getCognitoRequestHelper().getResendEmailRequest(userEmail);
     AdminCreateUserResult mockResult = new AdminCreateUserResult();
     UserType userType = userType(userEmail);
     mockResult.setUser(userType);
@@ -264,7 +269,7 @@ public class CognitoServiceFacadeTest {
   public void testCreateAdminDeleteUserRequest() {
     final String USER_ID = "user-id";
 
-    AdminDeleteUserRequest request = facade.createAdminDeleteUserRequest(USER_ID);
+    AdminDeleteUserRequest request = getCognitoRequestHelper().getAdminDeleteUserRequest(USER_ID);
 
     assertThat(request, is(notNullValue()));
     assertThat(request.getUsername(), is(USER_ID));
@@ -274,7 +279,7 @@ public class CognitoServiceFacadeTest {
   @Test
   public void testDeleteCognitoUserById() {
     final String USER_ID = "user-id";
-    AdminDeleteUserRequest expectedRequest = facade.createAdminDeleteUserRequest(USER_ID);
+    AdminDeleteUserRequest expectedRequest = getCognitoRequestHelper().getAdminDeleteUserRequest(USER_ID);
 
     facade.deleteCognitoUserById(USER_ID);
 
@@ -282,14 +287,45 @@ public class CognitoServiceFacadeTest {
   }
 
   @Test
+  public void testCreateUserUnlockUpdateRequest() {
+    final String USER_ID = "user-id";
+
+    AdminUpdateUserAttributesRequest request =
+        getCognitoRequestHelper().getAdminUpdateUserAttributesRequest(USER_ID, getCognitoRequestHelper().getLockedAttributeType());
+
+    assertThat(request, is(notNullValue()));
+    assertThat(request.getUsername(), is(USER_ID));
+    assertThat(request.getUserPoolId(), is(USERPOOL));
+    assertThat(request.getUserAttributes(), is(getCognitoRequestHelper().getLockedAttributeType()));
+    final Optional<AttributeType> lockedAttributeType =
+        request.getUserAttributes().stream()
+            .filter(attributeType -> Objects.equals(attributeType.getName(), IS_LOCKED.getName()))
+            .findAny();
+    assertTrue(lockedAttributeType.isPresent());
+    assertThat(
+        lockedAttributeType.get().getValue(), is(String.valueOf(FALSE.getValue())));
+  }
+
+  @Test
+  public void testUnlockUserById() {
+    final String USER_ID = "user-id";
+    AdminUpdateUserAttributesRequest expectedRequest =
+        getCognitoRequestHelper().getAdminUpdateUserAttributesRequest(USER_ID, getCognitoRequestHelper().getLockedAttributeType());
+
+    facade.unlockUser(USER_ID);
+
+    verify(identityProvider, times(1)).adminUpdateUserAttributes(expectedRequest);
+  }
+
+  @Test
   public void testCreateResendEmailRequest() {
     final String USER_EMAIL = "USER@EMAIL.com";
 
-    AdminCreateUserRequest request = facade.createResendEmailRequest(USER_EMAIL);
+    AdminCreateUserRequest request = getCognitoRequestHelper().getResendEmailRequest(USER_EMAIL);
 
     assertThat(request, is(notNullValue()));
     assertThat(request.getUsername(), is("user@email.com"));
-    assertThat(request.getUserPoolId(), is("userpool"));
+    assertThat(request.getUserPoolId(), is(USERPOOL));
     assertThat(request.getMessageAction(), is("RESEND"));
     assertThat(request.getDesiredDeliveryMediums(), is(Arrays.asList("EMAIL")));
   }
@@ -297,7 +333,7 @@ public class CognitoServiceFacadeTest {
   @Test
   public void testSendInvitationMessageByEmail() {
     final String USER_EMAIL = "user@email.com";
-    AdminCreateUserRequest expectedRequest = facade.createResendEmailRequest(USER_EMAIL);
+    AdminCreateUserRequest expectedRequest = getCognitoRequestHelper().getResendEmailRequest(USER_EMAIL);
     when(identityProvider.adminCreateUser(expectedRequest)).thenReturn(new AdminCreateUserResult());
 
     facade.sendInvitationMessageByEmail(USER_EMAIL);
@@ -311,7 +347,7 @@ public class CognitoServiceFacadeTest {
 
     CognitoUsersSearchCriteria searchCriteria1 = new CognitoUsersSearchCriteria(searchCriteria);
     searchCriteria1.setPaginationToken(requestPaginationToken);
-    ListUsersRequest request = facade.composeListUsersRequest(searchCriteria1);
+    ListUsersRequest request = getCognitoRequestHelper().composeListUsersRequest(searchCriteria1);
     ListUsersResult listUsersResult =
         new ListUsersResult().withUsers(userTypes).withPaginationToken(responsePaginationToken);
     when(identityProvider.listUsers(request)).thenReturn(listUsersResult);
@@ -345,5 +381,9 @@ public class CognitoServiceFacadeTest {
   private static void assertAttr(Map<String, String> attrMap, UserAttribute attr, String value) {
     assertTrue(attrMap.containsKey(attr.getName()));
     assertThat(attrMap.get(attr.getName()), is(value));
+  }
+
+  private CognitoRequestHelper getCognitoRequestHelper() {
+    return facade.getCognitoRequestHelper();
   }
 }

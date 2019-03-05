@@ -26,7 +26,7 @@ public class Roles {
   public static final String CWS_WORKER = "CWS-worker";
   public static final String CALS_EXTERNAL_WORKER = "CALS-external-worker";
 
-  public static final String IDM_JOB = "IDM-job";
+  public static final String EXTERNAL_APP = "External-application";
 
   private static List<Map<String, String>> roleList;
 
