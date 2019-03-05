@@ -4,6 +4,7 @@ import static gov.ca.cwds.idm.service.PossibleUserPermissionsService.CANS_PERMIS
 import static gov.ca.cwds.service.messages.MessageCode.ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.COUNTY_NAME_IS_NOT_PROVIDED;
 import static gov.ca.cwds.service.messages.MessageCode.FIRST_NAME_IS_NOT_PROVIDED;
+import static gov.ca.cwds.service.messages.MessageCode.INVALID_PHONE_EXTENSION_FORMAT;
 import static gov.ca.cwds.service.messages.MessageCode.INVALID_PHONE_FORMAT;
 import static gov.ca.cwds.service.messages.MessageCode.LAST_NAME_IS_NOT_PROVIDED;
 import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID_IN_CWSCMS;
@@ -14,6 +15,7 @@ import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_CREATE_USER_WIT
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_REMOVE_ALL_ROLES;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_UNALLOWED_ROLES;
 import static gov.ca.cwds.service.messages.MessageCode.USER_CANNOT_BE_UNLOCKED;
+import static gov.ca.cwds.service.messages.MessageCode.USER_PHONE_IS_NOT_PROVIDED;
 import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
 import static gov.ca.cwds.util.Utils.isRacfidUser;
 import static gov.ca.cwds.util.Utils.toCommaDelimitedString;
@@ -36,6 +38,9 @@ import org.springframework.stereotype.Service;
 @Service
 @Profile("idm")
 public class ValidationServiceImpl implements ValidationService {
+
+  static final PatternValidator PHONE_PATTERN_VALIDATOR = new PatternValidator("[1-9]\\d{0,9}");
+  static final PatternValidator PHONE_EXTENSION_PATTERN_VALIDATOR = new PatternValidator("\\d{0,7}");
 
   private CwsUserInfoService cwsUserInfoService;
 
@@ -70,7 +75,8 @@ public class ValidationServiceImpl implements ValidationService {
 
   @Override
   public void validateUserUpdate(User existedUser, UserUpdate updateUserDto) {
-    validatePhoneNumber(updateUserDto);
+    validatePhoneNumber(updateUserDto.getPhoneNumber());
+    validatePhoneExtension(updateUserDto.getPhoneExtensionNumber());
     validateNotAllRolesAreRemovedAtUpdate(updateUserDto);
     validateNewUserRolesAreAllowedAtUpdate(updateUserDto);
     validateUpdateByCansPermission(existedUser, updateUserDto);
@@ -227,15 +233,51 @@ public class ValidationServiceImpl implements ValidationService {
     validateRacfidDoesNotExistInCognito(racfId);
   }
 
-  private void validatePhoneNumber(UserUpdate updateUserDto) {
-    String newPhoneNumber = updateUserDto.getPhoneNumber();
+  void validatePhoneNumber(String newPhoneNumber) {
+    validateRequiredStringProperty(
+        newPhoneNumber,
+        PHONE_PATTERN_VALIDATOR,
+        USER_PHONE_IS_NOT_PROVIDED,
+        INVALID_PHONE_FORMAT
+    );
+  }
 
-    if (newPhoneNumber == null) {
+  void validatePhoneExtension(String newPhoneExtension) {
+    validateOptionalStringProperty(
+        newPhoneExtension,
+        PHONE_EXTENSION_PATTERN_VALIDATOR,
+        INVALID_PHONE_EXTENSION_FORMAT);
+  }
+
+  private void validateRequiredStringProperty(
+      String newValue,
+      PatternValidator patternValidator,
+      MessageCode absenceErrCode,
+      MessageCode formatErrCode) {
+
+    if (newValue == null) {
       return;
     }
 
-    if (!PhoneNumberValidator.isValid(newPhoneNumber)) {
-      throwValidationException(INVALID_PHONE_FORMAT, newPhoneNumber);
+    if(StringUtils.isBlank(newValue)){
+      throwValidationException(absenceErrCode);
+    }
+
+    if (!patternValidator.isValid(newValue)) {
+      throwValidationException(formatErrCode, newValue);
+    }
+  }
+
+  private void validateOptionalStringProperty(
+      String value,
+      PatternValidator patternValidator,
+      MessageCode errCode) {
+
+    if (StringUtils.isBlank(value)) {
+      return;
+    }
+    if (!patternValidator.isValid(value)) {
+      throwValidationException(errCode, value);
     }
   }
 
