@@ -232,8 +232,4 @@ public class UserService {
   public void setNsUserService(NsUserService nsUserService) {
     this.nsUserService = nsUserService;
   }
-
-  public ExceptionFactory getExceptionFactory() {
-    return exceptionFactory;
-  }
 }
