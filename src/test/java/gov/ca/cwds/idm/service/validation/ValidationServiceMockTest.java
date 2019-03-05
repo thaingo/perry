@@ -6,8 +6,14 @@ import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
+import static gov.ca.cwds.service.messages.MessageCode.INVALID_PHONE_EXTENSION_FORMAT;
+import static gov.ca.cwds.service.messages.MessageCode.INVALID_PHONE_FORMAT;
+import static gov.ca.cwds.service.messages.MessageCode.USER_PHONE_IS_NOT_PROVIDED;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.Utils.toSet;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -24,6 +30,7 @@ import gov.ca.cwds.service.messages.MessageCode;
 import gov.ca.cwds.service.messages.MessagesService;
 import gov.ca.cwds.service.messages.MessagesService.Messages;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
+import java.util.function.Consumer;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -124,6 +131,103 @@ public class ValidationServiceMockTest {
     testAdminCanNotCreate(admin(OFFICE_ADMIN), user());
     testAdminCanNotCreate(admin(OFFICE_ADMIN), user(CALS_ADMIN));
     testAdminCanNotCreate(admin(OFFICE_ADMIN), user(CALS_EXTERNAL_WORKER));
+  }
+
+  @Test
+  public void canNotUpdate_emptyPhoneNumber() {
+    canNotUpdatePhoneNumber("", USER_PHONE_IS_NOT_PROVIDED);
+  }
+
+  @Test
+  public void canNotUpdate_blankPhoneNumber() {
+    canNotUpdatePhoneNumber("   ", USER_PHONE_IS_NOT_PROVIDED);
+  }
+
+  @Test
+  public void canNotUpdate_phoneNumberWithNonDigits() {
+    canNotUpdatePhoneNumber("abc-456789", INVALID_PHONE_FORMAT);
+  }
+
+  @Test
+  public void canNotUpdate_phoneNumberWithMoreThenTenChars() {
+    canNotUpdatePhoneNumber("12345678901", INVALID_PHONE_FORMAT);
+  }
+
+  @Test
+  public void canNotUpdatep_phoneNumberStartingWithZero(){
+    canNotUpdatePhoneNumber("0123456789", INVALID_PHONE_FORMAT);
+  }
+
+  @Test
+  public void canUpdate_phoneNumberWithLessThenTenChars() {
+    canUpdatePhoneNumber("123");
+  }
+
+  @Test
+  public void canUpdate_phoneNumberWithTenChars(){
+    canUpdatePhoneNumber("1234567890");
+  }
+
+  @Test
+  public void canUpdate_emptyPhoneExtension() {
+    canUpdatePhoneExtension("");
+  }
+
+  @Test
+  public void canUpdate_blankPhoneExtension() {
+    canUpdatePhoneExtension("   ");
+  }
+
+  @Test
+  public void canNotUpdate_phoneExtensionWithNonDigits() {
+    canNotUpdatePhoneExtension("a-45", INVALID_PHONE_EXTENSION_FORMAT);
+  }
+
+  @Test
+  public void canNotUpdate_phoneExtensionWithMoreThenSevenChars() {
+    canNotUpdatePhoneExtension("12345678", INVALID_PHONE_EXTENSION_FORMAT);
+  }
+
+  @Test
+  public void canUpdate_phoneExtenionWithLessThenSevenChars() {
+    canUpdatePhoneExtension("123");
+  }
+  @Test
+  public void canUpdate_phoneExtensionWithSevenChars(){
+    canUpdatePhoneExtension("1234567");
+  }
+
+  private void canNotUpdatePhoneNumber(String newPhoneNumber, MessageCode messageCode) {
+    canNotUpdate(newPhoneNumber, messageCode, service::validatePhoneNumber);
+  }
+
+  private void canUpdatePhoneNumber(String newPhoneNumber){
+    canUpdate(newPhoneNumber, service::validatePhoneNumber);
+  }
+
+  private void canNotUpdatePhoneExtension(String newPhoneExtension, MessageCode messageCode) {
+    canNotUpdate(newPhoneExtension, messageCode, service::validatePhoneExtension);
+  }
+
+  private void canUpdatePhoneExtension(String newPhoneExtension){
+    canUpdate(newPhoneExtension, service::validatePhoneExtension);
+  }
+
+  private <T> void canNotUpdate(T validatedValue , MessageCode messageCode, Consumer<T> validateMethod) {
+    try {
+      validateMethod.accept(validatedValue);
+      fail("UserValidationException should be thrown");
+    } catch (UserValidationException e) {
+      assertThat(e.getErrorCode(), is(messageCode));
+    }
+  }
+
+  private <T> void canUpdate(T validatedValue, Consumer<T> validateMethod) {
+    try {
+      validateMethod.accept(validatedValue);
+    } catch (UserValidationException e) {
+      fail("UserValidationException should not be thrown");
+    }
   }
 
   private void testAdminCanUpdate(UniversalUserToken admin, UserUpdate userUpdate) {

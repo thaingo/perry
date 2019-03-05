@@ -1,7 +1,10 @@
 package gov.ca.cwds.idm.service;
 
+import static gov.ca.cwds.util.Utils.blankToNull;
+
 import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
 import gov.ca.cwds.idm.service.diff.Diff;
+import gov.ca.cwds.idm.service.diff.StringDiff;
 import gov.ca.cwds.idm.service.diff.UpdateDifference;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -22,7 +25,8 @@ public class NsUserBuilder {
 
   public NsUser build() {
     setProperty(updateDifference.getPhoneNumberDiff(), nsUser::setPhoneNumber);
-    setProperty(updateDifference.getPhoneExtensionNumberDiff(), nsUser::setPhoneExtensionNumber);
+    setNullableStringProperty(
+        updateDifference.getPhoneExtensionNumberDiff(), nsUser::setPhoneExtensionNumber);
     setProperty(updateDifference.getNotesDiff(), nsUser::setNotes);
     setProperty(updateDifference.getRolesDiff(), nsUser::setRoles);
     setProperty(updateDifference.getPermissionsDiff(), nsUser::setPermissions);
@@ -35,5 +39,9 @@ public class NsUserBuilder {
       setter.accept(newValue);
       userIsUpdated = true;
     }
+  }
+
+  private  void setNullableStringProperty(Optional<StringDiff> diff, Consumer<String> setter) {
+    setProperty(diff, str -> setter.accept(blankToNull(str)));
   }
 }
