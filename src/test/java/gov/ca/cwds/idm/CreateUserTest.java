@@ -144,7 +144,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
     AdminCreateUserRequest request = requests.createRequest;
     AdminCreateUserRequest invitationRequest = requests.invitationRequest;
     AdminDeleteUserRequest deleteRequest =
-        cognitoServiceFacade.createAdminDeleteUserRequest(NEW_USER_EMAIL_FAIL_ID);
+        cognitoRequestHelper.getAdminDeleteUserRequest(NEW_USER_EMAIL_FAIL_ID);
 
     MvcResult result =
         mockMvc
@@ -230,7 +230,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
     AdminCreateUserRequest invitationRequest = requests.invitationRequest;
 
     AdminDeleteUserRequest deleteRequest =
-        cognitoServiceFacade.createAdminDeleteUserRequest(NEW_USER_DELETE_FAIL_ID);
+        cognitoRequestHelper.getAdminDeleteUserRequest(NEW_USER_DELETE_FAIL_ID);
     when(cognito.adminDeleteUser(deleteRequest))
         .thenThrow(new RuntimeException("Cognito delete error"));
 
@@ -263,7 +263,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
     User user = user();
     user.setEmail("some.existing@email");
 
-    AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
+    AdminCreateUserRequest request = cognitoRequestHelper.getAdminCreateUserRequest(user);
     when(cognito.adminCreateUser(request))
         .thenThrow(new UsernameExistsException("user already exists"));
 
@@ -328,7 +328,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
   public void testCreateUserCognitoValidationError() throws Exception {
     User user = user();
     user.setOfficeId("long_string_invalid_id");
-    AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
+    AdminCreateUserRequest request = cognitoRequestHelper.getAdminCreateUserRequest(user);
     when(cognito.adminCreateUser(request))
         .thenThrow(new InvalidParameterException("invalid parameter"));
 
@@ -503,7 +503,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
       String newUserId) {
     TestCognitoServiceFacade testCognitoServiceFacade = (TestCognitoServiceFacade) cognitoServiceFacade;
 
-    AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(actuallySendUser);
+    AdminCreateUserRequest request = cognitoRequestHelper.getAdminCreateUserRequest(actuallySendUser);
     AdminCreateUserResult result = testCognitoServiceFacade.setCreateUserResult(request, newUserId);
     AdminCreateUserRequest invitationEmailRequest = testCognitoServiceFacade
         .setCreateUserInvitationRequest(actuallySendUser.getEmail(), result);
@@ -515,7 +515,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
       String newUserId) {
     TestCognitoServiceFacade testCognitoServiceFacade = (TestCognitoServiceFacade) cognitoServiceFacade;
 
-    AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(actuallySendUser);
+    AdminCreateUserRequest request = cognitoRequestHelper.getAdminCreateUserRequest(actuallySendUser);
     testCognitoServiceFacade.setCreateUserResult(request, newUserId);
     AdminCreateUserRequest invitationEmailRequest = testCognitoServiceFacade
         .setCreateUserInvitationRequestWithEmailError(actuallySendUser.getEmail());
@@ -526,7 +526,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
     User user = user();
     user.setEmail("unauthorized@gmail.com");
 
-    AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
+    AdminCreateUserRequest request = cognitoRequestHelper.getAdminCreateUserRequest(user);
 
     MvcResult result = mockMvc
         .perform(
@@ -565,7 +565,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
   }
 
   private void assertCreateUserBadRequest(User user, String fixturePath) throws Exception {
-    AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
+    AdminCreateUserRequest request = cognitoRequestHelper.getAdminCreateUserRequest(user);
 
     MvcResult result = mockMvc
         .perform(
@@ -581,7 +581,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
 
   private void testCreateUserValidationError(User user) throws Exception {
 
-    AdminCreateUserRequest request = cognitoServiceFacade.createAdminCreateUserRequest(user);
+    AdminCreateUserRequest request = cognitoRequestHelper.getAdminCreateUserRequest(user);
 
     mockMvc
         .perform(

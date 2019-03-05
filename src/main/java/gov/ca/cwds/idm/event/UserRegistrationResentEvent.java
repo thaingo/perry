@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import gov.ca.cwds.idm.dto.User;
 
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class UserRegistrationResentEvent extends UserChangeLogEvent {
+public class UserRegistrationResentEvent extends AdminCausedChangeLogEvent {
 
   private static final long serialVersionUID = 968999099511509164L;
 
