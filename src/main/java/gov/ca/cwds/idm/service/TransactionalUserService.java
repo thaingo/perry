@@ -71,7 +71,7 @@ public class TransactionalUserService {
   @Transactional(value = TOKEN_TRANSACTION_MANAGER)
   public boolean updateUserAttributes(UserUpdateRequest userUpdateRequest) {
     boolean isDatabaseUpdated = nsUserService.update(userUpdateRequest);
-    entityManager.flush();
+    entityManager.flush();//to prevent updating in Cognito if data cannot be updated in DB
 
     boolean isCognitoUpdated = cognitoServiceFacade.updateUserAttributes(userUpdateRequest);
     return (isDatabaseUpdated || isCognitoUpdated);
