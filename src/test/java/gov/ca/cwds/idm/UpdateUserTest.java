@@ -144,7 +144,6 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     assertThat(updatedNsUser.getPermissions(), is(toSet("RFA-rollout", "Hotline-rollout")));
     assertThat(updatedNsUser.getNotes(), is(NEW_NOTES));
 
-//    assertEquals(5, nsAuditEventRepository.count() - previousEventCount);
     LocalDateTime newLastModifiedTime = updatedNsUser.getLastModifiedTime();
     assertThat(newLastModifiedTime, is(notNullValue()));
     assertThat(newLastModifiedTime, is(not(equalTo(oldLastModifiedTime))));
@@ -160,6 +159,48 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     assertTrue(events.stream().anyMatch(e -> e instanceof NotesChangedEvent));
     verify(auditEventService, times(1))
         .saveAuditEvent(any(UserEnabledStatusChangedEvent.class));
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {STATE_ADMIN})
+  public void testUpdateCognitoAttributesFail() throws Exception {
+
+    final String NEW_EMAIL = "newmail@mail.com";
+    final String OLD_NOTES = "Some notes text";
+    final String NEW_NOTES = "New notes text";
+    assertThat(NEW_NOTES, not(OLD_NOTES));
+
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setEmail(NEW_EMAIL);
+    userUpdate.setNotes(NEW_NOTES);
+
+    NsUser existedNsUser = assertNsUserInDb(USER_NO_RACFID_ID);
+    assertThat(existedNsUser.getNotes(), is(OLD_NOTES));
+
+    AdminUpdateUserAttributesRequest request =
+        new AdminUpdateUserAttributesRequest()
+            .withUsername(USER_NO_RACFID_ID)
+            .withUserPoolId(USERPOOL)
+            .withUserAttributes(attr(EMAIL, NEW_EMAIL), attr(EMAIL_VERIFIED, "True"));
+
+    when(cognito.adminUpdateUserAttributes(request))
+        .thenThrow(new RuntimeException("Cognito update attributes error"));
+
+    mockMvc.perform(
+        MockMvcRequestBuilders.patch("/idm/users/" + USER_NO_RACFID_ID)
+            .contentType(JSON_CONTENT_TYPE)
+            .content(asJsonString(userUpdate)))
+        .andExpect(MockMvcResultMatchers.status().isInternalServerError())
+        .andReturn();
+
+    verify(spySearchService, times(0)).updateUser(any(User.class));
+
+    NsUser updatedNsUser =  assertNsUserInDb(USER_NO_RACFID_ID);
+    assertThat(updatedNsUser.getNotes(), is(OLD_NOTES));
+
+    verifyDoraCalls(0);
+    ArgumentCaptor<List<? extends AuditEvent>> captor = ArgumentCaptor.forClass(List.class);
+    verify(auditEventService, times(0)).saveAuditEvents(captor.capture());
   }
 
   @Test
