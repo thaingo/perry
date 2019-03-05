@@ -1,0 +1,6 @@
+{
+  "status": "UNAUTHORIZED",
+  "technical_message": "County admin cannot update the user from the other county, username: 44732d50-9425-4rd2-a92f-7425q0c411bw",
+  "user_message": "As a county admin You cannot update a user from the other county",
+  "error_code": "CAP-045"
+}

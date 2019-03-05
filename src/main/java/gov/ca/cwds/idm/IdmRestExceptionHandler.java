@@ -10,6 +10,7 @@ import gov.ca.cwds.idm.dto.IdmApiCustomError;
 import gov.ca.cwds.idm.dto.IdmApiCustomError.IdmApiCustomErrorBuilder;
 import gov.ca.cwds.idm.exception.AdminAuthorizationException;
 import gov.ca.cwds.idm.exception.IdmException;
+import gov.ca.cwds.idm.exception.OperationNotSupportedException;
 import gov.ca.cwds.idm.exception.PartialSuccessException;
 import gov.ca.cwds.idm.exception.UserAlreadyExistsException;
 import gov.ca.cwds.idm.exception.UserNotFoundException;
@@ -56,6 +57,12 @@ public class IdmRestExceptionHandler extends ResponseEntityExceptionHandler {
 
   @ExceptionHandler(value = {UserValidationException.class})
   ResponseEntity<Object> handleUserValidationException(UserValidationException e) {
+    logger.error(e.getMessage(), e);
+    return buildResponseEntity(HttpStatus.BAD_REQUEST, e);
+  }
+
+  @ExceptionHandler(value = {OperationNotSupportedException.class})
+  ResponseEntity<Object> handleOperationNotSupportedException(OperationNotSupportedException e) {
     logger.error(e.getMessage(), e);
     return buildResponseEntity(HttpStatus.BAD_REQUEST, e);
   }

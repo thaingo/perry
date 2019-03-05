@@ -1,0 +1,6 @@
+{
+  "status": "BAD_REQUEST",
+  "technical_message": "Unable to unlock user, username: YOLOD",
+  "user_message": "Unable to unlock user, username: YOLOD",
+  "error_code": "CAP-067"
+}

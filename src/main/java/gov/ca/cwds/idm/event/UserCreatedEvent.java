@@ -5,11 +5,8 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import gov.ca.cwds.config.api.idm.Roles;
 import gov.ca.cwds.idm.dto.User;
 
-/**
- * Created by Alexander Serbin on 1/11/2019
- */
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class UserCreatedEvent extends UserChangeLogEvent {
+public class UserCreatedEvent extends AdminCausedChangeLogEvent {
 
   private static final long serialVersionUID = 1527655053336674520L;
 

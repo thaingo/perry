@@ -4,6 +4,7 @@ import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.idm.BaseIdmIntegrationTest.DORA_WS_MAX_ATTEMPTS;
 import static gov.ca.cwds.idm.BaseIdmIntegrationTest.IDM_BASIC_AUTH_PASS;
 import static gov.ca.cwds.idm.BaseIdmIntegrationTest.IDM_BASIC_AUTH_USER;
+import static gov.ca.cwds.idm.util.TestHelper.getTestCognitoProperties;
 import static gov.ca.cwds.util.LiquibaseUtils.CMS_STORE_URL;
 import static gov.ca.cwds.util.LiquibaseUtils.SPRING_BOOT_H2_PASSWORD;
 import static gov.ca.cwds.util.LiquibaseUtils.SPRING_BOOT_H2_USER;
@@ -21,12 +22,14 @@ import ch.qos.logback.core.Appender;
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
 import gov.ca.cwds.BaseIntegrationTest;
 import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.idm.lifecycle.UserLockService;
 import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
 import gov.ca.cwds.idm.persistence.ns.repository.NsUserRepository;
 import gov.ca.cwds.idm.persistence.ns.repository.UserLogRepository;
 import gov.ca.cwds.idm.service.IdmServiceImpl;
 import gov.ca.cwds.idm.service.SearchService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
+import gov.ca.cwds.idm.service.cognito.util.CognitoRequestHelper;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.idm.util.TestCognitoServiceFacade;
 import gov.ca.cwds.idm.util.WithMockCustomUser;
@@ -90,6 +93,11 @@ public abstract class BaseIdmIntegrationTest extends BaseIntegrationTest {
   protected IdmServiceImpl idmService;
 
   @Autowired
+  protected UserLockService userLockService;
+
+  protected CognitoRequestHelper cognitoRequestHelper;
+
+  @Autowired
   protected UserLogRepository userLogRepository;
 
   @Autowired
@@ -116,6 +124,7 @@ public abstract class BaseIdmIntegrationTest extends BaseIntegrationTest {
     ((TestCognitoServiceFacade) cognitoServiceFacade).setExceptionFactory(exceptionFactory);
 
     cognito = ((TestCognitoServiceFacade) cognitoServiceFacade).getIdentityProvider();
+    cognitoRequestHelper = new CognitoRequestHelper(getTestCognitoProperties());
 
     Logger rootLogger = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
     rootLogger.addAppender(mockAppender);

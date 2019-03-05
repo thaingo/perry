@@ -10,11 +10,8 @@ import java.util.Set;
 import java.util.TreeSet;
 import org.apache.commons.lang3.StringUtils;
 
-/**
- * Created by Alexander Serbin on 1/11/2019
- */
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class UserRoleChangedEvent extends UserChangeLogEvent {
+public class UserRoleChangedEvent extends AdminCausedChangeLogEvent {
 
   private static final long serialVersionUID = 1145582435628289251L;
 

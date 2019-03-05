@@ -14,10 +14,10 @@ import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_CREATE_USER_WIT
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_CREATE_USER_WITH_UNALLOWED_ROLES;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_REMOVE_ALL_ROLES;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_UNALLOWED_ROLES;
-import static gov.ca.cwds.service.messages.MessageCode.USER_PHONE_IS_NOT_PROVIDED;
 import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
 import static gov.ca.cwds.util.Utils.isRacfidUser;
 import static gov.ca.cwds.util.Utils.toCommaDelimitedString;
+import static java.lang.Boolean.FALSE;
 
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
@@ -79,6 +79,13 @@ public class ValidationServiceImpl implements ValidationService {
     validateNewUserRolesAreAllowedAtUpdate(updateUserDto);
     validateUpdateByCansPermission(existedUser, updateUserDto);
     validateActivateUser(existedUser, updateUserDto);
+  }
+
+  @Override
+  public void validateUnlockUser(User existedUser, boolean newLocked) {
+    if (!canChangeLockStatusToFalse(newLocked, existedUser.isLocked())) {
+      throwValidationException(USER_CANNOT_BE_UNLOCKED, existedUser.getRacfid());
+    }
   }
 
   private void validateFirstNameIsProvided(User user) {
@@ -213,6 +220,10 @@ public class ValidationServiceImpl implements ValidationService {
 
   private static boolean canChangeToEnableActiveStatus(Boolean newEnabled, Boolean currentEnabled) {
     return newEnabled != null && !newEnabled.equals(currentEnabled) && newEnabled;
+  }
+
+  private static boolean canChangeLockStatusToFalse(Boolean newLocked, Boolean currentLocked) {
+    return FALSE.equals(newLocked) && !newLocked.equals(currentLocked);
   }
 
   private void validateActivateUser(String racfId) {

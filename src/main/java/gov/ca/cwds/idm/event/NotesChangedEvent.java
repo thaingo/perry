@@ -6,7 +6,7 @@ import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.diff.StringDiff;
 
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class NotesChangedEvent extends UserChangeLogEvent {
+public class NotesChangedEvent extends AdminCausedChangeLogEvent {
 
   private static final long serialVersionUID = 88269111887681820L;
 
