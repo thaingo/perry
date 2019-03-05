@@ -4,6 +4,7 @@ import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.COUNTY;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.IS_LOCKED;
+import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.MAX_LOGIN_ATTEMPTS;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.OFFICE;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PERMISSIONS;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PHONE_EXTENSION;
@@ -16,7 +17,6 @@ import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.FI
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.LAST_NAME;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.PHONE_NUMBER;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.RACFID_STANDARD;
-import static gov.ca.cwds.idm.service.cognito.attribute.UserLockStatus.FALSE;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USERPOOL;
 import static gov.ca.cwds.idm.util.TestHelper.getTestCognitoProperties;
 import static gov.ca.cwds.idm.util.TestUtils.attr;
@@ -297,13 +297,21 @@ public class CognitoServiceFacadeTest {
     assertThat(request.getUsername(), is(USER_ID));
     assertThat(request.getUserPoolId(), is(USERPOOL));
     assertThat(request.getUserAttributes(), is(getCognitoRequestHelper().getLockedAttributeType()));
-    final Optional<AttributeType> lockedAttributeType =
+    final Optional<AttributeType> isLockedAttributeType =
         request.getUserAttributes().stream()
             .filter(attributeType -> Objects.equals(attributeType.getName(), IS_LOCKED.getName()))
             .findAny();
-    assertTrue(lockedAttributeType.isPresent());
-    assertThat(
-        lockedAttributeType.get().getValue(), is(String.valueOf(FALSE.getValue())));
+    assertTrue(isLockedAttributeType.isPresent());
+    assertThat(isLockedAttributeType.get().getValue(), is("false"));
+
+    final Optional<AttributeType> loginAttemptsAttributeType =
+        request.getUserAttributes().stream()
+            .filter(
+                attributeType ->
+                    Objects.equals(attributeType.getName(), MAX_LOGIN_ATTEMPTS.getName()))
+            .findAny();
+    assertTrue(loginAttemptsAttributeType.isPresent());
+    assertThat(loginAttemptsAttributeType.get().getValue(), is("0"));
   }
 
   @Test
