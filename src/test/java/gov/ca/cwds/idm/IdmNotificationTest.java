@@ -39,7 +39,7 @@ public class IdmNotificationTest extends BaseIdmIntegrationWithSearchTest {
         .andExpect(MockMvcResultMatchers.status().isAccepted())
         .andReturn();
 
-    verify(auditEventService, times(1)).saveAuditEvent(any(
+    verify(auditEventService, times(1)).persistAuditEvent(any(
         UserLockedEvent.class));
     int newUserLogsSize = Iterables.size(userLogRepository.findAll());
     assertThat(newUserLogsSize, is(oldUserLogsSize + 1));
