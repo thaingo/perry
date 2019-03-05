@@ -75,7 +75,7 @@ public class IdmResource {
       value = "Users page",
       response = UsersPage.class,
       notes =
-          "This service is used by batch job to build the ES index. The client of this service should have 'IDM-job' role."
+          "This service is used by batch job to build the ES index. The client of this service should have 'External-application' role."
               + "Once there is more items than a default page size (60) in the datasource you will get a paginationToken "
               + "in a responce. Use it as a parameter to get a next page."
   )
@@ -99,7 +99,7 @@ public class IdmResource {
       value = "Search users with given RACFIDs list",
       response = User.class,
       responseContainer = "List",
-      notes = "This service is used by batch job to build the ES index. The client of this service should have 'IDM-job' role."
+      notes = "This service is used by batch job to build the ES index. The client of this service should have 'External-application' role."
   )
   @PreAuthorize("hasAuthority(T(gov.ca.cwds.config.api.idm.Roles).EXTERNAL_APP)")
   public List<User> searchUsersByRacfid(
@@ -121,7 +121,7 @@ public class IdmResource {
       value = "Get list of failed User creates and updates in Dora",
       response = UserAndOperation.class,
       responseContainer = "List",
-      notes = "This service is used by batch job to build the ES index. The client of this service should have 'IDM-job' role."
+      notes = "This service is used by batch job to build the ES index. The client of this service should have 'External-application' role."
   )
   @PreAuthorize("hasAuthority(T(gov.ca.cwds.config.api.idm.Roles).EXTERNAL_APP)")
   public ResponseEntity getFailedOperations(
@@ -350,15 +350,20 @@ public class IdmResource {
       method = RequestMethod.POST,
       value = "/notifications"
   )
+  @ResponseStatus(HttpStatus.ACCEPTED)
   @ApiResponses(
       value = {
-          @ApiResponse(code = 204, message = "No Content"),
-          @ApiResponse(code = 400, message = "Bad Request"),
+          @ApiResponse(code = 202, message = "Accepted"),
+          @ApiResponse(code = 400, message = "Bad Request. Operation type is not supported"),
           @ApiResponse(code = 401, message = "Not Authorized"),
-          @ApiResponse(code = 404, message = "Not found")
+          @ApiResponse(code = 404, message = "User Not found")
       }
   )
-  @ApiOperation(value = "Notify Perry about external action on user")
+  @ApiOperation(
+      value = "Notify Perry about external action on user",
+      notes =
+          "This service is used to notify Perry about external action on user in case some further action is required."
+              + " The client of this service should have 'External-application' role.")
   @PreAuthorize("hasAuthority(T(gov.ca.cwds.config.api.idm.Roles).EXTERNAL_APP)")
   public ResponseEntity notify(
       @ApiParam(required = true, name = "Notification", value = "Notification data")
