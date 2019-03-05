@@ -6,15 +6,12 @@ import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.NEW_USER_SUCCESS_ID;
 import static gov.ca.cwds.idm.util.TestUtils.asJsonString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import com.google.common.collect.Iterables;
 import gov.ca.cwds.idm.dto.IdmNotification;
-import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.event.UserCreatedEvent;
 import gov.ca.cwds.idm.event.UserLockedEvent;
 import org.apache.commons.codec.binary.Base64;
 import org.junit.Test;

@@ -2,5 +2,5 @@
   "status": "NOT_FOUND",
   "technical_message": "User with id: absentInNsDbUserId is not found in NS database",
   "user_message": "User with id: absentInNsDbUserId is not found in NS database",
-  "error_code": "CAP-067"
+  "error_code": "CAP-069"
 }

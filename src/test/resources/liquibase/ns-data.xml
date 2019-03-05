@@ -368,5 +368,17 @@
       <column name="role_key" value="CWS-worker"/>
     </insert>
 
+    <insert tableName="user">
+      <column name="id" value="19"/>
+      <column name="username" value="17067e4e-270f-4623-b86c-b4d4fa527a34"/>
+      <column name="last_login_time" valueDate="2018-10-17 07:01:12"/>
+      <column name="racfid"/>
+      <column name="phone_number"/>
+      <column name="phone_extension"/>
+      <column name="last_modified_time" valueDate="2018-05-30"/>
+      <column name="first_name" value="Garcia"/>
+      <column name="last_name" value="Gonzales"/>
+    </insert>
+
   </changeSet>
 </databaseChangeLog>
