@@ -1,5 +1,6 @@
 package gov.ca.cwds.idm.service;
 
+import static gov.ca.cwds.config.TokenServiceConfiguration.TOKEN_PERSISTENCE_UNIT_NAME;
 import static gov.ca.cwds.config.TokenServiceConfiguration.TOKEN_TRANSACTION_MANAGER;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_CREATE_NEW_USER;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_DELETE_IDM_USER_AT_USER_CREATION_FAIL;
@@ -10,6 +11,8 @@ import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.idm.service.mapper.NsUserMapper;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +32,9 @@ public class TransactionalUserService {
 
   private ExceptionFactory exceptionFactory;
 
+  @PersistenceContext(unitName = TOKEN_PERSISTENCE_UNIT_NAME)
+  private EntityManager entityManager;
+
   @Transactional(value = TOKEN_TRANSACTION_MANAGER)
   @SuppressWarnings({"fb-contrib:LEST_LOST_EXCEPTION_STACK_TRACE"})//exception with custom constructor is used
   public void createUserInDbWithInvitationEmail(User user) {
@@ -38,13 +44,15 @@ public class TransactionalUserService {
     try {
       NsUserMapper nsUserMapper = new NsUserMapper();
       NsUser nsUser = nsUserMapper.toNsUser(user);
-
       nsUserService.create(nsUser);
+      entityManager.flush();//to prevent sending invitation email if data cannot be saved in DB
+
       cognitoServiceFacade.sendInvitationMessageByEmail(email);
 
     } catch (Exception userCreateException) {
       try {
         cognitoServiceFacade.deleteCognitoUserById(userId);
+        LOGGER.info("Cognito user with username:{} was successfully deleted", userId);
       } catch (Exception cognitoUserDeleteException) {
         LOGGER.error("error at attempt to delete new user in Cognito with username: " + userId,
             cognitoUserDeleteException);
@@ -63,6 +71,8 @@ public class TransactionalUserService {
   @Transactional(value = TOKEN_TRANSACTION_MANAGER)
   public boolean updateUserAttributes(UserUpdateRequest userUpdateRequest) {
     boolean isDatabaseUpdated = nsUserService.update(userUpdateRequest);
+    entityManager.flush();
+
     boolean isCognitoUpdated = cognitoServiceFacade.updateUserAttributes(userUpdateRequest);
     return (isDatabaseUpdated || isCognitoUpdated);
   }
@@ -80,5 +90,13 @@ public class TransactionalUserService {
   @Autowired
   public void setExceptionFactory(ExceptionFactory exceptionFactory) {
     this.exceptionFactory = exceptionFactory;
+  }
+
+  public void setEntityManager(EntityManager entityManager) {
+    this.entityManager = entityManager;
+  }
+
+  public EntityManager getEntityManager() {
+    return entityManager;
   }
 }
