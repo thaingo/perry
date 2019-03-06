@@ -44,7 +44,6 @@ import gov.ca.cwds.idm.event.UserCreatedEvent;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
-import gov.ca.cwds.idm.service.TransactionalUserService;
 import gov.ca.cwds.idm.util.TestCognitoServiceFacade;
 import gov.ca.cwds.idm.util.WithMockCustomUser;
 import java.time.LocalDate;
@@ -52,15 +51,11 @@ import java.util.Set;
 import javax.persistence.EntityManager;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
-
-  @Autowired
-  private TransactionalUserService transactionalUserService;
 
   @Test
   @WithMockCustomUser

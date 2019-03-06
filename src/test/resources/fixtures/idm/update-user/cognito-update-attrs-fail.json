@@ -1,0 +1,7 @@
+{
+  "status": "INTERNAL_SERVER_ERROR",
+  "technical_message": "Exception while updating user in AWS Cognito, username: 2be3221f-8c2f-4386-8a95-a68f0282efb0",
+  "user_message": "Exception while updating user in AWS Cognito",
+  "error_code": "CAP-010",
+  "causes": ["Cognito update attributes error"]
+}
