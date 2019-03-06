@@ -159,8 +159,8 @@ public class ValidationServiceMockTest {
   }
 
   @Test
-  public void canUpdate_phoneNumberWithLessThenTenChars() {
-    canUpdatePhoneNumber("123");
+  public void canNotUpdate_phoneNumberWithLessThenTenChars() {
+    canNotUpdatePhoneNumber("123", INVALID_PHONE_FORMAT);
   }
 
   @Test

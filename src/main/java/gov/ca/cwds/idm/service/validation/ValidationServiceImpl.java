@@ -39,7 +39,7 @@ import org.springframework.stereotype.Service;
 @Profile("idm")
 public class ValidationServiceImpl implements ValidationService {
 
-  static final PatternValidator PHONE_PATTERN_VALIDATOR = new PatternValidator("[1-9]\\d{0,9}");
+  static final PatternValidator PHONE_PATTERN_VALIDATOR = new PatternValidator("[1-9]\\d{9}");
   static final PatternValidator PHONE_EXTENSION_PATTERN_VALIDATOR = new PatternValidator("\\d{0,7}");
 
   private CwsUserInfoService cwsUserInfoService;
