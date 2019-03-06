@@ -2,6 +2,7 @@ package gov.ca.cwds.idm.service;
 
 import static gov.ca.cwds.config.TokenServiceConfiguration.TOKEN_PERSISTENCE_UNIT_NAME;
 import static gov.ca.cwds.config.TokenServiceConfiguration.TOKEN_TRANSACTION_MANAGER;
+import static gov.ca.cwds.service.messages.MessageCode.ERROR_UPDATE_USER_IN_NS_DB;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_CREATE_NEW_USER;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_DELETE_IDM_USER_AT_USER_CREATION_FAIL;
 
@@ -72,8 +73,15 @@ public class TransactionalUserService {
    */
   @Transactional(value = TOKEN_TRANSACTION_MANAGER)
   public boolean updateUserAttributes(UserUpdateRequest userUpdateRequest) {
-    boolean isDatabaseUpdated = nsUserService.update(userUpdateRequest);
-    entityManager.flush();
+    boolean isDatabaseUpdated;
+
+    try {
+      isDatabaseUpdated = nsUserService.update(userUpdateRequest);
+      entityManager.flush();//to prevent updating in Cognito if data cannot be updated in DB
+    } catch (Exception updateInNsDbException) {
+      throw exceptionFactory.createIdmException(
+          ERROR_UPDATE_USER_IN_NS_DB, updateInNsDbException, userUpdateRequest.getUserId());
+    }
 
     boolean isCognitoUpdated = cognitoServiceFacade.updateUserAttributes(userUpdateRequest);
     return (isDatabaseUpdated || isCognitoUpdated);
