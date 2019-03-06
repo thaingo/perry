@@ -18,10 +18,10 @@ public class PhoneNumberPatternTest extends BasePatternTest {
     invalid("012-345-6789");
     invalid("(012) 345-6789");
     invalid("0123456789");
+    invalid("45678");
     invalid("0");
+    invalid("1");
 
     valid("1234567890");
-    valid("45678");
-    valid("1");
   }
 }
