@@ -218,7 +218,7 @@ public class IdmServiceImpl implements IdmService {
     switch (notification.getActionType().toLowerCase()) {
       case USER_LOCKED:
         User user = userService.getUser(notification.getUserId());
-        auditService.saveAuditEvent(new UserLockedEvent(user));
+        auditService.persistAuditEvent(new UserLockedEvent(user));
         userLogService.logUpdate(notification.getUserId(), LocalDateTime.now());
         break;
       default:
