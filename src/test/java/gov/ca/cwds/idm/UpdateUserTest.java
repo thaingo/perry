@@ -39,8 +39,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -74,6 +76,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.persistence.EntityManager;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
@@ -177,28 +180,86 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     NsUser existedNsUser = assertNsUserInDb(USER_NO_RACFID_ID);
     assertThat(existedNsUser.getNotes(), is(OLD_NOTES));
 
-    AdminUpdateUserAttributesRequest request =
+    AdminUpdateUserAttributesRequest cognitoUpdateAttributesRequest =
         new AdminUpdateUserAttributesRequest()
             .withUsername(USER_NO_RACFID_ID)
             .withUserPoolId(USERPOOL)
             .withUserAttributes(attr(EMAIL, NEW_EMAIL), attr(EMAIL_VERIFIED, "True"));
 
-    when(cognito.adminUpdateUserAttributes(request))
+    when(cognito.adminUpdateUserAttributes(cognitoUpdateAttributesRequest))
         .thenThrow(new RuntimeException("Cognito update attributes error"));
 
-    mockMvc.perform(
+    MvcResult result = mockMvc.perform(
         MockMvcRequestBuilders.patch("/idm/users/" + USER_NO_RACFID_ID)
             .contentType(JSON_CONTENT_TYPE)
             .content(asJsonString(userUpdate)))
         .andExpect(MockMvcResultMatchers.status().isInternalServerError())
         .andReturn();
 
-    verify(spySearchService, times(0)).updateUser(any(User.class));
+    assertExtensible(result, "fixtures/idm/update-user/cognito-update-attrs-fail.json");
+
+    verify(cognito, times(1)).adminUpdateUserAttributes(cognitoUpdateAttributesRequest);
 
     NsUser updatedNsUser =  assertNsUserInDb(USER_NO_RACFID_ID);
     assertThat(updatedNsUser.getNotes(), is(OLD_NOTES));
 
+    verify(spySearchService, times(0)).updateUser(any(User.class));
     verifyDoraCalls(0);
+
+    ArgumentCaptor<List<? extends AuditEvent>> captor = ArgumentCaptor.forClass(List.class);
+    verify(auditEventService, times(0)).saveAuditEvents(captor.capture());
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {STATE_ADMIN})
+  public void testUpdateNsDatabaseFail() throws Exception {
+
+    final String NEW_EMAIL = "newmail@mail.com";
+    final String OLD_NOTES = null;
+    final String NEW_NOTES = "New notes text";
+    assertThat(NEW_NOTES, not(OLD_NOTES));
+
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setEmail(NEW_EMAIL);
+    userUpdate.setNotes(NEW_NOTES);
+
+    final String USER_ID = USER_WITH_RACFID_ID;
+
+    NsUser existedNsUser = assertNsUserInDb(USER_ID);
+    assertThat(existedNsUser.getNotes(), is(OLD_NOTES));
+
+    AdminUpdateUserAttributesRequest cognitoUpdateAttributesRequest =
+        new AdminUpdateUserAttributesRequest()
+            .withUsername(USER_ID)
+            .withUserPoolId(USERPOOL)
+            .withUserAttributes(attr(EMAIL, NEW_EMAIL), attr(EMAIL_VERIFIED, "True"));
+
+    EntityManager entityManager = transactionalUserService.getEntityManager();
+    EntityManager spyEntityManager = spy(transactionalUserService.getEntityManager());
+    transactionalUserService.setEntityManager(spyEntityManager);
+    doThrow(new RuntimeException("DB error")).when(spyEntityManager).flush();
+
+    MvcResult result;
+    try {
+      result = mockMvc.perform(
+          MockMvcRequestBuilders.patch("/idm/users/" + USER_ID)
+              .contentType(JSON_CONTENT_TYPE)
+              .content(asJsonString(userUpdate)))
+          .andExpect(MockMvcResultMatchers.status().isInternalServerError())
+          .andReturn();
+      assertExtensible(result, "fixtures/idm/update-user/ns-db-update-fail.json");
+    } finally {
+      transactionalUserService.setEntityManager(entityManager);
+    }
+
+    verify(cognito, times(0)).adminUpdateUserAttributes(cognitoUpdateAttributesRequest);
+
+    NsUser updatedNsUser =  assertNsUserInDb(USER_ID);
+    assertThat(updatedNsUser.getNotes(), is(OLD_NOTES));
+
+    verify(spySearchService, times(0)).updateUser(any(User.class));
+    verifyDoraCalls(0);
+
     ArgumentCaptor<List<? extends AuditEvent>> captor = ArgumentCaptor.forClass(List.class);
     verify(auditEventService, times(0)).saveAuditEvents(captor.capture());
   }

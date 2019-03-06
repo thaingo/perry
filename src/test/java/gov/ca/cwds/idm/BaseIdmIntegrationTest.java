@@ -28,6 +28,7 @@ import gov.ca.cwds.idm.persistence.ns.repository.NsUserRepository;
 import gov.ca.cwds.idm.persistence.ns.repository.UserLogRepository;
 import gov.ca.cwds.idm.service.IdmServiceImpl;
 import gov.ca.cwds.idm.service.SearchService;
+import gov.ca.cwds.idm.service.TransactionalUserService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.util.CognitoRequestHelper;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
@@ -102,6 +103,9 @@ public abstract class BaseIdmIntegrationTest extends BaseIntegrationTest {
 
   @Autowired
   protected NsUserRepository nsUserRepository;
+
+  @Autowired
+  protected TransactionalUserService transactionalUserService;
 
   protected NsUserRepository spyNsUserRepository;
 
