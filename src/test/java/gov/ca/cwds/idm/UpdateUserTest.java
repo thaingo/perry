@@ -46,6 +46,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.transaction.annotation.Propagation.NOT_SUPPORTED;
 
 import ch.qos.logback.classic.spi.LoggingEvent;
 import com.amazonaws.services.cognitoidp.model.AdminDisableUserRequest;
@@ -165,6 +166,7 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
   }
 
   @Test
+  @Transactional(value = TOKEN_TRANSACTION_MANAGER, propagation = NOT_SUPPORTED)//to turn off class level @Transactional
   @WithMockCustomUser(roles = {STATE_ADMIN})
   public void testUpdateCognitoAttributesFail() throws Exception {
 
@@ -211,6 +213,7 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
   }
 
   @Test
+  @Transactional(value = TOKEN_TRANSACTION_MANAGER, propagation = NOT_SUPPORTED)//to turn off class level @Transactional
   @WithMockCustomUser(roles = {STATE_ADMIN})
   public void testUpdateNsDatabaseFail() throws Exception {
 
