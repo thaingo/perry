@@ -92,7 +92,7 @@ node('dora-slave') {
             def gradlePropsText = """
             perry.health.check.url=http://10.110.12.162:9082/manage/health
             perry.url=${PERRY_URL}
-            perry.username=cwds.perry.test@gmail.com
+            perry.username=donzano123+cap@gmail.com
             perry.password=CWS4kids!
             perry.json={}
             perry.threads.count=1
