@@ -7,4 +7,4 @@ build/
 .project
 bin/
 config/perry-cognito-local.yml
-src/test/resources/scripts/cognito/idm.groovy
+src/test/resources/scripts/cognito/*.groovy
