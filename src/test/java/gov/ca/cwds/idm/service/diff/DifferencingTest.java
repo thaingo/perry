@@ -49,8 +49,11 @@ public class DifferencingTest {
 
   @Test
   public void testNewAreTheSame() {
+    User user = existedUser();
+    user.setEmail("lower.case@email");
+
     UserUpdate userUpdate = new UserUpdate();
-    userUpdate.setEmail(EXISTED_EMAIL.toLowerCase());
+    userUpdate.setEmail("lower.case@email");
     userUpdate.setEnabled(EXISTED_ENABLED);
     userUpdate.setPhoneNumber(EXISTED_PHONE);
     userUpdate.setPhoneExtensionNumber(EXISTED_PHONE_EXTENSION);
@@ -58,8 +61,39 @@ public class DifferencingTest {
     userUpdate.setRoles(EXISTED_ROLES);
     userUpdate.setPermissions(EXISTED_PERMISSIONS);
 
-    UpdateDifference updateDifference = new UpdateDifference(existedUser(), userUpdate);
+    UpdateDifference updateDifference = new UpdateDifference(user, userUpdate);
     assertNoDiffs(updateDifference);
+  }
+
+  @Test
+  public void testEmailsAreTheSame() {
+    User user = existedUser();
+    user.setEmail("lower.case@email");
+
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setEmail("LOWER.CASE@EMAIL");
+
+    UpdateDifference updateDifference = new UpdateDifference(user, userUpdate);
+    assertNoDiffs(updateDifference);
+  }
+
+  @Test
+  public void testEmailChangeCaseToLower() {
+    final String UPPER_CASE_EMAIL = "SOME.USER@EMAIL";
+    final String LOWER_CASE_EMAIL = "some.user@email";
+
+    User user = existedUser();
+    UserUpdate userUpdate = new UserUpdate();
+
+    user.setEmail(UPPER_CASE_EMAIL);
+    userUpdate.setEmail(UPPER_CASE_EMAIL);
+    UpdateDifference updateDifference = new UpdateDifference(user, userUpdate);
+    assertStringDiff(updateDifference.getEmailDiff(), UPPER_CASE_EMAIL, LOWER_CASE_EMAIL);
+
+    user.setEmail(UPPER_CASE_EMAIL);
+    userUpdate.setEmail(LOWER_CASE_EMAIL);
+    updateDifference = new UpdateDifference(user, userUpdate);
+    assertStringDiff(updateDifference.getEmailDiff(), UPPER_CASE_EMAIL, LOWER_CASE_EMAIL);
   }
 
   @Test
@@ -75,7 +109,7 @@ public class DifferencingTest {
 
     UpdateDifference updateDifference = new UpdateDifference(existedUser(), userUpdate);
 
-    assertStringDiff(updateDifference.getEmailDiff(), EXISTED_EMAIL.toLowerCase(), NEW_EMAIL.toLowerCase());
+    assertStringDiff(updateDifference.getEmailDiff(), EXISTED_EMAIL, NEW_EMAIL.toLowerCase());
     assertBooleanDiff(updateDifference.getEnabledDiff(), EXISTED_ENABLED, NEW_ENABLED);
     assertStringDiff(updateDifference.getPhoneNumberDiff(), EXISTED_PHONE, NEW_PHONE);
     assertStringDiff(
