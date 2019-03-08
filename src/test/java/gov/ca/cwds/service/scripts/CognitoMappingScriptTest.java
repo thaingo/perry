@@ -21,7 +21,7 @@ public class CognitoMappingScriptTest {
 
   @Before
   public void before() throws Exception {
-    String path = Paths.get(getClass().getResource("/scripts/cognito/cognito.groovy").toURI()).toString();
+    String path = Paths.get(getClass().getResource("/scripts/cognito.groovy").toURI()).toString();
     idpMappingScript = new IdpMappingScript(path);
   }
 

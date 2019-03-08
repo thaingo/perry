@@ -316,8 +316,8 @@ task integrationTest(type: Test, dependsOn: testClasses) {
 
 task copyConfigToTestResources(type: Copy) {
     from 'config'
-    into 'src/test/resources/scripts/cognito'
-    include 'idm.groovy', 'cognito.groovy'
+    into 'src/test/resources/scripts'
+    include 'idm.groovy', 'cognito.groovy', 'default.groovy'
 }
 
 test.dependsOn copyConfigToTestResources
