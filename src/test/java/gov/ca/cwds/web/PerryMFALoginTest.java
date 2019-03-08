@@ -8,17 +8,23 @@ import static gov.ca.cwds.util.LiquibaseUtils.runLiquibaseScript;
 import static gov.ca.cwds.web.MockOAuth2Service.EXPECTED_SSO_TOKEN;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 import gov.ca.cwds.BaseIntegrationTest;
 import gov.ca.cwds.PerryApplication;
 import gov.ca.cwds.UniversalUserToken;
+import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
+import gov.ca.cwds.idm.service.NsUserService;
 import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.service.sso.OAuth2Service;
 import io.dropwizard.testing.FixtureHelpers;
 import java.util.Collections;
+import java.util.Optional;
 import javax.servlet.http.HttpSession;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -85,10 +92,17 @@ public class PerryMFALoginTest extends BaseIntegrationTest {
   private static final Logger LOGGER = LoggerFactory.getLogger(PerryMFALoginTest.class);
   @Autowired
   private OAuth2Service oAuth2Service;
+  @MockBean
+  private NsUserService nsUserService;
 
   @BeforeClass
   public static void beforeClass() throws Exception {
     runLiquibaseScript(CMS_STORE_URL, "liquibase/cms-data.xml");
+  }
+
+  @Before
+  public void before() {
+    when(nsUserService.findByUsername(any())).thenReturn(Optional.of(new NsUser()));
   }
 
   @Test

@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Profile("idm")
+@Profile({"idm", "mfa"})
 public class NsUserServiceImpl implements NsUserService {
 
   private NsUserRepository nsUserRepository;

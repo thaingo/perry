@@ -2,6 +2,7 @@ package gov.ca.cwds.service.scripts;
 
 import gov.ca.cwds.UniversalUserToken;
 
+import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
 import javax.script.ScriptException;
 import java.io.IOException;
 import java.util.Map;
@@ -11,12 +12,12 @@ import java.util.Map;
  */
 public class IdpMappingScript extends Script {
   public IdpMappingScript(String path) throws IOException {
-    super(path, "universalUserToken", "idpToken");
+    super(path, "universalUserToken", "idpToken", "nsUser");
   }
 
-  public UniversalUserToken map(Map idpToken) throws ScriptException {
+  public UniversalUserToken map(Map idpToken, NsUser nsUser) throws ScriptException {
     UniversalUserToken universalUserToken = new UniversalUserToken();
-    eval(universalUserToken, idpToken);
+    eval(universalUserToken, idpToken, nsUser);
     return universalUserToken;
   }
 }
