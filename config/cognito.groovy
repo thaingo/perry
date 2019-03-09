@@ -1,37 +1,28 @@
-def isMultiValueAttribute = {String name-> ["custom:permission", "custom:role"].find {it.equalsIgnoreCase(name)}}
+import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.*
+import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.*
+import static gov.ca.cwds.util.UniversalUserTokenDeserializer.*
 
-def getValues = {String value ->
-    def result = value?.split('\\s*:\\s*') as HashSet
-    return result ? result : new HashSet<>()
-}
+import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute
 
-def getValue = {String name, String value ->
-    if(isMultiValueAttribute(name)) {
-        return getValues(value)
-    }
-    else {
-        return value
-    }
-}
+def cognitoAttribute = {UserAttribute attr -> idpToken.UserAttributes?.find {it.Name.equalsIgnoreCase(attr.name)}?.Value}
 
-def attribute = {name ->
-    getValue(name, idpToken.UserAttributes?.find {it.Name.equalsIgnoreCase(name)}?.Value)
-}
-
-def racfid = attribute("custom:racfid")?.toUpperCase()?.trim()
+def racfid = nsUser.racfid?.toUpperCase()?.trim()
 
 if(racfid) {
     universalUserToken.userId = racfid
 }
 else {
-    universalUserToken.userId = attribute("email")
+    universalUserToken.userId = cognitoAttribute(EMAIL)
 }
 
-universalUserToken.roles = attribute("custom:role")
-universalUserToken.permissions = attribute("custom:permission")
+universalUserToken.roles = nsUser.roles
+universalUserToken.permissions = nsUser.permissions
 
 idpToken.UserAttributes?.each {
-    universalUserToken.parameters[it.Name.toLowerCase()] = getValue(it.Name, it.Value)
+    universalUserToken.parameters[it.Name.toLowerCase()] = it.Value
 }
 
-universalUserToken.parameters["userName"] = idpToken.Username
+universalUserToken.parameters[USER_NAME] = idpToken.Username
+universalUserToken.parameters[ROLES.name.toLowerCase()] = nsUser.roles
+universalUserToken.parameters[PERMISSIONS.name.toLowerCase()] = nsUser.permissions
+universalUserToken.parameters[PHONE_NUMBER.name.toLowerCase()] = nsUser.phoneNumber

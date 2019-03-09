@@ -1,10 +1,9 @@
 package gov.ca.cwds.service.sso;
 
-import static gov.ca.cwds.service.messages.MessageCode.USER_NOT_FOUND_BY_ID_IN_NS_DATABASE;
-
+import gov.ca.cwds.PerryProperties;
+import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
 import gov.ca.cwds.idm.service.NsUserService;
-import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -17,8 +16,6 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
-import gov.ca.cwds.PerryProperties;
-import gov.ca.cwds.UniversalUserToken;
 
 /**
  * Created by dmitry.rudenko on 7/28/2017.
