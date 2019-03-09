@@ -4,6 +4,7 @@ import gov.ca.cwds.PerryProperties;
 import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
 import gov.ca.cwds.idm.service.NsUserService;
+import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;

@@ -1,10 +1,12 @@
 package gov.ca.cwds.idm.service;
 
 import static gov.ca.cwds.config.TokenServiceConfiguration.TOKEN_TRANSACTION_MANAGER;
+import static gov.ca.cwds.service.messages.MessageCode.USER_NOT_FOUND_BY_ID_IN_NS_DATABASE;
 
 import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
 import gov.ca.cwds.idm.persistence.ns.repository.NsUserRepository;
 import gov.ca.cwds.idm.service.diff.UpdateDifference;
+import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -19,6 +21,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class NsUserServiceImpl implements NsUserService {
 
   private NsUserRepository nsUserRepository;
+
+
+  private ExceptionFactory exceptionFactory;
 
   @Override
   @Transactional(value = TOKEN_TRANSACTION_MANAGER)
@@ -51,7 +56,9 @@ public class NsUserServiceImpl implements NsUserService {
   @Override
   @Transactional(value = TOKEN_TRANSACTION_MANAGER)
   public void saveLastLoginTime(String username, LocalDateTime loginTime) {
-    NsUser nsUser = getOrCreateNewNsUser(username);
+    NsUser nsUser = findByUsername(username).orElseThrow(() ->
+        exceptionFactory
+            .createUserNotFoundException(USER_NOT_FOUND_BY_ID_IN_NS_DATABASE, username));
     nsUser.setLastLoginTime(loginTime);
     nsUserRepository.save(nsUser);
   }
@@ -102,5 +109,10 @@ public class NsUserServiceImpl implements NsUserService {
   @Autowired
   public void setNsUserRepository(NsUserRepository nsUserRepository) {
     this.nsUserRepository = nsUserRepository;
+  }
+
+  @Autowired
+  public void setExceptionFactory(ExceptionFactory exceptionFactory) {
+    this.exceptionFactory = exceptionFactory;
   }
 }
