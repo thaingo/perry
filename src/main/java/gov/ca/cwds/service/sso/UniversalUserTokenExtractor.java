@@ -39,7 +39,8 @@ public class UniversalUserTokenExtractor implements PrincipalExtractor {
 
     String username = (String) userInfo.get(USER_INFO_USERNAME_KEY);
     Optional<NsUser> optNsUser = nsUserService.findByUsername(username);
-    NsUser nsUser = optNsUser.orElseThrow(() -> new AccessDeniedException("No user in NS DB"));
+//    NsUser nsUser = optNsUser.orElseThrow(() -> new AccessDeniedException("No user in NS DB"));
+    NsUser nsUser = optNsUser.orElse(null);
 
     try {
       UniversalUserToken userToken = configuration.getIdentityProvider().getIdpMapping()
