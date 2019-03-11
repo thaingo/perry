@@ -50,7 +50,9 @@ public class AuditEventService {
   @Transactional(TOKEN_TRANSACTION_MANAGER)
   @Async("auditLogTaskExecutor")
   public <T extends AuditEvent> void persistAuditEvent(T auditEvent) {
-    nsAuditEventRepository.save(mapToNsAuditEvent(auditEvent));
+    NsAuditEvent event = mapToNsAuditEvent(auditEvent);
+    event.setProcessed(false);
+    nsAuditEventRepository.save(event);
   }
 
   private <T extends AuditEvent> void sendAuditEventToEsIndex(T event) {
