@@ -66,6 +66,7 @@ public class AuditEventService {
       NsAuditEvent nsAuditEvent = new NsAuditEvent();
       nsAuditEvent.setId(auditEvent.getId());
       nsAuditEvent.setEventTimestamp(auditEvent.getTimestamp());
+      nsAuditEvent.setProcessed(true);
       nsAuditEvent.setAuditEvent(objectMapper.writeValueAsString(auditEvent));
       return nsAuditEvent;
     } catch (JsonProcessingException e) {
