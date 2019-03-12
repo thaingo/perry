@@ -17,6 +17,7 @@ public class AbacPermission implements Permission {
   private Object securedObject;
 
   private static final String SUPPORTED_PERMISSION_PATTERN = "^[^:,*]+:[^:,*]+:[^:,*]+$";
+  private Authorizer authorizer;
   private static final String PARTS_DELIMITER = ":";
 
   public AbacPermission() {

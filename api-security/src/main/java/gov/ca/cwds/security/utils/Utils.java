@@ -5,10 +5,6 @@ package gov.ca.cwds.security.utils;
  */
 public class Utils {
 
-  private UtilsClass() {
-      throw new IllegalStateException("Utility class");
-  }
-
   public static String replaceCRLF(String string) {
     return string.replaceAll("[\\n\\r]", " ");
   }
