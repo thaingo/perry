@@ -43,7 +43,7 @@ public class PerryUserInfoTokenService extends UserInfoTokenServices {
     return new OAuth2Authentication(request, token);
   }
 
-  private List<GrantedAuthority> extractAuthorities(@SuppressWarnings("rawtypes") Map map) {
+  private List<GrantedAuthority> extractAuthorities(@SuppressWarnings("rawtypes") Map) {
     return AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER");
   }
 
