@@ -7,10 +7,6 @@ import javax.ws.rs.client.ClientRequestFilter;
 
 public class SecureClientFactory {
 
-  private ClientFactoryClass() {
-    throw new IllegalStateException("Client Factory class");
-  }
-
   public static Client createSecureClient() {
     Client client = ClientBuilder.newClient();
     client.register((ClientRequestFilter) requestContext -> requestContext.getHeaders()
