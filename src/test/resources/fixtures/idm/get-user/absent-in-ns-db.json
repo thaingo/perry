@@ -1,0 +1,6 @@
+{
+  "status": "NOT_FOUND",
+  "technical_message": "User with id: absentInNsDbUserId is not found in NS database",
+  "user_message": "User with id: absentInNsDbUserId is not found",
+  "error_code": "CAP-072"
+}

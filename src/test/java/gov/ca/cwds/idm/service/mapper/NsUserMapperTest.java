@@ -2,7 +2,7 @@ package gov.ca.cwds.idm.service.mapper;
 
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
-import static gov.ca.cwds.util.Utils.fromDate;
+import static gov.ca.cwds.util.Utils.toLocalDateTime;
 import static gov.ca.cwds.util.Utils.toSet;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -67,7 +67,7 @@ public class NsUserMapperTest {
     assertThat(nsUser.getPhoneExtensionNumber(), is(PHONE_EXTENSION));
     assertThat(nsUser.getFirstName(), is(FIRST_NAME));
     assertThat(nsUser.getLastName(), is(LAST_NAME));
-    assertThat(nsUser.getLastModifiedTime(), is(fromDate(LAST_MODIFIED_TIME)));
+    assertThat(nsUser.getLastModifiedTime(), is(toLocalDateTime(LAST_MODIFIED_TIME)));
 
     Set<String> roles = nsUser.getRoles();
     assertThat(roles, notNullValue());
