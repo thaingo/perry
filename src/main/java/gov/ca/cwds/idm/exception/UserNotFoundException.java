@@ -11,7 +11,7 @@ public class UserNotFoundException extends IdmException {
     super(message, userMessage, errorCode, e);
   }
 
-  public UserNotFoundException(String message, MessageCode errorCode, Throwable e) {
-    super(message, message, errorCode, e);
+  public UserNotFoundException(String message, String userMessage, MessageCode errorCode) {
+    super(message, userMessage, errorCode);
   }
 }

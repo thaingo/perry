@@ -3,6 +3,7 @@ package gov.ca.cwds.idm.service;
 import static gov.ca.cwds.idm.service.IdmServiceImpl.transformSearchValues;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getRACFId;
 import static gov.ca.cwds.service.messages.MessageCode.DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS;
+import static gov.ca.cwds.service.messages.MessageCode.USER_NOT_FOUND_BY_ID_IN_NS_DATABASE;
 import static gov.ca.cwds.util.Utils.isRacfidUser;
 
 import com.amazonaws.services.cognitoidp.model.UserType;
@@ -17,6 +18,7 @@ import gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil;
+import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType;
 import gov.ca.cwds.service.CwsUserInfoService;
 import gov.ca.cwds.service.dto.CwsUserInfo;
@@ -58,14 +60,16 @@ public class UserService {
   @Autowired
   private MappingService mappingService;
 
+  @Autowired
+  private ExceptionFactory exceptionFactory;
 
-  public User getUser(String id) {
-    UserType cognitoUser = cognitoServiceFacade.getCognitoUserById(id);
-    String userId = cognitoUser.getUsername();
-    String racfId = getRACFId(cognitoUser);
-
+  public User getUser(String userId) {
+    NsUser nsUser = nsUserService.findByUsername(userId).orElseThrow(()->
+        exceptionFactory.createUserNotFoundException(USER_NOT_FOUND_BY_ID_IN_NS_DATABASE, userId)
+    );
+    UserType cognitoUser = cognitoServiceFacade.getCognitoUserById(userId);
+    String racfId = nsUser.getRacfid();
     CwsUserInfo cwsUser = cwsUserInfoService.getCwsUserByRacfId(racfId);
-    NsUser nsUser = nsUserService.findByUsername(userId).orElse(null);
 
     return mappingService.toUser(cognitoUser, cwsUser, nsUser);
   }
@@ -132,6 +136,7 @@ public class UserService {
     Map<String, NsUser> usernameToNsUser =
         nsUserService.findByUsernames(userNames).stream()
             .collect(Collectors.toMap(NsUser::getUsername, e -> e));
+
     return cognitoUsers
         .stream()
         .map(userType -> mappingService.toUser(
