@@ -9,6 +9,10 @@
       "Value": "true"
     },
     {
+      "Name": "preferred_username",
+      "Value": "RACFID"
+    },
+    {
       "Name": "nickname",
       "Value": "perry"
     },

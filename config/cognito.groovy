@@ -17,14 +17,13 @@ racfid = racfid?.toUpperCase()?.trim()
 
 if(racfid) {
     universalUserToken.userId = racfid
-}
-else {
+} else {
     universalUserToken.userId = cognitoAttribute(EMAIL)
 }
 
 if(nsUser) {
-    universalUserToken.roles = nsUser.roles
-    universalUserToken.permissions = nsUser.permissions
+    universalUserToken.roles = nsUser?.roles
+    universalUserToken.permissions = nsUser?.permissions
 }
 
 idpToken.UserAttributes?.each {
@@ -32,8 +31,6 @@ idpToken.UserAttributes?.each {
 }
 
 universalUserToken.parameters[USER_NAME] = idpToken.Username
-if(nsUser) {
-    universalUserToken.parameters[ROLES.name.toLowerCase()] = nsUser.roles
-    universalUserToken.parameters[PERMISSIONS.name.toLowerCase()] = nsUser.permissions
-    universalUserToken.parameters[PHONE_NUMBER.name.toLowerCase()] = nsUser.phoneNumber
-}
+universalUserToken.parameters[ROLES.name.toLowerCase()] = nsUser ? nsUser.roles : [] as Set
+universalUserToken.parameters[PERMISSIONS.name.toLowerCase()] = nsUser ? nsUser.permissions : [] as Set
+universalUserToken.parameters[PHONE_NUMBER.name.toLowerCase()] = nsUser?.phoneNumber

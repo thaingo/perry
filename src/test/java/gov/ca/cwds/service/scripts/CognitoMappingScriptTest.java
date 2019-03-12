@@ -72,4 +72,27 @@ public class CognitoMappingScriptTest {
     Assert.assertNull(userToken.getParameter("custom:office"));
     Assert.assertEquals("19161111111", userToken.getParameter("phone_number"));
   }
+
+  @Test
+  public void testNoNsUser() throws Exception {
+    Map userInfo =  new ObjectMapper()
+        .readValue(getClass().getResourceAsStream("/scripts/cognito/cognito.json"), Map.class);
+
+    UniversalUserToken userToken = idpMappingScript.map(userInfo, null);
+
+    Assert.assertEquals("RACFID", userToken.getUserId());
+    Assert.assertTrue(userToken.getRoles().isEmpty());
+    Assert.assertTrue(userToken.getPermissions().isEmpty());
+    assertEmptySetParameter(userToken, "custom:role");
+    assertEmptySetParameter(userToken, "custom:permission");
+    Assert.assertEquals("perry", userToken.getParameter("userName"));
+    Assert.assertEquals("17", userToken.getParameter("custom:office"));
+    Assert.assertNull(userToken.getParameter("phone_number"));
+  }
+
+  private void assertEmptySetParameter(UniversalUserToken userToken, String name) {
+    Object value = userToken.getParameter(name);
+    Assert.assertTrue(value instanceof Set);
+    Assert.assertTrue(((Set) value).isEmpty());
+  }
 }
