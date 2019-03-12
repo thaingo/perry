@@ -37,6 +37,7 @@ public class CognitoMappingScriptTest {
     nsUser.setRoles(toSet("first-role", "second-role", "third-role"));
     nsUser.setPermissions(toSet("first-permission", "second-permission", "third-permission"));
     nsUser.setPhoneNumber("19161111111");
+    nsUser.setPhoneExtensionNumber("123");
     nsUser.setFirstName("nsFirstName");
     nsUser.setLastName("nsLastName");
 
@@ -51,11 +52,10 @@ public class CognitoMappingScriptTest {
         "first-permission",
         "second-permission",
         "third-permission")), userToken.getPermissions());
-    Assert.assertTrue(userToken.getParameter("custom:permission") instanceof Set);
-    Assert.assertTrue(userToken.getParameter("custom:role") instanceof Set);
+    Assert.assertEquals("some.email@gmail.com", userToken.getParameter("email"));
     Assert.assertEquals("perry", userToken.getParameter("userName"));
     Assert.assertEquals("17", userToken.getParameter("custom:office"));
-    Assert.assertEquals("19161111111", userToken.getParameter("phone_number"));
+    Assert.assertEquals("Butte", userToken.getParameter("custom:county"));
     Assert.assertEquals("nsFirstName", userToken.getParameter("given_name"));
     Assert.assertEquals("nsLastName", userToken.getParameter("family_name"));
   }
@@ -72,9 +72,9 @@ public class CognitoMappingScriptTest {
 
     Assert.assertEquals("some.email@gmail.com", userToken.getUserId());
     Assert.assertTrue(userToken.getRoles().isEmpty());
+    Assert.assertEquals("some.email@gmail.com", userToken.getParameter("email"));
     Assert.assertEquals("perry", userToken.getParameter("userName"));
     Assert.assertNull(userToken.getParameter("custom:office"));
-    Assert.assertEquals("19161111111", userToken.getParameter("phone_number"));
   }
 
   @Test
@@ -87,18 +87,11 @@ public class CognitoMappingScriptTest {
     Assert.assertEquals("RACFID", userToken.getUserId());
     Assert.assertTrue(userToken.getRoles().isEmpty());
     Assert.assertTrue(userToken.getPermissions().isEmpty());
-    assertEmptySetParameter(userToken, "custom:role");
-    assertEmptySetParameter(userToken, "custom:permission");
+    Assert.assertEquals("some.email@gmail.com", userToken.getParameter("email"));
     Assert.assertEquals("perry", userToken.getParameter("userName"));
     Assert.assertEquals("17", userToken.getParameter("custom:office"));
+    Assert.assertEquals("Butte", userToken.getParameter("custom:county"));
     Assert.assertEquals("cognitoFirstName", userToken.getParameter("given_name"));
     Assert.assertEquals("cognitoLastName", userToken.getParameter("family_name"));
-    Assert.assertNull(userToken.getParameter("phone_number"));
-  }
-
-  private void assertEmptySetParameter(UniversalUserToken userToken, String name) {
-    Object value = userToken.getParameter(name);
-    Assert.assertTrue(value instanceof Set);
-    Assert.assertTrue(((Set) value).isEmpty());
   }
 }

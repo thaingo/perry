@@ -35,11 +35,4 @@ universalUserToken.parameters[USER_NAME] = idpToken.Username
 if(nsUser) {
     universalUserToken.parameters[FIRST_NAME.name] = nsUser.firstName
     universalUserToken.parameters[LAST_NAME.name] = nsUser.lastName
-    universalUserToken.parameters[PHONE_NUMBER.name] = nsUser.phoneNumber
-    universalUserToken.parameters[ROLES.name.toLowerCase()] = nsUser.roles
-    universalUserToken.parameters[PERMISSIONS.name.toLowerCase()] = nsUser.permissions
-} else {
-    universalUserToken.parameters[ROLES.name.toLowerCase()] = [] as Set
-    universalUserToken.parameters[PERMISSIONS.name.toLowerCase()] = [] as Set
 }
-
