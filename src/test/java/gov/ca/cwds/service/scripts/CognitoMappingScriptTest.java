@@ -37,6 +37,8 @@ public class CognitoMappingScriptTest {
     nsUser.setRoles(toSet("first-role", "second-role", "third-role"));
     nsUser.setPermissions(toSet("first-permission", "second-permission", "third-permission"));
     nsUser.setPhoneNumber("19161111111");
+    nsUser.setFirstName("nsFirstName");
+    nsUser.setLastName("nsLastName");
 
     UniversalUserToken userToken = idpMappingScript.map(userInfo, nsUser);
 
@@ -54,6 +56,8 @@ public class CognitoMappingScriptTest {
     Assert.assertEquals("perry", userToken.getParameter("userName"));
     Assert.assertEquals("17", userToken.getParameter("custom:office"));
     Assert.assertEquals("19161111111", userToken.getParameter("phone_number"));
+    Assert.assertEquals("nsFirstName", userToken.getParameter("given_name"));
+    Assert.assertEquals("nsLastName", userToken.getParameter("family_name"));
   }
 
   @Test
@@ -87,6 +91,8 @@ public class CognitoMappingScriptTest {
     assertEmptySetParameter(userToken, "custom:permission");
     Assert.assertEquals("perry", userToken.getParameter("userName"));
     Assert.assertEquals("17", userToken.getParameter("custom:office"));
+    Assert.assertEquals("cognitoFirstName", userToken.getParameter("given_name"));
+    Assert.assertEquals("cognitoLastName", userToken.getParameter("family_name"));
     Assert.assertNull(userToken.getParameter("phone_number"));
   }
 

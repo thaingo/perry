@@ -17,6 +17,14 @@
       "Value": "perry"
     },
     {
+      "Name": "given_name",
+      "Value": "cognitoFirstName"
+    },
+    {
+      "Name": "family_name",
+      "Value": "cognitoLastName"
+    },
+    {
       "Name": "custom:Office",
       "Value": "17"
     }
