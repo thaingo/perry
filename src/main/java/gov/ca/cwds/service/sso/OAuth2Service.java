@@ -18,8 +18,6 @@ import java.util.Map;
 import java.util.Optional;
 import javax.annotation.PostConstruct;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.ResourceServerProperties;
@@ -44,7 +42,6 @@ import org.springframework.web.client.RestTemplate;
 @Profile("prod")
 public class OAuth2Service implements SsoService {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(OAuth2Service.class);
 
   private OAuth2ProtectedResourceDetails resourceDetails;
   private OAuth2RestTemplate clientTemplate;
