@@ -75,6 +75,8 @@ public final class UserAuthorization {
    * @param unitAuthority the unitAuthority
    * @param cwsOffice the cwsOffice
    */
+
+  @SuppressWarnings({"squid:S00107"})
   public UserAuthorization(@JsonProperty("user_id") String userId,
       @JsonProperty("social_worker") Boolean socialWorker,
       @JsonProperty("supervisor") Boolean supervisor,

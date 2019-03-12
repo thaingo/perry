@@ -157,6 +157,8 @@ public class CwsOffice extends CmsPersistentObject {
    * @param locationCountyType the locationCountyType
    * @param directorsNameTitle the directorsNameTitle
    */
+
+  @SuppressWarnings({"squid:S00107"})
   public CwsOffice(String officeId, Long faxNumber, String geographicRegionTextCode,
       Short governmentEntityType, String headquarterIndicator, String inactiveIndicator,
       String mailStopDescription, Long messagePhoneNumber,
