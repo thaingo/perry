@@ -31,7 +31,7 @@ public class SmokeTest {
       try {
         return restTemplate.getForObject(url, String.class);
       } catch (Exception e) {
-        Thread.sleep(RETRY_TIMEOUT);
+        await().atMost(RETRY_TIMEOUT);
       }
     }
     throw new Exception("CAN'T CONNECT TO: " + url);

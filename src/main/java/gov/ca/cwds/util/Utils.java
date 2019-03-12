@@ -135,6 +135,7 @@ public class Utils {
     try {
       return formatter.parse(date);
     } catch (ParseException ignored) {
+      //Ignoring parseException
     }
     return null;
   }

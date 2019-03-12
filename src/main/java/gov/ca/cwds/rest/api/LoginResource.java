@@ -67,6 +67,7 @@ public class LoginResource {
     this.whiteList = whiteList;
   }
 
+  @Override
   protected String addAccessCode(String callback, String accessCode) throws Exception {
     return new URIBuilder(callback)
         .setParameter("accessCode", accessCode)

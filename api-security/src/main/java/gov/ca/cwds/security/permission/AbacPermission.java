@@ -15,7 +15,6 @@ import java.util.Optional;
 
 public class AbacPermission implements Permission {
   private Object securedObject;
-  private Authorizer authorizer;
 
   private static final String SUPPORTED_PERMISSION_PATTERN = "^[^:,*]+:[^:,*]+:[^:,*]+$";
   private static final String PARTS_DELIMITER = ":";
