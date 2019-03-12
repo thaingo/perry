@@ -4,7 +4,6 @@ import gov.ca.cwds.PerryProperties;
 import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
 import gov.ca.cwds.idm.service.NsUserService;
-import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -15,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.PrincipalExtractor;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 /**
@@ -39,8 +37,13 @@ public class UniversalUserTokenExtractor implements PrincipalExtractor {
 
     String username = (String) userInfo.get(USER_INFO_USERNAME_KEY);
     Optional<NsUser> optNsUser = nsUserService.findByUsername(username);
-//    NsUser nsUser = optNsUser.orElseThrow(() -> new AccessDeniedException("No user in NS DB"));
-    NsUser nsUser = optNsUser.orElse(null);
+
+    NsUser nsUser = optNsUser.orElseGet(() -> {
+      LOGGER.error(
+          "Data for the user with username:{} is not found in NS database, user will not be authorized for any operation",
+          username);
+      return null;
+    });
 
     try {
       UniversalUserToken userToken = configuration.getIdentityProvider().getIdpMapping()
