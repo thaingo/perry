@@ -25,9 +25,17 @@ public class ExceptionFactory {
     return createExceptionWithCause(IdmException::new, cause, messageCode, args);
   }
 
+  public IdmException createIdmException(MessageCode messageCode, String... args) {
+    return createException(IdmException::new, messageCode, args);
+  }
+
   public UserNotFoundException createUserNotFoundException(MessageCode messageCode, Throwable cause,
       String... args) {
     return createExceptionWithCause(UserNotFoundException::new, cause, messageCode, args);
+  }
+
+  public UserNotFoundException createUserNotFoundException(MessageCode messageCode, String... args) {
+    return createException(UserNotFoundException::new, messageCode, args);
   }
 
   public UserAlreadyExistsException createUserAlreadyExistsException(MessageCode messageCode,

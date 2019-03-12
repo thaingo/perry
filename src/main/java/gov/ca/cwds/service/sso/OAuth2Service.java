@@ -1,7 +1,7 @@
 package gov.ca.cwds.service.sso;
 
 import static gov.ca.cwds.util.Utils.deserialize;
-import static gov.ca.cwds.util.Utils.fromDate;
+import static gov.ca.cwds.util.Utils.toLocalDateTime;
 
 import gov.ca.cwds.PerryProperties;
 import gov.ca.cwds.data.reissue.model.PerryTokenEntity;
@@ -113,7 +113,7 @@ public class OAuth2Service implements SsoService {
     if (perryTokenEntity.getLastIdpValidateTime() == null) {
       return false;
     }
-    LocalDateTime lastIdpValidateTime = fromDate(perryTokenEntity.getLastIdpValidateTime());
+    LocalDateTime lastIdpValidateTime = toLocalDateTime(perryTokenEntity.getLastIdpValidateTime());
     return lastIdpValidateTime
         .plusSeconds(properties.getIdpValidateInterval())
         .isAfter(LocalDateTime.now())

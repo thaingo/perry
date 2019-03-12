@@ -61,6 +61,10 @@ public final class TestUtils {
     return LocalDateTime.ofInstant(Instant.ofEpochMilli(millis), ZoneId.systemDefault());
   }
 
+  public static long toMillis(LocalDateTime ldt) {
+    return ldt.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+  }
+
   public static String generateId() {
     return UUID.randomUUID().toString();
   }
