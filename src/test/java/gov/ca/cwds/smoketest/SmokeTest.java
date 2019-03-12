@@ -24,6 +24,7 @@ public class SmokeTest {
     }
   }
 
+  @SuppressWarnings({"squid:S2925"})
   private String getHealth(RestTemplate restTemplate) throws Exception {
     String url = System.getProperty("perry.health.check.url");
     long endTime = System.currentTimeMillis() + RETRY_PERIOD;
@@ -31,7 +32,7 @@ public class SmokeTest {
       try {
         return restTemplate.getForObject(url, String.class);
       } catch (Exception e) {
-        await().atMost(RETRY_TIMEOUT);
+        Thread.sleep(RETRY_TIMEOUT);
       }
     }
     throw new Exception("CAN'T CONNECT TO: " + url);
