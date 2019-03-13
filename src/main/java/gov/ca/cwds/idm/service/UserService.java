@@ -135,7 +135,14 @@ public class UserService {
 
     return cognitoUsers
         .stream()
-        .filter(e -> usernameToNsUser.containsKey(e.getUsername()))
+        .filter(userType -> {
+          boolean foundInNsDb = usernameToNsUser.containsKey(userType.getUsername());
+          if (!foundInNsDb) {
+            LOGGER.error("User with username {} is not found in NS database",
+                userType.getUsername());
+          }
+          return foundInNsDb;
+        })
         .map(userType -> mappingService.toUser(
             userType,
             racfidToCmsUser.get(userNameToRacfId.get(userType.getUsername())),
