@@ -7,6 +7,9 @@ import gov.ca.cwds.data.persistence.auth.CmsUserAuthPrivilege;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 /**
  * Class representing a Staff Person Authority Privilege.
  *
@@ -103,93 +106,14 @@ public class StaffAuthorityPrivilege {
     return county;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see java.lang.Object#hashCode()
-   */
   @Override
-  public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((authPrivilegeCode == null) ? 0 : authPrivilegeCode.hashCode());
-    result =
-        prime * result + ((authPrivilegeCodeDesc == null) ? 0 : authPrivilegeCodeDesc.hashCode());
-    result = prime * result + ((authPrivilegeType == null) ? 0 : authPrivilegeType.hashCode());
-    result =
-        prime * result + ((authPrivilegeTypeDesc == null) ? 0 : authPrivilegeTypeDesc.hashCode());
-    result = prime * result + ((county == null) ? 0 : county.hashCode());
-    result = prime * result + ((endDate == null) ? 0 : endDate.hashCode());
-    result = prime * result + ((countyCode == null) ? 0 : countyCode.hashCode());
-    return result;
+  public boolean equals(Object o) {
+    return EqualsBuilder.reflectionEquals(this, o);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see java.lang.Object#equals(java.lang.Object)
-   */
   @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
-      return false;
-    }
-    StaffAuthorityPrivilege other = (StaffAuthorityPrivilege) obj;
-    if (authPrivilegeCode == null) {
-      if (other.authPrivilegeCode != null) {
-        return false;
-      }
-    } else if (!authPrivilegeCode.equals(other.authPrivilegeCode)) {
-      return false;
-    }
-    if (authPrivilegeCodeDesc == null) {
-      if (other.authPrivilegeCodeDesc != null) {
-        return false;
-      }
-    } else if (!authPrivilegeCodeDesc.equals(other.authPrivilegeCodeDesc)) {
-      return false;
-    }
-    if (authPrivilegeType == null) {
-      if (other.authPrivilegeType != null) {
-        return false;
-      }
-    } else if (!authPrivilegeType.equals(other.authPrivilegeType)) {
-      return false;
-    }
-    if (authPrivilegeTypeDesc == null) {
-      if (other.authPrivilegeTypeDesc != null) {
-        return false;
-      }
-    } else if (!authPrivilegeTypeDesc.equals(other.authPrivilegeTypeDesc)) {
-      return false;
-    }
-    if (county == null) {
-      if (other.county != null) {
-        return false;
-      }
-    } else if (!county.equals(other.county)) {
-      return false;
-    }
-    if (endDate == null) {
-      if (other.endDate != null) {
-        return false;
-      }
-    } else if (!endDate.equals(other.endDate)) {
-      return false;
-    }
-    if (countyCode == null) {
-      if (other.countyCode != null) {
-        return false;
-      }
-    } else if (!countyCode.equals(other.countyCode)) {
-      return false;
-    }
-    return true;
+  public int hashCode() {
+    return HashCodeBuilder.reflectionHashCode(this);
   }
+
 }
