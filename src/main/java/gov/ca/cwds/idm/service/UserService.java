@@ -139,6 +139,7 @@ public class UserService {
 
     return cognitoUsers
         .stream()
+        .filter(e -> usernameToNsUser.containsKey(e.getUsername()))
         .map(userType -> mappingService.toUser(
             userType,
             racfidToCmsUser.get(userNameToRacfId.get(userType.getUsername())),
