@@ -16,6 +16,7 @@ import org.codehaus.jackson.map.annotate.JsonDeserialize;
 /**
  * Created by dmitry.rudenko on 7/28/2017.
  */
+@SuppressWarnings("squid:S1948")
 @JsonDeserialize(using = UniversalUserTokenDeserializer.class)
 public class UniversalUserToken implements RolesHolder, Serializable {
 
