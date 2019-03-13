@@ -5,8 +5,10 @@ package gov.ca.cwds.service.mfa.model;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
+import java.io.Serializable;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AuthParameters {
+public class AuthParameters implements Serializable{
 
     @JsonProperty("REFRESH_TOKEN")
     private String refreshToken;

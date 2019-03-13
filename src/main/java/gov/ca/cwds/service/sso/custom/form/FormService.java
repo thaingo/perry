@@ -21,12 +21,12 @@ public class FormService implements SsoService {
 
   @Override
   public void validate(PerryTokenEntity perryTokenEntity) {
-
+    //empty method
   }
 
   @Override
   public void invalidate(String ssoToken) {
-
+    //empty method
   }
 
   @Override
