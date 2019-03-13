@@ -164,8 +164,7 @@ public class Utils {
     return StringUtil.isBlank(str)? null : str;
   }
 
-  public static Set<String> applyFunctionToValues(Set<String> values,
-      Function<String, String> function) {
+  public static <T, R> Set<R> applyFunctionToValues(Collection<T> values, Function<T, R> function) {
     return values.stream().map(function).collect(Collectors.toSet());
   }
 }

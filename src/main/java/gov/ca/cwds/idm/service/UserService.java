@@ -161,7 +161,7 @@ public class UserService {
     if (CollectionUtils.isEmpty(nsUsers)) {
       return Collections.emptyList();
     }
-    Set<String> racfIds = nsUsers.stream().map(NsUser::getRacfid).collect(Collectors.toSet());
+    Set<String> racfIds = applyFunctionToValues(nsUsers, NsUser::getRacfid);
 
     Map<String, CwsUserInfo> racfidToCmsUser = getRacfidToCmsUserMap(racfIds);
 
