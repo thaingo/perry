@@ -4,8 +4,10 @@ package gov.ca.cwds.service.mfa.model;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
+import java.io.Serializable;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AuthenticationResult {
+public class AuthenticationResult implements Serializable{
 
     @JsonProperty("AccessToken")
     private String accessToken;

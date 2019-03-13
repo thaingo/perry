@@ -7,6 +7,8 @@ import gov.ca.cwds.data.persistence.auth.CwsOffice;
 import gov.ca.cwds.data.persistence.auth.StaffPerson;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import java.util.Set;
 
 /**
@@ -160,110 +162,15 @@ public final class UserAuthorization {
     this.hasAssignment = hasAssignment;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see java.lang.Object#hashCode()
-   */
+  @Override
+  public boolean equals(Object o) {
+    return EqualsBuilder.reflectionEquals(this, o);
+  }
+
   @Override
   public int hashCode() {
-    final int prime = 31;
-    int result = 1;
-    result = prime * result + ((authorityPrivilege == null) ? 0 : authorityPrivilege.hashCode());
-    result = prime * result + ((cwsOffice == null) ? 0 : cwsOffice.hashCode());
-    result = prime * result + ((overrideAuthority == null) ? 0 : overrideAuthority.hashCode());
-    result = prime * result + ((socialWorker == null) ? 0 : socialWorker.hashCode());
-    result = prime * result + ((supervisor == null) ? 0 : supervisor.hashCode());
-    result = prime * result + ((unitAuthority == null) ? 0 : unitAuthority.hashCode());
-    result = prime * result + ((userId == null) ? 0 : userId.hashCode());
-    result = prime * result + ((staffPerson == null) ? 0 : staffPerson.hashCode());
-    result = prime * result + ((hasAssignment == null) ? 0 : hasAssignment.hashCode());
-    return result;
+    return HashCodeBuilder.reflectionHashCode(this);
   }
-
-  /*
-   * (non-Javadoc)
-   *
-   * @see java.lang.Object#equals(java.lang.Object)
-   */
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    }
-    if (obj == null) {
-      return false;
-    }
-    if (getClass() != obj.getClass()) {
-      return false;
-    }
-    UserAuthorization other = (UserAuthorization) obj;
-    if (authorityPrivilege == null) {
-      if (other.authorityPrivilege != null) {
-        return false;
-      }
-    } else if (!authorityPrivilege.equals(other.authorityPrivilege)) {
-      return false;
-    }
-    if (cwsOffice == null) {
-      if (other.cwsOffice != null) {
-        return false;
-      }
-    } else if (!cwsOffice.equals(other.cwsOffice)) {
-      return false;
-    }
-    if (overrideAuthority == null) {
-      if (other.overrideAuthority != null) {
-        return false;
-      }
-    } else if (!overrideAuthority.equals(other.overrideAuthority)) {
-      return false;
-    }
-    if (socialWorker == null) {
-      if (other.socialWorker != null) {
-        return false;
-      }
-    } else if (!socialWorker.equals(other.socialWorker)) {
-      return false;
-    }
-    if (supervisor == null) {
-      if (other.supervisor != null) {
-        return false;
-      }
-    } else if (!supervisor.equals(other.supervisor)) {
-      return false;
-    }
-    if (unitAuthority == null) {
-      if (other.unitAuthority != null) {
-        return false;
-      }
-    } else if (!unitAuthority.equals(other.unitAuthority)) {
-      return false;
-    }
-    if (userId == null) {
-      if (other.userId != null) {
-        return false;
-      }
-    } else if (!userId.equals(other.userId)) {
-      return false;
-    }
-    if (staffPerson == null) {
-      if (other.staffPerson != null) {
-        return false;
-      }
-    } else if (!staffPerson.equals(other.staffPerson)) {
-      return false;
-    }
-    if (hasAssignment == null) {
-      if (other.hasAssignment != null) {
-        return false;
-      }
-    } else if (!hasAssignment.equals(other.hasAssignment)) {
-      return false;
-    }
-    return true;
-  }
-
 
   public static final class UserAuthorizationBuilder {
 
