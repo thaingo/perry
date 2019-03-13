@@ -19,6 +19,11 @@ import org.springframework.session.data.redis.config.annotation.web.http.EnableR
 @EnableSpringHttpSession
 @Configuration
 public class RedisConfiguration {
+
+  private RedisConfiguration() {
+    throw new IllegalStateException("Redis Configuration");
+  }
+
   @Bean
   public static ConfigureRedisAction configureRedisAction() {
     return ConfigureRedisAction.NO_OP;

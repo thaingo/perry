@@ -24,6 +24,7 @@ public class SmokeTest {
     }
   }
 
+  @SuppressWarnings({"squid:S2925"})
   private String getHealth(RestTemplate restTemplate) throws Exception {
     String url = System.getProperty("perry.health.check.url");
     long endTime = System.currentTimeMillis() + RETRY_PERIOD;
