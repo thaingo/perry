@@ -6,13 +6,8 @@ import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.SUPER_ADMIN;
-import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PERMISSIONS;
-import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PHONE_EXTENSION;
-import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.ROLES;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL_VERIFIED;
-import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.PHONE_NUMBER;
-import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.createPermissionsAttribute;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.INACTIVE_USER_WITH_ACTIVE_RACFID_IN_CMS;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.INACTIVE_USER_WITH_NO_ACTIVE_RACFID_IN_CMS;
@@ -93,7 +88,7 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
   @WithMockCustomUser(roles = {STATE_ADMIN})
   public void testUpdateUser() throws Exception {
 
-    final String NEW_EMAIL = "newmail@mail.com";
+    final String NEW_EMAIL = "error.mail@mail.com";
     final String NEW_PHONE = "6889228010";
     final String NEW_PHONE_EXTENSION = "123";
     final String NEW_NOTES = "New notes text";
@@ -114,11 +109,7 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
         setUpdateUserAttributesRequestAndResult(
             USER_NO_RACFID_ID,
             attr(EMAIL, NEW_EMAIL),
-            attr(EMAIL_VERIFIED, "True"),
-            attr(PHONE_NUMBER, "+" + NEW_PHONE),
-            attr(PHONE_EXTENSION, NEW_PHONE_EXTENSION),
-            attr(PERMISSIONS, "RFA-rollout:Hotline-rollout"),
-            attr(ROLES, "Office-admin:CWS-worker")
+            attr(EMAIL_VERIFIED, "True")
         );
 
     AdminDisableUserRequest disableUserRequest = setDisableUserRequestAndResult(USER_NO_RACFID_ID);
@@ -398,11 +389,14 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
 
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setEnabled(Boolean.FALSE);
-    userUpdate.setPermissions(toSet("RFA-rollout", "Hotline-rollout"));
+    userUpdate.setEmail("new@gmail.com");
 
     AdminUpdateUserAttributesRequest updateAttributesRequest =
         setUpdateUserAttributesRequestAndResult(
-            USER_WITH_RACFID_ID, attr(PERMISSIONS, "RFA-rollout:Hotline-rollout"));
+            USER_WITH_RACFID_ID,
+            attr(EMAIL, "new@gmail.com"),
+            attr(EMAIL_VERIFIED, "True")
+        );
 
     AdminDisableUserRequest disableUserRequest = setDisableUserRequestAndResult(
         USER_WITH_RACFID_ID);
@@ -420,9 +414,6 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
 
     verify(cognito, times(1)).adminUpdateUserAttributes(updateAttributesRequest);
     verify(cognito, times(1)).adminDisableUser(disableUserRequest);
-
-    NsUser updatedNsUser =  assertNsUserInDb(USER_WITH_RACFID_ID);
-    assertThat(updatedNsUser.getPermissions(), equalTo(toSet("RFA-rollout", "Hotline-rollout")));
 
     verify(spySearchService, times(1)).updateUser(any(User.class));
     verifyDoraCalls(DORA_WS_MAX_ATTEMPTS);
@@ -448,12 +439,14 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
 
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setEnabled(Boolean.FALSE);
-    userUpdate.setPermissions(toSet("RFA-rollout", "Hotline-rollout"));
+    userUpdate.setEmail("new@gmail.com");
 
     AdminUpdateUserAttributesRequest updateAttributesRequest =
         setUpdateUserAttributesRequestAndResult(
             USER_WITH_RACFID_AND_DB_DATA_ID,
-            attr(PERMISSIONS, "RFA-rollout:Hotline-rollout"));
+            attr(EMAIL, "new@gmail.com"),
+            attr(EMAIL_VERIFIED, "True")
+        );
 
     setDoraSuccess();
 
@@ -473,9 +466,6 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
 
     verify(cognito, times(1)).adminUpdateUserAttributes(updateAttributesRequest);
     verify(cognito, times(1)).adminDisableUser(disableUserRequest);
-
-    NsUser updatedNsUser =  assertNsUserInDb(USER_WITH_RACFID_AND_DB_DATA_ID);
-    assertThat(updatedNsUser.getPermissions(), equalTo(toSet("RFA-rollout", "Hotline-rollout")));
 
     verify(spySearchService, times(1)).updateUser(any(User.class));
     verifyDoraCalls(1);
@@ -739,11 +729,6 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setPermissions(permissions);
 
-    setUpdateUserAttributesRequestAndResult(
-        userId,
-        createPermissionsAttribute(permissions)
-    );
-
     assertSuccessfulUpdate(userId, userUpdate);
   }
 
@@ -785,11 +770,7 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
         setUpdateUserAttributesRequestAndResult(
             userId,
             attr(EMAIL, "garcia@gmail.com"),
-            attr(EMAIL_VERIFIED, "True"),
-            attr(PHONE_NUMBER, "+4646888777"),
-            attr(PHONE_EXTENSION, "7"),
-            attr(PERMISSIONS, "Hotline-rollout"),
-            attr(ROLES, "CWS-worker")
+            attr(EMAIL_VERIFIED, "True")
         );
 
    AdminEnableUserRequest enableUserRequest = setEnableUserRequestAndResult(userId);

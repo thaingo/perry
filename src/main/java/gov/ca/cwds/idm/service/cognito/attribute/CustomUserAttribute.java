@@ -1,13 +1,8 @@
 package gov.ca.cwds.idm.service.cognito.attribute;
 
 public enum CustomUserAttribute implements UserAttribute {
-  PERMISSIONS("custom:Permission"),
-  ROLES("custom:Role"),
   OFFICE("custom:Office"),
   COUNTY("custom:County"),
-  RACFID_CUSTOM("custom:RACFID"),
-  RACFID_CUSTOM_2("custom:RACFId"),
-  PHONE_EXTENSION("custom:PhoneExtension"),
   IS_LOCKED("custom:accountLocked"),
   MAX_LOGIN_ATTEMPTS("custom:numLoginAttempts");
 
