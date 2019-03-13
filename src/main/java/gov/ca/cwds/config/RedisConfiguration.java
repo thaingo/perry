@@ -12,6 +12,7 @@ import org.springframework.session.data.redis.config.annotation.web.http.EnableR
 /**
  * Created by TPT2 on 12/7/2017.
  */
+@SuppressWarnings({"squid:S1118"}) //spring configuration class needs default constructor
 @Profile("redis")
 @ImportAutoConfiguration(classes = {
     RedisAutoConfiguration.class})
@@ -19,10 +20,6 @@ import org.springframework.session.data.redis.config.annotation.web.http.EnableR
 @EnableSpringHttpSession
 @Configuration
 public class RedisConfiguration {
-
-  private RedisConfiguration() {
-    throw new IllegalStateException("Redis Configuration");
-  }
 
   @Bean
   public static ConfigureRedisAction configureRedisAction() {
