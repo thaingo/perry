@@ -3,8 +3,6 @@ package gov.ca.cwds.service.sso;
 import java.util.Map;
 import java.util.UUID;
 import javax.script.ScriptException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.PrincipalExtractor;
 import org.springframework.context.annotation.Primary;
@@ -21,11 +19,10 @@ import gov.ca.cwds.UniversalUserToken;
 @Profile({"prod"})
 public class UniversalUserTokenExtractor implements PrincipalExtractor {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(UniversalUserTokenExtractor.class);
-
   private PerryProperties configuration;
 
   @Override
+  @SuppressWarnings("squid:S00112")
   public UniversalUserToken extractPrincipal(Map<String, Object> map) {
     try {
       UniversalUserToken userToken = configuration.getIdentityProvider().getIdpMapping().map(map);
