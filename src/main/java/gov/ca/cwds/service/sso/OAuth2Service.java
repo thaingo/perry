@@ -161,6 +161,7 @@ public class OAuth2Service implements SsoService {
       }
       return null;
     } catch (Exception e) {
+      LOGGER.error(e.getMessage(), e);
       return null;
     }
   }

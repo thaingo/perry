@@ -79,6 +79,8 @@ public class StaffAuthorityPrivilege extends CmsPersistentObject {
    * @param startDate The startDate
    * @param startTime The startTime
    */
+
+  @SuppressWarnings({"squid:S00107"})
   public StaffAuthorityPrivilege(
       String countySpecificCode,
       LocalDate endDate,

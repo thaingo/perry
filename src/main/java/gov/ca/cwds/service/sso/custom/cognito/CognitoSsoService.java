@@ -28,6 +28,7 @@ public class CognitoSsoService extends OAuth2Service {
   private CognitoResponseService cognitoResponseService;
   private RestTemplate restTemplate = new RestTemplate();
 
+  @Override
   protected Optional<PerryTokenEntity> validateIdp(
       PerryTokenEntity perryTokenEntity,
       OAuth2ClientContext oAuth2ClientContext) {

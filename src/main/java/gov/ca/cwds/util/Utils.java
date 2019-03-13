@@ -66,7 +66,7 @@ public class Utils {
     }
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"squid:S1166"})
   public static <T> T unwrap(T bean) {
     try {
       if (AopUtils.isAopProxy(bean) && bean instanceof Advised) {
@@ -147,6 +147,7 @@ public class Utils {
     try {
       return formatter.parse(date);
     } catch (ParseException ignored) {
+      //Ignoring parseException
     }
     return null;
   }
