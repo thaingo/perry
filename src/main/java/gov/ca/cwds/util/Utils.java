@@ -1,7 +1,6 @@
 package gov.ca.cwds.util;
 
 import static gov.ca.cwds.config.Constants.DEFAULT_LOCALE;
-import static java.util.stream.Collectors.toSet;
 
 import gov.ca.cwds.idm.dto.User;
 import java.sql.Timestamp;
@@ -16,9 +15,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.util.StringUtil;
@@ -162,10 +158,5 @@ public class Utils {
 
   public static String blankToNull(String str) {
     return StringUtil.isBlank(str)? null : str;
-  }
-
-  public static Set<String> applyFunctionToValues(Set<String> values,
-      Function<String, String> function) {
-    return values.stream().map(function).collect(Collectors.toSet());
   }
 }

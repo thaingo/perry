@@ -4,8 +4,8 @@ import static gov.ca.cwds.idm.service.IdmServiceImpl.transformSearchValues;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getRACFId;
 import static gov.ca.cwds.service.messages.MessageCode.DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_NOT_FOUND_BY_ID_IN_NS_DATABASE;
-import static gov.ca.cwds.util.Utils.applyFunctionToValues;
 import static gov.ca.cwds.util.Utils.isRacfidUser;
+import static java.util.stream.Collectors.toSet;
 
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.data.persistence.auth.CwsOffice;
@@ -152,7 +152,7 @@ public class UserService {
   }
 
   public List<User> searchUsersByRacfids(Set<String> racfids) {
-    Set<String> upperCaseRacfids = applyFunctionToValues(racfids, Utils::toUpperCase);
+    Set<String> upperCaseRacfids = racfids.stream().map(Utils::toUpperCase).collect(toSet());
     List<NsUser> nsUsers = nsUserService.findByRacfids(upperCaseRacfids);
     return enrichNsUsers(nsUsers);
   }

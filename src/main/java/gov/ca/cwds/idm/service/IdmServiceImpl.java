@@ -24,9 +24,9 @@ import static gov.ca.cwds.service.messages.MessageCode.USER_PARTIAL_UPDATE_AND_S
 import static gov.ca.cwds.service.messages.MessageCode.USER_UPDATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_UPDATE_SAVE_TO_SEARCH_ERROR;
 import static gov.ca.cwds.util.Utils.URL_DATETIME_FORMATTER;
-import static gov.ca.cwds.util.Utils.applyFunctionToValues;
 import static gov.ca.cwds.util.Utils.toLowerCase;
 import static gov.ca.cwds.util.Utils.toUpperCase;
+import static java.util.stream.Collectors.toSet;
 
 import gov.ca.cwds.idm.dto.IdmNotification;
 import gov.ca.cwds.idm.dto.RegistrationResubmitResponse;
@@ -71,6 +71,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -449,6 +450,12 @@ public class IdmServiceImpl implements IdmService {
     }
     return values;
   }
+
+  private static Set<String> applyFunctionToValues(Set<String> values,
+      Function<String, String> function) {
+    return values.stream().map(function).collect(toSet());
+  }
+
 
   private PutInSearchExecution<String> updateUserInSearch(String id) {
     return new PutInSearchExecution<String>(id) {
