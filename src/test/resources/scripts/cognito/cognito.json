@@ -1,36 +1,36 @@
 {
   "UserAttributes": [
     {
+      "Name": "email",
+      "Value": "some.email@gmail.com"
+    },
+    {
       "Name": "email_verified",
       "Value": "true"
+    },
+    {
+      "Name": "preferred_username",
+      "Value": "RACFID"
     },
     {
       "Name": "nickname",
       "Value": "perry"
     },
     {
-      "Name": "phone_number_verified",
-      "Value": "true"
+      "Name": "given_name",
+      "Value": "cognitoFirstName"
     },
     {
-      "Name": "phone_number",
-      "Value": "+19161111111"
-    },
-    {
-      "Name": "custom:RacfId",
-      "Value": "RACFID"
-    },
-    {
-      "Name": "custom:Role",
-      "Value": "first-role :second-role:third-role"
+      "Name": "family_name",
+      "Value": "cognitoLastName"
     },
     {
       "Name": "custom:Office",
       "Value": "17"
     },
     {
-      "Name": "custom:Permission",
-      "Value": "first-permission :second-permission:third-permission"
+      "Name": "custom:County",
+      "Value": "Butte"
     }
   ],
   "Username": "perry"

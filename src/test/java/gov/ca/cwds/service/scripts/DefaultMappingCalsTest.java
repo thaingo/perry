@@ -24,7 +24,7 @@ public class DefaultMappingCalsTest extends ScriptTestBase {
 
   @Test
   public void testGroovyMapping() throws Exception {
-    test("/scripts/default/default.groovy",
+    test("/scripts/default.groovy",
         "/scripts/default/default-cals.json",
         null);
   }

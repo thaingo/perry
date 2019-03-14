@@ -5,20 +5,27 @@ import static gov.ca.cwds.util.LiquibaseUtils.SPRING_BOOT_H2_PASSWORD;
 import static gov.ca.cwds.util.LiquibaseUtils.SPRING_BOOT_H2_USER;
 import static gov.ca.cwds.util.LiquibaseUtils.TOKEN_STORE_URL;
 import static gov.ca.cwds.util.LiquibaseUtils.runLiquibaseScript;
+import static gov.ca.cwds.util.Utils.toSet;
 import static gov.ca.cwds.web.MockOAuth2Service.EXPECTED_SSO_TOKEN;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 import gov.ca.cwds.BaseIntegrationTest;
 import gov.ca.cwds.PerryApplication;
 import gov.ca.cwds.UniversalUserToken;
+import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
+import gov.ca.cwds.idm.service.NsUserService;
 import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.service.sso.OAuth2Service;
 import io.dropwizard.testing.FixtureHelpers;
 import java.util.Collections;
+import java.util.Optional;
 import javax.servlet.http.HttpSession;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -82,9 +90,15 @@ public class PerryMFALoginTest extends BaseIntegrationTest {
   public static final String AUTH_MISSING_INFO_JSON = "fixtures/mfa/auth-missing-info.json";
   public static final String AUTH_NO_RACFID_JSON = "fixtures/mfa/auth-no-racfid.json";
   public static final String UUID_PATTERN = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
+  public static final String USERNAME = "9a11585d-0a86-4715-bedf-3cf783bc4baf";
+
   private static final Logger LOGGER = LoggerFactory.getLogger(PerryMFALoginTest.class);
+
   @Autowired
   private OAuth2Service oAuth2Service;
+
+  @MockBean
+  private NsUserService nsUserService;
 
   @BeforeClass
   public static void beforeClass() throws Exception {
@@ -93,6 +107,12 @@ public class PerryMFALoginTest extends BaseIntegrationTest {
 
   @Test
   public void whenValidMFAJsonProvided_thenAuthenticate() throws Exception {
+    NsUser nsUser = nsUserWithoutKeyInfo();
+    nsUser.setRacfid("BRADYG");
+    nsUser.setRoles(toSet("CWS-worker", "County-admin"));
+    nsUser.setPermissions(toSet("Snapshot-rollout", "Facility-search-rollout"));
+    when(nsUserService.findByUsername(USERNAME)).thenReturn(Optional.of(nsUser));
+
     MvcResult result = navigateToSecureUrl();
     result = sendMfaJson(result, FixtureHelpers.fixture(VALID_MFA_RESPONSE_JSON),
         LOGIN_REDIRECT_URL);
@@ -113,6 +133,8 @@ public class PerryMFALoginTest extends BaseIntegrationTest {
 
   @Test
   public void whenEmptyMFAJsonProvided_thenPerryErrorPage() {
+    when(nsUserService.findByUsername(any())).thenReturn(Optional.empty());
+
     try {
       MvcResult result = navigateToSecureUrl();
       sendMfaJson(result, "{}", ERROR_PAGE_URL);
@@ -124,6 +146,11 @@ public class PerryMFALoginTest extends BaseIntegrationTest {
 
   @Test
   public void whenRacfidMissingMFAJsonProvided_thenLoginSuccessfully() throws Exception {
+    NsUser nsUser = nsUserWithoutKeyInfo();
+    nsUser.setRoles(toSet("CWS-worker", "County-admin"));
+    nsUser.setPermissions(toSet("Snapshot-rollout", "Facility-search-rollout"));
+    when(nsUserService.findByUsername(USERNAME)).thenReturn(Optional.of(nsUser));
+
     Mockito.when(oAuth2Service.getUserInfo(EXPECTED_SSO_TOKEN))
         .thenReturn(MockOAuth2Service.constructUserInfo(MISSING_RACFID_MFA_RESPONSE_JSON));
     runLoginFlow(MISSING_RACFID_MFA_RESPONSE_JSON, AUTH_NO_RACFID_JSON);
@@ -131,6 +158,9 @@ public class PerryMFALoginTest extends BaseIntegrationTest {
 
   @Test
   public void whenKeyInfoMissingMFAJsonProvided_thenLoginSuccessfully() throws Exception {
+    NsUser nsUser = nsUserWithoutKeyInfo();
+    when(nsUserService.findByUsername(USERNAME)).thenReturn(Optional.of(nsUser));
+
     Mockito.when(oAuth2Service.getUserInfo(EXPECTED_SSO_TOKEN))
         .thenReturn(MockOAuth2Service.constructUserInfo(KEY_INFO_MISSING_MFA_RESPONSE_JSON));
     runLoginFlow(KEY_INFO_MISSING_MFA_RESPONSE_JSON, AUTH_MISSING_INFO_JSON);
@@ -138,6 +168,8 @@ public class PerryMFALoginTest extends BaseIntegrationTest {
 
   @Test
   public void whenInvalidMFAJsonProvided_thenPerryErrorPage() {
+    when(nsUserService.findByUsername(any())).thenReturn(Optional.empty());
+
     try {
       MvcResult result = navigateToSecureUrl();
       sendMfaJson(result, "Invalid JSON", ERROR_PAGE_URL);
@@ -145,6 +177,15 @@ public class PerryMFALoginTest extends BaseIntegrationTest {
       Assert.assertTrue(e instanceof PerryException);
       Assert.assertTrue(e.getMessage().startsWith("COGNITO RESPONSE PROCESSING ERROR"));
     }
+  }
+
+  private static NsUser nsUserWithoutKeyInfo() {
+    NsUser nsUser = new NsUser();
+    nsUser.setUsername(USERNAME);
+    nsUser.setFirstName("Greg");
+    nsUser.setLastName("Brady");
+    nsUser.setPhoneNumber("19161111111");
+    return nsUser;
   }
 
   private MvcResult runLoginFlow(String mfaJson, String authJson) throws Exception {
