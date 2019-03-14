@@ -157,6 +157,8 @@ public class CwsOffice extends CmsPersistentObject {
    * @param locationCountyType the locationCountyType
    * @param directorsNameTitle the directorsNameTitle
    */
+
+  @SuppressWarnings({"squid:S00107"})
   public CwsOffice(String officeId, Long faxNumber, String geographicRegionTextCode,
       Short governmentEntityType, String headquarterIndicator, String inactiveIndicator,
       String mailStopDescription, Long messagePhoneNumber,
@@ -202,6 +204,10 @@ public class CwsOffice extends CmsPersistentObject {
     return officeId;
   }
 
+  public void setOfficeId(String officeId) {
+    this.officeId = officeId;
+  }
+
   /**
    * @return the faxNumber
    */
@@ -221,6 +227,10 @@ public class CwsOffice extends CmsPersistentObject {
    */
   public Short getGovernmentEntityType() {
     return governmentEntityType;
+  }
+
+  public void setGovernmentEntityType(Short governmentEntityType) {
+    this.governmentEntityType = governmentEntityType;
   }
 
   /**
@@ -272,11 +282,19 @@ public class CwsOffice extends CmsPersistentObject {
     return primaryPhoneNumber;
   }
 
+  public void setPrimaryPhoneNumber(Long primaryPhoneNumber) {
+    this.primaryPhoneNumber = primaryPhoneNumber;
+  }
+
   /**
    * @return the primaryPhoneExtensionNumber
    */
   public String getPrimaryPhoneExtensionNumber() {
     return primaryPhoneExtensionNumber;
+  }
+
+  public void setPrimaryPhoneExtensionNumber(String primaryPhoneExtensionNumber) {
+    this.primaryPhoneExtensionNumber = primaryPhoneExtensionNumber;
   }
 
   /**

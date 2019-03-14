@@ -2,26 +2,21 @@
   "idToken": {
     "jwtToken": "eyJraWQiOiJEdTYxTVNjUzZDNnJrbGJFM2crdnVyZjZlbjlUcGxUZjN5TE10RFwvcTlEWT0iLCJhbGciOiJSUzI1NiJ9.eyJjdXN0b206UkFDRklEIjoiQlJBRFlHIiwiY3VzdG9tOlJBQ0ZJZCI6IkJSQURZRyIsInN1YiI6IjlhMTE1ODVkLTBhODYtNDcxNS1iZWRmLTNjZjc4M2JjNGJhZiIsInpvbmVpbmZvIjoiQ1dTLXdvcmtlcjpDV1MtYWRtaW4iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiaXNzIjoiaHR0cHM6XC9cL2NvZ25pdG8taWRwLnVzLXdlc3QtMi5hbWF6b25hd3MuY29tXC91cy13ZXN0LTJfYlV0QVN4VXo2IiwiY29nbml0bzp1c2VybmFtZSI6IjlhMTE1ODVkLTBhODYtNDcxNS1iZWRmLTNjZjc4M2JjNGJhZiIsImN1c3RvbTpSb2xlIjoiQ1dTLXdvcmtlcjpDV1MtYWRtaW4iLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJMb3MgQW5nZWxlcyIsImdpdmVuX25hbWUiOiJHcmVnIiwiY3VzdG9tOkNvdW50eSI6IkxvcyBBbmdlbGVzIiwiYXVkIjoiMmExZGYxdjhicjYwaTUycW9maTRxbWtqMmsiLCJjdXN0b206T2ZmaWNlIjoiQ2FzZVdvcmtlciIsInRva2VuX3VzZSI6ImlkIiwiYXV0aF90aW1lIjoxNTMwODk5MDczLCJwaG9uZV9udW1iZXIiOiIrMTkxNjExMTExMTEiLCJleHAiOjE1MzA5MDI2NzMsImlhdCI6MTUzMDg5OTA3MywiZmFtaWx5X25hbWUiOiJCcmFkeSIsImN1c3RvbTpQZXJtaXNzaW9uIjoiU25hcHNob3Qtcm9sbG91dDpGYWNpbGl0eS1zZWFyY2gtcm9sbG91dCIsImVtYWlsIjoiZG9uemFubzEyMytCUkFEWUdAZ21haWwuY29tIn0.RFdbqNwljC3HiNMcP9cXBPia-ONeyXZBteinFlhyscOQMA135eIvEnNtOitVk7qtGG20CvvjBcj_qkBOLdUGo4AaU7ngTy6UX-pdSm9MBvfrtd5NV6sssxW_i0H9mxGZXcVvWYUyGopPXwqHfDJGWMX1mdzx0LmUblyG0OMc9WxZadUIPw6rYO8utVVFYvRnO8CvCVswVl2pjITF1kiVxcxBY1gxkH2Gnc_f7ZlMOPk6jT5k5_0CSVI6SwqbxmVNoKmUK4OM1bcQvExVZAjOi6P53q2biUJ4ucBwHZCwmY3ZHkaGAR2wX-CUM6dvFdRBzkFzdWuobS0dlnpXy4mFIg",
     "payload": {
-      "custom:RACFID": "BRADYG",
-      "custom:RACFId": "BRADYG",
       "sub": "9a11585d-0a86-4715-bedf-3cf783bc4baf",
       "zoneinfo": "CWS-worker:County-admin",
       "email_verified": true,
       "iss": "https://cognito-idp.us-west-2.amazonaws.com/us-west-2_bUtASxUz6",
       "cognito:username": "9a11585d-0a86-4715-bedf-3cf783bc4baf",
-      "custom:Role": "CWS-worker:County-admin",
-      "preferred_username": "Los Angeles",
+      "preferred_username": "BRADYG",
       "given_name": "Greg",
       "custom:County": "Los Angeles",
       "aud": "2a1df1v8br60i52qofi4qmkj2k",
       "custom:Office": "CaseWorker",
       "token_use": "id",
       "auth_time": 1530899073,
-      "phone_number": "+19161111111",
       "exp": 1530902673,
       "iat": 1530899073,
       "family_name": "Brady",
-      "custom:Permission": "Snapshot-rollout:Facility-search-rollout",
       "email": "donzano123+BRADYG@gmail.com"
     }
   },

@@ -7,3 +7,4 @@ build/
 .project
 bin/
 config/perry-cognito-local.yml
+src/test/resources/scripts/*.groovy

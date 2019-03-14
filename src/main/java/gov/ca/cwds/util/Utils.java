@@ -46,7 +46,7 @@ public class Utils {
     return (T) SerializationUtils.deserialize(data);
   }
 
-  public static LocalDateTime fromDate(Date date) {
+  public static LocalDateTime toLocalDateTime(Date date) {
     if (date != null) {
       return new Timestamp(date.getTime()).toLocalDateTime();
     } else {
@@ -54,7 +54,15 @@ public class Utils {
     }
   }
 
-  @SuppressWarnings("unchecked")
+  public static Date toDate(LocalDateTime ldt) {
+    if (ldt != null) {
+      return Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant());
+    } else {
+      return null;
+    }
+  }
+
+  @SuppressWarnings({"squid:S1166"})
   public static <T> T unwrap(T bean) {
     try {
       if (AopUtils.isAopProxy(bean) && bean instanceof Advised) {
@@ -135,6 +143,7 @@ public class Utils {
     try {
       return formatter.parse(date);
     } catch (ParseException ignored) {
+      //Ignoring parseException
     }
     return null;
   }

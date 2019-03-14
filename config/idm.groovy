@@ -1,29 +1,31 @@
+import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.*
+import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.*
+
 import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType
-import gov.ca.cwds.idm.service.cognito.util.CognitoPhoneConverter
+import gov.ca.cwds.util.Utils
+import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute
 import org.apache.commons.lang3.StringUtils
 
-def attribute = {name -> cognitoUser.attributes?.find {it.name.equalsIgnoreCase(name)}?.value}
+def cognitoUserAttrValue = {UserAttribute attr -> cognitoUser.attributes?.find {it.name.equalsIgnoreCase(attr.name)}?.value}
 
-result.id = cognitoUser.username
+result.id = nsUser.username
+result.racfid = nsUser.racfid
+result.phoneNumber = nsUser.phoneNumber
+result.phoneExtensionNumber = nsUser.phoneExtensionNumber
+result.lastLoginDateTime = nsUser.lastLoginTime
+result.notes = nsUser.notes
+result.roles = nsUser.roles
+result.permissions = nsUser.permissions
+
+result.userLastModifiedDate = lastDate(Utils.toDate(nsUser.lastModifiedTime), cognitoUser.userLastModifiedDate)
+
 result.enabled = cognitoUser.enabled
 result.userCreateDate = cognitoUser.userCreateDate
-result.userLastModifiedDate = cognitoUser.userLastModifiedDate
 result.status = cognitoUser.userStatus
-result.email = attribute("email")
-result.racfid = attribute("custom:RACFID")
-result.phoneNumber = CognitoPhoneConverter.fromCognitoFormat(attribute("phone_number"))
-result.phoneExtensionNumber = attribute("custom:PhoneExtension")
+result.email = cognitoUserAttrValue(EMAIL)
 
-if(StringUtils.isNotBlank(attribute("custom:accountLocked"))) {
-    result.locked = attribute("custom:accountLocked").toBoolean()
-}
-
-if(StringUtils.isNotBlank(attribute("custom:Permission"))) {
-    result.permissions = attribute("custom:Permission").split('\\s*:\\s*') as HashSet
-}
-
-if(StringUtils.isNotBlank(attribute("custom:Role"))) {
-    result.roles = attribute("custom:Role").split('\\s*:\\s*') as HashSet
+if(StringUtils.isNotBlank(cognitoUserAttrValue(IS_LOCKED))) {
+    result.locked = cognitoUserAttrValue(IS_LOCKED).toBoolean()
 }
 
 if(cwsUser) {
@@ -40,10 +42,12 @@ if(cwsUser) {
     result.officePhoneExtensionNumber = cwsUser.cwsOffice?.primaryPhoneExtensionNumber
     result.cwsPrivileges = cwsUser.cwsStaffPrivs
 } else {
-    result.countyName = attribute("custom:County")
-    result.firstName = attribute("given_name")
-    result.lastName = attribute("family_name")
-    result.officeId = attribute("custom:Office")
+    result.firstName = nsUser.firstName
+    result.lastName = nsUser.lastName
+    result.countyName = cognitoUserAttrValue(COUNTY)
+    result.officeId = cognitoUserAttrValue(OFFICE)
 }
 
-
+static Date lastDate(Date firstDate, Date secondDate) {
+    return firstDate > secondDate ? firstDate : secondDate
+}

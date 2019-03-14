@@ -17,7 +17,7 @@
     "locked": false,
     "status": "CONFIRMED",
     "permissions": [
-      "test"
+      "Hotline-rollout"
     ],
     "roles": [
       "State-admin"

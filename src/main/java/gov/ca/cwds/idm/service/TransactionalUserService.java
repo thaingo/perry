@@ -37,7 +37,9 @@ public class TransactionalUserService {
   private EntityManager entityManager;
 
   @Transactional(value = TOKEN_TRANSACTION_MANAGER)
-  @SuppressWarnings({"fb-contrib:LEST_LOST_EXCEPTION_STACK_TRACE"})//exception with custom constructor is used
+  @SuppressWarnings({
+      "fb-contrib:LEST_LOST_EXCEPTION_STACK_TRACE",//exception with custom constructor is used
+      "fb-contrib:EXS_EXCEPTION_SOFTENING_NO_CONSTRAINTS"})//no checked exceptions here
   public void createUserInDbWithInvitationEmail(User user) {
     String email = user.getEmail();
     String userId = user.getId();
@@ -70,6 +72,7 @@ public class TransactionalUserService {
    * @return true if User attributes (in Cognito and database) were really updated, false otherwise
    */
   @Transactional(value = TOKEN_TRANSACTION_MANAGER)
+  @SuppressWarnings("fb-contrib:EXS_EXCEPTION_SOFTENING_NO_CONSTRAINTS")//no checked exceptions here
   public boolean updateUserAttributes(UserUpdateRequest userUpdateRequest) {
     boolean isDatabaseUpdated;
 

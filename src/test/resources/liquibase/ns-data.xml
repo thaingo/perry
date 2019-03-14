@@ -155,9 +155,7 @@
       <column name="user_id" value="7"/>
       <column name="permission_name" value="Hotline-rollout"/>
     </insert>
-  </changeSet>
 
-  <changeSet id="data_for_ns_db-2" author="Dmytro.Sorych">
     <insert tableName="user">
       <column name="id" value="8"/>
       <column name="username" value="24932d54-9321-4dd2-a92f-7425q6c411be"/>
@@ -181,7 +179,206 @@
       <column name="user_id" value="8"/>
       <column name="permission_name" value="Hotline-rollout"/>
     </insert>
+
+    <insert tableName="user">
+      <column name="id" value="9"/>
+      <column name="username" value="a3427f8e-b080-4f71-9514-840c1fcb505b"/>
+      <column name="last_login_time" valueDate="2018-10-17 07:01:12"/>
+      <column name="racfid"/>
+      <column name="phone_number"/>
+      <column name="phone_extension"/>
+      <column name="last_modified_time" valueDate="2018-05-29"/>
+      <column name="first_name" value="May"/>
+      <column name="last_name" value="Gosh"/>
+    </insert>
+    <insert tableName="user_role">
+      <column name="user_id" value="9"/>
+      <column name="role_key" value="Super-admin"/>
+    </insert>
+
+    <insert tableName="user">
+      <column name="id" value="10"/>
+      <column name="username" value="c3702f4c113f1d2415447c8bfe8321d8df2d5151"/>
+      <column name="last_login_time" valueDate="2018-10-17 07:01:12"/>
+      <column name="racfid" value="MCALLUM"/>
+      <column name="phone_number" value="7680797987"/>
+      <column name="phone_extension"/>
+      <column name="last_modified_time" valueDate="2018-05-31"/>
+      <column name="first_name" value="Reddy"/>
+      <column name="last_name" value="Jkuser"/>
+    </insert>
+    <insert tableName="user_role">
+      <column name="user_id" value="10"/>
+      <column name="role_key" value="County-admin"/>
+    </insert>
+    <insert tableName="user_permission">
+      <column name="user_id" value="10"/>
+      <column name="permission_name" value="Hotline-rollout"/>
+    </insert>
+
+    <insert tableName="user">
+      <column name="id" value="11"/>
+      <column name="username" value="44732d50-9425-4rd2-a92f-7425q0c411bw"/>
+      <column name="last_login_time" valueDate="2018-10-17 07:01:12"/>
+      <column name="racfid" value="YOLOD"/>
+      <column name="phone_number"/>
+      <column name="phone_extension"/>
+      <column name="last_modified_time" valueDate="2018-05-29"/>
+      <column name="first_name" value="Julio"/>
+      <column name="last_name" value="Iglecias"/>
+    </insert>
+    <insert tableName="user_role">
+      <column name="user_id" value="11"/>
+      <column name="role_key" value="CWS-worker"/>
+    </insert>
+    <insert tableName="user_role">
+      <column name="user_id" value="11"/>
+      <column name="role_key" value="County-admin"/>
+    </insert>
+    <insert tableName="user_permission">
+      <column name="user_id" value="11"/>
+      <column name="permission_name" value="Hotline-rollout"/>
+    </insert>
+
+    <insert tableName="user">
+      <column name="id" value="12"/>
+      <column name="username" value="145614ce-0168-4950-9b47-7ba0cdf1f299"/>
+      <column name="last_login_time" valueDate="2018-10-17 07:01:12"/>
+      <column name="racfid" value="HAILES"/>
+      <column name="phone_number" value="9167777777"/>
+      <column name="phone_extension" value="777"/>
+      <column name="last_modified_time" valueDate="2018-12-03"/>
+      <column name="first_name" value="Stan"/>
+      <column name="last_name" value="Hailen"/>
+    </insert>
+    <insert tableName="user_role">
+      <column name="user_id" value="12"/>
+      <column name="role_key" value="CWS-worker"/>
+    </insert>
+    <insert tableName="user_permission">
+      <column name="user_id" value="12"/>
+      <column name="permission_name" value="Facility-search-rollout"/>
+    </insert>
+
+    <insert tableName="user">
+      <column name="id" value="13"/>
+      <column name="username" value="145614ce-0168-4950-9b47-7ba0cdf1f589"/>
+      <column name="last_login_time" valueDate="2018-10-17 07:01:12"/>
+      <column name="racfid" value="CWSPRV"/>
+      <column name="phone_number" value="9167777777"/>
+      <column name="phone_extension" value="777"/>
+      <column name="last_modified_time" valueDate="2018-02-08"/>
+      <column name="first_name" value="Han"/>
+      <column name="last_name" value="Solo"/>
+    </insert>
+    <insert tableName="user_role">
+      <column name="user_id" value="13"/>
+      <column name="role_key" value="CWS-worker"/>
+    </insert>
+    <insert tableName="user_permission">
+      <column name="user_id" value="13"/>
+      <column name="permission_name" value="Facility-search-rollout"/>
+    </insert>
+
+    <insert tableName="user">
+      <column name="id" value="14"/>
+      <column name="username" value="24732d50-9421-4dd2-a92f-7425q6c411bx"/>
+      <column name="last_login_time" valueDate="2018-10-17 07:01:12"/>
+      <column name="racfid" value="YOLOD"/>
+      <column name="phone_number"/>
+      <column name="phone_extension"/>
+      <column name="last_modified_time" valueDate="2018-05-29"/>
+      <column name="first_name" value="Julio"/>
+      <column name="last_name" value="Iglecias"/>
+    </insert>
+    <insert tableName="user_role">
+      <column name="user_id" value="14"/>
+      <column name="role_key" value="CWS-worker"/>
+    </insert>
+    <insert tableName="user_role">
+      <column name="user_id" value="14"/>
+      <column name="role_key" value="County-admin"/>
+    </insert>
+    <insert tableName="user_permission">
+      <column name="user_id" value="14"/>
+      <column name="permission_name" value="Hotline-rollout"/>
+    </insert>
+
+    <insert tableName="user">
+      <column name="id" value="15"/>
+      <column name="username" value="17067e4e-270f-4623-b86c-b4d4fa525d68"/>
+      <column name="last_login_time" valueDate="2018-10-17 07:01:12"/>
+      <column name="racfid"/>
+      <column name="phone_number"/>
+      <column name="phone_extension"/>
+      <column name="last_modified_time"/>
+      <column name="first_name" value="Smith"/>
+      <column name="last_name" value="Sixth"/>
+    </insert>
+    <insert tableName="user_permission">
+      <column name="user_id" value="15"/>
+      <column name="permission_name" value="Hotline-rollout"/>
+    </insert>
+
+    <insert tableName="user">
+      <column name="id" value="16"/>
+      <column name="username" value="17067e4e-270f-4623-b86c-b4d4fa527z79"/>
+      <column name="last_login_time" valueDate="2018-10-17 07:01:12"/>
+      <column name="racfid" value="NOIDCMS"/>
+      <column name="phone_number" value="7186888777"/>
+      <column name="phone_extension" value="7"/>
+      <column name="last_modified_time" valueDate="2018-05-31"/>
+      <column name="first_name" value="Smith"/>
+      <column name="last_name" value="Forth"/>
+    </insert>
+    <insert tableName="user_permission">
+      <column name="user_id" value="16"/>
+      <column name="permission_name" value="Hotline-rollout"/>
+    </insert>
+
+    <insert tableName="user">
+      <column name="id" value="17"/>
+      <column name="username" value="errorUserId"/>
+      <column name="last_login_time" valueDate="2018-10-17 07:01:12"/>
+      <column name="racfid"/>
+      <column name="phone_number"/>
+      <column name="phone_extension"/>
+      <column name="last_modified_time" valueDate="2018-05-31"/>
+      <column name="first_name" value="Incognito"/>
+      <column name="last_name" value="Offshorer"/>
+    </insert>
+    <insert tableName="user_role">
+      <column name="user_id" value="17"/>
+      <column name="role_key" value="CWS-worker"/>
+    </insert>
+
+    <insert tableName="user">
+      <column name="id" value="18"/>
+      <column name="username" value="absentInIdmUserId"/>
+      <column name="last_login_time" valueDate="2018-10-17 07:01:12"/>
+      <column name="racfid" value="INCOGNITO"/>
+      <column name="phone_number"/>
+      <column name="phone_extension"/>
+      <column name="last_modified_time" valueDate="2018-05-31"/>
+      <column name="first_name" value="Nonfound"/>
+      <column name="last_name" value="Disappearer"/>
+    </insert>
+    <insert tableName="user_role">
+      <column name="user_id" value="18"/>
+      <column name="role_key" value="CWS-worker"/>
+    </insert>
+
+    <insert tableName="user">
+      <column name="id" value="19"/>
+      <column name="username" value="17067e4e-270f-4623-b86c-b4d4fa527a34"/>
+      <column name="last_login_time" valueDate="2018-10-17 07:01:12"/>
+      <column name="racfid"/>
+      <column name="phone_number"/>
+      <column name="phone_extension"/>
+      <column name="last_modified_time" valueDate="2018-05-30"/>
+      <column name="first_name" value="Garcia"/>
+      <column name="last_name" value="Gonzales"/>
+    </insert>
+
   </changeSet>
-
-
 </databaseChangeLog>
