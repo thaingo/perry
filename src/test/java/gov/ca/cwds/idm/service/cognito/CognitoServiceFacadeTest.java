@@ -45,26 +45,29 @@ import com.amazonaws.services.cognitoidp.model.ListUsersRequest;
 import com.amazonaws.services.cognitoidp.model.ListUsersResult;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.exception.IdmException;
+
 import gov.ca.cwds.idm.exception.UserNotFoundException;
+import gov.ca.cwds.idm.service.UserUpdateRequest;
 import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.idm.service.cognito.util.CognitoRequestHelper;
+
+import gov.ca.cwds.idm.service.diff.UpdateDifference;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.service.messages.MessageCode;
 import gov.ca.cwds.service.messages.MessagesService;
 import gov.ca.cwds.service.messages.MessagesService.Messages;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+
+import java.util.*;
 import java.util.stream.Collectors;
+
+import org.hamcrest.junit.ExpectedException;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+
 import org.mockito.ArgumentMatchers;
 import org.mockito.InOrder;
 
@@ -178,6 +181,30 @@ public class CognitoServiceFacadeTest {
     assertAttr(attrMap, ROLES, "County-admin:CWS-worker");
     assertAttr(attrMap, PHONE_NUMBER, "+1234567890");
     assertAttr(attrMap, PHONE_EXTENSION, "54321");
+  }
+
+  @Rule
+  public final ExpectedException exception = ExpectedException.none();
+
+  @Test
+  public void testUpdateUserAttributesWithDuplicateEmail() {
+    final String new_email = "newEmail@gmail.com";
+
+    when(messagesService.getMessages(MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM, new_email.toLowerCase()))
+            .thenReturn(new Messages(new_email, new_email));
+
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setEmail(new_email);
+
+    final UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
+    userUpdateRequest.setExistedUser(user());
+    userUpdateRequest.setUpdateDifference(new UpdateDifference(user(), userUpdate));
+
+    when(identityProvider.adminUpdateUserAttributes(any(AdminUpdateUserAttributesRequest.class)))
+      .thenThrow(new com.amazonaws.services.cognitoidp.model.AliasExistsException("user exists"));
+
+    exception.expectMessage(new_email);
+    facade.updateUserAttributes(userUpdateRequest);
   }
 
   @Test
@@ -335,7 +362,7 @@ public class CognitoServiceFacadeTest {
     assertThat(request.getUsername(), is("user@email.com"));
     assertThat(request.getUserPoolId(), is(USERPOOL));
     assertThat(request.getMessageAction(), is("RESEND"));
-    assertThat(request.getDesiredDeliveryMediums(), is(Arrays.asList("EMAIL")));
+    assertThat(request.getDesiredDeliveryMediums(), is(Collections.singletonList("EMAIL")));
   }
 
   @Test

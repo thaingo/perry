@@ -45,6 +45,7 @@ import gov.ca.cwds.idm.service.UserUpdateRequest;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.idm.service.cognito.util.CognitoRequestHelper;
+import gov.ca.cwds.idm.service.diff.StringDiff;
 import gov.ca.cwds.idm.service.diff.UpdateDifference;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.service.messages.MessageCode;
@@ -52,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import javax.annotation.PostConstruct;
 import liquibase.util.StringUtils;
@@ -191,9 +193,7 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
   public boolean updateUserAttributes(
       UserUpdateRequest userUpdateRequest) {
 
-    User existedUser = userUpdateRequest.getExistedUser();
     UpdateDifference updateDifference = userUpdateRequest.getUpdateDifference();
-
     List<AttributeType> attributeTypes = buildUpdatedAttributesList(updateDifference);
 
     if (attributeTypes.isEmpty()) {
@@ -209,8 +209,9 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
       throw exceptionFactory.createUserNotFoundException(USER_NOT_FOUND_BY_ID_IN_IDM, e,
           userUpdateRequest.getUserId());
     } catch (com.amazonaws.services.cognitoidp.model.AliasExistsException e) {
-      throw exceptionFactory.createUserAlreadyExistsException(USER_WITH_EMAIL_EXISTS_IN_IDM, e,
-          existedUser.getEmail());
+        final String testX = updateDifference.getEmailDiff().map(StringDiff::getNewValue).orElse("");
+        throw exceptionFactory.createUserAlreadyExistsException(USER_WITH_EMAIL_EXISTS_IN_IDM, e,
+                testX);
     } catch (Exception e) {
       throw exceptionFactory
           .createIdmException(getErrorCode(UPDATE), e, userUpdateRequest.getUserId());
