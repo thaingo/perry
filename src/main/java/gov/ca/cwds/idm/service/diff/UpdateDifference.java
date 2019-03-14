@@ -19,7 +19,7 @@ public class UpdateDifference {
 
   public UpdateDifference(final User existedUser, final UserUpdate userUpdate) {
     emailDiff = createStringDiff(
-        Utils.toLowerCase(existedUser.getEmail()),
+        existedUser.getEmail(),
         Utils.toLowerCase(userUpdate.getEmail()));
 
     enabledDiff = createBooleanDiff(existedUser.getEnabled(), userUpdate.getEnabled());

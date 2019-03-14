@@ -18,8 +18,8 @@ import org.junit.Test;
 
 public class DifferencingTest {
 
-  private static final String EXISTED_EMAIL = "user@OCI.CA.GOV";
-  private static final String NEW_EMAIL = "NEW@e.mail";
+  private static final String EXISTED_EMAIL = "old.user@oci.ca.gov";
+  private static final String NEW_EMAIL = "new.user@oci.ca.gov";
 
   private static final Boolean EXISTED_ENABLED = Boolean.TRUE;
   private static final Boolean NEW_ENABLED = !EXISTED_ENABLED;
@@ -41,6 +41,9 @@ public class DifferencingTest {
   private static final HashSet<String> NEW_PERMISSIONS
       = toSet("Hotline-rollout", "CANS-rollout");
 
+  final String UPPER_CASE_EMAIL = "SOME.USER@EMAIL";
+  final String LOWER_CASE_EMAIL = "some.user@email";
+
   @Test
   public void testNoChanges() {
     UpdateDifference updateDifference = new UpdateDifference(existedUser(), new UserUpdate());
@@ -49,8 +52,10 @@ public class DifferencingTest {
 
   @Test
   public void testNewAreTheSame() {
+    User user = existedUser();
+
     UserUpdate userUpdate = new UserUpdate();
-    userUpdate.setEmail(EXISTED_EMAIL.toLowerCase());
+    userUpdate.setEmail(EXISTED_EMAIL);
     userUpdate.setEnabled(EXISTED_ENABLED);
     userUpdate.setPhoneNumber(EXISTED_PHONE);
     userUpdate.setPhoneExtensionNumber(EXISTED_PHONE_EXTENSION);
@@ -58,11 +63,38 @@ public class DifferencingTest {
     userUpdate.setRoles(EXISTED_ROLES);
     userUpdate.setPermissions(EXISTED_PERMISSIONS);
 
-    UpdateDifference updateDifference = new UpdateDifference(existedUser(), userUpdate);
+    UpdateDifference updateDifference = new UpdateDifference(user, userUpdate);
     assertNoDiffs(updateDifference);
   }
 
   @Test
+  public void testChangeEmailCaseToLower() {
+    User user = existedUser();
+    UserUpdate userUpdate = new UserUpdate();
+
+    user.setEmail(UPPER_CASE_EMAIL);
+    userUpdate.setEmail(UPPER_CASE_EMAIL);
+    UpdateDifference updateDifference = new UpdateDifference(user, userUpdate);
+    assertStringDiff(updateDifference.getEmailDiff(), UPPER_CASE_EMAIL, LOWER_CASE_EMAIL);
+
+    user.setEmail(UPPER_CASE_EMAIL);
+    userUpdate.setEmail(LOWER_CASE_EMAIL);
+    updateDifference = new UpdateDifference(user, userUpdate);
+    assertStringDiff(updateDifference.getEmailDiff(), UPPER_CASE_EMAIL, LOWER_CASE_EMAIL);
+  }
+
+  @Test
+  public void testCanNotChangeEmailCaseToUpper() {
+    User user = existedUser();
+    UserUpdate userUpdate = new UserUpdate();
+
+    user.setEmail(LOWER_CASE_EMAIL);
+    userUpdate.setEmail(UPPER_CASE_EMAIL);
+    UpdateDifference updateDifference = new UpdateDifference(user, userUpdate);
+    assertNoDiffs(updateDifference);
+  }
+
+    @Test
   public void testAllChanged() {
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setEmail(NEW_EMAIL);
@@ -75,7 +107,7 @@ public class DifferencingTest {
 
     UpdateDifference updateDifference = new UpdateDifference(existedUser(), userUpdate);
 
-    assertStringDiff(updateDifference.getEmailDiff(), EXISTED_EMAIL.toLowerCase(), NEW_EMAIL.toLowerCase());
+    assertStringDiff(updateDifference.getEmailDiff(), EXISTED_EMAIL, NEW_EMAIL.toLowerCase());
     assertBooleanDiff(updateDifference.getEnabledDiff(), EXISTED_ENABLED, NEW_ENABLED);
     assertStringDiff(updateDifference.getPhoneNumberDiff(), EXISTED_PHONE, NEW_PHONE);
     assertStringDiff(
