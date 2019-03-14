@@ -10,6 +10,8 @@ import gov.ca.cwds.idm.persistence.ns.repository.NsAuditEventRepository;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.persistence.PersistenceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Async;
@@ -19,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service(value = "auditEventService")
 @Profile("idm")
 public class AuditEventService {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(AuditEventService.class);
 
   @Autowired
   private NsAuditEventRepository nsAuditEventRepository;
@@ -31,20 +35,14 @@ public class AuditEventService {
 
   @Transactional(TOKEN_TRANSACTION_MANAGER)
   @Async("auditLogTaskExecutor")
-  public <T extends AuditEvent> void saveAuditEvent(
-      T auditEvent) {
-    nsAuditEventRepository.save(mapToNsAuditEvent(auditEvent));
-    sendAuditEventToEsIndex(auditEvent);
+  public <T extends AuditEvent> void saveAuditEvent(T auditEvent) {
+    processAuditEvent(auditEvent);
   }
 
   @Transactional(TOKEN_TRANSACTION_MANAGER)
   @Async("auditLogTaskExecutor")
-  public void saveAuditEvents(
-      List<? extends AuditEvent> auditEvents) {
-    List<NsAuditEvent> nsAuditEvents = auditEvents.stream().map(this::mapToNsAuditEvent)
-        .collect(Collectors.toList());
-    nsAuditEventRepository.save(nsAuditEvents);
-    sendAuditEventsToEsIndex(auditEvents);
+  public void saveAuditEvents(List<? extends AuditEvent> auditEvents) {
+    auditEvents.forEach(this::processAuditEvent);
   }
 
   @Transactional(TOKEN_TRANSACTION_MANAGER)
@@ -55,12 +53,15 @@ public class AuditEventService {
     nsAuditEventRepository.save(event);
   }
 
-  private <T extends AuditEvent> void sendAuditEventToEsIndex(T event) {
-    auditEventIndexService.sendAuditEventToEsIndex(event);
-  }
-
-  private <T extends AuditEvent> void sendAuditEventsToEsIndex(List<T> events) {
-    events.forEach(auditEventIndexService::sendAuditEventToEsIndex);
+  private <T extends AuditEvent> void processAuditEvent(T auditEvent) {
+    NsAuditEvent nsAuditEvent = mapToNsAuditEvent(auditEvent);
+    nsAuditEvent = nsAuditEventRepository.save(nsAuditEvent);
+    try {
+      auditEventIndexService.sendAuditEventToEsIndex(auditEvent);
+    } catch (Exception e) {
+      nsAuditEvent.setProcessed(false);
+      LOGGER.warn("AuditEvent {} has been marked for further processing by the job", nsAuditEvent.getId());
+    }
   }
 
   private <T extends AuditEvent> NsAuditEvent mapToNsAuditEvent(T auditEvent) {
