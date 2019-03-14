@@ -88,18 +88,6 @@ public class NsUserServiceImpl implements NsUserService {
     }
   }
 
-  private NsUser getOrCreateNewNsUser(String username) {
-    Optional<NsUser> nsUserOpt = findByUsername(username);
-
-    if (nsUserOpt.isPresent()) {
-      return nsUserOpt.get();
-    } else {
-      NsUser nsUser = new NsUser();
-      nsUser.setUsername(username);
-      return nsUser;
-    }
-  }
-
   @Override
   @Transactional(value = TOKEN_TRANSACTION_MANAGER, readOnly = true)
   public List<NsUser> findByUsernames(Set<String> usernames) {
