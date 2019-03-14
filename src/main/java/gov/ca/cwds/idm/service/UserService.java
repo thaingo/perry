@@ -13,6 +13,7 @@ import gov.ca.cwds.data.persistence.auth.StaffPerson;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UsersPage;
 import gov.ca.cwds.idm.dto.UsersSearchCriteria;
+import gov.ca.cwds.idm.exception.UserNotFoundException;
 import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute;
@@ -29,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -165,14 +167,18 @@ public class UserService {
 
     Map<String, CwsUserInfo> racfidToCmsUser = getRacfidToCmsUserMap(racfIds);
 
-    return nsUsers
-        .stream()
-        .map(nsUser -> mappingService.toUser(
-            cognitoServiceFacade.getCognitoUserById(nsUser.getUsername()),
-            racfidToCmsUser.get(nsUser.getRacfid()),
-            nsUser
-            )
-        ).collect(Collectors.toList());
+    List<User> result = new LinkedList<>();
+
+    for(NsUser nsUser : nsUsers) {
+      try {
+        UserType cognitoUser = cognitoServiceFacade.getCognitoUserById(nsUser.getUsername());
+        CwsUserInfo cwsUser = racfidToCmsUser.get(nsUser.getRacfid());
+        result.add(mappingService.toUser(cognitoUser, cwsUser, nsUser));
+      } catch (UserNotFoundException e) {
+        LOGGER.error(e.getMessage(), e);
+      }
+    }
+    return result;
   }
 
   private Map<String, CwsUserInfo> getRacfidToCmsUserMap(Collection<String> racfIds) {

@@ -356,7 +356,7 @@
       <column name="id" value="18"/>
       <column name="username" value="absentInIdmUserId"/>
       <column name="last_login_time" valueDate="2018-10-17 07:01:12"/>
-      <column name="racfid"/>
+      <column name="racfid" value="INCOGNITO"/>
       <column name="phone_number"/>
       <column name="phone_extension"/>
       <column name="last_modified_time" valueDate="2018-05-31"/>
