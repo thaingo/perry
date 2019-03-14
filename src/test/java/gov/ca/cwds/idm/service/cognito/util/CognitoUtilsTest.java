@@ -2,7 +2,6 @@ package gov.ca.cwds.idm.service.cognito.util;
 
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getAttribute;
-import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getCustomDelimitedListAttributeValue;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getRACFId;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -12,9 +11,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.UserType;
-import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
 import org.junit.Test;
 
 public class CognitoUtilsTest {
@@ -73,25 +70,6 @@ public class CognitoUtilsTest {
     AttributeType attrUpCase = attrOptUpCase.get();
     assertThat(attrUpCase.getName(), is("someName"));
     assertThat(attrUpCase.getValue(), is("someValue"));
-  }
-
-  @Test
-  public void testGetPermissionsAttributeValueNull() {
-    assertThat(getCustomDelimitedListAttributeValue(null), is(""));
-  }
-
-  @Test
-  public void testGetPermissionsAttributeValueEmpty() {
-    Set<String> permissions = new HashSet<>();
-    assertThat(getCustomDelimitedListAttributeValue(permissions), is(""));
-  }
-
-  @Test
-  public void testGetPermissionsAttributeValue() {
-    Set<String> permissions = new HashSet<>();
-    permissions.add("one");
-    permissions.add("two");
-    assertThat(getCustomDelimitedListAttributeValue(permissions), is("one:two"));
   }
 
   @Test

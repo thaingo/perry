@@ -7,7 +7,6 @@ import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EM
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.FIRST_NAME;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.LAST_NAME;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.RACFID_STANDARD;
-import static gov.ca.cwds.util.Utils.toSet;
 import static gov.ca.cwds.util.Utils.toUpperCase;
 
 import com.amazonaws.services.cognitoidp.model.AttributeType;
@@ -15,16 +14,12 @@ import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.cognito.attribute.AttributesBuilder;
 import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.CollectionUtils;
 
 public class CognitoUtils {
 
-  private static final String COGNITO_LIST_DELIMITER = ":";
   public static final String TRUE_VALUE = "True";
 
   private CognitoUtils() {
@@ -53,38 +48,6 @@ public class CognitoUtils {
 
   public static String getEmail(UserType cognitoUser) {
     return getAttributeValue(cognitoUser, EMAIL.getName());
-  }
-
-  public static Set<String> getDelimitedAttributeValue(UserType cognitoUser,
-      UserAttribute userAttribute) {
-    Optional<AttributeType> attrOpt = getAttribute(cognitoUser, userAttribute.getName());
-
-    if (!attrOpt.isPresent()) {
-      return new HashSet<>();
-    }
-
-    AttributeType attr = attrOpt.get();
-    String attrStrValue = attr.getValue();
-
-    if (StringUtils.isEmpty(attrStrValue)) {
-      return new HashSet<>();
-    }
-
-    return toSet(attrStrValue.split(COGNITO_LIST_DELIMITER));
-  }
-
-  public static String getCustomDelimitedListAttributeValue(Set<String> setOfValues) {
-    if (!CollectionUtils.isEmpty(setOfValues)) {
-      return String.join(COGNITO_LIST_DELIMITER, setOfValues);
-    } else {
-      return "";
-    }
-  }
-
-  public static AttributeType createDelimitedAttribute(UserAttribute userAttribute,
-      Set<String> values) {
-    return new AttributeType().withName(userAttribute.getName()).withValue(
-        getCustomDelimitedListAttributeValue(values));
   }
 
   public static List<AttributeType> buildCreateUserAttributes(User user) {
