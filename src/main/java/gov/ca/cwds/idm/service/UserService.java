@@ -168,7 +168,7 @@ public class UserService {
         CwsUserInfo cwsUser = racfidToCmsUser.get(nsUser.getRacfid());
         result.add(mappingService.toUser(cognitoUser, cwsUser, nsUser));
       } catch (UserNotFoundException e) {
-        LOGGER.error(e.getMessage(), e);
+        LOGGER.error(e.getMessage(), e.getCause());
       }
     }
     return result;
