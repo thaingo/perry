@@ -1,5 +1,7 @@
 package gov.ca.cwds.web;
 
+import static gov.ca.cwds.service.sso.UniversalUserTokenExtractor.USER_INFO_USERNAME_KEY;
+
 import gov.ca.cwds.data.reissue.model.PerryTokenEntity;
 import gov.ca.cwds.service.sso.OAuth2Service;
 import io.dropwizard.testing.FixtureHelpers;
@@ -56,7 +58,7 @@ public class MockOAuth2Service extends OAuth2Service {
       Map payloadMap = objectMapper.convertValue(payloadNode, Map.class);
       Map<String, Object> userInfo = new HashMap<>();
       userInfo.put("UserAttributes", mapToNameValueList(payloadMap));
-      userInfo.put("Username", payloadMap.get("cognito:username"));
+      userInfo.put(USER_INFO_USERNAME_KEY, payloadMap.get("cognito:username"));
       return userInfo;
     } catch (IOException e) {
       throw new RuntimeException(e);

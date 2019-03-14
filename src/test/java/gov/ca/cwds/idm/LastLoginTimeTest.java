@@ -2,15 +2,19 @@ package gov.ca.cwds.idm;
 
 import static gov.ca.cwds.config.TokenServiceConfiguration.TOKEN_TRANSACTION_MANAGER;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_NO_RACFID_ID;
 import static gov.ca.cwds.idm.util.TestUtils.dateTime;
+import static gov.ca.cwds.service.messages.MessageCode.USER_NOT_FOUND_BY_ID_IN_NS_DATABASE;
 import static gov.ca.cwds.util.UniversalUserTokenDeserializer.USER_NAME;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.event.UserLoggedInEvent;
 import gov.ca.cwds.idm.event.UserLoggedInEventListener;
+import gov.ca.cwds.idm.exception.UserNotFoundException;
 import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
 import gov.ca.cwds.idm.service.NsUserService;
 import java.time.LocalDateTime;
@@ -20,8 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 public class LastLoginTimeTest extends BaseIdmIntegrationWithUserLogTest {
-
-  private static final String NEW_USER_NAME = "last-login-time-test-unique-username";
 
   @Autowired
   private UserLoggedInEventListener userLoggedInEventListener;
@@ -41,15 +43,23 @@ public class LastLoginTimeTest extends BaseIdmIntegrationWithUserLogTest {
 
     userLogRepository.deleteAll();
 
-    assertThat(getLastLoginTime(NEW_USER_NAME), nullValue());
+    final String USER_ID = USER_NO_RACFID_ID;
 
-    userLoggedInEventListener.handleUserLoggedInEvent(loggedInEvent(NEW_USER_NAME, FIRST_LOGIN_TIME));
-    assertThat(getLastLoginTime(NEW_USER_NAME), is(FIRST_LOGIN_TIME));
-    assertLastUserLog(dateTime(FIRST_LOGIN_TIME_MILLIS - 100), NEW_USER_NAME, UPDATE);
+    userLoggedInEventListener.handleUserLoggedInEvent(loggedInEvent(USER_ID, FIRST_LOGIN_TIME));
+    assertThat(getLastLoginTime(USER_ID), is(FIRST_LOGIN_TIME));
+    assertLastUserLog(dateTime(FIRST_LOGIN_TIME_MILLIS - 100), USER_ID, UPDATE);
 
-    userLoggedInEventListener.handleUserLoggedInEvent(loggedInEvent(NEW_USER_NAME, SECOND_LOGIN_TIME));
-    assertThat(getLastLoginTime(NEW_USER_NAME), is(SECOND_LOGIN_TIME));
-    assertLastUserLog(dateTime(SECOND_LOGIN_TIME_MILLIS - 100), NEW_USER_NAME, UPDATE);
+    userLoggedInEventListener.handleUserLoggedInEvent(loggedInEvent(USER_ID, SECOND_LOGIN_TIME));
+    assertThat(getLastLoginTime(USER_ID), is(SECOND_LOGIN_TIME));
+    assertLastUserLog(dateTime(SECOND_LOGIN_TIME_MILLIS - 100), USER_ID, UPDATE);
+  }
+
+  @Test
+  public void testUserNotExistedInNsDb() {
+    final String USER_ID = "not-existed-in-ns-db-username";
+    assertNoNsUserInDb(USER_ID);
+    userLoggedInEventListener.handleUserLoggedInEvent(loggedInEvent(USER_ID, dateTime(1000000L)));
+    assertNoNsUserInDb(USER_ID);
   }
 
   private UserLoggedInEvent loggedInEvent(String username, LocalDateTime loginTime) {
