@@ -23,11 +23,13 @@ public class DebugRestTemplateInterceptor implements ClientHttpRequestIntercepto
     }
 
     private void traceRequest(HttpRequest request, byte[] body) throws IOException {
-        log.debug("===========================request begin================================================");
-        log.debug("URI         : {}", request.getURI());
-        log.debug("Method      : {}", request.getMethod());
-        log.debug("Headers     : {}", request.getHeaders());
-        log.debug("Request body: {}", new String(body, Charset.defaultCharset()));
-        log.debug("==========================request end================================================");
+        if (log.isDebugEnabled()) {
+            log.debug("===========================request begin================================================");
+            log.debug("URI         : {}", request.getURI());
+            log.debug("Method      : {}", request.getMethod());
+            log.debug("Headers     : {}", request.getHeaders());
+            log.debug("Request body: {}", new String(body, Charset.defaultCharset()));
+            log.debug("==========================request end================================================");
+        }
     }
 }

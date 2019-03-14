@@ -33,6 +33,7 @@ public class UniversalUserTokenExtractor implements PrincipalExtractor {
   private NsUserService nsUserService;
 
   @Override
+  @SuppressWarnings("squid:S00112")
   public UniversalUserToken extractPrincipal(Map<String, Object> userInfo) {
 
     String username = (String) userInfo.get(USER_INFO_USERNAME_KEY);

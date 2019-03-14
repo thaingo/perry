@@ -3,8 +3,8 @@ package gov.ca.cwds.idm.service;
 import static gov.ca.cwds.idm.service.IdmServiceImpl.transformSearchValues;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getRACFId;
 import static gov.ca.cwds.service.messages.MessageCode.DUPLICATE_USERID_FOR_RACFID_IN_CWSCMS;
-import static gov.ca.cwds.util.Utils.applyFunctionToValues;
 import static gov.ca.cwds.util.Utils.isRacfidUser;
+import static java.util.stream.Collectors.toSet;
 
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.data.persistence.auth.CwsOffice;
@@ -12,6 +12,7 @@ import gov.ca.cwds.data.persistence.auth.StaffPerson;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UsersPage;
 import gov.ca.cwds.idm.dto.UsersSearchCriteria;
+import gov.ca.cwds.idm.exception.UserNotFoundException;
 import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute;
@@ -27,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -128,6 +130,14 @@ public class UserService {
 
     return cognitoUsers
         .stream()
+        .filter(userType -> {
+          boolean foundInNsDb = usernameToNsUser.containsKey(userType.getUsername());
+          if (!foundInNsDb) {
+            LOGGER.error("User with username {} is not found in NS database",
+                userType.getUsername());
+          }
+          return foundInNsDb;
+        })
         .map(userType -> mappingService.toUser(
             userType,
             racfidToCmsUser.get(userNameToRacfId.get(userType.getUsername())),
@@ -137,7 +147,7 @@ public class UserService {
   }
 
   public List<User> searchUsersByRacfids(Set<String> racfids) {
-    Set<String> upperCaseRacfids = applyFunctionToValues(racfids, Utils::toUpperCase);
+    Set<String> upperCaseRacfids = racfids.stream().map(Utils::toUpperCase).collect(toSet());
     List<NsUser> nsUsers = nsUserService.findByRacfids(upperCaseRacfids);
     return enrichNsUsers(nsUsers);
   }
@@ -150,14 +160,18 @@ public class UserService {
 
     Map<String, CwsUserInfo> racfidToCmsUser = getRacfidToCmsUserMap(racfIds);
 
-    return nsUsers
-        .stream()
-        .map(nsUser -> mappingService.toUser(
-            cognitoServiceFacade.getCognitoUserById(nsUser.getUsername()),
-            racfidToCmsUser.get(nsUser.getRacfid()),
-            nsUser
-            )
-        ).collect(Collectors.toList());
+    List<User> result = new LinkedList<>();
+
+    for(NsUser nsUser : nsUsers) {
+      try {
+        UserType cognitoUser = cognitoServiceFacade.getCognitoUserById(nsUser.getUsername());
+        CwsUserInfo cwsUser = racfidToCmsUser.get(nsUser.getRacfid());
+        result.add(mappingService.toUser(cognitoUser, cwsUser, nsUser));
+      } catch (UserNotFoundException e) {
+        LOGGER.error(e.getMessage(), e);
+      }
+    }
+    return result;
   }
 
   private Map<String, CwsUserInfo> getRacfidToCmsUserMap(Collection<String> racfIds) {
