@@ -89,6 +89,7 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
    * {@inheritDoc}
    */
   @Override
+  @SuppressWarnings({"fb-contrib:EXS_EXCEPTION_SOFTENING_NO_CHECKED"})//no checked exceptions here
   public UserType createUser(User user) {
 
     AdminCreateUserRequest request = cognitoRequestHelper.getAdminCreateUserRequest(user);
@@ -109,6 +110,7 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
    * {@inheritDoc}
    */
   @Override
+  @SuppressWarnings({"fb-contrib:EXS_EXCEPTION_SOFTENING_NO_CHECKED"})//no checked exceptions here
   public CognitoUserPage searchPage(CognitoUsersSearchCriteria searchCriteria) {
     ListUsersRequest request = cognitoRequestHelper.composeListUsersRequest(searchCriteria);
     try {
