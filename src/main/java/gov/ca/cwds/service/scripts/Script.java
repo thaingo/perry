@@ -14,14 +14,14 @@ import java.util.stream.IntStream;
  */
 class Script {
   private String[] variables;
-  private String script;
+  private String newScript;
   private ScriptEngine scriptEngine;
 
   @SuppressFBWarnings("PATH_TRAVERSAL_IN")
     //script file location taken from property file only!
   Script(String filePath, String... variables) throws IOException {
     byte[] bytes = Files.readAllBytes(Paths.get(filePath));
-    script = new String(bytes, StandardCharsets.UTF_8);
+    newScript = new String(bytes, StandardCharsets.UTF_8);
     this.variables = variables;
     int dotIndex = filePath.lastIndexOf('.');
     String fileExtension = dotIndex == -1 ? "" : filePath.substring(dotIndex + 1);
@@ -33,6 +33,6 @@ class Script {
     ScriptContext scriptContext = new SimpleScriptContext();
     IntStream.range(0, variables.length)
             .forEach(i -> scriptContext.setAttribute(variables[i], objects[i], ScriptContext.ENGINE_SCOPE));
-    return scriptEngine.eval(script, scriptContext);
+    return scriptEngine.eval(newScript, scriptContext);
   }
 }

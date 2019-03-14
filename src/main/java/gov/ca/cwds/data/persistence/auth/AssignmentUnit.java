@@ -10,7 +10,6 @@ import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.annotations.Type;
 
 /**
  * {@link CmsPersistentObject} representing an Assignment Unit
@@ -72,6 +71,8 @@ public class AssignmentUnit extends CmsPersistentObject {
    * @param startDate the startDate
    * @param id the id
    */
+
+  @SuppressWarnings({"squid:S00107"})
   public AssignmentUnit(
       Long phoneNo,
       int telExtNo,

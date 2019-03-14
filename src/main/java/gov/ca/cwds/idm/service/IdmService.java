@@ -24,7 +24,7 @@ public interface IdmService {
 
   String createUser(User user);
 
-  List<User> searchUsersInIdm(UsersSearchCriteria usersSearchCriteria);
+  List<User> searchUsersInCognito(UsersSearchCriteria usersSearchCriteria);
 
   List<User> searchUsersByRacfids(Set<String> racfids);
 
