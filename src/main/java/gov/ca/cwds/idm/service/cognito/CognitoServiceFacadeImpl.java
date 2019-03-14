@@ -209,9 +209,9 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
       throw exceptionFactory.createUserNotFoundException(USER_NOT_FOUND_BY_ID_IN_IDM, e,
           userUpdateRequest.getUserId());
     } catch (com.amazonaws.services.cognitoidp.model.AliasExistsException e) {
-        final String testX = updateDifference.getEmailDiff().map(StringDiff::getNewValue).orElse("");
+        final String newEmail = updateDifference.getEmailDiff().map(StringDiff::getNewValue).orElse("");
         throw exceptionFactory.createUserAlreadyExistsException(USER_WITH_EMAIL_EXISTS_IN_IDM, e,
-                testX);
+                newEmail);
     } catch (Exception e) {
       throw exceptionFactory
           .createIdmException(getErrorCode(UPDATE), e, userUpdateRequest.getUserId());
