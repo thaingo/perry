@@ -197,7 +197,7 @@ public class UserChangeLogEventTest {
     assertEquals(UNLOCKED, event.getEvent().getOldValue());
     assertEquals(LOCKED, event.getEvent().getNewValue());
     assertEquals(SYSTEM_USER_LOGIN, event.getUserLogin());
-
+    assertEquals(SYSTEM_USER_LOGIN, event.getEvent().getAdminName());
   }
 
   @Test
