@@ -9,7 +9,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-@Profile("idm")
+@Profile({"idm", "mfa"})
 @Repository
 @SuppressWarnings({"squid:S1214"})//implementation details are queries and they are put here by Spring Data design
 public interface NsUserRepository extends CrudRepository<NsUser, Long> {
