@@ -1,43 +1,27 @@
 package gov.ca.cwds.idm.service;
 
-import static gov.ca.cwds.BaseIntegrationTest.H2_DRIVER_CLASS_NAME;
-import static gov.ca.cwds.BaseIntegrationTest.IDM_BASIC_AUTH_PASS;
-import static gov.ca.cwds.BaseIntegrationTest.IDM_BASIC_AUTH_USER;
 import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
-import static gov.ca.cwds.util.LiquibaseUtils.CMS_STORE_URL;
-import static gov.ca.cwds.util.LiquibaseUtils.SPRING_BOOT_H2_PASSWORD;
-import static gov.ca.cwds.util.LiquibaseUtils.SPRING_BOOT_H2_USER;
-import static gov.ca.cwds.util.LiquibaseUtils.TOKEN_STORE_URL;
-import static gov.ca.cwds.util.LiquibaseUtils.createCmsDatabase;
-import static gov.ca.cwds.util.LiquibaseUtils.createTokenStoreDatabase;
-import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.when;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Iterables;
 import gov.ca.cwds.PerryApplication;
-import gov.ca.cwds.UniversalUserToken;
+import gov.ca.cwds.config.SpringAsyncConfiguration;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.event.AuditEvent;
-import gov.ca.cwds.idm.event.UserCreatedEvent;
 import gov.ca.cwds.idm.event.UserLockedEvent;
 import gov.ca.cwds.idm.persistence.ns.entity.NsAuditEvent;
 import gov.ca.cwds.idm.persistence.ns.repository.NsAuditEventRepository;
-import gov.ca.cwds.idm.service.authorization.UserRolesService;
-import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.TreeSet;
 import java.util.concurrent.Executor;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,33 +31,23 @@ import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.util.AbstractUriTemplateHandler;
 
 @RunWith(SpringRunner.class)
-//@SpringBootTest(properties = {
-//    "perry.identityManager.idmBasicAuthUser=" + IDM_BASIC_AUTH_USER,
-//    "perry.identityManager.idmBasicAuthPass=" + IDM_BASIC_AUTH_PASS,
-//    "perry.identityManager.idmMapping=config/idm.groovy",
-//    "spring.jpa.hibernate.ddl-auto=none",
-//    "perry.tokenStore.datasource.url=" + TOKEN_STORE_URL,
-//    "spring.datasource.hikari.jdbcUrl=" + CMS_STORE_URL,
-//    "spring.datasource.hikari.username=" + SPRING_BOOT_H2_USER,
-//    "spring.datasource.hikari.password=" + SPRING_BOOT_H2_PASSWORD,
-//})
 @DataJpaTest(
-    excludeAutoConfiguration = {FlywayAutoConfiguration.class, LiquibaseAutoConfiguration.class}
+    excludeAutoConfiguration = {FlywayAutoConfiguration.class, LiquibaseAutoConfiguration.class, SpringAsyncConfiguration.class}
 )
-@DirtiesContext
-@ActiveProfiles("dev, idm")
+@ActiveProfiles("dev, idm, asynctest")
 public class AuditEventServiceTest {
 
   private static final String TEST_USER_ID = "testId";
@@ -103,8 +77,7 @@ public class AuditEventServiceTest {
   @MockBean
   private AuditEventIndexService auditEventIndexService;
 
-  @Configuration
-  @Import(PerryApplication.class)
+  @TestConfiguration
   static class ContextConfiguration {
     @Bean(name = "auditLogTaskExecutor")
     @Primary
@@ -113,12 +86,6 @@ public class AuditEventServiceTest {
     }
   }
 
-//  @BeforeClass
-//  public static void prepareDatabases() throws Exception {
-//    Class.forName(H2_DRIVER_CLASS_NAME);
-//    createTokenStoreDatabase();
-//    createCmsDatabase();
-//  }
 
   @Test
   public void testSaveAuditEvent() {
@@ -140,7 +107,9 @@ public class AuditEventServiceTest {
 
     int sizeBefore = Iterables.size(nsAuditEventRepository.findAll());
 
-    doThrow(new RuntimeException()).when(auditEventIndexService).sendAuditEventToEsIndex(any(AuditEvent.class));
+    doThrow(new RuntimeException())
+        .when(auditEventIndexService)
+        .sendAuditEventToEsIndex(any(AuditEvent.class));
 
     AuditEvent event = new UserLockedEvent(mockUser());
     service.saveAuditEvent(event);
@@ -183,5 +152,6 @@ public class AuditEventServiceTest {
   }
 
 
-
 }
+
+
