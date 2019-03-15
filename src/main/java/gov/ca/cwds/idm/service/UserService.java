@@ -152,6 +152,9 @@ public class UserService {
     return enrichNsUsers(nsUsers);
   }
 
+  @SuppressWarnings("squid:S1166")
+//caught UserNotFoundException message is logged in error message,
+// its stacktrace is of no interest since it duplicates  stacktrace of the original exception
   private List<User> enrichNsUsers(Collection<NsUser> nsUsers) {
     if (CollectionUtils.isEmpty(nsUsers)) {
       return Collections.emptyList();
