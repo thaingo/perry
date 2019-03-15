@@ -183,8 +183,13 @@ public class IdmServiceImpl implements IdmService {
   }
 
   @Override
-  public List<User> searchUsers(UsersSearchCriteria criteria) {
+  public List<User> searchUsersInCognito(UsersSearchCriteria criteria) {
     return userService.searchUsers(criteria);
+  }
+
+  @Override
+  public List<User> searchUsersByRacfids(Set<String> racfids) {
+    return userService.searchUsersByRacfids(racfids);
   }
 
   @Override

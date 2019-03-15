@@ -1,37 +1,38 @@
-def isMultiValueAttribute = {String name-> ["custom:permission", "custom:role"].find {it.equalsIgnoreCase(name)}}
+import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.*
+import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.*
+import static gov.ca.cwds.util.UniversalUserTokenDeserializer.*
 
-def getValues = {String value ->
-    def result = value?.split('\\s*:\\s*') as HashSet
-    return result ? result : new HashSet<>()
+import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute
+
+def cognitoAttribute = {UserAttribute attr -> idpToken.UserAttributes?.find {it.Name.equalsIgnoreCase(attr.name)}?.Value}
+
+def racfid
+
+if(nsUser) {
+    racfid = nsUser.racfid
+} else {
+    racfid = cognitoAttribute(RACFID_STANDARD)
 }
-
-def getValue = {String name, String value ->
-    if(isMultiValueAttribute(name)) {
-        return getValues(value)
-    }
-    else {
-        return value
-    }
-}
-
-def attribute = {name ->
-    getValue(name, idpToken.UserAttributes?.find {it.Name.equalsIgnoreCase(name)}?.Value)
-}
-
-def racfid = attribute("custom:racfid")?.toUpperCase()?.trim()
+racfid = racfid?.toUpperCase()?.trim()
 
 if(racfid) {
     universalUserToken.userId = racfid
-}
-else {
-    universalUserToken.userId = attribute("email")
+} else {
+    universalUserToken.userId = cognitoAttribute(EMAIL)
 }
 
-universalUserToken.roles = attribute("custom:role")
-universalUserToken.permissions = attribute("custom:permission")
+if(nsUser) {
+    universalUserToken.roles = nsUser?.roles
+    universalUserToken.permissions = nsUser?.permissions
+}
 
 idpToken.UserAttributes?.each {
-    universalUserToken.parameters[it.Name.toLowerCase()] = getValue(it.Name, it.Value)
+    universalUserToken.parameters[it.Name.toLowerCase()] = it.Value
 }
 
-universalUserToken.parameters["userName"] = idpToken.Username
+universalUserToken.parameters[USER_NAME] = idpToken.Username
+
+if(nsUser) {
+    universalUserToken.parameters[FIRST_NAME.name] = nsUser.firstName
+    universalUserToken.parameters[LAST_NAME.name] = nsUser.lastName
+}

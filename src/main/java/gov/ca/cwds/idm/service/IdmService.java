@@ -10,6 +10,7 @@ import gov.ca.cwds.idm.dto.UsersPage;
 import gov.ca.cwds.idm.dto.UsersSearchCriteria;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 public interface IdmService {
 
@@ -23,7 +24,9 @@ public interface IdmService {
 
   String createUser(User user);
 
-  List<User> searchUsers(UsersSearchCriteria usersSearchCriteria);
+  List<User> searchUsersInCognito(UsersSearchCriteria usersSearchCriteria);
+
+  List<User> searchUsersByRacfids(Set<String> racfids);
 
   List<UserAndOperation> getFailedOperations(LocalDateTime lastJobTime);
 

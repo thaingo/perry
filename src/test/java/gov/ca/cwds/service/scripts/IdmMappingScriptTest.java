@@ -73,7 +73,7 @@ public class IdmMappingScriptTest {
 
   @Before
   public void before() throws Exception {
-    String path = Paths.get(getClass().getResource("/scripts/cognito/idm.groovy").toURI()).toString();
+    String path = Paths.get(getClass().getResource("/scripts/idm.groovy").toURI()).toString();
     idpMappingScript = new IdmMappingScript(path);
   }
 

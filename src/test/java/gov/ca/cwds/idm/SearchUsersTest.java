@@ -43,4 +43,38 @@ public class SearchUsersTest extends BaseIdmIntegrationTest {
 
     assertNonStrict(result, "fixtures/idm/users-search/yolod.json");
   }
+
+  @Test
+  public void testSearchUsersByRacfid_WithInvalidRacfid() throws Exception {
+
+    MvcResult result =
+        mockMvc
+            .perform(
+                MockMvcRequestBuilders.post("/idm/users/search")
+                    .contentType(JSON_CONTENT_TYPE)
+                    .content("[\"YOLOD\", \"SMITHBO\", \"INVALIDO\"]")
+                    .header(HttpHeaders.AUTHORIZATION, BASIC_AUTH_HEADER))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
+            .andReturn();
+
+    assertNonStrict(result, "fixtures/idm/users-search/valid.json");
+  }
+
+  @Test
+  public void testSearchUsersByRacfid_WithNotInCognitoRacfid() throws Exception {
+
+    MvcResult result =
+        mockMvc
+            .perform(
+                MockMvcRequestBuilders.post("/idm/users/search")
+                    .contentType(JSON_CONTENT_TYPE)
+                    .content("[\"YOLOD\", \"SMITHBO\", \"INCOGNITO\"]")
+                    .header(HttpHeaders.AUTHORIZATION, BASIC_AUTH_HEADER))
+            .andExpect(MockMvcResultMatchers.status().isOk())
+            .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
+            .andReturn();
+
+    assertNonStrict(result, "fixtures/idm/users-search/valid.json");
+  }
 }
