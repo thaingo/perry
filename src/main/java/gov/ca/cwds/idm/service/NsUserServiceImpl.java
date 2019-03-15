@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,11 +52,17 @@ public class NsUserServiceImpl implements NsUserService {
   }
 
   @Override
-  @Transactional(value = TOKEN_TRANSACTION_MANAGER)
-  public void saveLastLoginTime(String username, LocalDateTime loginTime) {
-    NsUser nsUser = findByUsername(username).orElseThrow(() ->
+  @Transactional(value = TOKEN_TRANSACTION_MANAGER, readOnly = true)
+  public NsUser getByUsername(String username) {
+    return findByUsername(username).orElseThrow(() ->
         exceptionFactory
             .createUserNotFoundException(USER_NOT_FOUND_BY_ID_IN_NS_DATABASE, username));
+  }
+
+  @Override
+  @Transactional(value = TOKEN_TRANSACTION_MANAGER)
+  public void saveLastLoginTime(String username, LocalDateTime loginTime) {
+    NsUser nsUser = getByUsername(username);
     nsUser.setLastLoginTime(loginTime);
     nsUserRepository.save(nsUser);
   }
@@ -67,7 +72,7 @@ public class NsUserServiceImpl implements NsUserService {
   public boolean update(UserUpdateRequest userUpdateRequest) {
     UpdateDifference updateDifference = userUpdateRequest.getUpdateDifference();
 
-    NsUser nsUser = getOrCreateNewNsUser(userUpdateRequest.getUserId());
+    NsUser nsUser = getByUsername(userUpdateRequest.getUserId());
 
     NsUserBuilder nsUserBuilder = new NsUserBuilder(nsUser, updateDifference);
     NsUser modifiedNsUser = nsUserBuilder.build();
@@ -78,18 +83,6 @@ public class NsUserServiceImpl implements NsUserService {
       return true;
     } else {
       return false;
-    }
-  }
-
-  private NsUser getOrCreateNewNsUser(String username) {
-    Optional<NsUser> nsUserOpt = findByUsername(username);
-
-    if (nsUserOpt.isPresent()) {
-      return nsUserOpt.get();
-    } else {
-      NsUser nsUser = new NsUser();
-      nsUser.setUsername(username);
-      return nsUser;
     }
   }
 

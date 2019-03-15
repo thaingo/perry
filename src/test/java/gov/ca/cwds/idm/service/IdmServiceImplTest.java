@@ -35,6 +35,7 @@ import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.util.WithMockCustomUser;
 import java.util.List;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -58,8 +59,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 })
 public class IdmServiceImplTest {
 
-//  private static final String USER_ID = "17067e4e-270f-4623-b86c-b4d4fa527a34";
-
   @Autowired
   private IdmServiceImpl service;
 
@@ -73,6 +72,9 @@ public class IdmServiceImplTest {
   private UserService userServiceMock;
 
   @MockBean
+  private TransactionalUserService transactionalUserServiceMock;
+
+  @MockBean
   private SearchService searchServiceMock;
 
   @BeforeClass
@@ -80,6 +82,12 @@ public class IdmServiceImplTest {
     Class.forName(H2_DRIVER_CLASS_NAME);
     createTokenStoreDatabase();
     createCmsDatabase();
+  }
+
+  @Before
+  public void before() {
+    when(transactionalUserServiceMock.updateUserAttributes(any(UserUpdateRequest.class)))
+        .thenReturn(true);
   }
 
   @Test
@@ -283,6 +291,9 @@ public class IdmServiceImplTest {
     existedUser.setPermissions(toSet("old permission"));
 
     setGetUserById(USER_ID, existedUser);
+
+    when(transactionalUserServiceMock.updateUserAttributes(any(UserUpdateRequest.class)))
+        .thenReturn(false);
 
     RuntimeException enableStatusError = new RuntimeException("Change Enable Status Error");
     setChangeUserEnabledStatusFail(enableStatusError);

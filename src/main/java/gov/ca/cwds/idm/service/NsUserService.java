@@ -16,6 +16,11 @@ public interface NsUserService {
 
   Optional<NsUser> findByUsername(String username);
 
+  /**
+   * throws UserNotFoundException if user is not found
+   */
+  NsUser getByUsername(String username);
+
   List<NsUser> findByUsernames(Set<String> usernames);
 
   List<NsUser> findByRacfids(Set<String> racfids);
