@@ -61,9 +61,7 @@ public class ValidationServiceImpl implements ValidationService {
     validateUserRolesAreAllowedAtCreate(enrichedUser);
 
     validateCreateByCansPermission(enrichedUser);
-
-    validateActiveRacfidUserExistsInCws(enrichedUser.getRacfid());
-    validateRacfidDoesNotExistInCognito(enrichedUser.getRacfid());
+    
   }
 
   @Override
