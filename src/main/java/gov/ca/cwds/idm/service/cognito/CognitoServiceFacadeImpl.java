@@ -26,20 +26,7 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProviderClientBuilder;
-import com.amazonaws.services.cognitoidp.model.AdminCreateUserRequest;
-import com.amazonaws.services.cognitoidp.model.AdminCreateUserResult;
-import com.amazonaws.services.cognitoidp.model.AdminDeleteUserRequest;
-import com.amazonaws.services.cognitoidp.model.AdminDisableUserRequest;
-import com.amazonaws.services.cognitoidp.model.AdminEnableUserRequest;
-import com.amazonaws.services.cognitoidp.model.AdminGetUserRequest;
-import com.amazonaws.services.cognitoidp.model.AdminGetUserResult;
-import com.amazonaws.services.cognitoidp.model.AdminUpdateUserAttributesRequest;
-import com.amazonaws.services.cognitoidp.model.AttributeType;
-import com.amazonaws.services.cognitoidp.model.InvalidParameterException;
-import com.amazonaws.services.cognitoidp.model.ListUsersRequest;
-import com.amazonaws.services.cognitoidp.model.ListUsersResult;
-import com.amazonaws.services.cognitoidp.model.UserType;
-import com.amazonaws.services.cognitoidp.model.UsernameExistsException;
+import com.amazonaws.services.cognitoidp.model.*;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.service.UserUpdateRequest;
@@ -208,14 +195,7 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
       throw exceptionFactory.createUserNotFoundException(USER_NOT_FOUND_BY_ID_IN_IDM, e,
           userUpdateRequest.getUserId());
     } catch (com.amazonaws.services.cognitoidp.model.AliasExistsException e) {
-        Optional<StringDiff> emailDiff =  updateDifference.getEmailDiff();
-        if(emailDiff.isPresent()) {
-            throw exceptionFactory.createUserAlreadyExistsException(USER_WITH_EMAIL_EXISTS_IN_IDM, e,
-                    emailDiff.get().getNewValue());
-        } else {
-            throw exceptionFactory.createUserAlreadyExistsException(USER_WITH_THIS_ALIAS_EXISTS_IN_IDM, e,
-                    userUpdateRequest.getUserId());
-        }
+        return handleAliasExistsException(userUpdateRequest, updateDifference, e);
     } catch (Exception e) {
       throw exceptionFactory
           .createIdmException(getErrorCode(UPDATE), e, userUpdateRequest.getUserId());
@@ -334,4 +314,16 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
   public CognitoRequestHelper getCognitoRequestHelper() {
     return cognitoRequestHelper;
   }
+
+
+  private boolean handleAliasExistsException(UserUpdateRequest userUpdateRequest, UpdateDifference updateDifference, AliasExistsException e) {
+    Optional<StringDiff> emailDiff =  updateDifference.getEmailDiff();
+      if(emailDiff.isPresent()) {
+        throw exceptionFactory.createUserAlreadyExistsException(USER_WITH_EMAIL_EXISTS_IN_IDM, e,
+          emailDiff.get().getNewValue());
+      } else {
+        throw exceptionFactory.createUserAlreadyExistsException(USER_WITH_THIS_ALIAS_EXISTS_IN_IDM, e,
+          userUpdateRequest.getUserId());
+      }
+    }
 }
