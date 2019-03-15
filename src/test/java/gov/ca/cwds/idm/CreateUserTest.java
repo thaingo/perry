@@ -338,13 +338,6 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
     verify(cognito, times(1)).adminCreateUser(request);
   }
 
-  @Test
-  @WithMockCustomUser
-  public void testCreateUserWithActiveStatusInCognito() throws Exception {
-    User user = racfIdUser("test@test.com", "SMITHBO", toSet(CWS_WORKER));
-    assertCreateUserBadRequest(user,
-        "fixtures/idm/create-user/active-user-with-same-racfid-in-cognito-error.json");
-  }
 
   @Test
   @WithMockCustomUser(roles = {STATE_ADMIN})
@@ -381,13 +374,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
     verify(cognito, times(0)).adminCreateUser(invitationRequest);
     assertExtensible(result, "fixtures/idm/create-user/racfid-user-unauthorized.json");
   }
-
-  @Test
-  @WithMockCustomUser
-  public void testCreateUserNoRacfIdInCws() throws Exception {
-    User user = racfIdUser("test@test.com", "SMITHB1", toSet(CWS_WORKER));
-    assertCreateUserBadRequest(user, "fixtures/idm/create-user/no-racfid-in-cws-error.json");
-  }
+  
 
   @Test
   @WithMockCustomUser

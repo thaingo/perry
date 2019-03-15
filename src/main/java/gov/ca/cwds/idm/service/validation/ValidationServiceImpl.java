@@ -61,7 +61,7 @@ public class ValidationServiceImpl implements ValidationService {
     validateUserRolesAreAllowedAtCreate(enrichedUser);
 
     validateCreateByCansPermission(enrichedUser);
-    
+
   }
 
   @Override
