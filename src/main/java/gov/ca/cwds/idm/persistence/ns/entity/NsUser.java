@@ -2,6 +2,7 @@ package gov.ca.cwds.idm.persistence.ns.entity;
 
 import static javax.persistence.FetchType.EAGER;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Objects;
@@ -20,7 +21,9 @@ import javax.validation.constraints.Size;
 
 @Entity
 @Table(name = "user")
-public class NsUser {
+public class NsUser  implements Serializable {
+
+  private static final long serialVersionUID = 2637959636222771141L;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

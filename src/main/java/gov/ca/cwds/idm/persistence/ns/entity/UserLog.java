@@ -1,6 +1,7 @@
 package gov.ca.cwds.idm.persistence.ns.entity;
 
 import gov.ca.cwds.idm.persistence.ns.OperationType;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import javax.persistence.Column;
@@ -16,7 +17,9 @@ import javax.validation.constraints.Size;
 
 @Entity
 @Table(name = "user_log")
-public class UserLog {
+public class UserLog implements Serializable {
+
+  private static final long serialVersionUID = 184474567572039577L;
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
