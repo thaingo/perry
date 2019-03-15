@@ -1,5 +1,6 @@
 package gov.ca.cwds.idm.persistence.ns.entity;
 
+import java.io.Serializable;
 import java.util.Objects;
 import javax.persistence.Cacheable;
 import javax.persistence.Column;
@@ -11,7 +12,9 @@ import javax.validation.constraints.NotNull;
 @Entity
 @Cacheable
 @Table(name = "permission")
-public class Permission {
+public class Permission  implements Serializable {
+
+  private static final long serialVersionUID = -1871160666991025171L;
 
   @Id
   @NotNull
