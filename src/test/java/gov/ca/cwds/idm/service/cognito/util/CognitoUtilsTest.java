@@ -1,26 +1,17 @@
 package gov.ca.cwds.idm.service.cognito.util;
 
-import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PERMISSIONS;
-import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.RACFID_CUSTOM;
-import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.createPermissionsAttribute;
+import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getAttribute;
-import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getCustomDelimitedListAttributeValue;
-import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getPermissions;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUtils.getRACFId;
-import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import com.amazonaws.services.cognitoidp.model.AttributeType;
 import com.amazonaws.services.cognitoidp.model.UserType;
-import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
 import org.junit.Test;
 
 public class CognitoUtilsTest {
@@ -82,94 +73,6 @@ public class CognitoUtilsTest {
   }
 
   @Test
-  public void testGetNoPermissions() {
-
-    UserType cognitoUser = new UserType();
-
-    AttributeType otherAttr = new AttributeType();
-    otherAttr.setName("otherName");
-    otherAttr.setValue("otherValue");
-
-    cognitoUser.withAttributes(otherAttr);
-
-    assertThat(getPermissions(cognitoUser), empty());
-  }
-
-  @Test
-  public void testGetNullPermissions() {
-
-    UserType cognitoUser = new UserType();
-
-    AttributeType permissionsAttr = new AttributeType();
-    permissionsAttr.setName(PERMISSIONS.getName());
-    permissionsAttr.setValue(null);
-
-    cognitoUser.withAttributes(permissionsAttr);
-
-    assertThat(getPermissions(cognitoUser), empty());
-  }
-
-  @Test
-  public void testGetEmptyPermissions() {
-
-    UserType cognitoUser = new UserType();
-
-    AttributeType permissionsAttr = new AttributeType();
-    permissionsAttr.setName(PERMISSIONS.getName());
-    permissionsAttr.setValue("");
-
-    cognitoUser.withAttributes(permissionsAttr);
-
-    assertThat(getPermissions(cognitoUser), empty());
-  }
-
-  @Test
-  public void testGetPermissions() {
-    UserType cognitoUser = new UserType();
-
-    AttributeType permissionsAttr = new AttributeType();
-    permissionsAttr.setName(PERMISSIONS.getName());
-    permissionsAttr.setValue("Snapshot-rollout:Hotline-rollout");
-
-    cognitoUser.withAttributes(permissionsAttr);
-
-    Set<String> permissions = getPermissions(cognitoUser);
-    assertThat(permissions, hasSize(2));
-    assertThat(permissions, hasItem("Snapshot-rollout"));
-    assertThat(permissions, hasItem("Hotline-rollout"));
-  }
-
-  @Test
-  public void testGetPermissionsAttributeValueNull() {
-    assertThat(getCustomDelimitedListAttributeValue(null), is(""));
-  }
-
-  @Test
-  public void testGetPermissionsAttributeValueEmpty() {
-    Set<String> permissions = new HashSet<>();
-    assertThat(getCustomDelimitedListAttributeValue(permissions), is(""));
-  }
-
-  @Test
-  public void testGetPermissionsAttributeValue() {
-    Set<String> permissions = new HashSet<>();
-    permissions.add("one");
-    permissions.add("two");
-    assertThat(getCustomDelimitedListAttributeValue(permissions), is("one:two"));
-  }
-
-  @Test
-  public void testCreatePermissionsAttribute() {
-    Set<String> permissions = new HashSet<>();
-    permissions.add("one");
-    permissions.add("two");
-    AttributeType attr = createPermissionsAttribute(permissions);
-    assertThat(attr.getName(), is(PERMISSIONS.getName()));
-    assertThat(attr.getValue(), is("one:two"));
-  }
-
-
-  @Test
   public void testAttribute() {
     AttributeType attr = new AttributeType().withName("attrName").withValue("attrValue");
     assertThat(attr, is(notNullValue()));
@@ -182,7 +85,7 @@ public class CognitoUtilsTest {
     UserType cognitoUser = new UserType();
 
     AttributeType attr = new AttributeType();
-    attr.setName(RACFID_CUSTOM.getName());
+    attr.setName(RACFID_STANDARD.getName());
     attr.setValue("YOLOD");
     cognitoUser.withAttributes(attr);
 

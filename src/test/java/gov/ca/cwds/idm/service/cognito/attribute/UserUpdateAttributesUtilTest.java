@@ -2,12 +2,8 @@ package gov.ca.cwds.idm.service.cognito.attribute;
 
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
-import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PERMISSIONS;
-import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PHONE_EXTENSION;
-import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.ROLES;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL_VERIFIED;
-import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.PHONE_NUMBER;
 import static gov.ca.cwds.idm.service.cognito.attribute.UserUpdateAttributesUtil.buildUpdatedAttributesList;
 import static gov.ca.cwds.util.Utils.toSet;
 import static org.hamcrest.Matchers.notNullValue;
@@ -50,22 +46,13 @@ public class UserUpdateAttributesUtilTest {
 
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setEmail("admin@oci.ca.gov");
-    userUpdate.setPhoneNumber("0987654321");
-    userUpdate.setPhoneExtensionNumber("99");
-    userUpdate.setRoles(toSet("County-admin", "Office-admin"));
-    userUpdate.setPermissions(toSet("Hotline-rollout", "RFA-rollout"));
 
     UpdateDifference updateDifference = new UpdateDifference(existedCognitoUser(), userUpdate);
     List<AttributeType> updatedAttributes = buildUpdatedAttributesList(updateDifference);
-    assertThat(updatedAttributes.size(), is(6));
+    assertThat(updatedAttributes.size(), is(2));
 
     assertAttribute(updatedAttributes.get(0), EMAIL, "admin@oci.ca.gov");
     assertAttribute(updatedAttributes.get(1), EMAIL_VERIFIED, "True");
-    assertAttribute(updatedAttributes.get(2), PHONE_NUMBER, "+0987654321");
-    assertAttribute(updatedAttributes.get(3), PHONE_EXTENSION, "99");
-    assertCollectionAttribute(updatedAttributes.get(4), PERMISSIONS, "Hotline-rollout",
-        "RFA-rollout");
-    assertCollectionAttribute(updatedAttributes.get(5), ROLES, "County-admin", "Office-admin");
   }
 
   private void assertAttribute(
