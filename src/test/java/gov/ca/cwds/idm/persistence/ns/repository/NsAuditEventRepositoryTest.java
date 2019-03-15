@@ -2,6 +2,8 @@ package gov.ca.cwds.idm.persistence.ns.repository;
 
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.ca.cwds.idm.persistence.ns.entity.NsAuditEvent;
@@ -50,6 +52,7 @@ public class NsAuditEventRepositoryTest{
     NsAuditEvent auditEvent1 = new NsAuditEvent();
     auditEvent1.setId(ID1);
     auditEvent1.setAuditEvent(AUDIT_EVENT);
+    auditEvent1.setProcessed(true);
     nsAuditEventRepository.save(auditEvent1);
     NsAuditEvent auditEvent2 = new NsAuditEvent();
     auditEvent2.setId(ID2);
@@ -62,6 +65,8 @@ public class NsAuditEventRepositoryTest{
     assertEquals(AUDIT_EVENT, nsAuditEventRepository.findOne(ID1).getAuditEvent());
     assertEquals(AUDIT_EVENT, nsAuditEventRepository.findOne(ID3).getAuditEvent());
     assertEquals(ID2, nsAuditEventRepository.findOne(ID2).getId());
+    assertTrue(nsAuditEventRepository.findOne(ID1).isProcessed());
+    assertFalse(nsAuditEventRepository.findOne(ID2).isProcessed());
   }
 
 }

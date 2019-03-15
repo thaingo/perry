@@ -13,7 +13,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 @Table(name = "audit_event")
 public class NsAuditEvent implements Serializable {
 
-  private static final long serialVersionUID = 4983865226118474684L;
+  private static final long serialVersionUID = 5334981920633133553L;
 
   @Id
   @Column(name = "id")
@@ -24,6 +24,9 @@ public class NsAuditEvent implements Serializable {
 
   @Column(name = "event_json")
   private String auditEvent;
+
+  @Column(name = "processed")
+  private boolean processed;
 
   public String getId() {
     return id;
@@ -47,6 +50,14 @@ public class NsAuditEvent implements Serializable {
 
   public void setAuditEvent(String auditEvent) {
     this.auditEvent = auditEvent;
+  }
+
+  public boolean isProcessed() {
+    return processed;
+  }
+
+  public void setProcessed(boolean processed) {
+    this.processed = processed;
   }
 
   @Override
