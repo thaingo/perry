@@ -32,6 +32,7 @@ import gov.ca.cwds.idm.service.UserUpdateRequest;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.idm.service.cognito.util.CognitoRequestHelper;
+import gov.ca.cwds.idm.service.diff.StringDiff;
 import gov.ca.cwds.idm.service.diff.UpdateDifference;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.service.messages.MessageCode;
@@ -280,9 +281,10 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
   }
 
   private void handleAliasExists(UpdateDifference updateDifference, AliasExistsException e) {
-    if (updateDifference.getEmailDiff().isPresent())
-      throw exceptionFactory.createUserAlreadyExistsException(USER_WITH_EMAIL_EXISTS_IN_IDM, e,
-        updateDifference.getEmailDiff().get().getNewValue());
+      final Optional<StringDiff> emailDiff = updateDifference.getEmailDiff();
+      if (emailDiff.isPresent())
+        throw exceptionFactory.createUserAlreadyExistsException(USER_WITH_EMAIL_EXISTS_IN_IDM, e,
+          emailDiff.get().getNewValue());
   }
 
   private static boolean isActiveUserPresent(Collection<UserType> cognitoUsers) {
