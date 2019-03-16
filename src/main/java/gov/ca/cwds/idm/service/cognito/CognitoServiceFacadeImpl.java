@@ -192,9 +192,7 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
       throw exceptionFactory.createUserNotFoundException(USER_NOT_FOUND_BY_ID_IN_IDM, e,
           userUpdateRequest.getUserId());
     } catch (com.amazonaws.services.cognitoidp.model.AliasExistsException e) {
-      if (updateDifference.getEmailDiff().isPresent())
-        throw exceptionFactory.createUserAlreadyExistsException(USER_WITH_EMAIL_EXISTS_IN_IDM, e,
-          updateDifference.getEmailDiff().get().getNewValue());
+        handleAliasExists(updateDifference, e);
     } catch (Exception e) {
       throw exceptionFactory
           .createIdmException(getErrorCode(UPDATE), e, userUpdateRequest.getUserId());
@@ -279,6 +277,12 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
     } else {
       return IDM_GENERIC_ERROR;
     }
+  }
+
+  private void handleAliasExists(UpdateDifference updateDifference, AliasExistsException e) {
+    if (updateDifference.getEmailDiff().isPresent())
+      throw exceptionFactory.createUserAlreadyExistsException(USER_WITH_EMAIL_EXISTS_IN_IDM, e,
+        updateDifference.getEmailDiff().get().getNewValue());
   }
 
   private static boolean isActiveUserPresent(Collection<UserType> cognitoUsers) {
