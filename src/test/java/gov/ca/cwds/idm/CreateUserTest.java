@@ -374,7 +374,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
     verify(cognito, times(0)).adminCreateUser(invitationRequest);
     assertExtensible(result, "fixtures/idm/create-user/racfid-user-unauthorized.json");
   }
-  
+
 
   @Test
   @WithMockCustomUser
