@@ -55,24 +55,6 @@ node('dora-slave') {
         stage('Clean Workspace') {
             archiveArtifacts artifacts: '**/perry*.jar,readme.txt', fingerprint: true
         }
-        stage('Deploy Cognito Mode') {
-            sh 'cd ansible ; ansible-playbook -e NEW_RELIC_AGENT=$USE_NEWRELIC -e VERSION_NUMBER=$APP_VERSION -i $inventory deploy-perry.yml --vault-password-file ~/.ssh/vault.txt -vv'
-            sleep(20)
-        }
-        stage('Cognito Integration Tests') {
-            def gradlePropsText = """
-            perry.health.check.url=http://10.110.12.162:9082/manage/health
-            perry.url=${PERRY_URL}
-            perry.username=donzano123+cap@gmail.com
-            perry.password=CWS4kids!
-            perry.json={}
-            perry.threads.count=1
-            selenium.grid.url=
-            validate.repeat.count=2
-            """
-            writeFile file: "gradle.properties", text: gradlePropsText
-            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'integrationTestProd --stacktrace'
-        }
         stage('Deploy Dev Mode') {
             // TODO: Need to change Perry mode here to DEV
             sh 'sed -i \'s/perry_mode: "COGNITO"/perry_mode: "CLUSTERED_DEV"/\'  ansible/inventories/tpt2dev/group_vars/perry.yml'
