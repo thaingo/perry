@@ -6,16 +6,10 @@ import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.COUN
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.IS_LOCKED;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.MAX_LOGIN_ATTEMPTS;
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.OFFICE;
-import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PERMISSIONS;
-import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.PHONE_EXTENSION;
-import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.RACFID_CUSTOM;
-import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.RACFID_CUSTOM_2;
-import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.ROLES;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL_VERIFIED;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.FIRST_NAME;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.LAST_NAME;
-import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.PHONE_NUMBER;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USERPOOL;
 import static gov.ca.cwds.idm.util.TestHelper.getTestCognitoProperties;
@@ -164,7 +158,7 @@ public class CognitoServiceFacadeTest {
 
     List<AttributeType> attrs = request.getUserAttributes();
     assertThat(attrs.isEmpty(), is(false));
-    assertThat(attrs.size(), is(13));
+    assertThat(attrs.size(), is(7));
 
     Map<String, String> attrMap = attrMap(attrs);
 
@@ -173,14 +167,8 @@ public class CognitoServiceFacadeTest {
     assertAttr(attrMap, LAST_NAME, "Gonzales");
     assertAttr(attrMap, COUNTY, "Madera");
     assertAttr(attrMap, OFFICE, "Office07IJ");
-    assertAttr(attrMap, RACFID_CUSTOM, "RUBBLBA");
     assertAttr(attrMap, RACFID_STANDARD, "RUBBLBA");
-    assertAttr(attrMap, RACFID_CUSTOM_2, "RUBBLBA");
     assertAttr(attrMap, EMAIL_VERIFIED, "True");
-    assertAttr(attrMap, PERMISSIONS, "RFA-rollout:Hotline-rollout");
-    assertAttr(attrMap, ROLES, "County-admin:CWS-worker");
-    assertAttr(attrMap, PHONE_NUMBER, "+1234567890");
-    assertAttr(attrMap, PHONE_EXTENSION, "54321");
   }
 
   @Rule
@@ -235,9 +223,7 @@ public class CognitoServiceFacadeTest {
 
     AdminCreateUserRequest request = getCognitoRequestHelper().getAdminCreateUserRequest(user);
     Map<String, String> attrMap = attrMap(request.getUserAttributes());
-    assertAttr(attrMap, RACFID_CUSTOM, "RUBBLBA");
     assertAttr(attrMap, RACFID_STANDARD, "RUBBLBA");
-    assertAttr(attrMap, RACFID_CUSTOM_2, "RUBBLBA");
   }
 
   @Test

@@ -21,6 +21,7 @@ import javax.validation.constraints.Size;
 
 @Entity
 @Table(name = "user")
+@SuppressWarnings("squid:S3437")
 public class NsUser  implements Serializable {
 
   private static final long serialVersionUID = 2637959636222771141L;
