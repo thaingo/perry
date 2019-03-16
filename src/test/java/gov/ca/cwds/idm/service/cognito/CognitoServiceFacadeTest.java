@@ -196,27 +196,6 @@ public class CognitoServiceFacadeTest {
   }
 
   @Test
-  public void testUpdateUserAttributesWithDuplicateEmailMissing() {
-    User existedUser = user();
-    UserUpdate userUpdate = new UserUpdate();
-    userUpdate.setPhoneExtensionNumber("12345");
-    final String err_msg = "ERR_MSG";
-    final UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
-    userUpdateRequest.setExistedUser(user());
-    userUpdateRequest.setUpdateDifference(new UpdateDifference(user(), userUpdate));
-    userUpdateRequest.setUserId(existedUser.getId());
-
-    when(messagesService.getMessages(MessageCode.USER_WITH_THIS_ALIAS_EXISTS_IN_IDM, userUpdateRequest.getUserId()))
-            .thenReturn(new Messages(err_msg, err_msg));
-
-    when(identityProvider.adminUpdateUserAttributes(any(AdminUpdateUserAttributesRequest.class)))
-            .thenThrow(new com.amazonaws.services.cognitoidp.model.AliasExistsException("user exists"));
-
-    exception.expectMessage(err_msg);
-    facade.updateUserAttributes(userUpdateRequest);
-  }
-
-  @Test
   public void testRacifIdLowerCase() {
     User user = user();
     user.setRacfid("rubblba ");

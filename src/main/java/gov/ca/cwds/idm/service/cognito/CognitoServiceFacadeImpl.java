@@ -15,7 +15,6 @@ import static gov.ca.cwds.service.messages.MessageCode.IDM_GENERIC_ERROR;
 import static gov.ca.cwds.service.messages.MessageCode.IDM_USER_VALIDATION_FAILED;
 import static gov.ca.cwds.service.messages.MessageCode.USER_NOT_FOUND_BY_ID_IN_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
-import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_THIS_ALIAS_EXISTS_IN_IDM;
 import static gov.ca.cwds.util.Utils.toUpperCase;
 
 import com.amazonaws.AmazonWebServiceRequest;
@@ -33,13 +32,11 @@ import gov.ca.cwds.idm.service.UserUpdateRequest;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUserPage;
 import gov.ca.cwds.idm.service.cognito.dto.CognitoUsersSearchCriteria;
 import gov.ca.cwds.idm.service.cognito.util.CognitoRequestHelper;
-import gov.ca.cwds.idm.service.diff.StringDiff;
 import gov.ca.cwds.idm.service.diff.UpdateDifference;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.service.messages.MessageCode;
 
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import javax.annotation.PostConstruct;
 import liquibase.util.StringUtils;
@@ -195,7 +192,9 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
       throw exceptionFactory.createUserNotFoundException(USER_NOT_FOUND_BY_ID_IN_IDM, e,
           userUpdateRequest.getUserId());
     } catch (com.amazonaws.services.cognitoidp.model.AliasExistsException e) {
-        return handleAliasExistsException(userUpdateRequest, updateDifference, e);
+      if (updateDifference.getEmailDiff().isPresent())
+        throw exceptionFactory.createUserAlreadyExistsException(USER_WITH_EMAIL_EXISTS_IN_IDM, e,
+          updateDifference.getEmailDiff().get().getNewValue());
     } catch (Exception e) {
       throw exceptionFactory
           .createIdmException(getErrorCode(UPDATE), e, userUpdateRequest.getUserId());
@@ -314,16 +313,4 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
   public CognitoRequestHelper getCognitoRequestHelper() {
     return cognitoRequestHelper;
   }
-
-
-  private boolean handleAliasExistsException(UserUpdateRequest userUpdateRequest, UpdateDifference updateDifference, AliasExistsException e) {
-    Optional<StringDiff> emailDiff =  updateDifference.getEmailDiff();
-      if(emailDiff.isPresent()) {
-        throw exceptionFactory.createUserAlreadyExistsException(USER_WITH_EMAIL_EXISTS_IN_IDM, e,
-          emailDiff.get().getNewValue());
-      } else {
-        throw exceptionFactory.createUserAlreadyExistsException(USER_WITH_THIS_ALIAS_EXISTS_IN_IDM, e,
-          userUpdateRequest.getUserId());
-      }
-    }
 }
