@@ -282,8 +282,7 @@ public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
 
   private void handleAliasExists(UpdateDifference updateDifference, AliasExistsException e) {
       final Optional<StringDiff> emailDiff = updateDifference.getEmailDiff();
-      if (emailDiff.isPresent())
-        throw exceptionFactory.createUserAlreadyExistsException(USER_WITH_EMAIL_EXISTS_IN_IDM, e,
+      throw exceptionFactory.createUserAlreadyExistsException(USER_WITH_EMAIL_EXISTS_IN_IDM, e,
           emailDiff.get().getNewValue());
   }
 
