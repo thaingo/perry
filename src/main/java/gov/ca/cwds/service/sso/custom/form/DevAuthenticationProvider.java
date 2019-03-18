@@ -57,7 +57,7 @@ public class DevAuthenticationProvider implements AuthenticationProvider {
 
   private Map getUserInfo(String json) {
     try {
-      return  objectMapper.readValue(json, Map.class);
+      return objectMapper.readValue(json, Map.class);
     } catch (IOException e) {
       throw new AuthenticationServiceException("Cannot read json object", e);
     }
@@ -71,20 +71,21 @@ public class DevAuthenticationProvider implements AuthenticationProvider {
 
   @SuppressFBWarnings("PATH_TRAVERSAL_IN") //user file location taken from property file only!
   private void tryAuthenticate(Authentication authentication) {
-    try {
-      if (!StringUtils.isEmpty(perryProperties.getUsers())) {
+
+    if (!StringUtils.isEmpty(perryProperties.getUsers())) {
+      try(InputStream inputStream = Files.newInputStream(Paths.get(perryProperties.getUsers()))) {
         String user = authentication.getName();
         String password = authentication.getCredentials().toString();
         Properties properties = new Properties();
-        InputStream inputStream = Files.newInputStream(Paths.get(perryProperties.getUsers()));
         properties.load(inputStream);
         if (!properties.containsKey(user) || !properties.getProperty(user).equals(password)) {
           throw new BadCredentialsException("Authentication failed");
         }
-        inputStream.close();
+      } catch (IOException e) {
+        throw new AuthenticationServiceException("Can't read users", e);
       }
-    } catch (IOException e) {
-      throw new AuthenticationServiceException("Can't read users", e);
+
     }
+
   }
 }
