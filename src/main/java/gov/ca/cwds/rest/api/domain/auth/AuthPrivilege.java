@@ -54,11 +54,7 @@ public enum AuthPrivilege {
   }
 
   public static String getAuthPrivilegeDescription(String type) {
-    String description = "";
-
-    description = findByAuthPrivilegeCode(type).getDescription();
-
-    return description;
+    return findByAuthPrivilegeCode(type).getDescription();
   }
 
 }

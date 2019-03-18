@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import gov.ca.cwds.RolesHolder;
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -20,6 +21,7 @@ import org.hibernate.validator.constraints.NotBlank;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 @SuppressWarnings("squid:S3437")
+@SuppressFBWarnings("EI_EXPOSE_REP2")
 public class User implements RolesHolder, Serializable {
 
   private static final long serialVersionUID = -3223381407378606717L;
