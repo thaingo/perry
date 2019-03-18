@@ -17,6 +17,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collections;
@@ -59,7 +60,7 @@ public class DevAuthenticationProvider implements AuthenticationProvider {
     try {
       return  objectMapper.readValue(json, Map.class);
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new AuthenticationServiceException("Cannot read json object", e);
     }
   }
 
@@ -76,10 +77,12 @@ public class DevAuthenticationProvider implements AuthenticationProvider {
         String user = authentication.getName();
         String password = authentication.getCredentials().toString();
         Properties properties = new Properties();
-        properties.load(Files.newInputStream(Paths.get(perryProperties.getUsers())));
+        InputStream inputStream = Files.newInputStream(Paths.get(perryProperties.getUsers()));
+        properties.load(inputStream);
         if (!properties.containsKey(user) || !properties.getProperty(user).equals(password)) {
           throw new BadCredentialsException("Authentication failed");
         }
+        inputStream.close();
       }
     } catch (IOException e) {
       throw new AuthenticationServiceException("Can't read users", e);
