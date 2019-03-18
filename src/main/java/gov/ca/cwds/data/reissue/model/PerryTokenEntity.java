@@ -11,7 +11,7 @@ import java.util.Date;
  */
 @Entity
 @Table(name = "perry_token")
-@SuppressFBWarnings("EI_EXPOSE_REP2")
+@SuppressFBWarnings({"EI_EXPOSE_REP2", "EI_EXPOSE_REP"})
 public class PerryTokenEntity implements Serializable {
   @Id
   @Column(name = "token", nullable = false)
