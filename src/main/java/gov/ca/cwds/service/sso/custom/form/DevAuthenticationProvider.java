@@ -42,7 +42,7 @@ public class DevAuthenticationProvider implements AuthenticationProvider {
   private ObjectMapper objectMapper = new ObjectMapper();
 
   @Override
-  public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+  public Authentication authenticate(Authentication authentication) {
     tryAuthenticate(authentication);
     String json = authentication.getName();
     Map userInfo = getUserInfo(json);
@@ -71,7 +71,7 @@ public class DevAuthenticationProvider implements AuthenticationProvider {
   }
 
   @SuppressFBWarnings("PATH_TRAVERSAL_IN") //user file location taken from property file only!
-  private void tryAuthenticate(Authentication authentication) throws AuthenticationException {
+  private void tryAuthenticate(Authentication authentication) {
     try {
       if (!StringUtils.isEmpty(perryProperties.getUsers())) {
         String user = authentication.getName();

@@ -3,7 +3,6 @@ package gov.ca.cwds.data.reissue.model;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
-import org.apache.commons.lang3.SerializationUtils;
 
 /**
  * Created by TPT2 on 10/24/2017.
