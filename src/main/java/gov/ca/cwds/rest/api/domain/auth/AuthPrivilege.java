@@ -22,7 +22,7 @@ public enum AuthPrivilege {
 
   private final String code;
   private final String description;
-
+  private static final Map<String, AuthPrivilege> mapByAuthPrivilegeCode = new HashMap<>();
 
   private AuthPrivilege(String code, String description) {
     this.code = code;
@@ -43,8 +43,6 @@ public enum AuthPrivilege {
     return description;
   }
 
-  private static final Map<String, AuthPrivilege> mapByAuthPrivilegeCode = new HashMap<>();
-
   public static AuthPrivilege findByAuthPrivilegeCode(String code) {
     return mapByAuthPrivilegeCode.get(code);
   }
@@ -56,11 +54,7 @@ public enum AuthPrivilege {
   }
 
   public static String getAuthPrivilegeDescription(String type) {
-    String description = "";
-
-    description = findByAuthPrivilegeCode(type).getDescription();
-
-    return description;
+    return findByAuthPrivilegeCode(type).getDescription();
   }
 
 }

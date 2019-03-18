@@ -62,7 +62,7 @@ import org.springframework.stereotype.Service;
 
 @Service(value = "cognitoServiceFacade")
 @Profile("idm")
-@SuppressWarnings({"fb-contrib:EXS_EXCEPTION_SOFTENING_NO_CONSTRAINTS"})
+@SuppressWarnings({"fb-contrib:EXS_EXCEPTION_SOFTENING_NO_CONSTRAINTS", "fb-contrib:EXS_EXCEPTION_SOFTENING_NO_CHECKED"})
 public class CognitoServiceFacadeImpl implements CognitoServiceFacade {
 
   private CognitoProperties properties;

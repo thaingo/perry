@@ -8,7 +8,6 @@ import gov.ca.cwds.idm.event.AuditEvent;
 import gov.ca.cwds.idm.persistence.ns.entity.NsAuditEvent;
 import gov.ca.cwds.idm.persistence.ns.repository.NsAuditEventRepository;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.persistence.PersistenceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +59,7 @@ public class AuditEventService {
       auditEventIndexService.sendAuditEventToEsIndex(auditEvent);
     } catch (Exception e) {
       nsAuditEvent.setProcessed(false);
-      LOGGER.warn("AuditEvent {} has been marked for further processing by the job", nsAuditEvent.getId());
+      LOGGER.warn("AuditEvent {} has been marked for further processing by the job", nsAuditEvent.getId(), e);
     }
   }
 
