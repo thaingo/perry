@@ -22,8 +22,8 @@ if(racfid) {
 }
 
 if(nsUser) {
-    universalUserToken.roles = nsUser?.roles
-    universalUserToken.permissions = nsUser?.permissions
+    universalUserToken.roles = nsUser?.roles.toArray() as Set
+    universalUserToken.permissions = nsUser?.permissions.toArray() as Set
 }
 
 idpToken.UserAttributes?.each {
