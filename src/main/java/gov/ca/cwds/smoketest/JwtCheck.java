@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class JwtCheck implements HealthIndicator {
-  private final static String TEST_IDENTITY = "identity";
+  private static final String TEST_IDENTITY = "identity";
 
 
   private JwtService jwtService;

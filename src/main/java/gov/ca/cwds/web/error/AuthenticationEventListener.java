@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class AuthenticationEventListener implements ApplicationListener<AbstractAuthenticationEvent> {
-  private final static Log logger = LogFactory.getLog(AuthenticationEventListener.class);
+  private static final Log logger = LogFactory.getLog(AuthenticationEventListener.class);
 
   @Override
   public void onApplicationEvent(AbstractAuthenticationEvent event) {

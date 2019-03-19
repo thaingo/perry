@@ -12,7 +12,7 @@ import java.nio.charset.Charset;
 
 public class DebugRestTemplateInterceptor implements ClientHttpRequestInterceptor {
 
-    private final static Logger log = LoggerFactory.getLogger(DebugRestTemplateInterceptor.class);
+    private static final Logger log = LoggerFactory.getLogger(DebugRestTemplateInterceptor.class);
 
     @Override
     public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
@@ -22,7 +22,7 @@ public class DebugRestTemplateInterceptor implements ClientHttpRequestIntercepto
         return execution.execute(request, body);
     }
 
-    private void traceRequest(HttpRequest request, byte[] body) throws IOException {
+    private void traceRequest(HttpRequest request, byte[] body) {
         if (log.isDebugEnabled()) {
             log.debug("===========================request begin================================================");
             log.debug("URI         : {}", request.getURI());

@@ -1,5 +1,6 @@
 package gov.ca.cwds;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.rest.api.domain.auth.UserAuthorization;
 import gov.ca.cwds.util.UniversalUserTokenDeserializer;
@@ -17,6 +18,7 @@ import org.codehaus.jackson.map.annotate.JsonDeserialize;
  * Created by dmitry.rudenko on 7/28/2017.
  */
 @SuppressWarnings("squid:S1948")
+@SuppressFBWarnings("SE_BAD_FIELD")
 @JsonDeserialize(using = UniversalUserTokenDeserializer.class)
 public class UniversalUserToken implements RolesHolder, Serializable {
 
