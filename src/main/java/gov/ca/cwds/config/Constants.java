@@ -7,10 +7,6 @@ import java.util.Locale;
  */
 public final class Constants {
 
-  private Constants(){
-    //private constructor
-  }
-
   public static final String LOGIN_SERVICE_URL = "/authn/login";
   public static final String VALIDATE_SERVICE_URL = "/authn/validate";
   public static final String TOKEN_SERVICE_URL = "/authn/token";
@@ -20,5 +16,9 @@ public final class Constants {
   public static final String ERROR_CONTROLLER = "error";
   public static final Locale DEFAULT_LOCALE = Locale.US;
   public static final int HTTP_STATUS_NOT_HEALTHY = 465;
+
+  private Constants(){
+    //private constructor
+  }
 }
 

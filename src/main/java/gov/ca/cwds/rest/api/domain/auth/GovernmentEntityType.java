@@ -315,6 +315,10 @@ public enum GovernmentEntityType {
   private final String description;
   private final String countyCd;
 
+  private static final Map<Integer, GovernmentEntityType> mapBySysId = new HashMap<>();
+  private static final Map<String, GovernmentEntityType> mapByCountyCd = new HashMap<>();
+  private static final Map<String, GovernmentEntityType> mapByDescription = new HashMap<>();
+
   private GovernmentEntityType(int sysId, String shortDsc, String countyCd) {
     this.sysId = sysId;
     this.description = shortDsc;
@@ -350,11 +354,6 @@ public enum GovernmentEntityType {
   public static GovernmentEntityType findByDescription(String description) {
     return mapByDescription.getOrDefault(descriptionToKey(description), GovernmentEntityType.NONE);
   }
-
-
-  private static final Map<Integer, GovernmentEntityType> mapBySysId = new HashMap<>();
-  private static final Map<String, GovernmentEntityType> mapByCountyCd = new HashMap<>();
-  private static final Map<String, GovernmentEntityType> mapByDescription = new HashMap<>();
 
 
   static {

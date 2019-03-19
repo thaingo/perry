@@ -12,7 +12,6 @@ import javax.persistence.Table;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.annotations.Type;
 
 /**
  * {@link CmsPersistentObject} representing a StaffPersonUnitAuthority.

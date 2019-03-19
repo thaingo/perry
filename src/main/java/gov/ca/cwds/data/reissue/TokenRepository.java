@@ -3,10 +3,8 @@ package gov.ca.cwds.data.reissue;
 import gov.ca.cwds.data.reissue.model.PerryTokenEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.List;
 

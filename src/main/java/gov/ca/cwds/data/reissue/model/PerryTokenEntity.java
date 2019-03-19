@@ -1,15 +1,17 @@
 package gov.ca.cwds.data.reissue.model;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
-import org.apache.commons.lang3.SerializationUtils;
 
 /**
  * Created by TPT2 on 10/24/2017.
  */
 @Entity
 @Table(name = "perry_token")
+@SuppressFBWarnings({"EI_EXPOSE_REP2", "EI_EXPOSE_REP"})
 public class PerryTokenEntity implements Serializable {
   @Id
   @Column(name = "token", nullable = false)

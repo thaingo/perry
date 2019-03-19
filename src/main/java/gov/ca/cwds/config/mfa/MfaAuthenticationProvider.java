@@ -24,7 +24,7 @@ public class MfaAuthenticationProvider implements AuthenticationProvider {
 
   //must never throw an AuthenticationException!
   @Override
-  public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+  public Authentication authenticate(Authentication authentication) {
     try {
       String cognitoResponseJson = authentication.getName();
       OAuth2ClientContext context = cognitoResponseService.convert(cognitoResponseJson);

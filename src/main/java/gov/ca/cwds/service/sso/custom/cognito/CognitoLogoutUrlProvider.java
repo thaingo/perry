@@ -4,7 +4,6 @@ import java.net.URL;
 import java.util.Optional;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
-import gov.ca.cwds.PerryProperties;
 import gov.ca.cwds.rest.api.domain.PerryException;
 import gov.ca.cwds.web.LogoutUrlProvider;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,6 +1,5 @@
 package gov.ca.cwds.config.api.common;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import gov.ca.cwds.UniversalUserToken;
@@ -12,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
@@ -26,7 +24,7 @@ public class SpApiAuthenticationProvider implements AuthenticationProvider {
   private LoginService loginService;
 
   @Override
-  public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+  public Authentication authenticate(Authentication authentication) {
     try {
       String perryToken = (String) authentication.getPrincipal();
       UniversalUserToken universalUserToken = loginService.validate(perryToken);

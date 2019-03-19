@@ -12,11 +12,11 @@ import org.springframework.security.authentication.AuthenticationServiceExceptio
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collections;
@@ -41,7 +41,7 @@ public class DevAuthenticationProvider implements AuthenticationProvider {
   private ObjectMapper objectMapper = new ObjectMapper();
 
   @Override
-  public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+  public Authentication authenticate(Authentication authentication) {
     tryAuthenticate(authentication);
     String json = authentication.getName();
     Map userInfo = getUserInfo(json);
@@ -57,9 +57,9 @@ public class DevAuthenticationProvider implements AuthenticationProvider {
 
   private Map getUserInfo(String json) {
     try {
-      return  objectMapper.readValue(json, Map.class);
+      return objectMapper.readValue(json, Map.class);
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new AuthenticationServiceException("Cannot read json object", e);
     }
   }
 
@@ -70,19 +70,22 @@ public class DevAuthenticationProvider implements AuthenticationProvider {
   }
 
   @SuppressFBWarnings("PATH_TRAVERSAL_IN") //user file location taken from property file only!
-  private void tryAuthenticate(Authentication authentication) throws AuthenticationException {
-    try {
-      if (!StringUtils.isEmpty(perryProperties.getUsers())) {
+  private void tryAuthenticate(Authentication authentication) {
+
+    if (!StringUtils.isEmpty(perryProperties.getUsers())) {
+      try(InputStream inputStream = Files.newInputStream(Paths.get(perryProperties.getUsers()))) {
         String user = authentication.getName();
         String password = authentication.getCredentials().toString();
         Properties properties = new Properties();
-        properties.load(Files.newInputStream(Paths.get(perryProperties.getUsers())));
+        properties.load(inputStream);
         if (!properties.containsKey(user) || !properties.getProperty(user).equals(password)) {
           throw new BadCredentialsException("Authentication failed");
         }
+      } catch (IOException e) {
+        throw new AuthenticationServiceException("Can't read users", e);
       }
-    } catch (IOException e) {
-      throw new AuthenticationServiceException("Can't read users", e);
+
     }
+
   }
 }
