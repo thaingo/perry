@@ -154,7 +154,7 @@ public class IdmServiceImpl implements IdmService {
       throw (RuntimeException) updateUserEnabledExecution.getException();
     }
 
-    PutInSearchExecution<String> doraExecution = null;
+    PutInSearchExecution<User> doraExecution = null;
     if (doesElasticSearchNeedUpdate(updateAttributesStatus, updateUserEnabledExecution)) {
       doraExecution = updateUserInSearch(userId);
     } else {
@@ -227,7 +227,7 @@ public class IdmServiceImpl implements IdmService {
       case USER_LOCKED:
         User user = userService.getUser(notification.getUserId());
         auditService.persistAuditEvent(new UserLockedEvent(user));
-        updateUserInSearch(notification.getUserId());
+        updateUserInSearch(user);
         break;
       default:
         throw exceptionFactory.createOperationNotSupportedException(IDM_NOTIFY_UNSUPPORTED_OPERATION, notification.getActionType());
@@ -313,7 +313,7 @@ public class IdmServiceImpl implements IdmService {
       String userId,
       ExecutionStatus updateAttributesStatus,
       OptionalExecution<BooleanDiff, Void> updateUserEnabledExecution,
-      PutInSearchExecution<String> doraExecution) {
+      PutInSearchExecution<User> doraExecution) {
 
     ExecutionStatus updateEnableStatus = updateUserEnabledExecution.getExecutionStatus();
     Exception updateEnableException = updateUserEnabledExecution.getException();
@@ -481,19 +481,23 @@ public class IdmServiceImpl implements IdmService {
   }
 
 
-  private PutInSearchExecution<String> updateUserInSearch(String id) {
-    return new PutInSearchExecution<String>(id) {
+  private PutInSearchExecution<User> updateUserInSearch(String id) {
+    User updatedUser = userService.getUser(id);
+    return updateUserInSearch(updatedUser);
+  }
+
+  private PutInSearchExecution<User> updateUserInSearch(User updatedUser) {
+    return new PutInSearchExecution<User>(updatedUser) {
       @Override
-      protected ResponseEntity<String> tryMethod(String id) {
-        User updatedUser = userService.getUser(id);
+      protected ResponseEntity<String> tryMethod(User updatedUser) {
         return searchService.updateUser(updatedUser);
       }
 
       @Override
       protected void catchMethod(Exception e) {
-        String msg = messages.getTechMessage(UNABLE_UPDATE_IDM_USER_IN_ES, id);
+        String msg = messages.getTechMessage(UNABLE_UPDATE_IDM_USER_IN_ES, updatedUser.getId());
         LOGGER.error(msg, e);
-        setUserLogExecution(userLogService.logUpdate(id));
+        setUserLogExecution(userLogService.logUpdate(updatedUser.getId()));
       }
     };
   }
