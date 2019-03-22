@@ -156,7 +156,8 @@ public class IdmServiceImpl implements IdmService {
 
     PutInSearchExecution<User> doraExecution = null;
     if (doesElasticSearchNeedUpdate(updateAttributesStatus, updateUserEnabledExecution)) {
-      doraExecution = updateUserInSearch(userId);
+      User updatedUser = userService.getUser(userId);
+      doraExecution = updateUserInSearch(updatedUser);
     } else {
       LOGGER.info(messages.getTechMessage(USER_NOTHING_UPDATED, userId));
     }
@@ -243,7 +244,8 @@ public class IdmServiceImpl implements IdmService {
       }
       LOGGER.debug("Handling \"user logged in\" event for user {}", userId);
       nsUserService.saveLastLoginTime(userId, loginTime);
-      updateUserInSearch(userId);
+      User user = userService.getUser(userId);
+      updateUserInSearch(user);
 
     } catch (Exception e) {
       String msg = messagesService.getTechMessage(UNABLE_TO_WRITE_LAST_LOGIN_TIME, userId);
@@ -478,12 +480,6 @@ public class IdmServiceImpl implements IdmService {
   private static Set<String> applyFunctionToValues(Set<String> values,
       Function<String, String> function) {
     return values.stream().map(function).collect(toSet());
-  }
-
-
-  private PutInSearchExecution<User> updateUserInSearch(String id) {
-    User updatedUser = userService.getUser(id);
-    return updateUserInSearch(updatedUser);
   }
 
   private PutInSearchExecution<User> updateUserInSearch(User updatedUser) {
