@@ -17,18 +17,28 @@ import com.amazonaws.services.cognitoidp.model.AdminCreateUserResult;
 import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.RegistrationResubmitResponse;
 import gov.ca.cwds.idm.event.UserRegistrationResentEvent;
+import gov.ca.cwds.idm.service.AuditEventService;
+import gov.ca.cwds.idm.service.UserLogService;
 import gov.ca.cwds.idm.util.TestUtils;
 import gov.ca.cwds.idm.util.WithMockCustomUser;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional(value = TOKEN_TRANSACTION_MANAGER)
-public class ResendInvitationEmailTest extends BaseIdmIntegrationWithUserLogTest {
+public class ResendInvitationEmailTest extends BaseIdmIntegrationTest {
 
   private static final String USER_WITH_RACFID_ID_EMAIL = "julio@gmail.com";
+
+  @Autowired
+  protected UserLogService userLogService;
+
+  @MockBean
+  protected AuditEventService auditEventService;
 
 
   @Test

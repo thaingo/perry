@@ -14,6 +14,7 @@ import static gov.ca.cwds.service.messages.MessageCode.ERROR_UPDATE_USER_ENABLED
 import static gov.ca.cwds.service.messages.MessageCode.IDM_NOTIFY_UNSUPPORTED_OPERATION;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_CREATE_IDM_USER_IN_ES;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_PURGE_PROCESSED_USER_LOGS;
+import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_WRITE_LAST_LOGIN_TIME;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_IDM_USER_IN_ES;
 import static gov.ca.cwds.service.messages.MessageCode.USER_CREATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_CREATE_SAVE_TO_SEARCH_ERROR;
@@ -121,6 +122,12 @@ public class IdmServiceImpl implements IdmService {
   @Autowired
   private DictionaryProvider dictionaryProvider;
 
+  @Autowired
+  private NsUserService nsUserService;
+
+  @Autowired
+  private MessagesService messagesService;
+
   @Override
   public User findUser(String id) {
     User user = userService.getUser(id);
@@ -224,6 +231,23 @@ public class IdmServiceImpl implements IdmService {
         break;
       default:
         throw exceptionFactory.createOperationNotSupportedException(IDM_NOTIFY_UNSUPPORTED_OPERATION, notification.getActionType());
+    }
+  }
+
+  @Override
+  public void saveLastLoginTime(String userId, LocalDateTime loginTime) {
+    try {
+      if (userId == null) {
+        LOGGER.warn("userToken doesn't contain the userId, no following actions expected}");
+        return;
+      }
+      LOGGER.debug("Handling \"user logged in\" event for user {}", userId);
+      nsUserService.saveLastLoginTime(userId, loginTime);
+      updateUserInSearch(userId);
+
+    } catch (Exception e) {
+      String msg = messagesService.getTechMessage(UNABLE_TO_WRITE_LAST_LOGIN_TIME, userId);
+      LOGGER.error(msg, e);
     }
   }
 
@@ -461,7 +485,7 @@ public class IdmServiceImpl implements IdmService {
     return new PutInSearchExecution<String>(id) {
       @Override
       protected ResponseEntity<String> tryMethod(String id) {
-        User updatedUser = findUser(id);
+        User updatedUser = userService.getUser(id);
         return searchService.updateUser(updatedUser);
       }
 
