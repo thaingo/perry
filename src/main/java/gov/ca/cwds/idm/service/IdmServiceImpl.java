@@ -179,7 +179,7 @@ public class IdmServiceImpl implements IdmService {
     LOGGER.info("New user with username:{} was successfully created in Cognito", createdUser.getId());
     transactionalUserService.createUserInDbWithInvitationEmail(createdUser);
     LOGGER.info("New user with username:{} was successfully created in database", createdUser.getId());
-    auditService.saveAuditEvent(new UserCreatedEvent(createdUser));
+    auditService.processAuditEvent(new UserCreatedEvent(createdUser));
     PutInSearchExecution doraExecution = createUserInSearch(createdUser);
     handleCreatePartialSuccess(createdUser, doraExecution);
     return createdUser.getId();
@@ -218,7 +218,7 @@ public class IdmServiceImpl implements IdmService {
   public RegistrationResubmitResponse resendInvitationMessage(User user) {
     authorizeService.checkCanResendInvitationMessage(user);
     cognitoServiceFacade.resendInvitationMessage(user.getId());
-    auditService.saveAuditEvent(new UserRegistrationResentEvent(user));
+    auditService.processAuditEvent(new UserRegistrationResentEvent(user));
     return new RegistrationResubmitResponse(user.getId());
   }
 
@@ -400,7 +400,7 @@ public class IdmServiceImpl implements IdmService {
       public Void tryMethod(BooleanDiff enabledDiff) {
         cognitoServiceFacade
             .changeUserEnabledStatus(existedUser.getId(), enabledDiff.getNewValue());
-        auditService.saveAuditEvent(
+        auditService.processAuditEvent(
             new UserEnabledStatusChangedEvent(existedUser, enabledDiff));
         return null;
       }

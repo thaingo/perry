@@ -36,6 +36,6 @@ public class UserLockService {
     validationService.validateUnlockUser(existedUser, false);
 
     cognitoServiceFacade.unlockUser(userId);
-    auditService.saveAuditEvent(new UserUnlockedEvent(existedUser));
+    auditService.processAuditEvent(new UserUnlockedEvent(existedUser));
   }
 }

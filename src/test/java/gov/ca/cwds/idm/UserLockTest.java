@@ -31,7 +31,7 @@ public class UserLockTest extends BaseIdmIntegrationWithSearchTest {
             .andExpect(MockMvcResultMatchers.status().isUnauthorized())
             .andReturn();
     verify(cognito, times(0)).adminUpdateUserAttributes(getUnlockUserUpdateRequest(LOCKED_USER));
-    verify(auditEventService, never()).saveAuditEvent(any(UserUnlockedEvent.class));
+    verify(auditEventService, never()).processAuditEvent(any(UserUnlockedEvent.class));
     assertExtensible(
         result, "fixtures/idm/user-lock-status/unlock-user-with-different-county.json");
   }
@@ -66,7 +66,7 @@ public class UserLockTest extends BaseIdmIntegrationWithSearchTest {
         .andReturn();
 
     verify(cognito, times(1)).adminUpdateUserAttributes(getUnlockUserUpdateRequest(LOCKED_USER));
-    verify(auditEventService, times(1)).saveAuditEvent(any(UserUnlockedEvent.class));
+    verify(auditEventService, times(1)).processAuditEvent(any(UserUnlockedEvent.class));
   }
 
   private void assertUnlockUserBadRequest(String userId, String fixture) throws Exception {
@@ -76,7 +76,7 @@ public class UserLockTest extends BaseIdmIntegrationWithSearchTest {
             .andExpect(MockMvcResultMatchers.status().isBadRequest())
             .andReturn();
     verify(cognito, times(0)).adminUpdateUserAttributes(getUnlockUserUpdateRequest(userId));
-    verify(auditEventService, never()).saveAuditEvent(any(UserUnlockedEvent.class));
+    verify(auditEventService, never()).processAuditEvent(any(UserUnlockedEvent.class));
     assertExtensible(result, fixture);
   }
 

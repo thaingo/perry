@@ -11,7 +11,6 @@ import static org.mockito.Mockito.doThrow;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Iterables;
-import gov.ca.cwds.PerryApplication;
 import gov.ca.cwds.config.SpringAsyncConfiguration;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.event.AuditEvent;
@@ -30,16 +29,11 @@ import org.springframework.boot.actuate.endpoint.InfoEndpoint;
 import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.task.SyncTaskExecutor;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -93,7 +87,7 @@ public class AuditEventServiceTest {
 
     AuditEvent event = new UserLockedEvent(mockUser());
 
-    service.saveAuditEvent(event);
+    service.processAuditEvent(event);
 
     assertEquals(1, Iterables.size(nsAuditEventRepository.findAll()) - sizeBefore);
 
@@ -112,7 +106,7 @@ public class AuditEventServiceTest {
         .sendAuditEventToEsIndex(any(AuditEvent.class));
 
     AuditEvent event = new UserLockedEvent(mockUser());
-    service.saveAuditEvent(event);
+    service.processAuditEvent(event);
 
     assertEquals(1, Iterables.size(nsAuditEventRepository.findAll()) - sizeBefore);
 

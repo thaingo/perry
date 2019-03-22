@@ -153,7 +153,7 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     assertTrue(events.stream().anyMatch(e -> e instanceof EmailChangedEvent));
     assertTrue(events.stream().anyMatch(e -> e instanceof NotesChangedEvent));
     verify(auditEventService, times(1))
-        .saveAuditEvent(any(UserEnabledStatusChangedEvent.class));
+        .processAuditEvent(any(UserEnabledStatusChangedEvent.class));
   }
 
   @Test
@@ -314,9 +314,9 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
                 .content(asJsonString(userUpdate)))
         .andExpect(MockMvcResultMatchers.status().isNoContent())
         .andReturn();
-    verify(auditEventService, never()).saveAuditEvent(any(
+    verify(auditEventService, never()).processAuditEvent(any(
         UserRoleChangedEvent.class));
-    verify(auditEventService, never()).saveAuditEvent(any(
+    verify(auditEventService, never()).processAuditEvent(any(
         EmailChangedEvent.class));
   }
 
@@ -527,9 +527,9 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
 
     verify(cognito, times(0)).adminEnableUser(enableUserRequest);
     verify(spySearchService, times(0)).createUser(any(User.class));
-    verify(auditEventService, never()).saveAuditEvent(any(
+    verify(auditEventService, never()).processAuditEvent(any(
         PermissionsChangedEvent.class));
-    verify(auditEventService, never()).saveAuditEvent(any(
+    verify(auditEventService, never()).processAuditEvent(any(
         UserEnabledStatusChangedEvent.class));
   }
 
@@ -782,7 +782,7 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
         .andExpect(MockMvcResultMatchers.status().isNoContent())
         .andReturn();
 
-    verify(auditEventService, never()).saveAuditEvent(any());
+    verify(auditEventService, never()).processAuditEvent(any());
     verify(cognito, times(0)).adminUpdateUserAttributes(updateAttributesRequest);
     verify(cognito, times(0)).adminEnableUser(enableUserRequest);
     verify(spySearchService, times(0)).createUser(any(User.class));

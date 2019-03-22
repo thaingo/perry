@@ -34,8 +34,15 @@ public class AuditEventService {
 
   @Transactional(TOKEN_TRANSACTION_MANAGER)
   @Async("auditLogTaskExecutor")
-  public <T extends AuditEvent> void saveAuditEvent(T auditEvent) {
-    processAuditEvent(auditEvent);
+  public <T extends AuditEvent> void processAuditEvent(T auditEvent) {
+    NsAuditEvent nsAuditEvent = mapToNsAuditEvent(auditEvent);
+    nsAuditEvent = nsAuditEventRepository.save(nsAuditEvent);
+    try {
+      auditEventIndexService.sendAuditEventToEsIndex(auditEvent);
+    } catch (Exception e) {
+      nsAuditEvent.setProcessed(false);
+      LOGGER.warn("AuditEvent {} has been marked for further processing by the job", nsAuditEvent.getId(), e);
+    }
   }
 
   @Transactional(TOKEN_TRANSACTION_MANAGER)
@@ -50,17 +57,6 @@ public class AuditEventService {
     NsAuditEvent event = mapToNsAuditEvent(auditEvent);
     event.setProcessed(false);
     nsAuditEventRepository.save(event);
-  }
-
-  private <T extends AuditEvent> void processAuditEvent(T auditEvent) {
-    NsAuditEvent nsAuditEvent = mapToNsAuditEvent(auditEvent);
-    nsAuditEvent = nsAuditEventRepository.save(nsAuditEvent);
-    try {
-      auditEventIndexService.sendAuditEventToEsIndex(auditEvent);
-    } catch (Exception e) {
-      nsAuditEvent.setProcessed(false);
-      LOGGER.warn("AuditEvent {} has been marked for further processing by the job", nsAuditEvent.getId(), e);
-    }
   }
 
   private <T extends AuditEvent> NsAuditEvent mapToNsAuditEvent(T auditEvent) {
