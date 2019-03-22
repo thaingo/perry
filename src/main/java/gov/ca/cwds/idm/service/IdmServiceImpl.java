@@ -227,7 +227,7 @@ public class IdmServiceImpl implements IdmService {
       case USER_LOCKED:
         User user = userService.getUser(notification.getUserId());
         auditService.persistAuditEvent(new UserLockedEvent(user));
-        userLogService.logUpdate(notification.getUserId(), LocalDateTime.now());
+        updateUserInSearch(notification.getUserId());
         break;
       default:
         throw exceptionFactory.createOperationNotSupportedException(IDM_NOTIFY_UNSUPPORTED_OPERATION, notification.getActionType());
