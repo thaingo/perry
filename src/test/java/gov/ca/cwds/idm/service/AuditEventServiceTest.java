@@ -116,22 +116,6 @@ public class AuditEventServiceTest {
     assertFalse(nsAuditEvent.isProcessed());
   }
 
-  @Test
-  public void testPersistEvent() {
-
-    int sizeBefore = Iterables.size(nsAuditEventRepository.findAll());
-
-    AuditEvent event = new UserLockedEvent(mockUser());
-    service.persistAuditEvent(event);
-
-    assertEquals(1, Iterables.size(nsAuditEventRepository.findAll()) - sizeBefore);
-
-    NsAuditEvent nsAuditEvent = nsAuditEventRepository.findOne(event.getId());
-
-    assertNotNull(nsAuditEvent);
-    assertFalse(nsAuditEvent.isProcessed());
-  }
-
   private User mockUser() {
     User user = new User();
     user.setId(TEST_USER_ID);

@@ -51,14 +51,6 @@ public class AuditEventService {
     auditEvents.forEach(this::processAuditEvent);
   }
 
-  @Transactional(TOKEN_TRANSACTION_MANAGER)
-  @Async("auditLogTaskExecutor")
-  public <T extends AuditEvent> void persistAuditEvent(T auditEvent) {
-    NsAuditEvent event = mapToNsAuditEvent(auditEvent);
-    event.setProcessed(false);
-    nsAuditEventRepository.save(event);
-  }
-
   private <T extends AuditEvent> NsAuditEvent mapToNsAuditEvent(T auditEvent) {
     try {
       NsAuditEvent nsAuditEvent = new NsAuditEvent();
