@@ -137,10 +137,10 @@ public class SearchServiceTest {
   public void testGetUrlTemplate() {
     assertThat(
         getUrlTemplate(OperationType.CREATE),
-        is("{doraUrl}/dora/{esUserIndex}/{esUserType}/{id}/_create?token={ssoToken}"));
+        is("{doraUrl}/dora/{esIndexName}/{esIndexType}/{id}/_create?token={ssoToken}"));
     assertThat(
         getUrlTemplate(OperationType.UPDATE),
-        is("{doraUrl}/dora/{esUserIndex}/{esUserType}/{id}?token={ssoToken}"));
+        is("{doraUrl}/dora/{esIndexName}/{esIndexType}/{id}?token={ssoToken}"));
   }
 
   @Test(expected = IllegalArgumentException.class)

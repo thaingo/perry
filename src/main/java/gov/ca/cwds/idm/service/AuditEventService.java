@@ -26,14 +26,14 @@ public class AuditEventService {
   private ObjectMapper objectMapper;
 
   @Autowired
-  private AuditEventIndexService auditEventIndexService;
+  private SearchService searchService;
 
   @Async("auditLogTaskExecutor")
   public <T extends AuditEvent> void processAuditEvent(T auditEvent) {
     NsAuditEvent nsAuditEvent = mapToNsAuditEvent(auditEvent);
     nsAuditEvent = nsAuditEventService.save(nsAuditEvent);
     try {
-      auditEventIndexService.sendAuditEventToEsIndex(auditEvent);
+      searchService.sendAuditEventToEsIndex(auditEvent);
     } catch (Exception e) {
       nsAuditEventService.markAsUnprocessed(nsAuditEvent.getId());
       LOGGER.warn("AuditEvent {} has been marked for further processing by the job", nsAuditEvent.getId(), e);
@@ -62,9 +62,8 @@ public class AuditEventService {
     this.objectMapper = objectMapper;
   }
 
-  public void setAuditEventIndexService(
-      AuditEventIndexService auditEventIndexService) {
-    this.auditEventIndexService = auditEventIndexService;
+  public void setSearchService(SearchService searchService) {
+    this.searchService = searchService;
   }
 
 }

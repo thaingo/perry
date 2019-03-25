@@ -3,6 +3,7 @@ package gov.ca.cwds.idm.service;
 import static gov.ca.cwds.util.Utils.toLowerCase;
 
 import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.idm.event.AuditEvent;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.service.cognito.SearchProperties;
 import gov.ca.cwds.idm.service.cognito.SearchProperties.SearchIndex;
@@ -26,8 +27,8 @@ public class SearchService {
   private static final Logger LOGGER = LoggerFactory.getLogger(SearchService.class);
 
   private static final String DORA_URL = "doraUrl";
-  private static final String ES_USER_INDEX = "esUserIndex";
-  private static final String ES_USER_TYPE = "esUserType";
+  private static final String ES_INDEX_NAME = "esIndexName";
+  private static final String ES_INDEX_TYPE = "esIndexType";
   private static final String ID = "id";
   private static final String SSO_TOKEN = "ssoToken";
 
@@ -35,9 +36,9 @@ public class SearchService {
       "{"
           + DORA_URL
           + "}/dora/{"
-          + ES_USER_INDEX
+          + ES_INDEX_NAME
           + "}/{"
-          + ES_USER_TYPE
+          + ES_INDEX_TYPE
           + "}/{"
           + ID
           + "}/_create?token={"
@@ -48,9 +49,9 @@ public class SearchService {
       "{"
           + DORA_URL
           + "}/dora/{"
-          + ES_USER_INDEX
+          + ES_INDEX_NAME
           + "}/{"
-          + ES_USER_TYPE
+          + ES_INDEX_TYPE
           + "}/{"
           + ID
           + "}?token={"
@@ -69,8 +70,35 @@ public class SearchService {
     return putUser(user, OperationType.UPDATE);
   }
 
-  protected String getSsoToken() {
-    return CurrentAuthenticatedUserUtil.getSsoToken();
+  public <T extends AuditEvent> void sendAuditEventToEsIndex(T event) {
+    String eventId = event.getId();
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    HttpEntity<AuditEvent> requestEntity = new HttpEntity<>(event, headers);
+
+    Map<String, String> params = new HashMap<>();
+    params.put(DORA_URL, searchProperties.getDoraUrl());
+    SearchIndex auditIndex = searchProperties.getAuditIndex();
+    params.put(ES_INDEX_NAME, auditIndex.getName());
+    params.put(ES_INDEX_TYPE, auditIndex.getType());
+    params.put(ID, eventId);
+    params.put(SSO_TOKEN, getSsoToken());
+    ResponseEntity<String> response;
+    try {
+      response = restSender.send(CREATE_URL_TEMPLATE, requestEntity, params);
+
+      if (LOGGER.isInfoEnabled()) {
+        LOGGER.info(
+            "Audit record, id:{} was successfully stored in Elastic Search index, Dora response string is:{}",
+            eventId,
+            response.getBody());
+      }
+    } catch (Exception e) {
+      LOGGER.error("Error while storing the audit event {} for user {}.",
+          event.getEventType(),
+          event.getUserLogin());
+      throw e;
+    }
   }
 
   ResponseEntity<String> putUser(User user, OperationType operation) {
@@ -88,8 +116,8 @@ public class SearchService {
     Map<String, String> params = new HashMap<>();
     params.put(DORA_URL, searchProperties.getDoraUrl());
     SearchIndex usersIndex = searchProperties.getUsersIndex();
-    params.put(ES_USER_INDEX, usersIndex.getName());
-    params.put(ES_USER_TYPE, usersIndex.getType());
+    params.put(ES_INDEX_NAME, usersIndex.getName());
+    params.put(ES_INDEX_TYPE, usersIndex.getType());
     params.put(ID, user.getId());
     params.put(SSO_TOKEN, getSsoToken());
 
@@ -114,6 +142,10 @@ public class SearchService {
       throw new IllegalArgumentException(
           "Provided unsupported OperationType: " + operation.toString());
     }
+  }
+
+  protected String getSsoToken() {
+    return CurrentAuthenticatedUserUtil.getSsoToken();
   }
 
   public void setSearchProperties(SearchProperties searchProperties) {

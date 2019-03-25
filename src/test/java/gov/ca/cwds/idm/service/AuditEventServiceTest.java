@@ -69,7 +69,7 @@ public class AuditEventServiceTest {
   @Autowired AuditEventService service;
 
   @MockBean
-  private AuditEventIndexService auditEventIndexService;
+  private SearchService searchService;
 
   @TestConfiguration
   static class ContextConfiguration {
@@ -102,7 +102,7 @@ public class AuditEventServiceTest {
     int sizeBefore = Iterables.size(nsAuditEventRepository.findAll());
 
     doThrow(new RuntimeException())
-        .when(auditEventIndexService)
+        .when(searchService)
         .sendAuditEventToEsIndex(any(AuditEvent.class));
 
     AuditEvent event = new UserLockedEvent(mockUser());
@@ -128,8 +128,6 @@ public class AuditEventServiceTest {
     user.setPermissions(new TreeSet<>(Arrays.asList(PERMISSION_1, PERMISSION_2)));
     return user;
   }
-
-
 }
 
 
