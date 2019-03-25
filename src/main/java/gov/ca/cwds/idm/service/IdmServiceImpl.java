@@ -61,6 +61,7 @@ import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.idm.service.execution.OptionalExecution;
 import gov.ca.cwds.idm.service.execution.OptionalExecution.NoUpdateExecution;
 import gov.ca.cwds.idm.service.execution.PutInSearchExecution;
+import gov.ca.cwds.idm.service.search.UserIndexService;
 import gov.ca.cwds.idm.service.validation.ValidationService;
 import gov.ca.cwds.service.messages.MessageCode;
 import gov.ca.cwds.service.messages.MessagesService;
@@ -102,7 +103,7 @@ public class IdmServiceImpl implements IdmService {
   private UserLogService userLogService;
 
   @Autowired
-  private SearchService searchService;
+  private UserIndexService userIndexService;
 
   @Autowired
   private AuthorizationService authorizeService;
@@ -486,7 +487,7 @@ public class IdmServiceImpl implements IdmService {
     return new PutInSearchExecution<User>(updatedUser) {
       @Override
       protected ResponseEntity<String> tryMethod(User updatedUser) {
-        return searchService.updateUser(updatedUser);
+        return userIndexService.updateUserInIndex(updatedUser);
       }
 
       @Override
@@ -502,7 +503,7 @@ public class IdmServiceImpl implements IdmService {
     return new PutInSearchExecution<User>(user) {
       @Override
       protected ResponseEntity<String> tryMethod(User user) {
-        return searchService.createUser(user);
+        return userIndexService.createUserInIndex(user);
       }
 
       @Override
@@ -545,8 +546,8 @@ public class IdmServiceImpl implements IdmService {
         || updateUserEnabledExecution.getExecutionStatus() == SUCCESS;
   }
 
-  public void setSearchService(SearchService searchService) {
-    this.searchService = searchService;
+  public void setUserIndexService(UserIndexService userIndexService) {
+    this.userIndexService = userIndexService;
   }
 
   public void setCognitoServiceFacade(

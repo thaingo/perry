@@ -17,6 +17,7 @@ import gov.ca.cwds.idm.event.AuditEvent;
 import gov.ca.cwds.idm.event.UserLockedEvent;
 import gov.ca.cwds.idm.persistence.ns.entity.NsAuditEvent;
 import gov.ca.cwds.idm.persistence.ns.repository.NsAuditEventRepository;
+import gov.ca.cwds.idm.service.search.AuditEventIndexService;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.TreeSet;
@@ -69,7 +70,7 @@ public class AuditEventServiceTest {
   @Autowired AuditEventService service;
 
   @MockBean
-  private SearchService searchService;
+  private AuditEventIndexService suditEventIndexService;
 
   @TestConfiguration
   static class ContextConfiguration {
@@ -102,8 +103,8 @@ public class AuditEventServiceTest {
     int sizeBefore = Iterables.size(nsAuditEventRepository.findAll());
 
     doThrow(new RuntimeException())
-        .when(searchService)
-        .sendAuditEventToEsIndex(any(AuditEvent.class));
+        .when(suditEventIndexService)
+        .sendAuditEventToIndex(any(AuditEvent.class));
 
     AuditEvent event = new UserLockedEvent(mockUser());
     service.processAuditEvent(event);

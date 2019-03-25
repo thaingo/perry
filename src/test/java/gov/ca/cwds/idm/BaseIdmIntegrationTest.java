@@ -27,11 +27,11 @@ import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
 import gov.ca.cwds.idm.persistence.ns.repository.NsUserRepository;
 import gov.ca.cwds.idm.persistence.ns.repository.UserLogRepository;
 import gov.ca.cwds.idm.service.IdmServiceImpl;
-import gov.ca.cwds.idm.service.SearchService;
 import gov.ca.cwds.idm.service.TransactionalUserService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.util.CognitoRequestHelper;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
+import gov.ca.cwds.idm.service.search.UserIndexService;
 import gov.ca.cwds.idm.util.TestCognitoServiceFacade;
 import gov.ca.cwds.idm.util.WithMockCustomUser;
 import gov.ca.cwds.service.messages.MessagesService;
@@ -202,8 +202,8 @@ public abstract class BaseIdmIntegrationTest extends BaseIntegrationTest {
         throws BeansException {
       if (beanName.equals("cognitoServiceFacade")) {
         return new TestCognitoServiceFacade();
-      } else if (beanName.equals("searchService")) {
-        return new TestSearchService();
+      } else if (beanName.equals("userIndexService")) {
+        return new TestUserIndexService();
       } else {
         return bean;
       }
@@ -216,7 +216,7 @@ public abstract class BaseIdmIntegrationTest extends BaseIntegrationTest {
     }
   }
 
-  public static class TestSearchService extends SearchService {
+  public static class TestUserIndexService extends UserIndexService {
     private static final String SSO_TOKEN = "b02aa833-f8b2-4d28-8796-3abe059313d1";
 
     @Override

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.ca.cwds.idm.event.AuditEvent;
 import gov.ca.cwds.idm.persistence.ns.entity.NsAuditEvent;
+import gov.ca.cwds.idm.service.search.AuditEventIndexService;
 import java.util.List;
 import javax.persistence.PersistenceException;
 import org.slf4j.Logger;
@@ -26,14 +27,14 @@ public class AuditEventService {
   private ObjectMapper objectMapper;
 
   @Autowired
-  private SearchService searchService;
+  private AuditEventIndexService auditEventIndexService;
 
   @Async("auditLogTaskExecutor")
   public <T extends AuditEvent> void processAuditEvent(T auditEvent) {
     NsAuditEvent nsAuditEvent = mapToNsAuditEvent(auditEvent);
     nsAuditEvent = nsAuditEventService.save(nsAuditEvent);
     try {
-      searchService.sendAuditEventToEsIndex(auditEvent);
+      auditEventIndexService.sendAuditEventToIndex(auditEvent);
     } catch (Exception e) {
       nsAuditEventService.markAsUnprocessed(nsAuditEvent.getId());
       LOGGER.warn("AuditEvent {} has been marked for further processing by the job", nsAuditEvent.getId(), e);
@@ -62,8 +63,7 @@ public class AuditEventService {
     this.objectMapper = objectMapper;
   }
 
-  public void setSearchService(SearchService searchService) {
-    this.searchService = searchService;
+  public void setAuditEventIndexService(AuditEventIndexService auditEventIndexService) {
+    this.auditEventIndexService = auditEventIndexService;
   }
-
 }

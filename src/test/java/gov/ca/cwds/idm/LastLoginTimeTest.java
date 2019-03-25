@@ -119,8 +119,8 @@ public class LastLoginTimeTest extends BaseIdmIntegrationWithSearchTest {
   }
 
   private void verifySearchUpdate(LocalDateTime loginTime) {
-    verify(spySearchService, times(1))
-        .updateUser(argThat(user -> loginTime.equals(user.getLastLoginDateTime())));
+    verify(spyUserIndexService, times(1))
+        .updateUserInIndex(argThat(user -> loginTime.equals(user.getLastLoginDateTime())));
   }
 
   private final void assertEmptyUserLog() {

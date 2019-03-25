@@ -11,10 +11,10 @@ public class SearchProperties {
   private String doraUrl;
 
   @NestedConfigurationProperty
-  private SearchIndex usersIndex;
+  private SearchIndexProperties usersIndex;
 
   @NestedConfigurationProperty
-  private SearchIndex auditIndex;
+  private SearchIndexProperties auditIndex;
 
   public String getDoraUrl() {
     return doraUrl;
@@ -24,23 +24,23 @@ public class SearchProperties {
     this.doraUrl = doraUrl;
   }
 
-  public SearchIndex getUsersIndex() {
+  public SearchIndexProperties getUsersIndex() {
     return usersIndex;
   }
 
-  public void setUsersIndex(SearchIndex usersIndex) {
+  public void setUsersIndex(SearchIndexProperties usersIndex) {
     this.usersIndex = usersIndex;
   }
 
-  public SearchIndex getAuditIndex() {
+  public SearchIndexProperties getAuditIndex() {
     return auditIndex;
   }
 
-  public void setAuditIndex(SearchIndex auditIndex) {
+  public void setAuditIndex(SearchIndexProperties auditIndex) {
     this.auditIndex = auditIndex;
   }
 
-  public static class SearchIndex {
+  public static class SearchIndexProperties {
 
     private String name;
     private String type;

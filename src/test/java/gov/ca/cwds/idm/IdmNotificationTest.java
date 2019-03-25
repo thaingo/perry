@@ -49,7 +49,7 @@ public class IdmNotificationTest extends BaseIdmIntegrationWithSearchTest {
     verify(auditEventService, times(1)).processAuditEvent(any(
         UserLockedEvent.class));
 
-    verify(spySearchService, times(1)).updateUser(argThat(User::isLocked));
+    verify(spyUserIndexService, times(1)).updateUserInIndex(argThat(User::isLocked));
 
     assertThat(userLogRepository.count(), is(oldUserLogsSize));
   }

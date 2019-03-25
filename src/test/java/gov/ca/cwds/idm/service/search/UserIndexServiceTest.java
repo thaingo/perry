@@ -1,6 +1,5 @@
-package gov.ca.cwds.idm.service;
+package gov.ca.cwds.idm.service.search;
 
-import static gov.ca.cwds.idm.service.SearchService.getUrlTemplate;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
@@ -11,12 +10,11 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
-
 import gov.ca.cwds.PerryProperties;
 import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.persistence.ns.OperationType;
+import gov.ca.cwds.idm.service.IndexRestSender;
 import gov.ca.cwds.idm.service.cognito.SearchProperties;
-import gov.ca.cwds.idm.service.cognito.SearchProperties.SearchIndex;
+import gov.ca.cwds.idm.service.cognito.SearchProperties.SearchIndexProperties;
 import gov.ca.cwds.idm.service.retry.IndexRetryConfiguration;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import org.junit.After;
@@ -36,14 +34,14 @@ import org.springframework.web.client.RestTemplate;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(fullyQualifiedNames = "gov.ca.cwds.util.CurrentAuthenticatedUserUtil")
-public class SearchServiceTest {
+public class UserIndexServiceTest {
 
   private static final String USER_ID = "123";
   private static final String USER_ERROR_ID = "999";
   private static final String SSO_TOKEN = "abc";
   private static final String DORA_RESPONSE = "{\"_id\": \"123\"\"}";
 
-  private SearchService service;
+  private UserIndexService service;
 
   private MockRestServiceServer mockServer;
 
@@ -52,7 +50,7 @@ public class SearchServiceTest {
     mockStatic(CurrentAuthenticatedUserUtil.class);
     when(CurrentAuthenticatedUserUtil.getSsoToken()).thenReturn(SSO_TOKEN);
 
-    service = new SearchService();
+    service = new UserIndexService();
 
     PerryProperties perryProperties = new PerryProperties();
     perryProperties.setDoraWsMaxAttempts(3);
@@ -61,7 +59,7 @@ public class SearchServiceTest {
     SearchProperties searchProperties = new SearchProperties();
     searchProperties.setDoraUrl("http://localhost");
 
-    SearchIndex usersIndex = new SearchIndex();
+    SearchIndexProperties usersIndex = new SearchIndexProperties();
     searchProperties.setUsersIndex(usersIndex);
     usersIndex.setName("users");
     usersIndex.setType("user");
@@ -96,7 +94,7 @@ public class SearchServiceTest {
 
     User user = new User();
     user.setId(USER_ID);
-    ResponseEntity<String> response = service.updateUser(user);
+    ResponseEntity<String> response = service.updateUserInIndex(user);
     assertThat(response.getStatusCode(), is(HttpStatus.OK));
     assertThat(response.getBody(), is(DORA_RESPONSE));
   }
@@ -114,7 +112,7 @@ public class SearchServiceTest {
 
     User user = new User();
     user.setId(USER_ID);
-    ResponseEntity<String> response = service.createUser(user);
+    ResponseEntity<String> response = service.createUserInIndex(user);
     assertThat(response.getStatusCode(), is(HttpStatus.CREATED));
     assertThat(response.getBody(), is(DORA_RESPONSE));
   }
@@ -130,23 +128,6 @@ public class SearchServiceTest {
 
     User user = new User();
     user.setId(USER_ERROR_ID);
-    service.updateUser(user);
-  }
-
-  @Test
-  public void testGetUrlTemplate() {
-    assertThat(
-        getUrlTemplate(OperationType.CREATE),
-        is("{doraUrl}/dora/{esIndexName}/{esIndexType}/{id}/_create?token={ssoToken}"));
-    assertThat(
-        getUrlTemplate(OperationType.UPDATE),
-        is("{doraUrl}/dora/{esIndexName}/{esIndexType}/{id}?token={ssoToken}"));
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void testPutUserOperationNull() {
-    User user = new User();
-    user.setId(USER_ID);
-    service.putUser(user, null);
+    service.updateUserInIndex(user);
   }
 }
