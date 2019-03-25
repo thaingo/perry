@@ -5,6 +5,7 @@ import static gov.ca.cwds.util.Utils.toLowerCase;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.service.cognito.SearchProperties;
+import gov.ca.cwds.idm.service.cognito.SearchProperties.SearchIndex;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import java.util.HashMap;
 import java.util.Map;
@@ -86,8 +87,9 @@ public class SearchService {
 
     Map<String, String> params = new HashMap<>();
     params.put(DORA_URL, searchProperties.getDoraUrl());
-    params.put(ES_USER_INDEX, searchProperties.getIndex());
-    params.put(ES_USER_TYPE, searchProperties.getType());
+    SearchIndex usersIndex = searchProperties.getUsersIndex();
+    params.put(ES_USER_INDEX, usersIndex.getName());
+    params.put(ES_USER_TYPE, usersIndex.getType());
     params.put(ID, user.getId());
     params.put(SSO_TOKEN, getSsoToken());
 

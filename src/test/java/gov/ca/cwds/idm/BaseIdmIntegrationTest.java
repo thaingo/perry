@@ -68,7 +68,11 @@ import org.springframework.test.context.junit4.SpringRunner;
         "spring.datasource.hikari.username=" + SPRING_BOOT_H2_USER,
         "spring.datasource.hikari.password=" + SPRING_BOOT_H2_PASSWORD,
         "perry.doraWsMaxAttempts=" + DORA_WS_MAX_ATTEMPTS,
-        "perry.doraWsRetryDelayMs=500"
+        "perry.doraWsRetryDelayMs=500",
+        "search.usersIndex.name=users",
+        "search.usersIndex.type=user",
+        "search.auditIndex.name=auditevents",
+        "search.auditIndex.type=auditevent"
     }
 )
 public abstract class BaseIdmIntegrationTest extends BaseIntegrationTest {

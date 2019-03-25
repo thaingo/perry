@@ -133,5 +133,9 @@ logging:
       hibernate: ${LOG_LEVEL:DEBUG}
 search:
   doraUrl: ${DORA_URL:https://dora.preint.cwds.io}
-  index: ${ES_USER_INDEX:users}
-  type: ${ES_USER_TYPE:user}
+  usersIndex:
+    name: ${ES_USER_INDEX:users}
+    type: ${ES_USER_TYPE:user}
+  auditIndex:
+    name: ${ES_AUDIT_INDEX:auditevents}
+    type: ${ES_AUDIT_TYPE:auditevent}

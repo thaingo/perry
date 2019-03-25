@@ -2,7 +2,8 @@ package gov.ca.cwds.idm.service;
 
 
 import gov.ca.cwds.idm.event.AuditEvent;
-import gov.ca.cwds.idm.service.cognito.AuditProperties;
+import gov.ca.cwds.idm.service.cognito.SearchProperties;
+import gov.ca.cwds.idm.service.cognito.SearchProperties.SearchIndex;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,7 +43,7 @@ public class AuditEventIndexService {
           + "}";
 
   @Autowired
-  private AuditProperties auditProperties;
+  private SearchProperties searchProperties;
 
   @Autowired
   private IndexRestSender restSender;
@@ -54,9 +55,10 @@ public class AuditEventIndexService {
     HttpEntity<AuditEvent> requestEntity = new HttpEntity<>(event, headers);
 
     Map<String, String> params = new HashMap<>();
-    params.put(DORA_URL, auditProperties.getDoraUrl());
-    params.put(ES_AUDIT_INDEX, auditProperties.getIndex());
-    params.put(ES_AUDIT_TYPE, auditProperties.getType());
+    params.put(DORA_URL, searchProperties.getDoraUrl());
+    SearchIndex auditIndex = searchProperties.getAuditIndex();
+    params.put(ES_AUDIT_INDEX, auditIndex.getName());
+    params.put(ES_AUDIT_TYPE, auditIndex.getType());
     params.put(ID, eventId);
     params.put(SSO_TOKEN, getSsoToken());
     ResponseEntity<String> response;
@@ -82,8 +84,8 @@ public class AuditEventIndexService {
   }
 
 
-  public void setAuditProperties(AuditProperties auditProperties) {
-    this.auditProperties = auditProperties;
+  public void setSearchProperties(SearchProperties searchProperties) {
+    this.searchProperties = searchProperties;
   }
 
   public void setRestSender(IndexRestSender restSender) {

@@ -16,6 +16,7 @@ import gov.ca.cwds.PerryProperties;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.service.cognito.SearchProperties;
+import gov.ca.cwds.idm.service.cognito.SearchProperties.SearchIndex;
 import gov.ca.cwds.idm.service.retry.IndexRetryConfiguration;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import org.junit.After;
@@ -57,11 +58,15 @@ public class SearchServiceTest {
     perryProperties.setDoraWsMaxAttempts(3);
     perryProperties.setDoraWsRetryDelayMs(500);
 
-    SearchProperties properties = new SearchProperties();
-    properties.setDoraUrl("http://localhost");
-    properties.setIndex("users");
-    properties.setType("user");
-    service.setSearchProperties(properties);
+    SearchProperties searchProperties = new SearchProperties();
+    searchProperties.setDoraUrl("http://localhost");
+
+    SearchIndex usersIndex = new SearchIndex();
+    searchProperties.setUsersIndex(usersIndex);
+    usersIndex.setName("users");
+    usersIndex.setType("user");
+
+    service.setSearchProperties(searchProperties);
 
     IndexRetryConfiguration indexRetryConfiguration = new IndexRetryConfiguration();
     indexRetryConfiguration.setProperties(perryProperties);
