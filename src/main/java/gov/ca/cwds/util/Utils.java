@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.util.StringUtil;
@@ -158,5 +159,12 @@ public class Utils {
 
   public static String blankToNull(String str) {
     return StringUtil.isBlank(str)? null : str;
+  }
+
+  public static String prepareBasicAuthHeader(String user, String pwd) {
+    String authString = user + ":" + pwd;
+    byte[] authEncBytes = Base64.encodeBase64(authString.getBytes());
+    String authStringEnc = new String(authEncBytes);
+    return "Basic " + authStringEnc;
   }
 }

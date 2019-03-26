@@ -15,6 +15,7 @@ import static org.mockito.Mockito.verify;
 import gov.ca.cwds.idm.dto.IdmNotification;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.event.UserLockedEvent;
+import gov.ca.cwds.util.Utils;
 import org.apache.commons.codec.binary.Base64;
 import org.junit.Before;
 import org.junit.Test;
@@ -133,9 +134,6 @@ public class IdmNotificationTest extends BaseIdmIntegrationWithSearchTest {
   }
 
   private static String prepareNotValidBasicAuthHeader() {
-    String authString = "invalidUser" + ":" + "InvalidPass";
-    byte[] authEncBytes = Base64.encodeBase64(authString.getBytes());
-    String authStringEnc = new String(authEncBytes);
-    return "Basic " + authStringEnc;
+    return Utils.prepareBasicAuthHeader("invalidUser", "InvalidPass");
   }
 }

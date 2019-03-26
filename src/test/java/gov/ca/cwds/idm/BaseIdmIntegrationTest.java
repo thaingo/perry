@@ -141,10 +141,7 @@ public abstract class BaseIdmIntegrationTest extends BaseIntegrationTest {
   }
 
   private static String prepareBasicAuthHeader() {
-    String authString = IDM_BASIC_AUTH_USER + ":" + IDM_BASIC_AUTH_PASS;
-    byte[] authEncBytes = Base64.encodeBase64(authString.getBytes());
-    String authStringEnc = new String(authEncBytes);
-    return "Basic " + authStringEnc;
+    return Utils.prepareBasicAuthHeader(IDM_BASIC_AUTH_USER, IDM_BASIC_AUTH_PASS);
   }
 
   protected final User user() {
