@@ -2,10 +2,9 @@ package gov.ca.cwds.idm.service.search;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
 import static org.springframework.test.web.client.ExpectedCount.times;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
@@ -16,13 +15,11 @@ import gov.ca.cwds.idm.service.IndexRestSender;
 import gov.ca.cwds.idm.service.cognito.SearchProperties;
 import gov.ca.cwds.idm.service.cognito.SearchProperties.SearchIndexProperties;
 import gov.ca.cwds.idm.service.retry.IndexRetryConfiguration;
-import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
+import gov.ca.cwds.util.Utils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -32,14 +29,15 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(fullyQualifiedNames = "gov.ca.cwds.util.CurrentAuthenticatedUserUtil")
 public class UserIndexServiceTest {
 
   private static final String USER_ID = "123";
   private static final String USER_ERROR_ID = "999";
-  private static final String SSO_TOKEN = "abc";
   private static final String DORA_RESPONSE = "{\"_id\": \"123\"\"}";
+  public static final String BASIC_AUTH_USER = "ba_user";
+  public static final String BASIC_AUTH_PWD = "ba_pwd";
+  protected static final String BASIC_AUTH_HEADER = Utils.prepareBasicAuthHeader(BASIC_AUTH_USER,
+      BASIC_AUTH_PWD);
 
   private UserIndexService service;
 
@@ -47,9 +45,6 @@ public class UserIndexServiceTest {
 
   @Before
   public void before() {
-    mockStatic(CurrentAuthenticatedUserUtil.class);
-    when(CurrentAuthenticatedUserUtil.getSsoToken()).thenReturn(SSO_TOKEN);
-
     service = new UserIndexService();
 
     PerryProperties perryProperties = new PerryProperties();
@@ -58,6 +53,8 @@ public class UserIndexServiceTest {
 
     SearchProperties searchProperties = new SearchProperties();
     searchProperties.setDoraUrl("http://localhost");
+    searchProperties.setDoraBasicAuthUser("ba_user");
+    searchProperties.setDoraBasicAuthPass("ba_pwd");
 
     SearchIndexProperties usersIndex = new SearchIndexProperties();
     searchProperties.setUsersIndex(usersIndex);
@@ -88,8 +85,9 @@ public class UserIndexServiceTest {
   @Test
   public void testUpdate() {
     mockServer
-        .expect(requestTo("http://localhost/dora/users/user/" + USER_ID + "?token=" + SSO_TOKEN))
+        .expect(requestTo("http://localhost/dora/users/user/" + USER_ID))
         .andExpect(method(HttpMethod.PUT))
+        .andExpect(header(HttpHeaders.AUTHORIZATION, BASIC_AUTH_HEADER))
         .andRespond(withSuccess(DORA_RESPONSE, MediaType.APPLICATION_JSON));
 
     User user = new User();
@@ -104,9 +102,10 @@ public class UserIndexServiceTest {
     mockServer
         .expect(
             requestTo(
-                "http://localhost/dora/users/user/" + USER_ID + "/_create?token=" + SSO_TOKEN))
+                "http://localhost/dora/users/user/" + USER_ID + "/_create"))
         .andExpect(method(HttpMethod.PUT))
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(header(HttpHeaders.AUTHORIZATION, BASIC_AUTH_HEADER))
         .andRespond(
             request -> new MockClientHttpResponse(DORA_RESPONSE.getBytes(), HttpStatus.CREATED));
 
@@ -120,9 +119,10 @@ public class UserIndexServiceTest {
   @Test(expected = HttpServerErrorException.class)
   public void testDoraError() {
     mockServer
-        .expect(times(3), requestTo("http://localhost/dora/users/user/" + USER_ERROR_ID + "?token=" + SSO_TOKEN))
+        .expect(times(3), requestTo("http://localhost/dora/users/user/" + USER_ERROR_ID))
         .andExpect(method(HttpMethod.PUT))
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(header(HttpHeaders.AUTHORIZATION, BASIC_AUTH_HEADER))
         .andRespond(
         request -> new MockClientHttpResponse("error".getBytes(), HttpStatus.INTERNAL_SERVER_ERROR));
 

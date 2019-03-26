@@ -3,6 +3,7 @@ package gov.ca.cwds.util;
 import static gov.ca.cwds.config.Constants.DEFAULT_LOCALE;
 
 import gov.ca.cwds.idm.dto.User;
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -163,8 +164,8 @@ public class Utils {
 
   public static String prepareBasicAuthHeader(String user, String pwd) {
     String authString = user + ":" + pwd;
-    byte[] authEncBytes = Base64.encodeBase64(authString.getBytes());
-    String authStringEnc = new String(authEncBytes);
+    byte[] authEncBytes = Base64.encodeBase64(authString.getBytes(StandardCharsets.UTF_8));
+    String authStringEnc = new String(authEncBytes, StandardCharsets.UTF_8);
     return "Basic " + authStringEnc;
   }
 }

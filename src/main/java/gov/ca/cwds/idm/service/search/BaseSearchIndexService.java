@@ -8,6 +8,7 @@ import gov.ca.cwds.idm.service.IndexRestSender;
 import gov.ca.cwds.idm.service.cognito.SearchProperties;
 import gov.ca.cwds.idm.service.cognito.SearchProperties.SearchIndexProperties;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
+import gov.ca.cwds.util.Utils;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,9 +23,8 @@ public abstract class BaseSearchIndexService {
   private static final String ES_INDEX_NAME = "esIndexName";
   private static final String ES_INDEX_TYPE = "esIndexType";
   private static final String ID = "id";
-  private static final String SSO_TOKEN = "ssoToken";
 
-  private static final String CREATE_URL_TEMPLATE =
+  private static final String URL_TEMPLATE_ROOT =
       "{"
           + DORA_URL
           + "}/dora/{"
@@ -33,22 +33,11 @@ public abstract class BaseSearchIndexService {
           + ES_INDEX_TYPE
           + "}/{"
           + ID
-          + "}/_create?token={"
-          + SSO_TOKEN
           + "}";
 
-  private static final String UPDATE_URL_TEMPLATE =
-      "{"
-          + DORA_URL
-          + "}/dora/{"
-          + ES_INDEX_NAME
-          + "}/{"
-          + ES_INDEX_TYPE
-          + "}/{"
-          + ID
-          + "}?token={"
-          + SSO_TOKEN
-          + "}";
+  private static final String CREATE_URL_TEMPLATE = URL_TEMPLATE_ROOT + "/_create";
+
+  private static final String UPDATE_URL_TEMPLATE = URL_TEMPLATE_ROOT;
 
   private static Map<OperationType, String> URL_TEMPLATE_MAP = new HashMap<>();
 
@@ -75,14 +64,23 @@ public abstract class BaseSearchIndexService {
     params.put(ES_INDEX_NAME, indexProps.getName());
     params.put(ES_INDEX_TYPE, indexProps.getType());
     params.put(ID, indexId);
-    params.put(SSO_TOKEN, getSsoToken());
     return params;
   }
 
   private <T> HttpEntity<T> createRequestEntity(T body) {
+    return new HttpEntity<>(body, createHeaders());
+  }
+
+  private HttpHeaders createHeaders() {
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
-    return new HttpEntity<>(body, headers);
+
+    String basicAuthUser = searchProperties.getDoraBasicAuthUser();
+    String basicAuthPass = searchProperties.getDoraBasicAuthPass();
+    String authHeader = Utils.prepareBasicAuthHeader(basicAuthUser, basicAuthPass);
+    headers.set(HttpHeaders.AUTHORIZATION, authHeader);
+
+    return headers;
   }
 
   static String getUrlTemplate(OperationType operation) {
