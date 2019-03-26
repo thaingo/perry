@@ -33,13 +33,13 @@ import gov.ca.cwds.idm.service.cognito.util.CognitoRequestHelper;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.idm.service.search.UserIndexService;
 import gov.ca.cwds.idm.util.TestCognitoServiceFacade;
+import gov.ca.cwds.idm.util.TestUtils;
 import gov.ca.cwds.idm.util.WithMockCustomUser;
 import gov.ca.cwds.service.messages.MessagesService;
 import gov.ca.cwds.util.Utils;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Set;
-import org.apache.commons.codec.binary.Base64;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.runner.RunWith;
@@ -69,6 +69,8 @@ import org.springframework.test.context.junit4.SpringRunner;
         "spring.datasource.hikari.password=" + SPRING_BOOT_H2_PASSWORD,
         "perry.doraWsMaxAttempts=" + DORA_WS_MAX_ATTEMPTS,
         "perry.doraWsRetryDelayMs=500",
+        "search.doraBasicAuthUser=ba_user",
+        "search.doraBasicAuthPass=ba_pwd",
         "search.usersIndex.name=users",
         "search.usersIndex.type=user",
         "search.auditIndex.name=auditevents",
@@ -141,7 +143,7 @@ public abstract class BaseIdmIntegrationTest extends BaseIntegrationTest {
   }
 
   private static String prepareBasicAuthHeader() {
-    return Utils.prepareBasicAuthHeader(IDM_BASIC_AUTH_USER, IDM_BASIC_AUTH_PASS);
+    return TestUtils.prepareBasicAuthHeader(IDM_BASIC_AUTH_USER, IDM_BASIC_AUTH_PASS);
   }
 
   protected final User user() {

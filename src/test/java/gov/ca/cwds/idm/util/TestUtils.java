@@ -8,12 +8,14 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import gov.ca.cwds.idm.service.cognito.attribute.UserAttribute;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.UUID;
+import org.apache.commons.codec.binary.Base64;
 
 public final class TestUtils {
 
@@ -67,5 +69,12 @@ public final class TestUtils {
 
   public static String generateId() {
     return UUID.randomUUID().toString();
+  }
+
+  public static String prepareBasicAuthHeader(String user, String pwd) {
+    String authString = user + ":" + pwd;
+    byte[] authEncBytes = Base64.encodeBase64(authString.getBytes(StandardCharsets.UTF_8));
+    String authStringEnc = new String(authEncBytes, StandardCharsets.UTF_8);
+    return "Basic " + authStringEnc;
   }
 }

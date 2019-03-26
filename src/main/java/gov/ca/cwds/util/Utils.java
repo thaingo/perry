@@ -161,11 +161,4 @@ public class Utils {
   public static String blankToNull(String str) {
     return StringUtil.isBlank(str)? null : str;
   }
-
-  public static String prepareBasicAuthHeader(String user, String pwd) {
-    String authString = user + ":" + pwd;
-    byte[] authEncBytes = Base64.encodeBase64(authString.getBytes(StandardCharsets.UTF_8));
-    String authStringEnc = new String(authEncBytes, StandardCharsets.UTF_8);
-    return "Basic " + authStringEnc;
-  }
 }

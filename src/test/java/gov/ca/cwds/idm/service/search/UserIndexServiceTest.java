@@ -11,14 +11,14 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 
 import gov.ca.cwds.PerryProperties;
 import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.service.IndexRestSender;
 import gov.ca.cwds.idm.service.cognito.SearchProperties;
 import gov.ca.cwds.idm.service.cognito.SearchProperties.SearchIndexProperties;
 import gov.ca.cwds.idm.service.retry.IndexRetryConfiguration;
-import gov.ca.cwds.util.Utils;
+import gov.ca.cwds.idm.util.TestUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -27,7 +27,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mock.http.client.MockClientHttpResponse;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.HttpServerErrorException;
-import org.springframework.web.client.RestTemplate;
 
 public class UserIndexServiceTest {
 
@@ -36,8 +35,8 @@ public class UserIndexServiceTest {
   private static final String DORA_RESPONSE = "{\"_id\": \"123\"\"}";
   public static final String BASIC_AUTH_USER = "ba_user";
   public static final String BASIC_AUTH_PWD = "ba_pwd";
-  protected static final String BASIC_AUTH_HEADER = Utils.prepareBasicAuthHeader(BASIC_AUTH_USER,
-      BASIC_AUTH_PWD);
+  protected static final String BASIC_AUTH_HEADER =
+      TestUtils.prepareBasicAuthHeader(BASIC_AUTH_USER, BASIC_AUTH_PWD);
 
   private UserIndexService service;
 
@@ -56,24 +55,26 @@ public class UserIndexServiceTest {
     searchProperties.setDoraBasicAuthUser("ba_user");
     searchProperties.setDoraBasicAuthPass("ba_pwd");
 
-    SearchIndexProperties usersIndex = new SearchIndexProperties();
-    searchProperties.setUsersIndex(usersIndex);
-    usersIndex.setName("users");
-    usersIndex.setType("user");
+    SearchIndexProperties usersIndexProperties = new SearchIndexProperties();
+    searchProperties.setUsersIndex(usersIndexProperties);
+    usersIndexProperties.setName("users");
+    usersIndexProperties.setType("user");
 
     service.setSearchProperties(searchProperties);
 
     IndexRetryConfiguration indexRetryConfiguration = new IndexRetryConfiguration();
     indexRetryConfiguration.setProperties(perryProperties);
 
-    RestTemplate restTemplate = new RestTemplate();
-    IndexRestSender restSender = new IndexRestSender();
-    restSender.setRestTemplate(restTemplate);
-    restSender.setRetryTemplate(indexRetryConfiguration.retryTemplate());
+    RestTemplateBuilder restTemplateBuilder = new RestTemplateBuilder();
+    IndexRestSender indexRestSender = new IndexRestSender();
+    indexRestSender.setRestTemplateBuilder(restTemplateBuilder);
+    indexRestSender.setRetryTemplate(indexRetryConfiguration.retryTemplate());
+    indexRestSender.setSearchProperties(searchProperties);
+    indexRestSender.init();
 
-    service.setRestSender(restSender);
+    service.setRestSender(indexRestSender);
 
-    mockServer = MockRestServiceServer.bindTo(restTemplate).build();
+    mockServer = MockRestServiceServer.bindTo(indexRestSender.getRestTemplate()).build();
   }
 
   @After

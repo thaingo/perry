@@ -57,6 +57,8 @@ import org.springframework.test.context.junit4.SpringRunner;
     "spring.datasource.hikari.jdbcUrl=" + CMS_STORE_URL,
     "spring.datasource.hikari.username=" + SPRING_BOOT_H2_USER,
     "spring.datasource.hikari.password=" + SPRING_BOOT_H2_PASSWORD,
+    "search.doraBasicAuthUser=ba_user",
+    "search.doraBasicAuthPass=ba_pwd"
 })
 public class IdmServiceImplTest {
 

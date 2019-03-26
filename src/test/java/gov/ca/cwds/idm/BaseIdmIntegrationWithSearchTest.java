@@ -9,7 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import gov.ca.cwds.idm.service.AuditEventService;
-import gov.ca.cwds.idm.service.IndexRestSender;
+import gov.ca.cwds.idm.service.search.IndexRestSender;
 import gov.ca.cwds.idm.service.cognito.SearchProperties;
 import gov.ca.cwds.idm.service.search.UserIndexService;
 import java.util.Map;
@@ -28,7 +28,7 @@ public abstract class BaseIdmIntegrationWithSearchTest extends BaseIdmIntegratio
   protected UserIndexService userIndexService;
 
   @Autowired
-  protected IndexRestSender searchRestSender;
+  protected IndexRestSender indexRestSender;
 
   @Autowired
   protected SearchProperties searchProperties;
@@ -44,8 +44,8 @@ public abstract class BaseIdmIntegrationWithSearchTest extends BaseIdmIntegratio
   public void before() {
     super.before();
 
-    searchRestSender.setRestTemplate(mockRestTemplate);
-    userIndexService.setRestSender(searchRestSender);
+    indexRestSender.setRestTemplate(mockRestTemplate);
+    userIndexService.setRestSender(indexRestSender);
     userIndexService.setSearchProperties(searchProperties);
     spyUserIndexService = spy(userIndexService);
 

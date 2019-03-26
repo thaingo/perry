@@ -1,10 +1,13 @@
-package gov.ca.cwds.idm.service;
+package gov.ca.cwds.idm.service.search;
 
+import gov.ca.cwds.idm.service.cognito.SearchProperties;
 import java.util.Map;
+import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -19,11 +22,24 @@ public class IndexRestSender {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(IndexRestSender.class);
 
-  @Autowired private RestTemplate restTemplate;
+  @Autowired
+  private RestTemplateBuilder restTemplateBuilder;
 
   @Autowired
   @Qualifier("indexRetryTemplate")
   private RetryTemplate retryTemplate;
+
+  @Autowired
+  private SearchProperties searchProperties;
+
+  private RestTemplate restTemplate;
+
+  @PostConstruct
+  public void init() {
+    String basicAuthUser = searchProperties.getDoraBasicAuthUser();
+    String basicAuthPass = searchProperties.getDoraBasicAuthPass();
+    restTemplate = restTemplateBuilder.basicAuthorization(basicAuthUser,basicAuthPass).build();
+  }
 
   public ResponseEntity<String> send(
       String urlTemplate, HttpEntity<?> requestEntity, Map<String, String> params) {
@@ -39,11 +55,23 @@ public class IndexRestSender {
         });
   }
 
-  public void setRestTemplate(RestTemplate restTemplate) {
-    this.restTemplate = restTemplate;
+  void setRestTemplateBuilder(RestTemplateBuilder restTemplateBuilder) {
+    this.restTemplateBuilder = restTemplateBuilder;
   }
 
-  public void setRetryTemplate(RetryTemplate retryTemplate) {
+  void setRetryTemplate(RetryTemplate retryTemplate) {
     this.retryTemplate = retryTemplate;
+  }
+
+  void setSearchProperties(SearchProperties searchProperties) {
+    this.searchProperties = searchProperties;
+  }
+
+  RestTemplate getRestTemplate() {
+    return restTemplate;
+  }
+
+  public void setRestTemplate(RestTemplate restTemplate) {
+    this.restTemplate = restTemplate;
   }
 }

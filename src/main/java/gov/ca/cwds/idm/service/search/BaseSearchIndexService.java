@@ -4,11 +4,9 @@ import static gov.ca.cwds.idm.persistence.ns.OperationType.CREATE;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
 
 import gov.ca.cwds.idm.persistence.ns.OperationType;
-import gov.ca.cwds.idm.service.IndexRestSender;
 import gov.ca.cwds.idm.service.cognito.SearchProperties;
 import gov.ca.cwds.idm.service.cognito.SearchProperties.SearchIndexProperties;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
-import gov.ca.cwds.util.Utils;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,12 +72,6 @@ public abstract class BaseSearchIndexService {
   private HttpHeaders createHeaders() {
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
-
-    String basicAuthUser = searchProperties.getDoraBasicAuthUser();
-    String basicAuthPass = searchProperties.getDoraBasicAuthPass();
-    String authHeader = Utils.prepareBasicAuthHeader(basicAuthUser, basicAuthPass);
-    headers.set(HttpHeaders.AUTHORIZATION, authHeader);
-
     return headers;
   }
 
