@@ -159,6 +159,8 @@ logging:
       hibernate: ${LOG_LEVEL:DEBUG}
 search:
   doraUrl: ${DORA_URL:https://doraapi.integration.cwds.io}
+  doraBasicAuthUser: ${DORA_BASIC_AUTH_USER:}
+  doraBasicAuthPass: ${DORA_BASIC_AUTH_PASSWORD:}
   usersIndex:
     name: ${ES_USER_INDEX:users}
     type: ${ES_USER_TYPE:user}

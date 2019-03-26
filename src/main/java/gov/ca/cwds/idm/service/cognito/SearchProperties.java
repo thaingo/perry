@@ -10,6 +10,10 @@ public class SearchProperties {
 
   private String doraUrl;
 
+  private String doraBasicAuthUser;
+
+  private String doraBasicAuthPass;
+
   @NestedConfigurationProperty
   private SearchIndexProperties usersIndex;
 
@@ -22,6 +26,22 @@ public class SearchProperties {
 
   public void setDoraUrl(String doraUrl) {
     this.doraUrl = doraUrl;
+  }
+
+  public String getDoraBasicAuthUser() {
+    return doraBasicAuthUser;
+  }
+
+  public void setDoraBasicAuthUser(String doraBasicAuthUser) {
+    this.doraBasicAuthUser = doraBasicAuthUser;
+  }
+
+  public String getDoraBasicAuthPass() {
+    return doraBasicAuthPass;
+  }
+
+  public void setDoraBasicAuthPass(String doraBasicAuthPass) {
+    this.doraBasicAuthPass = doraBasicAuthPass;
   }
 
   public SearchIndexProperties getUsersIndex() {
