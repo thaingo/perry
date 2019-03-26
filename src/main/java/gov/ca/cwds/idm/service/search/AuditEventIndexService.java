@@ -15,7 +15,7 @@ public class AuditEventIndexService extends BaseSearchIndexService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AuditEventIndexService.class);
 
-  public <T extends AuditEvent> ResponseEntity<String> sendAuditEventToIndex(T event) {
+  public <T extends AuditEvent> ResponseEntity<String> createAuditEventInIndex(T event) {
     final String eventId = event.getId();
 
     try {

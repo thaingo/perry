@@ -104,7 +104,7 @@ public class AuditEventServiceTest {
 
     doThrow(new RuntimeException())
         .when(suditEventIndexService)
-        .sendAuditEventToIndex(any(AuditEvent.class));
+        .createAuditEventInIndex(any(AuditEvent.class));
 
     AuditEvent event = new UserLockedEvent(mockUser());
     service.processAuditEvent(event);

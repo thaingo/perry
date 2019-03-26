@@ -34,7 +34,7 @@ public class AuditEventService {
     NsAuditEvent nsAuditEvent = mapToNsAuditEvent(auditEvent);
     nsAuditEvent = nsAuditEventService.save(nsAuditEvent);
     try {
-      auditEventIndexService.sendAuditEventToIndex(auditEvent);
+      auditEventIndexService.createAuditEventInIndex(auditEvent);
     } catch (Exception e) {
       nsAuditEventService.markAsUnprocessed(nsAuditEvent.getId());
       LOGGER.warn("AuditEvent {} has been marked for further processing by the job", nsAuditEvent.getId(), e);
