@@ -34,9 +34,6 @@ public class ResendInvitationEmailTest extends BaseIdmIntegrationTest {
 
   private static final String USER_WITH_RACFID_ID_EMAIL = "julio@gmail.com";
 
-  @Autowired
-  protected UserLogService userLogService;
-
   @MockBean
   protected AuditEventService auditEventService;
 
