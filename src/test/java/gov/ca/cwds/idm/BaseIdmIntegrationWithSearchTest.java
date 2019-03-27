@@ -30,9 +30,6 @@ public abstract class BaseIdmIntegrationWithSearchTest extends BaseIdmIntegratio
   @Autowired
   protected IndexRestSender indexRestSender;
 
-  @Autowired
-  protected SearchProperties searchProperties;
-
   @MockBean
   protected AuditEventService auditEventService;
 
@@ -45,10 +42,7 @@ public abstract class BaseIdmIntegrationWithSearchTest extends BaseIdmIntegratio
     super.before();
 
     indexRestSender.setRestTemplate(mockRestTemplate);
-    userIndexService.setRestSender(indexRestSender);
-    userIndexService.setSearchProperties(searchProperties);
     spyUserIndexService = spy(userIndexService);
-
     idmService.setUserIndexService(spyUserIndexService);
   }
 
