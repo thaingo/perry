@@ -18,11 +18,9 @@ import com.amazonaws.services.cognitoidp.model.UserType;
 import gov.ca.cwds.idm.dto.RegistrationResubmitResponse;
 import gov.ca.cwds.idm.event.UserRegistrationResentEvent;
 import gov.ca.cwds.idm.service.AuditEventService;
-import gov.ca.cwds.idm.service.UserLogService;
 import gov.ca.cwds.idm.util.TestUtils;
 import gov.ca.cwds.idm.util.WithMockCustomUser;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -110,5 +108,4 @@ public class ResendInvitationEmailTest extends BaseIdmIntegrationTest {
     verify(auditEventService, times(1)).saveAuditEvent(any(
         UserRegistrationResentEvent.class));
   }
-
 }
