@@ -7,6 +7,7 @@ import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.service.cognito.SearchProperties;
 import gov.ca.cwds.idm.service.cognito.SearchProperties.SearchIndexProperties;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +38,8 @@ public abstract class BaseSearchIndexService {
 
   private static final String UPDATE_URL_TEMPLATE = URL_TEMPLATE_ROOT;
 
-  private static Map<OperationType, String> URL_TEMPLATE_MAP = new HashMap<>();
+  private static final Map<OperationType, String> URL_TEMPLATE_MAP =
+      new EnumMap<>(OperationType.class);
 
   static {
     URL_TEMPLATE_MAP.put(CREATE, CREATE_URL_TEMPLATE);
