@@ -15,6 +15,7 @@ import static gov.ca.cwds.service.messages.MessageCode.IDM_NOTIFY_UNSUPPORTED_OP
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_CREATE_IDM_USER_IN_ES;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_PURGE_PROCESSED_USER_LOGS;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_WRITE_LAST_LOGIN_TIME;
+import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_IDM_USER_IN_ES;
 import static gov.ca.cwds.service.messages.MessageCode.USER_CREATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_CREATE_SAVE_TO_SEARCH_ERROR;
 import static gov.ca.cwds.service.messages.MessageCode.USER_NOTHING_UPDATED;
@@ -482,20 +483,20 @@ public class IdmServiceImpl implements IdmService {
     return values.stream().map(function).collect(toSet());
   }
 
-  private PutInSearchExecution<User> updateUserInSearch(User updatedUser) {
-    return putUserInSearch(
-        updatedUser,
-        userIndexService::updateUserInIndex,
-        userLogService::logUpdate,
-        UNABLE_CREATE_IDM_USER_IN_ES);
-  }
-
   private PutInSearchExecution<User> createUserInSearch(User user) {
     return putUserInSearch(
         user,
         userIndexService::createUserInIndex,
         userLogService::logCreate,
         UNABLE_CREATE_IDM_USER_IN_ES);
+  }
+
+  private PutInSearchExecution<User> updateUserInSearch(User updatedUser) {
+    return putUserInSearch(
+        updatedUser,
+        userIndexService::updateUserInIndex,
+        userLogService::logUpdate,
+        UNABLE_UPDATE_IDM_USER_IN_ES);
   }
 
   private PutInSearchExecution<User> putUserInSearch(
