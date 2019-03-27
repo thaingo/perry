@@ -1,6 +1,5 @@
 package gov.ca.cwds.idm.service.filter;
 
-import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CALS_EXTERNAL_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
@@ -49,14 +48,12 @@ public class MainRoleFilter {
   private static int getRoleValue(String role) {
     switch (role) {
       case SUPER_ADMIN:
-        return 7;
-      case STATE_ADMIN:
         return 6;
-      case COUNTY_ADMIN:
+      case STATE_ADMIN:
         return 5;
-      case OFFICE_ADMIN:
+      case COUNTY_ADMIN:
         return 4;
-      case CALS_ADMIN:
+      case OFFICE_ADMIN:
         return 3;
       case CWS_WORKER:
         return 2;

@@ -167,8 +167,7 @@ public class IdmResource {
       }
   )
   @ApiOperation(value = "Update User")
-  @PreAuthorize("@userRoleService.isAdmin(principal) &&  " +
-      " !@userRoleService.isCalsAdminStrongestRole(principal)")
+  @PreAuthorize("@userRoleService.isAdmin(principal)")
   public ResponseEntity updateUser(
       @ApiParam(required = true, value = "The unique user ID", example = "userId1")
       @PathVariable
@@ -202,8 +201,7 @@ public class IdmResource {
               + "email, first_name, last_name, county_name, RACFID, permissions, office, phone_number.\n "
               + "Other properties values will be set by the system automatically.\n"
               + "Required properties are: email, first_name, last_name, county_name.")
-  @PreAuthorize("@userRoleService.isAdmin(principal) &&  " +
-      " !@userRoleService.isCalsAdminStrongestRole(principal)")
+  @PreAuthorize("@userRoleService.isAdmin(principal)")
   public ResponseEntity createUser(
       @ApiParam(required = true, name = "User", value = "The User create data")
       @NotNull
@@ -259,8 +257,7 @@ public class IdmResource {
   @RequestMapping(method = RequestMethod.GET, value = "users/verify", produces = "application/json")
   @ApiOperation(value = "Check if user can be created by racfId and email", response = UserVerificationResult.class)
   @ApiResponses(value = {@ApiResponse(code = 401, message = "Not Authorized")})
-  @PreAuthorize("@userRoleService.isAdmin(principal) && "
-      + "!@userRoleService.isCalsAdminStrongestRole(principal)")
+  @PreAuthorize("@userRoleService.isAdmin(principal)")
   public ResponseEntity<UserVerificationResult> verifyIfUserCanBeCreated(
       @ApiParam(required = true, name = "racfid", value = "The RACFID to verify user by in CWS/CMS")
       @NotNull
@@ -288,8 +285,7 @@ public class IdmResource {
           @ApiResponse(code = 404, message = "Not found")
       }
   )
-  @PreAuthorize("@userRoleService.isAdmin(principal) &&  " +
-      " !@userRoleService.isCalsAdminStrongestRole(principal)")
+  @PreAuthorize("@userRoleService.isAdmin(principal)")
   public ResponseEntity<RegistrationResubmitResponse> resendInvitationEmail(
       @ApiParam(required = true, value = "The unique user ID", example = "userId1")
       @NotNull
@@ -313,8 +309,7 @@ public class IdmResource {
       response = CwsOffice.class,
       responseContainer = "List"
   )
-  @PreAuthorize("@userRoleService.isAdmin(principal) &&  " +
-      " !@userRoleService.isCalsAdminStrongestRole(principal)")
+  @PreAuthorize("@userRoleService.isAdmin(principal)")
   public ResponseEntity getAdminOffices() {
     return ResponseEntity.ok().body(officeService.getOfficesByAdmin());
   }
@@ -333,8 +328,7 @@ public class IdmResource {
       }
   )
   @ApiOperation(value = "Unlock User")
-  @PreAuthorize("@userRoleService.isAdmin(principal) &&  " +
-      " !@userRoleService.isCalsAdminStrongestRole(principal)")
+  @PreAuthorize("@userRoleService.isAdmin(principal)")
   public ResponseEntity unlockUser(
       @ApiParam(required = true, value = "The unique user ID", example = "userId1")
       @PathVariable

@@ -1,6 +1,5 @@
 package gov.ca.cwds.idm.service.authorization;
 
-import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CALS_EXTERNAL_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
@@ -68,16 +67,6 @@ public class AuthorizationServiceImplTest {
   @Test
   public void updateCalsExternalWorkerRole() {
     assertCantUpdateRole(CALS_EXTERNAL_WORKER);
-  }
-
-  @Test
-  public void updateCalsAdminRole() {
-    assertCantUpdateRole(CALS_ADMIN);
-  }
-
-  @Test
-  public void updateCalsAdminRolePlusSomeRole() {
-    assertCantUpdateRole(CALS_ADMIN);
   }
 
   private void assertCantUpdateRole(String... roles) {

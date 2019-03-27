@@ -1,6 +1,5 @@
 package gov.ca.cwds.idm.service.role.implementor;
 
-import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
@@ -31,8 +30,6 @@ public class AdminRoleImplementorFactory {
         return new CountyAdminRoleImplementor();
       case OFFICE_ADMIN:
         return new OfficeAdminRoleImplementor();
-      case CALS_ADMIN:
-        return new CalsAdminRoleImplementor();
       default:
         throw new IllegalStateException();
     }

@@ -1,11 +1,8 @@
 package gov.ca.cwds.idm.service.role.implementor;
 
-import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isSuperAdmin;
 import static gov.ca.cwds.idm.service.role.implementor.AuthorizationUtils.isPrincipalInTheSameCountyWith;
-import static gov.ca.cwds.service.messages.MessageCode.CALS_ADMIN_ROLES_CANNOT_BE_EDITED;
 import static gov.ca.cwds.service.messages.MessageCode.CANNOT_EDIT_ROLES_OF_CALS_EXTERNAL_WORKER;
-import static gov.ca.cwds.service.messages.MessageCode.NOT_SUPER_ADMIN_CANNOT_VIEW_USERS_WITH_SUPER_ADMIN_ROLE;
 import static gov.ca.cwds.service.messages.MessageCode.ROLE_IS_UNSUFFICIENT_FOR_OPERATION;
 
 import gov.ca.cwds.idm.dto.User;
@@ -31,10 +28,6 @@ public abstract class AbstractAdminActionsAuthorizer implements AdminActionsAuth
   public void checkCanEditRoles() {
     if(UserRolesService.isCalsExternalWorker(user)) {
       throwAuthorizationException(CANNOT_EDIT_ROLES_OF_CALS_EXTERNAL_WORKER, user.getId());
-    }
-
-    if(UserRolesService.isCalsAdmin(user)) {
-      throwAuthorizationException(CALS_ADMIN_ROLES_CANNOT_BE_EDITED, user.getId());
     }
   }
 

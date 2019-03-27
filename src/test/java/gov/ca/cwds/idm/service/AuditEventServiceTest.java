@@ -1,7 +1,7 @@
 package gov.ca.cwds.idm.service;
 
-import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
+import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -11,7 +11,6 @@ import static org.mockito.Mockito.doThrow;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Iterables;
-import gov.ca.cwds.PerryApplication;
 import gov.ca.cwds.config.SpringAsyncConfiguration;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.event.AuditEvent;
@@ -30,16 +29,11 @@ import org.springframework.boot.actuate.endpoint.InfoEndpoint;
 import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
 import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.task.SyncTaskExecutor;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -146,12 +140,10 @@ public class AuditEventServiceTest {
     user.setCountyName(TEST_COUNTY);
     user.setOfficeId(TEST_OFFICE_ID);
     user.setEmail(OLD_EMAIL);
-    user.setRoles(new HashSet<>(Arrays.asList(CWS_WORKER, CALS_ADMIN)));
+    user.setRoles(new HashSet<>(Arrays.asList(CWS_WORKER, OFFICE_ADMIN)));
     user.setPermissions(new TreeSet<>(Arrays.asList(PERMISSION_1, PERMISSION_2)));
     return user;
   }
-
-
 }
 
 
