@@ -91,10 +91,6 @@ public abstract class BaseSearchIndexService {
     return template;
   }
 
-  protected String getSsoToken() {
-    return CurrentAuthenticatedUserUtil.getSsoToken();
-  }
-
   public void setSearchProperties(SearchProperties searchProperties) {
     this.searchProperties = searchProperties;
   }

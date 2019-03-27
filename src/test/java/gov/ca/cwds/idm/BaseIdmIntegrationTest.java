@@ -201,8 +201,6 @@ public abstract class BaseIdmIntegrationTest extends BaseIntegrationTest {
         throws BeansException {
       if (beanName.equals("cognitoServiceFacade")) {
         return new TestCognitoServiceFacade();
-      } else if (beanName.equals("userIndexService")) {
-        return new TestUserIndexService();
       } else {
         return bean;
       }
@@ -212,15 +210,6 @@ public abstract class BaseIdmIntegrationTest extends BaseIntegrationTest {
     public Object postProcessAfterInitialization(Object bean, String beanName)
         throws BeansException {
       return bean;
-    }
-  }
-
-  public static class TestUserIndexService extends UserIndexService {
-    private static final String SSO_TOKEN = "b02aa833-f8b2-4d28-8796-3abe059313d1";
-
-    @Override
-    protected String getSsoToken() {
-      return SSO_TOKEN;
     }
   }
 }
