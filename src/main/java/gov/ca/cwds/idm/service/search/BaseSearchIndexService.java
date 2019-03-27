@@ -6,7 +6,6 @@ import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.service.cognito.SearchProperties;
 import gov.ca.cwds.idm.service.cognito.SearchProperties.SearchIndexProperties;
-import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
