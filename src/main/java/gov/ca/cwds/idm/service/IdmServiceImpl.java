@@ -15,7 +15,6 @@ import static gov.ca.cwds.service.messages.MessageCode.IDM_NOTIFY_UNSUPPORTED_OP
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_CREATE_IDM_USER_IN_ES;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_PURGE_PROCESSED_USER_LOGS;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_WRITE_LAST_LOGIN_TIME;
-import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_IDM_USER_IN_ES;
 import static gov.ca.cwds.service.messages.MessageCode.USER_CREATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_CREATE_SAVE_TO_SEARCH_ERROR;
 import static gov.ca.cwds.service.messages.MessageCode.USER_NOTHING_UPDATED;
@@ -180,7 +179,7 @@ public class IdmServiceImpl implements IdmService {
     LOGGER.info("New user with username:{} was successfully created in Cognito", createdUser.getId());
     transactionalUserService.createUserInDbWithInvitationEmail(createdUser);
     LOGGER.info("New user with username:{} was successfully created in database", createdUser.getId());
-    auditService.processAuditEvent(new UserCreatedEvent(createdUser));
+    auditService.saveAuditEvent(new UserCreatedEvent(createdUser));
     PutInSearchExecution doraExecution = createUserInSearch(createdUser);
     handleCreatePartialSuccess(createdUser, doraExecution);
     return createdUser.getId();
@@ -219,7 +218,7 @@ public class IdmServiceImpl implements IdmService {
   public RegistrationResubmitResponse resendInvitationMessage(User user) {
     authorizeService.checkCanResendInvitationMessage(user);
     cognitoServiceFacade.resendInvitationMessage(user.getId());
-    auditService.processAuditEvent(new UserRegistrationResentEvent(user));
+    auditService.saveAuditEvent(new UserRegistrationResentEvent(user));
     return new RegistrationResubmitResponse(user.getId());
   }
 
@@ -228,7 +227,7 @@ public class IdmServiceImpl implements IdmService {
     switch (notification.getActionType().toLowerCase()) {
       case USER_LOCKED:
         User user = userService.getUser(notification.getUserId());
-        auditService.processAuditEvent(new UserLockedEvent(user));
+        auditService.saveAuditEvent(new UserLockedEvent(user));
         updateUserInSearch(user);
         break;
       default:
@@ -401,7 +400,7 @@ public class IdmServiceImpl implements IdmService {
       public Void tryMethod(BooleanDiff enabledDiff) {
         cognitoServiceFacade
             .changeUserEnabledStatus(existedUser.getId(), enabledDiff.getNewValue());
-        auditService.processAuditEvent(
+        auditService.saveAuditEvent(
             new UserEnabledStatusChangedEvent(existedUser, enabledDiff));
         return null;
       }

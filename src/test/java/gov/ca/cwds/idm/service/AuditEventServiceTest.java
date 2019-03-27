@@ -90,7 +90,7 @@ public class AuditEventServiceTest {
 
     AuditEvent event = new UserLockedEvent(mockUser());
 
-    service.processAuditEvent(event);
+    service.saveAuditEvent(event);
 
     assertEquals(1, Iterables.size(nsAuditEventRepository.findAll()) - sizeBefore);
 
@@ -109,7 +109,7 @@ public class AuditEventServiceTest {
         .createAuditEventInIndex(any(AuditEvent.class));
 
     AuditEvent event = new UserLockedEvent(mockUser());
-    service.processAuditEvent(event);
+    service.saveAuditEvent(event);
 
     assertEquals(1, Iterables.size(nsAuditEventRepository.findAll()) - sizeBefore);
 

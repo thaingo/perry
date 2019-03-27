@@ -30,7 +30,7 @@ public class AuditEventService {
   private AuditEventIndexService auditEventIndexService;
 
   @Async("auditLogTaskExecutor")
-  public <T extends AuditEvent> void processAuditEvent(T auditEvent) {
+  public <T extends AuditEvent> void saveAuditEvent(T auditEvent) {
     NsAuditEvent nsAuditEvent = mapToNsAuditEvent(auditEvent);
     nsAuditEvent = nsAuditEventService.save(nsAuditEvent);
     try {
@@ -43,7 +43,7 @@ public class AuditEventService {
 
   @Async("auditLogTaskExecutor")
   public void saveAuditEvents(List<? extends AuditEvent> auditEvents) {
-    auditEvents.forEach(this::processAuditEvent);
+    auditEvents.forEach(this::saveAuditEvent);
   }
 
   private <T extends AuditEvent> NsAuditEvent mapToNsAuditEvent(T auditEvent) {

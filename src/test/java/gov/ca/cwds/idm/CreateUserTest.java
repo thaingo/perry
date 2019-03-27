@@ -479,7 +479,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
     verify(cognito, times(1)).adminCreateUser(invitationRequest);
     verify(spyUserIndexService, times(1)).createUserInIndex(argThat(new UserMatcher()));
     verifyDoraCalls(1);
-    verify(auditEventService, times(1)).processAuditEvent(any(
+    verify(auditEventService, times(1)).saveAuditEvent(any(
         UserCreatedEvent.class));
 
     NsUser newNsUser = assertNsUserInDb(newUserId);
@@ -588,7 +588,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
 
     verify(cognito, times(0)).adminCreateUser(request);
     verify(spyUserIndexService, times(0)).createUserInIndex(any(User.class));
-    verify(auditEventService, never()).processAuditEvent(any());
+    verify(auditEventService, never()).saveAuditEvent(any());
   }
 
   private static final class CognitoCreateRequests {

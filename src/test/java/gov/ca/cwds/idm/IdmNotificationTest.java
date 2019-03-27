@@ -46,7 +46,7 @@ public class IdmNotificationTest extends BaseIdmIntegrationWithSearchTest {
         .andExpect(MockMvcResultMatchers.status().isAccepted())
         .andReturn();
 
-    verify(auditEventService, times(1)).processAuditEvent(any(
+    verify(auditEventService, times(1)).saveAuditEvent(any(
         UserLockedEvent.class));
 
     verify(spyUserIndexService, times(1)).updateUserInIndex(argThat(User::isLocked));
@@ -71,7 +71,7 @@ public class IdmNotificationTest extends BaseIdmIntegrationWithSearchTest {
         .andExpect(MockMvcResultMatchers.status().isAccepted())
         .andReturn();
 
-    verify(auditEventService, times(1)).processAuditEvent(any(
+    verify(auditEventService, times(1)).saveAuditEvent(any(
         UserLockedEvent.class));
 
     assertThat(userLogRepository.count(), is(oldUserLogsSize + 1));
