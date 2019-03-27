@@ -484,33 +484,38 @@ public class IdmServiceImpl implements IdmService {
   }
 
   private PutInSearchExecution<User> updateUserInSearch(User updatedUser) {
-    return new PutInSearchExecution<User>(updatedUser) {
-      @Override
-      protected ResponseEntity<String> tryMethod(User updatedUser) {
-        return userIndexService.updateUserInIndex(updatedUser);
-      }
-
-      @Override
-      protected void catchMethod(Exception e) {
-        String msg = messages.getTechMessage(UNABLE_UPDATE_IDM_USER_IN_ES, updatedUser.getId());
-        LOGGER.error(msg, e);
-        setUserLogExecution(userLogService.logUpdate(updatedUser.getId()));
-      }
-    };
+    return putUserInSearch(
+        updatedUser,
+        userIndexService::updateUserInIndex,
+        userLogService::logUpdate,
+        UNABLE_CREATE_IDM_USER_IN_ES);
   }
 
-  private PutInSearchExecution createUserInSearch(User user) {
+  private PutInSearchExecution<User> createUserInSearch(User user) {
+    return putUserInSearch(
+        user,
+        userIndexService::createUserInIndex,
+        userLogService::logCreate,
+        UNABLE_CREATE_IDM_USER_IN_ES);
+  }
+
+  private PutInSearchExecution<User> putUserInSearch(
+      User user,
+      Function<User, ResponseEntity<String>> tryOperation,
+      Function<String, OptionalExecution<String, UserLog>> catchOperation,
+      MessageCode errorCode) {
+
     return new PutInSearchExecution<User>(user) {
       @Override
       protected ResponseEntity<String> tryMethod(User user) {
-        return userIndexService.createUserInIndex(user);
+        return tryOperation.apply(user);
       }
 
       @Override
       protected void catchMethod(Exception e) {
-        String msg = messages.getTechMessage(UNABLE_CREATE_IDM_USER_IN_ES, user.getId());
+        String msg = messages.getTechMessage(errorCode, user.getId());
         LOGGER.error(msg, e);
-        setUserLogExecution(userLogService.logCreate(user.getId()));
+        setUserLogExecution(catchOperation.apply(user.getId()));
       }
     };
   }
