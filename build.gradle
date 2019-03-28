@@ -305,6 +305,12 @@ task integrationTestProd(dependsOn: ':integration-tests:testCognitoMode') {
     }
 }
 
+task integrationTestProdWithMFA(dependsOn: ':integration-tests:testCognitoWithMFAMode') {
+    doLast {
+        println 'Integration Test With MFA Passed'
+    }
+}
+
 javadoc {
     options.addStringOption("charset", "UTF-8")
 }
