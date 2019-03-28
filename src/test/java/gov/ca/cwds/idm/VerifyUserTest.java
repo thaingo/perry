@@ -1,6 +1,5 @@
 package gov.ca.cwds.idm;
 
-import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
@@ -78,12 +77,6 @@ public class VerifyUserTest extends BaseIdmIntegrationTest {
   @WithMockCustomUser(county = "Madera")
   public void testVerifyUsersOtherCounty() throws Exception {
     assertVerify("test@test.com", "SMITHB3", "fixtures/idm/verify-user/verify-other-county.json");
-  }
-
-  @Test
-  @WithMockCustomUser(roles = {CALS_ADMIN})
-  public void testVerifyUsersCalsAdmin() throws Exception {
-    assertVerifyUserUnauthorized();
   }
 
   private void assertVerify(String email, String racfId, String fixturePath) throws Exception {

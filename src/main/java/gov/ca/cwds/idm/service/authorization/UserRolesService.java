@@ -1,6 +1,5 @@
 package gov.ca.cwds.idm.service.authorization;
 
-import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CALS_EXTERNAL_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.EXTERNAL_APP;
@@ -45,10 +44,6 @@ public class UserRolesService {
     return hasRole(user, EXTERNAL_APP);
   }
 
-  public static <T extends RolesHolder> boolean isCalsAdmin(T user) {
-    return hasRole(user, CALS_ADMIN);
-  }
-
   private static <T extends RolesHolder> boolean hasRole(T user, String roleName) {
     return user.getRoles().contains(roleName);
   }
@@ -72,15 +67,8 @@ public class UserRolesService {
       return STATE_ADMIN;
     } else if (user.getRoles().contains(COUNTY_ADMIN)) {
       return COUNTY_ADMIN;
-    } else if (user.getRoles().contains(OFFICE_ADMIN)) {
-      return OFFICE_ADMIN;
     } else {
-      return CALS_ADMIN;
+      return OFFICE_ADMIN;
     }
   }
-
-  public static <T extends RolesHolder> boolean isCalsAdminStrongestRole(T user) {
-    return CALS_ADMIN.equals(getStrongestAdminRole(user));
-  }
-
 }

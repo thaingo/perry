@@ -1,6 +1,5 @@
 package gov.ca.cwds.idm;
 
-import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.SUPER_ADMIN;
@@ -14,7 +13,6 @@ import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.LOCKED_USER;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.STATE_ADMIN_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.SUPER_ADMIN_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.UNLOCKED_USER;
-import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_CALS_EXTERNAL;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_NO_RACFID_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_WITH_NO_LOCKED_VALUE_UNLOCKED;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_WITH_NO_PHONE_EXTENSION;
@@ -49,20 +47,6 @@ public class GetUserTest extends BaseIdmIntegrationTest {
   public void testGetUserOfficeAdminOtherOffice() throws Exception {
     testGetValidUser(USER_WITH_RACFID_AND_DB_DATA_ID,
         "fixtures/idm/get-user/with-racfid-and-db-data-valid-2.json");
-  }
-
-  @Test
-  @WithMockCustomUser(roles = {CALS_ADMIN})
-  public void testGetUserCalsAdminUnauthorized() throws Exception {
-    assertGetUserUnauthorized(USER_NO_RACFID_ID,
-        "fixtures/idm/get-user/cals-admin-unauthorized.json");
-  }
-
-  @Test
-  @WithMockCustomUser(roles = {CALS_ADMIN})
-  public void testGetUserCalsAdmin() throws Exception {
-    testGetValidUser(USER_CALS_EXTERNAL,
-        "fixtures/idm/get-user/with-cals-externa-worker-role.json");
   }
 
   @Test
@@ -185,13 +169,6 @@ public class GetUserTest extends BaseIdmIntegrationTest {
   public void testGetSuperAdminByStateAdmin() throws Exception {
     assertGetUserUnauthorized(SUPER_ADMIN_ID,
         "fixtures/idm/get-user/super-admin-by-state-admin.json");
-  }
-
-  @Test
-  @WithMockCustomUser(roles = {CALS_ADMIN})
-  public void testGetSuperAdminByCalsAdmin() throws Exception {
-    assertGetUserUnauthorized(SUPER_ADMIN_ID,
-        "fixtures/idm/get-user/super-admin-by-cals-admin.json");
   }
 
   @Test

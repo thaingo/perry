@@ -27,7 +27,6 @@
         "State-admin",
         "County-admin",
         "Office-admin",
-        "CALS-admin",
         "CWS-worker",
         "CALS-external-worker"
       ]

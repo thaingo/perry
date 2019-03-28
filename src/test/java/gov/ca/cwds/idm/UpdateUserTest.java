@@ -1,7 +1,6 @@
 package gov.ca.cwds.idm;
 
 import static gov.ca.cwds.config.TokenServiceConfiguration.TOKEN_TRANSACTION_MANAGER;
-import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
@@ -538,12 +537,6 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
   public void testUpdateUserByOtherCountyAdmin() throws Exception {
     assertUpdateSomeUserUnauthorized(
         "fixtures/idm/update-user/other-county-admin.json");
-  }
-
-  @Test
-  @WithMockCustomUser(roles = {CALS_ADMIN})
-  public void testUpdateUserCalsAdmin() throws Exception {
-    assertUpdateSomeUserUnauthorized();
   }
 
   @Test
