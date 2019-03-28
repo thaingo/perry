@@ -1,6 +1,5 @@
 package gov.ca.cwds.idm.service.validation;
 
-import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CALS_EXTERNAL_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
@@ -74,7 +73,6 @@ public class ValidationServiceMockTest {
     testAdminCanUpdate(admin(STATE_ADMIN), userUpdate(OFFICE_ADMIN));
     testAdminCanUpdate(admin(STATE_ADMIN), userUpdate(CWS_WORKER));
     testAdminCanNotUpdate(admin(STATE_ADMIN), userUpdate());
-    testAdminCanNotUpdate(admin(STATE_ADMIN), userUpdate(CALS_ADMIN));
     testAdminCanNotUpdate(admin(STATE_ADMIN), userUpdate(CALS_EXTERNAL_WORKER));
   }
 
@@ -85,7 +83,6 @@ public class ValidationServiceMockTest {
     testAdminCanUpdate(admin(COUNTY_ADMIN), userUpdate(OFFICE_ADMIN));
     testAdminCanUpdate(admin(COUNTY_ADMIN), userUpdate(CWS_WORKER));
     testAdminCanNotUpdate(admin(COUNTY_ADMIN), userUpdate());
-    testAdminCanNotUpdate(admin(COUNTY_ADMIN), userUpdate(CALS_ADMIN));
     testAdminCanNotUpdate(admin(COUNTY_ADMIN), userUpdate(CALS_EXTERNAL_WORKER));
   }
 
@@ -96,7 +93,6 @@ public class ValidationServiceMockTest {
     testAdminCanNotUpdate(admin(OFFICE_ADMIN), userUpdate(OFFICE_ADMIN));
     testAdminCanUpdate(admin(OFFICE_ADMIN), userUpdate(CWS_WORKER));
     testAdminCanNotUpdate(admin(OFFICE_ADMIN), userUpdate());
-    testAdminCanNotUpdate(admin(OFFICE_ADMIN), userUpdate(CALS_ADMIN));
     testAdminCanNotUpdate(admin(OFFICE_ADMIN), userUpdate(CALS_EXTERNAL_WORKER));
   }
 
@@ -107,7 +103,6 @@ public class ValidationServiceMockTest {
     testAdminCanCreate(admin(STATE_ADMIN), user(OFFICE_ADMIN));
     testAdminCanCreate(admin(STATE_ADMIN), user(CWS_WORKER));
     testAdminCanNotCreate(admin(STATE_ADMIN), user());
-    testAdminCanNotCreate(admin(STATE_ADMIN), user(CALS_ADMIN));
     testAdminCanNotCreate(admin(STATE_ADMIN), user(CALS_EXTERNAL_WORKER));
   }
 
@@ -118,7 +113,6 @@ public class ValidationServiceMockTest {
     testAdminCanCreate(admin(COUNTY_ADMIN), user(OFFICE_ADMIN));
     testAdminCanCreate(admin(COUNTY_ADMIN), user(CWS_WORKER));
     testAdminCanNotCreate(admin(COUNTY_ADMIN), user());
-    testAdminCanNotCreate(admin(COUNTY_ADMIN), user(CALS_ADMIN));
     testAdminCanNotCreate(admin(COUNTY_ADMIN), user(CALS_EXTERNAL_WORKER));
   }
 
@@ -129,7 +123,6 @@ public class ValidationServiceMockTest {
     testAdminCanNotCreate(admin(OFFICE_ADMIN), user(OFFICE_ADMIN));
     testAdminCanCreate(admin(OFFICE_ADMIN), user(CWS_WORKER));
     testAdminCanNotCreate(admin(OFFICE_ADMIN), user());
-    testAdminCanNotCreate(admin(OFFICE_ADMIN), user(CALS_ADMIN));
     testAdminCanNotCreate(admin(OFFICE_ADMIN), user(CALS_EXTERNAL_WORKER));
   }
 

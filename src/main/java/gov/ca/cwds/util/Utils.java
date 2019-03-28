@@ -96,7 +96,6 @@ public class Utils {
     return new HashSet<>(Arrays.asList(values));
   }
 
-
   public static String formatDate(LocalDate date) {
     if (date != null) {
       DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT);

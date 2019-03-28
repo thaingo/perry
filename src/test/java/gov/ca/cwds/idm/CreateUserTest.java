@@ -1,6 +1,5 @@
 package gov.ca.cwds.idm;
 
-import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
@@ -278,12 +277,6 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
   @WithMockCustomUser(county = "OtherCounty")
   public void testCreateUserInOtherCounty() throws Exception {
     assertCreateUserUnauthorized("fixtures/idm/create-user/county-admin-other-county.json");
-  }
-
-  @Test
-  @WithMockCustomUser(roles = {CALS_ADMIN})
-  public void testCreateUserCalsAdmin() throws Exception {
-    assertCreateUserUnauthorized();
   }
 
   @Test

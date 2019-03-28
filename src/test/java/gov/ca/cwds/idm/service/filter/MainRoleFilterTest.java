@@ -1,6 +1,5 @@
 package gov.ca.cwds.idm.service.filter;
 
-import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CALS_EXTERNAL_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
@@ -35,28 +34,21 @@ public class MainRoleFilterTest {
   @Test
   public void testStateAdmin() {
     assertThat(filter(
-        toSet(STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CALS_ADMIN, CWS_WORKER, CALS_EXTERNAL_WORKER,
+        toSet(STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER, CALS_EXTERNAL_WORKER,
             "developer")), is(toSet(STATE_ADMIN)));
   }
 
   public void testCountyAdmin() {
     assertThat(filter(
-        toSet(COUNTY_ADMIN, OFFICE_ADMIN, CALS_ADMIN, CWS_WORKER, CALS_EXTERNAL_WORKER,
+        toSet(COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER, CALS_EXTERNAL_WORKER,
             "developer")), is(toSet(COUNTY_ADMIN)));
   }
 
   @Test
   public void testOfficeAdmin() {
     assertThat(filter(
-        toSet(OFFICE_ADMIN, CALS_ADMIN, CWS_WORKER, CALS_EXTERNAL_WORKER, "developer")),
+        toSet(OFFICE_ADMIN, CWS_WORKER, CALS_EXTERNAL_WORKER, "developer")),
         is(toSet(OFFICE_ADMIN)));
-  }
-
-  @Test
-  public void testCalsAdmin() {
-    assertThat(filter(
-        toSet(CALS_ADMIN, CWS_WORKER, CALS_EXTERNAL_WORKER, "developer")),
-        is(toSet(CALS_ADMIN)));
   }
 
   @Test

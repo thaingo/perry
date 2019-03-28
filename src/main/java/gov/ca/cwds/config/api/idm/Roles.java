@@ -21,7 +21,6 @@ public class Roles {
   public static final String STATE_ADMIN = "State-admin";
   public static final String COUNTY_ADMIN = "County-admin";
   public static final String OFFICE_ADMIN = "Office-admin";
-  public static final String CALS_ADMIN = "CALS-admin";
 
   public static final String CWS_WORKER = "CWS-worker";
   public static final String CALS_EXTERNAL_WORKER = "CALS-external-worker";
@@ -35,7 +34,7 @@ public class Roles {
   private Roles() {}
 
   public static Set<String> getAdminRoles() {
-    return toSet(SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CALS_ADMIN);
+    return toSet(SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN);
   }
 
   /**
@@ -47,7 +46,6 @@ public class Roles {
     roleList.add(ImmutableMap.of("id", STATE_ADMIN, "name", "State Administrator"));
     roleList.add(ImmutableMap.of("id", COUNTY_ADMIN, "name", "County Administrator"));
     roleList.add(ImmutableMap.of("id", OFFICE_ADMIN, "name", "Office Administrator"));
-    roleList.add(ImmutableMap.of("id", CALS_ADMIN, "name", "CALS Administrator"));
     roleList.add(ImmutableMap.of("id", CWS_WORKER, "name", "CWS Worker"));
     roleList.add(ImmutableMap.of("id", CALS_EXTERNAL_WORKER, "name", "CALS External Worker"));
     for (Map<String, String> role: roleList) {

@@ -1,6 +1,5 @@
 package gov.ca.cwds.idm;
 
-import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.SOME_PAGINATION_TOKEN;
@@ -58,12 +57,6 @@ public class GetUsersTest extends BaseIdmIntegrationTest {
   @Test
   @WithMockCustomUser(roles = {STATE_ADMIN})
   public void testGetUsersWithStateAdmin() throws Exception {
-    assertGetUsersUnauthorized();
-  }
-
-  @Test
-  @WithMockCustomUser(roles = {CALS_ADMIN})
-  public void testGetUsersWithCalsAdmin() throws Exception {
     assertGetUsersUnauthorized();
   }
 

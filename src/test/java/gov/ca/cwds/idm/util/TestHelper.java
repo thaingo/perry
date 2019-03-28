@@ -1,6 +1,5 @@
 package gov.ca.cwds.idm.util;
 
-import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CALS_EXTERNAL_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
@@ -100,10 +99,6 @@ public final class TestHelper {
 
   public static User officeAdmin() {
     return user(toSet(OFFICE_ADMIN), COUNTY_NAME, OFFICE_ID);
-  }
-
-  public static User calsAdmin() {
-    return TestHelper.user(toSet(CALS_ADMIN), COUNTY_NAME, OFFICE_ID);
   }
 
   public static User cwsWorker() {

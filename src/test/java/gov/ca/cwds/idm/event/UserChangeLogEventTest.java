@@ -1,6 +1,6 @@
 package gov.ca.cwds.idm.event;
 
-import static gov.ca.cwds.config.api.idm.Roles.CALS_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
@@ -88,9 +88,9 @@ public class UserChangeLogEventTest {
     User user = mockUser();
     UserCreatedEvent userCreatedEvent = new UserCreatedEvent(user);
     assertEquals(UserCreatedEvent.EVENT_TYPE_USER_CREATED, userCreatedEvent.getEventType());
-    assertEquals(String.join(", ", CALS_ADMIN, CWS_WORKER),
+    assertEquals(String.join(", ", COUNTY_ADMIN, CWS_WORKER),
         userCreatedEvent.getEvent().getNewValue());
-    assertEquals(String.join(", ", getRoleNameById(CWS_WORKER), getRoleNameById(CALS_ADMIN)),
+    assertEquals(String.join(", ", getRoleNameById(CWS_WORKER), getRoleNameById(COUNTY_ADMIN)),
         userCreatedEvent.getEvent().getUserRoles());
   }
 
@@ -100,23 +100,23 @@ public class UserChangeLogEventTest {
     UserRegistrationResentEvent event = new UserRegistrationResentEvent(user);
     assertEquals(UserRegistrationResentEvent.EVENT_TYPE_REGISTRATION_RESENT, event.getEventType());
     assertEquals(TEST_FIRST_NAME + " " + TEST_LAST_NAME, event.getEvent().getUserName());
-    assertEquals(String.join(", ", getRoleNameById(CWS_WORKER), getRoleNameById(CALS_ADMIN)),
+    assertEquals(String.join(", ", getRoleNameById(CWS_WORKER), getRoleNameById(COUNTY_ADMIN)),
         event.getEvent().getUserRoles());
   }
 
   @Test
   public void testUserRoleChangedEvent() {
     StringSetDiff diff = new StringSetDiff(
-        toSet(CALS_ADMIN, CWS_WORKER), toSet(OFFICE_ADMIN, STATE_ADMIN));
+        toSet(COUNTY_ADMIN, CWS_WORKER), toSet(OFFICE_ADMIN, STATE_ADMIN));
 
     UserRoleChangedEvent userRoleChangedEvent = new UserRoleChangedEvent(mockUser(), diff);
     assertEquals(UserRoleChangedEvent.EVENT_TYPE_USER_ROLE_CHANGED,
         userRoleChangedEvent.getEventType());
-    assertEquals(StringUtils.join(new String[]{"CALS Administrator", "CWS Worker"}, ", "),
+    assertEquals("CWS Worker, County Administrator",
         userRoleChangedEvent.getEvent().getOldValue());
     assertEquals("Office Administrator, State Administrator",
         userRoleChangedEvent.getEvent().getNewValue());
-    assertEquals(String.join(", ", "Office Administrator", "State Administrator"),
+    assertEquals("Office Administrator, State Administrator",
         userRoleChangedEvent.getEvent().getUserRoles());
   }
 
@@ -145,7 +145,7 @@ public class UserChangeLogEventTest {
         new String[]{
             PERMISSION_3 + PERMISSION_DESCRIPTION,
             PERMISSION_4 + PERMISSION_DESCRIPTION}, ", "), event.getEvent().getNewValue());
-    assertEquals(String.join(", ", getRoleNameById(CWS_WORKER), getRoleNameById(CALS_ADMIN)),
+    assertEquals(String.join(", ", getRoleNameById(CWS_WORKER), getRoleNameById(COUNTY_ADMIN)),
         event.getEvent().getUserRoles());
   }
 
@@ -159,7 +159,7 @@ public class UserChangeLogEventTest {
         event.getEventType());
     assertEquals(OLD_EMAIL, event.getEvent().getOldValue());
     assertEquals(NEW_EMAIL, event.getEvent().getNewValue());
-    assertEquals(String.join(", ", getRoleNameById(CWS_WORKER), getRoleNameById(CALS_ADMIN)),
+    assertEquals(String.join(", ", getRoleNameById(CWS_WORKER), getRoleNameById(COUNTY_ADMIN)),
         event.getEvent().getUserRoles());
   }
 
@@ -171,7 +171,7 @@ public class UserChangeLogEventTest {
     assertEquals(NotesChangedEvent.EVENT_TYPE_NOTES_CHANGED, event.getEventType());
     assertEquals(OLD_NOTES, event.getEvent().getOldValue());
     assertEquals(NEW_NOTES, event.getEvent().getNewValue());
-    assertEquals(String.join(", ", getRoleNameById(CWS_WORKER), getRoleNameById(CALS_ADMIN)),
+    assertEquals(String.join(", ", getRoleNameById(CWS_WORKER), getRoleNameById(COUNTY_ADMIN)),
         event.getEvent().getUserRoles());
   }
 
@@ -184,7 +184,7 @@ public class UserChangeLogEventTest {
         event.getEventType());
     assertEquals(INACTIVE, event.getEvent().getOldValue());
     assertEquals(ACTIVE, event.getEvent().getNewValue());
-    assertEquals(String.join(", ", getRoleNameById(CWS_WORKER), getRoleNameById(CALS_ADMIN)),
+    assertEquals(String.join(", ", getRoleNameById(CWS_WORKER), getRoleNameById(COUNTY_ADMIN)),
         event.getEvent().getUserRoles());
 
   }
@@ -216,7 +216,7 @@ public class UserChangeLogEventTest {
     user.setCountyName(TEST_COUNTY);
     user.setOfficeId(TEST_OFFICE_ID);
     user.setEmail(OLD_EMAIL);
-    user.setRoles(new HashSet<>(Arrays.asList(CWS_WORKER, CALS_ADMIN)));
+    user.setRoles(new HashSet<>(Arrays.asList(CWS_WORKER, COUNTY_ADMIN)));
     user.setPermissions(new TreeSet<>(Arrays.asList(PERMISSION_1, PERMISSION_2)));
     when(CurrentAuthenticatedUserUtil.getCurrentUserName()).thenReturn(ADMIN_LOGIN);
     when(CurrentAuthenticatedUserUtil.getCurrentUser()).thenReturn(new UniversalUserToken());
