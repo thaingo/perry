@@ -36,6 +36,8 @@ def smokeTestStage(environment) {
       def gradlePropsText = """
         perry.health.check.url=https://web.preint.cwds.io/perry/system-information
         perry.url=https://web.preint.cwds.io/perry
+        perry.username=
+        perry.password=
         perry.json= { "user": "RACFID", "staffId": "0X5", "roles": [ "CWS-admin", "County-admin", "Supervisor" ], "county_code": "56", "county_cws_code": "1123", "county_name": "Ventura", "first_name": "Anna", "last_name": "Smith", "privileges": [ "CWS Case Management System", "Resource Management", "Resource Mgmt Placement Facility Maint", "Sealed", "Sensitive Persons", "Snapshot-rollout", "Hotline-rollout", "Facility-search-rollout", "RFA-rollout", "CANS-rollout", "CANS-staff-person-subordinates-read", "CANS-staff-person-read", "CANS-staff-person-clients-read", "CANS-client-read", "CANS-client-search", "CANS-assessment-read", "CANS-assessment-create", "CANS-assessment-in-progress-update", "CANS-assessment-completed-update", "CANS-assessment-completed-delete", "CANS-assessment-in-progress-delete", "CANS-assessment-complete", "development-not-in-use" ] }
         perry.threads.count=5
         selenium.grid.url=
@@ -48,6 +50,8 @@ def smokeTestStage(environment) {
        def gradlePropsText = """
          perry.health.check.url=https://web.integration.cwds.io/perry/system-information
          perry.url=https://web.integration.cwds.io/perry
+         perry.username=
+         perry.password=
          perry.json={}
          perry.threads.count=5
          selenium.grid.url=
@@ -68,19 +72,18 @@ def deployWithSmoke(environment) {
     smokeTestStage(environment)
     buildDockerImageForTestStage(environment)
     integrationTestStage(environment)
-    }
     cleanWs()
+    }
   }
-}
 
 def deployToStage(environment, version) {
   stage("Deploy to $environment") {
     ws {
       git branch: "master", credentialsId: githubCredentialsId, url: deAnsibleGithubUrl
       if (environment == 'integration') {
-        sh "ansible-playbook -e VERSION_NUMBER=$version -e NEW_RELIC_AGENT=$NEW_RELIC_AGENT  -e OAUTH_STATE=true -i inventories/$environment/hosts.yml deploy-perry.yml --vault-password-file ~/.ssh/vault.txt -vv"
+        sh "ansible-playbook -e VERSION_NUMBER=$version -e NEW_RELIC_AGENT=$USE_NEWRELIC  -e OAUTH_STATE=true -i inventories/$environment/hosts.yml deploy-perry.yml --vault-password-file ~/.ssh/vault.txt -vv"
       } else {
-        sh "ansible-playbook -e VERSION_NUMBER=$version -e NEW_RELIC_AGENT=$NEW_RELIC_AGENT -i inventories/$environment/hosts.yml deploy-perry.yml --vault-password-file ~/.ssh/vault.txt -vv"
+        sh "ansible-playbook -e VERSION_NUMBER=$version -e NEW_RELIC_AGENT=$USE_NEWRELIC -i inventories/$environment/hosts.yml deploy-perry.yml --vault-password-file ~/.ssh/vault.txt -vv"
       }
     }
   }
@@ -93,7 +96,7 @@ def updateManifestStage(environment, version) {
 }
   
 def buildDockerImageForTestStage(environment) {
-  stage('Build Docker Image for Test $environment') {
+  stage("Build Docker Image for Test $environment") {
         if (environment == 'integration') {
         def gradlePropsText = """
          perry.health.check.url=https://web.integration.cwds.io/perry/system-information
@@ -125,7 +128,7 @@ def buildDockerImageForTestStage(environment) {
 }
 
 def integrationTestStage(environment) {
-  stage('Integration Test $environment') {
+  stage("Integration Test $environment") {
      if (environment == 'integration') {
      withCredentials([
          string(credentialsId: 'cals-app-smoke-email', variable: 'SMOKE_TEST_USER'),
