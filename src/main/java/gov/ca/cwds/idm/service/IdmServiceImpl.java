@@ -124,9 +124,6 @@ public class IdmServiceImpl implements IdmService {
   private DictionaryProvider dictionaryProvider;
 
   @Autowired
-  private NsUserService nsUserService;
-
-  @Autowired
   private MessagesService messagesService;
 
   @Override
@@ -244,7 +241,7 @@ public class IdmServiceImpl implements IdmService {
         return;
       }
       LOGGER.debug("Handling \"user logged in\" event for user {}", userId);
-      nsUserService.saveLastLoginTime(userId, loginTime);
+      userService.saveLastLoginTime(userId, loginTime);
       User user = userService.getUser(userId);
       updateUserInSearch(user);
 

@@ -24,6 +24,7 @@ import gov.ca.cwds.service.CwsUserInfoService;
 import gov.ca.cwds.service.dto.CwsUserInfo;
 import gov.ca.cwds.service.messages.MessagesService;
 import gov.ca.cwds.util.Utils;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -150,6 +151,10 @@ public class UserService {
     Set<String> upperCaseRacfids = racfids.stream().map(Utils::toUpperCase).collect(toSet());
     List<NsUser> nsUsers = nsUserService.findByRacfids(upperCaseRacfids);
     return enrichNsUsers(nsUsers);
+  }
+
+  public void saveLastLoginTime(String userId, LocalDateTime loginTime) {
+    nsUserService.saveLastLoginTime(userId, loginTime);
   }
 
   @SuppressWarnings("squid:S1166")
