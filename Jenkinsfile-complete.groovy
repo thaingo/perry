@@ -146,22 +146,6 @@ node('dora-slave') {
                 ],
                 wait: false 
         }
-        stage('Deploy to Pre-int') {
-            withCredentials([usernameColonPassword(credentialsId: 'fa186416-faac-44c0-a2fa-089aed50ca17', variable: 'jenkinsauth')]) {
-                sh "curl -u $jenkinsauth 'http://jenkins.mgmt.cwds.io:8080/job/preint/job/deploy-perry/buildWithParameters?token=deployPerryToPreint&version=${newTag}'"
-            }
-        }
-        stage('Update Pre-int Manifest') {
-            updateManifest("perry", "preint", github_credentials_id, newTag)
-        }
-        stage('Deploy to Integration') {
-            withCredentials([usernameColonPassword(credentialsId: 'fa186416-faac-44c0-a2fa-089aed50ca17', variable: 'jenkinsauth')]) {
-                sh "curl -u $jenkinsauth 'http://jenkins.mgmt.cwds.io:8080/job/Integration%20Environment/job/deploy-perry/buildWithParameters?token=deployPerryToIntegration&version=${newTag}'"
-            }
-        }
-        stage('Update Integration Manifest') {
-            updateManifest("perry", "integration", github_credentials_id, newTag)
-        }
         stage('Deploy to Pre-int and Integration') {
             withCredentials([usernameColonPassword(credentialsId: 'fa186416-faac-44c0-a2fa-089aed50ca17', variable: 'jenkinsauth')]) {
               sh "curl -u $jenkinsauth 'http://jenkins.mgmt.cwds.io:8080/job/PreInt-Integration/job/deploy-perry/buildWithParameters?token=trigger-perry-deploy&version=${newTag}'"
