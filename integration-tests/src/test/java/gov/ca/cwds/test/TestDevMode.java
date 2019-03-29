@@ -20,6 +20,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
@@ -44,7 +45,11 @@ public class TestDevMode {
   @Before
   public void init() throws MalformedURLException {
     if (StringUtils.isEmpty(testDataBean.getGridUrl())) {
-      driver = new ChromeDriver();
+      System.setProperty("webdriver.chrome.driver", System.getenv("CHROME_DRIVER"));
+      ChromeOptions chromeOptions = new ChromeOptions();
+      chromeOptions.addArguments("--headless");
+      chromeOptions.addArguments("--no-sandbox");
+      driver = new ChromeDriver(chromeOptions);
     } else {
       driver = new RemoteWebDriver(new URL(testDataBean.getGridUrl()), DesiredCapabilities.chrome());
     }

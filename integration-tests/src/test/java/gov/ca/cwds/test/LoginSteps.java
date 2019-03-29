@@ -1,10 +1,12 @@
 package gov.ca.cwds.test;
 
+import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
+import static org.openqa.selenium.support.ui.ExpectedConditions.urlContains;
+
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.stream.Collectors;
-import com.jayway.restassured.RestAssured;
-import net.thucydides.core.annotations.Step;
+
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.json.JSONException;
@@ -15,9 +17,9 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.skyscreamer.jsonassert.JSONAssert;
 
+import com.jayway.restassured.RestAssured;
 
-import static org.openqa.selenium.support.ui.ExpectedConditions.presenceOfElementLocated;
-import static org.openqa.selenium.support.ui.ExpectedConditions.urlContains;
+import net.thucydides.core.annotations.Step;
 
 
 public class LoginSteps {
@@ -36,7 +38,7 @@ public class LoginSteps {
 
   @Step
   public void isElementPresent(String id) {
-    new WebDriverWait(driver, 5).until(presenceOfElementLocated(By.id(id)));
+    new WebDriverWait(driver, 15).until(presenceOfElementLocated(By.id(id)));
   }
 
   @Step
@@ -56,8 +58,7 @@ public class LoginSteps {
 
   private WebElement findXpath(String xpath) {
     try {
-      return driver.findElement(
-          By.xpath(xpath));
+      return driver.findElement(By.xpath(xpath));
     } catch (NoSuchElementException e) {
       return driver.findElement(By.xpath(xpath));
     }
@@ -82,10 +83,12 @@ public class LoginSteps {
   }
 
   @Step
-  public String waitForAccessCodeParameter() throws Exception{
-    new WebDriverWait(driver, 5).until(urlContains("accessCode"));
-    String accessCode = URLEncodedUtils.parse(new URI(driver.getCurrentUrl()), Charset.defaultCharset())
-        .stream().collect(Collectors.toMap(NameValuePair::getName, NameValuePair::getValue)).get("accessCode");
+  public String waitForAccessCodeParameter() throws Exception {
+    new WebDriverWait(driver, 15).until(urlContains("accessCode"));
+    String accessCode =
+        URLEncodedUtils.parse(new URI(driver.getCurrentUrl()), Charset.defaultCharset()).stream()
+            .collect(Collectors.toMap(NameValuePair::getName, NameValuePair::getValue))
+            .get("accessCode");
     driver.close();
     return accessCode;
   }
