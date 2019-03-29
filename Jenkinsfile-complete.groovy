@@ -162,6 +162,11 @@ node('dora-slave') {
         stage('Update Integration Manifest') {
             updateManifest("perry", "integration", github_credentials_id, newTag)
         }
+        stage('Deploy to Pre-int and Integration') {
+            withCredentials([usernameColonPassword(credentialsId: 'fa186416-faac-44c0-a2fa-089aed50ca17', variable: 'jenkinsauth')]) {
+              sh "curl -u $jenkinsauth 'http://jenkins.mgmt.cwds.io:8080/job/PreInt-Integration/job/deploy-perry/buildWithParameters?token=trigger-perry-deploy&version=${newTag}'"
+            }
+          }
     } catch (Exception e) {
         emailext attachLog: true, body: "Failed: ${e}", recipientProviders: [[$class: 'DevelopersRecipientProvider']],
                 subject: "Perry CI pipeline failed", to: "Leonid.Marushevskiy@osi.ca.gov, Alex.Kuznetsov@osi.ca.gov"
