@@ -44,6 +44,7 @@ def smokeTestStage(environment) {
         validate.repeat.count=2
       """
        writeFile file: "gradle.properties", text: gradlePropsText
+       sh "docker build --file docker/DockerfileIntegrationTestDev -t testperry ."
        def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'clean smokeTest'
        publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: 'build/reports/tests/integrationTest', reportFiles: 'index.html', reportName: 'Pre Integration Test Report', reportTitles: ''])
     } else {
@@ -58,6 +59,7 @@ def smokeTestStage(environment) {
          validate.repeat.count=2
        """
         writeFile file: "gradle.properties", text: gradlePropsText
+        sh "docker build --file docker/DockerfileIntegrationTest -t testperry ."
         def buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'clean smokeTest'
         publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: 'build/reports/tests/smokeTest', reportFiles: 'index.html', reportName: 'Integration Test Report', reportTitles: ''])
      }
@@ -70,7 +72,6 @@ def deployWithSmoke(environment) {
     deployToStage(environment, env.version)
     updateManifestStage(environment, env.version)
     smokeTestStage(environment)
-    buildDockerImageForTestStage(environment)
     integrationTestStage(environment)
     cleanWs()
     }
@@ -91,40 +92,8 @@ def deployToStage(environment, version) {
 
 def updateManifestStage(environment, version) {
   stage('Update Manifest Version') {
-    updateManifest("cals-api", environment, githubCredentialsId, version)
+    updateManifest("perry", environment, githubCredentialsId, version)
   }
-}
-  
-def buildDockerImageForTestStage(environment) {
-  stage("Build Docker Image for Test $environment") {
-        if (environment == 'integration') {
-        def gradlePropsText = """
-         perry.health.check.url=https://web.integration.cwds.io/perry/system-information
-         perry.url=https://web.integration.cwds.io/perry
-         perry.username=
-         perry.password=
-         perry.json={}
-         perry.threads.count=5
-         selenium.grid.url=
-         validate.repeat.count=2
-       """
-       writeFile file: "gradle.properties", text: gradlePropsText
-        sh "docker build --file docker/DockerfileIntegrationTest -t testperry ."
-       } else {
-       def gradlePropsText = """
-         perry.health.check.url=https://web.preint.cwds.io/perry/system-information
-         perry.url=https://web.preint.cwds.io/perry
-         perry.username=
-         perry.password=
-         perry.json= { "user": "RACFID", "staffId": "0X5", "roles": [ "CWS-admin", "County-admin", "Supervisor" ], "county_code": "56", "county_cws_code": "1123", "county_name": "Ventura", "first_name": "Anna", "last_name": "Smith", "privileges": [ "CWS Case Management System", "Resource Management", "Resource Mgmt Placement Facility Maint", "Sealed", "Sensitive Persons", "Snapshot-rollout", "Hotline-rollout", "Facility-search-rollout", "RFA-rollout", "CANS-rollout", "CANS-staff-person-subordinates-read", "CANS-staff-person-read", "CANS-staff-person-clients-read", "CANS-client-read", "CANS-client-search", "CANS-assessment-read", "CANS-assessment-create", "CANS-assessment-in-progress-update", "CANS-assessment-completed-update", "CANS-assessment-completed-delete", "CANS-assessment-in-progress-delete", "CANS-assessment-complete", "development-not-in-use" ] }
-         perry.threads.count=5
-         selenium.grid.url=
-         validate.repeat.count=2
-       """
-       writeFile file: "gradle.properties", text: gradlePropsText
-        sh "docker build --file docker/DockerfileIntegrationTestDev -t testperry ."
-       } 
-        }
 }
 
 def integrationTestStage(environment) {
