@@ -36,10 +36,6 @@ public class UserLogService {
     return log(username, UPDATE);
   }
 
-  public OptionalExecution<String, UserLog> logUpdate(String username, LocalDateTime updateTime) {
-    return log(username, UPDATE, updateTime);
-  }
-
   @SuppressWarnings({"fb-contrib:CLI_CONSTANT_LIST_INDEX"})
   public List<UserIdAndOperation> getUserIdAndOperations(LocalDateTime lastJobTime) {
     if (lastJobTime == null) {

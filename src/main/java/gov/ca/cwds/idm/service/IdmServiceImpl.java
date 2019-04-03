@@ -14,6 +14,7 @@ import static gov.ca.cwds.service.messages.MessageCode.ERROR_UPDATE_USER_ENABLED
 import static gov.ca.cwds.service.messages.MessageCode.IDM_NOTIFY_UNSUPPORTED_OPERATION;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_CREATE_IDM_USER_IN_ES;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_PURGE_PROCESSED_USER_LOGS;
+import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_WRITE_LAST_LOGIN_TIME;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_IDM_USER_IN_ES;
 import static gov.ca.cwds.service.messages.MessageCode.USER_CREATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_CREATE_SAVE_TO_SEARCH_ERROR;
@@ -60,6 +61,7 @@ import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.idm.service.execution.OptionalExecution;
 import gov.ca.cwds.idm.service.execution.OptionalExecution.NoUpdateExecution;
 import gov.ca.cwds.idm.service.execution.PutInSearchExecution;
+import gov.ca.cwds.idm.service.search.UserIndexService;
 import gov.ca.cwds.idm.service.validation.ValidationService;
 import gov.ca.cwds.service.messages.MessageCode;
 import gov.ca.cwds.service.messages.MessagesService;
@@ -101,7 +103,7 @@ public class IdmServiceImpl implements IdmService {
   private UserLogService userLogService;
 
   @Autowired
-  private SearchService searchService;
+  private UserIndexService userIndexService;
 
   @Autowired
   private AuthorizationService authorizeService;
@@ -120,6 +122,9 @@ public class IdmServiceImpl implements IdmService {
 
   @Autowired
   private DictionaryProvider dictionaryProvider;
+
+  @Autowired
+  private MessagesService messagesService;
 
   @Override
   public User findUser(String id) {
@@ -147,9 +152,10 @@ public class IdmServiceImpl implements IdmService {
       throw (RuntimeException) updateUserEnabledExecution.getException();
     }
 
-    PutInSearchExecution<String> doraExecution = null;
+    PutInSearchExecution<User> doraExecution = null;
     if (doesElasticSearchNeedUpdate(updateAttributesStatus, updateUserEnabledExecution)) {
-      doraExecution = updateUserInSearch(userId);
+      User updatedUser = userService.getUser(userId);
+      doraExecution = updateUserInSearch(updatedUser);
     } else {
       LOGGER.info(messages.getTechMessage(USER_NOTHING_UPDATED, userId));
     }
@@ -219,11 +225,29 @@ public class IdmServiceImpl implements IdmService {
     switch (notification.getActionType().toLowerCase()) {
       case USER_LOCKED:
         User user = userService.getUser(notification.getUserId());
-        auditService.persistAuditEvent(new UserLockedEvent(user));
-        userLogService.logUpdate(notification.getUserId(), LocalDateTime.now());
+        auditService.saveAuditEvent(new UserLockedEvent(user));
+        updateUserInSearch(user);
         break;
       default:
         throw exceptionFactory.createOperationNotSupportedException(IDM_NOTIFY_UNSUPPORTED_OPERATION, notification.getActionType());
+    }
+  }
+
+  @Override
+  public void saveLastLoginTime(String userId, LocalDateTime loginTime) {
+    try {
+      if (userId == null) {
+        LOGGER.warn("userToken doesn't contain the userId, no following actions expected}");
+        return;
+      }
+      LOGGER.debug("Handling \"user logged in\" event for user {}", userId);
+      userService.saveLastLoginTime(userId, loginTime);
+      User user = userService.getUser(userId);
+      updateUserInSearch(user);
+
+    } catch (Exception e) {
+      String msg = messagesService.getTechMessage(UNABLE_TO_WRITE_LAST_LOGIN_TIME, userId);
+      LOGGER.error(msg, e);
     }
   }
 
@@ -289,7 +313,7 @@ public class IdmServiceImpl implements IdmService {
       String userId,
       ExecutionStatus updateAttributesStatus,
       OptionalExecution<BooleanDiff, Void> updateUserEnabledExecution,
-      PutInSearchExecution<String> doraExecution) {
+      PutInSearchExecution<User> doraExecution) {
 
     ExecutionStatus updateEnableStatus = updateUserEnabledExecution.getExecutionStatus();
     Exception updateEnableException = updateUserEnabledExecution.getException();
@@ -456,36 +480,39 @@ public class IdmServiceImpl implements IdmService {
     return values.stream().map(function).collect(toSet());
   }
 
-
-  private PutInSearchExecution<String> updateUserInSearch(String id) {
-    return new PutInSearchExecution<String>(id) {
-      @Override
-      protected ResponseEntity<String> tryMethod(String id) {
-        User updatedUser = findUser(id);
-        return searchService.updateUser(updatedUser);
-      }
-
-      @Override
-      protected void catchMethod(Exception e) {
-        String msg = messages.getTechMessage(UNABLE_UPDATE_IDM_USER_IN_ES, id);
-        LOGGER.error(msg, e);
-        setUserLogExecution(userLogService.logUpdate(id));
-      }
-    };
+  private PutInSearchExecution<User> createUserInSearch(User user) {
+    return putUserInSearch(
+        user,
+        userIndexService::createUserInIndex,
+        userLogService::logCreate,
+        UNABLE_CREATE_IDM_USER_IN_ES);
   }
 
-  private PutInSearchExecution createUserInSearch(User user) {
+  private PutInSearchExecution<User> updateUserInSearch(User updatedUser) {
+    return putUserInSearch(
+        updatedUser,
+        userIndexService::updateUserInIndex,
+        userLogService::logUpdate,
+        UNABLE_UPDATE_IDM_USER_IN_ES);
+  }
+
+  private PutInSearchExecution<User> putUserInSearch(
+      User user,
+      Function<User, ResponseEntity<String>> tryOperation,
+      Function<String, OptionalExecution<String, UserLog>> catchOperation,
+      MessageCode errorCode) {
+
     return new PutInSearchExecution<User>(user) {
       @Override
       protected ResponseEntity<String> tryMethod(User user) {
-        return searchService.createUser(user);
+        return tryOperation.apply(user);
       }
 
       @Override
       protected void catchMethod(Exception e) {
-        String msg = messages.getTechMessage(UNABLE_CREATE_IDM_USER_IN_ES, user.getId());
+        String msg = messages.getTechMessage(errorCode, user.getId());
         LOGGER.error(msg, e);
-        setUserLogExecution(userLogService.logCreate(user.getId()));
+        setUserLogExecution(catchOperation.apply(user.getId()));
       }
     };
   }
@@ -521,8 +548,8 @@ public class IdmServiceImpl implements IdmService {
         || updateUserEnabledExecution.getExecutionStatus() == SUCCESS;
   }
 
-  public void setSearchService(SearchService searchService) {
-    this.searchService = searchService;
+  public void setUserIndexService(UserIndexService userIndexService) {
+    this.userIndexService = userIndexService;
   }
 
   public void setCognitoServiceFacade(

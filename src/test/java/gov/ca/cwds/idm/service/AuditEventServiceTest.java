@@ -17,6 +17,8 @@ import gov.ca.cwds.idm.event.AuditEvent;
 import gov.ca.cwds.idm.event.UserLockedEvent;
 import gov.ca.cwds.idm.persistence.ns.entity.NsAuditEvent;
 import gov.ca.cwds.idm.persistence.ns.repository.NsAuditEventRepository;
+import gov.ca.cwds.idm.service.search.AuditEventIndexService;
+import gov.ca.cwds.idm.service.search.IndexRestSender;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.TreeSet;
@@ -62,7 +64,6 @@ public class AuditEventServiceTest {
   @MockBean
   private ObjectMapper objectMapper;
 
-
   @Autowired
   private NsAuditEventRepository nsAuditEventRepository;
 
@@ -70,6 +71,9 @@ public class AuditEventServiceTest {
 
   @MockBean
   private AuditEventIndexService auditEventIndexService;
+
+  @MockBean
+  private IndexRestSender indexRestSender;
 
   @TestConfiguration
   static class ContextConfiguration {
@@ -79,7 +83,6 @@ public class AuditEventServiceTest {
       return new SyncTaskExecutor();
     }
   }
-
 
   @Test
   public void testSaveAuditEvent() {
@@ -103,26 +106,10 @@ public class AuditEventServiceTest {
 
     doThrow(new RuntimeException())
         .when(auditEventIndexService)
-        .sendAuditEventToEsIndex(any(AuditEvent.class));
+        .createAuditEventInIndex(any(AuditEvent.class));
 
     AuditEvent event = new UserLockedEvent(mockUser());
     service.saveAuditEvent(event);
-
-    assertEquals(1, Iterables.size(nsAuditEventRepository.findAll()) - sizeBefore);
-
-    NsAuditEvent nsAuditEvent = nsAuditEventRepository.findOne(event.getId());
-
-    assertNotNull(nsAuditEvent);
-    assertFalse(nsAuditEvent.isProcessed());
-  }
-
-  @Test
-  public void testPersistEvent() {
-
-    int sizeBefore = Iterables.size(nsAuditEventRepository.findAll());
-
-    AuditEvent event = new UserLockedEvent(mockUser());
-    service.persistAuditEvent(event);
 
     assertEquals(1, Iterables.size(nsAuditEventRepository.findAll()) - sizeBefore);
 

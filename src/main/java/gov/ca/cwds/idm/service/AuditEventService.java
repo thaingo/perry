@@ -1,12 +1,10 @@
 package gov.ca.cwds.idm.service;
 
-import static gov.ca.cwds.config.TokenServiceConfiguration.TOKEN_TRANSACTION_MANAGER;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.ca.cwds.idm.event.AuditEvent;
 import gov.ca.cwds.idm.persistence.ns.entity.NsAuditEvent;
-import gov.ca.cwds.idm.persistence.ns.repository.NsAuditEventRepository;
+import gov.ca.cwds.idm.service.search.AuditEventIndexService;
 import java.util.List;
 import javax.persistence.PersistenceException;
 import org.slf4j.Logger;
@@ -15,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service(value = "auditEventService")
 @Profile("idm")
@@ -24,7 +21,7 @@ public class AuditEventService {
   private static final Logger LOGGER = LoggerFactory.getLogger(AuditEventService.class);
 
   @Autowired
-  private NsAuditEventRepository nsAuditEventRepository;
+  private NsAuditEventService nsAuditEventService;
 
   @Autowired
   private ObjectMapper objectMapper;
@@ -32,35 +29,21 @@ public class AuditEventService {
   @Autowired
   private AuditEventIndexService auditEventIndexService;
 
-  @Transactional(TOKEN_TRANSACTION_MANAGER)
   @Async("auditLogTaskExecutor")
   public <T extends AuditEvent> void saveAuditEvent(T auditEvent) {
-    processAuditEvent(auditEvent);
-  }
-
-  @Transactional(TOKEN_TRANSACTION_MANAGER)
-  @Async("auditLogTaskExecutor")
-  public void saveAuditEvents(List<? extends AuditEvent> auditEvents) {
-    auditEvents.forEach(this::processAuditEvent);
-  }
-
-  @Transactional(TOKEN_TRANSACTION_MANAGER)
-  @Async("auditLogTaskExecutor")
-  public <T extends AuditEvent> void persistAuditEvent(T auditEvent) {
-    NsAuditEvent event = mapToNsAuditEvent(auditEvent);
-    event.setProcessed(false);
-    nsAuditEventRepository.save(event);
-  }
-
-  private <T extends AuditEvent> void processAuditEvent(T auditEvent) {
     NsAuditEvent nsAuditEvent = mapToNsAuditEvent(auditEvent);
-    nsAuditEvent = nsAuditEventRepository.save(nsAuditEvent);
+    nsAuditEvent = nsAuditEventService.save(nsAuditEvent);
     try {
-      auditEventIndexService.sendAuditEventToEsIndex(auditEvent);
+      auditEventIndexService.createAuditEventInIndex(auditEvent);
     } catch (Exception e) {
-      nsAuditEvent.setProcessed(false);
+      nsAuditEventService.markAsUnprocessed(nsAuditEvent.getId());
       LOGGER.warn("AuditEvent {} has been marked for further processing by the job", nsAuditEvent.getId(), e);
     }
+  }
+
+  @Async("auditLogTaskExecutor")
+  public void saveAuditEvents(List<? extends AuditEvent> auditEvents) {
+    auditEvents.forEach(this::saveAuditEvent);
   }
 
   private <T extends AuditEvent> NsAuditEvent mapToNsAuditEvent(T auditEvent) {
@@ -76,18 +59,11 @@ public class AuditEventService {
     }
   }
 
-  public void setNsAuditEventRepository(
-      NsAuditEventRepository nsAuditEventRepository) {
-    this.nsAuditEventRepository = nsAuditEventRepository;
-  }
-
   public void setObjectMapper(ObjectMapper objectMapper) {
     this.objectMapper = objectMapper;
   }
 
-  public void setAuditEventIndexService(
-      AuditEventIndexService auditEventIndexService) {
+  public void setAuditEventIndexService(AuditEventIndexService auditEventIndexService) {
     this.auditEventIndexService = auditEventIndexService;
   }
-
 }

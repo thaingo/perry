@@ -33,6 +33,7 @@ import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.exception.PartialSuccessException;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
+import gov.ca.cwds.idm.service.search.UserIndexService;
 import gov.ca.cwds.idm.util.WithMockCustomUser;
 import java.util.List;
 import org.junit.Before;
@@ -56,6 +57,8 @@ import org.springframework.test.context.junit4.SpringRunner;
     "spring.datasource.hikari.jdbcUrl=" + CMS_STORE_URL,
     "spring.datasource.hikari.username=" + SPRING_BOOT_H2_USER,
     "spring.datasource.hikari.password=" + SPRING_BOOT_H2_PASSWORD,
+    "search.doraBasicAuthUser=ba_user",
+    "search.doraBasicAuthPass=ba_pwd"
 })
 public class IdmServiceImplTest {
 
@@ -75,7 +78,7 @@ public class IdmServiceImplTest {
   private TransactionalUserService transactionalUserServiceMock;
 
   @MockBean
-  private SearchService searchServiceMock;
+  private UserIndexService userIndexService;
 
   @BeforeClass
   public static void prepareDatabases() throws Exception {
@@ -107,7 +110,7 @@ public class IdmServiceImplTest {
     String USER_ID = user.getId();
     Exception doraError = new RuntimeException("Dora error");
     mockUserService(user);
-    when(searchServiceMock.createUser(any(User.class))).thenThrow(doraError);
+    when(userIndexService.createUserInIndex(any(User.class))).thenThrow(doraError);
 
     try {
       service.createUser(user);
@@ -130,7 +133,7 @@ public class IdmServiceImplTest {
     mockUserService(user);
 
     Exception doraError = new RuntimeException("Dora error");
-    when(searchServiceMock.createUser(any(User.class))).thenThrow(doraError);
+    when(userIndexService.createUserInIndex(any(User.class))).thenThrow(doraError);
 
     Exception dbError = new RuntimeException("DB error");
     when(userLogTransactionalServiceMock.save(any(UserLog.class))).thenThrow(dbError);
@@ -162,7 +165,7 @@ public class IdmServiceImplTest {
     setGetUserById(USER_ID, existedUser);
 
     Exception doraError = new RuntimeException("Dora error");
-    when(searchServiceMock.updateUser(any(User.class))).thenThrow(doraError);
+    when(userIndexService.updateUserInIndex(any(User.class))).thenThrow(doraError);
 
     Exception dbError = new RuntimeException("DB error");
     when(userLogTransactionalServiceMock.save(any(UserLog.class))).thenThrow(dbError);
@@ -227,7 +230,7 @@ public class IdmServiceImplTest {
     setChangeUserEnabledStatusFail(enableStatusError);
 
     Exception doraError = new RuntimeException("Dora error");
-    when(searchServiceMock.updateUser(any(User.class))).thenThrow(doraError);
+    when(userIndexService.updateUserInIndex(any(User.class))).thenThrow(doraError);
 
     try {
       service.updateUser(USER_ID, userUpdate);
@@ -260,7 +263,7 @@ public class IdmServiceImplTest {
     setChangeUserEnabledStatusFail(enableStatusError);
 
     Exception doraError = new RuntimeException("Dora error");
-    when(searchServiceMock.updateUser(any(User.class))).thenThrow(doraError);
+    when(userIndexService.updateUserInIndex(any(User.class))).thenThrow(doraError);
 
     Exception dbError = new RuntimeException("DB error");
     when(userLogTransactionalServiceMock.save(any(UserLog.class))).thenThrow(dbError);

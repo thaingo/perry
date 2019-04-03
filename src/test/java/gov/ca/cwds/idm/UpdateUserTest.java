@@ -124,7 +124,7 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
         .andReturn();
 
     verify(cognito, times(1)).adminDisableUser(disableUserRequest);
-    verify(spySearchService, times(1)).updateUser(any(User.class));
+    verify(spyUserIndexService, times(1)).updateUserInIndex(any(User.class));
 
     InOrder inOrder = inOrder(cognito);
     inOrder.verify(cognito).adminUpdateUserAttributes(updateAttributesRequest);
@@ -195,7 +195,7 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     NsUser updatedNsUser =  assertNsUserInDb(USER_NO_RACFID_ID);
     assertThat(updatedNsUser.getNotes(), is(OLD_NOTES));
 
-    verify(spySearchService, times(0)).updateUser(any(User.class));
+    verify(spyUserIndexService, times(0)).updateUserInIndex(any(User.class));
     verifyDoraCalls(0);
 
     ArgumentCaptor<List<? extends AuditEvent>> captor = ArgumentCaptor.forClass(List.class);
@@ -250,7 +250,7 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     NsUser updatedNsUser =  assertNsUserInDb(USER_ID);
     assertThat(updatedNsUser.getNotes(), is(OLD_NOTES));
 
-    verify(spySearchService, times(0)).updateUser(any(User.class));
+    verify(spyUserIndexService, times(0)).updateUserInIndex(any(User.class));
     verifyDoraCalls(0);
 
     ArgumentCaptor<List<? extends AuditEvent>> captor = ArgumentCaptor.forClass(List.class);
@@ -332,7 +332,7 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     assertUpdateBadRequest(INACTIVE_USER_WITH_NO_ACTIVE_RACFID_IN_CMS, userUpdate,
         "fixtures/idm/update-user/no-active-cws-user-error.json");
 
-    verify(spySearchService, times(0)).updateUser(any(User.class));
+    verify(spyUserIndexService, times(0)).updateUserInIndex(any(User.class));
     verify(cognito, times(0)).adminEnableUser(enableUserRequest);
     verifyDoraCalls(0);
   }
@@ -356,7 +356,7 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
             .andExpect(MockMvcResultMatchers.status().isNoContent())
             .andReturn();
 
-    verify(spySearchService, times(1)).updateUser(any(User.class));
+    verify(spyUserIndexService, times(1)).updateUserInIndex(any(User.class));
     verify(cognito, times(1)).adminEnableUser(enableUserRequest);
     verifyDoraCalls(1);
   }
@@ -373,7 +373,7 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     assertUpdateBadRequest(INACTIVE_USER_WITH_ACTIVE_RACFID_IN_CMS, userUpdate,
         "fixtures/idm/update-user/active-user-with-same-racfid-in-cognito-error.json");
 
-    verify(spySearchService, times(0)).updateUser(any(User.class));
+    verify(spyUserIndexService, times(0)).updateUserInIndex(any(User.class));
     verify(cognito, times(0)).adminEnableUser(enableUserRequest);
     verifyDoraCalls(0);
   }
@@ -414,7 +414,7 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     verify(cognito, times(1)).adminUpdateUserAttributes(updateAttributesRequest);
     verify(cognito, times(1)).adminDisableUser(disableUserRequest);
 
-    verify(spySearchService, times(1)).updateUser(any(User.class));
+    verify(spyUserIndexService, times(1)).updateUserInIndex(any(User.class));
     verifyDoraCalls(DORA_WS_MAX_ATTEMPTS);
 
     InOrder inOrder = inOrder(cognito);
@@ -466,7 +466,7 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     verify(cognito, times(1)).adminUpdateUserAttributes(updateAttributesRequest);
     verify(cognito, times(1)).adminDisableUser(disableUserRequest);
 
-    verify(spySearchService, times(1)).updateUser(any(User.class));
+    verify(spyUserIndexService, times(1)).updateUserInIndex(any(User.class));
     verifyDoraCalls(1);
 
     InOrder inOrder = inOrder(cognito);
@@ -525,7 +525,7 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
         .andReturn();
 
     verify(cognito, times(0)).adminEnableUser(enableUserRequest);
-    verify(spySearchService, times(0)).createUser(any(User.class));
+    verify(spyUserIndexService, times(0)).updateUserInIndex(any(User.class));
     verify(auditEventService, never()).saveAuditEvent(any(
         PermissionsChangedEvent.class));
     verify(auditEventService, never()).saveAuditEvent(any(
@@ -605,7 +605,7 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
 
     verify(cognito, times(1)).adminUpdateUserAttributes(updateAttributesRequest);
     verify(cognito, times(0)).adminDisableUser(disableUserRequest);
-    verify(spySearchService, times(1)).updateUser(any(User.class));
+    verify(spyUserIndexService, times(1)).updateUserInIndex(any(User.class));
     verifyDoraCalls(1);
   }
 
@@ -637,7 +637,7 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
         .andReturn();
 
     verify(cognito, times(0)).adminDisableUser(disableUserRequest);
-    verify(spySearchService, times(0)).updateUser(any(User.class));
+    verify(spyUserIndexService, times(0)).updateUserInIndex(any(User.class));
     verifyDoraCalls(0);
   }
 
@@ -778,7 +778,7 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     verify(auditEventService, never()).saveAuditEvent(any());
     verify(cognito, times(0)).adminUpdateUserAttributes(updateAttributesRequest);
     verify(cognito, times(0)).adminEnableUser(enableUserRequest);
-    verify(spySearchService, times(0)).createUser(any(User.class));
+    verify(spyUserIndexService, times(0)).updateUserInIndex(any(User.class));
     verify(spyNsUserRepository, times(0)).save(any(NsUser.class));
     verifyDoraCalls(0);
 

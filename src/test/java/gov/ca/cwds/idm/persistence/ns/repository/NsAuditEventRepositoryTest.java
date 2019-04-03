@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.ca.cwds.idm.persistence.ns.entity.NsAuditEvent;
+import gov.ca.cwds.idm.service.search.IndexRestSender;
 import java.util.Arrays;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -46,6 +47,9 @@ public class NsAuditEventRepositoryTest{
 
   @MockBean
   private ObjectMapper objectMapper;
+
+  @MockBean
+  private IndexRestSender indexRestSender;
 
   @Test
   public void testSaveLoad() {

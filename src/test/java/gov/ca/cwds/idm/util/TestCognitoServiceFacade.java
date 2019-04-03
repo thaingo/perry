@@ -385,7 +385,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
         WithMockCustomUser.COUNTY,
         null,
         null,
-        null);
+        "true");
 
     testUser(
         NEW_USER_ES_FAIL_ID,

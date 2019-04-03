@@ -33,4 +33,6 @@ public interface IdmService {
   RegistrationResubmitResponse resendInvitationMessage(User user);
 
   void processNotification(IdmNotification notification);
+
+  void saveLastLoginTime(String username, LocalDateTime loginTime);
 }

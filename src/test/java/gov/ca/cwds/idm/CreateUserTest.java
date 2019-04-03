@@ -110,7 +110,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
 
     verify(cognito, times(1)).adminCreateUser(request);
     verify(cognito, times(1)).adminCreateUser(invitationRequest);
-    verify(spySearchService, times(1)).createUser(any(User.class));
+    verify(spyUserIndexService, times(1)).createUserInIndex(any(User.class));
     verifyDoraCalls(DORA_WS_MAX_ATTEMPTS);
 
     Iterable<UserLog> userLogs = userLogRepository.findAll();
@@ -154,7 +154,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
     verify(cognito, times(1)).adminCreateUser(request);
     verify(cognito, times(1)).adminCreateUser(invitationRequest);
     verify(cognito, times(1)).adminDeleteUser(deleteRequest);
-    verify(spySearchService, times(0)).createUser(any(User.class));
+    verify(spyUserIndexService, times(0)).createUserInIndex(any(User.class));
 
     Iterable<UserLog> userLogs = userLogRepository.findAll();
     int newUserLogsSize = Iterables.size(userLogs);
@@ -201,7 +201,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
     verify(cognito, times(1)).adminCreateUser(request);
     verify(cognito, times(0)).adminCreateUser(invitationRequest);
     verify(cognito, times(1)).adminDeleteUser(deleteRequest);
-    verify(spySearchService, times(0)).createUser(any(User.class));
+    verify(spyUserIndexService, times(0)).createUserInIndex(any(User.class));
 
     Iterable<UserLog> userLogs = userLogRepository.findAll();
     int newUserLogsSize = Iterables.size(userLogs);
@@ -242,7 +242,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
     verify(cognito, times(1)).adminCreateUser(request);
     verify(cognito, times(1)).adminCreateUser(invitationRequest);
     verify(cognito, times(1)).adminDeleteUser(deleteRequest);
-    verify(spySearchService, times(0)).createUser(any(User.class));
+    verify(spyUserIndexService, times(0)).createUserInIndex(any(User.class));
 
     Iterable<UserLog> userLogs = userLogRepository.findAll();
     int newUserLogsSize = Iterables.size(userLogs);
@@ -270,7 +270,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
         .andReturn();
 
     verify(cognito, times(1)).adminCreateUser(request);
-    verify(spySearchService, times(0)).createUser(any(User.class));
+    verify(spyUserIndexService, times(0)).createUserInIndex(any(User.class));
   }
 
   @Test
@@ -470,7 +470,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
 
     verify(cognito, times(1)).adminCreateUser(request);
     verify(cognito, times(1)).adminCreateUser(invitationRequest);
-    verify(spySearchService, times(1)).createUser(argThat(new UserMatcher()));
+    verify(spyUserIndexService, times(1)).createUserInIndex(argThat(new UserMatcher()));
     verifyDoraCalls(1);
     verify(auditEventService, times(1)).saveAuditEvent(any(
         UserCreatedEvent.class));
@@ -525,7 +525,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
         .andReturn();
 
     verify(cognito, times(0)).adminCreateUser(request);
-    verify(spySearchService, times(0)).createUser(any(User.class));
+    verify(spyUserIndexService, times(0)).createUserInIndex(any(User.class));
     return result;
   }
 
@@ -580,7 +580,7 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
         .andReturn();
 
     verify(cognito, times(0)).adminCreateUser(request);
-    verify(spySearchService, times(0)).createUser(any(User.class));
+    verify(spyUserIndexService, times(0)).createUserInIndex(any(User.class));
     verify(auditEventService, never()).saveAuditEvent(any());
   }
 

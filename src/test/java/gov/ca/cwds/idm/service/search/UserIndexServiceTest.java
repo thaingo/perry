@@ -1,29 +1,25 @@
-package gov.ca.cwds.idm.service;
+package gov.ca.cwds.idm.service.search;
 
-import static gov.ca.cwds.idm.service.SearchService.getUrlTemplate;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
 import static org.springframework.test.web.client.ExpectedCount.times;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
-
 import gov.ca.cwds.PerryProperties;
 import gov.ca.cwds.idm.dto.User;
-import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.service.cognito.SearchProperties;
+import gov.ca.cwds.idm.service.cognito.SearchProperties.SearchIndexProperties;
 import gov.ca.cwds.idm.service.retry.IndexRetryConfiguration;
-import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
+import gov.ca.cwds.idm.util.TestUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -31,49 +27,54 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mock.http.client.MockClientHttpResponse;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.HttpServerErrorException;
-import org.springframework.web.client.RestTemplate;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(fullyQualifiedNames = "gov.ca.cwds.util.CurrentAuthenticatedUserUtil")
-public class SearchServiceTest {
+public class UserIndexServiceTest {
 
   private static final String USER_ID = "123";
   private static final String USER_ERROR_ID = "999";
-  private static final String SSO_TOKEN = "abc";
   private static final String DORA_RESPONSE = "{\"_id\": \"123\"\"}";
+  public static final String BASIC_AUTH_USER = "ba_user";
+  public static final String BASIC_AUTH_PWD = "ba_pwd";
+  protected static final String BASIC_AUTH_HEADER =
+      TestUtils.prepareBasicAuthHeader(BASIC_AUTH_USER, BASIC_AUTH_PWD);
 
-  private SearchService service;
+  private UserIndexService service;
 
   private MockRestServiceServer mockServer;
 
   @Before
   public void before() {
-    mockStatic(CurrentAuthenticatedUserUtil.class);
-    when(CurrentAuthenticatedUserUtil.getSsoToken()).thenReturn(SSO_TOKEN);
-
-    service = new SearchService();
+    service = new UserIndexService();
 
     PerryProperties perryProperties = new PerryProperties();
     perryProperties.setDoraWsMaxAttempts(3);
     perryProperties.setDoraWsRetryDelayMs(500);
 
-    SearchProperties properties = new SearchProperties();
-    properties.setDoraUrl("http://localhost");
-    properties.setIndex("users");
-    properties.setType("user");
-    service.setSearchProperties(properties);
+    SearchProperties searchProperties = new SearchProperties();
+    searchProperties.setDoraUrl("http://localhost");
+    searchProperties.setDoraBasicAuthUser("ba_user");
+    searchProperties.setDoraBasicAuthPass("ba_pwd");
+
+    SearchIndexProperties usersIndexProperties = new SearchIndexProperties();
+    searchProperties.setUsersIndex(usersIndexProperties);
+    usersIndexProperties.setName("users");
+    usersIndexProperties.setType("user");
+
+    service.setSearchProperties(searchProperties);
 
     IndexRetryConfiguration indexRetryConfiguration = new IndexRetryConfiguration();
     indexRetryConfiguration.setProperties(perryProperties);
 
-    RestTemplate restTemplate = new RestTemplate();
-    IndexRestSender restSender = new IndexRestSender();
-    restSender.setRestTemplate(restTemplate);
-    restSender.setRetryTemplate(indexRetryConfiguration.retryTemplate());
+    RestTemplateBuilder restTemplateBuilder = new RestTemplateBuilder();
+    IndexRestSender indexRestSender = new IndexRestSender();
+    indexRestSender.setRestTemplateBuilder(restTemplateBuilder);
+    indexRestSender.setRetryTemplate(indexRetryConfiguration.retryTemplate());
+    indexRestSender.setSearchProperties(searchProperties);
+    indexRestSender.init();
 
-    service.setRestSender(restSender);
+    service.setRestSender(indexRestSender);
 
-    mockServer = MockRestServiceServer.bindTo(restTemplate).build();
+    mockServer = MockRestServiceServer.bindTo(indexRestSender.getRestTemplate()).build();
   }
 
   @After
@@ -85,13 +86,14 @@ public class SearchServiceTest {
   @Test
   public void testUpdate() {
     mockServer
-        .expect(requestTo("http://localhost/dora/users/user/" + USER_ID + "?token=" + SSO_TOKEN))
+        .expect(requestTo("http://localhost/dora/users/user/" + USER_ID))
         .andExpect(method(HttpMethod.PUT))
+        .andExpect(header(HttpHeaders.AUTHORIZATION, BASIC_AUTH_HEADER))
         .andRespond(withSuccess(DORA_RESPONSE, MediaType.APPLICATION_JSON));
 
     User user = new User();
     user.setId(USER_ID);
-    ResponseEntity<String> response = service.updateUser(user);
+    ResponseEntity<String> response = service.updateUserInIndex(user);
     assertThat(response.getStatusCode(), is(HttpStatus.OK));
     assertThat(response.getBody(), is(DORA_RESPONSE));
   }
@@ -101,15 +103,16 @@ public class SearchServiceTest {
     mockServer
         .expect(
             requestTo(
-                "http://localhost/dora/users/user/" + USER_ID + "/_create?token=" + SSO_TOKEN))
+                "http://localhost/dora/users/user/" + USER_ID + "/_create"))
         .andExpect(method(HttpMethod.PUT))
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(header(HttpHeaders.AUTHORIZATION, BASIC_AUTH_HEADER))
         .andRespond(
             request -> new MockClientHttpResponse(DORA_RESPONSE.getBytes(), HttpStatus.CREATED));
 
     User user = new User();
     user.setId(USER_ID);
-    ResponseEntity<String> response = service.createUser(user);
+    ResponseEntity<String> response = service.createUserInIndex(user);
     assertThat(response.getStatusCode(), is(HttpStatus.CREATED));
     assertThat(response.getBody(), is(DORA_RESPONSE));
   }
@@ -117,31 +120,15 @@ public class SearchServiceTest {
   @Test(expected = HttpServerErrorException.class)
   public void testDoraError() {
     mockServer
-        .expect(times(3), requestTo("http://localhost/dora/users/user/" + USER_ERROR_ID + "?token=" + SSO_TOKEN))
+        .expect(times(3), requestTo("http://localhost/dora/users/user/" + USER_ERROR_ID))
         .andExpect(method(HttpMethod.PUT))
         .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(header(HttpHeaders.AUTHORIZATION, BASIC_AUTH_HEADER))
         .andRespond(
         request -> new MockClientHttpResponse("error".getBytes(), HttpStatus.INTERNAL_SERVER_ERROR));
 
     User user = new User();
     user.setId(USER_ERROR_ID);
-    service.updateUser(user);
-  }
-
-  @Test
-  public void testGetUrlTemplate() {
-    assertThat(
-        getUrlTemplate(OperationType.CREATE),
-        is("{doraUrl}/dora/{esUserIndex}/{esUserType}/{id}/_create?token={ssoToken}"));
-    assertThat(
-        getUrlTemplate(OperationType.UPDATE),
-        is("{doraUrl}/dora/{esUserIndex}/{esUserType}/{id}?token={ssoToken}"));
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void testPutUserOperationNull() {
-    User user = new User();
-    user.setId(USER_ID);
-    service.putUser(user, null);
+    service.updateUserInIndex(user);
   }
 }

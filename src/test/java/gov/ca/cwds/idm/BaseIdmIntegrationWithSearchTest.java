@@ -9,9 +9,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import gov.ca.cwds.idm.service.AuditEventService;
-import gov.ca.cwds.idm.service.IndexRestSender;
-import gov.ca.cwds.idm.service.SearchService;
+import gov.ca.cwds.idm.service.search.IndexRestSender;
 import gov.ca.cwds.idm.service.cognito.SearchProperties;
+import gov.ca.cwds.idm.service.search.UserIndexService;
 import java.util.Map;
 import org.junit.Before;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,18 +25,15 @@ import org.springframework.web.client.RestTemplate;
 public abstract class BaseIdmIntegrationWithSearchTest extends BaseIdmIntegrationTest {
 
   @Autowired
-  protected SearchService searchService;
+  protected UserIndexService userIndexService;
 
   @Autowired
-  protected IndexRestSender searchRestSender;
-
-  @Autowired
-  protected SearchProperties searchProperties;
+  protected IndexRestSender indexRestSender;
 
   @MockBean
   protected AuditEventService auditEventService;
 
-  protected SearchService spySearchService;
+  protected UserIndexService spyUserIndexService;
 
   protected RestTemplate mockRestTemplate = mock(RestTemplate.class);
 
@@ -44,12 +41,9 @@ public abstract class BaseIdmIntegrationWithSearchTest extends BaseIdmIntegratio
   public void before() {
     super.before();
 
-    searchRestSender.setRestTemplate(mockRestTemplate);
-    searchService.setRestSender(searchRestSender);
-    searchService.setSearchProperties(searchProperties);
-    spySearchService = spy(searchService);
-
-    idmService.setSearchService(spySearchService);
+    indexRestSender.setRestTemplate(mockRestTemplate);
+    spyUserIndexService = spy(userIndexService);
+    idmService.setUserIndexService(spyUserIndexService);
   }
 
   protected final void setDoraSuccess() {
