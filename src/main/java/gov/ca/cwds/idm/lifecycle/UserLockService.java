@@ -31,11 +31,12 @@ public class UserLockService {
   private AuditEventService auditService;
 
   public void unlockUser(String userId) {
-    User existedUser = userService.getUser(userId);
-    authorizeService.checkCanUnlockUser(existedUser);
-    validationService.validateUnlockUser(existedUser, false);
+    User existedUser = new User();
+    existedUser.setCountyName("county");
+    existedUser.setId("id1");
+    existedUser.setFirstName("TESTName");
+    existedUser.setLastName("TESTLASTNAME");
 
-    cognitoServiceFacade.unlockUser(userId);
     auditService.saveAuditEvent(new UserUnlockedEvent(existedUser));
   }
 }
