@@ -1,10 +1,12 @@
 package gov.ca.cwds.idm;
 
 import static gov.ca.cwds.config.TokenServiceConfiguration.TOKEN_TRANSACTION_MANAGER;
-import static gov.ca.cwds.idm.service.notification.NotificationTypes.USER_LOCKED;
+import static gov.ca.cwds.idm.dto.NotificationType.USER_LOCKED;
+import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.ABSENT_USER_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.NEW_USER_SUCCESS_ID;
 import static gov.ca.cwds.idm.util.TestUtils.asJsonString;
+import static io.dropwizard.testing.FixtureHelpers.fixture;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -19,6 +21,7 @@ import gov.ca.cwds.idm.util.TestUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.http.HttpHeaders;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
@@ -121,15 +124,17 @@ public class IdmNotificationTest extends BaseIdmIntegrationWithSearchTest {
   @Test
   public void testNotifyInvalidOperation() throws Exception {
 
-    IdmNotification notification = new IdmNotification(NEW_USER_SUCCESS_ID, "invalidOperation");
+    String invalidNotification = fixture("fixtures/idm/notify/invalid.json");
 
-    mockMvc
+    MvcResult result = mockMvc
         .perform(MockMvcRequestBuilders.post("/idm/notifications/")
             .contentType(JSON_CONTENT_TYPE)
             .header(HttpHeaders.AUTHORIZATION, BASIC_AUTH_HEADER)
-            .content(asJsonString(notification)))
+            .content(invalidNotification))
         .andExpect(MockMvcResultMatchers.status().isBadRequest())
         .andReturn();
+
+    assertExtensible(result, "fixtures/idm/notify/invalid-result.json");
   }
 
   private static String prepareNotValidBasicAuthHeader() {

@@ -2,6 +2,7 @@ package gov.ca.cwds.idm.service;
 
 import static gov.ca.cwds.config.TokenServiceConfiguration.TOKEN_TRANSACTION_MANAGER;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
+import static gov.ca.cwds.idm.dto.NotificationType.USER_LOCKED;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.CREATE;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
 import static gov.ca.cwds.idm.service.ExecutionStatus.FAIL;
@@ -9,7 +10,6 @@ import static gov.ca.cwds.idm.service.ExecutionStatus.SUCCESS;
 import static gov.ca.cwds.idm.service.ExecutionStatus.WAS_NOT_EXECUTED;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.RACFID_STANDARD;
-import static gov.ca.cwds.idm.service.notification.NotificationTypes.USER_LOCKED;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_UPDATE_USER_ENABLED_STATUS;
 import static gov.ca.cwds.service.messages.MessageCode.IDM_NOTIFY_UNSUPPORTED_OPERATION;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_CREATE_IDM_USER_IN_ES;
@@ -30,6 +30,7 @@ import static gov.ca.cwds.util.Utils.toUpperCase;
 import static java.util.stream.Collectors.toSet;
 
 import gov.ca.cwds.idm.dto.IdmNotification;
+import gov.ca.cwds.idm.dto.NotificationType;
 import gov.ca.cwds.idm.dto.RegistrationResubmitResponse;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserAndOperation;
@@ -222,14 +223,17 @@ public class IdmServiceImpl implements IdmService {
 
   @Override
   public void processNotification(IdmNotification notification) {
-    switch (notification.getActionType().toLowerCase()) {
-      case USER_LOCKED:
-        User user = userService.getUser(notification.getUserId());
-        auditService.saveAuditEvent(new UserLockedEvent(user));
-        updateUserInSearch(user);
-        break;
-      default:
-        throw exceptionFactory.createOperationNotSupportedException(IDM_NOTIFY_UNSUPPORTED_OPERATION, notification.getActionType());
+
+    String notificationStr = notification.getActionType();
+    NotificationType notificationType = NotificationType.forString(notificationStr);
+
+    if(notificationType == USER_LOCKED) {
+      User user = userService.getUser(notification.getUserId());
+      auditService.saveAuditEvent(new UserLockedEvent(user));
+      updateUserInSearch(user);
+    } else {
+      throw exceptionFactory
+          .createOperationNotSupportedException(IDM_NOTIFY_UNSUPPORTED_OPERATION, notificationStr);
     }
   }
 
