@@ -14,7 +14,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import gov.ca.cwds.idm.dto.IdmNotification;
+import gov.ca.cwds.idm.dto.IdmUserNotification;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.event.UserLockedEvent;
 import gov.ca.cwds.idm.util.TestUtils;
@@ -38,7 +38,7 @@ public class IdmNotificationTest extends BaseIdmIntegrationWithSearchTest {
   @Test
   public void testNotifyUserWasLocked() throws Exception {
 
-    IdmNotification notification = new IdmNotification(NEW_USER_SUCCESS_ID, USER_LOCKED);
+    IdmUserNotification notification = new IdmUserNotification(NEW_USER_SUCCESS_ID, USER_LOCKED);
     long oldUserLogsSize = userLogRepository.count();
 
     mockMvc
@@ -61,7 +61,7 @@ public class IdmNotificationTest extends BaseIdmIntegrationWithSearchTest {
   @Transactional(value = TOKEN_TRANSACTION_MANAGER)
   public void testNotifyUserWasLockedDoraError() throws Exception {
 
-    IdmNotification notification = new IdmNotification(NEW_USER_SUCCESS_ID, USER_LOCKED);
+    IdmUserNotification notification = new IdmUserNotification(NEW_USER_SUCCESS_ID, USER_LOCKED);
     long oldUserLogsSize = userLogRepository.count();
 
     setDoraError();
@@ -83,7 +83,7 @@ public class IdmNotificationTest extends BaseIdmIntegrationWithSearchTest {
   @Test
   public void testNotifyNoAuthHeaderUnauthorized() throws Exception {
 
-    IdmNotification notification = new IdmNotification("userId", USER_LOCKED);
+    IdmUserNotification notification = new IdmUserNotification("userId", USER_LOCKED);
 
     mockMvc
         .perform(MockMvcRequestBuilders.post("/idm/notifications/")
@@ -96,7 +96,7 @@ public class IdmNotificationTest extends BaseIdmIntegrationWithSearchTest {
   @Test
   public void testNotifyInvalidCredsUnauthorized() throws Exception {
 
-    IdmNotification notification = new IdmNotification("userId", USER_LOCKED);
+    IdmUserNotification notification = new IdmUserNotification("userId", USER_LOCKED);
 
     mockMvc
         .perform(MockMvcRequestBuilders.post("/idm/notifications/")
@@ -110,7 +110,7 @@ public class IdmNotificationTest extends BaseIdmIntegrationWithSearchTest {
   @Test
   public void testNotifyUserNotFound() throws Exception {
 
-    IdmNotification notification = new IdmNotification(ABSENT_USER_ID, USER_LOCKED);
+    IdmUserNotification notification = new IdmUserNotification(ABSENT_USER_ID, USER_LOCKED);
 
     mockMvc
         .perform(MockMvcRequestBuilders.post("/idm/notifications/")

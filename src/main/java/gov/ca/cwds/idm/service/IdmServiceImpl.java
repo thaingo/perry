@@ -2,7 +2,6 @@ package gov.ca.cwds.idm.service;
 
 import static gov.ca.cwds.config.TokenServiceConfiguration.TOKEN_TRANSACTION_MANAGER;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
-import static gov.ca.cwds.idm.dto.NotificationType.USER_LOCKED;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.CREATE;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
 import static gov.ca.cwds.idm.service.ExecutionStatus.FAIL;
@@ -11,11 +10,8 @@ import static gov.ca.cwds.idm.service.ExecutionStatus.WAS_NOT_EXECUTED;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.service.messages.MessageCode.ERROR_UPDATE_USER_ENABLED_STATUS;
-import static gov.ca.cwds.service.messages.MessageCode.IDM_NOTIFY_UNSUPPORTED_OPERATION;
-import static gov.ca.cwds.service.messages.MessageCode.UNABLE_CREATE_IDM_USER_IN_ES;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_PURGE_PROCESSED_USER_LOGS;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_WRITE_LAST_LOGIN_TIME;
-import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_IDM_USER_IN_ES;
 import static gov.ca.cwds.service.messages.MessageCode.USER_CREATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS;
 import static gov.ca.cwds.service.messages.MessageCode.USER_CREATE_SAVE_TO_SEARCH_ERROR;
 import static gov.ca.cwds.service.messages.MessageCode.USER_NOTHING_UPDATED;
@@ -29,8 +25,6 @@ import static gov.ca.cwds.util.Utils.toLowerCase;
 import static gov.ca.cwds.util.Utils.toUpperCase;
 import static java.util.stream.Collectors.toSet;
 
-import gov.ca.cwds.idm.dto.IdmNotification;
-import gov.ca.cwds.idm.dto.NotificationType;
 import gov.ca.cwds.idm.dto.RegistrationResubmitResponse;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserAndOperation;
@@ -45,7 +39,6 @@ import gov.ca.cwds.idm.event.NotesChangedEvent;
 import gov.ca.cwds.idm.event.PermissionsChangedEvent;
 import gov.ca.cwds.idm.event.UserCreatedEvent;
 import gov.ca.cwds.idm.event.UserEnabledStatusChangedEvent;
-import gov.ca.cwds.idm.event.UserLockedEvent;
 import gov.ca.cwds.idm.event.UserRegistrationResentEvent;
 import gov.ca.cwds.idm.event.UserRoleChangedEvent;
 import gov.ca.cwds.idm.exception.AdminAuthorizationException;
@@ -62,7 +55,7 @@ import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.idm.service.execution.OptionalExecution;
 import gov.ca.cwds.idm.service.execution.OptionalExecution.NoUpdateExecution;
 import gov.ca.cwds.idm.service.execution.PutInSearchExecution;
-import gov.ca.cwds.idm.service.search.UserIndexService;
+import gov.ca.cwds.idm.service.search.UserSearchService;
 import gov.ca.cwds.idm.service.validation.ValidationService;
 import gov.ca.cwds.service.messages.MessageCode;
 import gov.ca.cwds.service.messages.MessagesService;
@@ -80,7 +73,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -104,9 +96,6 @@ public class IdmServiceImpl implements IdmService {
   private UserLogService userLogService;
 
   @Autowired
-  private UserIndexService userIndexService;
-
-  @Autowired
   private AuthorizationService authorizeService;
 
   @Autowired
@@ -126,6 +115,9 @@ public class IdmServiceImpl implements IdmService {
 
   @Autowired
   private MessagesService messagesService;
+
+  @Autowired
+  private UserSearchService userSearchService;
 
   @Override
   public User findUser(String id) {
@@ -156,7 +148,7 @@ public class IdmServiceImpl implements IdmService {
     PutInSearchExecution<User> doraExecution = null;
     if (doesElasticSearchNeedUpdate(updateAttributesStatus, updateUserEnabledExecution)) {
       User updatedUser = userService.getUser(userId);
-      doraExecution = updateUserInSearch(updatedUser);
+      doraExecution = userSearchService.updateUserInSearch(updatedUser);
     } else {
       LOGGER.info(messages.getTechMessage(USER_NOTHING_UPDATED, userId));
     }
@@ -179,7 +171,7 @@ public class IdmServiceImpl implements IdmService {
     transactionalUserService.createUserInDbWithInvitationEmail(createdUser);
     LOGGER.info("New user with username:{} was successfully created in database", createdUser.getId());
     auditService.saveAuditEvent(new UserCreatedEvent(createdUser));
-    PutInSearchExecution doraExecution = createUserInSearch(createdUser);
+    PutInSearchExecution doraExecution = userSearchService.createUserInSearch(createdUser);
     handleCreatePartialSuccess(createdUser, doraExecution);
     return createdUser.getId();
   }
@@ -222,22 +214,6 @@ public class IdmServiceImpl implements IdmService {
   }
 
   @Override
-  public void processNotification(IdmNotification notification) {
-
-    String notificationStr = notification.getActionType();
-    NotificationType notificationType = NotificationType.forString(notificationStr);
-
-    if(notificationType == USER_LOCKED) {
-      User user = userService.getUser(notification.getUserId());
-      auditService.saveAuditEvent(new UserLockedEvent(user));
-      updateUserInSearch(user);
-    } else {
-      throw exceptionFactory
-          .createOperationNotSupportedException(IDM_NOTIFY_UNSUPPORTED_OPERATION, notificationStr);
-    }
-  }
-
-  @Override
   public void saveLastLoginTime(String userId, LocalDateTime loginTime) {
     try {
       if (userId == null) {
@@ -247,7 +223,7 @@ public class IdmServiceImpl implements IdmService {
       LOGGER.debug("Handling \"user logged in\" event for user {}", userId);
       userService.saveLastLoginTime(userId, loginTime);
       User user = userService.getUser(userId);
-      updateUserInSearch(user);
+      userSearchService.updateUserInSearch(user);
 
     } catch (Exception e) {
       String msg = messagesService.getTechMessage(UNABLE_TO_WRITE_LAST_LOGIN_TIME, userId);
@@ -484,43 +460,6 @@ public class IdmServiceImpl implements IdmService {
     return values.stream().map(function).collect(toSet());
   }
 
-  private PutInSearchExecution<User> createUserInSearch(User user) {
-    return putUserInSearch(
-        user,
-        userIndexService::createUserInIndex,
-        userLogService::logCreate,
-        UNABLE_CREATE_IDM_USER_IN_ES);
-  }
-
-  private PutInSearchExecution<User> updateUserInSearch(User updatedUser) {
-    return putUserInSearch(
-        updatedUser,
-        userIndexService::updateUserInIndex,
-        userLogService::logUpdate,
-        UNABLE_UPDATE_IDM_USER_IN_ES);
-  }
-
-  private PutInSearchExecution<User> putUserInSearch(
-      User user,
-      Function<User, ResponseEntity<String>> tryOperation,
-      Function<String, OptionalExecution<String, UserLog>> catchOperation,
-      MessageCode errorCode) {
-
-    return new PutInSearchExecution<User>(user) {
-      @Override
-      protected ResponseEntity<String> tryMethod(User user) {
-        return tryOperation.apply(user);
-      }
-
-      @Override
-      protected void catchMethod(Exception e) {
-        String msg = messages.getTechMessage(errorCode, user.getId());
-        LOGGER.error(msg, e);
-        setUserLogExecution(catchOperation.apply(user.getId()));
-      }
-    };
-  }
-
   private UserUpdateRequest prepareUserUpdateRequest(User existedUser, UserUpdate updateUserDto) {
     UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
     userUpdateRequest.setUserId(existedUser.getId());
@@ -550,10 +489,6 @@ public class IdmServiceImpl implements IdmService {
       OptionalExecution<BooleanDiff, Void> updateUserEnabledExecution) {
     return updateAttributesStatus == SUCCESS
         || updateUserEnabledExecution.getExecutionStatus() == SUCCESS;
-  }
-
-  public void setUserIndexService(UserIndexService userIndexService) {
-    this.userIndexService = userIndexService;
   }
 
   public void setCognitoServiceFacade(
@@ -588,5 +523,4 @@ public class IdmServiceImpl implements IdmService {
   public void setUserService(UserService userService) {
     this.userService = userService;
   }
-
 }

@@ -12,6 +12,7 @@ import gov.ca.cwds.idm.service.AuditEventService;
 import gov.ca.cwds.idm.service.search.IndexRestSender;
 import gov.ca.cwds.idm.service.cognito.SearchProperties;
 import gov.ca.cwds.idm.service.search.UserIndexService;
+import gov.ca.cwds.idm.service.search.UserSearchService;
 import java.util.Map;
 import org.junit.Before;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,9 @@ public abstract class BaseIdmIntegrationWithSearchTest extends BaseIdmIntegratio
   @MockBean
   protected AuditEventService auditEventService;
 
+  @Autowired
+  protected UserSearchService userSearchService;
+
   protected UserIndexService spyUserIndexService;
 
   protected RestTemplate mockRestTemplate = mock(RestTemplate.class);
@@ -43,7 +47,7 @@ public abstract class BaseIdmIntegrationWithSearchTest extends BaseIdmIntegratio
 
     indexRestSender.setRestTemplate(mockRestTemplate);
     spyUserIndexService = spy(userIndexService);
-    idmService.setUserIndexService(spyUserIndexService);
+    userSearchService.setUserIndexService(spyUserIndexService);
   }
 
   protected final void setDoraSuccess() {

@@ -7,12 +7,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum NotificationType {
-  USER_LOCKED("locked");
+  USER_LOCKED("locked"),
+  USER_PASSWORD_CHANGED("user-password-changed");
 
   private static Map<String, NotificationType> strMap = new HashMap<>();
 
   static {
-    strMap.put(USER_LOCKED.toString(), USER_LOCKED);
+    for (NotificationType notificationType : NotificationType.values()) {
+      strMap.put(notificationType.toString(), notificationType);
+    }
   }
 
   private String str;

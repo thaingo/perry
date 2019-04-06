@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
-public class IdmNotification implements Serializable {
+public class IdmUserNotification implements Serializable {
 
   private static final long serialVersionUID = -1293310748892133999L;
 
@@ -16,14 +16,14 @@ public class IdmNotification implements Serializable {
   private String actionType;
 
   @JsonCreator
-  public IdmNotification(
+  public IdmUserNotification(
       @JsonProperty("userId") String userId,
       @JsonProperty("actionType") String actionType) {
     this.userId = userId;
     this.actionType = actionType;
   }
 
-  public IdmNotification(
+  public IdmUserNotification(
       String userId,
       NotificationType notificationType) {
     this.userId = userId;
