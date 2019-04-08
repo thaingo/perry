@@ -12,6 +12,9 @@ import static gov.ca.cwds.idm.event.UserEnabledStatusChangedEvent.INACTIVE;
 import static gov.ca.cwds.idm.event.UserLockedEvent.LOCKED;
 import static gov.ca.cwds.idm.event.UserLockedEvent.UNLOCKED;
 import static gov.ca.cwds.util.Utils.toSet;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
@@ -206,6 +209,19 @@ public class UserChangeLogEventTest {
     assertEquals(UserUnlockedEvent.EVENT_TYPE_USER_UNLOCKED, event.getEventType());
     assertEquals(LOCKED, event.getEvent().getOldValue());
     assertEquals(UNLOCKED, event.getEvent().getNewValue());
+  }
+
+  @Test
+  public void testUserPasswordChangedEvent() {
+    UserPasswordChangedEvent event = new UserPasswordChangedEvent(mockUser());
+
+    assertThat(event.getUserLogin(), is("testId"));
+    assertThat(event.getEventType(), is("User Password Changed"));
+    assertThat(event.getEvent().getAdminName(), is("testFirstName testLastName"));
+    assertThat(event.getEvent().getUserRoles(), is("CWS Worker, County Administrator"));
+    assertThat(event.getEvent().getAdminRole(), is("CWS Worker, County Administrator"));
+    assertThat(event.getEvent().getOldValue(), is(nullValue()));
+    assertThat(event.getEvent().getNewValue(), is(nullValue()));
   }
 
   private User mockUser() {

@@ -3,6 +3,7 @@ package gov.ca.cwds.config.api.idm;
 import static gov.ca.cwds.util.Utils.toSet;
 
 import com.google.common.collect.ImmutableMap;
+import gov.ca.cwds.idm.dto.User;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -60,7 +61,15 @@ public class Roles {
     return Roles.roleList;
   }
 
-  public static String joinRoles(Iterable<String> roles) {
+  public static String toRolesKeysString(User user) {
+    return joinRoles(user.getRoles());
+  }
+
+  public static String toRolesNamesString(User user) {
+    return joinRoles(replaceRoleIdByName(user.getRoles()));
+  }
+
+  private static String joinRoles(Iterable<String> roles) {
     return StringUtils.join(roles, ", ");
   }
 
