@@ -1,17 +1,28 @@
 package gov.ca.cwds.idm.dto;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
+import gov.ca.cwds.idm.event.AuditEvent;
+import gov.ca.cwds.idm.event.UserLockedEvent;
+import gov.ca.cwds.idm.event.UserPasswordChangedEvent;
 import gov.ca.cwds.util.Utils;
 import java.util.HashMap;
 import java.util.Map;
 
 public enum NotificationType {
-  USER_LOCKED("locked"),
-  USER_PASSWORD_CHANGED("user-password-changed");
+
+  USER_LOCKED("locked") {
+    @Override
+    public AuditEvent createAuditEvent(User user) {
+      return new UserLockedEvent(user);
+    }
+  },
+  USER_PASSWORD_CHANGED("user-password-changed") {
+    @Override
+    public AuditEvent createAuditEvent(User user) {
+      return new UserPasswordChangedEvent(user);
+    }
+  };
 
   private static Map<String, NotificationType> strMap = new HashMap<>();
-
   static {
     for (NotificationType notificationType : NotificationType.values()) {
       strMap.put(notificationType.toString(), notificationType);
@@ -24,14 +35,14 @@ public enum NotificationType {
     this.str = str;
   }
 
-  @JsonCreator
   public static NotificationType forString(String str) {
     return strMap.get(Utils.toLowerCase(str));
   }
 
   @Override
-  @JsonValue
   public final String toString() {
     return str;
   }
+
+  public abstract AuditEvent createAuditEvent(User user);
 }
