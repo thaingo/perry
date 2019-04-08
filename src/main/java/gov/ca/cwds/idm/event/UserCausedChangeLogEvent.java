@@ -5,6 +5,8 @@ import gov.ca.cwds.idm.dto.User;
 
 public abstract class UserCausedChangeLogEvent extends UserChangeLogEvent {
 
+  private static final long serialVersionUID = 1685967376478706898L;
+
   UserCausedChangeLogEvent(User user) {
     super(user);
 
