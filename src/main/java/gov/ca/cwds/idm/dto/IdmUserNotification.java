@@ -23,6 +23,7 @@ public class IdmUserNotification implements Serializable {
     this.actionType = actionType;
   }
 
+  @SuppressWarnings({"fb-contrib:STT_TOSTRING_STORED_IN_FIELD"})//constructor for using in tests
   public IdmUserNotification(
       String userId,
       NotificationType notificationType) {
