@@ -10,7 +10,7 @@ import java.io.Serializable;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class IdmUserNotification implements Serializable {
 
-  private static final long serialVersionUID = -1293310748892133999L;
+  private static final long serialVersionUID = 3030384804918895348L;
 
   private String userId;
   private String actionType;
