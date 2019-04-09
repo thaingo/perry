@@ -1,6 +1,5 @@
 package gov.ca.cwds.idm.service;
 
-import gov.ca.cwds.idm.dto.IdmUserNotification;
 import gov.ca.cwds.idm.dto.RegistrationResubmitResponse;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserAndOperation;
