@@ -215,13 +215,17 @@ public class UserChangeLogEventTest {
   public void testUserPasswordChangedEvent() {
     UserPasswordChangedEvent event = new UserPasswordChangedEvent(mockUser());
 
-    assertThat(event.getUserLogin(), is("testId"));
+    assertThat(event.getUserLogin(), is(TEST_USER_ID));
+    assertThat(event.getEvent().getUserId(), is(TEST_USER_ID));
     assertThat(event.getEventType(), is("User Password Changed"));
     assertThat(event.getEvent().getAdminName(), is("testFirstName testLastName"));
-    assertThat(event.getEvent().getUserRoles(), is("CWS Worker, County Administrator"));
+    assertThat(event.getEvent().getUserName(), is("testFirstName testLastName"));
     assertThat(event.getEvent().getAdminRole(), is("CWS Worker, County Administrator"));
+    assertThat(event.getEvent().getUserRoles(), is("CWS Worker, County Administrator"));
     assertThat(event.getEvent().getOldValue(), is(nullValue()));
     assertThat(event.getEvent().getNewValue(), is(nullValue()));
+    assertThat(event.getEvent().getCountyName(), is(TEST_COUNTY));
+    assertThat(event.getEvent().getOfficeId(), is(TEST_OFFICE_ID));
   }
 
   private User mockUser() {
