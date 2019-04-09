@@ -1,6 +1,5 @@
 package gov.ca.cwds.idm.service;
 
-import gov.ca.cwds.idm.dto.IdmNotification;
 import gov.ca.cwds.idm.dto.RegistrationResubmitResponse;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserAndOperation;
@@ -31,8 +30,6 @@ public interface IdmService {
   List<UserAndOperation> getFailedOperations(LocalDateTime lastJobTime);
 
   RegistrationResubmitResponse resendInvitationMessage(User user);
-
-  void processNotification(IdmNotification notification);
 
   void saveLastLoginTime(String username, LocalDateTime loginTime);
 }

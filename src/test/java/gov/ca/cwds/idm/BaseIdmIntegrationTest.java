@@ -32,6 +32,7 @@ import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.util.CognitoRequestHelper;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.idm.service.search.UserIndexService;
+import gov.ca.cwds.idm.service.search.UserSearchService;
 import gov.ca.cwds.idm.util.TestCognitoServiceFacade;
 import gov.ca.cwds.idm.util.TestUtils;
 import gov.ca.cwds.idm.util.WithMockCustomUser;

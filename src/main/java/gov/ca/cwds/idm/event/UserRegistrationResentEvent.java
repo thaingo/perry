@@ -1,7 +1,5 @@
 package gov.ca.cwds.idm.event;
 
-import static gov.ca.cwds.config.api.idm.Roles.joinRoles;
-
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import gov.ca.cwds.idm.dto.User;
@@ -17,5 +15,4 @@ public class UserRegistrationResentEvent extends AdminCausedChangeLogEvent {
     super(user);
     setEventType(EVENT_TYPE_REGISTRATION_RESENT);
   }
-
 }

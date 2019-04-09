@@ -1,10 +1,14 @@
 package gov.ca.cwds.idm;
 
 import static gov.ca.cwds.config.TokenServiceConfiguration.TOKEN_TRANSACTION_MANAGER;
-import static gov.ca.cwds.idm.service.notification.NotificationTypes.USER_LOCKED;
+import static gov.ca.cwds.idm.dto.NotificationType.USER_LOCKED;
+import static gov.ca.cwds.idm.dto.NotificationType.USER_PASSWORD_CHANGED;
+import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.ABSENT_USER_ID;
-import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.NEW_USER_SUCCESS_ID;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.LOCKED_USER;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USER_NO_RACFID_ID;
 import static gov.ca.cwds.idm.util.TestUtils.asJsonString;
+import static io.dropwizard.testing.FixtureHelpers.fixture;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -12,13 +16,15 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import gov.ca.cwds.idm.dto.IdmNotification;
+import gov.ca.cwds.idm.dto.IdmUserNotification;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.event.UserLockedEvent;
+import gov.ca.cwds.idm.event.UserPasswordChangedEvent;
 import gov.ca.cwds.idm.util.TestUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.http.HttpHeaders;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,7 +41,7 @@ public class IdmNotificationTest extends BaseIdmIntegrationWithSearchTest {
   @Test
   public void testNotifyUserWasLocked() throws Exception {
 
-    IdmNotification notification = new IdmNotification(NEW_USER_SUCCESS_ID, USER_LOCKED);
+    IdmUserNotification notification = new IdmUserNotification(LOCKED_USER, USER_LOCKED);
     long oldUserLogsSize = userLogRepository.count();
 
     mockMvc
@@ -58,7 +64,7 @@ public class IdmNotificationTest extends BaseIdmIntegrationWithSearchTest {
   @Transactional(value = TOKEN_TRANSACTION_MANAGER)
   public void testNotifyUserWasLockedDoraError() throws Exception {
 
-    IdmNotification notification = new IdmNotification(NEW_USER_SUCCESS_ID, USER_LOCKED);
+    IdmUserNotification notification = new IdmUserNotification(LOCKED_USER, USER_LOCKED);
     long oldUserLogsSize = userLogRepository.count();
 
     setDoraError();
@@ -80,7 +86,7 @@ public class IdmNotificationTest extends BaseIdmIntegrationWithSearchTest {
   @Test
   public void testNotifyNoAuthHeaderUnauthorized() throws Exception {
 
-    IdmNotification notification = new IdmNotification("userId", USER_LOCKED);
+    IdmUserNotification notification = new IdmUserNotification("userId", USER_LOCKED);
 
     mockMvc
         .perform(MockMvcRequestBuilders.post("/idm/notifications/")
@@ -93,7 +99,7 @@ public class IdmNotificationTest extends BaseIdmIntegrationWithSearchTest {
   @Test
   public void testNotifyInvalidCredsUnauthorized() throws Exception {
 
-    IdmNotification notification = new IdmNotification("userId", USER_LOCKED);
+    IdmUserNotification notification = new IdmUserNotification(LOCKED_USER, USER_LOCKED);
 
     mockMvc
         .perform(MockMvcRequestBuilders.post("/idm/notifications/")
@@ -107,7 +113,7 @@ public class IdmNotificationTest extends BaseIdmIntegrationWithSearchTest {
   @Test
   public void testNotifyUserNotFound() throws Exception {
 
-    IdmNotification notification = new IdmNotification(ABSENT_USER_ID, USER_LOCKED);
+    IdmUserNotification notification = new IdmUserNotification(ABSENT_USER_ID, USER_LOCKED);
 
     mockMvc
         .perform(MockMvcRequestBuilders.post("/idm/notifications/")
@@ -121,15 +127,42 @@ public class IdmNotificationTest extends BaseIdmIntegrationWithSearchTest {
   @Test
   public void testNotifyInvalidOperation() throws Exception {
 
-    IdmNotification notification = new IdmNotification(NEW_USER_SUCCESS_ID, "invalidOperation");
+    String invalidNotification = fixture("fixtures/idm/notify/invalid.json");
 
-    mockMvc
+    MvcResult result = mockMvc
         .perform(MockMvcRequestBuilders.post("/idm/notifications/")
             .contentType(JSON_CONTENT_TYPE)
             .header(HttpHeaders.AUTHORIZATION, BASIC_AUTH_HEADER)
-            .content(asJsonString(notification)))
+            .content(invalidNotification))
         .andExpect(MockMvcResultMatchers.status().isBadRequest())
         .andReturn();
+
+    assertExtensible(result, "fixtures/idm/notify/invalid-result.json");
+  }
+
+  @Test
+  public void testNotifyUserChangedPassword() throws Exception {
+
+    IdmUserNotification notification =
+        new IdmUserNotification(USER_NO_RACFID_ID, USER_PASSWORD_CHANGED);
+
+    long oldUserLogsSize = userLogRepository.count();
+
+    mockMvc
+        .perform(MockMvcRequestBuilders.post("/idm/notifications/")
+            .header(HttpHeaders.AUTHORIZATION, BASIC_AUTH_HEADER)
+            .contentType(JSON_CONTENT_TYPE)
+            .content(asJsonString(notification)))
+        .andExpect(MockMvcResultMatchers.status().isAccepted())
+        .andReturn();
+
+    verify(auditEventService, times(1)).saveAuditEvent(any(
+        UserPasswordChangedEvent.class));
+
+    verify(spyUserIndexService, times(1)).updateUserInIndex(
+        argThat(user -> user.getId().equals(USER_NO_RACFID_ID)));
+
+    assertThat(userLogRepository.count(), is(oldUserLogsSize));
   }
 
   private static String prepareNotValidBasicAuthHeader() {

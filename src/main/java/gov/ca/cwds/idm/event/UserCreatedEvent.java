@@ -15,6 +15,6 @@ public class UserCreatedEvent extends AdminCausedChangeLogEvent {
   public UserCreatedEvent(User user) {
     super(user);
     setEventType(EVENT_TYPE_USER_CREATED);
-    setNewValue(Roles.joinRoles(user.getRoles()));
+    setNewValue(Roles.toRolesKeysString(user));
   }
 }

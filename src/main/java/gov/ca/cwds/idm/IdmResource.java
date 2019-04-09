@@ -3,7 +3,7 @@ package gov.ca.cwds.idm;
 import static gov.ca.cwds.util.Utils.URL_DATETIME_FORMATTER;
 
 import gov.ca.cwds.data.persistence.auth.CwsOffice;
-import gov.ca.cwds.idm.dto.IdmNotification;
+import gov.ca.cwds.idm.dto.IdmUserNotification;
 import gov.ca.cwds.idm.dto.RegistrationResubmitResponse;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserAndOperation;
@@ -19,6 +19,7 @@ import gov.ca.cwds.idm.service.IdmService;
 import gov.ca.cwds.idm.service.OfficeService;
 import gov.ca.cwds.idm.service.UserEditDetailsService;
 import gov.ca.cwds.idm.service.UserService;
+import gov.ca.cwds.idm.service.notification.NotificationService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
@@ -67,6 +68,9 @@ public class IdmResource {
 
   @Autowired
   private UserEditDetailsService userEditDetailsService;
+
+  @Autowired
+  NotificationService notificationService;
 
   @RequestMapping(method = RequestMethod.GET, value = "/users", produces = "application/json")
   @ApiOperation(
@@ -362,9 +366,8 @@ public class IdmResource {
       @NotNull
       @Valid
       @RequestBody
-          IdmNotification notification) {
-    idmService.processNotification(notification);
+          IdmUserNotification userNotification) {
+    notificationService.processUserNotification(userNotification);
     return ResponseEntity.accepted().build();
   }
-
 }

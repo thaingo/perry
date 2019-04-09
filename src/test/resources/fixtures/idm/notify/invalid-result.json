@@ -1,0 +1,6 @@
+{
+  "status": "BAD_REQUEST",
+  "technical_message": "Idm Notification service doesn't support invalidOperation operation",
+  "user_message": "Idm Notification service doesn't support invalidOperation operation",
+  "error_code": "CAP-068"
+}

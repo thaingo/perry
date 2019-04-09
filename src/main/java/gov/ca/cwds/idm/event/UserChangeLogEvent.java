@@ -1,8 +1,6 @@
 package gov.ca.cwds.idm.event;
 
-import static gov.ca.cwds.config.api.idm.Roles.joinRoles;
-import static gov.ca.cwds.config.api.idm.Roles.replaceRoleIdByName;
-
+import gov.ca.cwds.config.api.idm.Roles;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserChangeLogRecord;
 import java.time.LocalDateTime;
@@ -21,9 +19,13 @@ public abstract class UserChangeLogEvent extends AuditEvent<UserChangeLogRecord>
     setEvent(userChangeLogRecord);
     setCountyName(user.getCountyName());
     setOfficeId(user.getOfficeId());
-    setUserRoles(joinRoles(replaceRoleIdByName(user.getRoles())));
+    setUserRoles(Roles.toRolesNamesString(user));
     setUserId(user.getId());
-    setUserName(user.getFirstName() + " " + user.getLastName());
+    setUserName(createUserFullNameString(user));
+  }
+
+  static String createUserFullNameString(User user) {
+    return user.getFirstName() + " " + user.getLastName();
   }
 
   final void setAdminRole(String adminRole) {

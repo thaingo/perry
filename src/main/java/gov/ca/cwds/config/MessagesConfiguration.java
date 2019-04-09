@@ -15,7 +15,7 @@ public class MessagesConfiguration {
     ReloadableResourceBundleMessageSource messageSource =
         new ReloadableResourceBundleMessageSource();
     messageSource.setBasename("classpath:/messages/tech_messages");
-
+    messageSource.setAlwaysUseMessageFormat(true);
     return messageSource;
   }
 
@@ -25,7 +25,7 @@ public class MessagesConfiguration {
     ReloadableResourceBundleMessageSource messageSource =
         new ReloadableResourceBundleMessageSource();
     messageSource.setBasename("classpath:/messages/user_messages");
-
+    messageSource.setAlwaysUseMessageFormat(true);
     return messageSource;
   }
 
