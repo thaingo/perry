@@ -7,6 +7,7 @@ import gov.ca.cwds.util.Utils;
 import java.util.HashMap;
 import java.util.Map;
 
+@SuppressWarnings({"fb-contrib:STT_TOSTRING_STORED_IN_FIELD"})
 public enum NotificationType {
 
   USER_LOCKED("locked") {
