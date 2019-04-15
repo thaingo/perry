@@ -57,11 +57,6 @@ JAVA_OPTS="$JAVA_OPTS -Ddb2.jcc.override.currentPackagePath=$DB2_CURRENT_PACKAGE
 JAVA_OPTS="$JAVA_OPTS -Ddb2.jcc.override.statementConcentrator=$DB2_STATEMENT_CONCENTRATOR"
 JAVA_OPTS="$JAVA_OPTS -Ddb2.jcc.override.keepDynamic=$DB2_KEEP_DYNAMIC"
 JAVA_OPTS="$JAVA_OPTS -Ddb2.jcc.override.currentDegree=$DB2_CURRENT_DEGREE"
-#DB2 driver trace settings
-JAVA_OPTS="$JAVA_OPTS -Ddb2.jcc.override.traceDirectory=$DB2_TRACE_DIRECTORY"
-JAVA_OPTS="$JAVA_OPTS -Ddb2.jcc.override.traceFile=$DB2_TRACE_FILE"
-JAVA_OPTS="$JAVA_OPTS -Ddb2.jcc.override.traceLevel=$DB2_TRACE_LEVEL"
-JAVA_OPTS="$JAVA_OPTS -Ddb2.jcc.override.traceFileAppend=$DB2_TRACE_FILE_APPEND"
 
 if [ -x /paramfolder/parameters.sh ]; then
     source /paramfolder/parameters.sh
