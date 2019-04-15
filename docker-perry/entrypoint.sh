@@ -48,6 +48,21 @@ if [ "$SWAGGER" = true ] ; then
     JAVA_OPTS="$JAVA_OPTS,swagger"
 fi
 
+#DB2 driver settings
+JAVA_OPTS="$JAVA_OPTS -Ddb2.jcc.override.queryDataSize=$DB2_QUERY_DATA_SIZE"
+JAVA_OPTS="$JAVA_OPTS -Ddb2.jcc.override.queryCloseImplicit=$DB2_QUERY_CLOSE_IMPLICIT"
+JAVA_OPTS="$JAVA_OPTS -Ddb2.jcc.override.resultSetHoldability=$DB2_RESULT_SET_HOLDABILITY"
+JAVA_OPTS="$JAVA_OPTS -Ddb2.jcc.override.interruptProcessingMode=$DB2_INTERRUPT_PROCESSING_MODE"
+JAVA_OPTS="$JAVA_OPTS -Ddb2.jcc.override.currentPackagePath=$DB2_CURRENT_PACKAGE_PATH"
+JAVA_OPTS="$JAVA_OPTS -Ddb2.jcc.override.statementConcentrator=$DB2_STATEMENT_CONCENTRATOR"
+JAVA_OPTS="$JAVA_OPTS -Ddb2.jcc.override.keepDynamic=$DB2_KEEP_DYNAMIC"
+JAVA_OPTS="$JAVA_OPTS -Ddb2.jcc.override.currentDegree=$DB2_CURRENT_DEGREE"
+#DB2 driver trace settings
+JAVA_OPTS="$JAVA_OPTS -Ddb2.jcc.override.traceDirectory=$DB2_TRACE_DIRECTORY"
+JAVA_OPTS="$JAVA_OPTS -Ddb2.jcc.override.traceFile=$DB2_TRACE_FILE"
+JAVA_OPTS="$JAVA_OPTS -Ddb2.jcc.override.traceLevel=$DB2_TRACE_LEVEL"
+JAVA_OPTS="$JAVA_OPTS -Ddb2.jcc.override.traceFileAppend=$DB2_TRACE_FILE_APPEND"
+
 if [ -x /paramfolder/parameters.sh ]; then
     source /paramfolder/parameters.sh
 fi
