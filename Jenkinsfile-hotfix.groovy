@@ -55,45 +55,6 @@ node('dora-slave') {
         stage('Clean Workspace') {
             archiveArtifacts artifacts: '**/perry*.jar,readme.txt', fingerprint: true
         }
-        stage('Deploy Cognito Mode') {
-            sh 'cd ansible ; ansible-playbook -e NEW_RELIC_AGENT=$USE_NEWRELIC -e VERSION_NUMBER=$APP_VERSION -i $inventory deploy-perry.yml --vault-password-file ~/.ssh/vault.txt -vv'
-            sleep(20)
-        }
-        stage('Cognito Integration Tests') {
-            def gradlePropsText = """
-            perry.health.check.url=http://10.110.12.162:9082/manage/health
-            perry.url=${PERRY_URL}
-            perry.username=cwds.perry.test@gmail.com
-            perry.password=CWS4kids!
-            perry.json={}
-            perry.threads.count=1
-            selenium.grid.url=
-            validate.repeat.count=2
-            """
-            writeFile file: "gradle.properties", text: gradlePropsText
-            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'integrationTestProd --stacktrace'
-        }
-        stage('Deploy Dev Mode') {
-            // TODO: Need to change Perry mode here to DEV
-            sh 'sed -i \'s/devmode: "false"/devmode: "true"/\'  ansible/inventories/tpt2dev/group_vars/perry.yml'
-            sh 'sed -i \'s/cognito_mode: "true"/cognito_mode: "false"/\'  ansible/inventories/tpt2dev/group_vars/perry.yml'
-            sh 'cd ansible ; ansible-playbook -e NEW_RELIC_AGENT=$USE_NEWRELIC -e VERSION_NUMBER=$APP_VERSION -i $inventory deploy-perry.yml --vault-password-file ~/.ssh/vault.txt -vv'
-            sleep(20)
-        }
-        stage('Dev Integration Tests') {
-            def gradlePropsText = """
-            perry.health.check.url=http://10.110.12.162:9082/manage/health
-            perry.url=${PERRY_URL}
-            perry.username=
-            perry.password=
-            perry.json=
-            perry.threads.count=1
-            selenium.grid.url=http://grid.dev.cwds.io:4444/wd/hub
-            validate.repeat.count=2
-            """
-            writeFile file: "gradle.properties", text: gradlePropsText
-            buildInfo = rtGradle.run buildFile: 'build.gradle', tasks: 'integrationTestDev --stacktrace'
-        }
         stage('Push artifacts') {
             // Artifactory
             rtGradle.deployer.deployArtifacts = true
