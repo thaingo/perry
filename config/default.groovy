@@ -31,7 +31,6 @@ if (authorization) {
             "CANS-assessment-create",
             "CANS-assessment-in-progress-update",
             "CANS-assessment-in-progress-delete",
-            "CANS-assessment-completed-delete",
             "CANS-assessment-complete"
     ]
 
@@ -51,7 +50,6 @@ if (authorization) {
             "CANS-assessment-create",
             "CANS-assessment-in-progress-update",
             "CANS-assessment-in-progress-delete",
-            "CANS-assessment-completed-delete",
             "CANS-assessment-complete"]
 
     def isSupervisor = authorityCodes.size() > 0 && authorityCodes.contains("S")
@@ -68,7 +66,6 @@ if (authorization) {
             "CANS-assessment-create",
             "CANS-assessment-in-progress-update",
             "CANS-assessment-in-progress-delete",
-            "CANS-assessment-completed-delete",
             "CANS-assessment-complete"
     ]
 
