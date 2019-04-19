@@ -63,7 +63,6 @@ function validateLoginString() {
         + "\t\t\"CANS-assessment-create\",\n"
         + "\t\t\"CANS-assessment-in-progress-update\",\n"
         + "\t\t\"CANS-assessment-completed-update\",\n"
-        + "\t\t\"CANS-assessment-completed-delete\",\n"
         + "\t\t\"CANS-assessment-in-progress-delete\",\n"
         + "\t\t\"CANS-assessment-complete\",\n"
         + "\t\t\"development-not-in-use\"\n"
