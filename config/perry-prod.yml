@@ -20,7 +20,7 @@ spring:
       datasource:
         hikari:
           poolName: CMS-pool
-          jdbcUrl: ${DB_CMS_JDBC_URL:jdbc:db2://localhost:50000/DB0TDEV:retrieveMessagesFromServerOnGetMessage=true;emulateParameterMetaDataForZCalls=1;allowNextOnExhaustedResultSet=1;resultSetHoldability=2;queryTimeoutInterruptProcessingMode=2;queryCloseImplicit=1; queryDataSize=266143;}
+          jdbcUrl: ${DB_CMS_JDBC_URL:jdbc:db2://localhost:50000/DB0TDEV:retrieveMessagesFromServerOnGetMessage=true;emulateParameterMetaDataForZCalls=1;allowNextOnExhaustedResultSet=1;resultSetHoldability=2;queryTimeoutInterruptProcessingMode=2;queryCloseImplicit=1;queryDataSize=262143;statementConcentrator=2;keepDynamic=1;currentDegree=ANY;currentPackagePath=NULLIDT1,NULLID}
           minimumIdle: ${DB_CMS_MIN_IDLE:2}
           maximumPoolSize: ${DB_CMS_MAX_POOL_SIZE:10}
           maxLifetime: ${DB_CMS_MAX_LIFETIME:900000}
