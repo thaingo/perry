@@ -8,15 +8,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import gov.ca.cwds.idm.service.AuditEventService;
-import gov.ca.cwds.idm.service.search.IndexRestSender;
-import gov.ca.cwds.idm.service.cognito.SearchProperties;
 import gov.ca.cwds.idm.service.search.UserIndexService;
-import gov.ca.cwds.idm.service.search.UserSearchService;
 import java.util.Map;
 import org.junit.Before;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -24,18 +18,6 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 public abstract class BaseIdmIntegrationWithSearchTest extends BaseIdmIntegrationTest {
-
-  @Autowired
-  protected UserIndexService userIndexService;
-
-  @Autowired
-  protected IndexRestSender indexRestSender;
-
-  @MockBean
-  protected AuditEventService auditEventService;
-
-  @Autowired
-  protected UserSearchService userSearchService;
 
   protected UserIndexService spyUserIndexService;
 

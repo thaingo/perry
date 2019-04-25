@@ -22,15 +22,21 @@ import ch.qos.logback.core.Appender;
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
 import gov.ca.cwds.BaseIntegrationTest;
 import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.idm.event.UserLoggedInEventListener;
 import gov.ca.cwds.idm.lifecycle.UserLockService;
 import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
+import gov.ca.cwds.idm.persistence.ns.repository.NsAuditEventRepository;
 import gov.ca.cwds.idm.persistence.ns.repository.NsUserRepository;
 import gov.ca.cwds.idm.persistence.ns.repository.UserLogRepository;
+import gov.ca.cwds.idm.service.AuditEventService;
 import gov.ca.cwds.idm.service.IdmServiceImpl;
+import gov.ca.cwds.idm.service.NsUserService;
 import gov.ca.cwds.idm.service.TransactionalUserService;
+import gov.ca.cwds.idm.service.UserLogService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.cognito.util.CognitoRequestHelper;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
+import gov.ca.cwds.idm.service.search.IndexRestSender;
 import gov.ca.cwds.idm.service.search.UserIndexService;
 import gov.ca.cwds.idm.service.search.UserSearchService;
 import gov.ca.cwds.idm.util.TestCognitoServiceFacade;
@@ -51,6 +57,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.ActiveProfiles;
@@ -113,6 +120,30 @@ public abstract class BaseIdmIntegrationTest extends BaseIntegrationTest {
 
   @Autowired
   protected TransactionalUserService transactionalUserService;
+
+  @Autowired
+  protected UserIndexService userIndexService;
+
+  @Autowired
+  protected IndexRestSender indexRestSender;
+
+  @Autowired
+  protected UserSearchService userSearchService;
+
+  @Autowired
+  protected UserLoggedInEventListener userLoggedInEventListener;
+
+  @Autowired
+  protected NsUserService nsUserService;
+
+  @Autowired
+  protected UserLogService userLogService;
+
+  @Autowired
+  protected NsAuditEventRepository nsAuditEventRepository;
+
+  @MockBean
+  protected AuditEventService auditEventService;
 
   protected NsUserRepository spyNsUserRepository;
 

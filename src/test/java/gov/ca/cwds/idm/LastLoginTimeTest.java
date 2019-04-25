@@ -15,28 +15,15 @@ import static org.mockito.Mockito.verify;
 import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.event.UserLoggedInEvent;
 import gov.ca.cwds.idm.dto.UserIdAndOperation;
-import gov.ca.cwds.idm.event.UserLoggedInEventListener;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
-import gov.ca.cwds.idm.service.NsUserService;
-import gov.ca.cwds.idm.service.UserLogService;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 public class LastLoginTimeTest extends BaseIdmIntegrationWithSearchTest {
-
-  @Autowired
-  private UserLoggedInEventListener userLoggedInEventListener;
-
-  @Autowired
-  private NsUserService nsUserService;
-
-  @Autowired
-  protected UserLogService userLogService;
 
   @Test
   @Transactional(value = TOKEN_TRANSACTION_MANAGER)
