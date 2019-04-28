@@ -13,11 +13,15 @@ import org.springframework.stereotype.Service;
 public class PossibleUserPermissionsService {
 
   public static final String CANS_PERMISSION_NAME = "CANS-rollout";
+  public static final String SNAPSHOT_PERMISSION_NAME = "Snapshot-rollout";
 
   private DictionaryProvider dictionaryProvider;
 
   public List<String> getPossibleUserPermissions(boolean isRacfidUser) {
     List<String> allPermissionNames = getAllPermissionNames();
+    allPermissionNames = allPermissionNames.stream()
+        .filter(name -> !SNAPSHOT_PERMISSION_NAME.equals(name))
+        .collect(toList());
 
     if(isRacfidUser) {
       return allPermissionNames;
