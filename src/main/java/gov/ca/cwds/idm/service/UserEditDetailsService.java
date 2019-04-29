@@ -1,5 +1,6 @@
 package gov.ca.cwds.idm.service;
 
+import static gov.ca.cwds.idm.service.PossibleUserPermissionsService.SNAPSHOT_PERMISSION_NAME;
 import static gov.ca.cwds.util.Utils.isRacfidUser;
 
 import gov.ca.cwds.idm.dto.ListOfValues;
@@ -47,6 +48,10 @@ public class UserEditDetailsService {
 
     usersPossiblePermissions.setPossibleValues(
         possibleUserPermissionsService.getPossibleUserPermissions(isRacfidUser(user)));
+
+    if (user.getPermissions().contains(SNAPSHOT_PERMISSION_NAME)) {
+      usersPossiblePermissions.getPossibleValues().add(SNAPSHOT_PERMISSION_NAME);
+    }
 
     return usersPossiblePermissions;
   }

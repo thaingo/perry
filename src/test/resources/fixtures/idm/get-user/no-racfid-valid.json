@@ -36,7 +36,8 @@
       "possible_values": [
         "Facility-search-rollout",
         "Hotline-rollout",
-        "RFA-rollout"
+        "RFA-rollout",
+        "Snapshot-rollout"
       ]
     }
   }
