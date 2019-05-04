@@ -36,7 +36,6 @@
       "editable": false,
       "possible_values": [
         "CANS-rollout",
-        "Facility-search-rollout",
         "Hotline-rollout",
         "RFA-rollout"
       ]

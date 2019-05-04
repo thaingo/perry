@@ -1,6 +1,6 @@
 package gov.ca.cwds.idm.service.validation;
 
-import static gov.ca.cwds.idm.service.PossibleUserPermissionsService.CANS_PERMISSION_NAME;
+import static gov.ca.cwds.idm.service.PermissionNames.CANS_PERMISSION_NAME;
 import static gov.ca.cwds.service.messages.MessageCode.ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.COUNTY_NAME_IS_NOT_PROVIDED;
 import static gov.ca.cwds.service.messages.MessageCode.FIRST_NAME_IS_NOT_PROVIDED;
@@ -259,7 +259,7 @@ public class ValidationServiceImpl implements ValidationService {
       return;
     }
 
-    if(StringUtils.isBlank(newValue)){
+    if (StringUtils.isBlank(newValue)) {
       throwValidationException(absenceErrCode);
     }
 

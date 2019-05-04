@@ -34,7 +34,6 @@
     "permissions": {
       "editable": true,
       "possible_values": [
-        "Facility-search-rollout",
         "Hotline-rollout",
         "RFA-rollout",
         "Snapshot-rollout"

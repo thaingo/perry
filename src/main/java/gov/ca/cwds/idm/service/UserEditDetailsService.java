@@ -1,13 +1,16 @@
 package gov.ca.cwds.idm.service;
 
-import static gov.ca.cwds.idm.service.PossibleUserPermissionsService.SNAPSHOT_PERMISSION_NAME;
+import static gov.ca.cwds.idm.service.PermissionNames.CANS_PERMISSION_NAME;
 import static gov.ca.cwds.util.Utils.isRacfidUser;
+import static java.util.stream.Collectors.toList;
 
 import gov.ca.cwds.idm.dto.ListOfValues;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserEditDetails;
+import gov.ca.cwds.idm.persistence.ns.entity.Permission;
 import gov.ca.cwds.idm.service.authorization.AuthorizationService;
 import gov.ca.cwds.idm.service.role.implementor.AdminRoleImplementorFactory;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -20,7 +23,7 @@ public class UserEditDetailsService {
 
   private AdminRoleImplementorFactory adminRoleImplementorFactory;
 
-  private PossibleUserPermissionsService possibleUserPermissionsService;
+  private DictionaryProvider dictionaryProvider;
 
   public UserEditDetails getEditDetails(User user) {
     UserEditDetails editDetails = new UserEditDetails();
@@ -46,14 +49,40 @@ public class UserEditDetailsService {
     usersPossiblePermissions
         .setEditable(canUpdateUser && authorizationService.canEditPermissions(user));
 
-    usersPossiblePermissions.setPossibleValues(
-        possibleUserPermissionsService.getPossibleUserPermissions(isRacfidUser(user)));
+    List<Permission> permissions = dictionaryProvider.getPermissions();
 
-    if (user.getPermissions().contains(SNAPSHOT_PERMISSION_NAME)) {
-      usersPossiblePermissions.getPossibleValues().add(SNAPSHOT_PERMISSION_NAME);
-    }
+    usersPossiblePermissions.setPossibleValues(
+        getPossibleUserPermissions(permissions, isRacfidUser(user)));
+
+    List<String> hiddenPermissions = permissions.stream()
+        .filter(Permission::isHidden)
+        .map(Permission::getName)
+        .collect(toList());
+
+    user.getPermissions().forEach(permission -> {
+      if (hiddenPermissions.contains(permission)) {
+        usersPossiblePermissions.getPossibleValues().add(permission);
+      }
+    });
 
     return usersPossiblePermissions;
+  }
+
+  private List<String> getPossibleUserPermissions(
+      List<Permission> permissions,
+      boolean isRacfidUser) {
+    List<String> allNotHiddenPermissions = permissions.stream()
+        .filter(permission -> !permission.isHidden())
+        .map(Permission::getName)
+        .collect(toList());
+
+    if (isRacfidUser) {
+      return allNotHiddenPermissions;
+    } else {
+      return allNotHiddenPermissions.stream()
+          .filter(name -> !CANS_PERMISSION_NAME.equals(name))
+          .collect(toList());
+    }
   }
 
   @Autowired
@@ -68,8 +97,7 @@ public class UserEditDetailsService {
   }
 
   @Autowired
-  public void setPossibleUserPermissionsService(
-      PossibleUserPermissionsService possibleUserPermissionsService) {
-    this.possibleUserPermissionsService = possibleUserPermissionsService;
+  public void setDictionaryProvider(DictionaryProvider dictionaryProvider) {
+    this.dictionaryProvider = dictionaryProvider;
   }
 }
