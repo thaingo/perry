@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+    <changeSet author="dmitry.rudenko" id="perry_token_store_1">
+        <createTable tableName="perry_token">
+            <column name="token" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="access_code" type="BLOB"/>
+            <column name="created_date" type="TIMESTAMP"/>
+            <column name="user_id" type="VARCHAR(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet author="dmitry.rudenko" id="perry_token_store_add_access_code">
+        <dropColumn tableName="perry_token">
+            <column name="access_code"/>
+        </dropColumn>
+        <addColumn tableName="perry_token">
+            <column name="access_code" type="VARCHAR(255)"/>
+            <column name="access_token" type="BLOB"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="dmitry.rudenko" id="perry_token_store_access_token_bytea">
+        <dropColumn tableName="perry_token">
+            <column name="access_token"/>
+        </dropColumn>
+        <addColumn tableName="perry_token">
+            <column name="access_token" type="${type.blob}"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="dmitry.rudenko" id="perry_token_sso_token">
+        <dropColumn tableName="perry_token">
+            <column name="access_token"/>
+        </dropColumn>
+        <addColumn tableName="perry_token">
+            <column name="sso_token" type="TEXT"/>
+            <column name="json_token" type="TEXT"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="dmitry.rudenko" id="perry_token_store_security_context">
+        <addColumn tableName="perry_token">
+            <column name="security_context" type="${type.blob}"/>
+        </addColumn>
+    </changeSet>
+    <include file="structure/permission_structure.xml" relativeToChangelogFile="true"/>
+    <changeSet author="dmitry.rudenko" id="perry_token_store_validate_interval">
+        <addColumn tableName="perry_token">
+            <column name="last_idp_validate_time" type="timestamp"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="dmitry.rudenko" id="perry_last_used_date">
+        <addColumn tableName="perry_token">
+            <column name="last_used_date" type="TIMESTAMP"/>
+        </addColumn>
+    </changeSet>
+    <include file="structure/user_log_structure.xml" relativeToChangelogFile="true"/>
+    <include file="structure/user_structure.xml" relativeToChangelogFile="true"/>
+    <include file="structure/role_structure.xml" relativeToChangelogFile="true"/>
+    <include file="structure/user_permission_structure.xml" relativeToChangelogFile="true"/>
+    <include file="structure/user_role_structure.xml" relativeToChangelogFile="true"/>
+    <include file="structure/event_structure.xml" relativeToChangelogFile="true"/>
+</databaseChangeLog>
