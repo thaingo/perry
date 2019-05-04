@@ -83,4 +83,11 @@
     </insert>
   </changeSet>
 
+  <changeSet id="hide_some_permissions" author="dmytro.sorych">
+    <update tableName="permission">
+      <column name="hidden" value="true" />
+      <where>name in ('Snapshot-rollout', 'Facility-search-rollout')</where>>
+    </update>
+  </changeSet>
+
 </databaseChangeLog>
