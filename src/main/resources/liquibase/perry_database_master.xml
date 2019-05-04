@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog logicalFilePath="perry-master.xml"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <property name="type.string" value="VARCHAR" dbms="postgresql"/>
+    <property name="type.string" value="VARCHAR" dbms="db2,h2"/>
+
+    <property name="type.timestamp" value="timestamp" dbms="postgresql, db2, h2"/>
+
+    <property name="type.date" value="date" dbms="postgresql, db2, h2"/>
+
+    <property name="current.timestamp" value="NOW" dbms="postgresql"/>
+    <property name="current.timestamp" value="CURRENT_TIMESTAMP" dbms="db2, h2"/>
+
+    <property name="type.boolean" value="BOOLEAN" dbms="postgresql, h2"/>
+    <property name="type.boolean" value="SMALLINT" dbms="db2"/>
+
+    <property name="type.short" value="int2" dbms="postgresql"/>
+    <property name="type.short" value="SMALLINT" dbms="db2, h2"/>
+
+    <property name="type.int" value="int4" dbms="postgresql"/>
+    <property name="type.int" value="integer" dbms="db2, h2"/>
+
+    <property name="type.long" value="BIGINT" dbms="postgresql"/>
+    <property name="type.long" value="BIGINT" dbms="db2, h2"/>
+
+    <property name="type.blob" value="bytea" dbms="postgresql"/>
+    <property name="type.blob" value="BLOB" dbms="db2, h2"/>
+
+    <property name="type.clob" value="oid" dbms="postgresql"/>
+    <property name="type.clob" value="CLOB" dbms="db2, h2"/>
+
+    <property name="valueFalse" value="false" dbms="postgresql"/>
+    <property name="valueFalse" value="0" dbms="db2, h2"/>
+
+    <property name="valueTrue" value="true" dbms="postgresql"/>
+    <property name="valueTrue" value="1" dbms="db2, h2"/>
+
+    <property name="type.currency" value="DECIMAL(19,2)" dbms="postgresql"/>
+    <property name="type.currency" value="DECIMAL(19,2)" dbms="db2, h2"/>
+
+    <property name="now" value="current_timestamp" dbms="postgresql"/>
+    <property name="now" value="CURRENT_TIMESTAMP" dbms="db2, h2"/>
+
+    <property name="boolean_true" value="true" dbms="postgresql, hsqldb"/>
+    <property name="boolean_true" value="1" dbms="db2"/>
+    <property name="boolean_false" value="false" dbms="postgresql, hsqldb"/>
+    <property name="boolean_false" value="0" dbms="db2"/>
+
+    <include file="perry_schema.xml" relativeToChangelogFile="true"/>
+    <include file="perry_structure.xml" relativeToChangelogFile="true"/>
+    <include file="perry_data.xml" relativeToChangelogFile="true"/>
+    <include file="perry_constraints.xml" relativeToChangelogFile="true"/>
+
+</databaseChangeLog>

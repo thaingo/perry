@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd
+                        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+  <changeSet id="user_permission_1" author="dmytro.palczewski">
+    <createTable tableName="user_permission">
+      <column name="id" type="${type.long}" autoIncrement="true">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="user_id" type="${type.long}">
+        <constraints nullable="false"/>
+      </column>
+      <column name="permission_name" type="${type.string}(100)">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <createIndex indexName="user_permission_user_id_idx" tableName="user_permission">
+      <column name="user_id"/>
+    </createIndex>
+
+    <createIndex indexName="user_permission_user_id_permission_name_idx" tableName="user_permission" unique="true">
+      <column name="user_id"/>
+      <column name="permission_name"/>
+    </createIndex>
+  </changeSet>
+
+</databaseChangeLog>

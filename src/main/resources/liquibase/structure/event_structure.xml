@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog logicalFilePath="event_structure"
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd
+                        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+  <changeSet id="event_structure_1" author="alex.serbin">
+    <createTable tableName="audit_event">
+      <column name="id" type="${type.string}(100)">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="event_timestamp" type="${type.timestamp}">
+        <constraints nullable="false"/>
+      </column>
+      <column name="event_json" type="clob">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+  </changeSet>
+
+  <changeSet id="event_structure_2" author="dmytro.sorych">
+    <addColumn tableName="audit_event">
+      <column name="processed" type="${type.boolean}" defaultValue="true">
+        <constraints nullable="false"/>
+      </column>
+    </addColumn>
+  </changeSet>
+
+</databaseChangeLog>

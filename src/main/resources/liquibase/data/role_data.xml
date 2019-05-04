@@ -1,0 +1,37 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+  <changeSet id="role-data_1" author="dmytro.palczewski">
+    <insert tableName="role">
+      <column name="key" value="Super-admin"/>
+      <column name="description" value="Global Administrator" />
+    </insert>
+    <insert tableName="role">
+      <column name="key" value="State-admin"/>
+      <column name="description" value="State Administrator" />
+    </insert>
+    <insert tableName="role">
+      <column name="key" value="County-admin"/>
+      <column name="description" value="County Administrator" />
+    </insert>
+    <insert tableName="role">
+      <column name="key" value="Office-admin"/>
+      <column name="description" value="Office Administrator" />
+    </insert>
+    <insert tableName="role">
+      <column name="key" value="CALS-admin"/>
+      <column name="description" value="CALS Administrator" />
+    </insert>
+    <insert tableName="role">
+      <column name="key" value="CWS-worker"/>
+      <column name="description" value="CWS Worker" />
+    </insert>
+    <insert tableName="role">
+      <column name="key" value="CALS-external-worker"/>
+      <column name="description" value="CALS External Worker" />
+    </insert>
+  </changeSet>
+</databaseChangeLog>
