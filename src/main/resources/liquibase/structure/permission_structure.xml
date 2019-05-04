@@ -20,4 +20,12 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="permission_add_hidden_column" author="dmytro.sorych">
+        <addColumn tableName="permission">
+            <column name="hidden" type="${type.boolean}" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>
