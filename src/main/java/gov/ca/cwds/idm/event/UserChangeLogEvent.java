@@ -21,11 +21,11 @@ public abstract class UserChangeLogEvent extends AuditEvent<UserChangeLogRecord>
     setOfficeId(user.getOfficeId());
     setUserRoles(Roles.toRolesNamesString(user));
     setUserId(user.getId());
-    setUserName(createUserFullNameString(user));
+    setUserName(formatUserFullName(user));
   }
 
-  static String createUserFullNameString(User user) {
-    return user.getFirstName() + " " + user.getLastName();
+  static String formatUserFullName(User user) {
+    return user.getLastName() + ", " + user.getFirstName();
   }
 
   final void setAdminRole(String adminRole) {

@@ -11,7 +11,7 @@ public abstract class UserCausedChangeLogEvent extends UserChangeLogEvent {
     super(user);
 
     setUserLogin(user.getId());
-    setAdminName(createUserFullNameString(user));
+    setAdminName(formatUserFullName(user));
     setAdminRole(Roles.toRolesNamesString(user));
   }
 }

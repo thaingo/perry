@@ -81,7 +81,7 @@ public class UserChangeLogEventTest {
     assertEquals(TEST_COUNTY, changeLogRecord.getCountyName());
     assertEquals(TEST_OFFICE_ID, changeLogRecord.getOfficeId());
     assertEquals(TEST_USER_ID, changeLogRecord.getUserId());
-    assertEquals(TEST_FIRST_NAME + " " + TEST_LAST_NAME, changeLogRecord.getUserName());
+    assertEquals(TEST_LAST_NAME + ", " + TEST_FIRST_NAME, changeLogRecord.getUserName());
     assertEquals(CAP_EVENT_SOURCE, userCreatedEvent.getEventSource());
     assertEquals(ADMIN_LOGIN, userCreatedEvent.getUserLogin());
   }
@@ -102,7 +102,7 @@ public class UserChangeLogEventTest {
     User user = mockUser();
     UserRegistrationResentEvent event = new UserRegistrationResentEvent(user);
     assertEquals(UserRegistrationResentEvent.EVENT_TYPE_REGISTRATION_RESENT, event.getEventType());
-    assertEquals(TEST_FIRST_NAME + " " + TEST_LAST_NAME, event.getEvent().getUserName());
+    assertEquals(TEST_LAST_NAME + ", " + TEST_FIRST_NAME, event.getEvent().getUserName());
     assertEquals(String.join(", ", getRoleNameById(CWS_WORKER), getRoleNameById(COUNTY_ADMIN)),
         event.getEvent().getUserRoles());
   }
@@ -218,8 +218,8 @@ public class UserChangeLogEventTest {
     assertThat(event.getUserLogin(), is(TEST_USER_ID));
     assertThat(event.getEvent().getUserId(), is(TEST_USER_ID));
     assertThat(event.getEventType(), is("User Password Changed"));
-    assertThat(event.getEvent().getAdminName(), is("testFirstName testLastName"));
-    assertThat(event.getEvent().getUserName(), is("testFirstName testLastName"));
+    assertThat(event.getEvent().getAdminName(), is("testLastName, testFirstName"));
+    assertThat(event.getEvent().getUserName(), is("testLastName, testFirstName"));
     assertThat(event.getEvent().getAdminRole(), is("CWS Worker, County Administrator"));
     assertThat(event.getEvent().getUserRoles(), is("CWS Worker, County Administrator"));
     assertThat(event.getEvent().getOldValue(), is(nullValue()));
