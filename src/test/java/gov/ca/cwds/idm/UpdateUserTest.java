@@ -1,6 +1,7 @@
 package gov.ca.cwds.idm;
 
 import static gov.ca.cwds.config.TokenServiceConfiguration.TOKEN_TRANSACTION_MANAGER;
+import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
@@ -8,9 +9,11 @@ import static gov.ca.cwds.config.api.idm.Roles.SUPER_ADMIN;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL_VERIFIED;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.COUNTY_ADMIN_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.INACTIVE_USER_WITH_ACTIVE_RACFID_IN_CMS;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.INACTIVE_USER_WITH_NO_ACTIVE_RACFID_IN_CMS;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.INACTIVE_USER_WITH_NO_RACFID;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.OFFICE_ADMIN_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.STATE_ADMIN_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.SUPER_ADMIN_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USERPOOL;
@@ -675,7 +678,6 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
   public void testSuperAdminCanDisableSuperAdmin() throws Exception {
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setEnabled(Boolean.FALSE);
-
     assertSuccessfulUpdate(SUPER_ADMIN_ID, userUpdate);
   }
 
@@ -684,7 +686,6 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
   public void testSuperAdminCanDegradeSuperAdmin() throws Exception {
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setRoles(toSet("CWS-worker"));
-
     assertSuccessfulUpdate(SUPER_ADMIN_ID, userUpdate);
   }
 
@@ -716,6 +717,118 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
 
     assertUpdateBadRequest(USER_NO_RACFID_ID, userUpdate,
         "fixtures/idm/update-user/invalid-phone-extension.json");
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {COUNTY_ADMIN}, adminOfficeIds = {"otherOfficeId"})
+  public void testCountyAdminCanUpdateCountyAdminInSameCounty() throws Exception {
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setNotes("new notes");
+    assertSuccessfulUpdate(COUNTY_ADMIN_ID, userUpdate);
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {COUNTY_ADMIN}, county = "Madera", adminOfficeIds = {"otherOfficeId"})
+  public void testCountyAdminCanNotUpdateWorkerInOtherCounty() throws Exception {
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setNotes("new notes");
+    assertUpdateUserUnauthorized(USER_WITH_RACFID_AND_DB_DATA_ID, userUpdate,
+        "fixtures/idm/update-user/county-admin-updates-worker-from-other-county.json");
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {COUNTY_ADMIN}, adminOfficeIds = {"otherOfficeId"})
+  public void testCountyAdminCanDowngradeCountyAdminToOfficeAdminInSameCounty() throws Exception {
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setRoles(toSet(OFFICE_ADMIN));
+    assertSuccessfulUpdate(COUNTY_ADMIN_ID, userUpdate);
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {COUNTY_ADMIN}, county = "Madera", adminOfficeIds = {"otherOfficeId"})
+  public void testCountyAdminCannotDowngradeCountyAdminToOfficeAdminInOtherCounty() throws Exception {
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setRoles(toSet(OFFICE_ADMIN));
+    assertUpdateUserUnauthorized(COUNTY_ADMIN_ID, userUpdate,
+        "fixtures/idm/update-user/county-admin-updates-county-admin-from-other-county.json");
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {COUNTY_ADMIN}, county = "Madera", adminOfficeIds = {"otherOfficeId"})
+  public void testCountyAdminCannotDowngradeCountyAdminToCwsWorkerInOtherCounty() throws Exception {
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setRoles(toSet(CWS_WORKER));
+    assertUpdateUserUnauthorized(COUNTY_ADMIN_ID, userUpdate,
+        "fixtures/idm/update-user/county-admin-updates-county-admin-from-other-county.json");
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {COUNTY_ADMIN}, adminOfficeIds = {"otherOfficeId"})
+  public void testCountyAdminCanDowngradeCountyAdminToCwsWorkerInSameCounty() throws Exception {
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setRoles(toSet(CWS_WORKER));
+    assertSuccessfulUpdate(COUNTY_ADMIN_ID, userUpdate);
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {COUNTY_ADMIN}, adminOfficeIds = {"otherOfficeId"})
+  public void testCountyAdminCannotUpgradeCwsWorkerToCountyAdminInSameCounty() throws Exception {
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setRoles(toSet(COUNTY_ADMIN));
+    assertUpdateBadRequest(USER_WITH_RACFID_AND_DB_DATA_ID, userUpdate,
+        "fixtures/idm/update-user/county-admin-upgrade-to-county-admin.json");
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {COUNTY_ADMIN}, adminOfficeIds = {"otherOfficeId"})
+  public void testCountyAdminCannotUpgradeOfficeAdminToCountyAdminInSameCounty() throws Exception {
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setRoles(toSet(COUNTY_ADMIN));
+    assertUpdateBadRequest(OFFICE_ADMIN_ID, userUpdate,
+        "fixtures/idm/update-user/county-admin-upgrade-to-county-admin.json");
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {OFFICE_ADMIN})
+  public void testOfficeAdminCanUpdateOfficeAdminInSameOffice() throws Exception {
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setNotes("new notes");
+    assertSuccessfulUpdate(OFFICE_ADMIN_ID, userUpdate);
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {OFFICE_ADMIN}, adminOfficeIds = {"otherOfficeId"})
+  public void testOfficeAdminCannotUpdateOfficeAdminInOtherOffice() throws Exception {
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setNotes("new notes");
+    assertUpdateUserUnauthorized(OFFICE_ADMIN_ID, userUpdate,
+        "fixtures/idm/update-user/office-admin-updates-office-admin-from-other-office.json");
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {OFFICE_ADMIN})
+  public void testOfficeAdminCanDowngradeOfficeAdminInSameOffice() throws Exception {
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setRoles(toSet(CWS_WORKER));
+    assertSuccessfulUpdate(OFFICE_ADMIN_ID, userUpdate);
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {OFFICE_ADMIN}, adminOfficeIds = {"otherOfficeId"})
+  public void testOfficeAdminCannotDowngradeOfficeAdminInOtherOffice() throws Exception {
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setRoles(toSet(CWS_WORKER));
+    assertUpdateUserUnauthorized(OFFICE_ADMIN_ID, userUpdate,
+        "fixtures/idm/update-user/office-admin-updates-office-admin-from-other-office.json");
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {OFFICE_ADMIN})
+  public void testOfficeAdminCannotUpgradeCwsWorkerToOfficeAdminInSameOffice() throws Exception {
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setRoles(toSet(OFFICE_ADMIN));
+    assertUpdateBadRequest(USER_WITH_RACFID_AND_DB_DATA_ID, userUpdate,
+        "fixtures/idm/update-user/office-admin-upgrade-to-office-admin.json");
   }
 
   private void assertCanUpdatePermissions(String userId, Set<String> permissions) throws Exception{
@@ -794,11 +907,7 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     assertUpdateUserUnauthorized(USER_WITH_RACFID_AND_DB_DATA_ID, fixturePath);
   }
 
-  private MvcResult assertUpdateUserUnauthorized(String userId) throws Exception {
-    UserUpdate userUpdate = new UserUpdate();
-    userUpdate.setEnabled(Boolean.FALSE);
-    userUpdate.setPermissions(toSet("RFA-rollout", "Hotline-rollout"));
-
+  private MvcResult assertUpdateUserUnauthorized(String userId, UserUpdate userUpdate) throws Exception {
     return mockMvc
         .perform(
             MockMvcRequestBuilders.patch("/idm/users/" + userId)
@@ -806,6 +915,19 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
                 .content(asJsonString(userUpdate)))
         .andExpect(MockMvcResultMatchers.status().isUnauthorized())
         .andReturn();
+  }
+
+  private MvcResult assertUpdateUserUnauthorized(String userId) throws Exception {
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setEnabled(Boolean.FALSE);
+    userUpdate.setPermissions(toSet("RFA-rollout", "Hotline-rollout"));
+    return assertUpdateUserUnauthorized(userId, userUpdate);
+  }
+
+  private void assertUpdateUserUnauthorized(String userId, UserUpdate userUpdate,
+      String fixture) throws Exception {
+    MvcResult result = assertUpdateUserUnauthorized(userId, userUpdate);
+    assertExtensible(result, fixture);
   }
 
   private void assertUpdateUserUnauthorized(String userId, String fixturePath) throws Exception {

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class SpApiAuthenticationErrorHandler implements AuthenticationEntryPoint {
   @Override
+  @SuppressWarnings({"findsecbugs:XSS_SERVLET"})//Printed constant string cannot contain XSS script
   public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
     response.getOutputStream().print(HttpStatus.UNAUTHORIZED.getReasonPhrase());
     response.setStatus(HttpStatus.UNAUTHORIZED.value());

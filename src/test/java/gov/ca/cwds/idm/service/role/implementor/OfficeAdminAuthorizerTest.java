@@ -9,8 +9,11 @@ import static gov.ca.cwds.config.api.idm.Roles.SUPER_ADMIN;
 import static gov.ca.cwds.idm.util.TestHelper.admin;
 import static gov.ca.cwds.idm.util.TestHelper.superAdmin;
 import static gov.ca.cwds.idm.util.TestHelper.user;
+import static gov.ca.cwds.service.messages.MessageCode.NOT_SUPER_ADMIN_CANNOT_UPDATE_USERS_WITH_SUPER_ADMIN_ROLE;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_SUPER_ADMIN_CANNOT_VIEW_USERS_WITH_SUPER_ADMIN_ROLE;
-import static gov.ca.cwds.service.messages.MessageCode.OFFICE_ADMIN_CANNOT_UPDATE_ADMIN;
+import static gov.ca.cwds.service.messages.MessageCode.OFFICE_ADMIN_CANNOT_UPDATE_COUNTY_ADMIN;
+import static gov.ca.cwds.service.messages.MessageCode.OFFICE_ADMIN_CANNOT_UPDATE_STATE_ADMIN;
+import static gov.ca.cwds.service.messages.MessageCode.OFFICE_ADMIN_CANNOT_UPDATE_USER_FROM_OTHER_OFFICE;
 import static gov.ca.cwds.service.messages.MessageCode.OFFICE_ADMIN_CANNOT_VIEW_USERS_WITH_CALS_EXTERNAL_WORKER_ROLE;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserCountyName;
@@ -58,7 +61,7 @@ public class OfficeAdminAuthorizerTest extends BaseAuthorizerTest {
   public void canNotEditStateAdminTest() {
     assertCanNotUpdateUser(
         user(toSet(STATE_ADMIN),"Yolo", "Yolo_2"),
-        OFFICE_ADMIN_CANNOT_UPDATE_ADMIN);
+        OFFICE_ADMIN_CANNOT_UPDATE_STATE_ADMIN);
   }
 
   @Test
@@ -70,15 +73,20 @@ public class OfficeAdminAuthorizerTest extends BaseAuthorizerTest {
   public void canNotEditCountyAdminTest() {
     assertCanNotUpdateUser(
         user(toSet(COUNTY_ADMIN),"Yolo", "Yolo_2"),
-        OFFICE_ADMIN_CANNOT_UPDATE_ADMIN);
+        OFFICE_ADMIN_CANNOT_UPDATE_COUNTY_ADMIN);
   }
 
   @Test
-  public void canNotEditOfficeAdminTest() {
+  public void canNotEditOfficeAdminFromOtherOfficeTest() {
     assertCanNotUpdateUser(
-        user(toSet(OFFICE_ADMIN),"Yolo", "Yolo_2"),
-        OFFICE_ADMIN_CANNOT_UPDATE_ADMIN
+        user(toSet(OFFICE_ADMIN),"Yolo", "Yolo_1"),
+        OFFICE_ADMIN_CANNOT_UPDATE_USER_FROM_OTHER_OFFICE
         );
+  }
+
+  @Test
+  public void canEditOfficeAdminInSameOfficeTest() {
+    assertCanUpdateUser(user(toSet(OFFICE_ADMIN),"Yolo", "Yolo_2"));
   }
 
   @Test
@@ -88,6 +96,6 @@ public class OfficeAdminAuthorizerTest extends BaseAuthorizerTest {
 
   @Test
   public void canNotUpdateSuperAdmin() {
-    assertCanNotUpdateUser(superAdmin(), OFFICE_ADMIN_CANNOT_UPDATE_ADMIN);
+    assertCanNotUpdateUser(superAdmin(), NOT_SUPER_ADMIN_CANNOT_UPDATE_USERS_WITH_SUPER_ADMIN_ROLE);
   }
 }

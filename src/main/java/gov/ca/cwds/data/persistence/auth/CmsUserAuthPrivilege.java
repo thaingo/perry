@@ -98,7 +98,7 @@ public final class CmsUserAuthPrivilege {
       Long sysId = Long.valueOf(type);
       description = findSysIdDescription(sysId);
     } catch (Exception e) {
-      LOGGER.error("ERROR - Description couldn't parse: {}", e);
+      LOGGER.error("ERROR - Description couldn't parse: " + type, e);
     }
     return description;
   }

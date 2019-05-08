@@ -78,6 +78,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
   public static final String STATE_ADMIN_ID = "2d9369b4-5855-4a2c-95f7-3617fab1496a";
   public static final String COUNTY_ADMIN_ID = "c3702f4c113f1d2415447c8bfe8321d8df2d5151";
   public static final String SUPER_ADMIN_ID = "a3427f8e-b080-4f71-9514-840c1fcb505b";
+  public static final String OFFICE_ADMIN_ID = "0d2202a2-713b-4b31-b33c-5a629fa4cfd0";
 
   public static final String USERPOOL = "userpool";
   public static final String COGNITO_USER_STATUS_ON_CREATE = "FORCE_CHANGE_PASSWORD";
@@ -313,6 +314,21 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
         "Jkuser",
         WithMockCustomUser.COUNTY,
         "MCALLUM",
+        WithMockCustomUser.OFFICE_ID,
+        null);
+
+    //officeAdmin user
+    testUser(
+        OFFICE_ADMIN_ID,
+        Boolean.TRUE,
+        "CONFIRMED",
+        date(2018, 5, 3),
+        date(2018, 5, 31),
+        "jkuser@gmail.com",
+        "John",
+        "Perot",
+        WithMockCustomUser.COUNTY,
+        "PEROTJA",
         WithMockCustomUser.OFFICE_ID,
         null);
 

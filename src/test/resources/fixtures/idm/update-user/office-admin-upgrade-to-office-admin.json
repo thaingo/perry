@@ -1,0 +1,6 @@
+{
+  "status": "BAD_REQUEST",
+  "technical_message": "Unable to assign roles: [Office-admin], allowed roles are: [CWS-worker]",
+  "user_message": "Unable to assign roles: [Office-admin], allowed roles are: [CWS-worker]",
+  "error_code": "CAP-031"
+}

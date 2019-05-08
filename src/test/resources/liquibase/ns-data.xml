@@ -380,5 +380,21 @@
       <column name="last_name" value="Gonzales"/>
     </insert>
 
+    <insert tableName="user">
+      <column name="id" value="20"/>
+      <column name="username" value="0d2202a2-713b-4b31-b33c-5a629fa4cfd0"/>
+      <column name="last_login_time" valueDate="2018-10-12 11:09:45"/>
+      <column name="racfid" value="PEROTJA"/>
+      <column name="phone_number" value="9165555555"/>
+      <column name="phone_extension"/>
+      <column name="last_modified_time" valueDate="2018-06-22"/>
+      <column name="first_name" value="John"/>
+      <column name="last_name" value="Perot"/>
+    </insert>
+    <insert tableName="user_role">
+      <column name="user_id" value="20"/>
+      <column name="role_key" value="Office-admin"/>
+    </insert>
+
   </changeSet>
 </databaseChangeLog>

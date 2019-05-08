@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class SpApiAccessDeniedHandler implements AccessDeniedHandler {
   @Override
+  @SuppressWarnings({"findsecbugs:XSS_SERVLET"})//Printed constant string cannot contain XSS script
   public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
     response.getOutputStream().print(HttpStatus.UNAUTHORIZED.getReasonPhrase());
     response.setStatus(HttpStatus.UNAUTHORIZED.value());
