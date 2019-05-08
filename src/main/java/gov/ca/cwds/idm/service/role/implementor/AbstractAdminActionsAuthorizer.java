@@ -9,12 +9,14 @@ import static gov.ca.cwds.idm.service.role.implementor.AuthorizationUtils.isPrin
 import static gov.ca.cwds.service.messages.MessageCode.CANNOT_EDIT_ROLES_OF_CALS_EXTERNAL_WORKER;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserOfficeIds;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.authorization.AdminActionsAuthorizer;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.service.messages.MessageCode;
 import java.util.Set;
+import liquibase.util.StringUtils;
 
 /**
  * Created by Alexander Serbin on 11/2/2018
@@ -68,7 +70,7 @@ public abstract class AbstractAdminActionsAuthorizer implements AdminActionsAuth
   }
 
   protected final void checkAdminAndUserInTheSameCounty(MessageCode errorMessage, String... args) {
-    if (!isPrincipalInTheSameCountyWith(getUser())) {
+    if (isNotEmpty(getUser().getCountyName()) && !isPrincipalInTheSameCountyWith(getUser())) {
       throwAuthorizationException(errorMessage, args);
     }
   }

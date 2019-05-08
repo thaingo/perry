@@ -14,5 +14,4 @@ final class AuthorizationUtils {
     String adminCountyName = getCurrentUserCountyName();
     return userCountyName != null && userCountyName.equals(adminCountyName);
   }
-
 }

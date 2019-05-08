@@ -164,8 +164,8 @@ public class IdmServiceImpl implements IdmService {
     userDto.setEmail(email);
     String racfId = toUpperCase(userDto.getRacfid());
     userDto.setRacfid(racfId);
-    validationService.validateUserCreate(userDto);
     authorizeService.checkCanCreateUser(userDto);
+    validationService.validateUserCreate(userDto);
     User createdUser = userService.createUser(userDto);
     LOGGER.info("New user with username:{} was successfully created in Cognito", createdUser.getId());
     transactionalUserService.createUserInDbWithInvitationEmail(createdUser);
