@@ -20,7 +20,7 @@ import org.springframework.http.HttpStatus;
 @JsonInclude(Include.NON_EMPTY)
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 @SuppressWarnings({"squid:S3437"})
-public class IdmApiCustomError  implements Serializable {
+public class IdmApiErrorResponse implements Serializable {
 
   private static final long serialVersionUID = -7854227531434018227L;
 
@@ -45,7 +45,7 @@ public class IdmApiCustomError  implements Serializable {
   @JsonProperty
   private List<String> causes = new ArrayList<>();
 
-  private IdmApiCustomError() {
+  private IdmApiErrorResponse() {
     timestamp = LocalDateTime.now();
   }
 
@@ -134,8 +134,8 @@ public class IdmApiCustomError  implements Serializable {
       return this;
     }
 
-    public IdmApiCustomError build() {
-      IdmApiCustomError idmApiCustomError = new IdmApiCustomError();
+    public IdmApiErrorResponse build() {
+      IdmApiErrorResponse idmApiCustomError = new IdmApiErrorResponse();
       idmApiCustomError.incidentId = MDC.get(REQUEST_ID);
       idmApiCustomError.status = this.status;
       idmApiCustomError.errorCode = this.errorCode;

@@ -6,8 +6,8 @@ import static gov.ca.cwds.service.messages.MessageCode.INVALID_DATE_FORMAT;
 import static gov.ca.cwds.util.Utils.URL_DATETIME_FORMAT_PATTERN;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
-import gov.ca.cwds.idm.dto.IdmApiCustomError;
-import gov.ca.cwds.idm.dto.IdmApiCustomError.IdmApiCustomErrorBuilder;
+import gov.ca.cwds.idm.dto.IdmApiErrorResponse;
+import gov.ca.cwds.idm.dto.IdmApiErrorResponse.IdmApiCustomErrorBuilder;
 import gov.ca.cwds.idm.exception.AdminAuthorizationException;
 import gov.ca.cwds.idm.exception.IdmException;
 import gov.ca.cwds.idm.exception.OperationNotSupportedException;
@@ -98,8 +98,8 @@ public class IdmRestExceptionHandler extends ResponseEntityExceptionHandler {
     logger.error(messages.getTechMsg(), e);
 
     HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
-    IdmApiCustomError apiError =
-        IdmApiCustomError.IdmApiCustomErrorBuilder.anIdmApiCustomError()
+    IdmApiErrorResponse apiError =
+        IdmApiErrorResponse.IdmApiCustomErrorBuilder.anIdmApiCustomError()
             .withStatus(httpStatus)
             .withErrorCode(INVALID_DATE_FORMAT)
             .withTechnicalMessage(messages.getTechMsg())
@@ -122,11 +122,11 @@ public class IdmRestExceptionHandler extends ResponseEntityExceptionHandler {
     return new ResponseEntity<>(buildApiCustomError(httpStatus, e, causes), headers, httpStatus);
   }
 
-  private IdmApiCustomError buildApiCustomError(HttpStatus httpStatus, IdmException e) {
+  private IdmApiErrorResponse buildApiCustomError(HttpStatus httpStatus, IdmException e) {
     return createErrorBuilder(e, httpStatus).build();
   }
 
-  private IdmApiCustomError buildApiCustomError(HttpStatus httpStatus, IdmException e,
+  private IdmApiErrorResponse buildApiCustomError(HttpStatus httpStatus, IdmException e,
       List<Exception> causes) {
     return createErrorBuilder(e, httpStatus).withCauses(causes).build();
   }
