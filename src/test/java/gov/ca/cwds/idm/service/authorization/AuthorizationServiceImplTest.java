@@ -25,6 +25,7 @@ import static org.assertj.core.api.Fail.fail;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
@@ -37,7 +38,7 @@ import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.idm.service.role.implementor.AdminRoleImplementorFactory;
 import gov.ca.cwds.service.messages.MessageCode;
 import gov.ca.cwds.service.messages.MessagesService;
-import gov.ca.cwds.service.messages.MessagesService.Messages;
+import gov.ca.cwds.service.messages.Messages;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -66,7 +67,9 @@ public class AuthorizationServiceImplTest {
     service.setExceptionFactory(exceptionFactory);
 
     when(messagesServiceMock.getMessages(any(MessageCode.class), ArgumentMatchers.<String>any()))
-        .thenReturn(new Messages("techMsg", "userMsg"));
+//        .thenAnswer(i -> new Messages((MessageCode)i.getArguments()[0],"techMsg", "userMsg"));
+        .thenAnswer(i -> new Messages(i.getArgument(0),"techMsg", "userMsg"));
+//        .thenReturn(new Messages(i -> i.getArgumentAt(0, Bar.class),"techMsg", "userMsg"));
 
     mockStatic(CurrentAuthenticatedUserUtil.class);
   }

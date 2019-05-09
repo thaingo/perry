@@ -1,10 +1,14 @@
 {
   "status": "INTERNAL_SERVER_ERROR",
-  "technical_message": "User create operation failed but new user cannot be deleted in Cognito, username: fcdba3ee-dffa-4e8c-ab3a-933d0e80f80b",
-  "user_message": "User create operation failed but new user cannot be deleted in Cognito, username: fcdba3ee-dffa-4e8c-ab3a-933d0e80f80b",
-  "error_code": "CAP-066",
-  "causes": [
-    "Cognito email error",
-    "Cognito delete error"
+  "errors": [
+    {
+      "error_code": "CAP-066",
+      "technical_message": "User create operation failed but new user cannot be deleted in Cognito, username: fcdba3ee-dffa-4e8c-ab3a-933d0e80f80b",
+      "user_message": "User create operation failed but new user cannot be deleted in Cognito, username: fcdba3ee-dffa-4e8c-ab3a-933d0e80f80b",
+      "causes": [
+        "Cognito email error",
+        "Cognito delete error"
+      ]
+    }
   ]
 }

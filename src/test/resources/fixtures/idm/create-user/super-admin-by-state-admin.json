@@ -1,6 +1,10 @@
 {
   "status": "BAD_REQUEST",
-  "technical_message": "Unable to create user with roles: [Super-admin], allowed roles are: [Office-admin, County-admin, CWS-worker]",
-  "user_message": "Unable to create user with roles: [Super-admin], allowed roles are: [Office-admin, County-admin, CWS-worker]",
-  "error_code": "CAP-061"
+  "errors": [
+    {
+      "error_code": "CAP-061",
+      "technical_message": "Unable to create user with roles: [Super-admin], allowed roles are: [Office-admin, County-admin, CWS-worker]",
+      "user_message": "Unable to create user with roles: [Super-admin], allowed roles are: [Office-admin, County-admin, CWS-worker]"
+    }
+  ]
 }

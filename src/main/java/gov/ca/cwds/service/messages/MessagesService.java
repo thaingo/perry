@@ -41,25 +41,6 @@ public class MessagesService {
   public Messages getMessages(MessageCode messageCode, String... args) {
     String techMsg = getTechMessage(messageCode, args);
     String userMsg = getUserMessage(messageCode, args);
-    return new Messages(techMsg, userMsg);
-  }
-
-  public static class Messages {
-
-    private final String techMsg;
-    private final String userMsg;
-
-    public Messages(String techMsg, String userMsg) {
-      this.techMsg = techMsg;
-      this.userMsg = userMsg;
-    }
-
-    public String getTechMsg() {
-      return techMsg;
-    }
-
-    public String getUserMsg() {
-      return userMsg;
-    }
+    return new Messages(messageCode, techMsg, userMsg);
   }
 }

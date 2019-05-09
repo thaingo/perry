@@ -14,6 +14,7 @@ import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.RA
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USERPOOL;
 import static gov.ca.cwds.idm.util.TestHelper.getTestCognitoProperties;
 import static gov.ca.cwds.idm.util.TestUtils.attr;
+import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
 import static gov.ca.cwds.util.Utils.toSet;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -52,7 +53,7 @@ import gov.ca.cwds.idm.service.diff.UpdateDifference;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.service.messages.MessageCode;
 import gov.ca.cwds.service.messages.MessagesService;
-import gov.ca.cwds.service.messages.MessagesService.Messages;
+import gov.ca.cwds.service.messages.Messages;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -94,7 +95,8 @@ public class CognitoServiceFacadeTest {
     facade.setCognitoRequestHelper(new CognitoRequestHelper(properties));
 
     when(messagesService.getMessages(any(MessageCode.class), ArgumentMatchers.<String>any()))
-        .thenReturn(new Messages("", ""));
+        .thenAnswer(i -> new Messages(i.getArgument(0),"", ""));
+//        .thenReturn(new Messages("", ""));
   }
 
   @Test
@@ -185,8 +187,8 @@ public class CognitoServiceFacadeTest {
   public void testUpdateUserAttributesWithDuplicateEmail() {
     final String new_email = "newEmail@gmail.com";
     final String err_msg = "ERR_MSG";
-    when(messagesService.getMessages(MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM, new_email.toLowerCase()))
-            .thenReturn(new Messages(err_msg, err_msg));
+    when(messagesService.getMessages(USER_WITH_EMAIL_EXISTS_IN_IDM, new_email.toLowerCase()))
+            .thenReturn(new Messages(USER_WITH_EMAIL_EXISTS_IN_IDM, err_msg, err_msg));
 
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setEmail(new_email);

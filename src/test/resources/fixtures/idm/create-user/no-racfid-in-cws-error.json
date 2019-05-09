@@ -1,6 +1,10 @@
-  {
-    "status": "BAD_REQUEST",
-    "technical_message": "No user with RACFID: SMITHB1 found in CWSCMS",
-    "user_message": "No active user with CWS Login SMITHB1 was found in CWS/CMS.",
-    "error_code": "CAP-003"
-  }
+{
+  "status": "BAD_REQUEST",
+  "errors": [
+    {
+      "error_code": "CAP-003",
+      "technical_message": "No user with RACFID: SMITHB1 found in CWSCMS",
+      "user_message": "No active user with CWS Login SMITHB1 was found in CWS/CMS."
+    }
+  ]
+}

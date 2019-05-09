@@ -1,6 +1,10 @@
 {
   "status": "BAD_REQUEST",
-  "technical_message": "Unable to create user without RACFID with CANS-rollout permission",
-  "user_message": "Unable to create user without CWS Login with CANS permission",
-  "error_code": "CAP-059"
+  "errors": [
+    {
+      "error_code": "CAP-059",
+      "technical_message": "Unable to create user without RACFID with CANS-rollout permission",
+      "user_message": "Unable to create user without CWS Login with CANS permission"
+    }
+  ]
 }

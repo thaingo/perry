@@ -1,6 +1,10 @@
 {
   "status": "UNAUTHORIZED",
-  "technical_message": "You are not authorized to add user from Office other than yours",
-  "user_message": "You are not authorized to add user from Office other than yours",
-  "error_code": "CAP-029"
+  "errors": [
+    {
+      "error_code": "CAP-029",
+      "technical_message": "You are not authorized to add user from Office other than yours",
+      "user_message": "You are not authorized to add user from Office other than yours"
+    }
+  ]
 }

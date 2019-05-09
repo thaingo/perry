@@ -1,9 +1,13 @@
 {
   "status": "INTERNAL_SERVER_ERROR",
-  "technical_message": "Unable to create new user with email: email.error@create.com",
-  "user_message": "Unable to create new user with email: email.error@create.com",
-  "error_code": "CAP-011",
-  "causes": [
-    "Cognito email error"
+  "errors": [
+    {
+      "error_code": "CAP-011",
+      "technical_message": "Unable to create new user with email: email.error@create.com",
+      "user_message": "Unable to create new user with email: email.error@create.com",
+      "causes": [
+        "Cognito email error"
+      ]
+    }
   ]
 }

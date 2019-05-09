@@ -1,6 +1,10 @@
 {
   "status": "BAD_REQUEST",
-  "technical_message": "Unable to assign roles: [County-admin], allowed roles are: [Office-admin, CWS-worker]",
-  "user_message": "Unable to assign roles: [County-admin], allowed roles are: [Office-admin, CWS-worker]",
-  "error_code": "CAP-031"
+  "errors": [
+    {
+      "error_code": "CAP-031",
+      "technical_message": "Unable to assign roles: [County-admin], allowed roles are: [Office-admin, CWS-worker]",
+      "user_message": "Unable to assign roles: [County-admin], allowed roles are: [Office-admin, CWS-worker]"
+    }
+  ]
 }

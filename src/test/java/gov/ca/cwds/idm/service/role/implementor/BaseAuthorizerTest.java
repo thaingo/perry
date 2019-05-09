@@ -13,7 +13,7 @@ import gov.ca.cwds.idm.exception.AdminAuthorizationException;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.service.messages.MessageCode;
 import gov.ca.cwds.service.messages.MessagesService;
-import gov.ca.cwds.service.messages.MessagesService.Messages;
+import gov.ca.cwds.service.messages.Messages;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import org.junit.Before;
 import org.junit.runner.RunWith;
@@ -34,7 +34,8 @@ public abstract class BaseAuthorizerTest {
     exceptionFactory = new ExceptionFactory();
     exceptionFactory.setMessagesService(messagesServiceMock);
     when(messagesServiceMock.getMessages(any(MessageCode.class), ArgumentMatchers.<String>any()))
-        .thenReturn(new Messages("techMsg", "userMsg"));
+//        .thenReturn(new Messages("techMsg", "userMsg"));
+        .thenAnswer(i -> new Messages(i.getArgument(0),"techMsg", "userMsg"));
   }
 
   protected abstract AbstractAdminActionsAuthorizer getAuthorizer(User user);

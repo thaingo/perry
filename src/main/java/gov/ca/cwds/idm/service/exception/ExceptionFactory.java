@@ -10,7 +10,7 @@ import gov.ca.cwds.idm.exception.UserValidationException;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.service.messages.MessageCode;
 import gov.ca.cwds.service.messages.MessagesService;
-import gov.ca.cwds.service.messages.MessagesService.Messages;
+import gov.ca.cwds.service.messages.Messages;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

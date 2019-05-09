@@ -27,7 +27,7 @@ import gov.ca.cwds.idm.service.role.implementor.AdminRoleImplementorFactory;
 import gov.ca.cwds.idm.util.TestHelper;
 import gov.ca.cwds.service.messages.MessageCode;
 import gov.ca.cwds.service.messages.MessagesService;
-import gov.ca.cwds.service.messages.MessagesService.Messages;
+import gov.ca.cwds.service.messages.Messages;
 import gov.ca.cwds.util.CurrentAuthenticatedUserUtil;
 import java.util.function.Consumer;
 import org.junit.Before;
@@ -63,7 +63,8 @@ public class ValidationServiceMockTest {
     service.setAdminRoleImplementorFactory(new AdminRoleImplementorFactory());
 
     when(messagesServiceMock.getMessages(any(MessageCode.class), ArgumentMatchers.<String>any()))
-        .thenReturn(new Messages("", ""));
+//        .thenReturn(new Messages("", ""));
+        .thenAnswer(i -> new Messages(i.getArgument(0),"", ""));
   }
 
   @Test

@@ -1,6 +1,10 @@
 {
   "status": "BAD_REQUEST",
-  "technical_message": "Unable to create user without roles. User should have at least one role",
-  "user_message": "Unable to create user without roles. User should have at least one role",
-  "error_code": "CAP-060"
+  "errors": [
+    {
+      "error_code": "CAP-060",
+       "technical_message": "Unable to create user without roles. User should have at least one role",
+        "user_message": "Unable to create user without roles. User should have at least one role"
+    }
+  ]
 }
