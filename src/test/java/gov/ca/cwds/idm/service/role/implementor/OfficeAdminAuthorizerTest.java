@@ -7,6 +7,7 @@ import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.SUPER_ADMIN;
 import static gov.ca.cwds.idm.util.TestHelper.admin;
+import static gov.ca.cwds.idm.util.TestHelper.cwsWorker;
 import static gov.ca.cwds.idm.util.TestHelper.superAdmin;
 import static gov.ca.cwds.idm.util.TestHelper.user;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_SUPER_ADMIN_CANNOT_UPDATE_USERS_WITH_SUPER_ADMIN_ROLE;
@@ -19,10 +20,12 @@ import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserCountyName;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserOfficeIds;
 import static gov.ca.cwds.util.Utils.toSet;
+import static org.junit.Assert.assertEquals;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.service.messages.MessageCode;
+import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -97,5 +100,12 @@ public class OfficeAdminAuthorizerTest extends BaseAuthorizerTest {
   @Test
   public void canNotUpdateSuperAdmin() {
     assertCanNotUpdateUser(superAdmin(), NOT_SUPER_ADMIN_CANNOT_UPDATE_USERS_WITH_SUPER_ADMIN_ROLE);
+  }
+
+  @Test
+  public void testGetPossibleUserRolesAtCreate() {
+    assertEquals(
+        Arrays.asList(CWS_WORKER),
+        getAuthorizer(cwsWorker()).getPossibleUserRolesAtCreate());
   }
 }

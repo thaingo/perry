@@ -2,6 +2,7 @@ package gov.ca.cwds.idm.service.authorization;
 
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
+import java.util.List;
 
 public interface AuthorizationService {
 
@@ -17,7 +18,5 @@ public interface AuthorizationService {
 
   boolean canUpdateUser(User user);
 
-  boolean canEditRoles(User user);
-
-  boolean canEditPermissions(User user);
+  List<String> getPossibleUserRolesAtUpdate(User user);
 }

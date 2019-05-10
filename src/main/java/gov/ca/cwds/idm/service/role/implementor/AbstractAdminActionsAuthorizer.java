@@ -16,9 +16,6 @@ import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.service.messages.MessageCode;
 import java.util.Set;
 
-/**
- * Created by Alexander Serbin on 11/2/2018
- */
 public abstract class AbstractAdminActionsAuthorizer implements AdminActionsAuthorizer {
 
   private User user;
@@ -32,11 +29,6 @@ public abstract class AbstractAdminActionsAuthorizer implements AdminActionsAuth
   @Override
   public void checkCanEditRoles() {
     checkUserIsNotCalsExternalWorker(CANNOT_EDIT_ROLES_OF_CALS_EXTERNAL_WORKER, user.getId());
-  }
-
-  @Override
-  public void checkCanEditPermissions() {
-    //no authorization rules to check
   }
 
   protected User getUser() {

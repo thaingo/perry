@@ -23,7 +23,7 @@ import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.exception.UserValidationException;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
-import gov.ca.cwds.idm.service.role.implementor.AdminRoleImplementorFactory;
+import gov.ca.cwds.idm.service.role.implementor.AdminActionsAuthorizerFactory;
 import gov.ca.cwds.idm.util.TestHelper;
 import gov.ca.cwds.service.messages.MessageCode;
 import gov.ca.cwds.service.messages.MessagesService;
@@ -60,7 +60,7 @@ public class ValidationServiceMockTest {
     ExceptionFactory exceptionFactory = new ExceptionFactory();
     exceptionFactory.setMessagesService(messagesServiceMock);
     service.setExceptionFactory(exceptionFactory);
-    service.setAdminRoleImplementorFactory(new AdminRoleImplementorFactory());
+    service.setAdminActionsAuthorizerFactory(new AdminActionsAuthorizerFactory());
 
     when(messagesServiceMock.getMessages(any(MessageCode.class), ArgumentMatchers.<String>any()))
         .thenReturn(new Messages("", ""));

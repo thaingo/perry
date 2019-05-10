@@ -3,12 +3,17 @@ package gov.ca.cwds.idm.service.authorization;
 import static gov.ca.cwds.service.messages.MessageCode.ADMIN_CANNOT_UPDATE_HIMSELF;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserName;
 
+import gov.ca.cwds.config.api.idm.Roles;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.exception.AdminAuthorizationException;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.idm.service.role.implementor.AbstractAdminActionsAuthorizer;
-import gov.ca.cwds.idm.service.role.implementor.AdminRoleImplementorFactory;
+import gov.ca.cwds.idm.service.role.implementor.AdminActionsAuthorizerFactory;
+import gov.ca.cwds.util.Utils;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import org.apache.commons.collections4.CollectionUtils;
@@ -28,7 +33,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
   private static final String PERMISSIONS_EDITING = "permissions editing";
   private static final String USER_UPDATE = "user update";
 
-  private AdminRoleImplementorFactory adminRoleImplementorFactory;
+  private AdminActionsAuthorizerFactory adminRoleImplementorFactory;
 
   private ExceptionFactory exceptionFactory;
 
@@ -61,7 +66,14 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     }
     checkCanUpdateUser(user);
     authorizeRolesUpdate(user, updateUserDto);
-    authorizePermissionsUpdate(user, updateUserDto);
+  }
+
+  @Override
+  public List<String> getPossibleUserRolesAtUpdate(User user) {
+    Set<String> allowedRoles = new HashSet<>();
+
+
+    return new ArrayList<>(allowedRoles);
   }
 
   private void authorizeRolesUpdate(User user, UserUpdate updateUserDto) {
@@ -73,25 +85,10 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     }
   }
 
-  private void authorizePermissionsUpdate(User user, UserUpdate updateUserDto) {
-    if (updateUserDto.getPermissions() == null) {
-      return;
-    }
-    if (wasPermissionsActuallyEdited(user, updateUserDto)) {
-      checkCanEditPermissions(user);
-    }
-  }
-
   private boolean wasRolesActuallyEdited(User user, UserUpdate updateUserDto) {
     return wasActuallyEdited(
         user.getRoles(),
         updateUserDto.getRoles());
-  }
-
-  private boolean wasPermissionsActuallyEdited(User user, UserUpdate updateUserDto) {
-    return wasActuallyEdited(
-        user.getPermissions(),
-        updateUserDto.getPermissions());
   }
 
   private boolean wasActuallyEdited(Set<String> oldSet, Set<String> newSet) {
@@ -103,19 +100,10 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     getAdminActionsAuthorizer(user).checkCanEditRoles();
   }
 
-  @Override
-  public boolean canEditRoles(User user) {
-    return canAuthorizeOperation(user, this::checkCanEditRoles, ROLES_EDITING);
-  }
-
-  private void checkCanEditPermissions(User user) {
-    getAdminActionsAuthorizer(user).checkCanEditPermissions();
-  }
-
-  @Override
-  public boolean canEditPermissions(User user) {
-    return canAuthorizeOperation(user, this::checkCanEditPermissions, PERMISSIONS_EDITING);
-  }
+//  @Override
+//  public boolean canEditRoles(User user) {
+//    return canAuthorizeOperation(user, this::checkCanEditRoles, ROLES_EDITING);
+//  }
 
   private AdminActionsAuthorizer getAdminActionsAuthorizer(User user) {
     AbstractAdminActionsAuthorizer authorizer = adminRoleImplementorFactory
@@ -149,7 +137,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
   @Autowired
   public void setAdminRoleImplementorFactory(
-      AdminRoleImplementorFactory adminRoleImplementorFactory) {
+      AdminActionsAuthorizerFactory adminRoleImplementorFactory) {
     this.adminRoleImplementorFactory = adminRoleImplementorFactory;
   }
 

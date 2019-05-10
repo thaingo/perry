@@ -8,38 +8,26 @@ import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.service.authorization.UserRolesService;
-import java.util.List;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
-/**
- * Created by Alexander Serbin on 10/9/2018
- */
 @Service
 @Profile("idm")
-public class AdminRoleImplementorFactory {
+public class AdminActionsAuthorizerFactory {
 
-  private AdminRoleImplementor createAdminRoleImplementor() {
+  public AbstractAdminActionsAuthorizer getAdminActionsAuthorizer(User user) {
 
     switch (UserRolesService.getStrongestAdminRole(getCurrentUser())) {
       case SUPER_ADMIN:
-        return new SuperAdminRoleImplementor();
+        return new SuperAdminAuthorizer(user);
       case STATE_ADMIN:
-        return new StateAdminRoleImplementor();
+        return new StateAdminAuthorizer(user);
       case COUNTY_ADMIN:
-        return new CountyAdminRoleImplementor();
+        return new CountyAdminAuthorizer(user);
       case OFFICE_ADMIN:
-        return new OfficeAdminRoleImplementor();
+        return new OfficeAdminAuthorizer(user);
       default:
         throw new IllegalStateException();
     }
-  }
-
-  public AbstractAdminActionsAuthorizer getAdminActionsAuthorizer(User user) {
-    return createAdminRoleImplementor().getAdminActionsAuthorizer(user);
-  }
-
-  public List<String> getPossibleUserRoles() {
-    return createAdminRoleImplementor().getPossibleUserRoles();
   }
 }

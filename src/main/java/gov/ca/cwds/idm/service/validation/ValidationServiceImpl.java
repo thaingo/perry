@@ -25,7 +25,7 @@ import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
-import gov.ca.cwds.idm.service.role.implementor.AdminRoleImplementorFactory;
+import gov.ca.cwds.idm.service.role.implementor.AdminActionsAuthorizerFactory;
 import gov.ca.cwds.service.CwsUserInfoService;
 import gov.ca.cwds.service.messages.MessageCode;
 import java.util.Collection;
@@ -44,7 +44,7 @@ public class ValidationServiceImpl implements ValidationService {
 
   private CwsUserInfoService cwsUserInfoService;
 
-  private AdminRoleImplementorFactory adminRoleImplementorFactory;
+  private AdminActionsAuthorizerFactory adminActionsAuthorizerFactory;
 
   private ExceptionFactory exceptionFactory;
 
@@ -78,7 +78,7 @@ public class ValidationServiceImpl implements ValidationService {
     validatePhoneNumber(updateUserDto.getPhoneNumber());
     validatePhoneExtension(updateUserDto.getPhoneExtensionNumber());
     validateNotAllRolesAreRemovedAtUpdate(updateUserDto);
-    validateNewUserRolesAreAllowedAtUpdate(updateUserDto);
+    validateNewUserRolesAreAllowedAtUpdate(existedUser, updateUserDto);
     validateUpdateByCansPermission(existedUser, updateUserDto);
     validateActivateUser(existedUser, updateUserDto);
   }
@@ -125,7 +125,7 @@ public class ValidationServiceImpl implements ValidationService {
   }
 
   private void validateUserRolesAreAllowedAtCreate(User user) {
-    validateByAllowedRoles(user.getRoles(), UNABLE_TO_CREATE_USER_WITH_UNALLOWED_ROLES);
+    validateByAllowedRoles(user, UNABLE_TO_CREATE_USER_WITH_UNALLOWED_ROLES);
   }
 
   void validateRacfidDoesNotExistInCognito(String racfId) {
@@ -156,17 +156,18 @@ public class ValidationServiceImpl implements ValidationService {
     }
   }
 
-  private void validateNewUserRolesAreAllowedAtUpdate(UserUpdate updateUserDto) {
-    validateByAllowedRoles(updateUserDto.getRoles(), UNABLE_UPDATE_UNALLOWED_ROLES);
+  private void validateNewUserRolesAreAllowedAtUpdate(User existedUser, UserUpdate updateUserDto) {
+    validateByAllowedRoles(existedUser, UNABLE_UPDATE_UNALLOWED_ROLES);
   }
 
-  private void validateByAllowedRoles(Collection<String> roles, MessageCode errorCode) {
-
+  private void validateByAllowedRoles(User user, MessageCode errorCode) {
+    Collection<String> roles = user.getRoles();
     if (roles == null) {
       return;
     }
 
-    Collection<String> allowedRoles = adminRoleImplementorFactory.getPossibleUserRoles();
+    Collection<String> allowedRoles =
+        adminActionsAuthorizerFactory.getAdminActionsAuthorizer(user).getPossibleUserRolesAtCreate();
     if (!allowedRoles.containsAll(roles)) {
       throwValidationException(
           errorCode,
@@ -293,9 +294,9 @@ public class ValidationServiceImpl implements ValidationService {
   }
 
   @Autowired
-  public void setAdminRoleImplementorFactory(
-      AdminRoleImplementorFactory adminRoleImplementorFactory) {
-    this.adminRoleImplementorFactory = adminRoleImplementorFactory;
+  public void setAdminActionsAuthorizerFactory(
+      AdminActionsAuthorizerFactory adminActionsAuthorizerFactory) {
+    this.adminActionsAuthorizerFactory = adminActionsAuthorizerFactory;
   }
 
   @Autowired

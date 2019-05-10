@@ -10,6 +10,7 @@ import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.ABSENT_IN_NS_DB_USER
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.COUNTY_ADMIN_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.ERROR_USER_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.LOCKED_USER;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.OFFICE_ADMIN_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.STATE_ADMIN_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.SUPER_ADMIN_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.UNLOCKED_USER;
@@ -204,6 +205,13 @@ public class GetUserTest extends BaseIdmIntegrationTest {
   public void testGetUserShouldBeLocked() throws Exception {
     testGetValidUser(LOCKED_USER,
         "fixtures/idm/get-user/locked-user.json");
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {OFFICE_ADMIN})
+  public void testGetOfficeAdminByOfficeAdminInSameOffice() throws Exception {
+    testGetValidUser(OFFICE_ADMIN_ID,
+        "fixtures/idm/get-user/office-admin-by-office-admin-in-same-office.json");
   }
 
   private MvcResult assertGetUserUnauthorized(String userId) throws Exception {

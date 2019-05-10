@@ -6,7 +6,8 @@ import gov.ca.cwds.idm.dto.ListOfValues;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserEditDetails;
 import gov.ca.cwds.idm.service.authorization.AuthorizationService;
-import gov.ca.cwds.idm.service.role.implementor.AdminRoleImplementorFactory;
+import gov.ca.cwds.idm.service.role.implementor.AdminActionsAuthorizerFactory;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -17,7 +18,7 @@ public class UserEditDetailsService {
 
   private AuthorizationService authorizationService;
 
-  private AdminRoleImplementorFactory adminRoleImplementorFactory;
+  private AdminActionsAuthorizerFactory adminRoleImplementorFactory;
 
   private PossibleUserPermissionsService possibleUserPermissionsService;
 
@@ -35,16 +36,18 @@ public class UserEditDetailsService {
 
   private ListOfValues getRoles(User user, boolean canUpdateUser) {
     ListOfValues usersPossibleRoles = new ListOfValues();
-    usersPossibleRoles.setEditable(canUpdateUser && authorizationService.canEditRoles(user));
-    usersPossibleRoles.setPossibleValues(adminRoleImplementorFactory.getPossibleUserRoles());
+
+    List<String> possibleRoles = authorizationService.getPossibleUserRolesAtUpdate(user);
+    boolean rolesAreEditable = possibleRoles.size() > 1;//there is always current user role
+
+    usersPossibleRoles.setEditable(canUpdateUser && rolesAreEditable);
+    usersPossibleRoles.setPossibleValues(possibleRoles);
     return usersPossibleRoles;
   }
 
   private ListOfValues getPermissions(User user, boolean canUpdateUser) {
     ListOfValues usersPossiblePermissions = new ListOfValues();
-    usersPossiblePermissions
-        .setEditable(canUpdateUser && authorizationService.canEditPermissions(user));
-
+    usersPossiblePermissions.setEditable(canUpdateUser);
     usersPossiblePermissions.setPossibleValues(
         possibleUserPermissionsService.getPossibleUserPermissions(isRacfidUser(user)));
 
@@ -58,7 +61,7 @@ public class UserEditDetailsService {
 
   @Autowired
   public void setAdminRoleImplementorFactory(
-      AdminRoleImplementorFactory adminRoleImplementorFactory) {
+      AdminActionsAuthorizerFactory adminRoleImplementorFactory) {
     this.adminRoleImplementorFactory = adminRoleImplementorFactory;
   }
 

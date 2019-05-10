@@ -1,5 +1,7 @@
 package gov.ca.cwds.idm.service.authorization;
 
+import java.util.List;
+
 public interface AdminActionsAuthorizer {
 
   void checkCanViewUser();
@@ -10,7 +12,9 @@ public interface AdminActionsAuthorizer {
 
   void checkCanResendInvitationMessage();
 
-  void checkCanEditRoles();
+  List<String> getPossibleUserRolesAtCreate();
 
-  void checkCanEditPermissions();
+  List<String> getPossibleUserRolesAtUpdate();
+
+  void checkCanEditRoles();
 }
