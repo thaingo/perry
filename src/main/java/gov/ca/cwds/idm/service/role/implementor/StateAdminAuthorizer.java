@@ -33,22 +33,17 @@ class StateAdminAuthorizer extends AbstractAdminActionsAuthorizer {
   }
 
   @Override
-  public void checkCanUpdateUser() {
-    checkUserIsNotSuperAdmin(NOT_SUPER_ADMIN_CANNOT_UPDATE_USERS_WITH_SUPER_ADMIN_ROLE);
-  }
-
-  @Override
   public void checkCanResendInvitationMessage() {
     //no authorization rules to check
   }
 
   @Override
-  public List<String> getMaxPossibleUserRolesAtCreate() {
-    return unmodifiableList(asList(COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER));
+  public void checkCanUpdateUser() {
+    checkUserIsNotSuperAdmin(NOT_SUPER_ADMIN_CANNOT_UPDATE_USERS_WITH_SUPER_ADMIN_ROLE);
   }
 
   @Override
-  public List<String> getMaxPossibleUserRolesAtUpdate() {
+  public List<String> getMaxAllowedUserRolesAtUpdate() {
     User user = getUser();
 
     if (isStateAdmin(user)) {
@@ -58,6 +53,11 @@ class StateAdminAuthorizer extends AbstractAdminActionsAuthorizer {
     } else {
       return unmodifiableList(asList(COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER));
     }
+  }
+
+  @Override
+  public List<String> getMaxAllowedUserRolesAtCreate() {
+    return unmodifiableList(asList(COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER));
   }
 
 //  @Override

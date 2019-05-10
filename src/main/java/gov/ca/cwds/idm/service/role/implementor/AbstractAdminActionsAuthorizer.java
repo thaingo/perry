@@ -1,17 +1,12 @@
 package gov.ca.cwds.idm.service.role.implementor;
 
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.getStrongestAdminRole;
-import static gov.ca.cwds.idm.service.authorization.UserRolesService.hasCalsExternalWorkerRole;
-import static gov.ca.cwds.idm.service.authorization.UserRolesService.hasCountyAdminRole;
-import static gov.ca.cwds.idm.service.authorization.UserRolesService.hasStateAdminRole;
-import static gov.ca.cwds.idm.service.authorization.UserRolesService.hasSuperAdminRole;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isCalsExternalWorker;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isCountyAdmin;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isStateAdmin;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isSuperAdmin;
-import static gov.ca.cwds.idm.service.role.implementor.AuthorizationUtils.isPrincipalInTheSameCountyWith;
-import static gov.ca.cwds.service.messages.MessageCode.CANNOT_EDIT_ROLES_OF_CALS_EXTERNAL_WORKER;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
+import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserCountyName;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserOfficeIds;
 
 import gov.ca.cwds.idm.dto.User;
@@ -64,7 +59,7 @@ public abstract class AbstractAdminActionsAuthorizer implements AdminActionsAuth
   }
 
   protected final void checkAdminAndUserInTheSameCounty(MessageCode errorMessage, String... args) {
-    if (!isPrincipalInTheSameCountyWith(getUser())) {
+    if (!isAdminInTheSameCountyAsUser()) {
       throwAuthorizationException(errorMessage, args);
     }
   }
@@ -75,7 +70,13 @@ public abstract class AbstractAdminActionsAuthorizer implements AdminActionsAuth
     }
   }
 
-  private boolean isAdminInTheSameOfficeAsUser() {
+  protected final boolean isAdminInTheSameCountyAsUser() {
+    String userCountyName = getUser().getCountyName();
+    String adminCountyName = getCurrentUserCountyName();
+    return userCountyName != null && userCountyName.equals(adminCountyName);
+  }
+
+  protected final boolean isAdminInTheSameOfficeAsUser() {
     String userOfficeId = getUser().getOfficeId();
     Set<String> adminOfficeIds = getCurrentUserOfficeIds();
     return userOfficeId != null && adminOfficeIds != null && adminOfficeIds.contains(userOfficeId);

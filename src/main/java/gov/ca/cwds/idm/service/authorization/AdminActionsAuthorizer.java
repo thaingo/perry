@@ -13,9 +13,9 @@ public interface AdminActionsAuthorizer {
 
   void checkCanResendInvitationMessage();
 
-  List<String> getMaxPossibleUserRolesAtCreate();
+  List<String> getMaxAllowedUserRolesAtCreate();
 
-  List<String> getMaxPossibleUserRolesAtUpdate();
+  List<String> getMaxAllowedUserRolesAtUpdate();
 
 //  void checkCanEditRoles();
 }

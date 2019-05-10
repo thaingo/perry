@@ -5,14 +5,10 @@ import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.idm.util.TestHelper.admin;
-import static gov.ca.cwds.idm.util.TestHelper.countyAdmin;
 import static gov.ca.cwds.idm.util.TestHelper.cwsWorker;
-import static gov.ca.cwds.idm.util.TestHelper.officeAdmin;
-import static gov.ca.cwds.idm.util.TestHelper.stateAdmin;
 import static gov.ca.cwds.idm.util.TestHelper.superAdmin;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_SUPER_ADMIN_CANNOT_UPDATE_USERS_WITH_SUPER_ADMIN_ROLE;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_SUPER_ADMIN_CANNOT_VIEW_USERS_WITH_SUPER_ADMIN_ROLE;
-import static gov.ca.cwds.service.messages.MessageCode.STATE_ADMIN_ROLES_CANNOT_BE_EDITED;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserCountyName;
 import static gov.ca.cwds.util.Utils.toSet;
@@ -69,6 +65,6 @@ public class StateAdminAuthorizerTest extends BaseAuthorizerTest {
   public void testGetPossibleUserRolesAtCreate() {
     assertEquals(
         Arrays.asList(COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER),
-        getAuthorizer(cwsWorker()).getMaxPossibleUserRolesAtCreate());
+        getAuthorizer(cwsWorker()).getMaxAllowedUserRolesAtCreate());
   }
 }

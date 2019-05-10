@@ -5,6 +5,7 @@ import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isCalsExternalWorker;
+import static gov.ca.cwds.idm.service.authorization.UserRolesService.isCountyAdmin;
 import static gov.ca.cwds.service.messages.MessageCode.COUNTY_ADMIN_CANNOT_RESEND_INVITATION_FOR_USER_FROM_OTHER_COUNTY;
 import static gov.ca.cwds.service.messages.MessageCode.COUNTY_ADMIN_CANNOT_UPDATE_STATE_ADMIN;
 import static gov.ca.cwds.service.messages.MessageCode.COUNTY_ADMIN_CANNOT_UPDATE_USER_FROM_OTHER_COUNTY;
@@ -38,6 +39,12 @@ class CountyAdminAuthorizer extends AbstractAdminActionsAuthorizer {
   }
 
   @Override
+  public void checkCanResendInvitationMessage() {
+    checkAdminAndUserInTheSameCounty(
+        COUNTY_ADMIN_CANNOT_RESEND_INVITATION_FOR_USER_FROM_OTHER_COUNTY, getUser().getId());
+  }
+
+  @Override
   public void checkCanUpdateUser() {
     checkAdminAndUserInTheSameCounty(COUNTY_ADMIN_CANNOT_UPDATE_USER_FROM_OTHER_COUNTY, getUser().getId());
     checkUserIsNotStateAdmin(COUNTY_ADMIN_CANNOT_UPDATE_STATE_ADMIN);
@@ -45,22 +52,20 @@ class CountyAdminAuthorizer extends AbstractAdminActionsAuthorizer {
   }
 
   @Override
-  public void checkCanResendInvitationMessage() {
-    checkAdminAndUserInTheSameCounty(
-        COUNTY_ADMIN_CANNOT_RESEND_INVITATION_FOR_USER_FROM_OTHER_COUNTY, getUser().getId());
-  }
+  public List<String> getMaxAllowedUserRolesAtUpdate() {
+    User user = getUser();
 
-  @Override
-  public List<String> getMaxPossibleUserRolesAtCreate() {
-    return unmodifiableList(Arrays.asList(OFFICE_ADMIN, CWS_WORKER));
-  }
-
-  @Override
-  public List<String> getMaxPossibleUserRolesAtUpdate() {
-    if(isCalsExternalWorker(getUser())) {
+    if(isCalsExternalWorker(user)) {
       return unmodifiableList(Collections.singletonList(CALS_EXTERNAL_WORKER));
-    } else {
+    } else if (isCountyAdmin(user) && isAdminInTheSameCountyAsUser()){
       return unmodifiableList(Arrays.asList(COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER));
+    } else {
+      return unmodifiableList(Arrays.asList(OFFICE_ADMIN, CWS_WORKER));
     }
+  }
+
+  @Override
+  public List<String> getMaxAllowedUserRolesAtCreate() {
+    return unmodifiableList(Arrays.asList(OFFICE_ADMIN, CWS_WORKER));
   }
 }

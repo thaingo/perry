@@ -172,6 +172,6 @@ public class SuperAdminAuthorizerTest extends BaseAuthorizerTest {
     assertEquals(
         Arrays.asList(SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER,
             CALS_EXTERNAL_WORKER),
-        getAuthorizer(cwsWorker()).getMaxPossibleUserRolesAtCreate());
+        getAuthorizer(cwsWorker()).getMaxAllowedUserRolesAtCreate());
   }
 }

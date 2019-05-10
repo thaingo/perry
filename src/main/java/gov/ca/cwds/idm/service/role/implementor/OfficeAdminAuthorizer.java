@@ -4,6 +4,7 @@ import static gov.ca.cwds.config.api.idm.Roles.CALS_EXTERNAL_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isCalsExternalWorker;
+import static gov.ca.cwds.idm.service.authorization.UserRolesService.isOfficeAdmin;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_OFFICE;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_SUPER_ADMIN_CANNOT_UPDATE_USERS_WITH_SUPER_ADMIN_ROLE;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_SUPER_ADMIN_CANNOT_VIEW_USERS_WITH_SUPER_ADMIN_ROLE;
@@ -49,21 +50,26 @@ class OfficeAdminAuthorizer extends AbstractAdminActionsAuthorizer {
   }
 
   @Override
-  public void checkCanResendInvitationMessage() {
-    checkAdminAndUserInTheSameOffice(OFFICE_ADMIN_CANNOT_RESEND_INVITATION_FOR_USER_FROM_OTHER_OFFICE);
-  }
+  public List<String> getMaxAllowedUserRolesAtUpdate() {
+    User user = getUser();
 
-  @Override
-  public List<String> getMaxPossibleUserRolesAtCreate() {
-    return unmodifiableList(Collections.singletonList(CWS_WORKER));
-  }
-
-  @Override
-  public List<String> getMaxPossibleUserRolesAtUpdate() {
-    if(isCalsExternalWorker(getUser())) {
+    if (isCalsExternalWorker(user)) {
       return unmodifiableList(Collections.singletonList(CALS_EXTERNAL_WORKER));
-    } else {
+    } else if (isOfficeAdmin(user) && isAdminInTheSameOfficeAsUser()) {
       return unmodifiableList(Arrays.asList(OFFICE_ADMIN, CWS_WORKER));
+    } else {
+      return unmodifiableList(Arrays.asList(CWS_WORKER));
     }
+  }
+
+  @Override
+  public void checkCanResendInvitationMessage() {
+    checkAdminAndUserInTheSameOffice(
+        OFFICE_ADMIN_CANNOT_RESEND_INVITATION_FOR_USER_FROM_OTHER_OFFICE);
+  }
+
+  @Override
+  public List<String> getMaxAllowedUserRolesAtCreate() {
+    return unmodifiableList(Collections.singletonList(CWS_WORKER));
   }
 }

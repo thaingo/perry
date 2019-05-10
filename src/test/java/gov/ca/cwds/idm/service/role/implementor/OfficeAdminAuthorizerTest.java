@@ -106,6 +106,6 @@ public class OfficeAdminAuthorizerTest extends BaseAuthorizerTest {
   public void testGetPossibleUserRolesAtCreate() {
     assertEquals(
         Arrays.asList(CWS_WORKER),
-        getAuthorizer(cwsWorker()).getMaxPossibleUserRolesAtCreate());
+        getAuthorizer(cwsWorker()).getMaxAllowedUserRolesAtCreate());
   }
 }

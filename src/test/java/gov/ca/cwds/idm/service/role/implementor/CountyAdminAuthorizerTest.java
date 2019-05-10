@@ -5,7 +5,6 @@ import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.idm.util.TestHelper.admin;
 import static gov.ca.cwds.idm.util.TestHelper.cwsWorker;
-import static gov.ca.cwds.idm.util.TestHelper.officeAdmin;
 import static gov.ca.cwds.idm.util.TestHelper.superAdmin;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_SUPER_ADMIN_CANNOT_UPDATE_USERS_WITH_SUPER_ADMIN_ROLE;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_SUPER_ADMIN_CANNOT_VIEW_USERS_WITH_SUPER_ADMIN_ROLE;
@@ -53,6 +52,6 @@ public class CountyAdminAuthorizerTest extends BaseAuthorizerTest {
   public void testGetPossibleUserRolesAtCreate() {
     assertEquals(
         Arrays.asList(OFFICE_ADMIN, CWS_WORKER),
-        getAuthorizer(cwsWorker()).getMaxPossibleUserRolesAtCreate());
+        getAuthorizer(cwsWorker()).getMaxAllowedUserRolesAtCreate());
   }
 }

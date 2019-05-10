@@ -158,7 +158,7 @@ public class ValidationServiceImpl implements ValidationService {
       return;
     }
     Collection<String> allowedRoles =
-        adminActionsAuthorizerFactory.getAdminActionsAuthorizer(user).getMaxPossibleUserRolesAtCreate();
+        adminActionsAuthorizerFactory.getAdminActionsAuthorizer(user).getMaxAllowedUserRolesAtCreate();
     validateByAllowedRoles(roles, allowedRoles, UNABLE_TO_CREATE_USER_WITH_UNALLOWED_ROLES);
   }
 
@@ -169,7 +169,7 @@ public class ValidationServiceImpl implements ValidationService {
     }
     Collection<String> allowedRoles =
         adminActionsAuthorizerFactory.getAdminActionsAuthorizer(existedUser)
-            .getMaxPossibleUserRolesAtUpdate();
+            .getMaxAllowedUserRolesAtUpdate();
     validateByAllowedRoles(newRoles, allowedRoles, UNABLE_UPDATE_UNALLOWED_ROLES);
   }
 

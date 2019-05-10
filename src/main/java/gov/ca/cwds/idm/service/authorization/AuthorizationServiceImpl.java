@@ -3,21 +3,16 @@ package gov.ca.cwds.idm.service.authorization;
 import static gov.ca.cwds.service.messages.MessageCode.ADMIN_CANNOT_UPDATE_HIMSELF;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserName;
 
-import gov.ca.cwds.config.api.idm.Roles;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.exception.AdminAuthorizationException;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.idm.service.role.implementor.AbstractAdminActionsAuthorizer;
 import gov.ca.cwds.idm.service.role.implementor.AdminActionsAuthorizerFactory;
-import gov.ca.cwds.util.Utils;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Consumer;
-import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,7 +67,7 @@ public class AuthorizationServiceImpl implements AuthorizationService {
   @Override
   public List<String> getPossibleUserRolesAtUpdate(User existedUser) {
     Collection<String> allowedRoles =
-        getAdminActionsAuthorizer(existedUser).getMaxPossibleUserRolesAtUpdate();
+        getAdminActionsAuthorizer(existedUser).getMaxAllowedUserRolesAtUpdate();
     return new ArrayList<>(allowedRoles);
   }
 
