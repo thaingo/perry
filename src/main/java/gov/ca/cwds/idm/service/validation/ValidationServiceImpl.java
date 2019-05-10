@@ -124,10 +124,6 @@ public class ValidationServiceImpl implements ValidationService {
     }
   }
 
-  private void validateUserRolesAreAllowedAtCreate(User user) {
-    validateByAllowedRoles(user, UNABLE_TO_CREATE_USER_WITH_UNALLOWED_ROLES);
-  }
-
   void validateRacfidDoesNotExistInCognito(String racfId) {
     if (!isRacfidUser(racfId)) {
       return;
@@ -156,22 +152,34 @@ public class ValidationServiceImpl implements ValidationService {
     }
   }
 
-  private void validateNewUserRolesAreAllowedAtUpdate(User existedUser, UserUpdate updateUserDto) {
-    validateByAllowedRoles(existedUser, UNABLE_UPDATE_UNALLOWED_ROLES);
-  }
-
-  private void validateByAllowedRoles(User user, MessageCode errorCode) {
+  private void validateUserRolesAreAllowedAtCreate(User user) {
     Collection<String> roles = user.getRoles();
     if (roles == null) {
       return;
     }
-
     Collection<String> allowedRoles =
         adminActionsAuthorizerFactory.getAdminActionsAuthorizer(user).getPossibleUserRolesAtCreate();
-    if (!allowedRoles.containsAll(roles)) {
+    validateByAllowedRoles(roles, allowedRoles, UNABLE_TO_CREATE_USER_WITH_UNALLOWED_ROLES);
+  }
+
+  private void validateNewUserRolesAreAllowedAtUpdate(User existedUser, UserUpdate updateUser) {
+    Collection<String> newRoles = updateUser.getRoles();
+    if (newRoles == null) {
+      return;
+    }
+    Collection<String> allowedRoles =
+        adminActionsAuthorizerFactory.getAdminActionsAuthorizer(existedUser)
+            .getPossibleUserRolesAtUpdate();
+    validateByAllowedRoles(newRoles, allowedRoles, UNABLE_UPDATE_UNALLOWED_ROLES);
+  }
+
+  private void validateByAllowedRoles(Collection<String> newRoles, Collection<String> allowedRoles,
+      MessageCode errorCode) {
+
+    if (!allowedRoles.containsAll(newRoles)) {
       throwValidationException(
           errorCode,
-          toCommaDelimitedString(roles),
+          toCommaDelimitedString(newRoles),
           toCommaDelimitedString(allowedRoles));
     }
   }
