@@ -82,49 +82,49 @@ public class UserRolesServiceTest {
 
   @Test
   public void testIsStateAdmin() {
-    assertTrue(UserRolesService.isStateAdmin(user(STATE_ADMIN)));
-    assertTrue(UserRolesService.isStateAdmin(user(STATE_ADMIN, COUNTY_ADMIN)));
-    assertFalse(UserRolesService.isStateAdmin(user(COUNTY_ADMIN)));
-    assertFalse(UserRolesService.isStateAdmin(user()));
+    assertTrue(UserRolesService.hasStateAdminRole(user(STATE_ADMIN)));
+    assertTrue(UserRolesService.hasStateAdminRole(user(STATE_ADMIN, COUNTY_ADMIN)));
+    assertFalse(UserRolesService.hasStateAdminRole(user(COUNTY_ADMIN)));
+    assertFalse(UserRolesService.hasStateAdminRole(user()));
   }
 
   @Test
   public void testUserIsCountyAdmin() {
-    assertTrue(UserRolesService.isCountyAdmin(user(COUNTY_ADMIN)));
-    assertTrue(UserRolesService.isCountyAdmin(user(COUNTY_ADMIN, OFFICE_ADMIN)));
-    assertTrue(UserRolesService.isCountyAdmin(user(STATE_ADMIN, COUNTY_ADMIN)));
-    assertFalse(UserRolesService.isCountyAdmin(user(STATE_ADMIN)));
-    assertFalse(UserRolesService.isCountyAdmin(user(OFFICE_ADMIN)));
-    assertFalse(UserRolesService.isCountyAdmin(user()));
+    assertTrue(UserRolesService.hasCountyAdminRole(user(COUNTY_ADMIN)));
+    assertTrue(UserRolesService.hasCountyAdminRole(user(COUNTY_ADMIN, OFFICE_ADMIN)));
+    assertTrue(UserRolesService.hasCountyAdminRole(user(STATE_ADMIN, COUNTY_ADMIN)));
+    assertFalse(UserRolesService.hasCountyAdminRole(user(STATE_ADMIN)));
+    assertFalse(UserRolesService.hasCountyAdminRole(user(OFFICE_ADMIN)));
+    assertFalse(UserRolesService.hasCountyAdminRole(user()));
   }
 
   @Test
   public void testAdminIsCountyAdmin() {
-    assertTrue(UserRolesService.isCountyAdmin(userToken(COUNTY_ADMIN)));
-    assertTrue(UserRolesService.isCountyAdmin(userToken(COUNTY_ADMIN, OFFICE_ADMIN)));
-    assertTrue(UserRolesService.isCountyAdmin(userToken(STATE_ADMIN, COUNTY_ADMIN)));
-    assertFalse(UserRolesService.isCountyAdmin(userToken(EXTERNAL_APP)));
-    assertFalse(UserRolesService.isCountyAdmin(userToken()));
+    assertTrue(UserRolesService.hasCountyAdminRole(userToken(COUNTY_ADMIN)));
+    assertTrue(UserRolesService.hasCountyAdminRole(userToken(COUNTY_ADMIN, OFFICE_ADMIN)));
+    assertTrue(UserRolesService.hasCountyAdminRole(userToken(STATE_ADMIN, COUNTY_ADMIN)));
+    assertFalse(UserRolesService.hasCountyAdminRole(userToken(EXTERNAL_APP)));
+    assertFalse(UserRolesService.hasCountyAdminRole(userToken()));
   }
 
   @Test
   public void testIsSuperAdmin() {
-    assertTrue(UserRolesService.isSuperAdmin(user(SUPER_ADMIN)));
-    assertTrue(UserRolesService.isSuperAdmin(user(SUPER_ADMIN, STATE_ADMIN)));
-    assertFalse(UserRolesService.isSuperAdmin(user(COUNTY_ADMIN)));
-    assertFalse(UserRolesService.isSuperAdmin(user()));
+    assertTrue(UserRolesService.hasSuperAdminRole(user(SUPER_ADMIN)));
+    assertTrue(UserRolesService.hasSuperAdminRole(user(SUPER_ADMIN, STATE_ADMIN)));
+    assertFalse(UserRolesService.hasSuperAdminRole(user(COUNTY_ADMIN)));
+    assertFalse(UserRolesService.hasSuperAdminRole(user()));
   }
 
   @Test
   public void testCalsAdminCanView() {
     User user = user(CALS_EXTERNAL_WORKER);
-    assertTrue(UserRolesService.isCalsExternalWorker(user));
+    assertTrue(UserRolesService.hasCalsExternalWorkerRole(user));
   }
 
   @Test
   public void testCalsAdminCanNotView() {
     User user = user(CWS_WORKER);
-    assertFalse(UserRolesService.isCalsExternalWorker(user));
+    assertFalse(UserRolesService.hasCalsExternalWorkerRole(user));
   }
 
   static private UniversalUserToken userToken(String... roles) {

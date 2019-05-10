@@ -31,7 +31,7 @@ public class MainRoleFilter {
     return result;
   }
 
-  private static String getMainRole(Set<String> roles) {
+  public static String getMainRole(Set<String> roles) {
     int maxRoleValue = 0;
     String maxRole = null;
 

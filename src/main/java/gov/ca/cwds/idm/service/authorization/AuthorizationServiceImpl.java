@@ -12,6 +12,7 @@ import gov.ca.cwds.idm.service.role.implementor.AbstractAdminActionsAuthorizer;
 import gov.ca.cwds.idm.service.role.implementor.AdminActionsAuthorizerFactory;
 import gov.ca.cwds.util.Utils;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -65,40 +66,39 @@ public class AuthorizationServiceImpl implements AuthorizationService {
       throw exceptionFactory.createAuthorizationException(ADMIN_CANNOT_UPDATE_HIMSELF);
     }
     checkCanUpdateUser(user);
-    authorizeRolesUpdate(user, updateUserDto);
+//    authorizeRolesUpdate(user, updateUserDto);
   }
 
   @Override
-  public List<String> getPossibleUserRolesAtUpdate(User user) {
-    Set<String> allowedRoles = new HashSet<>();
-
-
+  public List<String> getPossibleUserRolesAtUpdate(User existedUser) {
+    Collection<String> allowedRoles =
+        getAdminActionsAuthorizer(existedUser).getMaxPossibleUserRolesAtUpdate();
     return new ArrayList<>(allowedRoles);
   }
 
-  private void authorizeRolesUpdate(User user, UserUpdate updateUserDto) {
-    if (updateUserDto.getRoles() == null) {
-      return;
-    }
-    if (wasRolesActuallyEdited(user, updateUserDto)) {
-      checkCanEditRoles(user);
-    }
-  }
+//  private void authorizeRolesUpdate(User user, UserUpdate updateUserDto) {
+//    if (updateUserDto.getRoles() == null) {
+//      return;
+//    }
+//    if (wasRolesActuallyEdited(user, updateUserDto)) {
+//      checkCanEditRoles(user);
+//    }
+//  }
 
-  private boolean wasRolesActuallyEdited(User user, UserUpdate updateUserDto) {
-    return wasActuallyEdited(
-        user.getRoles(),
-        updateUserDto.getRoles());
-  }
+//  private boolean wasRolesActuallyEdited(User user, UserUpdate updateUserDto) {
+//    return wasActuallyEdited(
+//        user.getRoles(),
+//        updateUserDto.getRoles());
+//  }
 
-  private boolean wasActuallyEdited(Set<String> oldSet, Set<String> newSet) {
-    return !CollectionUtils.isEqualCollection(oldSet, newSet);
-  }
+//  private boolean wasActuallyEdited(Set<String> oldSet, Set<String> newSet) {
+//    return !CollectionUtils.isEqualCollection(oldSet, newSet);
+//  }
 
 
-  private void checkCanEditRoles(User user) {
-    getAdminActionsAuthorizer(user).checkCanEditRoles();
-  }
+//  private void checkCanEditRoles(User user) {
+//    getAdminActionsAuthorizer(user).checkCanEditRoles();
+//  }
 
 //  @Override
 //  public boolean canEditRoles(User user) {

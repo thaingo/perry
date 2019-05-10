@@ -1,8 +1,10 @@
 package gov.ca.cwds.idm.service.role.implementor;
 
+import static gov.ca.cwds.config.api.idm.Roles.CALS_EXTERNAL_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
+import static gov.ca.cwds.idm.service.authorization.UserRolesService.isCalsExternalWorker;
 import static gov.ca.cwds.service.messages.MessageCode.COUNTY_ADMIN_CANNOT_RESEND_INVITATION_FOR_USER_FROM_OTHER_COUNTY;
 import static gov.ca.cwds.service.messages.MessageCode.COUNTY_ADMIN_CANNOT_UPDATE_STATE_ADMIN;
 import static gov.ca.cwds.service.messages.MessageCode.COUNTY_ADMIN_CANNOT_UPDATE_USER_FROM_OTHER_COUNTY;
@@ -14,6 +16,7 @@ import static java.util.Collections.unmodifiableList;
 
 import gov.ca.cwds.idm.dto.User;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 class CountyAdminAuthorizer extends AbstractAdminActionsAuthorizer {
@@ -48,14 +51,16 @@ class CountyAdminAuthorizer extends AbstractAdminActionsAuthorizer {
   }
 
   @Override
-  public List<String> getPossibleUserRolesAtCreate() {
+  public List<String> getMaxPossibleUserRolesAtCreate() {
     return unmodifiableList(Arrays.asList(OFFICE_ADMIN, CWS_WORKER));
   }
 
   @Override
-  public List<String> getPossibleUserRolesAtUpdate() {
-    return unmodifiableList(Arrays.asList(COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER));
+  public List<String> getMaxPossibleUserRolesAtUpdate() {
+    if(isCalsExternalWorker(getUser())) {
+      return unmodifiableList(Collections.singletonList(CALS_EXTERNAL_WORKER));
+    } else {
+      return unmodifiableList(Arrays.asList(COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER));
+    }
   }
-
-
 }

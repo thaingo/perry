@@ -2,10 +2,12 @@ package gov.ca.cwds.idm.service.authorization;
 
 import static gov.ca.cwds.config.api.idm.Roles.CALS_EXTERNAL_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.EXTERNAL_APP;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.SUPER_ADMIN;
+import static gov.ca.cwds.idm.service.filter.MainRoleFilter.getMainRole;
 
 import gov.ca.cwds.RolesHolder;
 import gov.ca.cwds.config.api.idm.Roles;
@@ -20,27 +22,51 @@ public class UserRolesService {
   private UserRolesService() {
   }
 
-  public static <T extends RolesHolder> boolean isCountyAdmin(T user) {
+  public static <T extends RolesHolder> boolean hasCountyAdminRole(T user) {
     return hasRole(user, COUNTY_ADMIN);
   }
 
-  public static <T extends RolesHolder> boolean isSuperAdmin(T user) {
+  public static <T extends RolesHolder> boolean isCountyAdmin(T user) {
+    return isAdmin(user, COUNTY_ADMIN);
+  }
+
+  public static <T extends RolesHolder> boolean hasSuperAdminRole(T user) {
     return hasRole(user, SUPER_ADMIN);
   }
 
-  public static <T extends RolesHolder> boolean isStateAdmin(T user) {
+  public static <T extends RolesHolder> boolean isSuperAdmin(T user) {
+    return isAdmin(user, SUPER_ADMIN);
+  }
+
+  public static <T extends RolesHolder> boolean hasStateAdminRole(T user) {
     return hasRole(user, STATE_ADMIN);
   }
 
-  public static <T extends RolesHolder> boolean isCalsExternalWorker(T user) {
+  public static <T extends RolesHolder> boolean isStateAdmin(T user) {
+    return isAdmin(user, STATE_ADMIN);
+  }
+
+  public static <T extends RolesHolder> boolean hasCalsExternalWorkerRole(T user) {
     return hasRole(user, CALS_EXTERNAL_WORKER);
   }
 
-  public static <T extends RolesHolder> boolean isOfficeAdmin(T user) {
+  public static <T extends RolesHolder> boolean isCalsExternalWorker(T user) {
+    return CALS_EXTERNAL_WORKER.equals(getMainRole(user.getRoles()));
+  }
+
+  public static <T extends RolesHolder> boolean isCwsWorker(T user) {
+    return CWS_WORKER.equals(getMainRole(user.getRoles()));
+  }
+
+  public static <T extends RolesHolder> boolean hasOfficeAdminRole(T user) {
     return hasRole(user, OFFICE_ADMIN);
   }
 
-  public static <T extends RolesHolder> boolean isIdmJob(T user) {
+  public static <T extends RolesHolder> boolean isOfficeAdmin(T user) {
+    return isAdmin(user, OFFICE_ADMIN);
+  }
+
+  public static <T extends RolesHolder> boolean hasIdmJobRole(T user) {
     return hasRole(user, EXTERNAL_APP);
   }
 
@@ -53,7 +79,7 @@ public class UserRolesService {
   }
 
   public static <T extends RolesHolder> boolean isNonRacfIdCalsUser(T user) {
-    return isCalsExternalWorker(user);
+    return hasCalsExternalWorkerRole(user);
   }
 
   public static <T extends RolesHolder> String getStrongestAdminRole(T user) {
@@ -70,5 +96,9 @@ public class UserRolesService {
     } else {
       return OFFICE_ADMIN;
     }
+  }
+
+  private static <T extends RolesHolder> boolean isAdmin(T user, String strongestAdminRole) {
+    return isAdmin(user) && (strongestAdminRole.equals(getStrongestAdminRole(user)));
   }
 }

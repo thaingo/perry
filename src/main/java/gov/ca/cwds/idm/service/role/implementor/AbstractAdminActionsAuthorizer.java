@@ -1,6 +1,10 @@
 package gov.ca.cwds.idm.service.role.implementor;
 
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.getStrongestAdminRole;
+import static gov.ca.cwds.idm.service.authorization.UserRolesService.hasCalsExternalWorkerRole;
+import static gov.ca.cwds.idm.service.authorization.UserRolesService.hasCountyAdminRole;
+import static gov.ca.cwds.idm.service.authorization.UserRolesService.hasStateAdminRole;
+import static gov.ca.cwds.idm.service.authorization.UserRolesService.hasSuperAdminRole;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isCalsExternalWorker;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isCountyAdmin;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isStateAdmin;
@@ -26,10 +30,10 @@ public abstract class AbstractAdminActionsAuthorizer implements AdminActionsAuth
     this.user = user;
   }
 
-  @Override
-  public void checkCanEditRoles() {
-    checkUserIsNotCalsExternalWorker(CANNOT_EDIT_ROLES_OF_CALS_EXTERNAL_WORKER, user.getId());
-  }
+//  @Override
+//  public void checkCanEditRoles() {
+//    checkUserisNotCalsExternalWorker(CANNOT_EDIT_ROLES_OF_CALS_EXTERNAL_WORKER, user.getId());
+//  }
 
   protected User getUser() {
     return user;
@@ -53,7 +57,7 @@ public abstract class AbstractAdminActionsAuthorizer implements AdminActionsAuth
     }
   }
 
-  protected final void checkUserIsNotCalsExternalWorker(MessageCode errorMessage, String... args) {
+  protected final void checkUserisNotCalsExternalWorker(MessageCode errorMessage, String... args) {
     if (isCalsExternalWorker(getUser())) {
       throwAuthorizationException(errorMessage, args);
     }

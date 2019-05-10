@@ -39,21 +39,21 @@ class SuperAdminAuthorizer extends AbstractAdminActionsAuthorizer {
   }
 
   @Override
-  public List<String> getPossibleUserRolesAtCreate() {
+  public List<String> getMaxPossibleUserRolesAtCreate() {
     return unmodifiableList(
         asList(SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER,
             CALS_EXTERNAL_WORKER));
   }
 
   @Override
-  public List<String> getPossibleUserRolesAtUpdate() {
+  public List<String> getMaxPossibleUserRolesAtUpdate() {
     return unmodifiableList(
         asList(SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER,
             CALS_EXTERNAL_WORKER));
   }
 
-  @Override
-  public void checkCanEditRoles() {
-    //no authorization rules to check
-  }
+//  @Override
+//  public void checkCanEditRoles() {
+//    //no authorization rules to check
+//  }
 }

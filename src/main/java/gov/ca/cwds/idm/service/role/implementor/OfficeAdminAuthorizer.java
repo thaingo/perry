@@ -1,7 +1,9 @@
 package gov.ca.cwds.idm.service.role.implementor;
 
+import static gov.ca.cwds.config.api.idm.Roles.CALS_EXTERNAL_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
+import static gov.ca.cwds.idm.service.authorization.UserRolesService.isCalsExternalWorker;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_OFFICE;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_SUPER_ADMIN_CANNOT_UPDATE_USERS_WITH_SUPER_ADMIN_ROLE;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_SUPER_ADMIN_CANNOT_VIEW_USERS_WITH_SUPER_ADMIN_ROLE;
@@ -28,7 +30,7 @@ class OfficeAdminAuthorizer extends AbstractAdminActionsAuthorizer {
   public void checkCanViewUser() {
     checkAdminAndUserInTheSameCounty(
         OFFICE_ADMIN_CANNOT_VIEW_USER_FROM_OTHER_COUNTY, getUser().getId());
-    checkUserIsNotCalsExternalWorker(
+    checkUserisNotCalsExternalWorker(
         OFFICE_ADMIN_CANNOT_VIEW_USERS_WITH_CALS_EXTERNAL_WORKER_ROLE, getUser().getId());
     checkUserIsNotSuperAdmin(NOT_SUPER_ADMIN_CANNOT_VIEW_USERS_WITH_SUPER_ADMIN_ROLE);
   }
@@ -52,12 +54,16 @@ class OfficeAdminAuthorizer extends AbstractAdminActionsAuthorizer {
   }
 
   @Override
-  public List<String> getPossibleUserRolesAtCreate() {
+  public List<String> getMaxPossibleUserRolesAtCreate() {
     return unmodifiableList(Collections.singletonList(CWS_WORKER));
   }
 
   @Override
-  public List<String> getPossibleUserRolesAtUpdate() {
-    return unmodifiableList(Arrays.asList(OFFICE_ADMIN, CWS_WORKER));
+  public List<String> getMaxPossibleUserRolesAtUpdate() {
+    if(isCalsExternalWorker(getUser())) {
+      return unmodifiableList(Collections.singletonList(CALS_EXTERNAL_WORKER));
+    } else {
+      return unmodifiableList(Arrays.asList(OFFICE_ADMIN, CWS_WORKER));
+    }
   }
 }

@@ -77,13 +77,13 @@ public abstract class BaseAuthorizerTest {
     assertCan(getAuthorizerWithExceptionFactory(user)::checkCanResendInvitationMessage);
   }
 
-  protected void assertCanNotEditRoles(User user, MessageCode errorCode) {
-    assertCanNot(errorCode, getAuthorizerWithExceptionFactory(user)::checkCanEditRoles);
-  }
-
-  protected void assertCanEditRoles(User user) {
-    assertCan(getAuthorizerWithExceptionFactory(user)::checkCanEditRoles);
-  }
+//  protected void assertCanNotEditRoles(User user, MessageCode errorCode) {
+//    assertCanNot(errorCode, getAuthorizerWithExceptionFactory(user)::checkCanEditRoles);
+//  }
+//
+//  protected void assertCanEditRoles(User user) {
+//    assertCan(getAuthorizerWithExceptionFactory(user)::checkCanEditRoles);
+//  }
 
   private void assertCanNot(MessageCode errorCode, Check check) {
     try {
