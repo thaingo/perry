@@ -1,11 +1,14 @@
 package gov.ca.cwds.idm.service.role.implementor;
 
+import static gov.ca.cwds.config.api.idm.Roles.CALS_EXTERNAL_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.getStrongestAdminRole;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isCalsExternalWorker;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isCountyAdmin;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isStateAdmin;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isSuperAdmin;
+import static gov.ca.cwds.idm.service.authorization.UserRolesService.isUser;
+import static gov.ca.cwds.service.messages.MessageCode.CANNOT_EDIT_ROLES_OF_CALS_EXTERNAL_WORKER;
 import static gov.ca.cwds.service.messages.MessageCode.STATE_ADMIN_ROLES_CANNOT_BE_EDITED;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserCountyName;
@@ -28,11 +31,6 @@ public abstract class AbstractAdminActionsAuthorizer implements AdminActionsAuth
   AbstractAdminActionsAuthorizer(User user) {
     this.user = user;
   }
-
-//  @Override
-//  public void checkCanEditRoles() {
-//    checkUserisNotCalsExternalWorker(CANNOT_EDIT_ROLES_OF_CALS_EXTERNAL_WORKER, user.getId());
-//  }
 
   protected User getUser() {
     return user;
@@ -75,8 +73,19 @@ public abstract class AbstractAdminActionsAuthorizer implements AdminActionsAuth
   }
 
   protected final void checkStateAdminUserRolesAreNotEdited(UserUpdate userUpdate) {
-    if (isStateAdmin(getUser()) && !Utils.toSet(STATE_ADMIN).equals(userUpdate.getRoles())) {
-      throwAuthorizationException(STATE_ADMIN_ROLES_CANNOT_BE_EDITED, getUser().getId());
+    checkRolesAreNotEdited(STATE_ADMIN, userUpdate, STATE_ADMIN_ROLES_CANNOT_BE_EDITED);
+  }
+
+  protected final void checkCalsExternalWorkerRolesAreNotEdited(UserUpdate userUpdate) {
+    checkRolesAreNotEdited(CALS_EXTERNAL_WORKER, userUpdate, CANNOT_EDIT_ROLES_OF_CALS_EXTERNAL_WORKER);
+  }
+
+  private void checkRolesAreNotEdited(String userMainRole, UserUpdate userUpdate, MessageCode errorCode) {
+    if(userUpdate.getRoles() == null){
+      return;
+    }
+    if (isUser(getUser(), userMainRole) && !Utils.toSet(userMainRole).equals(userUpdate.getRoles())) {
+      throwAuthorizationException(errorCode, getUser().getId());
     }
   }
 

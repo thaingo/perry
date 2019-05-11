@@ -1,21 +1,15 @@
 package gov.ca.cwds.idm.service.role.implementor;
 
-import static gov.ca.cwds.config.api.idm.Roles.CALS_EXTERNAL_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
-import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
-import static gov.ca.cwds.idm.service.authorization.UserRolesService.isCalsExternalWorker;
-import static gov.ca.cwds.idm.service.authorization.UserRolesService.isStateAdmin;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_SUPER_ADMIN_CANNOT_UPDATE_USERS_WITH_SUPER_ADMIN_ROLE;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_SUPER_ADMIN_CANNOT_VIEW_USERS_WITH_SUPER_ADMIN_ROLE;
-import static gov.ca.cwds.service.messages.MessageCode.STATE_ADMIN_ROLES_CANNOT_BE_EDITED;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
 
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
-import java.util.Collections;
 import java.util.List;
 
 class StateAdminAuthorizer extends AbstractAdminActionsAuthorizer {
@@ -43,18 +37,12 @@ class StateAdminAuthorizer extends AbstractAdminActionsAuthorizer {
   public void checkCanUpdateUser(UserUpdate userUpdate) {
     checkUserIsNotSuperAdmin(NOT_SUPER_ADMIN_CANNOT_UPDATE_USERS_WITH_SUPER_ADMIN_ROLE);
     checkStateAdminUserRolesAreNotEdited(userUpdate);
+    checkCalsExternalWorkerRolesAreNotEdited(userUpdate);
   }
 
   @Override
   public List<String> getMaxAllowedUserRolesAtUpdate() {
-    User user = getUser();
-
-
-    if (isCalsExternalWorker(user)) {
-      return Collections.singletonList(CALS_EXTERNAL_WORKER);
-    } else {
       return unmodifiableList(asList(COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER));
-    }
   }
 
   @Override

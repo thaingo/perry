@@ -1,10 +1,8 @@
 package gov.ca.cwds.idm.service.role.implementor;
 
-import static gov.ca.cwds.config.api.idm.Roles.CALS_EXTERNAL_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
-import static gov.ca.cwds.idm.service.authorization.UserRolesService.isCalsExternalWorker;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isCountyAdmin;
 import static gov.ca.cwds.service.messages.MessageCode.COUNTY_ADMIN_CANNOT_RESEND_INVITATION_FOR_USER_FROM_OTHER_COUNTY;
 import static gov.ca.cwds.service.messages.MessageCode.COUNTY_ADMIN_CANNOT_UPDATE_STATE_ADMIN;
@@ -18,7 +16,6 @@ import static java.util.Collections.unmodifiableList;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 class CountyAdminAuthorizer extends AbstractAdminActionsAuthorizer {
@@ -50,15 +47,14 @@ class CountyAdminAuthorizer extends AbstractAdminActionsAuthorizer {
     checkAdminAndUserInTheSameCounty(COUNTY_ADMIN_CANNOT_UPDATE_USER_FROM_OTHER_COUNTY, getUser().getId());
     checkUserIsNotStateAdmin(COUNTY_ADMIN_CANNOT_UPDATE_STATE_ADMIN);
     checkUserIsNotSuperAdmin(NOT_SUPER_ADMIN_CANNOT_UPDATE_USERS_WITH_SUPER_ADMIN_ROLE);
+    checkCalsExternalWorkerRolesAreNotEdited(userUpdate);
   }
 
   @Override
   public List<String> getMaxAllowedUserRolesAtUpdate() {
     User user = getUser();
 
-    if(isCalsExternalWorker(user)) {
-      return Collections.singletonList(CALS_EXTERNAL_WORKER);
-    } else if (isCountyAdmin(user) && isAdminInTheSameCountyAsUser()){
+    if (isCountyAdmin(user) && isAdminInTheSameCountyAsUser()){
       return unmodifiableList(Arrays.asList(COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER));
     } else {
       return unmodifiableList(Arrays.asList(OFFICE_ADMIN, CWS_WORKER));

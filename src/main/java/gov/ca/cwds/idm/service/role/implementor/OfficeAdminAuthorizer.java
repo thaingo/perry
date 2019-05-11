@@ -1,9 +1,7 @@
 package gov.ca.cwds.idm.service.role.implementor;
 
-import static gov.ca.cwds.config.api.idm.Roles.CALS_EXTERNAL_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
-import static gov.ca.cwds.idm.service.authorization.UserRolesService.isCalsExternalWorker;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isOfficeAdmin;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_OFFICE;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_SUPER_ADMIN_CANNOT_UPDATE_USERS_WITH_SUPER_ADMIN_ROLE;
@@ -48,18 +46,17 @@ class OfficeAdminAuthorizer extends AbstractAdminActionsAuthorizer {
     checkUserIsNotCountyAdmin(OFFICE_ADMIN_CANNOT_UPDATE_COUNTY_ADMIN);
     checkUserIsNotStateAdmin(OFFICE_ADMIN_CANNOT_UPDATE_STATE_ADMIN);
     checkUserIsNotSuperAdmin(NOT_SUPER_ADMIN_CANNOT_UPDATE_USERS_WITH_SUPER_ADMIN_ROLE);
+    checkCalsExternalWorkerRolesAreNotEdited(userUpdate);
   }
 
   @Override
   public List<String> getMaxAllowedUserRolesAtUpdate() {
     User user = getUser();
 
-    if (isCalsExternalWorker(user)) {
-      return Collections.singletonList(CALS_EXTERNAL_WORKER);
-    } else if (isOfficeAdmin(user) && isAdminInTheSameOfficeAsUser()) {
+    if (isOfficeAdmin(user) && isAdminInTheSameOfficeAsUser()) {
       return unmodifiableList(Arrays.asList(OFFICE_ADMIN, CWS_WORKER));
     } else {
-      return unmodifiableList(Arrays.asList(CWS_WORKER));
+      return Collections.singletonList(CWS_WORKER);
     }
   }
 
@@ -71,6 +68,6 @@ class OfficeAdminAuthorizer extends AbstractAdminActionsAuthorizer {
 
   @Override
   public List<String> getMaxAllowedUserRolesAtCreate() {
-    return unmodifiableList(Collections.singletonList(CWS_WORKER));
+    return Collections.singletonList(CWS_WORKER);
   }
 }

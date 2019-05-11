@@ -52,9 +52,4 @@ class SuperAdminAuthorizer extends AbstractAdminActionsAuthorizer {
         asList(SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER,
             CALS_EXTERNAL_WORKER));
   }
-
-//  @Override
-//  public void checkCanEditRoles() {
-//    //no authorization rules to check
-//  }
 }
