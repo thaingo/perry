@@ -9,6 +9,7 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.exception.AdminAuthorizationException;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.service.messages.MessageCode;
@@ -94,12 +95,30 @@ public abstract class BaseAuthorizerTest {
     }
   }
 
+  private void assertCanNot(MessageCode errorCode, CheckWithUserUpdate check) {
+    try {
+      check.check(new UserUpdate());
+      fail("Expected an AdminAuthorizationException to be thrown");
+    } catch (AdminAuthorizationException e) {
+      assertThat(e.getErrorCode(), is(errorCode));
+    }
+  }
+
   private void assertCan(Check check) {
     check.check();
+  }
+
+  private void assertCan(CheckWithUserUpdate check) {
+    check.check(new UserUpdate());
   }
 
   @FunctionalInterface
   interface Check {
     void check();
+  }
+
+  @FunctionalInterface
+  interface CheckWithUserUpdate {
+    void check(UserUpdate userUpdate);
   }
 }

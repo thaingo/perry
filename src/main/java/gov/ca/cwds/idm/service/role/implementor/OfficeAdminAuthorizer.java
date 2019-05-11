@@ -17,6 +17,7 @@ import static gov.ca.cwds.service.messages.MessageCode.OFFICE_ADMIN_CANNOT_VIEW_
 import static java.util.Collections.unmodifiableList;
 
 import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.idm.dto.UserUpdate;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -42,7 +43,7 @@ class OfficeAdminAuthorizer extends AbstractAdminActionsAuthorizer {
   }
 
   @Override
-  public void checkCanUpdateUser() {
+  public void checkCanUpdateUser(UserUpdate userUpdate) {
     checkAdminAndUserInTheSameOffice(OFFICE_ADMIN_CANNOT_UPDATE_USER_FROM_OTHER_OFFICE);
     checkUserIsNotCountyAdmin(OFFICE_ADMIN_CANNOT_UPDATE_COUNTY_ADMIN);
     checkUserIsNotStateAdmin(OFFICE_ADMIN_CANNOT_UPDATE_STATE_ADMIN);

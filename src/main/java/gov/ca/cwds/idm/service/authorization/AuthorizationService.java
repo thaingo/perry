@@ -16,7 +16,7 @@ public interface AuthorizationService {
 
   void checkCanResendInvitationMessage(User user);
 
-  boolean canUpdateUser(User user);
+  boolean canUpdateUser(User user, UserUpdate updateUserDto);
 
   List<String> getRolesListForUI(User user);
 }

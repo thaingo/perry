@@ -5,6 +5,7 @@ import static gov.ca.cwds.util.Utils.isRacfidUser;
 import gov.ca.cwds.idm.dto.ListOfValues;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserEditDetails;
+import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.service.authorization.AuthorizationService;
 import gov.ca.cwds.idm.service.role.implementor.AdminActionsAuthorizerFactory;
 import java.util.List;
@@ -25,7 +26,7 @@ public class UserEditDetailsService {
   public UserEditDetails getEditDetails(User user) {
     UserEditDetails editDetails = new UserEditDetails();
 
-    boolean canUpdateUser = authorizationService.canUpdateUser(user);
+    boolean canUpdateUser = authorizationService.canUpdateUser(user, new UserUpdate());
 
     editDetails.setEditable(canUpdateUser);
     editDetails.setRoles(getRoles(user, canUpdateUser));

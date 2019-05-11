@@ -10,6 +10,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
 
 import gov.ca.cwds.idm.dto.User;
+import gov.ca.cwds.idm.dto.UserUpdate;
 import java.util.List;
 
 class SuperAdminAuthorizer extends AbstractAdminActionsAuthorizer {
@@ -29,7 +30,7 @@ class SuperAdminAuthorizer extends AbstractAdminActionsAuthorizer {
   }
 
   @Override
-  public void checkCanUpdateUser() {
+  public void checkCanUpdateUser(UserUpdate userUpdate) {
     //no authorization rules to check
   }
 
