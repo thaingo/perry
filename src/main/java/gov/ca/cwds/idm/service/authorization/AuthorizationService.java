@@ -18,5 +18,5 @@ public interface AuthorizationService {
 
   boolean canUpdateUser(User user);
 
-  List<String> getPossibleUserRolesAtUpdate(User user);
+  List<String> getRolesListForUI(User user);
 }

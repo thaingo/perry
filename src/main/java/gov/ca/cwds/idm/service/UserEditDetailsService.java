@@ -37,7 +37,7 @@ public class UserEditDetailsService {
   private ListOfValues getRoles(User user, boolean canUpdateUser) {
     ListOfValues usersPossibleRoles = new ListOfValues();
 
-    List<String> possibleRoles = authorizationService.getPossibleUserRolesAtUpdate(user);
+    List<String> possibleRoles = authorizationService.getRolesListForUI(user);
     boolean rolesAreEditable = possibleRoles.size() > 1;//there is always current user role
 
     usersPossibleRoles.setEditable(canUpdateUser && rolesAreEditable);

@@ -47,9 +47,9 @@ class StateAdminAuthorizer extends AbstractAdminActionsAuthorizer {
     User user = getUser();
 
     if (isStateAdmin(user)) {
-      return unmodifiableList(Collections.singletonList(STATE_ADMIN));
+      return Collections.singletonList(STATE_ADMIN);
     } else if (isCalsExternalWorker(user)) {
-      return unmodifiableList(Collections.singletonList(CALS_EXTERNAL_WORKER));
+      return Collections.singletonList(CALS_EXTERNAL_WORKER);
     } else {
       return unmodifiableList(asList(COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER));
     }

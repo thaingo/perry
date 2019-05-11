@@ -1,5 +1,6 @@
 package gov.ca.cwds.idm.service.authorization;
 
+import static gov.ca.cwds.idm.service.filter.MainRoleFilter.getMainRole;
 import static gov.ca.cwds.service.messages.MessageCode.ADMIN_CANNOT_UPDATE_HIMSELF;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserName;
 
@@ -11,6 +12,7 @@ import gov.ca.cwds.idm.service.role.implementor.AbstractAdminActionsAuthorizer;
 import gov.ca.cwds.idm.service.role.implementor.AdminActionsAuthorizerFactory;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 import org.slf4j.Logger;
@@ -25,8 +27,6 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(AuthorizationServiceImpl.class);
 
-  private static final String ROLES_EDITING = "roles editing";
-  private static final String PERMISSIONS_EDITING = "permissions editing";
   private static final String USER_UPDATE = "user update";
 
   private AdminActionsAuthorizerFactory adminRoleImplementorFactory;
@@ -43,6 +43,16 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     getAdminActionsAuthorizer(user).checkCanCreateUser();
   }
 
+  @Override
+  public void checkCanUpdateUser(User user, UserUpdate updateUserDto) {
+    checkCanUpdateUser(user);
+  }
+
+  @Override
+  public boolean canUpdateUser(User user) {
+    return canAuthorizeOperation(user, this::checkCanUpdateUser, USER_UPDATE);
+  }
+
   void checkCanUpdateUser(User user) {
     if (user.getId().equals(getCurrentUserName())) {
       throw exceptionFactory.createAuthorizationException(ADMIN_CANNOT_UPDATE_HIMSELF);
@@ -51,54 +61,13 @@ public class AuthorizationServiceImpl implements AuthorizationService {
   }
 
   @Override
-  public boolean canUpdateUser(User user) {
-    return canAuthorizeOperation(user, this::checkCanUpdateUser, USER_UPDATE);
-  }
-
-  @Override
-  public void checkCanUpdateUser(User user, UserUpdate updateUserDto) {
-    if (user.getId().equals(getCurrentUserName())) {
-      throw exceptionFactory.createAuthorizationException(ADMIN_CANNOT_UPDATE_HIMSELF);
+  public List<String> getRolesListForUI(User existedUser) {
+    if(canUpdateUser(existedUser)) {
+      return getAdminActionsAuthorizer(existedUser).getMaxAllowedUserRolesAtUpdate();
+    } else {
+      return Collections.singletonList(getMainRole(existedUser.getRoles()));
     }
-    checkCanUpdateUser(user);
-//    authorizeRolesUpdate(user, updateUserDto);
   }
-
-  @Override
-  public List<String> getPossibleUserRolesAtUpdate(User existedUser) {
-    Collection<String> allowedRoles =
-        getAdminActionsAuthorizer(existedUser).getMaxAllowedUserRolesAtUpdate();
-    return new ArrayList<>(allowedRoles);
-  }
-
-//  private void authorizeRolesUpdate(User user, UserUpdate updateUserDto) {
-//    if (updateUserDto.getRoles() == null) {
-//      return;
-//    }
-//    if (wasRolesActuallyEdited(user, updateUserDto)) {
-//      checkCanEditRoles(user);
-//    }
-//  }
-
-//  private boolean wasRolesActuallyEdited(User user, UserUpdate updateUserDto) {
-//    return wasActuallyEdited(
-//        user.getRoles(),
-//        updateUserDto.getRoles());
-//  }
-
-//  private boolean wasActuallyEdited(Set<String> oldSet, Set<String> newSet) {
-//    return !CollectionUtils.isEqualCollection(oldSet, newSet);
-//  }
-
-
-//  private void checkCanEditRoles(User user) {
-//    getAdminActionsAuthorizer(user).checkCanEditRoles();
-//  }
-
-//  @Override
-//  public boolean canEditRoles(User user) {
-//    return canAuthorizeOperation(user, this::checkCanEditRoles, ROLES_EDITING);
-//  }
 
   private AdminActionsAuthorizer getAdminActionsAuthorizer(User user) {
     AbstractAdminActionsAuthorizer authorizer = adminRoleImplementorFactory

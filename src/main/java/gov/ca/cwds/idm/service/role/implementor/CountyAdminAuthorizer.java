@@ -56,7 +56,7 @@ class CountyAdminAuthorizer extends AbstractAdminActionsAuthorizer {
     User user = getUser();
 
     if(isCalsExternalWorker(user)) {
-      return unmodifiableList(Collections.singletonList(CALS_EXTERNAL_WORKER));
+      return Collections.singletonList(CALS_EXTERNAL_WORKER);
     } else if (isCountyAdmin(user) && isAdminInTheSameCountyAsUser()){
       return unmodifiableList(Arrays.asList(COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER));
     } else {

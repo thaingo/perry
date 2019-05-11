@@ -54,7 +54,7 @@ class OfficeAdminAuthorizer extends AbstractAdminActionsAuthorizer {
     User user = getUser();
 
     if (isCalsExternalWorker(user)) {
-      return unmodifiableList(Collections.singletonList(CALS_EXTERNAL_WORKER));
+      return Collections.singletonList(CALS_EXTERNAL_WORKER);
     } else if (isOfficeAdmin(user) && isAdminInTheSameOfficeAsUser()) {
       return unmodifiableList(Arrays.asList(OFFICE_ADMIN, CWS_WORKER));
     } else {
