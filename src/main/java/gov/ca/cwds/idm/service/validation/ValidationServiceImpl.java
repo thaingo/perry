@@ -58,7 +58,6 @@ public class ValidationServiceImpl implements ValidationService {
     validateCountyNameIsProvided(enrichedUser);
 
     validateUserRolesExistAtCreate(enrichedUser);
-    validateUserRolesAreAllowedAtCreate(enrichedUser);
 
     validateCreateByCansPermission(enrichedUser);
 
@@ -150,16 +149,6 @@ public class ValidationServiceImpl implements ValidationService {
     if (newUserRoles.isEmpty()) {
       throwValidationException(UNABLE_TO_REMOVE_ALL_ROLES);
     }
-  }
-
-  private void validateUserRolesAreAllowedAtCreate(User user) {
-    Collection<String> roles = user.getRoles();
-    if (roles == null) {
-      return;
-    }
-    Collection<String> allowedRoles =
-        adminActionsAuthorizerFactory.getAdminActionsAuthorizer(user).getMaxAllowedUserRolesAtCreate();
-    validateByAllowedRoles(roles, allowedRoles, UNABLE_TO_CREATE_USER_WITH_UNALLOWED_ROLES);
   }
 
   private void validateNewUserRolesAreAllowedAtUpdate(User existedUser, UserUpdate updateUser) {

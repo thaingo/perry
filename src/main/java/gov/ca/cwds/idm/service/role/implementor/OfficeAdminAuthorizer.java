@@ -38,6 +38,7 @@ class OfficeAdminAuthorizer extends AbstractAdminActionsAuthorizer {
   @Override
   public void checkCanCreateUser() {
     checkAdminAndUserInTheSameOffice(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_OFFICE);
+    checkRolesAreAllowedAtCreate(CWS_WORKER);
   }
 
   @Override
@@ -64,10 +65,5 @@ class OfficeAdminAuthorizer extends AbstractAdminActionsAuthorizer {
   public void checkCanResendInvitationMessage() {
     checkAdminAndUserInTheSameOffice(
         OFFICE_ADMIN_CANNOT_RESEND_INVITATION_FOR_USER_FROM_OTHER_OFFICE);
-  }
-
-  @Override
-  public List<String> getMaxAllowedUserRolesAtCreate() {
-    return Collections.singletonList(CWS_WORKER);
   }
 }

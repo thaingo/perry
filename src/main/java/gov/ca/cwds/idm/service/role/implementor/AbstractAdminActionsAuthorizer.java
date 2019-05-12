@@ -10,9 +10,12 @@ import static gov.ca.cwds.idm.service.authorization.UserRolesService.isSuperAdmi
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isUser;
 import static gov.ca.cwds.service.messages.MessageCode.CANNOT_EDIT_ROLES_OF_CALS_EXTERNAL_WORKER;
 import static gov.ca.cwds.service.messages.MessageCode.STATE_ADMIN_ROLES_CANNOT_BE_EDITED;
+import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_CREATE_USER_WITH_UNALLOWED_ROLES;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserCountyName;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserOfficeIds;
+import static gov.ca.cwds.util.Utils.toCommaDelimitedString;
+import static java.util.Arrays.asList;
 
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
@@ -20,6 +23,7 @@ import gov.ca.cwds.idm.service.authorization.AdminActionsAuthorizer;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.service.messages.MessageCode;
 import gov.ca.cwds.util.Utils;
+import java.util.Collection;
 import java.util.Set;
 
 public abstract class AbstractAdminActionsAuthorizer implements AdminActionsAuthorizer {
@@ -99,6 +103,29 @@ public abstract class AbstractAdminActionsAuthorizer implements AdminActionsAuth
     String userOfficeId = getUser().getOfficeId();
     Set<String> adminOfficeIds = getCurrentUserOfficeIds();
     return userOfficeId != null && adminOfficeIds != null && adminOfficeIds.contains(userOfficeId);
+  }
+
+  protected final void checkRolesAreAllowedAtCreate(String... allowedRoles) {
+    Collection<String> roles = getUser().getRoles();
+    if (roles == null) {
+      return;
+    }
+    checkByAllowedRoles(roles, asList(allowedRoles), UNABLE_TO_CREATE_USER_WITH_UNALLOWED_ROLES);
+  }
+
+  private void checkByAllowedRoles(Collection<String> newRoles, Collection<String> allowedRoles,
+      MessageCode errorCode) {
+
+    if (!allowedRoles.containsAll(newRoles)) {
+      throwValidationException(
+          errorCode,
+          toCommaDelimitedString(newRoles),
+          toCommaDelimitedString(allowedRoles));
+    }
+  }
+
+  private void throwValidationException(MessageCode messageCode, String... args) {
+    throw exceptionFactory.createValidationException(messageCode, args);
   }
 
   private final void throwAuthorizationException(MessageCode messageCode, String... args) {

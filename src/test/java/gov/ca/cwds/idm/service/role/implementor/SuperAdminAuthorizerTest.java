@@ -167,11 +167,11 @@ public class SuperAdminAuthorizerTest extends BaseAuthorizerTest {
     assertCanUpdateUser(calsWorker());
   }
 
-  @Test
-  public void testGetPossibleUserRolesAtCreate() {
-    assertEquals(
-        Arrays.asList(SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER,
-            CALS_EXTERNAL_WORKER),
-        getAuthorizer(cwsWorker()).getMaxAllowedUserRolesAtCreate());
-  }
+//  @Test
+//  public void testGetPossibleUserRolesAtCreate() {
+//    assertEquals(
+//        Arrays.asList(SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER,
+//            CALS_EXTERNAL_WORKER),
+//        getAuthorizer(cwsWorker()).getMaxAllowedUserRolesAtCreate());
+//  }
 }

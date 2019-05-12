@@ -26,7 +26,8 @@ class SuperAdminAuthorizer extends AbstractAdminActionsAuthorizer {
 
   @Override
   public void checkCanCreateUser() {
-    //no authorization rules to check
+    checkRolesAreAllowedAtCreate(SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER,
+        CALS_EXTERNAL_WORKER);
   }
 
   @Override
@@ -37,13 +38,6 @@ class SuperAdminAuthorizer extends AbstractAdminActionsAuthorizer {
   @Override
   public void checkCanResendInvitationMessage() {
     //no authorization rules to check
-  }
-
-  @Override
-  public List<String> getMaxAllowedUserRolesAtCreate() {
-    return unmodifiableList(
-        asList(SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER,
-            CALS_EXTERNAL_WORKER));
   }
 
   @Override

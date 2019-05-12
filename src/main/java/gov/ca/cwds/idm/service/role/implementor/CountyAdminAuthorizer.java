@@ -34,6 +34,7 @@ class CountyAdminAuthorizer extends AbstractAdminActionsAuthorizer {
   @Override
   public void checkCanCreateUser() {
     checkAdminAndUserInTheSameCounty(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY, getUser().getCountyName());
+    checkRolesAreAllowedAtCreate(OFFICE_ADMIN, CWS_WORKER);
   }
 
   @Override
@@ -59,10 +60,5 @@ class CountyAdminAuthorizer extends AbstractAdminActionsAuthorizer {
     } else {
       return unmodifiableList(Arrays.asList(OFFICE_ADMIN, CWS_WORKER));
     }
-  }
-
-  @Override
-  public List<String> getMaxAllowedUserRolesAtCreate() {
-    return unmodifiableList(Arrays.asList(OFFICE_ADMIN, CWS_WORKER));
   }
 }

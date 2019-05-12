@@ -25,7 +25,7 @@ class StateAdminAuthorizer extends AbstractAdminActionsAuthorizer {
 
   @Override
   public void checkCanCreateUser() {
-    //no authorization rules to check
+    checkRolesAreAllowedAtCreate(COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER);
   }
 
   @Override
@@ -43,10 +43,5 @@ class StateAdminAuthorizer extends AbstractAdminActionsAuthorizer {
   @Override
   public List<String> getMaxAllowedUserRolesAtUpdate() {
       return unmodifiableList(asList(COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER));
-  }
-
-  @Override
-  public List<String> getMaxAllowedUserRolesAtCreate() {
-    return unmodifiableList(asList(COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER));
   }
 }
