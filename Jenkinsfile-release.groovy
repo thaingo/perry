@@ -69,10 +69,12 @@ def smokeTestStage(environment) {
 def deployWithSmoke(environment) {
   node(environment) {
     checkoutStage()
-    deployToStage(environment, env.version)
-    updateManifestStage(environment, env.version)
-    smokeTestStage(environment)
-    integrationTestStage(environment)
+    rollbackDeployOnFailure('perry', environment, githubCredentialsId, ansibleCommand(environment, env.version)) {
+        deployToStage(environment, env.version)
+        updateManifestStage(environment, env.version)
+        smokeTestStage(environment)
+        integrationTestStage(environment)
+    }
     cleanWs()
     }
   }
@@ -81,13 +83,19 @@ def deployToStage(environment, version) {
   stage("Deploy to $environment") {
     ws {
       git branch: "master", credentialsId: githubCredentialsId, url: deAnsibleGithubUrl
-      if (environment == 'integration') {
-        sh "ansible-playbook -e VERSION_NUMBER=$version -e NEW_RELIC_AGENT=$USE_NEWRELIC  -e OAUTH_STATE=true -i inventories/$environment/hosts.yml deploy-perry.yml --vault-password-file ~/.ssh/vault.txt -vv"
-      } else {
-        sh "ansible-playbook -e VERSION_NUMBER=$version -e NEW_RELIC_AGENT=$USE_NEWRELIC -i inventories/$environment/hosts.yml deploy-perry.yml --vault-password-file ~/.ssh/vault.txt -vv"
-      }
+      sh ansibleCommand(environment, version)
     }
   }
+}
+
+def ansibleCommand(environment, version){
+    def ansiCommand = ''
+    if (environment == 'integration') {
+        ansiCommand = "ansible-playbook -e VERSION_NUMBER=$version -e NEW_RELIC_AGENT=$USE_NEWRELIC  -e OAUTH_STATE=true -i inventories/$environment/hosts.yml deploy-perry.yml --vault-password-file ~/.ssh/vault.txt -vv"
+    } else {
+        ansiCommand = "ansible-playbook -e VERSION_NUMBER=$version -e NEW_RELIC_AGENT=$USE_NEWRELIC -i inventories/$environment/hosts.yml deploy-perry.yml --vault-password-file ~/.ssh/vault.txt -vv"
+    }
+    ansiCommand
 }
 
 def updateManifestStage(environment, version) {
