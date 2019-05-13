@@ -99,6 +99,6 @@ public class UserRolesService {
   }
 
   public static <T extends RolesHolder> boolean isUser(T user, String strongestAdminRole) {
-    return strongestAdminRole.equals(getMainRole(user.getRoles()));
+    return strongestAdminRole.equals(getMainRole(user));
   }
 }

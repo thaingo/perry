@@ -18,5 +18,8 @@ public interface AuthorizationService {
 
   boolean canUpdateUser(User user, UserUpdate updateUserDto);
 
-  List<String> getRolesListForUI(User user);
+  //only update rules which do not depend on new values are fired
+  boolean canUpdateUser(User user);
+
+  List<String> getAllowedUiRolesForUpdate(User user);
 }

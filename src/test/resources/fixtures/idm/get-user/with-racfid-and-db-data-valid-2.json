@@ -43,9 +43,7 @@
     "editable": false,
     "roles": {
       "editable": false,
-      "possible_values": [
-        "CWS-worker"
-      ]
+      "possible_values": []
     },
     "permissions": {
       "editable": false,

@@ -90,5 +90,4 @@ public class Roles {
     return roleIds != null ? roleIds.stream().sorted().map(Roles::getRoleNameById)
         .collect(Collectors.toSet()) : null;
   }
-
 }

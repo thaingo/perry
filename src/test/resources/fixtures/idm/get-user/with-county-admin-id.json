@@ -30,7 +30,7 @@
     "editable": false,
     "roles": {
       "editable": false,
-      "possible_values": ["County-admin"]
+      "possible_values": []
     },
     "permissions": {
       "editable": false,

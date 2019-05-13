@@ -77,7 +77,6 @@ public class ValidationServiceImpl implements ValidationService {
     validatePhoneNumber(updateUserDto.getPhoneNumber());
     validatePhoneExtension(updateUserDto.getPhoneExtensionNumber());
     validateNotAllRolesAreRemovedAtUpdate(updateUserDto);
-    validateNewUserRolesAreAllowedAtUpdate(existedUser, updateUserDto);
     validateUpdateByCansPermission(existedUser, updateUserDto);
     validateActivateUser(existedUser, updateUserDto);
   }
@@ -149,17 +148,6 @@ public class ValidationServiceImpl implements ValidationService {
     if (newUserRoles.isEmpty()) {
       throwValidationException(UNABLE_TO_REMOVE_ALL_ROLES);
     }
-  }
-
-  private void validateNewUserRolesAreAllowedAtUpdate(User existedUser, UserUpdate updateUser) {
-    Collection<String> newRoles = updateUser.getRoles();
-    if (newRoles == null) {
-      return;
-    }
-    Collection<String> allowedRoles =
-        adminActionsAuthorizerFactory.getAdminActionsAuthorizer(existedUser)
-            .getMaxAllowedUserRolesAtUpdate();
-    validateByAllowedRoles(newRoles, allowedRoles, UNABLE_UPDATE_UNALLOWED_ROLES);
   }
 
   private void validateByAllowedRoles(Collection<String> newRoles, Collection<String> allowedRoles,

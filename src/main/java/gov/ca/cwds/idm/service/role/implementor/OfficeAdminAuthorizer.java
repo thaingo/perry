@@ -2,7 +2,6 @@ package gov.ca.cwds.idm.service.role.implementor;
 
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
-import static gov.ca.cwds.idm.service.authorization.UserRolesService.isOfficeAdmin;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_OFFICE;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_SUPER_ADMIN_CANNOT_UPDATE_USERS_WITH_SUPER_ADMIN_ROLE;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_SUPER_ADMIN_CANNOT_VIEW_USERS_WITH_SUPER_ADMIN_ROLE;
@@ -12,13 +11,9 @@ import static gov.ca.cwds.service.messages.MessageCode.OFFICE_ADMIN_CANNOT_UPDAT
 import static gov.ca.cwds.service.messages.MessageCode.OFFICE_ADMIN_CANNOT_UPDATE_USER_FROM_OTHER_OFFICE;
 import static gov.ca.cwds.service.messages.MessageCode.OFFICE_ADMIN_CANNOT_VIEW_USERS_WITH_CALS_EXTERNAL_WORKER_ROLE;
 import static gov.ca.cwds.service.messages.MessageCode.OFFICE_ADMIN_CANNOT_VIEW_USER_FROM_OTHER_COUNTY;
-import static java.util.Collections.unmodifiableList;
 
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 class OfficeAdminAuthorizer extends AbstractAdminActionsAuthorizer {
 
@@ -50,17 +45,6 @@ class OfficeAdminAuthorizer extends AbstractAdminActionsAuthorizer {
     checkCalsExternalWorkerRolesAreNotEdited(userUpdate);
     checkCanChangeCwsWorkerRoleTo(userUpdate, CWS_WORKER);
     checkCanChangeOfficeAdminUserRoleTo(userUpdate, OFFICE_ADMIN, CWS_WORKER);
-  }
-
-  @Override
-  public List<String> getMaxAllowedUserRolesAtUpdate() {
-    User user = getUser();
-
-    if (isOfficeAdmin(user) && isAdminInTheSameOfficeAsUser()) {
-      return unmodifiableList(Arrays.asList(OFFICE_ADMIN, CWS_WORKER));
-    } else {
-      return Collections.singletonList(CWS_WORKER);
-    }
   }
 
   @Override

@@ -29,7 +29,7 @@
     "editable": false,
     "roles": {
       "editable": false,
-      "possible_values": ["State-admin"]
+      "possible_values": []
     },
     "permissions": {
       "editable": false,
