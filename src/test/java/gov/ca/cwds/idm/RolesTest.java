@@ -1,5 +1,8 @@
 package gov.ca.cwds.idm;
 
+import static gov.ca.cwds.config.api.idm.Roles.CALS_EXTERNAL_WORKER;
+import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.SUPER_ADMIN;
@@ -8,11 +11,11 @@ import static org.junit.Assert.assertEquals;
 
 import gov.ca.cwds.config.api.idm.Roles;
 import gov.ca.cwds.idm.util.WithMockCustomUser;
+import java.util.Arrays;
 import org.junit.Test;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-
 public class RolesTest extends BaseIdmIntegrationTest {
 
   @Test
@@ -48,6 +51,14 @@ public class RolesTest extends BaseIdmIntegrationTest {
   @Test
   public void getRoleNameByIdTest() {
     assertEquals("Office Administrator", Roles.getRoleNameById(Roles.OFFICE_ADMIN));
+  }
+
+  @Test
+  public void testGetAllRolesUsedByUI() {
+    assertEquals(
+        Arrays.asList(SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER,
+            CALS_EXTERNAL_WORKER),
+        Roles.getAllRolesUsedByUI());
   }
 
   private void assertGetRolesSuccess() throws Exception {

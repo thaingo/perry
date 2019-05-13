@@ -28,6 +28,9 @@ public class Roles {
 
   public static final String EXTERNAL_APP = "External-application";
 
+  private static final String ID = "id";
+  private static final String NAME = "name";
+
   private static List<Map<String, String>> roleList;
 
   private static Map<String, String> roleListReversed = new HashMap<>(7);
@@ -38,19 +41,21 @@ public class Roles {
     return toSet(SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN);
   }
 
+
+
   /**
    * Static block to initialize roleList to be used as a dictionary service.
    */
   static {
     roleList = new ArrayList<>();
-    roleList.add(ImmutableMap.of("id", SUPER_ADMIN, "name", "Global Administrator"));
-    roleList.add(ImmutableMap.of("id", STATE_ADMIN, "name", "State Administrator"));
-    roleList.add(ImmutableMap.of("id", COUNTY_ADMIN, "name", "County Administrator"));
-    roleList.add(ImmutableMap.of("id", OFFICE_ADMIN, "name", "Office Administrator"));
-    roleList.add(ImmutableMap.of("id", CWS_WORKER, "name", "CWS Worker"));
-    roleList.add(ImmutableMap.of("id", CALS_EXTERNAL_WORKER, "name", "CALS External Worker"));
+    roleList.add(ImmutableMap.of(ID, SUPER_ADMIN, NAME, "Global Administrator"));
+    roleList.add(ImmutableMap.of(ID, STATE_ADMIN, NAME, "State Administrator"));
+    roleList.add(ImmutableMap.of(ID, COUNTY_ADMIN, NAME, "County Administrator"));
+    roleList.add(ImmutableMap.of(ID, OFFICE_ADMIN, NAME, "Office Administrator"));
+    roleList.add(ImmutableMap.of(ID, CWS_WORKER, NAME, "CWS Worker"));
+    roleList.add(ImmutableMap.of(ID, CALS_EXTERNAL_WORKER, NAME, "CALS External Worker"));
     for (Map<String, String> role: roleList) {
-      roleListReversed.put(role.get("id"), role.get("name"));
+      roleListReversed.put(role.get(ID), role.get(NAME));
     }
   }
 
@@ -59,6 +64,10 @@ public class Roles {
    */
   public static List<Map<String, String>> findRoles() {
     return Roles.roleList;
+  }
+
+  public static List<String> getAllRolesUsedByUI() {
+    return Roles.roleList.stream().map(m -> m.get(ID)).collect(Collectors.toList());
   }
 
   public static String toRolesKeysString(User user) {
