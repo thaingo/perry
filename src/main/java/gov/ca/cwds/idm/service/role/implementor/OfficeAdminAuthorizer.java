@@ -48,6 +48,8 @@ class OfficeAdminAuthorizer extends AbstractAdminActionsAuthorizer {
     checkUserIsNotStateAdmin(OFFICE_ADMIN_CANNOT_UPDATE_STATE_ADMIN);
     checkUserIsNotSuperAdmin(NOT_SUPER_ADMIN_CANNOT_UPDATE_USERS_WITH_SUPER_ADMIN_ROLE);
     checkCalsExternalWorkerRolesAreNotEdited(userUpdate);
+    checkCanChangeCwsWorkerRoleTo(userUpdate, CWS_WORKER);
+    checkCanChangeOfficeAdminUserRoleTo(userUpdate, OFFICE_ADMIN, CWS_WORKER);
   }
 
   @Override

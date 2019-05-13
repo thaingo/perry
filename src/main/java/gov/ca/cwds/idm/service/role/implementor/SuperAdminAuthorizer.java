@@ -32,7 +32,14 @@ class SuperAdminAuthorizer extends AbstractAdminActionsAuthorizer {
 
   @Override
   public void checkCanUpdateUser(UserUpdate userUpdate) {
-    //no authorization rules to check
+    checkCanChangeCwsWorkerRoleTo(userUpdate,
+        STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER);
+    checkCanChangeOfficeAdminUserRoleTo(userUpdate,
+        STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER);
+    checkCanChangeCountyAdminUserRoleTo(userUpdate,
+        STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER);
+    checkCanChangeStateAdminUserRoleTo(userUpdate,
+        STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER);
   }
 
   @Override

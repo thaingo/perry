@@ -1,16 +1,21 @@
 package gov.ca.cwds.idm.service.role.implementor;
 
 import static gov.ca.cwds.config.api.idm.Roles.CALS_EXTERNAL_WORKER;
+import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
+import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.getStrongestAdminRole;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isCalsExternalWorker;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isCountyAdmin;
+import static gov.ca.cwds.idm.service.authorization.UserRolesService.isCwsWorker;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isStateAdmin;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isSuperAdmin;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isUser;
 import static gov.ca.cwds.service.messages.MessageCode.CANNOT_EDIT_ROLES_OF_CALS_EXTERNAL_WORKER;
 import static gov.ca.cwds.service.messages.MessageCode.STATE_ADMIN_ROLES_CANNOT_BE_EDITED;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_CREATE_USER_WITH_UNALLOWED_ROLES;
+import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_UNALLOWED_ROLES;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserCountyName;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserOfficeIds;
@@ -111,6 +116,31 @@ public abstract class AbstractAdminActionsAuthorizer implements AdminActionsAuth
       return;
     }
     checkByAllowedRoles(roles, asList(allowedRoles), UNABLE_TO_CREATE_USER_WITH_UNALLOWED_ROLES);
+  }
+
+
+  protected final void checkCanChangeCwsWorkerRoleTo(UserUpdate userUpdate, String... allowedRoles) {
+    checkUserCanChangeRoleOnlyTo(CWS_WORKER, userUpdate, allowedRoles);
+  }
+
+  protected final void checkCanChangeOfficeAdminUserRoleTo(UserUpdate userUpdate, String... allowedRoles) {
+    checkUserCanChangeRoleOnlyTo(OFFICE_ADMIN, userUpdate, allowedRoles);
+  }
+
+  protected final void checkCanChangeCountyAdminUserRoleTo(UserUpdate userUpdate, String... allowedRoles) {
+    checkUserCanChangeRoleOnlyTo(COUNTY_ADMIN, userUpdate, allowedRoles);
+  }
+
+  protected final void checkCanChangeStateAdminUserRoleTo(UserUpdate userUpdate, String... allowedRoles) {
+    checkUserCanChangeRoleOnlyTo(STATE_ADMIN, userUpdate, allowedRoles);
+  }
+
+  private void checkUserCanChangeRoleOnlyTo(String userCurrentRole, UserUpdate userUpdate,
+      String... allowedRoles) {
+    Set<String> newRoles = userUpdate.getRoles();
+    if (newRoles != null && isUser(getUser(), userCurrentRole)) {
+      checkByAllowedRoles(newRoles, asList(allowedRoles), UNABLE_UPDATE_UNALLOWED_ROLES);
+    }
   }
 
   private void checkByAllowedRoles(Collection<String> newRoles, Collection<String> allowedRoles,

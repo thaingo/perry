@@ -38,6 +38,9 @@ class StateAdminAuthorizer extends AbstractAdminActionsAuthorizer {
     checkUserIsNotSuperAdmin(NOT_SUPER_ADMIN_CANNOT_UPDATE_USERS_WITH_SUPER_ADMIN_ROLE);
     checkStateAdminUserRolesAreNotEdited(userUpdate);
     checkCalsExternalWorkerRolesAreNotEdited(userUpdate);
+    checkCanChangeCwsWorkerRoleTo(userUpdate, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER);
+    checkCanChangeOfficeAdminUserRoleTo(userUpdate, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER);
+    checkCanChangeCountyAdminUserRoleTo(userUpdate, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER);
   }
 
   @Override
