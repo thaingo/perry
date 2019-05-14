@@ -11,9 +11,7 @@ import static gov.ca.cwds.service.messages.MessageCode.NO_USER_WITH_RACFID_IN_CW
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_ASSIGN_CANS_PERMISSION_TO_NON_RACFID_USER;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_CREATE_NON_RACFID_USER_WITH_CANS_PERMISSION;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_CREATE_USER_WITHOUT_ROLES;
-import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_CREATE_USER_WITH_UNALLOWED_ROLES;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_REMOVE_ALL_ROLES;
-import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_UNALLOWED_ROLES;
 import static gov.ca.cwds.service.messages.MessageCode.USER_CANNOT_BE_UNLOCKED;
 import static gov.ca.cwds.service.messages.MessageCode.USER_PHONE_IS_NOT_PROVIDED;
 import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
@@ -25,7 +23,6 @@ import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
-import gov.ca.cwds.idm.service.role.implementor.AdminActionsAuthorizerFactory;
 import gov.ca.cwds.service.CwsUserInfoService;
 import gov.ca.cwds.service.messages.MessageCode;
 import java.util.Collection;
@@ -43,8 +40,6 @@ public class ValidationServiceImpl implements ValidationService {
   static final PatternValidator PHONE_EXTENSION_PATTERN_VALIDATOR = new PatternValidator("\\d{0,7}");
 
   private CwsUserInfoService cwsUserInfoService;
-
-  private AdminActionsAuthorizerFactory adminActionsAuthorizerFactory;
 
   private ExceptionFactory exceptionFactory;
 
@@ -276,12 +271,6 @@ public class ValidationServiceImpl implements ValidationService {
   public void setCognitoServiceFacade(
       CognitoServiceFacade cognitoServiceFacade) {
     this.cognitoServiceFacade = cognitoServiceFacade;
-  }
-
-  @Autowired
-  public void setAdminActionsAuthorizerFactory(
-      AdminActionsAuthorizerFactory adminActionsAuthorizerFactory) {
-    this.adminActionsAuthorizerFactory = adminActionsAuthorizerFactory;
   }
 
   @Autowired
