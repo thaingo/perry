@@ -35,98 +35,98 @@ public class SuperAdminAuthorizerTest extends BaseAuthorizerTest {
 
   @Test
   public void canViewSuperAdmin() {
-    assertCanViewUser(superAdmin());
+    canView(superAdmin());
   }
 
   @Test
   public void canViewHimself() {
     User user = superAdmin();
     user.setId(ADMIN_ID);
-    assertCanViewUser(superAdmin());
+    canView(superAdmin());
   }
 
   @Test
   public void canViewStateAdmin() {
-    assertCanViewUser(stateAdmin());
+    canView(stateAdmin());
   }
 
   @Test
   public void canViewCountyAdmin() {
-    assertCanViewUser(countyAdmin());
+    canView(countyAdmin());
   }
 
   @Test
   public void canViewOfficeAdmin() {
-    assertCanViewUser(officeAdmin());
+    canView(officeAdmin());
   }
 
   @Test
   public void canViewCwsWorker() {
-    assertCanViewUser(cwsWorker());
+    canView(cwsWorker());
   }
 
   @Test
   public void canViewCalsWorker() {
-    assertCanViewUser(calsWorker());
+    canView(calsWorker());
   }
 
   @Test
   public void canCreateSuperAdmin() {
-    assertCanCreateUser(superAdmin());
+    canCreate(superAdmin());
   }
 
   @Test
   public void canCreateStateAdmin() {
-    assertCanCreateUser(stateAdmin());
+    canCreate(stateAdmin());
   }
 
   @Test
   public void canCreateCountyAdmin() {
-    assertCanCreateUser(countyAdmin());
+    canCreate(countyAdmin());
   }
 
   @Test
   public void canCreateOfficeAdmin() {
-    assertCanCreateUser(officeAdmin());
+    canCreate(officeAdmin());
   }
 
   @Test
   public void canCreateCwsWorker() {
-    assertCanCreateUser(cwsWorker());
+    canCreate(cwsWorker());
   }
 
   @Test
   public void canCreateCalsWorker() {
-    assertCanCreateUser(calsWorker());
+    canCreate(calsWorker());
   }
 
   @Test
   public void canUpdateSuperAdmin() {
-    assertCanUpdateUser(superAdmin());
+    canUpdate(superAdmin());
   }
 
   @Test
   public void canUpdateStateAdmin() {
-    assertCanUpdateUser(stateAdmin());
+    canUpdate(stateAdmin());
   }
 
   @Test
   public void canUpdateCountyAdmin() {
-    assertCanUpdateUser(countyAdmin());
+    canUpdate(countyAdmin());
   }
 
   @Test
   public void canUpdateOfficeAdmin() {
-    assertCanUpdateUser(officeAdmin());
+    canUpdate(officeAdmin());
   }
 
   @Test
   public void canUpdateCwsWorker() {
-    assertCanUpdateUser(cwsWorker());
+    canUpdate(cwsWorker());
   }
 
   @Test
   public void canUpdateCalsWorker() {
-    assertCanUpdateUser(calsWorker());
+    canUpdate(calsWorker());
   }
 }

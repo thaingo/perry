@@ -11,6 +11,7 @@ import static org.powermock.api.mockito.PowerMockito.when;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.exception.AdminAuthorizationException;
+import gov.ca.cwds.idm.exception.UserValidationException;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.service.messages.MessageCode;
 import gov.ca.cwds.service.messages.MessagesService;
@@ -46,39 +47,55 @@ public abstract class BaseAuthorizerTest {
     return authorizer;
   }
 
-  protected void assertCanNotViewUser(User user, MessageCode errorCode) {
-    assertCanNot(errorCode, getAuthorizerWithExceptionFactory(user)::checkCanViewUser);
-  }
-
-  protected void assertCanViewUser(User user) {
+  protected void canView(User user) {
     assertCan(getAuthorizerWithExceptionFactory(user)::checkCanViewUser);
   }
 
-  protected void assertCanNotCreateUser(User user, MessageCode errorCode) {
-    assertCanNot(errorCode, getAuthorizerWithExceptionFactory(user)::checkCanCreateUser);
+  protected void canNotView(User user, MessageCode errorCode) {
+    assertAuthorizationException(errorCode, getAuthorizerWithExceptionFactory(user)::checkCanViewUser);
   }
 
-  protected void assertCanCreateUser(User user) {
+  protected void canCreate(User user) {
     assertCan(getAuthorizerWithExceptionFactory(user)::checkCanCreateUser);
   }
 
-  protected void assertCanNotUpdateUser(User user, MessageCode errorCode) {
-    assertCanNot(errorCode, getAuthorizerWithExceptionFactory(user)::checkCanUpdateUser);
+  protected void canNotCreateWithAuthorizationError(User user, MessageCode errorCode) {
+    assertAuthorizationException(errorCode,
+        getAuthorizerWithExceptionFactory(user)::checkCanCreateUser);
   }
 
-  protected void assertCanUpdateUser(User user) {
+  protected void canNotCreateWithValidationError(User user, MessageCode errorCode) {
+    assertValidationException(errorCode,
+        getAuthorizerWithExceptionFactory(user)::checkCanCreateUser);
+  }
+
+  protected void canUpdate(User user) {
     assertCan(getAuthorizerWithExceptionFactory(user)::checkCanUpdateUser);
   }
 
+  protected void canNotUpdateWithAuthorizationError(User user, MessageCode errorCode) {
+    assertAuthorizationException(errorCode, getAuthorizerWithExceptionFactory(user)::checkCanUpdateUser);
+  }
+
+  protected void canNotUpdateWithAuthorizationError(User user, MessageCode errorCode, UserUpdate userUpdate) {
+    assertAuthorizationException(errorCode, getAuthorizerWithExceptionFactory(user)::checkCanUpdateUser, userUpdate);
+  }
+
+  protected void canNotUpdateWithValidationError(User user, MessageCode errorCode,
+      UserUpdate userUpdate) {
+    assertValidationException(errorCode,
+        getAuthorizerWithExceptionFactory(user)::checkCanUpdateUser, userUpdate);
+  }
+
   protected void assertCanNotResendInvitationMessage(User user, MessageCode errorCode) {
-    assertCanNot(errorCode, getAuthorizerWithExceptionFactory(user)::checkCanResendInvitationMessage);
+    assertAuthorizationException(errorCode, getAuthorizerWithExceptionFactory(user)::checkCanResendInvitationMessage);
   }
 
   protected void assertCanResendInvitationMessage(User user) {
     assertCan(getAuthorizerWithExceptionFactory(user)::checkCanResendInvitationMessage);
   }
 
-  private void assertCanNot(MessageCode errorCode, Check check) {
+  private void assertAuthorizationException(MessageCode errorCode, Check check) {
     try {
       check.check();
       fail("Expected an AdminAuthorizationException to be thrown");
@@ -87,9 +104,38 @@ public abstract class BaseAuthorizerTest {
     }
   }
 
-  private void assertCanNot(MessageCode errorCode, CheckWithUserUpdate check) {
+  private void assertValidationException(MessageCode errorCode, Check check) {
+    try {
+      check.check();
+      fail("Expected an UserValidationException to be thrown");
+    } catch (UserValidationException e) {
+      assertThat(e.getErrorCode(), is(errorCode));
+    }
+  }
+
+  private void assertAuthorizationException(MessageCode errorCode, CheckWithUserUpdate check) {
     try {
       check.check(new UserUpdate());
+      fail("Expected an AdminAuthorizationException to be thrown");
+    } catch (AdminAuthorizationException e) {
+      assertThat(e.getErrorCode(), is(errorCode));
+    }
+  }
+
+  private void assertValidationException(MessageCode errorCode, CheckWithUserUpdate check,
+      UserUpdate userUpdate) {
+    try {
+      check.check(userUpdate);
+      fail("Expected an UserValidationException to be thrown");
+    } catch (UserValidationException e) {
+      assertThat(e.getErrorCode(), is(errorCode));
+    }
+  }
+
+  private void assertAuthorizationException(MessageCode errorCode, CheckWithUserUpdate check,
+      UserUpdate userUpdate) {
+    try {
+      check.check(userUpdate);
       fail("Expected an AdminAuthorizationException to be thrown");
     } catch (AdminAuthorizationException e) {
       assertThat(e.getErrorCode(), is(errorCode));
