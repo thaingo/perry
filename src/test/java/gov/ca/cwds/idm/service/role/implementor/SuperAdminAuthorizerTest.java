@@ -1,10 +1,5 @@
 package gov.ca.cwds.idm.service.role.implementor;
 
-import static gov.ca.cwds.config.api.idm.Roles.CALS_EXTERNAL_WORKER;
-import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
-import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
-import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
-import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.SUPER_ADMIN;
 import static gov.ca.cwds.idm.util.TestHelper.ADMIN_ID;
 import static gov.ca.cwds.idm.util.TestHelper.COUNTY_NAME;
@@ -19,11 +14,9 @@ import static gov.ca.cwds.idm.util.TestHelper.superAdmin;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserCountyName;
 import static gov.ca.cwds.util.Utils.toSet;
-import static org.junit.Assert.assertEquals;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 import gov.ca.cwds.idm.dto.User;
-import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -39,36 +32,6 @@ public class SuperAdminAuthorizerTest extends BaseAuthorizerTest {
     when(getCurrentUser()).thenReturn(admin(toSet(SUPER_ADMIN), COUNTY_NAME, toSet(OFFICE_ID)));
     when(getCurrentUserCountyName()).thenReturn(null);
   }
-
-//  @Test
-//  public void canEditSuperAdminRoles() {
-//    assertCanEditRoles(superAdmin());
-//  }
-
-//  @Test
-//  public void canEditStateAdminRoles() {
-//    assertCanEditRoles(stateAdmin());
-//  }
-
-//  @Test
-//  public void canEditCountyAdminRoles() {
-//    assertCanEditRoles(countyAdmin());
-//  }
-
-//  @Test
-//  public void canEditOfficeAdminRoles() {
-//    assertCanEditRoles(officeAdmin());
-//  }
-
-//  @Test
-//  public void canEditCwsWorkerRoles() {
-//    assertCanEditRoles(cwsWorker());
-//  }
-
-//  @Test
-//  public void canEditCalsWorkerRoles() {
-//    assertCanEditRoles(calsWorker());
-//  }
 
   @Test
   public void canViewSuperAdmin() {
@@ -166,12 +129,4 @@ public class SuperAdminAuthorizerTest extends BaseAuthorizerTest {
   public void canUpdateCalsWorker() {
     assertCanUpdateUser(calsWorker());
   }
-
-//  @Test
-//  public void testGetPossibleUserRolesAtCreate() {
-//    assertEquals(
-//        Arrays.asList(SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER,
-//            CALS_EXTERNAL_WORKER),
-//        getAuthorizer(cwsWorker()).getMaxAllowedUserRolesAtCreate());
-//  }
 }

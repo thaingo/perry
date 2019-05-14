@@ -33,11 +33,6 @@ public class CountyAdminAuthorizerTest extends BaseAuthorizerTest {
     return new CountyAdminAuthorizer(user);
   }
 
-//  @Test
-//  public void canEditOfficeAdminRoles() {
-//    assertCanEditRoles(officeAdmin());
-//  }
-
   @Test
   public void canNotViewSuperAdmin() {
     assertCanNotViewUser(superAdmin(), NOT_SUPER_ADMIN_CANNOT_VIEW_USERS_WITH_SUPER_ADMIN_ROLE);
@@ -47,11 +42,4 @@ public class CountyAdminAuthorizerTest extends BaseAuthorizerTest {
   public void canNotUpdateSuperAdmin() {
     assertCanNotUpdateUser(superAdmin(), NOT_SUPER_ADMIN_CANNOT_UPDATE_USERS_WITH_SUPER_ADMIN_ROLE);
   }
-
-//  @Test
-//  public void testGetPossibleUserRolesAtCreate() {
-//    assertEquals(
-//        Arrays.asList(OFFICE_ADMIN, CWS_WORKER),
-//        getAuthorizer(cwsWorker()).getMaxAllowedUserRolesAtCreate());
-//  }
 }
