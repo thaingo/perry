@@ -26,8 +26,12 @@ public class CurrentAuthenticatedUserUtil {
     return (String) getCurrentUser().getParameter(COUNTY_NAME_PARAM);
   }
 
-  public static String getCurrentUserFullName() {
-    return getCurrentUser().getParameter(FIRST_NAME) + " " + getCurrentUser().getParameter(LAST_NAME);
+  public static String getCurrentUserFirstName() {
+    return (String) getCurrentUser().getParameter(FIRST_NAME);
+  }
+
+  public static String getCurrentUserLastName() {
+    return (String) getCurrentUser().getParameter(LAST_NAME);
   }
 
   public static Set<String> getCurrentUserOfficeIds() {
