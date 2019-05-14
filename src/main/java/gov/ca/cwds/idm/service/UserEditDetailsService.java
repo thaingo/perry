@@ -2,13 +2,13 @@ package gov.ca.cwds.idm.service;
 
 import static gov.ca.cwds.idm.service.filter.MainRoleFilter.getMainRole;
 import static gov.ca.cwds.util.Utils.isRacfidUser;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
 import gov.ca.cwds.idm.dto.ListOfValues;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserEditDetails;
 import gov.ca.cwds.idm.service.authorization.AuthorizationService;
-import gov.ca.cwds.idm.service.role.implementor.AdminActionsAuthorizerFactory;
 import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,9 +50,12 @@ public class UserEditDetailsService {
   private ListOfValues getPermissions(User user, boolean canUpdateUser) {
     ListOfValues usersPossiblePermissions = new ListOfValues();
     usersPossiblePermissions.setEditable(canUpdateUser);
-    usersPossiblePermissions.setPossibleValues(
-        possibleUserPermissionsService.getPossibleUserPermissions(isRacfidUser(user)));
-
+    if(canUpdateUser) {
+      usersPossiblePermissions.setPossibleValues(
+          possibleUserPermissionsService.getPossibleUserPermissions(isRacfidUser(user)));
+    } else {
+      usersPossiblePermissions.setPossibleValues(emptyList());
+    }
     return usersPossiblePermissions;
   }
 
