@@ -27,7 +27,7 @@ public class UserRolesService {
   }
 
   public static <T extends RolesHolder> boolean isCountyAdmin(T user) {
-    return isUser(user, COUNTY_ADMIN);
+    return isUserWithMainRole(user, COUNTY_ADMIN);
   }
 
   public static <T extends RolesHolder> boolean hasSuperAdminRole(T user) {
@@ -35,7 +35,7 @@ public class UserRolesService {
   }
 
   public static <T extends RolesHolder> boolean isSuperAdmin(T user) {
-    return isUser(user, SUPER_ADMIN);
+    return isUserWithMainRole(user, SUPER_ADMIN);
   }
 
   public static <T extends RolesHolder> boolean hasStateAdminRole(T user) {
@@ -43,7 +43,7 @@ public class UserRolesService {
   }
 
   public static <T extends RolesHolder> boolean isStateAdmin(T user) {
-    return isUser(user, STATE_ADMIN);
+    return isUserWithMainRole(user, STATE_ADMIN);
   }
 
   public static <T extends RolesHolder> boolean hasCalsExternalWorkerRole(T user) {
@@ -51,11 +51,11 @@ public class UserRolesService {
   }
 
   public static <T extends RolesHolder> boolean isCalsExternalWorker(T user) {
-    return isUser(user, CALS_EXTERNAL_WORKER);
+    return isUserWithMainRole(user, CALS_EXTERNAL_WORKER);
   }
 
   public static <T extends RolesHolder> boolean isCwsWorker(T user) {
-    return isUser(user, CWS_WORKER);
+    return isUserWithMainRole(user, CWS_WORKER);
   }
 
   public static <T extends RolesHolder> boolean hasOfficeAdminRole(T user) {
@@ -63,7 +63,7 @@ public class UserRolesService {
   }
 
   public static <T extends RolesHolder> boolean isOfficeAdmin(T user) {
-    return isUser(user, OFFICE_ADMIN);
+    return isUserWithMainRole(user, OFFICE_ADMIN);
   }
 
   public static <T extends RolesHolder> boolean hasIdmJobRole(T user) {
@@ -98,7 +98,7 @@ public class UserRolesService {
     }
   }
 
-  public static <T extends RolesHolder> boolean isUser(T user, String strongestAdminRole) {
+  public static <T extends RolesHolder> boolean isUserWithMainRole(T user, String strongestAdminRole) {
     return strongestAdminRole.equals(getMainRole(user));
   }
 }

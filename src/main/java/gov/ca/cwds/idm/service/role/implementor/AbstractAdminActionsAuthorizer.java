@@ -10,7 +10,7 @@ import static gov.ca.cwds.idm.service.authorization.UserRolesService.isCalsExter
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isCountyAdmin;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isStateAdmin;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isSuperAdmin;
-import static gov.ca.cwds.idm.service.authorization.UserRolesService.isUser;
+import static gov.ca.cwds.idm.service.authorization.UserRolesService.isUserWithMainRole;
 import static gov.ca.cwds.service.messages.MessageCode.CANNOT_EDIT_ROLES_OF_CALS_EXTERNAL_WORKER;
 import static gov.ca.cwds.service.messages.MessageCode.STATE_ADMIN_ROLES_CANNOT_BE_EDITED;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_CREATE_USER_WITH_UNALLOWED_ROLES;
@@ -92,7 +92,7 @@ public abstract class AbstractAdminActionsAuthorizer implements AdminActionsAuth
     if(userUpdate.getRoles() == null){
       return;
     }
-    if (isUser(getUser(), userMainRole) && !Utils.toSet(userMainRole).equals(userUpdate.getRoles())) {
+    if (isUserWithMainRole(getUser(), userMainRole) && !Utils.toSet(userMainRole).equals(userUpdate.getRoles())) {
       throwAuthorizationException(errorCode, getUser().getId());
     }
   }
@@ -136,7 +136,7 @@ public abstract class AbstractAdminActionsAuthorizer implements AdminActionsAuth
   private void checkUserCanChangeRoleOnlyTo(String userCurrentRole, UserUpdate userUpdate,
       String... allowedRoles) {
     Set<String> newRoles = userUpdate.getRoles();
-    if (newRoles != null && isUser(getUser(), userCurrentRole)) {
+    if (newRoles != null && isUserWithMainRole(getUser(), userCurrentRole)) {
       checkByAllowedRoles(newRoles, asList(allowedRoles), UNABLE_UPDATE_UNALLOWED_ROLES);
     }
   }

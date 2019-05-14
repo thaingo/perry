@@ -8,6 +8,19 @@ import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.SUPER_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.getAdminRoles;
+import static gov.ca.cwds.idm.service.authorization.UserRolesService.getStrongestAdminRole;
+import static gov.ca.cwds.idm.service.authorization.UserRolesService.hasCalsExternalWorkerRole;
+import static gov.ca.cwds.idm.service.authorization.UserRolesService.hasCountyAdminRole;
+import static gov.ca.cwds.idm.service.authorization.UserRolesService.hasOfficeAdminRole;
+import static gov.ca.cwds.idm.service.authorization.UserRolesService.hasStateAdminRole;
+import static gov.ca.cwds.idm.service.authorization.UserRolesService.hasSuperAdminRole;
+import static gov.ca.cwds.idm.service.authorization.UserRolesService.isAdmin;
+import static gov.ca.cwds.idm.service.authorization.UserRolesService.isCountyAdmin;
+import static gov.ca.cwds.idm.service.authorization.UserRolesService.isNonRacfIdCalsUser;
+import static gov.ca.cwds.idm.service.authorization.UserRolesService.isOfficeAdmin;
+import static gov.ca.cwds.idm.service.authorization.UserRolesService.isStateAdmin;
+import static gov.ca.cwds.idm.service.authorization.UserRolesService.isSuperAdmin;
+import static gov.ca.cwds.idm.service.authorization.UserRolesService.isUserWithMainRole;
 import static gov.ca.cwds.util.Utils.toSet;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
@@ -34,144 +47,182 @@ public class UserRolesServiceTest {
 
   @Test
   public void testIsAdmin() {
-    assertFalse(UserRolesService.isAdmin(userToken()));
-    assertFalse(UserRolesService.isAdmin(userToken(CWS_WORKER)));
-    assertFalse(UserRolesService.isAdmin(userToken(EXTERNAL_APP)));
-    assertFalse(UserRolesService.isAdmin(userToken(CALS_EXTERNAL_WORKER, CWS_WORKER)));
-    assertTrue(UserRolesService.isAdmin(userToken(CWS_WORKER, COUNTY_ADMIN)));
-    assertTrue(UserRolesService.isAdmin(userToken(STATE_ADMIN, OFFICE_ADMIN)));
-    assertTrue(UserRolesService.isAdmin(userToken(OFFICE_ADMIN)));
-    assertTrue(UserRolesService.isAdmin(userToken(STATE_ADMIN)));
+    assertFalse(isAdmin(userToken()));
+    assertFalse(isAdmin(userToken(CWS_WORKER)));
+    assertFalse(isAdmin(userToken(EXTERNAL_APP)));
+    assertFalse(isAdmin(userToken(CALS_EXTERNAL_WORKER, CWS_WORKER)));
+    assertTrue(isAdmin(userToken(CWS_WORKER, COUNTY_ADMIN)));
+    assertTrue(isAdmin(userToken(STATE_ADMIN, OFFICE_ADMIN)));
+    assertTrue(isAdmin(userToken(OFFICE_ADMIN)));
+    assertTrue(isAdmin(userToken(STATE_ADMIN)));
   }
 
   @Test
   public void testIsNonRacfIdCalsUser() {
-    assertFalse(UserRolesService.isNonRacfIdCalsUser(userToken()));
-    assertFalse(UserRolesService.isNonRacfIdCalsUser((userToken(CWS_WORKER))));
-    assertFalse(UserRolesService.isNonRacfIdCalsUser(userToken(COUNTY_ADMIN)));
-    assertTrue(UserRolesService.isNonRacfIdCalsUser(userToken(CALS_EXTERNAL_WORKER)));
-    assertTrue(UserRolesService.isNonRacfIdCalsUser(userToken(OFFICE_ADMIN, CALS_EXTERNAL_WORKER)));
-    assertTrue(UserRolesService.isNonRacfIdCalsUser(userToken(CALS_EXTERNAL_WORKER, CWS_WORKER)));
+    assertFalse(isNonRacfIdCalsUser(userToken()));
+    assertFalse(isNonRacfIdCalsUser((userToken(CWS_WORKER))));
+    assertFalse(isNonRacfIdCalsUser(userToken(COUNTY_ADMIN)));
+    assertTrue(isNonRacfIdCalsUser(userToken(CALS_EXTERNAL_WORKER)));
+    assertTrue(isNonRacfIdCalsUser(userToken(OFFICE_ADMIN, CALS_EXTERNAL_WORKER)));
+    assertTrue(isNonRacfIdCalsUser(userToken(CALS_EXTERNAL_WORKER, CWS_WORKER)));
   }
 
   @Test(expected = IllegalStateException.class)
   public void testGetStrongestAdminRoleForIdmJob() {
-    UserRolesService.getStrongestAdminRole(userToken(EXTERNAL_APP));
+    getStrongestAdminRole(userToken(EXTERNAL_APP));
   }
 
   @Test(expected = IllegalStateException.class)
   public void testGetStrongestAdminRoleForNotAdmin() {
-    UserRolesService.getStrongestAdminRole(userToken());
+    getStrongestAdminRole(userToken());
   }
 
   @Test
   public void testGetStrongestAdminRole() {
-    assertThat(UserRolesService.getStrongestAdminRole(userToken(SUPER_ADMIN)), is(SUPER_ADMIN));
-    assertThat(UserRolesService.getStrongestAdminRole(userToken(STATE_ADMIN)), is(STATE_ADMIN));
-    assertThat(UserRolesService.getStrongestAdminRole(userToken(COUNTY_ADMIN)), is(COUNTY_ADMIN));
-    assertThat(UserRolesService.getStrongestAdminRole(userToken(OFFICE_ADMIN)), is(OFFICE_ADMIN));
-    assertThat(UserRolesService.getStrongestAdminRole(userToken(SUPER_ADMIN, STATE_ADMIN)),
+    assertThat(getStrongestAdminRole(userToken(SUPER_ADMIN)), is(SUPER_ADMIN));
+    assertThat(getStrongestAdminRole(userToken(STATE_ADMIN)), is(STATE_ADMIN));
+    assertThat(getStrongestAdminRole(userToken(COUNTY_ADMIN)), is(COUNTY_ADMIN));
+    assertThat(getStrongestAdminRole(userToken(OFFICE_ADMIN)), is(OFFICE_ADMIN));
+    assertThat(getStrongestAdminRole(userToken(SUPER_ADMIN, STATE_ADMIN)),
         is(SUPER_ADMIN));
-    assertThat(UserRolesService.getStrongestAdminRole(userToken(STATE_ADMIN, COUNTY_ADMIN)),
+    assertThat(getStrongestAdminRole(userToken(STATE_ADMIN, COUNTY_ADMIN)),
         is(STATE_ADMIN));
-    assertThat(UserRolesService.getStrongestAdminRole(userToken(OFFICE_ADMIN, COUNTY_ADMIN)),
+    assertThat(getStrongestAdminRole(userToken(OFFICE_ADMIN, COUNTY_ADMIN)),
         is(COUNTY_ADMIN));
-    assertThat(UserRolesService.getStrongestAdminRole(userToken(OFFICE_ADMIN, STATE_ADMIN)),
+    assertThat(getStrongestAdminRole(userToken(OFFICE_ADMIN, STATE_ADMIN)),
         is(STATE_ADMIN));
   }
 
   @Test
   public void testHasStateAdminRole() {
-    assertTrue(UserRolesService.hasStateAdminRole(user(STATE_ADMIN)));
-    assertTrue(UserRolesService.hasStateAdminRole(user(STATE_ADMIN, COUNTY_ADMIN)));
-    assertFalse(UserRolesService.hasStateAdminRole(user(COUNTY_ADMIN)));
-    assertFalse(UserRolesService.hasStateAdminRole(user()));
+    assertTrue(hasStateAdminRole(user(STATE_ADMIN)));
+    assertTrue(hasStateAdminRole(user(STATE_ADMIN, COUNTY_ADMIN)));
+    assertFalse(hasStateAdminRole(user(COUNTY_ADMIN)));
+    assertFalse(hasStateAdminRole(user()));
   }
 
   @Test
   public void testIsStateAdmin() {
-    assertTrue(UserRolesService.isStateAdmin(user(STATE_ADMIN)));
-    assertTrue(UserRolesService.isStateAdmin(user(STATE_ADMIN, COUNTY_ADMIN)));
-    assertFalse(UserRolesService.isStateAdmin(user(STATE_ADMIN, SUPER_ADMIN)));
-    assertFalse(UserRolesService.isStateAdmin(user(COUNTY_ADMIN)));
-    assertFalse(UserRolesService.isStateAdmin(user()));
+    assertTrue(isStateAdmin(user(STATE_ADMIN)));
+    assertTrue(isStateAdmin(user(STATE_ADMIN, COUNTY_ADMIN)));
+    assertFalse(isStateAdmin(user(STATE_ADMIN, SUPER_ADMIN)));
+    assertFalse(isStateAdmin(user(COUNTY_ADMIN)));
+    assertFalse(isStateAdmin(user()));
   }
 
   @Test
   public void testUserHasCountyAdminRole() {
-    assertTrue(UserRolesService.hasCountyAdminRole(user(COUNTY_ADMIN)));
-    assertTrue(UserRolesService.hasCountyAdminRole(user(COUNTY_ADMIN, OFFICE_ADMIN)));
-    assertTrue(UserRolesService.hasCountyAdminRole(user(STATE_ADMIN, COUNTY_ADMIN)));
-    assertFalse(UserRolesService.hasCountyAdminRole(user(STATE_ADMIN)));
-    assertFalse(UserRolesService.hasCountyAdminRole(user(OFFICE_ADMIN)));
-    assertFalse(UserRolesService.hasCountyAdminRole(user()));
+    assertTrue(hasCountyAdminRole(user(COUNTY_ADMIN)));
+    assertTrue(hasCountyAdminRole(user(COUNTY_ADMIN, OFFICE_ADMIN)));
+    assertTrue(hasCountyAdminRole(user(STATE_ADMIN, COUNTY_ADMIN)));
+    assertFalse(hasCountyAdminRole(user(STATE_ADMIN)));
+    assertFalse(hasCountyAdminRole(user(OFFICE_ADMIN)));
+    assertFalse(hasCountyAdminRole(user()));
   }
 
   @Test
   public void testUserIsCountyAdmin() {
-    assertTrue(UserRolesService.isCountyAdmin(user(COUNTY_ADMIN)));
-    assertTrue(UserRolesService.isCountyAdmin(user(COUNTY_ADMIN, OFFICE_ADMIN)));
-    assertFalse(UserRolesService.isCountyAdmin(user(STATE_ADMIN, COUNTY_ADMIN)));
-    assertFalse(UserRolesService.isCountyAdmin(user(STATE_ADMIN)));
-    assertFalse(UserRolesService.isCountyAdmin(user(OFFICE_ADMIN)));
-    assertFalse(UserRolesService.isCountyAdmin(user()));
+    assertTrue(isCountyAdmin(user(COUNTY_ADMIN)));
+    assertTrue(isCountyAdmin(user(COUNTY_ADMIN, OFFICE_ADMIN)));
+    assertFalse(isCountyAdmin(user(STATE_ADMIN, COUNTY_ADMIN)));
+    assertFalse(isCountyAdmin(user(STATE_ADMIN)));
+    assertFalse(isCountyAdmin(user(OFFICE_ADMIN)));
+    assertFalse(isCountyAdmin(user()));
   }
 
   @Test
   public void testUserHasOfficeAdminRole() {
-    assertTrue(UserRolesService.hasOfficeAdminRole(user(OFFICE_ADMIN)));
-    assertTrue(UserRolesService.hasOfficeAdminRole(user(OFFICE_ADMIN, CWS_WORKER)));
-    assertTrue(UserRolesService.hasOfficeAdminRole(user(STATE_ADMIN, OFFICE_ADMIN)));
-    assertFalse(UserRolesService.hasOfficeAdminRole(user(STATE_ADMIN)));
-    assertFalse(UserRolesService.hasOfficeAdminRole(user(COUNTY_ADMIN)));
-    assertFalse(UserRolesService.hasOfficeAdminRole(user()));
+    assertTrue(hasOfficeAdminRole(user(OFFICE_ADMIN)));
+    assertTrue(hasOfficeAdminRole(user(OFFICE_ADMIN, CWS_WORKER)));
+    assertTrue(hasOfficeAdminRole(user(STATE_ADMIN, OFFICE_ADMIN)));
+    assertFalse(hasOfficeAdminRole(user(STATE_ADMIN)));
+    assertFalse(hasOfficeAdminRole(user(COUNTY_ADMIN)));
+    assertFalse(hasOfficeAdminRole(user()));
   }
 
   @Test
   public void testUserIsOfficeAdmin() {
-    assertTrue(UserRolesService.isOfficeAdmin(user(OFFICE_ADMIN)));
-    assertTrue(UserRolesService.isOfficeAdmin(user(CWS_WORKER, OFFICE_ADMIN)));
-    assertFalse(UserRolesService.isOfficeAdmin(user(CWS_WORKER, COUNTY_ADMIN)));
-    assertFalse(UserRolesService.isOfficeAdmin(user(STATE_ADMIN)));
-    assertFalse(UserRolesService.isOfficeAdmin(user(COUNTY_ADMIN)));
-    assertFalse(UserRolesService.isOfficeAdmin(user()));
+    assertTrue(isOfficeAdmin(user(OFFICE_ADMIN)));
+    assertTrue(isOfficeAdmin(user(CWS_WORKER, OFFICE_ADMIN)));
+    assertFalse(isOfficeAdmin(user(CWS_WORKER, COUNTY_ADMIN)));
+    assertFalse(isOfficeAdmin(user(STATE_ADMIN)));
+    assertFalse(isOfficeAdmin(user(COUNTY_ADMIN)));
+    assertFalse(isOfficeAdmin(user()));
   }
 
   @Test
   public void testAdminHasCountyAdminRole() {
-    assertTrue(UserRolesService.hasCountyAdminRole(userToken(COUNTY_ADMIN)));
-    assertTrue(UserRolesService.hasCountyAdminRole(userToken(COUNTY_ADMIN, OFFICE_ADMIN)));
-    assertTrue(UserRolesService.hasCountyAdminRole(userToken(STATE_ADMIN, COUNTY_ADMIN)));
-    assertFalse(UserRolesService.hasCountyAdminRole(userToken(EXTERNAL_APP)));
-    assertFalse(UserRolesService.hasCountyAdminRole(userToken()));
+    assertTrue(hasCountyAdminRole(userToken(COUNTY_ADMIN)));
+    assertTrue(hasCountyAdminRole(userToken(COUNTY_ADMIN, OFFICE_ADMIN)));
+    assertTrue(hasCountyAdminRole(userToken(STATE_ADMIN, COUNTY_ADMIN)));
+    assertFalse(hasCountyAdminRole(userToken(EXTERNAL_APP)));
+    assertFalse(hasCountyAdminRole(userToken()));
   }
 
   @Test
   public void testHasSuperAdminRole() {
-    assertTrue(UserRolesService.hasSuperAdminRole(user(SUPER_ADMIN)));
-    assertTrue(UserRolesService.hasSuperAdminRole(user(SUPER_ADMIN, STATE_ADMIN)));
-    assertFalse(UserRolesService.hasSuperAdminRole(user(COUNTY_ADMIN)));
-    assertFalse(UserRolesService.hasSuperAdminRole(user()));
+    assertTrue(hasSuperAdminRole(user(SUPER_ADMIN)));
+    assertTrue(hasSuperAdminRole(user(SUPER_ADMIN, STATE_ADMIN)));
+    assertFalse(hasSuperAdminRole(user(COUNTY_ADMIN)));
+    assertFalse(hasSuperAdminRole(user()));
   }
 
   @Test
   public void testIsSuperAdmin() {
-    assertTrue(UserRolesService.isSuperAdmin(user(SUPER_ADMIN)));
-    assertTrue(UserRolesService.isSuperAdmin(user(SUPER_ADMIN, STATE_ADMIN)));
-    assertFalse(UserRolesService.isSuperAdmin(user(COUNTY_ADMIN)));
-    assertFalse(UserRolesService.isSuperAdmin(user()));
+    assertTrue(isSuperAdmin(user(SUPER_ADMIN)));
+    assertTrue(isSuperAdmin(user(SUPER_ADMIN, STATE_ADMIN)));
+    assertFalse(isSuperAdmin(user(COUNTY_ADMIN)));
+    assertFalse(isSuperAdmin(user()));
   }
 
   @Test
   public void testCalsAdminCanView() {
-    User user = user(CALS_EXTERNAL_WORKER);
-    assertTrue(UserRolesService.hasCalsExternalWorkerRole(user));
+    assertTrue(hasCalsExternalWorkerRole(user(CALS_EXTERNAL_WORKER)));
   }
 
   @Test
   public void testCalsAdminCanNotView() {
-    User user = user(CWS_WORKER);
-    assertFalse(UserRolesService.hasCalsExternalWorkerRole(user));
+    assertFalse(hasCalsExternalWorkerRole(user(CWS_WORKER)));
+  }
+
+  @Test
+  public void testIsUserWithMainRole() {
+
+    assertTrue(isUserWithMainRole(user(SUPER_ADMIN), SUPER_ADMIN));
+    assertTrue(isUserWithMainRole(user(SUPER_ADMIN, STATE_ADMIN), SUPER_ADMIN));
+    assertFalse(isUserWithMainRole(user(COUNTY_ADMIN), SUPER_ADMIN));
+    assertFalse(isUserWithMainRole(user(), SUPER_ADMIN));
+
+    assertTrue(isUserWithMainRole(user(STATE_ADMIN), STATE_ADMIN));
+    assertTrue(isUserWithMainRole(user(STATE_ADMIN, COUNTY_ADMIN), STATE_ADMIN));
+    assertFalse(isUserWithMainRole(user(STATE_ADMIN, SUPER_ADMIN), STATE_ADMIN));
+    assertFalse(isUserWithMainRole(user(COUNTY_ADMIN), STATE_ADMIN));
+    assertFalse(isUserWithMainRole(user(), STATE_ADMIN));
+
+    assertTrue(isUserWithMainRole(user(COUNTY_ADMIN), COUNTY_ADMIN));
+    assertTrue(isUserWithMainRole(user(COUNTY_ADMIN, OFFICE_ADMIN), COUNTY_ADMIN));
+    assertFalse(isUserWithMainRole(user(STATE_ADMIN, COUNTY_ADMIN), COUNTY_ADMIN));
+    assertFalse(isUserWithMainRole(user(STATE_ADMIN), COUNTY_ADMIN));
+    assertFalse(isUserWithMainRole(user(OFFICE_ADMIN), COUNTY_ADMIN));
+    assertFalse(isUserWithMainRole(user(), COUNTY_ADMIN));
+
+    assertTrue(isUserWithMainRole(user(OFFICE_ADMIN), OFFICE_ADMIN));
+    assertTrue(isUserWithMainRole(user(CWS_WORKER, OFFICE_ADMIN), OFFICE_ADMIN));
+    assertFalse(isUserWithMainRole(user(CWS_WORKER, COUNTY_ADMIN), OFFICE_ADMIN));
+    assertFalse(isUserWithMainRole(user(STATE_ADMIN), OFFICE_ADMIN));
+    assertFalse(isUserWithMainRole(user(COUNTY_ADMIN), OFFICE_ADMIN));
+    assertFalse(isUserWithMainRole(user(), OFFICE_ADMIN));
+
+    assertTrue(isUserWithMainRole(user(CWS_WORKER), CWS_WORKER));
+    assertTrue(isUserWithMainRole(user(CWS_WORKER, CALS_EXTERNAL_WORKER), CWS_WORKER));
+    assertFalse(isUserWithMainRole(user(CWS_WORKER, COUNTY_ADMIN), CWS_WORKER));
+    assertFalse(isUserWithMainRole(user(COUNTY_ADMIN), CWS_WORKER));
+    assertFalse(isUserWithMainRole(user(), CWS_WORKER));
+
+    assertTrue(isUserWithMainRole(user(CALS_EXTERNAL_WORKER), CALS_EXTERNAL_WORKER));
+    assertFalse(isUserWithMainRole(user(CWS_WORKER, CALS_EXTERNAL_WORKER), CALS_EXTERNAL_WORKER));
+    assertFalse(isUserWithMainRole(user(COUNTY_ADMIN), CALS_EXTERNAL_WORKER));
+    assertFalse(isUserWithMainRole(user(), CALS_EXTERNAL_WORKER));
   }
 
   static private UniversalUserToken userToken(String... roles) {
