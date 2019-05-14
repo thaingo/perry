@@ -4,7 +4,7 @@ import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.SUPER_ADMIN;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
-import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertNonStrict;
+import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertStrict;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.ABSENT_IN_IDM_USER_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.ABSENT_IN_NS_DB_USER_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.COUNTY_ADMIN_ID;
@@ -235,6 +235,6 @@ public class GetUserTest extends BaseIdmIntegrationTest {
             .andExpect(MockMvcResultMatchers.content().contentType(JSON_CONTENT_TYPE))
             .andReturn();
 
-    assertNonStrict(result, fixtureFilePath);
+    assertStrict(result, fixtureFilePath);
   }
 }

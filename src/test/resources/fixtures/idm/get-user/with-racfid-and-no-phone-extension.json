@@ -31,8 +31,8 @@
     "roles": {
       "editable": true,
       "possible_values": [
-        "CWS-worker",
-        "Office-admin"
+        "Office-admin",
+        "CWS-worker"
       ]
     },
     "permissions": {
