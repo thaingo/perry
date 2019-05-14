@@ -1,5 +1,7 @@
 package gov.ca.cwds.idm.event;
 
+import static gov.ca.cwds.util.UserNameFormatter.formatUserFullName;
+
 import gov.ca.cwds.config.api.idm.Roles;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserChangeLogRecord;
@@ -22,10 +24,6 @@ public abstract class UserChangeLogEvent extends AuditEvent<UserChangeLogRecord>
     setUserRoles(Roles.toRolesNamesString(user));
     setUserId(user.getId());
     setUserName(formatUserFullName(user));
-  }
-
-  static String formatUserFullName(User user) {
-    return user.getLastName() + ", " + user.getFirstName();
   }
 
   final void setAdminRole(String adminRole) {

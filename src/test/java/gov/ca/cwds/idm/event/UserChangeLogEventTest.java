@@ -11,6 +11,10 @@ import static gov.ca.cwds.idm.event.UserEnabledStatusChangedEvent.ACTIVE;
 import static gov.ca.cwds.idm.event.UserEnabledStatusChangedEvent.INACTIVE;
 import static gov.ca.cwds.idm.event.UserLockedEvent.LOCKED;
 import static gov.ca.cwds.idm.event.UserLockedEvent.UNLOCKED;
+import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
+import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserFirstName;
+import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserLastName;
+import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserName;
 import static gov.ca.cwds.util.Utils.toSet;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -59,7 +63,9 @@ public class UserChangeLogEventTest {
   private static final String PERMISSION_DESCRIPTION = "description";
   private static final String ADMIN_LOGIN = "TEST_USER_NAME";
   private static final String TEST_ADMIN_ROLE = "Test-admin";
-  private static final String TEST_ADMIN_NAME = "Cherno Samba";
+  private static final String TEST_ADMIN_LAST_NAME = "Samba";
+  private static final String TEST_ADMIN_FIRST_NAME = "Cherno";
+  private static final String TEST_ADMIN_NAME_FORMATTED = "Samba, Cherno";
   private static final String NEW_EMAIL = "newEmail@gmail.com";
   private static final String OLD_EMAIL = "oldEmail@gmail.com";
   private static final String NEW_NOTES = "new notes";
@@ -77,7 +83,7 @@ public class UserChangeLogEventTest {
     UserCreatedEvent userCreatedEvent = new UserCreatedEvent(user);
     UserChangeLogRecord changeLogRecord = userCreatedEvent.getEvent();
     assertEquals(TEST_ADMIN_ROLE, changeLogRecord.getAdminRole());
-    assertEquals(TEST_ADMIN_NAME, changeLogRecord.getAdminName());
+    assertEquals(TEST_ADMIN_NAME_FORMATTED, changeLogRecord.getAdminName());
     assertEquals(TEST_COUNTY, changeLogRecord.getCountyName());
     assertEquals(TEST_OFFICE_ID, changeLogRecord.getOfficeId());
     assertEquals(TEST_USER_ID, changeLogRecord.getUserId());
@@ -238,11 +244,12 @@ public class UserChangeLogEventTest {
     user.setEmail(OLD_EMAIL);
     user.setRoles(new HashSet<>(Arrays.asList(CWS_WORKER, COUNTY_ADMIN)));
     user.setPermissions(new TreeSet<>(Arrays.asList(PERMISSION_1, PERMISSION_2)));
-    when(CurrentAuthenticatedUserUtil.getCurrentUserName()).thenReturn(ADMIN_LOGIN);
-    when(CurrentAuthenticatedUserUtil.getCurrentUser()).thenReturn(new UniversalUserToken());
+    when(getCurrentUserName()).thenReturn(ADMIN_LOGIN);
+    when(getCurrentUser()).thenReturn(new UniversalUserToken());
     when(UserRolesService.getStrongestAdminRole(any(UniversalUserToken.class)))
         .thenReturn(TEST_ADMIN_ROLE);
-    when(CurrentAuthenticatedUserUtil.getCurrentUserFullName()).thenReturn(TEST_ADMIN_NAME);
+    when(getCurrentUserLastName()).thenReturn(TEST_ADMIN_LAST_NAME);
+    when(getCurrentUserFirstName()).thenReturn(TEST_ADMIN_FIRST_NAME);
     return user;
   }
 }
