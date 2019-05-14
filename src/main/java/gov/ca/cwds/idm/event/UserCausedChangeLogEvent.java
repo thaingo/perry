@@ -1,5 +1,7 @@
 package gov.ca.cwds.idm.event;
 
+import static gov.ca.cwds.util.UserNameFormatter.formatUserFullName;
+
 import gov.ca.cwds.config.api.idm.Roles;
 import gov.ca.cwds.idm.dto.User;
 
