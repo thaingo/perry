@@ -6,6 +6,7 @@ import gov.ca.cwds.idm.service.AuditEventService;
 import gov.ca.cwds.idm.service.UserService;
 import gov.ca.cwds.idm.service.authorization.AuthorizationService;
 import gov.ca.cwds.idm.service.cognito.CognitoServiceFacade;
+import gov.ca.cwds.idm.service.search.UserSearchService;
 import gov.ca.cwds.idm.service.validation.ValidationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
@@ -28,6 +29,9 @@ public class UserLockService {
   private UserService userService;
 
   @Autowired
+  private UserSearchService userSearchService;
+
+  @Autowired
   private AuditEventService auditService;
 
   public void unlockUser(String userId) {
@@ -36,6 +40,12 @@ public class UserLockService {
     validationService.validateUnlockUser(existedUser, false);
 
     cognitoServiceFacade.unlockUser(userId);
-    auditService.saveAuditEvent(new UserUnlockedEvent(existedUser));
+    User updatedUser = userService.getUser(userId);
+    userSearchService.updateUserInSearch(updatedUser);
+    auditService.saveAuditEvent(new UserUnlockedEvent(updatedUser));
+  }
+
+  public void setUserSearchService(UserSearchService userSearchService) {
+    this.userSearchService = userSearchService;
   }
 }
