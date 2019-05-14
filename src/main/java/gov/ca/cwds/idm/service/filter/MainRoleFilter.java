@@ -8,7 +8,6 @@ import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.SUPER_ADMIN;
 
 import gov.ca.cwds.RolesHolder;
-import gov.ca.cwds.idm.dto.User;
 import java.util.HashSet;
 import java.util.Set;
 

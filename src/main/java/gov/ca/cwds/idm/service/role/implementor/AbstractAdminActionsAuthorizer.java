@@ -8,7 +8,6 @@ import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.getStrongestAdminRole;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isCalsExternalWorker;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isCountyAdmin;
-import static gov.ca.cwds.idm.service.authorization.UserRolesService.isCwsWorker;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isStateAdmin;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isSuperAdmin;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isUser;
@@ -117,7 +116,6 @@ public abstract class AbstractAdminActionsAuthorizer implements AdminActionsAuth
     }
     checkByAllowedRoles(roles, asList(allowedRoles), UNABLE_TO_CREATE_USER_WITH_UNALLOWED_ROLES);
   }
-
 
   protected final void checkCanChangeCwsWorkerRoleTo(UserUpdate userUpdate, String... allowedRoles) {
     checkUserCanChangeRoleOnlyTo(CWS_WORKER, userUpdate, allowedRoles);
