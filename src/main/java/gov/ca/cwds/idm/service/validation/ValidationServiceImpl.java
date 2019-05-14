@@ -16,7 +16,6 @@ import static gov.ca.cwds.service.messages.MessageCode.USER_CANNOT_BE_UNLOCKED;
 import static gov.ca.cwds.service.messages.MessageCode.USER_PHONE_IS_NOT_PROVIDED;
 import static gov.ca.cwds.service.messages.MessageCode.USER_WITH_EMAIL_EXISTS_IN_IDM;
 import static gov.ca.cwds.util.Utils.isRacfidUser;
-import static gov.ca.cwds.util.Utils.toCommaDelimitedString;
 import static java.lang.Boolean.FALSE;
 
 import gov.ca.cwds.idm.dto.User;
@@ -142,17 +141,6 @@ public class ValidationServiceImpl implements ValidationService {
 
     if (newUserRoles.isEmpty()) {
       throwValidationException(UNABLE_TO_REMOVE_ALL_ROLES);
-    }
-  }
-
-  private void validateByAllowedRoles(Collection<String> newRoles, Collection<String> allowedRoles,
-      MessageCode errorCode) {
-
-    if (!allowedRoles.containsAll(newRoles)) {
-      throwValidationException(
-          errorCode,
-          toCommaDelimitedString(newRoles),
-          toCommaDelimitedString(allowedRoles));
     }
   }
 
