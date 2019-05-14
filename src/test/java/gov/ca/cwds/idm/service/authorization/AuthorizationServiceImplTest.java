@@ -9,6 +9,7 @@ import static gov.ca.cwds.config.api.idm.Roles.SUPER_ADMIN;
 import static gov.ca.cwds.idm.util.TestHelper.admin;
 import static gov.ca.cwds.idm.util.TestHelper.user;
 import static gov.ca.cwds.service.messages.MessageCode.ADMIN_CANNOT_UPDATE_HIMSELF;
+import static gov.ca.cwds.service.messages.MessageCode.CANNOT_EDIT_ROLES_OF_CALS_EXTERNAL_WORKER;
 import static gov.ca.cwds.service.messages.MessageCode.COUNTY_ADMIN_CANNOT_UPDATE_STATE_ADMIN;
 import static gov.ca.cwds.service.messages.MessageCode.COUNTY_ADMIN_CANNOT_UPDATE_USER_FROM_OTHER_COUNTY;
 import static gov.ca.cwds.service.messages.MessageCode.COUNTY_ADMIN_CANNOT_VIEW_USER_FROM_OTHER_COUNTY;
@@ -23,7 +24,6 @@ import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserOffice
 import static gov.ca.cwds.util.Utils.toSet;
 import static org.assertj.core.api.Fail.fail;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -71,11 +71,17 @@ public class AuthorizationServiceImplTest {
     mockStatic(CurrentAuthenticatedUserUtil.class);
   }
 
-//  @Test
-//  public void testCanUpdateCalsExternalWorkerRole() {
-//    setUpAdmin(toSet(STATE_ADMIN), "Yolo", toSet("Yolo_2"));
-//    assertFalse(service.canEditRoles(user(toSet(CALS_EXTERNAL_WORKER), "Yolo", "Yolo_1")));
-//  }
+  @Test
+  public void testCanUpdateCalsExternalWorkerRole() {
+    setUpAdmin(toSet(STATE_ADMIN), "Yolo", toSet("Yolo_2"));
+
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setRoles(toSet(CWS_WORKER));
+
+    assertCanNotUpdateUser(
+        user(toSet(CALS_EXTERNAL_WORKER), "Yolo", "Yolo_1"), userUpdate,
+        CANNOT_EDIT_ROLES_OF_CALS_EXTERNAL_WORKER);
+  }
 
   @Test
   public void testAdminCantUpdateHimself() {

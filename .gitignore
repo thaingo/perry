@@ -9,3 +9,4 @@ bin/
 config/perry-cognito-local.yml
 src/test/resources/scripts/*.groovy
 docker-compose/.env
+perry-log.txt
