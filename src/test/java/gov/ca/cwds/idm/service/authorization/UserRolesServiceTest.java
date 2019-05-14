@@ -81,7 +81,7 @@ public class UserRolesServiceTest {
   }
 
   @Test
-  public void testIsStateAdmin() {
+  public void testHasStateAdminRole() {
     assertTrue(UserRolesService.hasStateAdminRole(user(STATE_ADMIN)));
     assertTrue(UserRolesService.hasStateAdminRole(user(STATE_ADMIN, COUNTY_ADMIN)));
     assertFalse(UserRolesService.hasStateAdminRole(user(COUNTY_ADMIN)));
@@ -89,7 +89,16 @@ public class UserRolesServiceTest {
   }
 
   @Test
-  public void testUserIsCountyAdmin() {
+  public void testIsStateAdmin() {
+    assertTrue(UserRolesService.isStateAdmin(user(STATE_ADMIN)));
+    assertTrue(UserRolesService.isStateAdmin(user(STATE_ADMIN, COUNTY_ADMIN)));
+    assertFalse(UserRolesService.isStateAdmin(user(STATE_ADMIN, SUPER_ADMIN)));
+    assertFalse(UserRolesService.isStateAdmin(user(COUNTY_ADMIN)));
+    assertFalse(UserRolesService.isStateAdmin(user()));
+  }
+
+  @Test
+  public void testUserHasCountyAdminRole() {
     assertTrue(UserRolesService.hasCountyAdminRole(user(COUNTY_ADMIN)));
     assertTrue(UserRolesService.hasCountyAdminRole(user(COUNTY_ADMIN, OFFICE_ADMIN)));
     assertTrue(UserRolesService.hasCountyAdminRole(user(STATE_ADMIN, COUNTY_ADMIN)));
@@ -99,7 +108,37 @@ public class UserRolesServiceTest {
   }
 
   @Test
-  public void testAdminIsCountyAdmin() {
+  public void testUserIsCountyAdmin() {
+    assertTrue(UserRolesService.isCountyAdmin(user(COUNTY_ADMIN)));
+    assertTrue(UserRolesService.isCountyAdmin(user(COUNTY_ADMIN, OFFICE_ADMIN)));
+    assertFalse(UserRolesService.isCountyAdmin(user(STATE_ADMIN, COUNTY_ADMIN)));
+    assertFalse(UserRolesService.isCountyAdmin(user(STATE_ADMIN)));
+    assertFalse(UserRolesService.isCountyAdmin(user(OFFICE_ADMIN)));
+    assertFalse(UserRolesService.isCountyAdmin(user()));
+  }
+
+  @Test
+  public void testUserHasOfficeAdminRole() {
+    assertTrue(UserRolesService.hasOfficeAdminRole(user(OFFICE_ADMIN)));
+    assertTrue(UserRolesService.hasOfficeAdminRole(user(OFFICE_ADMIN, CWS_WORKER)));
+    assertTrue(UserRolesService.hasOfficeAdminRole(user(STATE_ADMIN, OFFICE_ADMIN)));
+    assertFalse(UserRolesService.hasOfficeAdminRole(user(STATE_ADMIN)));
+    assertFalse(UserRolesService.hasOfficeAdminRole(user(COUNTY_ADMIN)));
+    assertFalse(UserRolesService.hasOfficeAdminRole(user()));
+  }
+
+  @Test
+  public void testUserIsOfficeAdmin() {
+    assertTrue(UserRolesService.isOfficeAdmin(user(OFFICE_ADMIN)));
+    assertTrue(UserRolesService.isOfficeAdmin(user(CWS_WORKER, OFFICE_ADMIN)));
+    assertFalse(UserRolesService.isOfficeAdmin(user(CWS_WORKER, COUNTY_ADMIN)));
+    assertFalse(UserRolesService.isOfficeAdmin(user(STATE_ADMIN)));
+    assertFalse(UserRolesService.isOfficeAdmin(user(COUNTY_ADMIN)));
+    assertFalse(UserRolesService.isOfficeAdmin(user()));
+  }
+
+  @Test
+  public void testAdminHasCountyAdminRole() {
     assertTrue(UserRolesService.hasCountyAdminRole(userToken(COUNTY_ADMIN)));
     assertTrue(UserRolesService.hasCountyAdminRole(userToken(COUNTY_ADMIN, OFFICE_ADMIN)));
     assertTrue(UserRolesService.hasCountyAdminRole(userToken(STATE_ADMIN, COUNTY_ADMIN)));
@@ -108,11 +147,19 @@ public class UserRolesServiceTest {
   }
 
   @Test
-  public void testIsSuperAdmin() {
+  public void testHasSuperAdminRole() {
     assertTrue(UserRolesService.hasSuperAdminRole(user(SUPER_ADMIN)));
     assertTrue(UserRolesService.hasSuperAdminRole(user(SUPER_ADMIN, STATE_ADMIN)));
     assertFalse(UserRolesService.hasSuperAdminRole(user(COUNTY_ADMIN)));
     assertFalse(UserRolesService.hasSuperAdminRole(user()));
+  }
+
+  @Test
+  public void testIsSuperAdmin() {
+    assertTrue(UserRolesService.isSuperAdmin(user(SUPER_ADMIN)));
+    assertTrue(UserRolesService.isSuperAdmin(user(SUPER_ADMIN, STATE_ADMIN)));
+    assertFalse(UserRolesService.isSuperAdmin(user(COUNTY_ADMIN)));
+    assertFalse(UserRolesService.isSuperAdmin(user()));
   }
 
   @Test
