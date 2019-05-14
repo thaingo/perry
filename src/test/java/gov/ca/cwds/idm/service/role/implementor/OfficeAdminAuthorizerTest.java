@@ -45,11 +45,6 @@ public class OfficeAdminAuthorizerTest extends BaseAuthorizerTest {
     return new OfficeAdminAuthorizer(user);
   }
 
-//  @Test
-//  public void canEditRoles() {
-//    assertCanEditRoles(user("Yolo", "Yolo_1"));
-//  }
-
   @Test
   public void canNotViewCalsExternalWorkerTest() {
     assertCanNotView(OFFICE_ADMIN_CANNOT_VIEW_USERS_WITH_CALS_EXTERNAL_WORKER_ROLE,
@@ -101,11 +96,4 @@ public class OfficeAdminAuthorizerTest extends BaseAuthorizerTest {
   public void canNotUpdateSuperAdmin() {
     assertCanNotUpdateUser(superAdmin(), NOT_SUPER_ADMIN_CANNOT_UPDATE_USERS_WITH_SUPER_ADMIN_ROLE);
   }
-
-//  @Test
-//  public void testGetPossibleUserRolesAtCreate() {
-//    assertEquals(
-//        Arrays.asList(CWS_WORKER),
-//        getAuthorizer(cwsWorker()).getMaxAllowedUserRolesAtCreate());
-//  }
 }

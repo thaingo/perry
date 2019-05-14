@@ -36,21 +36,6 @@ public class StateAdminAuthorizerTest extends BaseAuthorizerTest {
     when(getCurrentUserCountyName()).thenReturn("Yolo");
   }
 
-//  @Test
-//  public void canNotStateAdminEditRoles() {
-//    assertCanNotEditRoles(stateAdmin(), STATE_ADMIN_ROLES_CANNOT_BE_EDITED);
-//  }
-
-//  @Test
-//  public void canEditCountyAdminRoles() {
-//    assertCanEditRoles(countyAdmin());
-//  }
-
-//  @Test
-//  public void canEditOfficeAdminRoles() {
-//    assertCanEditRoles(officeAdmin());
-//  }
-
   @Test
   public void canNotViewSuperAdmin() {
     assertCanNotViewUser(superAdmin(), NOT_SUPER_ADMIN_CANNOT_VIEW_USERS_WITH_SUPER_ADMIN_ROLE);
@@ -60,11 +45,4 @@ public class StateAdminAuthorizerTest extends BaseAuthorizerTest {
   public void canNotUpdateSuperAdmin() {
     assertCanNotUpdateUser(superAdmin(), NOT_SUPER_ADMIN_CANNOT_UPDATE_USERS_WITH_SUPER_ADMIN_ROLE);
   }
-
-//  @Test
-//  public void testGetPossibleUserRolesAtCreate() {
-//    assertEquals(
-//        Arrays.asList(COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER),
-//        getAuthorizer(cwsWorker()).getMaxAllowedUserRolesAtCreate());
-//  }
 }
