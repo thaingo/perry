@@ -1,9 +1,12 @@
 package gov.ca.cwds.idm.service.role.implementor;
 
+import static gov.ca.cwds.config.api.idm.Roles.CALS_EXTERNAL_WORKER;
+import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
+import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.SUPER_ADMIN;
 import static gov.ca.cwds.idm.util.TestHelper.ADMIN_ID;
-import static gov.ca.cwds.idm.util.TestHelper.COUNTY_NAME;
-import static gov.ca.cwds.idm.util.TestHelper.OFFICE_ID;
 import static gov.ca.cwds.idm.util.TestHelper.admin;
 import static gov.ca.cwds.idm.util.TestHelper.calsWorker;
 import static gov.ca.cwds.idm.util.TestHelper.countyAdmin;
@@ -29,8 +32,8 @@ public class SuperAdminAuthorizerTest extends BaseAuthorizerTest {
 
   @Before
   public void before() {
-    when(getCurrentUser()).thenReturn(admin(toSet(SUPER_ADMIN), COUNTY_NAME, toSet(OFFICE_ID)));
-    when(getCurrentUserCountyName()).thenReturn(null);
+    when(getCurrentUser()).thenReturn(admin(toSet(SUPER_ADMIN), ADMIN_COUNTY, toSet(ADMIN_OFFICE)));
+    when(getCurrentUserCountyName()).thenReturn(ADMIN_COUNTY);
   }
 
   @Test
@@ -72,32 +75,32 @@ public class SuperAdminAuthorizerTest extends BaseAuthorizerTest {
 
   @Test
   public void canCreateSuperAdmin() {
-    canCreate(superAdmin());
+    canCreateInAnyCountyAndOffice(SUPER_ADMIN);
   }
 
   @Test
   public void canCreateStateAdmin() {
-    canCreate(stateAdmin());
+    canCreateInAnyCountyAndOffice(STATE_ADMIN);
   }
 
   @Test
   public void canCreateCountyAdmin() {
-    canCreate(countyAdmin());
+    canCreateInAnyCountyAndOffice(COUNTY_ADMIN);
   }
 
   @Test
   public void canCreateOfficeAdmin() {
-    canCreate(officeAdmin());
+    canCreateInAnyCountyAndOffice(OFFICE_ADMIN);
   }
 
   @Test
   public void canCreateCwsWorker() {
-    canCreate(cwsWorker());
+    canCreateInAnyCountyAndOffice(CWS_WORKER);
   }
 
   @Test
   public void canCreateCalsWorker() {
-    canCreate(calsWorker());
+    canCreateInAnyCountyAndOffice(CALS_EXTERNAL_WORKER);
   }
 
   @Test

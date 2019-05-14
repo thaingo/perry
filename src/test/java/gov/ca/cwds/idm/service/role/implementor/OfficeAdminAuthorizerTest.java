@@ -30,9 +30,6 @@ import org.junit.Test;
 
 public class OfficeAdminAuthorizerTest extends BaseAuthorizerTest {
 
-  public static final String ADMIN_COUNTY = "Yolo";
-  public static final String ADMIN_OFFICE = "Yolo_2";
-
   @Before
   public void before() {
     when(getCurrentUser())

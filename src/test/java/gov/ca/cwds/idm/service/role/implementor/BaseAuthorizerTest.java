@@ -1,5 +1,7 @@
 package gov.ca.cwds.idm.service.role.implementor;
 
+import static gov.ca.cwds.idm.util.TestHelper.user;
+import static gov.ca.cwds.util.Utils.toSet;
 import static org.assertj.core.api.Fail.fail;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -26,6 +28,9 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(fullyQualifiedNames = "gov.ca.cwds.util.CurrentAuthenticatedUserUtil")
 public abstract class BaseAuthorizerTest {
+
+  static final String ADMIN_COUNTY = "Yolo";
+  static final String ADMIN_OFFICE = "Yolo_2";
 
   protected ExceptionFactory exceptionFactory;
   private MessagesService messagesServiceMock = mock(MessagesService.class);
@@ -75,6 +80,10 @@ public abstract class BaseAuthorizerTest {
 
   protected void canNotUpdateWithAuthorizationError(User user, MessageCode errorCode) {
     assertAuthorizationException(errorCode, getAuthorizerWithExceptionFactory(user)::checkCanUpdateUser);
+  }
+
+  protected void canCreateInAnyCountyAndOffice(String userRole) {
+    canCreate(user(toSet(userRole), "SomeCounty", "SomeOffice"));
   }
 
   protected void canNotUpdateWithAuthorizationError(User user, MessageCode errorCode, UserUpdate userUpdate) {
