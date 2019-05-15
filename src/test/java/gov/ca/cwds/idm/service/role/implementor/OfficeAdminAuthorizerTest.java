@@ -141,12 +141,19 @@ public class OfficeAdminAuthorizerTest extends BaseAuthorizerTest {
   }
 
   @Test
-  public void canUpdateCalsExternalWorkerWithTheSameRole() {
+  public void canUpdateCalsExternalWorkerRole() {
     canUpdateWithTheSameRoleInSameOffice(CALS_EXTERNAL_WORKER);
   }
 
-  private void canUpdateWithTheSameRoleInSameOffice(String role) {
-    canUpdateToRole(user(toSet(role), ADMIN_COUNTY, ADMIN_OFFICE), role);
+  @Test
+  public void canUpdateCwsWorkerRole() {
+    canUpdateWithTheSameRoleInSameOffice(CWS_WORKER);
+  }
+
+  @Test
+  public void canUpdateOfficeAdminRole() {
+    canUpdateWithTheSameRoleInSameOffice(OFFICE_ADMIN);
+    canUpdateToRole(user(toSet(OFFICE_ADMIN), ADMIN_COUNTY, ADMIN_OFFICE), CWS_WORKER);
   }
 
   @Test
@@ -158,12 +165,6 @@ public class OfficeAdminAuthorizerTest extends BaseAuthorizerTest {
     canNotChangeCalsExternalWorkerRoleInSameOfficeTo(SUPER_ADMIN);
   }
 
-  private void canNotChangeCalsExternalWorkerRoleInSameOfficeTo(String newUserRole) {
-    canNotUpdateToRoleWithAuthorizationError(
-        user(toSet(CALS_EXTERNAL_WORKER),ADMIN_COUNTY, ADMIN_OFFICE),
-        CANNOT_EDIT_ROLES_OF_CALS_EXTERNAL_WORKER, newUserRole);
-  }
-
   @Test
   public void canNotChangeCwsWorkerRole() {
     canNotChangeCwsWorkerRoleInSameOfficeTo(CALS_EXTERNAL_WORKER);
@@ -173,9 +174,35 @@ public class OfficeAdminAuthorizerTest extends BaseAuthorizerTest {
     canNotChangeCwsWorkerRoleInSameOfficeTo(SUPER_ADMIN);
   }
 
+  @Test
+  public void canNotChangeOfficeAdminRole() {
+    canNotChangeOfficeAdminRoleInSameOfficeTo(CALS_EXTERNAL_WORKER);
+    canNotChangeOfficeAdminRoleInSameOfficeTo(COUNTY_ADMIN);
+    canNotChangeOfficeAdminRoleInSameOfficeTo(STATE_ADMIN);
+    canNotChangeOfficeAdminRoleInSameOfficeTo(SUPER_ADMIN);
+  }
+
+  private void canUpdateWithTheSameRoleInSameOffice(String role) {
+    canUpdateToRole(user(toSet(role), ADMIN_COUNTY, ADMIN_OFFICE), role);
+  }
+
+  private void canNotChangeCalsExternalWorkerRoleInSameOfficeTo(String newUserRole) {
+    canNotUpdateToRoleWithAuthorizationError(
+        user(toSet(CALS_EXTERNAL_WORKER), ADMIN_COUNTY, ADMIN_OFFICE),
+        CANNOT_EDIT_ROLES_OF_CALS_EXTERNAL_WORKER, newUserRole);
+  }
+
   private void canNotChangeCwsWorkerRoleInSameOfficeTo(String newUserRole) {
+    canNotChangeRoleInSameOffice(CWS_WORKER, newUserRole);
+  }
+
+  private void canNotChangeOfficeAdminRoleInSameOfficeTo(String newUserRole) {
+    canNotChangeRoleInSameOffice(OFFICE_ADMIN, newUserRole);
+  }
+
+  private void canNotChangeRoleInSameOffice(String oldRole, String newUserRole) {
     canNotUpdateToRoleWithValidationError(
-        user(toSet(CWS_WORKER),ADMIN_COUNTY, ADMIN_OFFICE),
+        user(toSet(oldRole), ADMIN_COUNTY, ADMIN_OFFICE),
         UNABLE_UPDATE_UNALLOWED_ROLES, newUserRole);
   }
 }
