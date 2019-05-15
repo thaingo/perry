@@ -1,6 +1,11 @@
 package gov.ca.cwds.idm.service.role.implementor;
 
+import static gov.ca.cwds.config.api.idm.Roles.CALS_EXTERNAL_WORKER;
+import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.idm.util.TestHelper.user;
+import static gov.ca.cwds.service.messages.MessageCode.CANNOT_EDIT_ROLES_OF_CALS_EXTERNAL_WORKER;
+import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_UNALLOWED_ROLES;
 import static gov.ca.cwds.util.Utils.toSet;
 import static org.assertj.core.api.Fail.fail;
 import static org.hamcrest.core.Is.is;
@@ -124,6 +129,26 @@ public abstract class BaseAuthorizerTest {
 
   protected void assertCanResendInvitationMessage(User user) {
     assertCan(getAuthorizerWithExceptionFactory(user)::checkCanResendInvitationMessage);
+  }
+
+  protected void canNotChangeCalsExternalWorkerRoleInSameOfficeTo(String newUserRole) {
+    canNotUpdateToRoleWithAuthorizationError(
+        user(toSet(CALS_EXTERNAL_WORKER), ADMIN_COUNTY, ADMIN_OFFICE),
+        CANNOT_EDIT_ROLES_OF_CALS_EXTERNAL_WORKER, newUserRole);
+  }
+
+  protected void canNotChangeOfficeAdminRoleInSameOfficeTo(String newUserRole) {
+    canNotChangeRoleInSameOffice(OFFICE_ADMIN, newUserRole);
+  }
+
+  protected void canNotChangeCountyAdminRoleInSameOfficeTo(String newUserRole) {
+    canNotChangeRoleInSameOffice(COUNTY_ADMIN, newUserRole);
+  }
+
+  protected void canNotChangeRoleInSameOffice(String oldRole, String newUserRole) {
+    canNotUpdateToRoleWithValidationError(
+        user(toSet(oldRole), ADMIN_COUNTY, ADMIN_OFFICE),
+        UNABLE_UPDATE_UNALLOWED_ROLES, newUserRole);
   }
 
   private void assertAuthorizationException(MessageCode errorCode, Check check) {

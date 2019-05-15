@@ -9,7 +9,6 @@ import static gov.ca.cwds.config.api.idm.Roles.SUPER_ADMIN;
 import static gov.ca.cwds.idm.util.TestHelper.admin;
 import static gov.ca.cwds.idm.util.TestHelper.superAdmin;
 import static gov.ca.cwds.idm.util.TestHelper.user;
-import static gov.ca.cwds.service.messages.MessageCode.CANNOT_EDIT_ROLES_OF_CALS_EXTERNAL_WORKER;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_OFFICE;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_SUPER_ADMIN_CANNOT_UPDATE_USERS_WITH_SUPER_ADMIN_ROLE;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_SUPER_ADMIN_CANNOT_VIEW_USERS_WITH_SUPER_ADMIN_ROLE;
@@ -18,7 +17,6 @@ import static gov.ca.cwds.service.messages.MessageCode.OFFICE_ADMIN_CANNOT_UPDAT
 import static gov.ca.cwds.service.messages.MessageCode.OFFICE_ADMIN_CANNOT_UPDATE_USER_FROM_OTHER_OFFICE;
 import static gov.ca.cwds.service.messages.MessageCode.OFFICE_ADMIN_CANNOT_VIEW_USERS_WITH_CALS_EXTERNAL_WORKER_ROLE;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_CREATE_USER_WITH_UNALLOWED_ROLES;
-import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_UNALLOWED_ROLES;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserCountyName;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserOfficeIds;
@@ -119,9 +117,25 @@ public class OfficeAdminAuthorizerTest extends BaseAuthorizerTest {
   @Test
   public void canNotEditOfficeAdminFromOtherOfficeTest() {
     canNotUpdateWithAuthorizationError(
-        user(toSet(OFFICE_ADMIN),ADMIN_COUNTY, "Yolo_1"),
+        user(toSet(OFFICE_ADMIN), ADMIN_COUNTY, "OtherOffice"),
         OFFICE_ADMIN_CANNOT_UPDATE_USER_FROM_OTHER_OFFICE
         );
+  }
+
+  @Test
+  public void canNotUpdateCwsWorkerInOtherOffice() {
+    canNotUpdateWithAuthorizationError(
+        user(toSet(CWS_WORKER), ADMIN_COUNTY, "OtherOffice"),
+        OFFICE_ADMIN_CANNOT_UPDATE_USER_FROM_OTHER_OFFICE
+    );
+  }
+
+  @Test
+  public void canNotUpdateCalsExternalWorkerInOtherOffice() {
+    canNotUpdateWithAuthorizationError(
+        user(toSet(CALS_EXTERNAL_WORKER), ADMIN_COUNTY, "OtherOffice"),
+        OFFICE_ADMIN_CANNOT_UPDATE_USER_FROM_OTHER_OFFICE
+    );
   }
 
   @Test
@@ -141,18 +155,29 @@ public class OfficeAdminAuthorizerTest extends BaseAuthorizerTest {
   }
 
   @Test
-  public void canUpdateCalsExternalWorkerRole() {
+  public void canNotUpdateStateAdminInSameOffice() {
+    canNotUpdateWithAuthorizationError(
+        user(toSet(STATE_ADMIN), ADMIN_COUNTY, ADMIN_OFFICE),
+        OFFICE_ADMIN_CANNOT_UPDATE_STATE_ADMIN);
+  }
+
+  @Test
+  public void canUpdateCalsExternalWorkerToCalsExternalWorkerInSameOffice() {
     canUpdateWithTheSameRoleInSameOffice(CALS_EXTERNAL_WORKER);
   }
 
   @Test
-  public void canUpdateCwsWorkerRole() {
+  public void canUpdateCwsWorkerToCwsWorkerInSameOffice() {
     canUpdateWithTheSameRoleInSameOffice(CWS_WORKER);
   }
 
   @Test
-  public void canUpdateOfficeAdminRole() {
+  public void canUpdateOfficeAdminToOfficeAdminInSameOffice() {
     canUpdateWithTheSameRoleInSameOffice(OFFICE_ADMIN);
+  }
+
+  @Test
+  public void canUpdateOfficeAdminToCwsWorkerInSameOffice() {
     canUpdateToRole(user(toSet(OFFICE_ADMIN), ADMIN_COUNTY, ADMIN_OFFICE), CWS_WORKER);
   }
 
@@ -186,23 +211,7 @@ public class OfficeAdminAuthorizerTest extends BaseAuthorizerTest {
     canUpdateToRole(user(toSet(role), ADMIN_COUNTY, ADMIN_OFFICE), role);
   }
 
-  private void canNotChangeCalsExternalWorkerRoleInSameOfficeTo(String newUserRole) {
-    canNotUpdateToRoleWithAuthorizationError(
-        user(toSet(CALS_EXTERNAL_WORKER), ADMIN_COUNTY, ADMIN_OFFICE),
-        CANNOT_EDIT_ROLES_OF_CALS_EXTERNAL_WORKER, newUserRole);
-  }
-
   private void canNotChangeCwsWorkerRoleInSameOfficeTo(String newUserRole) {
     canNotChangeRoleInSameOffice(CWS_WORKER, newUserRole);
-  }
-
-  private void canNotChangeOfficeAdminRoleInSameOfficeTo(String newUserRole) {
-    canNotChangeRoleInSameOffice(OFFICE_ADMIN, newUserRole);
-  }
-
-  private void canNotChangeRoleInSameOffice(String oldRole, String newUserRole) {
-    canNotUpdateToRoleWithValidationError(
-        user(toSet(oldRole), ADMIN_COUNTY, ADMIN_OFFICE),
-        UNABLE_UPDATE_UNALLOWED_ROLES, newUserRole);
   }
 }
