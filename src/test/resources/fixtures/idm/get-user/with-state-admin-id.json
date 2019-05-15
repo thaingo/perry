@@ -29,11 +29,20 @@
     "editable": false,
     "roles": {
       "editable": false,
-      "possible_values": []
+      "possible_values": [
+        "CWS-worker",
+        "State-admin"
+      ]
     },
     "permissions": {
       "editable": false,
-      "possible_values": []
+      "possible_values": [
+        "CANS-rollout",
+        "Facility-search-rollout",
+        "Hotline-rollout",
+        "RFA-rollout",
+        "Snapshot-rollout"
+      ]
     }
   }
 }

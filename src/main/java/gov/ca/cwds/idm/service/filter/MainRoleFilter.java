@@ -32,7 +32,11 @@ public class MainRoleFilter {
     return result;
   }
 
-  public static String getMainRole(Set<String> roles) {
+  public static String getMainRole(RolesHolder user) {
+    return getMainRole(user.getRoles());
+  }
+
+  private static String getMainRole(Set<String> roles) {
     int maxRoleValue = 0;
     String maxRole = null;
 
@@ -44,10 +48,6 @@ public class MainRoleFilter {
       }
     }
     return maxRole;
-  }
-
-  public static String getMainRole(RolesHolder user) {
-    return getMainRole(user.getRoles());
   }
 
   private static int getRoleValue(String role) {

@@ -27,8 +27,8 @@
       "editable": true,
       "possible_values": [
         "County-admin",
-        "Office-admin",
-        "CWS-worker"
+        "CWS-worker",
+        "Office-admin"
       ]
     },
     "permissions": {
