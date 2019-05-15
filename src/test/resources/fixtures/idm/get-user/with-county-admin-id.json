@@ -30,20 +30,11 @@
     "editable": false,
     "roles": {
       "editable": false,
-      "possible_values": [
-        "CWS-worker",
-        "County-admin"
-      ]
+      "possible_values": []
     },
     "permissions": {
       "editable": false,
-      "possible_values": [
-        "CANS-rollout",
-        "Facility-search-rollout",
-        "Hotline-rollout",
-        "RFA-rollout",
-        "Snapshot-rollout"
-      ]
+      "possible_values": []
     }
   }
 }
