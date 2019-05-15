@@ -9,6 +9,7 @@ import static gov.ca.cwds.config.api.idm.Roles.SUPER_ADMIN;
 import static gov.ca.cwds.idm.util.TestHelper.admin;
 import static gov.ca.cwds.idm.util.TestHelper.superAdmin;
 import static gov.ca.cwds.idm.util.TestHelper.user;
+import static gov.ca.cwds.service.messages.MessageCode.CANNOT_EDIT_ROLES_OF_CALS_EXTERNAL_WORKER;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_OFFICE;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_SUPER_ADMIN_CANNOT_UPDATE_USERS_WITH_SUPER_ADMIN_ROLE;
 import static gov.ca.cwds.service.messages.MessageCode.NOT_SUPER_ADMIN_CANNOT_VIEW_USERS_WITH_SUPER_ADMIN_ROLE;
@@ -17,6 +18,7 @@ import static gov.ca.cwds.service.messages.MessageCode.OFFICE_ADMIN_CANNOT_UPDAT
 import static gov.ca.cwds.service.messages.MessageCode.OFFICE_ADMIN_CANNOT_UPDATE_USER_FROM_OTHER_OFFICE;
 import static gov.ca.cwds.service.messages.MessageCode.OFFICE_ADMIN_CANNOT_VIEW_USERS_WITH_CALS_EXTERNAL_WORKER_ROLE;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_CREATE_USER_WITH_UNALLOWED_ROLES;
+import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_UNALLOWED_ROLES;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserCountyName;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserOfficeIds;
@@ -136,5 +138,44 @@ public class OfficeAdminAuthorizerTest extends BaseAuthorizerTest {
   public void canNotUpdateSuperAdmin() {
     canNotUpdateWithAuthorizationError(superAdmin(),
         NOT_SUPER_ADMIN_CANNOT_UPDATE_USERS_WITH_SUPER_ADMIN_ROLE);
+  }
+
+  @Test
+  public void canUpdateCalsExternalWorkerWithTheSameRole() {
+    canUpdateWithTheSameRoleInSameOffice(CALS_EXTERNAL_WORKER);
+  }
+
+  private void canUpdateWithTheSameRoleInSameOffice(String role) {
+    canUpdateToRole(user(toSet(role), ADMIN_COUNTY, ADMIN_OFFICE), role);
+  }
+
+  @Test
+  public void canNotChangeCalsExternalWorkerRole() {
+    canNotChangeCalsExternalWorkerRoleInSameOfficeTo(CWS_WORKER);
+    canNotChangeCalsExternalWorkerRoleInSameOfficeTo(OFFICE_ADMIN);
+    canNotChangeCalsExternalWorkerRoleInSameOfficeTo(COUNTY_ADMIN);
+    canNotChangeCalsExternalWorkerRoleInSameOfficeTo(STATE_ADMIN);
+    canNotChangeCalsExternalWorkerRoleInSameOfficeTo(SUPER_ADMIN);
+  }
+
+  private void canNotChangeCalsExternalWorkerRoleInSameOfficeTo(String newUserRole) {
+    canNotUpdateToRoleWithAuthorizationError(
+        user(toSet(CALS_EXTERNAL_WORKER),ADMIN_COUNTY, ADMIN_OFFICE),
+        CANNOT_EDIT_ROLES_OF_CALS_EXTERNAL_WORKER, newUserRole);
+  }
+
+  @Test
+  public void canNotChangeCwsWorkerRole() {
+    canNotChangeCwsWorkerRoleInSameOfficeTo(CALS_EXTERNAL_WORKER);
+    canNotChangeCwsWorkerRoleInSameOfficeTo(OFFICE_ADMIN);
+    canNotChangeCwsWorkerRoleInSameOfficeTo(COUNTY_ADMIN);
+    canNotChangeCwsWorkerRoleInSameOfficeTo(STATE_ADMIN);
+    canNotChangeCwsWorkerRoleInSameOfficeTo(SUPER_ADMIN);
+  }
+
+  private void canNotChangeCwsWorkerRoleInSameOfficeTo(String newUserRole) {
+    canNotUpdateToRoleWithValidationError(
+        user(toSet(CWS_WORKER),ADMIN_COUNTY, ADMIN_OFFICE),
+        UNABLE_UPDATE_UNALLOWED_ROLES, newUserRole);
   }
 }

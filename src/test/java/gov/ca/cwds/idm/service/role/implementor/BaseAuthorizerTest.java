@@ -64,6 +64,12 @@ public abstract class BaseAuthorizerTest {
     assertCan(getAuthorizerWithExceptionFactory(user)::checkCanCreateUser);
   }
 
+  protected void canUpdateToRole(User user, String newRole) {
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setRoles(toSet(newRole));
+    getAuthorizerWithExceptionFactory(user).checkCanUpdateUser(userUpdate);
+  }
+
   protected void canNotCreateWithAuthorizationError(User user, MessageCode errorCode) {
     assertAuthorizationException(errorCode,
         getAuthorizerWithExceptionFactory(user)::checkCanCreateUser);
@@ -75,7 +81,7 @@ public abstract class BaseAuthorizerTest {
   }
 
   protected void canUpdate(User user) {
-    assertCan(getAuthorizerWithExceptionFactory(user)::checkCanUpdateUser);
+    assertCanUpdate(getAuthorizerWithExceptionFactory(user)::checkCanUpdateUser);
   }
 
   protected void canNotUpdateWithAuthorizationError(User user, MessageCode errorCode) {
@@ -86,14 +92,30 @@ public abstract class BaseAuthorizerTest {
     canCreate(user(toSet(userRole), "SomeCounty", "SomeOffice"));
   }
 
-  protected void canNotUpdateWithAuthorizationError(User user, MessageCode errorCode, UserUpdate userUpdate) {
-    assertAuthorizationException(errorCode, getAuthorizerWithExceptionFactory(user)::checkCanUpdateUser, userUpdate);
+  protected void canNotUpdateWithAuthorizationError(User user, MessageCode errorCode,
+      UserUpdate userUpdate) {
+    assertAuthorizationException(errorCode,
+        getAuthorizerWithExceptionFactory(user)::checkCanUpdateUser, userUpdate);
   }
 
   protected void canNotUpdateWithValidationError(User user, MessageCode errorCode,
       UserUpdate userUpdate) {
     assertValidationException(errorCode,
         getAuthorizerWithExceptionFactory(user)::checkCanUpdateUser, userUpdate);
+  }
+
+  protected void canNotUpdateToRoleWithValidationError(User user, MessageCode errorCode,
+      String newRole) {
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setRoles(toSet(newRole));
+    canNotUpdateWithValidationError(user, errorCode, userUpdate);
+  }
+
+  protected void canNotUpdateToRoleWithAuthorizationError(User user, MessageCode errorCode,
+      String newRole) {
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setRoles(toSet(newRole));
+    canNotUpdateWithAuthorizationError(user, errorCode, userUpdate);
   }
 
   protected void assertCanNotResendInvitationMessage(User user, MessageCode errorCode) {
@@ -155,7 +177,7 @@ public abstract class BaseAuthorizerTest {
     check.check();
   }
 
-  private void assertCan(CheckWithUserUpdate check) {
+  private void assertCanUpdate(CheckWithUserUpdate check) {
     check.check(new UserUpdate());
   }
 
