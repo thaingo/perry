@@ -30,7 +30,10 @@
     "editable": false,
     "roles": {
       "editable": false,
-      "possible_values": ["CWS-worker"]
+      "possible_values": [
+        "CWS-worker",
+        "County-admin"
+      ]
     },
     "permissions": {
       "editable": false,

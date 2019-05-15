@@ -6,7 +6,13 @@ import gov.ca.cwds.idm.dto.ListOfValues;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserEditDetails;
 import gov.ca.cwds.idm.service.authorization.AuthorizationService;
+import gov.ca.cwds.idm.service.filter.MainRoleFilter;
 import gov.ca.cwds.idm.service.role.implementor.AdminRoleImplementorFactory;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
@@ -36,7 +42,10 @@ public class UserEditDetailsService {
   private ListOfValues getRoles(User user, boolean canUpdateUser) {
     ListOfValues usersPossibleRoles = new ListOfValues();
     usersPossibleRoles.setEditable(canUpdateUser && authorizationService.canEditRoles(user));
-    usersPossibleRoles.setPossibleValues(adminRoleImplementorFactory.getPossibleUserRoles());
+    List<String> possibleValues = adminRoleImplementorFactory.getPossibleUserRoles();
+    Set<String> extendedPossibleValues = new HashSet<>(possibleValues);
+    Optional.of(MainRoleFilter.getMainRole(user)).ifPresent(extendedPossibleValues::add);
+    usersPossibleRoles.setPossibleValues(new ArrayList<>(extendedPossibleValues));
     return usersPossibleRoles;
   }
 

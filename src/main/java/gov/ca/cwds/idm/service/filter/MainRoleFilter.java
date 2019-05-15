@@ -7,6 +7,7 @@ import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.SUPER_ADMIN;
 
+import gov.ca.cwds.RolesHolder;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -29,6 +30,10 @@ public class MainRoleFilter {
       result.add(mainRole);
     }
     return result;
+  }
+
+  public static String getMainRole(RolesHolder user) {
+    return getMainRole(user.getRoles());
   }
 
   private static String getMainRole(Set<String> roles) {

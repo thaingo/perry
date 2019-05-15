@@ -26,6 +26,7 @@
     "roles": {
       "editable": true,
       "possible_values": [
+        "County-admin",
         "CWS-worker",
         "Office-admin"
       ]

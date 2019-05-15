@@ -29,7 +29,10 @@
     "editable": false,
     "roles": {
       "editable": false,
-      "possible_values": ["CWS-worker"]
+      "possible_values": [
+        "CWS-worker",
+        "State-admin"
+      ]
     },
     "permissions": {
       "editable": false,
