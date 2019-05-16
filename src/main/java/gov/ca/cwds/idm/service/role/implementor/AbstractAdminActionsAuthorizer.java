@@ -23,11 +23,16 @@ import static java.util.Arrays.asList;
 
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
+import gov.ca.cwds.idm.exception.AdminAuthorizationException;
+import gov.ca.cwds.idm.exception.IdmException;
+import gov.ca.cwds.idm.exception.UserValidationException;
 import gov.ca.cwds.idm.service.authorization.AdminActionsAuthorizer;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
+import gov.ca.cwds.idm.service.rule.ErrorRule;
 import gov.ca.cwds.service.messages.MessageCode;
 import gov.ca.cwds.util.Utils;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 public abstract class AbstractAdminActionsAuthorizer implements AdminActionsAuthorizer {
@@ -40,44 +45,87 @@ public abstract class AbstractAdminActionsAuthorizer implements AdminActionsAuth
     this.user = user;
   }
 
+  @Override
+  public final boolean canUpdateUser(UserUpdate userUpdate) {
+    return false;
+  }
+
   protected User getUser() {
     return user;
   }
 
   protected final void checkUserIsNotSuperAdmin(MessageCode errorCode) {
     if (isSuperAdmin(getUser())) {
-      throwAuthorizationException(errorCode, getStrongestAdminRole(getCurrentUser()), getUser().getId());
+      throw createAuthorizationException(errorCode, getStrongestAdminRole(getCurrentUser()),
+          getUser().getId());
     }
   }
 
   protected void checkUserIsNotStateAdmin(MessageCode errorCode) {
-    if (isStateAdmin(getUser())) {
-      throwAuthorizationException(errorCode, getUser().getId());
-    }
+    new ErrorRule(){
+      @Override
+      public boolean hasError() {
+        return userIsStateAdmin();
+      }
+      @Override
+      public IdmException createException() {
+        return createAuthorizationException(errorCode, getUser().getId());
+      }
+    }.check();
   }
 
   protected void checkUserIsNotCountyAdmin(MessageCode errorCode) {
-    if (isCountyAdmin(getUser())) {
-      throwAuthorizationException(errorCode, getUser().getId());
-    }
+    new ErrorRule(){
+      @Override
+      public boolean hasError() {
+        return userIsCountyAdmin();
+      }
+      @Override
+      public IdmException createException() {
+        return createAuthorizationException(errorCode, getUser().getId());
+      }
+    }.check();
+  }
+
+  private boolean userIsCountyAdmin() {
+    return isCountyAdmin(getUser());
+  }
+
+  private boolean userIsStateAdmin() {
+    return isStateAdmin(getUser());
   }
 
   protected final void checkUserisNotCalsExternalWorker(MessageCode errorCode, String... args) {
     if (isCalsExternalWorker(getUser())) {
-      throwAuthorizationException(errorCode, args);
+      throw createAuthorizationException(errorCode, args);
     }
   }
 
   protected final void checkAdminAndUserInTheSameCounty(MessageCode errorCode, String... args) {
     if (!isAdminInTheSameCountyAsUser()) {
-      throwAuthorizationException(errorCode, args);
+      throw createAuthorizationException(errorCode, args);
     }
   }
 
   protected final void checkAdminAndUserInTheSameOffice(MessageCode errorCode) {
-    if (!isAdminInTheSameOfficeAsUser()) {
-      throwAuthorizationException(errorCode, getUser().getId());
-    }
+    new ErrorRule() {
+      @Override
+      public boolean hasError() {
+        return adminAndUserAreInDifferentOffices();
+      }
+
+      @Override
+      public IdmException createException() {
+        return createAuthorizationException(errorCode, getUser().getId());
+      }
+    }.check();
+//    if (adminAndUserAreInDifferentOffices()) {
+//      throw createAuthorizationException(errorCode, getUser().getId());
+//    }
+  }
+
+  private boolean adminAndUserAreInDifferentOffices() {
+    return !isAdminInTheSameOfficeAsUser();
   }
 
   protected final void checkStateAdminUserRolesAreNotEdited(UserUpdate userUpdate) {
@@ -93,7 +141,7 @@ public abstract class AbstractAdminActionsAuthorizer implements AdminActionsAuth
       return;
     }
     if (isUserWithMainRole(getUser(), userMainRole) && !Utils.toSet(userMainRole).equals(userUpdate.getRoles())) {
-      throwAuthorizationException(errorCode, getUser().getId());
+      throw createAuthorizationException(errorCode, getUser().getId());
     }
   }
 
@@ -111,10 +159,14 @@ public abstract class AbstractAdminActionsAuthorizer implements AdminActionsAuth
 
   protected final void checkRolesAreAllowedAtCreate(String... allowedRoles) {
     Collection<String> roles = getUser().getRoles();
-    if (roles == null) {
-      return;
+    List<String> allowedRolesList = asList(allowedRoles);
+
+    if (roles != null && (!allowedRolesList.containsAll(roles))) {
+      throw createValidationException(
+          UNABLE_TO_CREATE_USER_WITH_UNALLOWED_ROLES,
+          toCommaDelimitedString(roles),
+          toCommaDelimitedString(allowedRolesList));
     }
-    checkByAllowedRoles(roles, asList(allowedRoles), UNABLE_TO_CREATE_USER_WITH_UNALLOWED_ROLES);
   }
 
   protected final void checkCanChangeCwsWorkerRoleTo(UserUpdate userUpdate, String... allowedRoles) {
@@ -135,29 +187,28 @@ public abstract class AbstractAdminActionsAuthorizer implements AdminActionsAuth
 
   private void checkUserCanChangeRoleOnlyTo(String userCurrentRole, UserUpdate userUpdate,
       String... allowedRoles) {
+
     Set<String> newRoles = userUpdate.getRoles();
-    if (newRoles != null && isUserWithMainRole(getUser(), userCurrentRole)) {
-      checkByAllowedRoles(newRoles, asList(allowedRoles), UNABLE_UPDATE_UNALLOWED_ROLES);
+    List<String> allowedRolesList = asList(allowedRoles);
+
+    if (newRoles != null
+        && isUserWithMainRole(getUser(), userCurrentRole)
+        && (!allowedRolesList.containsAll(newRoles))) {
+
+        throw createValidationException(
+            UNABLE_UPDATE_UNALLOWED_ROLES,
+            toCommaDelimitedString(newRoles),
+            toCommaDelimitedString(allowedRolesList));
     }
   }
 
-  private void checkByAllowedRoles(Collection<String> newRoles, Collection<String> allowedRoles,
-      MessageCode errorCode) {
-
-    if (!allowedRoles.containsAll(newRoles)) {
-      throwValidationException(
-          errorCode,
-          toCommaDelimitedString(newRoles),
-          toCommaDelimitedString(allowedRoles));
-    }
+  private UserValidationException createValidationException(MessageCode messageCode, String... args) {
+    return exceptionFactory.createValidationException(messageCode, args);
   }
 
-  private void throwValidationException(MessageCode messageCode, String... args) {
-    throw exceptionFactory.createValidationException(messageCode, args);
-  }
-
-  private final void throwAuthorizationException(MessageCode messageCode, String... args) {
-    throw exceptionFactory.createAuthorizationException(messageCode, args);
+  private AdminAuthorizationException createAuthorizationException(MessageCode messageCode,
+      String... args) {
+    return exceptionFactory.createAuthorizationException(messageCode, args);
   }
 
   public void setExceptionFactory(ExceptionFactory exceptionFactory) {

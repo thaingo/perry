@@ -10,5 +10,7 @@ public interface AdminActionsAuthorizer {
 
   void checkCanUpdateUser(UserUpdate userUpdate);
 
+  boolean canUpdateUser(UserUpdate userUpdate);
+
   void checkCanResendInvitationMessage();
 }
