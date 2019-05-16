@@ -132,4 +132,54 @@ public class SuperAdminAuthorizerTest extends BaseAuthorizerTest {
   public void canUpdateCalsWorker() {
     canUpdate(calsWorker());
   }
+
+  @Test
+  public void canUpdateCalsExternalWorkerRole() {
+    canUpdateCalsExternalWorkerInEveryCountyTo(CALS_EXTERNAL_WORKER);
+    canUpdateCalsExternalWorkerInEveryCountyTo(CWS_WORKER);
+    canUpdateCalsExternalWorkerInEveryCountyTo(OFFICE_ADMIN);
+    canUpdateCalsExternalWorkerInEveryCountyTo(COUNTY_ADMIN);
+    canUpdateCalsExternalWorkerInEveryCountyTo(STATE_ADMIN);
+    canUpdateCalsExternalWorkerInEveryCountyTo(SUPER_ADMIN);
+  }
+
+  @Test
+  public void canUpdateCwsWorkerRoles() {
+    canUpdateCwsWorkerInEveryCountyTo(CALS_EXTERNAL_WORKER);
+    canUpdateCwsWorkerInEveryCountyTo(CWS_WORKER);
+    canUpdateCwsWorkerInEveryCountyTo(OFFICE_ADMIN);
+    canUpdateCwsWorkerInEveryCountyTo(COUNTY_ADMIN);
+    canUpdateCwsWorkerInEveryCountyTo(STATE_ADMIN);
+    canUpdateCwsWorkerInEveryCountyTo(SUPER_ADMIN);
+  }
+
+  @Test
+  public void canUpdateOfficeAdminRole() {
+    canUpdateOfficeAdminInEveryCountyTo(CALS_EXTERNAL_WORKER);
+    canUpdateOfficeAdminInEveryCountyTo(CWS_WORKER);
+    canUpdateOfficeAdminInEveryCountyTo(OFFICE_ADMIN);
+    canUpdateOfficeAdminInEveryCountyTo(COUNTY_ADMIN);
+    canUpdateOfficeAdminInEveryCountyTo(STATE_ADMIN);
+    canUpdateOfficeAdminInEveryCountyTo(SUPER_ADMIN);
+  }
+
+  @Test
+  public void canUpdateCountyAdminRole() {
+    canUpdateCountyAdminInEveryCountyTo(CALS_EXTERNAL_WORKER);
+    canUpdateCountyAdminInEveryCountyTo(CWS_WORKER);
+    canUpdateCountyAdminInEveryCountyTo(OFFICE_ADMIN);
+    canUpdateCountyAdminInEveryCountyTo(COUNTY_ADMIN);
+    canUpdateCountyAdminInEveryCountyTo(STATE_ADMIN);
+    canUpdateCountyAdminInEveryCountyTo(SUPER_ADMIN);
+  }
+
+  @Test
+  public void canUpdateStateAdminRole() {
+    canUpdateStateAdminInEveryCountyTo(CALS_EXTERNAL_WORKER);
+    canUpdateStateAdminInEveryCountyTo(CWS_WORKER);
+    canUpdateStateAdminInEveryCountyTo(OFFICE_ADMIN);
+    canUpdateStateAdminInEveryCountyTo(COUNTY_ADMIN);
+    canUpdateStateAdminInEveryCountyTo(STATE_ADMIN);
+    canUpdateStateAdminInEveryCountyTo(SUPER_ADMIN);
+  }
 }

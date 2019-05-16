@@ -50,13 +50,9 @@ public class OfficeAdminAuthorizerTest extends BaseAuthorizerTest {
         CALS_EXTERNAL_WORKER);
   }
 
-  private void assertCanNotView(MessageCode errorCode, String... roles) {
-    canNotView(user(toSet(roles),ADMIN_COUNTY, ADMIN_OFFICE), errorCode);
-  }
-
   @Test
   public void canCreateCwsWorkerInSameOffice() {
-    canCreate(user(toSet(CWS_WORKER),ADMIN_COUNTY, ADMIN_OFFICE));
+    canCreate(user(toSet(CWS_WORKER), ADMIN_COUNTY, ADMIN_OFFICE));
   }
 
   @Test
@@ -90,27 +86,22 @@ public class OfficeAdminAuthorizerTest extends BaseAuthorizerTest {
     canNotCreateInSameOffice(CALS_EXTERNAL_WORKER);
   }
 
-  private void canNotCreateInSameOffice(String userRole) {
-    canNotCreateWithValidationError(user(toSet(userRole), ADMIN_COUNTY, ADMIN_OFFICE),
-        UNABLE_TO_CREATE_USER_WITH_UNALLOWED_ROLES);
-  }
-
   @Test
   public void canNotEditStateAdminTest() {
     canNotUpdateWithAuthorizationError(
-        user(toSet(STATE_ADMIN),ADMIN_COUNTY, ADMIN_OFFICE),
+        user(toSet(STATE_ADMIN), ADMIN_COUNTY, ADMIN_OFFICE),
         OFFICE_ADMIN_CANNOT_UPDATE_STATE_ADMIN);
   }
 
   @Test
   public void canEditCwsWorkerTest() {
-    canUpdate(user(toSet(CWS_WORKER),ADMIN_COUNTY, ADMIN_OFFICE));
+    canUpdate(user(toSet(CWS_WORKER), ADMIN_COUNTY, ADMIN_OFFICE));
   }
 
   @Test
   public void canNotEditCountyAdminTest() {
     canNotUpdateWithAuthorizationError(
-        user(toSet(COUNTY_ADMIN),ADMIN_COUNTY, ADMIN_OFFICE),
+        user(toSet(COUNTY_ADMIN), ADMIN_COUNTY, ADMIN_OFFICE),
         OFFICE_ADMIN_CANNOT_UPDATE_COUNTY_ADMIN);
   }
 
@@ -119,7 +110,7 @@ public class OfficeAdminAuthorizerTest extends BaseAuthorizerTest {
     canNotUpdateWithAuthorizationError(
         user(toSet(OFFICE_ADMIN), ADMIN_COUNTY, "OtherOffice"),
         OFFICE_ADMIN_CANNOT_UPDATE_USER_FROM_OTHER_OFFICE
-        );
+    );
   }
 
   @Test
@@ -140,7 +131,7 @@ public class OfficeAdminAuthorizerTest extends BaseAuthorizerTest {
 
   @Test
   public void canEditOfficeAdminInSameOfficeTest() {
-    canUpdate(user(toSet(OFFICE_ADMIN),ADMIN_COUNTY, "Yolo_2"));
+    canUpdate(user(toSet(OFFICE_ADMIN), ADMIN_COUNTY, ADMIN_OFFICE));
   }
 
   @Test
@@ -162,56 +153,57 @@ public class OfficeAdminAuthorizerTest extends BaseAuthorizerTest {
   }
 
   @Test
-  public void canUpdateCalsExternalWorkerToCalsExternalWorkerInSameOffice() {
-    canUpdateWithTheSameRoleInSameOffice(CALS_EXTERNAL_WORKER);
+  public void canUpdateCalsExternalWorkerRole() {
+    canUpdateCalsExternalWorkerInSameOfficeTo(CALS_EXTERNAL_WORKER);
+    canNotUpdateCalsExternalWorkerRoleInSameOfficeTo(CWS_WORKER);
+    canNotUpdateCalsExternalWorkerRoleInSameOfficeTo(OFFICE_ADMIN);
+    canNotUpdateCalsExternalWorkerRoleInSameOfficeTo(COUNTY_ADMIN);
+    canNotUpdateCalsExternalWorkerRoleInSameOfficeTo(STATE_ADMIN);
+    canNotUpdateCalsExternalWorkerRoleInSameOfficeTo(SUPER_ADMIN);
   }
 
   @Test
-  public void canUpdateCwsWorkerToCwsWorkerInSameOffice() {
-    canUpdateWithTheSameRoleInSameOffice(CWS_WORKER);
+  public void canUpdateCwsWorkerRole() {
+    canNotUpdateCwsWorkerInSameOfficeTo(CALS_EXTERNAL_WORKER);
+    canUpdateCwsWorkerInSameOfficeTo(CWS_WORKER);
+    canNotUpdateCwsWorkerInSameOfficeTo(OFFICE_ADMIN);
+    canNotUpdateCwsWorkerInSameOfficeTo(COUNTY_ADMIN);
+    canNotUpdateCwsWorkerInSameOfficeTo(STATE_ADMIN);
+    canNotUpdateCwsWorkerInSameOfficeTo(SUPER_ADMIN);
   }
 
   @Test
-  public void canUpdateOfficeAdminToOfficeAdminInSameOffice() {
-    canUpdateWithTheSameRoleInSameOffice(OFFICE_ADMIN);
+  public void canUpdateOfficeAdminRole() {
+    canNotUpdateOfficeAdminInSameOfficeTo(CALS_EXTERNAL_WORKER);
+    canUpdateOfficeAdminInSameOfficeTo(CWS_WORKER);
+    canUpdateOfficeAdminInSameOfficeTo(OFFICE_ADMIN);
+    canNotUpdateOfficeAdminInSameOfficeTo(COUNTY_ADMIN);
+    canNotUpdateOfficeAdminInSameOfficeTo(STATE_ADMIN);
+    canNotUpdateOfficeAdminInSameOfficeTo(SUPER_ADMIN);
   }
 
-  @Test
-  public void canUpdateOfficeAdminToCwsWorkerInSameOffice() {
-    canUpdateToRole(user(toSet(OFFICE_ADMIN), ADMIN_COUNTY, ADMIN_OFFICE), CWS_WORKER);
+  private void canNotCreateInSameOffice(String userRole) {
+    canNotCreateWithValidationError(user(toSet(userRole), ADMIN_COUNTY, ADMIN_OFFICE),
+        UNABLE_TO_CREATE_USER_WITH_UNALLOWED_ROLES);
   }
 
-  @Test
-  public void canNotChangeCalsExternalWorkerRole() {
-    canNotChangeCalsExternalWorkerRoleInSameOfficeTo(CWS_WORKER);
-    canNotChangeCalsExternalWorkerRoleInSameOfficeTo(OFFICE_ADMIN);
-    canNotChangeCalsExternalWorkerRoleInSameOfficeTo(COUNTY_ADMIN);
-    canNotChangeCalsExternalWorkerRoleInSameOfficeTo(STATE_ADMIN);
-    canNotChangeCalsExternalWorkerRoleInSameOfficeTo(SUPER_ADMIN);
+  private void assertCanNotView(MessageCode errorCode, String... roles) {
+    canNotView(user(toSet(roles), ADMIN_COUNTY, ADMIN_OFFICE), errorCode);
   }
 
-  @Test
-  public void canNotChangeCwsWorkerRole() {
-    canNotChangeCwsWorkerRoleInSameOfficeTo(CALS_EXTERNAL_WORKER);
-    canNotChangeCwsWorkerRoleInSameOfficeTo(OFFICE_ADMIN);
-    canNotChangeCwsWorkerRoleInSameOfficeTo(COUNTY_ADMIN);
-    canNotChangeCwsWorkerRoleInSameOfficeTo(STATE_ADMIN);
-    canNotChangeCwsWorkerRoleInSameOfficeTo(SUPER_ADMIN);
+  private void canUpdateRoleInSameOffice(String oldRole, String newRole) {
+    canUpdateToRole(user(toSet(oldRole), ADMIN_COUNTY, ADMIN_OFFICE), newRole);
   }
 
-  @Test
-  public void canNotChangeOfficeAdminRole() {
-    canNotChangeOfficeAdminRoleInSameOfficeTo(CALS_EXTERNAL_WORKER);
-    canNotChangeOfficeAdminRoleInSameOfficeTo(COUNTY_ADMIN);
-    canNotChangeOfficeAdminRoleInSameOfficeTo(STATE_ADMIN);
-    canNotChangeOfficeAdminRoleInSameOfficeTo(SUPER_ADMIN);
+  private void canUpdateCalsExternalWorkerInSameOfficeTo(String newRole) {
+    canUpdateRoleInSameOffice(CALS_EXTERNAL_WORKER, newRole);
   }
 
-  private void canUpdateWithTheSameRoleInSameOffice(String role) {
-    canUpdateToRole(user(toSet(role), ADMIN_COUNTY, ADMIN_OFFICE), role);
+  private void canUpdateCwsWorkerInSameOfficeTo(String newRole) {
+    canUpdateRoleInSameOffice(CWS_WORKER, newRole);
   }
 
-  private void canNotChangeCwsWorkerRoleInSameOfficeTo(String newUserRole) {
-    canNotChangeRoleInSameOffice(CWS_WORKER, newUserRole);
+  private void canUpdateOfficeAdminInSameOfficeTo(String newRole) {
+    canUpdateRoleInSameOffice(OFFICE_ADMIN, newRole);
   }
 }

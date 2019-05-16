@@ -2,7 +2,9 @@ package gov.ca.cwds.idm.service.role.implementor;
 
 import static gov.ca.cwds.config.api.idm.Roles.CALS_EXTERNAL_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
+import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.idm.util.TestHelper.user;
 import static gov.ca.cwds.service.messages.MessageCode.CANNOT_EDIT_ROLES_OF_CALS_EXTERNAL_WORKER;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_UNALLOWED_ROLES;
@@ -131,24 +133,52 @@ public abstract class BaseAuthorizerTest {
     assertCan(getAuthorizerWithExceptionFactory(user)::checkCanResendInvitationMessage);
   }
 
-  protected void canNotChangeCalsExternalWorkerRoleInSameOfficeTo(String newUserRole) {
+  protected void canNotUpdateCalsExternalWorkerRoleInSameOfficeTo(String newUserRole) {
     canNotUpdateToRoleWithAuthorizationError(
         user(toSet(CALS_EXTERNAL_WORKER), ADMIN_COUNTY, ADMIN_OFFICE),
         CANNOT_EDIT_ROLES_OF_CALS_EXTERNAL_WORKER, newUserRole);
   }
 
-  protected void canNotChangeOfficeAdminRoleInSameOfficeTo(String newUserRole) {
-    canNotChangeRoleInSameOffice(OFFICE_ADMIN, newUserRole);
+  protected void canNotUpdateCwsWorkerInSameOfficeTo(String newUserRole) {
+    canNotUpdateInSameOfficeFromTo(CWS_WORKER, newUserRole);
   }
 
-  protected void canNotChangeCountyAdminRoleInSameOfficeTo(String newUserRole) {
-    canNotChangeRoleInSameOffice(COUNTY_ADMIN, newUserRole);
+  protected void canNotUpdateOfficeAdminInSameOfficeTo(String newUserRole) {
+    canNotUpdateInSameOfficeFromTo(OFFICE_ADMIN, newUserRole);
   }
 
-  protected void canNotChangeRoleInSameOffice(String oldRole, String newUserRole) {
+  protected void canNotUpdateCountyAdminRoleInSameOfficeTo(String newUserRole) {
+    canNotUpdateInSameOfficeFromTo(COUNTY_ADMIN, newUserRole);
+  }
+
+  protected void canNotUpdateInSameOfficeFromTo(String oldRole, String newUserRole) {
     canNotUpdateToRoleWithValidationError(
         user(toSet(oldRole), ADMIN_COUNTY, ADMIN_OFFICE),
         UNABLE_UPDATE_UNALLOWED_ROLES, newUserRole);
+  }
+
+  protected void canUpdateCwsWorkerInEveryCountyTo(String newRole) {
+    canUpdateInEveryCounty(CWS_WORKER, newRole);
+  }
+
+  protected void canUpdateCalsExternalWorkerInEveryCountyTo(String newRole) {
+    canUpdateInEveryCounty(CALS_EXTERNAL_WORKER, newRole);
+  }
+
+  protected void canUpdateInEveryCounty(String oldRole, String newRole) {
+    canUpdateToRole(user(toSet(oldRole), "SomeCounty", "SomeOffice"), newRole);
+  }
+
+  protected void canUpdateOfficeAdminInEveryCountyTo(String newRole) {
+    canUpdateInEveryCounty(OFFICE_ADMIN, newRole);
+  }
+
+  protected void canUpdateCountyAdminInEveryCountyTo(String newRole) {
+    canUpdateInEveryCounty(COUNTY_ADMIN, newRole);
+  }
+
+  protected void canUpdateStateAdminInEveryCountyTo(String newRole) {
+    canUpdateInEveryCounty(STATE_ADMIN, newRole);
   }
 
   private void assertAuthorizationException(MessageCode errorCode, Check check) {

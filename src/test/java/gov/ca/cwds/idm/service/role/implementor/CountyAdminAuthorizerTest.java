@@ -45,7 +45,8 @@ public class CountyAdminAuthorizerTest extends BaseAuthorizerTest {
 
   @Test
   public void canNotUpdateSuperAdmin() {
-    canNotUpdateWithAuthorizationError(superAdmin(), NOT_SUPER_ADMIN_CANNOT_UPDATE_USERS_WITH_SUPER_ADMIN_ROLE);
+    canNotUpdateWithAuthorizationError(superAdmin(),
+        NOT_SUPER_ADMIN_CANNOT_UPDATE_USERS_WITH_SUPER_ADMIN_ROLE);
   }
 
   @Test
@@ -100,18 +101,8 @@ public class CountyAdminAuthorizerTest extends BaseAuthorizerTest {
   }
 
   @Test
-  public void canUpdateCalsExternalWorkerToCalsExternalWorkerInSameCounty() {
-    canUpdateWithTheSameRoleInSameCounty(CALS_EXTERNAL_WORKER);
-  }
-
-  @Test
   public void canNotUpdateCalsExternalWorkerInOtherCounty() {
     canNotUpdateInOtherCounty(CALS_EXTERNAL_WORKER);
-  }
-
-  @Test
-  public void canUpdateCwsWorkerToCwsWorkerInSameCounty() {
-    canUpdateWithTheSameRoleInSameCounty(CWS_WORKER);
   }
 
   @Test
@@ -120,28 +111,8 @@ public class CountyAdminAuthorizerTest extends BaseAuthorizerTest {
   }
 
   @Test
-  public void canUpdateCwsWorkerToOfficeAdminInSameCounty() {
-    canUpdateToRole(user(toSet(CWS_WORKER), ADMIN_COUNTY, "SomeOffice"), OFFICE_ADMIN);
-  }
-
-  @Test
-  public void canUpdateOfficeAdminToOfficeAdminInSameCounty() {
-    canUpdateWithTheSameRoleInSameCounty(OFFICE_ADMIN);
-  }
-
-  @Test
   public void canNotUpdateOfficeAdminInOtherCounty() {
     canNotUpdateInOtherCounty(OFFICE_ADMIN);
-  }
-
-  @Test
-  public void canUpdateOfficeAdminToCwsWorkerInSameCounty() {
-    canUpdateToRole(user(toSet(OFFICE_ADMIN), ADMIN_COUNTY, "SomeOffice"), CWS_WORKER);
-  }
-
-  @Test
-  public void canUpdateCountyAdminToCountyAdminInSameCounty() {
-    canUpdateWithTheSameRoleInSameCounty(COUNTY_ADMIN);
   }
 
   @Test
@@ -150,37 +121,43 @@ public class CountyAdminAuthorizerTest extends BaseAuthorizerTest {
   }
 
   @Test
-  public void canUpdateCountyAdminToOfficeAdminInSameCounty() {
-    canUpdateToRole(user(toSet(COUNTY_ADMIN), ADMIN_COUNTY, "SomeOffice"), OFFICE_ADMIN);
+  public void canUpdateCalsExternalWorkerRole() {
+    canUpdateCalsExternalWorkerInSameCountyTo(CALS_EXTERNAL_WORKER);
+    canNotUpdateCalsExternalWorkerRoleInSameOfficeTo(CWS_WORKER);
+    canNotUpdateCalsExternalWorkerRoleInSameOfficeTo(OFFICE_ADMIN);
+    canNotUpdateCalsExternalWorkerRoleInSameOfficeTo(COUNTY_ADMIN);
+    canNotUpdateCalsExternalWorkerRoleInSameOfficeTo(STATE_ADMIN);
+    canNotUpdateCalsExternalWorkerRoleInSameOfficeTo(SUPER_ADMIN);
   }
 
   @Test
-  public void canUpdateCountyAdminToCwsWorkerInSameCounty() {
-    canUpdateToRole(user(toSet(COUNTY_ADMIN), ADMIN_COUNTY, "SomeOffice"), CWS_WORKER);
+  public void canUpdateCwsWorkerRole() {
+    canNotUpdateCwsWorkerInSameOfficeTo(CALS_EXTERNAL_WORKER);
+    canUpdateCwsWorkerInSameCountyTo(CWS_WORKER);
+    canUpdateCwsWorkerInSameCountyTo(OFFICE_ADMIN);
+    canNotUpdateCwsWorkerInSameOfficeTo(COUNTY_ADMIN);
+    canNotUpdateCwsWorkerInSameOfficeTo(STATE_ADMIN);
+    canNotUpdateCwsWorkerInSameOfficeTo(SUPER_ADMIN);
   }
 
   @Test
-  public void canNotChangeCalsExternalWorkerRole() {
-    canNotChangeCalsExternalWorkerRoleInSameOfficeTo(CWS_WORKER);
-    canNotChangeCalsExternalWorkerRoleInSameOfficeTo(OFFICE_ADMIN);
-    canNotChangeCalsExternalWorkerRoleInSameOfficeTo(COUNTY_ADMIN);
-    canNotChangeCalsExternalWorkerRoleInSameOfficeTo(STATE_ADMIN);
-    canNotChangeCalsExternalWorkerRoleInSameOfficeTo(SUPER_ADMIN);
+  public void canUpdateOfficeAdminRole() {
+    canNotUpdateOfficeAdminInSameOfficeTo(CALS_EXTERNAL_WORKER);
+    canUpdateOfficeAdminInSameCountyTo(CWS_WORKER);
+    canUpdateOfficeAdminInSameCountyTo(OFFICE_ADMIN);
+    canNotUpdateOfficeAdminInSameOfficeTo(COUNTY_ADMIN);
+    canNotUpdateOfficeAdminInSameOfficeTo(STATE_ADMIN);
+    canNotUpdateOfficeAdminInSameOfficeTo(SUPER_ADMIN);
   }
 
   @Test
-  public void canNotChangeOfficeAdminRole() {
-    canNotChangeOfficeAdminRoleInSameOfficeTo(CALS_EXTERNAL_WORKER);
-    canNotChangeOfficeAdminRoleInSameOfficeTo(COUNTY_ADMIN);
-    canNotChangeOfficeAdminRoleInSameOfficeTo(STATE_ADMIN);
-    canNotChangeOfficeAdminRoleInSameOfficeTo(SUPER_ADMIN);
-  }
-
-  @Test
-  public void canNotChangeCountyAdminRole() {
-    canNotChangeCountyAdminRoleInSameOfficeTo(CALS_EXTERNAL_WORKER);
-    canNotChangeCountyAdminRoleInSameOfficeTo(STATE_ADMIN);
-    canNotChangeCountyAdminRoleInSameOfficeTo(SUPER_ADMIN);
+  public void canUpdateCountyAdminRole() {
+    canNotUpdateCountyAdminRoleInSameOfficeTo(CALS_EXTERNAL_WORKER);
+    canUpdateCountyAdminInSameCountyTo(CWS_WORKER);
+    canUpdateCountyAdminInSameCountyTo(OFFICE_ADMIN);
+    canUpdateCountyAdminInSameCountyTo(COUNTY_ADMIN);
+    canNotUpdateCountyAdminRoleInSameOfficeTo(STATE_ADMIN);
+    canNotUpdateCountyAdminRoleInSameOfficeTo(SUPER_ADMIN);
   }
 
   public void canNotUpdateInOtherCounty(String role) {
@@ -197,5 +174,21 @@ public class CountyAdminAuthorizerTest extends BaseAuthorizerTest {
 
   private void canUpdateWithTheSameRoleInSameCounty(String role) {
     canUpdateToRole(user(toSet(role), ADMIN_COUNTY, "SomeOffice"), role);
+  }
+
+  private void canUpdateCountyAdminInSameCountyTo(String newRole) {
+    canUpdateToRole(user(toSet(COUNTY_ADMIN), ADMIN_COUNTY, "SomeOffice"), newRole);
+  }
+
+  private void canUpdateOfficeAdminInSameCountyTo(String newRole) {
+    canUpdateToRole(user(toSet(OFFICE_ADMIN), ADMIN_COUNTY, "SomeOffice"), newRole);
+  }
+
+  private void canUpdateCwsWorkerInSameCountyTo(String newRole) {
+    canUpdateToRole(user(toSet(CWS_WORKER), ADMIN_COUNTY, "SomeOffice"), newRole);
+  }
+
+  private void canUpdateCalsExternalWorkerInSameCountyTo(String newRole) {
+    canUpdateToRole(user(toSet(CALS_EXTERNAL_WORKER), ADMIN_COUNTY, "SomeOffice"), newRole);
   }
 }
