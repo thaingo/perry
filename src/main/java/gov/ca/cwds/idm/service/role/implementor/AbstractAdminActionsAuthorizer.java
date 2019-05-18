@@ -54,61 +54,76 @@ public abstract class AbstractAdminActionsAuthorizer implements AdminActionsAuth
     return user;
   }
 
-  protected final void checkUserIsNotSuperAdmin(MessageCode errorCode) {
-    if (isSuperAdmin(getUser())) {
-      throw createAuthorizationException(errorCode, getStrongestAdminRole(getCurrentUser()),
-          getUser().getId());
-    }
-  }
-
-  protected void checkUserIsNotStateAdmin(MessageCode errorCode) {
-    new ErrorRule(){
+  protected final ErrorRule userIsNotSuperAdmin(MessageCode errorCode) {
+    return new ErrorRule(){
       @Override
       public boolean hasError() {
-        return userIsStateAdmin();
+        return isUserSuperAdmin();
+      }
+      @Override
+      public IdmException createException() {
+        return createAuthorizationException(errorCode, getStrongestAdminRole(getCurrentUser()),
+            getUser().getId());
+      }
+    };
+  }
+
+  protected final ErrorRule userIsNotStateAdmin(MessageCode errorCode) {
+    return new ErrorRule(){
+      @Override
+      public boolean hasError() {
+        return isUsersStateAdmin();
       }
       @Override
       public IdmException createException() {
         return createAuthorizationException(errorCode, getUser().getId());
       }
-    }.check();
+    };
   }
 
-  protected void checkUserIsNotCountyAdmin(MessageCode errorCode) {
-    new ErrorRule(){
+  protected final ErrorRule userIsNotCountyAdmin(MessageCode errorCode) {
+    return new ErrorRule(){
       @Override
       public boolean hasError() {
-        return userIsCountyAdmin();
+        return isUserCountyAdmin();
       }
       @Override
       public IdmException createException() {
         return createAuthorizationException(errorCode, getUser().getId());
       }
-    }.check();
+    };
   }
 
-  private boolean userIsCountyAdmin() {
-    return isCountyAdmin(getUser());
+
+  protected final ErrorRule userIsNotCalsExternalWorker(MessageCode errorCode) {
+    return new ErrorRule(){
+      @Override
+      public boolean hasError() {
+        return isUserCalsExternalWorker();
+      }
+      @Override
+      public IdmException createException() {
+        return createAuthorizationException(errorCode, getUser().getId());
+      }
+    };
   }
 
-  private boolean userIsStateAdmin() {
-    return isStateAdmin(getUser());
+  protected final ErrorRule adminAndUserAreInTheSameCounty(MessageCode errorCode, String... args) {
+    return new ErrorRule() {
+      @Override
+      public boolean hasError() {
+        return areAdminAndUserNotInTheSameCounty();
+      }
+
+      @Override
+      public IdmException createException() {
+        return createAuthorizationException(errorCode, args);
+      }
+    };
   }
 
-  protected final void checkUserisNotCalsExternalWorker(MessageCode errorCode, String... args) {
-    if (isCalsExternalWorker(getUser())) {
-      throw createAuthorizationException(errorCode, args);
-    }
-  }
-
-  protected final void checkAdminAndUserInTheSameCounty(MessageCode errorCode, String... args) {
-    if (!isAdminInTheSameCountyAsUser()) {
-      throw createAuthorizationException(errorCode, args);
-    }
-  }
-
-  protected final void checkAdminAndUserInTheSameOffice(MessageCode errorCode) {
-    new ErrorRule() {
+  protected final ErrorRule adminAndUserAreInTheSameOffice(MessageCode errorCode) {
+    return new ErrorRule() {
       @Override
       public boolean hasError() {
         return adminAndUserAreInDifferentOffices();
@@ -118,88 +133,125 @@ public abstract class AbstractAdminActionsAuthorizer implements AdminActionsAuth
       public IdmException createException() {
         return createAuthorizationException(errorCode, getUser().getId());
       }
-    }.check();
-//    if (adminAndUserAreInDifferentOffices()) {
-//      throw createAuthorizationException(errorCode, getUser().getId());
-//    }
+    };
   }
 
   private boolean adminAndUserAreInDifferentOffices() {
-    return !isAdminInTheSameOfficeAsUser();
-  }
-
-  protected final void checkStateAdminUserRolesAreNotEdited(UserUpdate userUpdate) {
-    checkRolesAreNotEdited(STATE_ADMIN, userUpdate, STATE_ADMIN_ROLES_CANNOT_BE_EDITED);
-  }
-
-  protected final void checkCalsExternalWorkerRolesAreNotEdited(UserUpdate userUpdate) {
-    checkRolesAreNotEdited(CALS_EXTERNAL_WORKER, userUpdate, CANNOT_EDIT_ROLES_OF_CALS_EXTERNAL_WORKER);
-  }
-
-  private void checkRolesAreNotEdited(String userMainRole, UserUpdate userUpdate, MessageCode errorCode) {
-    if(userUpdate.getRoles() == null){
-      return;
-    }
-    if (isUserWithMainRole(getUser(), userMainRole) && !Utils.toSet(userMainRole).equals(userUpdate.getRoles())) {
-      throw createAuthorizationException(errorCode, getUser().getId());
-    }
-  }
-
-  protected final boolean isAdminInTheSameCountyAsUser() {
-    String userCountyName = getUser().getCountyName();
-    String adminCountyName = getCurrentUserCountyName();
-    return userCountyName != null && userCountyName.equals(adminCountyName);
-  }
-
-  protected final boolean isAdminInTheSameOfficeAsUser() {
     String userOfficeId = getUser().getOfficeId();
     Set<String> adminOfficeIds = getCurrentUserOfficeIds();
-    return userOfficeId != null && adminOfficeIds != null && adminOfficeIds.contains(userOfficeId);
+    return adminOfficeIds == null || userOfficeId == null || !adminOfficeIds.contains(userOfficeId);
   }
 
-  protected final void checkRolesAreAllowedAtCreate(String... allowedRoles) {
-    Collection<String> roles = getUser().getRoles();
-    List<String> allowedRolesList = asList(allowedRoles);
-
-    if (roles != null && (!allowedRolesList.containsAll(roles))) {
-      throw createValidationException(
-          UNABLE_TO_CREATE_USER_WITH_UNALLOWED_ROLES,
-          toCommaDelimitedString(roles),
-          toCommaDelimitedString(allowedRolesList));
-    }
+  protected final ErrorRule stateAdminUserRolesAreNotChanged(UserUpdate userUpdate) {
+    return rolesAreNotEdited(STATE_ADMIN, userUpdate, STATE_ADMIN_ROLES_CANNOT_BE_EDITED);
   }
 
-  protected final void checkCanChangeCwsWorkerRoleTo(UserUpdate userUpdate, String... allowedRoles) {
-    checkUserCanChangeRoleOnlyTo(CWS_WORKER, userUpdate, allowedRoles);
+  protected final ErrorRule calsExternalWorkerRolesAreNotChanged(UserUpdate userUpdate) {
+    return rolesAreNotEdited(CALS_EXTERNAL_WORKER, userUpdate, CANNOT_EDIT_ROLES_OF_CALS_EXTERNAL_WORKER);
   }
 
-  protected final void checkCanChangeOfficeAdminUserRoleTo(UserUpdate userUpdate, String... allowedRoles) {
-    checkUserCanChangeRoleOnlyTo(OFFICE_ADMIN, userUpdate, allowedRoles);
+  private ErrorRule rolesAreNotEdited(String userMainRole, UserUpdate userUpdate, MessageCode errorCode) {
+    return new ErrorRule() {
+      @Override
+      public boolean hasError() {
+        return userUpdate.getRoles() != null
+            && isUserWithMainRole(getUser(), userMainRole)
+            && !Utils.toSet(userMainRole).equals(userUpdate.getRoles());
+      }
+
+      @Override
+      public IdmException createException() {
+        return createAuthorizationException(errorCode, getUser().getId());
+      }
+    };
   }
 
-  protected final void checkCanChangeCountyAdminUserRoleTo(UserUpdate userUpdate, String... allowedRoles) {
-    checkUserCanChangeRoleOnlyTo(COUNTY_ADMIN, userUpdate, allowedRoles);
+  private boolean areAdminAndUserNotInTheSameCounty() {
+    String userCountyName = getUser().getCountyName();
+    String adminCountyName = getCurrentUserCountyName();
+    return userCountyName == null || !userCountyName.equals(adminCountyName);
   }
 
-  protected final void checkCanChangeStateAdminUserRoleTo(UserUpdate userUpdate, String... allowedRoles) {
-    checkUserCanChangeRoleOnlyTo(STATE_ADMIN, userUpdate, allowedRoles);
+  protected final ErrorRule createdUserRolesMayBe(String... allowedRoles) {
+    return new ErrorRule() {
+      @Override
+      public boolean hasError() {
+        Collection<String> roles = getUser().getRoles();
+        List<String> allowedRolesList = asList(allowedRoles);
+
+        return roles != null && !allowedRolesList.containsAll(roles);
+      }
+
+      @Override
+      public IdmException createException() {
+        Collection<String> roles = getUser().getRoles();
+        List<String> allowedRolesList = asList(allowedRoles);
+
+        return createValidationException(
+            UNABLE_TO_CREATE_USER_WITH_UNALLOWED_ROLES,
+            toCommaDelimitedString(roles),
+            toCommaDelimitedString(allowedRolesList));
+      }
+    };
   }
 
-  private void checkUserCanChangeRoleOnlyTo(String userCurrentRole, UserUpdate userUpdate,
+  protected final ErrorRule cwsWorkerRolesMayBeChangedTo(UserUpdate userUpdate, String... allowedRoles) {
+    return userChangesRolesOnlyTo(CWS_WORKER, userUpdate, allowedRoles);
+  }
+
+  protected final ErrorRule officeAdminUserRolesMayBeChangedTo(UserUpdate userUpdate, String... allowedRoles) {
+    return userChangesRolesOnlyTo(OFFICE_ADMIN, userUpdate, allowedRoles);
+  }
+
+  protected final ErrorRule countyAdminUserRolesMayBeChangedTo(UserUpdate userUpdate, String... allowedRoles) {
+    return userChangesRolesOnlyTo(COUNTY_ADMIN, userUpdate, allowedRoles);
+  }
+
+  protected final ErrorRule stateAdminUserRolesMayBeChangedTo(UserUpdate userUpdate, String... allowedRoles) {
+    return userChangesRolesOnlyTo(STATE_ADMIN, userUpdate, allowedRoles);
+  }
+
+  private ErrorRule userChangesRolesOnlyTo(String userCurrentRole, UserUpdate userUpdate,
       String... allowedRoles) {
 
-    Set<String> newRoles = userUpdate.getRoles();
-    List<String> allowedRolesList = asList(allowedRoles);
+    return new ErrorRule() {
+      @Override
+      public boolean hasError() {
+        Set<String> newRoles = userUpdate.getRoles();
+        List<String> allowedRolesList = asList(allowedRoles);
 
-    if (newRoles != null
-        && isUserWithMainRole(getUser(), userCurrentRole)
-        && (!allowedRolesList.containsAll(newRoles))) {
+        return newRoles != null
+            && isUserWithMainRole(getUser(), userCurrentRole)
+            && (!allowedRolesList.containsAll(newRoles));
+      }
 
-        throw createValidationException(
+      @Override
+      public IdmException createException() {
+        Set<String> newRoles = userUpdate.getRoles();
+        List<String> allowedRolesList = asList(allowedRoles);
+
+        return createValidationException(
             UNABLE_UPDATE_UNALLOWED_ROLES,
             toCommaDelimitedString(newRoles),
             toCommaDelimitedString(allowedRolesList));
-    }
+      }
+    };
+  }
+
+  private boolean isUserCalsExternalWorker() {
+    return isCalsExternalWorker(getUser());
+  }
+
+  private boolean isUserCountyAdmin() {
+    return isCountyAdmin(getUser());
+  }
+
+  private boolean isUserSuperAdmin() {
+    return isSuperAdmin(getUser());
+  }
+
+  private boolean isUsersStateAdmin() {
+    return isStateAdmin(getUser());
   }
 
   private UserValidationException createValidationException(MessageCode messageCode, String... args) {

@@ -22,31 +22,31 @@ class CountyAdminAuthorizer extends AbstractAdminActionsAuthorizer {
 
   @Override
   public void checkCanViewUser() {
-    checkAdminAndUserInTheSameCounty(COUNTY_ADMIN_CANNOT_VIEW_USER_FROM_OTHER_COUNTY,
-        getUser().getId());
-    checkUserIsNotSuperAdmin(NOT_SUPER_ADMIN_CANNOT_VIEW_USERS_WITH_SUPER_ADMIN_ROLE);
+    adminAndUserAreInTheSameCounty(COUNTY_ADMIN_CANNOT_VIEW_USER_FROM_OTHER_COUNTY,
+        getUser().getId()).check();
+    userIsNotSuperAdmin(NOT_SUPER_ADMIN_CANNOT_VIEW_USERS_WITH_SUPER_ADMIN_ROLE).check();
   }
 
   @Override
   public void checkCanCreateUser() {
-    checkAdminAndUserInTheSameCounty(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY, getUser().getCountyName());
-    checkRolesAreAllowedAtCreate(OFFICE_ADMIN, CWS_WORKER);
+    adminAndUserAreInTheSameCounty(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY, getUser().getCountyName()).check();
+    createdUserRolesMayBe(OFFICE_ADMIN, CWS_WORKER).check();
   }
 
   @Override
   public void checkCanResendInvitationMessage() {
-    checkAdminAndUserInTheSameCounty(
-        COUNTY_ADMIN_CANNOT_RESEND_INVITATION_FOR_USER_FROM_OTHER_COUNTY, getUser().getId());
+    adminAndUserAreInTheSameCounty(
+        COUNTY_ADMIN_CANNOT_RESEND_INVITATION_FOR_USER_FROM_OTHER_COUNTY, getUser().getId()).check();
   }
 
   @Override
   public void checkCanUpdateUser(UserUpdate userUpdate) {
-    checkAdminAndUserInTheSameCounty(COUNTY_ADMIN_CANNOT_UPDATE_USER_FROM_OTHER_COUNTY, getUser().getId());
-    checkUserIsNotStateAdmin(COUNTY_ADMIN_CANNOT_UPDATE_STATE_ADMIN);
-    checkUserIsNotSuperAdmin(NOT_SUPER_ADMIN_CANNOT_UPDATE_USERS_WITH_SUPER_ADMIN_ROLE);
-    checkCalsExternalWorkerRolesAreNotEdited(userUpdate);
-    checkCanChangeCwsWorkerRoleTo(userUpdate, OFFICE_ADMIN, CWS_WORKER);
-    checkCanChangeOfficeAdminUserRoleTo(userUpdate, OFFICE_ADMIN, CWS_WORKER);
-    checkCanChangeCountyAdminUserRoleTo(userUpdate, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER);
+    adminAndUserAreInTheSameCounty(COUNTY_ADMIN_CANNOT_UPDATE_USER_FROM_OTHER_COUNTY, getUser().getId()).check();
+    userIsNotStateAdmin(COUNTY_ADMIN_CANNOT_UPDATE_STATE_ADMIN).check();
+    userIsNotSuperAdmin(NOT_SUPER_ADMIN_CANNOT_UPDATE_USERS_WITH_SUPER_ADMIN_ROLE).check();
+    calsExternalWorkerRolesAreNotChanged(userUpdate).check();
+    cwsWorkerRolesMayBeChangedTo(userUpdate, OFFICE_ADMIN, CWS_WORKER).check();
+    officeAdminUserRolesMayBeChangedTo(userUpdate, OFFICE_ADMIN, CWS_WORKER).check();
+    countyAdminUserRolesMayBeChangedTo(userUpdate, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER).check();
   }
 }

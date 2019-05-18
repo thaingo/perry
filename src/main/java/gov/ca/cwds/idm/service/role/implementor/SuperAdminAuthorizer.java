@@ -23,20 +23,20 @@ class SuperAdminAuthorizer extends AbstractAdminActionsAuthorizer {
 
   @Override
   public void checkCanCreateUser() {
-    checkRolesAreAllowedAtCreate(SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER,
-        CALS_EXTERNAL_WORKER);
+    createdUserRolesMayBe(SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER,
+        CALS_EXTERNAL_WORKER).check();
   }
 
   @Override
   public void checkCanUpdateUser(UserUpdate userUpdate) {
-    checkCanChangeCwsWorkerRoleTo(userUpdate,
-        SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER, CALS_EXTERNAL_WORKER);
-    checkCanChangeOfficeAdminUserRoleTo(userUpdate,
-        SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER, CALS_EXTERNAL_WORKER);
-    checkCanChangeCountyAdminUserRoleTo(userUpdate,
-        SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER, CALS_EXTERNAL_WORKER);
-    checkCanChangeStateAdminUserRoleTo(userUpdate,
-        SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER, CALS_EXTERNAL_WORKER);
+    cwsWorkerRolesMayBeChangedTo(userUpdate,
+        SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER, CALS_EXTERNAL_WORKER).check();
+    officeAdminUserRolesMayBeChangedTo(userUpdate,
+        SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER, CALS_EXTERNAL_WORKER).check();
+    countyAdminUserRolesMayBeChangedTo(userUpdate,
+        SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER, CALS_EXTERNAL_WORKER).check();
+    stateAdminUserRolesMayBeChangedTo(userUpdate,
+        SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER, CALS_EXTERNAL_WORKER).check();
   }
 
   @Override
