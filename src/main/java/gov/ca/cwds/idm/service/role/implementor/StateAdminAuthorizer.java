@@ -36,6 +36,7 @@ class StateAdminAuthorizer extends AbstractAdminActionsAuthorizer {
   @Override
   public ErrorRuleList getUpdateUserRules(UserUpdate userUpdate) {
     return new ErrorRuleList()
+        .addRule(userAndAdminAreNotTheSameUser())
         .addRule(userIsNotSuperAdmin(NOT_SUPER_ADMIN_CANNOT_UPDATE_USERS_WITH_SUPER_ADMIN_ROLE))
         .addRule(stateAdminUserRolesAreNotChanged(userUpdate))
         .addRule(calsExternalWorkerRolesAreNotChanged(userUpdate))

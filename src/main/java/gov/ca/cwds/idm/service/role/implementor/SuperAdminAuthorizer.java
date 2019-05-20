@@ -33,6 +33,7 @@ class SuperAdminAuthorizer extends AbstractAdminActionsAuthorizer {
   @Override
   public ErrorRuleList getUpdateUserRules(UserUpdate userUpdate) {
     return new ErrorRuleList()
+        .addRule(userAndAdminAreNotTheSameUser())
         .addRule(cwsWorkerRolesMayBeChangedTo(userUpdate,
             SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER, CALS_EXTERNAL_WORKER))
         .addRule(officeAdminUserRolesMayBeChangedTo(userUpdate,

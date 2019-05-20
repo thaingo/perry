@@ -11,6 +11,7 @@ import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USERPOOL;
 import static gov.ca.cwds.idm.util.TestUtils.generateId;
 import static gov.ca.cwds.util.UniversalUserTokenDeserializer.ADMIN_OFFICE_IDS_PARAM;
 import static gov.ca.cwds.util.UniversalUserTokenDeserializer.COUNTY_NAME_PARAM;
+import static gov.ca.cwds.util.UniversalUserTokenDeserializer.USER_NAME;
 import static gov.ca.cwds.util.Utils.toSet;
 
 import gov.ca.cwds.UniversalUserToken;
@@ -65,6 +66,7 @@ public final class TestHelper {
     UniversalUserToken admin = new UniversalUserToken();
     admin.setUserId(ADMIN_ID);
     admin.setRoles(roles);
+    admin.setParameter(USER_NAME, ADMIN_ID);
     admin.setParameter(COUNTY_NAME_PARAM, countyName);
     admin.setParameter(ADMIN_OFFICE_IDS_PARAM, adminOfficeIds);
     return admin;

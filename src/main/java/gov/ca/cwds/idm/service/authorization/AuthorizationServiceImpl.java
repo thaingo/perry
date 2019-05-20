@@ -42,24 +42,12 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
   @Override
   public void checkCanUpdateUser(User user, UserUpdate updateUserDto) {
-    if (user.getId().equals(getCurrentUserName())) {
-      throw exceptionFactory.createAuthorizationException(ADMIN_CANNOT_UPDATE_HIMSELF);
-    }
     getAdminActionsAuthorizer(user).checkCanUpdateUser(updateUserDto);
   }
 
   @Override
-  @SuppressWarnings({"squid:S1166", "fb-contrib:EXS_EXCEPTION_SOFTENING_RETURN_FALSE"})
-  //squid:S1166: exceptions stack trace can be omitted in this context
-  //fb-contrib:EXS_EXCEPTION_SOFTENING_RETURN_FALSE: our design needs a boolean result
   public boolean canUpdateUser(User user, UserUpdate updateUser) {
-    try {
-      checkCanUpdateUser(user, updateUser);
-    } catch (AdminAuthorizationException e) {
-      LOGGER.info("user update can not be authorized, since: {}",  e.getUserMessage());
-      return false;
-    }
-    return true;
+    return getAdminActionsAuthorizer(user).canUpdateUser(updateUser);
   }
 
   @Override
@@ -74,15 +62,12 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
     List<String> allRoles = Roles.getAllRolesUsedByUI();
 
-    for(String role : allRoles) {
+    for (String role : allRoles) {
       UserUpdate updateUser = new UserUpdate();
       updateUser.setRoles(Utils.toSet(role));
 
-      try {
-        checkCanUpdateUser(existedUser, updateUser);
+      if (canUpdateUser(existedUser, updateUser)) {
         allowedRoles.add(role);
-      } catch (AdminAuthorizationException | UserValidationException e) {
-        LOGGER.debug("Cannot add {} role to the role list because: {} ", role, e.getMessage());
       }
     }
     return allowedRoles;

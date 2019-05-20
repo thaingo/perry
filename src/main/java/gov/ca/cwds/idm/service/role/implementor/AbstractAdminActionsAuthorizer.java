@@ -11,12 +11,14 @@ import static gov.ca.cwds.idm.service.authorization.UserRolesService.isCountyAdm
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isStateAdmin;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isSuperAdmin;
 import static gov.ca.cwds.idm.service.authorization.UserRolesService.isUserWithMainRole;
+import static gov.ca.cwds.service.messages.MessageCode.ADMIN_CANNOT_UPDATE_HIMSELF;
 import static gov.ca.cwds.service.messages.MessageCode.CANNOT_EDIT_ROLES_OF_CALS_EXTERNAL_WORKER;
 import static gov.ca.cwds.service.messages.MessageCode.STATE_ADMIN_ROLES_CANNOT_BE_EDITED;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_TO_CREATE_USER_WITH_UNALLOWED_ROLES;
 import static gov.ca.cwds.service.messages.MessageCode.UNABLE_UPDATE_UNALLOWED_ROLES;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserCountyName;
+import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserName;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserOfficeIds;
 import static gov.ca.cwds.util.Utils.toCommaDelimitedString;
 import static java.util.Arrays.asList;
@@ -44,11 +46,6 @@ public abstract class AbstractAdminActionsAuthorizer implements AdminActionsAuth
 
   AbstractAdminActionsAuthorizer(User user) {
     this.user = user;
-  }
-
-  @Override
-  public final boolean canUpdateUser(UserUpdate userUpdate) {
-    return false;
   }
 
   protected User getUser() {
@@ -83,12 +80,32 @@ public abstract class AbstractAdminActionsAuthorizer implements AdminActionsAuth
     getUpdateUserRules(userUpdate).check();
   }
 
+  @Override
+  public final boolean canUpdateUser(UserUpdate userUpdate) {
+    return !getUpdateUserRules(userUpdate).hasError();
+  }
+
+  protected final ErrorRule userAndAdminAreNotTheSameUser() {
+    return new ErrorRule() {
+      @Override
+      public boolean hasError() {
+        return userAndAdminAreTheSameUser();
+      }
+
+      @Override
+      public IdmException createException() {
+        return createAuthorizationException(ADMIN_CANNOT_UPDATE_HIMSELF);
+      }
+    };
+  }
+
   protected final ErrorRule userIsNotSuperAdmin(MessageCode errorCode) {
-    return new ErrorRule(){
+    return new ErrorRule() {
       @Override
       public boolean hasError() {
         return isUserSuperAdmin();
       }
+
       @Override
       public IdmException createException() {
         return createAuthorizationException(errorCode, getStrongestAdminRole(getCurrentUser()),
@@ -98,11 +115,12 @@ public abstract class AbstractAdminActionsAuthorizer implements AdminActionsAuth
   }
 
   protected final ErrorRule userIsNotStateAdmin(MessageCode errorCode) {
-    return new ErrorRule(){
+    return new ErrorRule() {
       @Override
       public boolean hasError() {
         return isUsersStateAdmin();
       }
+
       @Override
       public IdmException createException() {
         return createAuthorizationException(errorCode, getUser().getId());
@@ -111,11 +129,12 @@ public abstract class AbstractAdminActionsAuthorizer implements AdminActionsAuth
   }
 
   protected final ErrorRule userIsNotCountyAdmin(MessageCode errorCode) {
-    return new ErrorRule(){
+    return new ErrorRule() {
       @Override
       public boolean hasError() {
         return isUserCountyAdmin();
       }
+
       @Override
       public IdmException createException() {
         return createAuthorizationException(errorCode, getUser().getId());
@@ -125,11 +144,12 @@ public abstract class AbstractAdminActionsAuthorizer implements AdminActionsAuth
 
 
   protected final ErrorRule userIsNotCalsExternalWorker(MessageCode errorCode) {
-    return new ErrorRule(){
+    return new ErrorRule() {
       @Override
       public boolean hasError() {
         return isUserCalsExternalWorker();
       }
+
       @Override
       public IdmException createException() {
         return createAuthorizationException(errorCode, getUser().getId());
@@ -176,10 +196,12 @@ public abstract class AbstractAdminActionsAuthorizer implements AdminActionsAuth
   }
 
   protected final ErrorRule calsExternalWorkerRolesAreNotChanged(UserUpdate userUpdate) {
-    return rolesAreNotEdited(CALS_EXTERNAL_WORKER, userUpdate, CANNOT_EDIT_ROLES_OF_CALS_EXTERNAL_WORKER);
+    return rolesAreNotEdited(CALS_EXTERNAL_WORKER, userUpdate,
+        CANNOT_EDIT_ROLES_OF_CALS_EXTERNAL_WORKER);
   }
 
-  private ErrorRule rolesAreNotEdited(String userMainRole, UserUpdate userUpdate, MessageCode errorCode) {
+  private ErrorRule rolesAreNotEdited(String userMainRole, UserUpdate userUpdate,
+      MessageCode errorCode) {
     return new ErrorRule() {
       @Override
       public boolean hasError() {
@@ -224,19 +246,23 @@ public abstract class AbstractAdminActionsAuthorizer implements AdminActionsAuth
     };
   }
 
-  protected final ErrorRule cwsWorkerRolesMayBeChangedTo(UserUpdate userUpdate, String... allowedRoles) {
+  protected final ErrorRule cwsWorkerRolesMayBeChangedTo(UserUpdate userUpdate,
+      String... allowedRoles) {
     return userChangesRolesOnlyTo(CWS_WORKER, userUpdate, allowedRoles);
   }
 
-  protected final ErrorRule officeAdminUserRolesMayBeChangedTo(UserUpdate userUpdate, String... allowedRoles) {
+  protected final ErrorRule officeAdminUserRolesMayBeChangedTo(UserUpdate userUpdate,
+      String... allowedRoles) {
     return userChangesRolesOnlyTo(OFFICE_ADMIN, userUpdate, allowedRoles);
   }
 
-  protected final ErrorRule countyAdminUserRolesMayBeChangedTo(UserUpdate userUpdate, String... allowedRoles) {
+  protected final ErrorRule countyAdminUserRolesMayBeChangedTo(UserUpdate userUpdate,
+      String... allowedRoles) {
     return userChangesRolesOnlyTo(COUNTY_ADMIN, userUpdate, allowedRoles);
   }
 
-  protected final ErrorRule stateAdminUserRolesMayBeChangedTo(UserUpdate userUpdate, String... allowedRoles) {
+  protected final ErrorRule stateAdminUserRolesMayBeChangedTo(UserUpdate userUpdate,
+      String... allowedRoles) {
     return userChangesRolesOnlyTo(STATE_ADMIN, userUpdate, allowedRoles);
   }
 
@@ -281,6 +307,10 @@ public abstract class AbstractAdminActionsAuthorizer implements AdminActionsAuth
 
   private boolean isUsersStateAdmin() {
     return isStateAdmin(getUser());
+  }
+
+  private boolean userAndAdminAreTheSameUser() {
+    return getUser().getId().equals(getCurrentUserName());
   }
 
   private UserValidationException createValidationException(MessageCode messageCode, String... args) {

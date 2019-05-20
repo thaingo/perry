@@ -6,6 +6,7 @@ import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.SUPER_ADMIN;
+import static gov.ca.cwds.idm.util.TestHelper.ADMIN_ID;
 import static gov.ca.cwds.idm.util.TestHelper.admin;
 import static gov.ca.cwds.idm.util.TestHelper.user;
 import static gov.ca.cwds.service.messages.MessageCode.ADMIN_CANNOT_UPDATE_HIMSELF;
@@ -20,7 +21,9 @@ import static gov.ca.cwds.service.messages.MessageCode.OFFICE_ADMIN_CANNOT_UPDAT
 import static gov.ca.cwds.service.messages.MessageCode.OFFICE_ADMIN_CANNOT_UPDATE_USER_FROM_OTHER_OFFICE;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserCountyName;
+import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserName;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserOfficeIds;
+import static gov.ca.cwds.util.UniversalUserTokenDeserializer.USER_NAME;
 import static gov.ca.cwds.util.Utils.toSet;
 import static org.assertj.core.api.Fail.fail;
 import static org.hamcrest.core.Is.is;
@@ -30,6 +33,7 @@ import static org.mockito.Mockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
+import gov.ca.cwds.UniversalUserToken;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.exception.AdminAuthorizationException;
@@ -85,10 +89,9 @@ public class AuthorizationServiceImplTest {
 
   @Test
   public void testAdminCantUpdateHimself() {
-    String adminId = "someId";
-    when(CurrentAuthenticatedUserUtil.getCurrentUserName()).thenReturn(adminId);
+    setUpAdmin(toSet(STATE_ADMIN), "Yolo", toSet("Yolo_2"));
     User user = new User();
-    user.setId(adminId);
+    user.setId(ADMIN_ID);
     assertCanNotUpdateUser(user, dummyUserUpdate(), ADMIN_CANNOT_UPDATE_HIMSELF);
   }
 
@@ -299,7 +302,9 @@ public class AuthorizationServiceImplTest {
   }
 
   private static void setUpAdmin(Set<String> roles, String countyName, Set<String> adminOfficeIds) {
-    when(getCurrentUser()).thenReturn(admin(roles, countyName, adminOfficeIds));
+    UniversalUserToken admin = admin(roles, countyName, adminOfficeIds);
+    when(getCurrentUser()).thenReturn(admin);
+    when(getCurrentUserName()).thenReturn((String)admin.getParameter(USER_NAME));
     when(getCurrentUserCountyName()).thenReturn(countyName);
     when(getCurrentUserOfficeIds()).thenReturn(adminOfficeIds);
   }
