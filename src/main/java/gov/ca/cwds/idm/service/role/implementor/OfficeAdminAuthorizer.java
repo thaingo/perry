@@ -23,42 +23,38 @@ class OfficeAdminAuthorizer extends AbstractAdminActionsAuthorizer {
   }
 
   @Override
-  public void checkCanViewUser() {
-    new ErrorRuleList()
+  public ErrorRuleList getViewUserRules() {
+    return new ErrorRuleList()
         .addRule(adminAndUserAreInTheSameCounty(
             OFFICE_ADMIN_CANNOT_VIEW_USER_FROM_OTHER_COUNTY, getUser().getId()))
         .addRule(userIsNotCalsExternalWorker(
             OFFICE_ADMIN_CANNOT_VIEW_USERS_WITH_CALS_EXTERNAL_WORKER_ROLE))
-        .addRule(userIsNotSuperAdmin(NOT_SUPER_ADMIN_CANNOT_VIEW_USERS_WITH_SUPER_ADMIN_ROLE))
-        .check();
+        .addRule(userIsNotSuperAdmin(NOT_SUPER_ADMIN_CANNOT_VIEW_USERS_WITH_SUPER_ADMIN_ROLE));
   }
 
   @Override
-  public void checkCanCreateUser() {
-    new ErrorRuleList()
+  public ErrorRuleList getCreateUserRules() {
+    return new ErrorRuleList()
         .addRule(adminAndUserAreInTheSameOffice(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_OFFICE))
-        .addRule(createdUserRolesMayBe(CWS_WORKER))
-        .check();
+        .addRule(createdUserRolesMayBe(CWS_WORKER));
   }
 
   @Override
-  public void checkCanUpdateUser(UserUpdate userUpdate) {
-    new ErrorRuleList()
+  public ErrorRuleList getUpdateUserRules(UserUpdate userUpdate) {
+    return new ErrorRuleList()
         .addRule(adminAndUserAreInTheSameOffice(OFFICE_ADMIN_CANNOT_UPDATE_USER_FROM_OTHER_OFFICE))
         .addRule(userIsNotCountyAdmin(OFFICE_ADMIN_CANNOT_UPDATE_COUNTY_ADMIN))
         .addRule(userIsNotStateAdmin(OFFICE_ADMIN_CANNOT_UPDATE_STATE_ADMIN))
         .addRule(userIsNotSuperAdmin(NOT_SUPER_ADMIN_CANNOT_UPDATE_USERS_WITH_SUPER_ADMIN_ROLE))
         .addRule(calsExternalWorkerRolesAreNotChanged(userUpdate))
         .addRule(cwsWorkerRolesMayBeChangedTo(userUpdate, CWS_WORKER))
-        .addRule(officeAdminUserRolesMayBeChangedTo(userUpdate, OFFICE_ADMIN, CWS_WORKER))
-        .check();
+        .addRule(officeAdminUserRolesMayBeChangedTo(userUpdate, OFFICE_ADMIN, CWS_WORKER));
   }
 
   @Override
-  public void checkCanResendInvitationMessage() {
-    new ErrorRuleList()
+  public ErrorRuleList getResendInvitationMessageRules() {
+    return new ErrorRuleList()
         .addRule(adminAndUserAreInTheSameOffice(
-            OFFICE_ADMIN_CANNOT_RESEND_INVITATION_FOR_USER_FROM_OTHER_OFFICE))
-        .check();
+            OFFICE_ADMIN_CANNOT_RESEND_INVITATION_FOR_USER_FROM_OTHER_OFFICE));
   }
 }

@@ -18,22 +18,21 @@ class SuperAdminAuthorizer extends AbstractAdminActionsAuthorizer {
   }
 
   @Override
-  public void checkCanViewUser() {
-    new ErrorRuleList().check();
+  public ErrorRuleList getViewUserRules() {
+    return new ErrorRuleList();
   }
 
   @Override
-  public void checkCanCreateUser() {
-    new ErrorRuleList()
+  public ErrorRuleList getCreateUserRules() {
+    return new ErrorRuleList()
         .addRule(
             createdUserRolesMayBe(SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER,
-                CALS_EXTERNAL_WORKER))
-        .check();
+                CALS_EXTERNAL_WORKER));
   }
 
   @Override
-  public void checkCanUpdateUser(UserUpdate userUpdate) {
-    new ErrorRuleList()
+  public ErrorRuleList getUpdateUserRules(UserUpdate userUpdate) {
+    return new ErrorRuleList()
         .addRule(cwsWorkerRolesMayBeChangedTo(userUpdate,
             SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER, CALS_EXTERNAL_WORKER))
         .addRule(officeAdminUserRolesMayBeChangedTo(userUpdate,
@@ -41,12 +40,12 @@ class SuperAdminAuthorizer extends AbstractAdminActionsAuthorizer {
         .addRule(countyAdminUserRolesMayBeChangedTo(userUpdate,
             SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER, CALS_EXTERNAL_WORKER))
         .addRule(stateAdminUserRolesMayBeChangedTo(userUpdate,
-            SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER, CALS_EXTERNAL_WORKER))
-        .check();
+            SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER,
+            CALS_EXTERNAL_WORKER));
   }
 
   @Override
-  public void checkCanResendInvitationMessage() {
-    new ErrorRuleList().check();
+  public ErrorRuleList getResendInvitationMessageRules() {
+    return new ErrorRuleList();
   }
 }

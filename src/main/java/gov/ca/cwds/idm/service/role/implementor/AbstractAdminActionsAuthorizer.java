@@ -29,6 +29,7 @@ import gov.ca.cwds.idm.exception.UserValidationException;
 import gov.ca.cwds.idm.service.authorization.AdminActionsAuthorizer;
 import gov.ca.cwds.idm.service.exception.ExceptionFactory;
 import gov.ca.cwds.idm.service.rule.ErrorRule;
+import gov.ca.cwds.idm.service.rule.ErrorRuleList;
 import gov.ca.cwds.service.messages.MessageCode;
 import gov.ca.cwds.util.Utils;
 import java.util.Collection;
@@ -52,6 +53,34 @@ public abstract class AbstractAdminActionsAuthorizer implements AdminActionsAuth
 
   protected User getUser() {
     return user;
+  }
+
+  public abstract ErrorRuleList getViewUserRules();
+
+  @Override
+  public final void checkCanViewUser() {
+    getViewUserRules().check();
+  }
+
+  public abstract ErrorRuleList getCreateUserRules();
+
+  @Override
+  public final void checkCanCreateUser() {
+    getCreateUserRules().check();
+  }
+
+  public abstract ErrorRuleList getResendInvitationMessageRules();
+
+  @Override
+  public final void checkCanResendInvitationMessage() {
+    getResendInvitationMessageRules().check();
+  }
+
+  public abstract ErrorRuleList getUpdateUserRules(UserUpdate userUpdate);
+
+  @Override
+  public final void checkCanUpdateUser(UserUpdate userUpdate) {
+    getUpdateUserRules(userUpdate).check();
   }
 
   protected final ErrorRule userIsNotSuperAdmin(MessageCode errorCode) {

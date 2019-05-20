@@ -17,27 +17,25 @@ class StateAdminAuthorizer extends AbstractAdminActionsAuthorizer {
   }
 
   @Override
-  public void checkCanViewUser() {
-    new ErrorRuleList()
-        .addRule(userIsNotSuperAdmin(NOT_SUPER_ADMIN_CANNOT_VIEW_USERS_WITH_SUPER_ADMIN_ROLE))
-        .check();
+  public ErrorRuleList getViewUserRules() {
+    return new ErrorRuleList()
+        .addRule(userIsNotSuperAdmin(NOT_SUPER_ADMIN_CANNOT_VIEW_USERS_WITH_SUPER_ADMIN_ROLE));
   }
 
   @Override
-  public void checkCanCreateUser() {
-    new ErrorRuleList()
-        .addRule(createdUserRolesMayBe(COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER))
-        .check();
+  public ErrorRuleList getCreateUserRules() {
+    return new ErrorRuleList()
+        .addRule(createdUserRolesMayBe(COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER));
   }
 
   @Override
-  public void checkCanResendInvitationMessage() {
-    new ErrorRuleList().check();
+  public ErrorRuleList getResendInvitationMessageRules() {
+    return new ErrorRuleList();
   }
 
   @Override
-  public void checkCanUpdateUser(UserUpdate userUpdate) {
-    new ErrorRuleList()
+  public ErrorRuleList getUpdateUserRules(UserUpdate userUpdate) {
+    return new ErrorRuleList()
         .addRule(userIsNotSuperAdmin(NOT_SUPER_ADMIN_CANNOT_UPDATE_USERS_WITH_SUPER_ADMIN_ROLE))
         .addRule(stateAdminUserRolesAreNotChanged(userUpdate))
         .addRule(calsExternalWorkerRolesAreNotChanged(userUpdate))
@@ -45,7 +43,6 @@ class StateAdminAuthorizer extends AbstractAdminActionsAuthorizer {
         .addRule(
             officeAdminUserRolesMayBeChangedTo(userUpdate, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER))
         .addRule(
-            countyAdminUserRolesMayBeChangedTo(userUpdate, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER))
-        .check();
+            countyAdminUserRolesMayBeChangedTo(userUpdate, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER));
   }
 }
