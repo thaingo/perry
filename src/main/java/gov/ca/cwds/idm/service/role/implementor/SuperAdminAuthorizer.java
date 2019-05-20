@@ -9,6 +9,7 @@ import static gov.ca.cwds.config.api.idm.Roles.SUPER_ADMIN;
 
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
+import gov.ca.cwds.idm.service.rule.ErrorRuleList;
 
 class SuperAdminAuthorizer extends AbstractAdminActionsAuthorizer {
 
@@ -18,29 +19,34 @@ class SuperAdminAuthorizer extends AbstractAdminActionsAuthorizer {
 
   @Override
   public void checkCanViewUser() {
-    //no authorization rules to check
+    new ErrorRuleList().check();
   }
 
   @Override
   public void checkCanCreateUser() {
-    createdUserRolesMayBe(SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER,
-        CALS_EXTERNAL_WORKER).check();
+    new ErrorRuleList()
+        .addRule(
+            createdUserRolesMayBe(SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER,
+                CALS_EXTERNAL_WORKER))
+        .check();
   }
 
   @Override
   public void checkCanUpdateUser(UserUpdate userUpdate) {
-    cwsWorkerRolesMayBeChangedTo(userUpdate,
-        SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER, CALS_EXTERNAL_WORKER).check();
-    officeAdminUserRolesMayBeChangedTo(userUpdate,
-        SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER, CALS_EXTERNAL_WORKER).check();
-    countyAdminUserRolesMayBeChangedTo(userUpdate,
-        SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER, CALS_EXTERNAL_WORKER).check();
-    stateAdminUserRolesMayBeChangedTo(userUpdate,
-        SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER, CALS_EXTERNAL_WORKER).check();
+    new ErrorRuleList()
+        .addRule(cwsWorkerRolesMayBeChangedTo(userUpdate,
+            SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER, CALS_EXTERNAL_WORKER))
+        .addRule(officeAdminUserRolesMayBeChangedTo(userUpdate,
+            SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER, CALS_EXTERNAL_WORKER))
+        .addRule(countyAdminUserRolesMayBeChangedTo(userUpdate,
+            SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER, CALS_EXTERNAL_WORKER))
+        .addRule(stateAdminUserRolesMayBeChangedTo(userUpdate,
+            SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER, CALS_EXTERNAL_WORKER))
+        .check();
   }
 
   @Override
   public void checkCanResendInvitationMessage() {
-    //no authorization rules to check
+    new ErrorRuleList().check();
   }
 }

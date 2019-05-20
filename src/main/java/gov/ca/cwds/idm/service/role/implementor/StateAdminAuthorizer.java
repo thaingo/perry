@@ -8,6 +8,7 @@ import static gov.ca.cwds.service.messages.MessageCode.NOT_SUPER_ADMIN_CANNOT_VI
 
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
+import gov.ca.cwds.idm.service.rule.ErrorRuleList;
 
 class StateAdminAuthorizer extends AbstractAdminActionsAuthorizer {
 
@@ -17,26 +18,34 @@ class StateAdminAuthorizer extends AbstractAdminActionsAuthorizer {
 
   @Override
   public void checkCanViewUser() {
-    userIsNotSuperAdmin(NOT_SUPER_ADMIN_CANNOT_VIEW_USERS_WITH_SUPER_ADMIN_ROLE).check();
+    new ErrorRuleList()
+        .addRule(userIsNotSuperAdmin(NOT_SUPER_ADMIN_CANNOT_VIEW_USERS_WITH_SUPER_ADMIN_ROLE))
+        .check();
   }
 
   @Override
   public void checkCanCreateUser() {
-    createdUserRolesMayBe(COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER).check();
+    new ErrorRuleList()
+        .addRule(createdUserRolesMayBe(COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER))
+        .check();
   }
 
   @Override
   public void checkCanResendInvitationMessage() {
-    //no authorization rules to check
+    new ErrorRuleList().check();
   }
 
   @Override
   public void checkCanUpdateUser(UserUpdate userUpdate) {
-    userIsNotSuperAdmin(NOT_SUPER_ADMIN_CANNOT_UPDATE_USERS_WITH_SUPER_ADMIN_ROLE).check();
-    stateAdminUserRolesAreNotChanged(userUpdate).check();
-    calsExternalWorkerRolesAreNotChanged(userUpdate).check();
-    cwsWorkerRolesMayBeChangedTo(userUpdate, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER).check();
-    officeAdminUserRolesMayBeChangedTo(userUpdate, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER).check();
-    countyAdminUserRolesMayBeChangedTo(userUpdate, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER).check();
+    new ErrorRuleList()
+        .addRule(userIsNotSuperAdmin(NOT_SUPER_ADMIN_CANNOT_UPDATE_USERS_WITH_SUPER_ADMIN_ROLE))
+        .addRule(stateAdminUserRolesAreNotChanged(userUpdate))
+        .addRule(calsExternalWorkerRolesAreNotChanged(userUpdate))
+        .addRule(cwsWorkerRolesMayBeChangedTo(userUpdate, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER))
+        .addRule(
+            officeAdminUserRolesMayBeChangedTo(userUpdate, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER))
+        .addRule(
+            countyAdminUserRolesMayBeChangedTo(userUpdate, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER))
+        .check();
   }
 }
