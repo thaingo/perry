@@ -11,6 +11,9 @@ import static gov.ca.cwds.idm.event.UserEnabledStatusChangedEvent.ACTIVE;
 import static gov.ca.cwds.idm.event.UserEnabledStatusChangedEvent.INACTIVE;
 import static gov.ca.cwds.idm.event.UserLockedEvent.LOCKED;
 import static gov.ca.cwds.idm.event.UserLockedEvent.UNLOCKED;
+import static gov.ca.cwds.idm.event.UserRegistrationCompleteEvent.EVENT_TYPE_USER_REGISTRATION_COMPLETE;
+import static gov.ca.cwds.idm.event.UserRegistrationCompleteEvent.REGISTERED;
+import static gov.ca.cwds.idm.event.UserRegistrationCompleteEvent.UNREGISTERED;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUser;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserFirstName;
 import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserLastName;
@@ -20,6 +23,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -233,6 +237,23 @@ public class UserChangeLogEventTest {
     assertThat(event.getEvent().getCountyName(), is(TEST_COUNTY));
     assertThat(event.getEvent().getOfficeId(), is(TEST_OFFICE_ID));
   }
+
+  @Test
+  public void testUserRegistrationCompleteEvent() {
+    UserRegistrationCompleteEvent event = new UserRegistrationCompleteEvent(mockUser());
+
+    assertThat(event.getEvent().getUserId(), is(TEST_USER_ID));
+    assertThat(event.getEventType(), is(EVENT_TYPE_USER_REGISTRATION_COMPLETE));
+    assertNull(event.getEvent().getAdminName());
+    assertThat(event.getEvent().getUserName(), is("testLastName, testFirstName"));
+    assertNull(event.getEvent().getAdminRole());
+    assertThat(event.getEvent().getUserRoles(), is("CWS Worker, County Administrator"));
+    assertEquals(UNREGISTERED, event.getEvent().getOldValue());
+    assertEquals(REGISTERED, event.getEvent().getNewValue());
+    assertThat(event.getEvent().getCountyName(), is(TEST_COUNTY));
+    assertThat(event.getEvent().getOfficeId(), is(TEST_OFFICE_ID));
+  }
+
 
   private User mockUser() {
     User user = new User();

@@ -1,7 +1,5 @@
 package gov.ca.cwds.idm.dto;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import java.io.Serializable;
@@ -15,12 +13,7 @@ public class IdmUserNotification implements Serializable {
   private String userId;
   private String actionType;
 
-  @JsonCreator
-  public IdmUserNotification(
-      @JsonProperty("userId") String userId,
-      @JsonProperty("actionType") String actionType) {
-    this.userId = userId;
-    this.actionType = actionType;
+  public IdmUserNotification() {
   }
 
   @SuppressWarnings({"fb-contrib:STT_TOSTRING_STORED_IN_FIELD"})//constructor for using in tests

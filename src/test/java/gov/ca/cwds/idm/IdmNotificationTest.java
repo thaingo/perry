@@ -3,6 +3,7 @@ package gov.ca.cwds.idm;
 import static gov.ca.cwds.config.TokenServiceConfiguration.TOKEN_TRANSACTION_MANAGER;
 import static gov.ca.cwds.idm.dto.NotificationType.USER_LOCKED;
 import static gov.ca.cwds.idm.dto.NotificationType.USER_PASSWORD_CHANGED;
+import static gov.ca.cwds.idm.dto.NotificationType.USER_REGISTRATION_COMPLETE;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.ABSENT_USER_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.LOCKED_USER;
@@ -20,6 +21,7 @@ import gov.ca.cwds.idm.dto.IdmUserNotification;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.event.UserLockedEvent;
 import gov.ca.cwds.idm.event.UserPasswordChangedEvent;
+import gov.ca.cwds.idm.event.UserRegistrationCompleteEvent;
 import gov.ca.cwds.idm.util.TestUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -163,6 +165,31 @@ public class IdmNotificationTest extends BaseIdmIntegrationWithSearchTest {
         argThat(user -> user.getId().equals(USER_NO_RACFID_ID)));
 
     assertThat(userLogRepository.count(), is(oldUserLogsSize));
+  }
+
+  @Test
+  public void testNotifyRegistrationComplete() throws Exception {
+    IdmUserNotification notification =
+        new IdmUserNotification(USER_NO_RACFID_ID, USER_REGISTRATION_COMPLETE);
+
+    long oldUserLogsSize = userLogRepository.count();
+
+    mockMvc
+        .perform(MockMvcRequestBuilders.post("/idm/notifications/")
+            .header(HttpHeaders.AUTHORIZATION, BASIC_AUTH_HEADER)
+            .contentType(JSON_CONTENT_TYPE)
+            .content(asJsonString(notification)))
+        .andExpect(MockMvcResultMatchers.status().isAccepted())
+        .andReturn();
+
+    verify(auditEventService, times(1)).saveAuditEvent(any(
+        UserRegistrationCompleteEvent.class));
+
+    verify(spyUserIndexService, times(1)).updateUserInIndex(
+        argThat(user -> user.getId().equals(USER_NO_RACFID_ID)));
+
+    assertThat(userLogRepository.count(), is(oldUserLogsSize));
+
   }
 
   private static String prepareNotValidBasicAuthHeader() {

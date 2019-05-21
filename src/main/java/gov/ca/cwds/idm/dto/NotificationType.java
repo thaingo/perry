@@ -3,6 +3,7 @@ package gov.ca.cwds.idm.dto;
 import gov.ca.cwds.idm.event.AuditEvent;
 import gov.ca.cwds.idm.event.UserLockedEvent;
 import gov.ca.cwds.idm.event.UserPasswordChangedEvent;
+import gov.ca.cwds.idm.event.UserRegistrationCompleteEvent;
 import gov.ca.cwds.util.Utils;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,6 +21,12 @@ public enum NotificationType {
     @Override
     public AuditEvent createAuditEvent(User user) {
       return new UserPasswordChangedEvent(user);
+    }
+  },
+  USER_REGISTRATION_COMPLETE("registration-complete") {
+    @Override
+    public AuditEvent createAuditEvent(User user) {
+      return new UserRegistrationCompleteEvent(user);
     }
   };
 
