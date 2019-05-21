@@ -1,0 +1,6 @@
+{
+  "status": "BAD_REQUEST",
+  "technical_message": "Cell phone number 123-456-7890 has invalid format. Cell phone number may consist only from 10 digits with the first one not a zero",
+  "user_message": "Cell phone number has invalid format. Cell phone number may consist only from 10 digits with the first one not a zero",
+  "error_code": "CAP-073"
+}

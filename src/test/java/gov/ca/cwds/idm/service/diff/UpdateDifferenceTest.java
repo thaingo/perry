@@ -16,7 +16,7 @@ import java.util.Optional;
 import java.util.Set;
 import org.junit.Test;
 
-public class DifferencingTest {
+public class UpdateDifferenceTest {
 
   private static final String EXISTED_EMAIL = "old.user@oci.ca.gov";
   private static final String NEW_EMAIL = "new.user@oci.ca.gov";
@@ -29,6 +29,9 @@ public class DifferencingTest {
 
   private static final String EXISTED_PHONE_EXTENSION = "28";
   private static final String NEW_PHONE_EXTENSION = "333";
+
+  private static final String EXISTED_CELL_PHONE = "1112223333";
+  private static final String NEW_CELL_PHONE ="4445556666";
 
   private static final String EXISTED_NOTES = "old notes";
   private static final String NEW_NOTES = "new notes";
@@ -101,6 +104,7 @@ public class DifferencingTest {
     userUpdate.setEnabled(NEW_ENABLED);
     userUpdate.setPhoneNumber(NEW_PHONE);
     userUpdate.setPhoneExtensionNumber(NEW_PHONE_EXTENSION);
+      userUpdate.setCellPhoneNumber(NEW_CELL_PHONE);
     userUpdate.setNotes(NEW_NOTES);
     userUpdate.setRoles(NEW_ROLES);
     userUpdate.setPermissions(NEW_PERMISSIONS);
@@ -112,6 +116,7 @@ public class DifferencingTest {
     assertStringDiff(updateDifference.getPhoneNumberDiff(), EXISTED_PHONE, NEW_PHONE);
     assertStringDiff(
         updateDifference.getPhoneExtensionNumberDiff(), EXISTED_PHONE_EXTENSION, NEW_PHONE_EXTENSION);
+      assertStringDiff(updateDifference.getCellPhoneNumberDiff(), EXISTED_CELL_PHONE, NEW_CELL_PHONE);
     assertStringDiff(updateDifference.getNotesDiff(), EXISTED_NOTES, NEW_NOTES);
     assertStringSetDiff(updateDifference.getRolesDiff(), EXISTED_ROLES, NEW_ROLES);
     assertStringSetDiff(updateDifference.getPermissionsDiff(), EXISTED_PERMISSIONS, NEW_PERMISSIONS);
@@ -157,6 +162,7 @@ public class DifferencingTest {
     user.setEnabled(EXISTED_ENABLED);
     user.setPhoneNumber(EXISTED_PHONE);
     user.setPhoneExtensionNumber(EXISTED_PHONE_EXTENSION);
+    user.setCellPhoneNumber(EXISTED_CELL_PHONE);
     user.setNotes(EXISTED_NOTES);
     user.setRoles(EXISTED_ROLES);
     user.setPermissions(EXISTED_PERMISSIONS);

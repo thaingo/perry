@@ -10,12 +10,13 @@ import java.util.Set;
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 public class UserUpdate implements Serializable {
 
-  private static final long serialVersionUID = 2710159981942074358L;
+  private static final long serialVersionUID = -704701478202376183L;
 
   private String email;
   private Boolean enabled;
   private String phoneNumber;
   private String phoneExtensionNumber;
+  private String cellPhoneNumber;
   private String notes;
   private Set<String> permissions;
   private Set<String> roles;
@@ -50,6 +51,14 @@ public class UserUpdate implements Serializable {
 
   public void setPhoneExtensionNumber(String phoneExtensionNumber) {
     this.phoneExtensionNumber = phoneExtensionNumber;
+  }
+
+  public String getCellPhoneNumber() {
+    return cellPhoneNumber;
+  }
+
+  public void setCellPhoneNumber(String cellPhoneNumber) {
+    this.cellPhoneNumber = cellPhoneNumber;
   }
 
   public Set<String> getPermissions() {

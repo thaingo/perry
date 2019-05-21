@@ -6,12 +6,14 @@ import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.OFFI
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.FIRST_NAME;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.LAST_NAME;
+import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.PHONE_NUMBER;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.DEFAULT_PAGESIZE;
 import static gov.ca.cwds.idm.service.cognito.util.CognitoUsersSearchCriteriaUtil.composeToGetFirstPageByAttribute;
 import static gov.ca.cwds.idm.util.TestHelper.getTestCognitoProperties;
 import static gov.ca.cwds.idm.util.TestUtils.attr;
 import static gov.ca.cwds.idm.util.TestUtils.date;
+import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -34,7 +36,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import liquibase.util.StringUtils;
 
@@ -98,6 +99,12 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
 
     initUsers();
 
+    setUpGetAbsentUserRequestAndResult();
+    setUpGetErrorUserRequestAndResult();
+  }
+
+  private void initUsers() {
+
     TestUser userWithoutRacfid =
         testUser(
             USER_NO_RACFID_ID,
@@ -111,9 +118,9 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
             WithMockCustomUser.COUNTY,
             null,
             null,
+            null,
             null);
 
-    TestUser userWithCalsExternalUserRole =
         testUser(
             USER_CALS_EXTERNAL,
             Boolean.TRUE,
@@ -124,6 +131,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
             "Don",
             "Manzano",
             WithMockCustomUser.COUNTY,
+            null,
             null,
             null,
             null);
@@ -141,6 +149,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
             WithMockCustomUser.COUNTY,
             "YOLOD",
             null,
+            null,
             null);
 
     TestUser userWithRacfidAndDbData =
@@ -156,66 +165,8 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
             WithMockCustomUser.COUNTY,
             "SMITHBO",
             WithMockCustomUser.OFFICE_ID,
-            null);
-
-    testUser(
-        USER_WITH_RACFID_AND_CWS_STAFF_AUTHORITY_PRVILIGES,
-        Boolean.TRUE,
-        "CONFIRMED",
-        date(2019, 1, 3),
-        date(2019, 2, 8),
-        "han.solo@osi.ca.gav",
-        "Han",
-        "Solo",
-        "Yolo",
-        "CWSPRV",
-        WithMockCustomUser.OFFICE_ID,
-        null);
-
-    TestUser userWithNoPhoneExtension =
-        testUser(
-            USER_WITH_NO_PHONE_EXTENSION,
-            Boolean.TRUE,
-            "CONFIRMED",
-            date(2018, 5, 3),
-            date(2018, 5, 31),
-            "gabriel@gmail.com",
-            "Gabriel",
-            "Huanito",
-            WithMockCustomUser.COUNTY,
-            "SMITHB2",
             null,
-            null);
-
-    TestUser userWithEnableStatusInactiveInCognito =
-        testUser(
-            USER_WITH_INACTIVE_STATUS_COGNITO,
-            Boolean.FALSE,
-            "CONFIRMED",
-            date(2018, 5, 3),
-            date(2018, 5, 31),
-            "smith3rd@gmail.com",
-            "Smith",
-            "Third",
-            WithMockCustomUser.COUNTY,
-            "SMITHB3",
-            null,
-            null);
-
-    TestUser userWithNoActiveRacfIdInCms =
-        testUser(
-            INACTIVE_USER_WITH_NO_ACTIVE_RACFID_IN_CMS,
-            Boolean.FALSE,
-            "CONFIRMED",
-            date(2018, 5, 3),
-            date(2018, 5, 31),
-            "smith4th@gmail.com",
-            "Smith",
-            "Forth",
-            WithMockCustomUser.COUNTY,
-            "NOIDCMS",
-            null,
-            null);
+            "+2223334444");
 
     TestUser userWithActiveRacfIdAInCms =
         testUser(
@@ -229,6 +180,70 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
             "Fifth",
             WithMockCustomUser.COUNTY,
             "SMITHBO",
+            null,
+            null,
+            null);
+
+    setSearchByRacfidRequestAndReturnResults(
+        "SMITHBO", userWithActiveRacfIdAInCms, userWithRacfidAndDbData);
+
+    testUser(
+        USER_WITH_RACFID_AND_CWS_STAFF_AUTHORITY_PRVILIGES,
+        Boolean.TRUE,
+        "CONFIRMED",
+        date(2019, 1, 3),
+        date(2019, 2, 8),
+        "han.solo@osi.ca.gav",
+        "Han",
+        "Solo",
+        "Yolo",
+        "CWSPRV",
+        WithMockCustomUser.OFFICE_ID,
+        null,
+        null);
+
+        testUser(
+            USER_WITH_NO_PHONE_EXTENSION,
+            Boolean.TRUE,
+            "CONFIRMED",
+            date(2018, 5, 3),
+            date(2018, 5, 31),
+            "gabriel@gmail.com",
+            "Gabriel",
+            "Huanito",
+            WithMockCustomUser.COUNTY,
+            "SMITHB2",
+            null,
+            null,
+            null);
+
+        testUser(
+            USER_WITH_INACTIVE_STATUS_COGNITO,
+            Boolean.FALSE,
+            "CONFIRMED",
+            date(2018, 5, 3),
+            date(2018, 5, 31),
+            "smith3rd@gmail.com",
+            "Smith",
+            "Third",
+            WithMockCustomUser.COUNTY,
+            "SMITHB3",
+            null,
+            null,
+            null);
+
+        testUser(
+            INACTIVE_USER_WITH_NO_ACTIVE_RACFID_IN_CMS,
+            Boolean.FALSE,
+            "CONFIRMED",
+            date(2018, 5, 3),
+            date(2018, 5, 31),
+            "smith4th@gmail.com",
+            "Smith",
+            "Forth",
+            WithMockCustomUser.COUNTY,
+            "NOIDCMS",
+            null,
             null,
             null);
 
@@ -245,34 +260,8 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
             WithMockCustomUser.COUNTY,
             null,
             null,
+            null,
             null);
-
-    setUpGetAbsentUserRequestAndResult();
-
-    setUpGetErrorUserRequestAndResult();
-
-    setListUsersRequestAndResult("", userWithoutRacfid, userWithRacfid, userWithRacfidAndDbData);
-
-    setListUsersRequestAndResult(SOME_PAGINATION_TOKEN, userWithoutRacfid);
-
-    setSearchUsersByEmailRequestAndResult("julio@gmail.com", "test@test.com", userWithRacfid);
-
-    setSearchByRacfidRequestAndResult(userWithRacfid);
-
-    setSearchByRacfidRequestAndResult(userWithRacfidAndDbData);
-
-    setSearchByRacfidRequestAndResult(userWithNoPhoneExtension);
-
-    setSearchByRacfidRequestAndResult(userWithEnableStatusInactiveInCognito);
-
-    setSearchByRacfidRequestAndResult(userWithNoActiveRacfIdInCms);
-
-    setSearchByRacfidRequestAndResult(inactiveUserWithNoRacfId);
-
-    setSearchByRacfidRequestAndReturnResults(userWithActiveRacfIdAInCms, userWithRacfidAndDbData);
-  }
-
-  private void initUsers() {
 
     testUser(
         USER_CALS_EXTERNAL,
@@ -284,6 +273,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
         "Don",
         "Manzano",
         WithMockCustomUser.COUNTY,
+        null,
         null,
         null,
         null);
@@ -300,6 +290,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
         "Lake",
         "HAILES",
         WithMockCustomUser.OFFICE_ID,
+        null,
         null);
 
     //countyAdminUser =
@@ -315,6 +306,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
         WithMockCustomUser.COUNTY,
         "MCALLUM",
         WithMockCustomUser.OFFICE_ID,
+        null,
         null);
 
     //officeAdmin user
@@ -330,6 +322,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
         WithMockCustomUser.COUNTY,
         "PEROTJA",
         WithMockCustomUser.OFFICE_ID,
+        null,
         null);
 
     //stateAdminUser =
@@ -345,6 +338,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
         WithMockCustomUser.COUNTY,
         "YULLC",
         WithMockCustomUser.OFFICE_ID,
+        null,
         null);
 
     testUser(
@@ -359,7 +353,8 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
         WithMockCustomUser.COUNTY,
         "YOLOD",
         null,
-        "false");
+        "false",
+        null);
 
     testUser(
         USER_WITH_NO_LOCKED_VALUE_UNLOCKED,
@@ -372,6 +367,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
         "Iglecias",
         WithMockCustomUser.COUNTY,
         "YOLOD",
+        null,
         null,
         null);
 
@@ -387,7 +383,8 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
         WithMockCustomUser.COUNTY,
         "YOLOD",
         null,
-        "true");
+        "true",
+        null);
 
     testUser(
         NEW_USER_SUCCESS_ID,
@@ -401,7 +398,8 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
         WithMockCustomUser.COUNTY,
         null,
         null,
-        "true");
+        "true",
+        null);
 
     testUser(
         NEW_USER_ES_FAIL_ID,
@@ -413,6 +411,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
         "Garcia",
         "Gonzales",
         WithMockCustomUser.COUNTY,
+        null,
         null,
         null,
         null);
@@ -429,7 +428,14 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
         WithMockCustomUser.COUNTY,
         null,
         null,
+        null,
         null);
+
+    setListUsersRequestAndResult("", userWithoutRacfid, userWithRacfid, userWithRacfidAndDbData);
+
+    setListUsersRequestAndResult(SOME_PAGINATION_TOKEN, userWithoutRacfid);
+
+    setSearchUsersByEmailRequestAndResult("julio@gmail.com", "test@test.com", userWithRacfid);
   }
 
   private void setListUsersRequestAndResult(String paginationToken, TestUser... testUsers) {
@@ -443,7 +449,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
     List<UserType> userTypes =
         Arrays.stream(testUsers)
             .map(TestCognitoServiceFacade::userType)
-            .collect(Collectors.toList());
+            .collect(toList());
 
     ListUsersResult result = new ListUsersResult().withUsers(userTypes);
 
@@ -462,7 +468,8 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
       String county,
       String racfId,
       String officeId,
-      String locked) {
+      String locked,
+      String cellPhoneNumber) {
 
     TestUser testUser =
         new TestUser(
@@ -477,9 +484,14 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
             county,
             racfId,
             officeId,
-            locked);
+            locked,
+            cellPhoneNumber);
 
     setUpGetUserRequestAndResult(testUser);
+
+    if(racfId != null) {
+      setSearchByRacfidRequestAndSingleResult(testUser);
+    }
 
     return testUser;
   }
@@ -507,6 +519,9 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
     }
     if (testUser.getLocked() != null) {
       attrs.add(attr(IS_LOCKED, testUser.getLocked()));
+    }
+    if (testUser.getCellPhoneNumber() != null) {
+      attrs.add(attr(PHONE_NUMBER, testUser.getCellPhoneNumber()));
     }
     return attrs;
   }
@@ -541,7 +556,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
     List<UserType> userTypes =
         Arrays.stream(testUsers)
             .map(TestCognitoServiceFacade::userType)
-            .collect(Collectors.toList());
+            .collect(toList());
 
     ListUsersResult result = new ListUsersResult().withUsers(userTypes);
     ListUsersResult result_empty = new ListUsersResult();
@@ -615,7 +630,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
     return sentInvitationRequest;
   }
 
-  private void setSearchByRacfidRequestAndResult(TestUser testUser) {
+  private void setSearchByRacfidRequestAndSingleResult(TestUser testUser) {
     setSearchByRacfidRequestAndResult(testUser.getRacfId(), userType(testUser));
   }
 
@@ -631,15 +646,14 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
     when(cognito.listUsers(request)).thenReturn(result);
   }
 
-  private void setSearchByRacfidRequestAndReturnResults(TestUser testUser1,
-      TestUser testUser2) {
+  private void setSearchByRacfidRequestAndReturnResults(String racfid, TestUser... testUsers) {
 
     ListUsersRequest request =
         getCognitoRequestHelper().composeListUsersRequest(
-            composeToGetFirstPageByAttribute(RACFID_STANDARD, testUser1.getRacfId()));
+            composeToGetFirstPageByAttribute(RACFID_STANDARD, racfid));
 
     ListUsersResult result = new ListUsersResult()
-        .withUsers(userType(testUser1), userType(testUser2));
+        .withUsers(Arrays.stream(testUsers).map(t -> userType(t)).collect(toList()));
 
     when(cognito.listUsers(request)).thenReturn(result);
   }
@@ -658,6 +672,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
     private String racfId;
     private String officeId;
     private String locked;
+    private String cellPhoneNumber;
 
     TestUser(
         String id,
@@ -671,7 +686,8 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
         String county,
         String racfId,
         String officeId,
-        String locked) {
+        String locked,
+        String cellPhoneNumber) {
       this.id = id;
       this.enabled = enabled;
       this.status = status;
@@ -684,6 +700,7 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
       this.racfId = racfId;
       this.officeId = officeId;
       this.locked = locked;
+      this.cellPhoneNumber = cellPhoneNumber;
     }
 
     public String getId() {
@@ -732,6 +749,10 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
 
     public String getLocked() {
       return locked;
+    }
+
+    public String getCellPhoneNumber() {
+      return cellPhoneNumber;
     }
   }
 }

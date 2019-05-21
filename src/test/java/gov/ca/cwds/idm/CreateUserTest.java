@@ -75,6 +75,14 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
   }
 
   @Test
+  @WithMockCustomUser
+  public void testCreateUserWithCellPhoneNumberSuccess() throws Exception {
+    User user = user("gonzales5@gmail.com");
+    user.setCellPhoneNumber("1112223333");
+    assertCreateUserSuccess(user, "new_user_success_id_5");
+  }
+
+  @Test
   @WithMockCustomUser(roles = {OFFICE_ADMIN}, adminOfficeIds = {"otherOfficeId"})
   public void testCreateUserOfficeAdminOtherOffice() throws Exception {
     assertCreateUserUnauthorized("fixtures/idm/create-user/office-admin-other-office.json");
@@ -445,6 +453,15 @@ public class CreateUserTest extends BaseIdmIntegrationWithSearchTest {
     User user = user("super.admin@test.com", toSet(SUPER_ADMIN), toSet("Snapshot-rollout"));
     assertCreateUserBadRequest(user,
         "fixtures/idm/create-user/super-admin-by-state-admin.json");
+  }
+
+  @Test
+  @WithMockCustomUser
+  public void testCreateUserWithInvalidCellPhone() throws Exception {
+    User user = user("invalid.cell@phone.com");
+    user.setCellPhoneNumber("111-222-3333");
+    assertCreateUserBadRequest(user,
+        "fixtures/idm/create-user/invalid-cell-phone.json");
   }
 
   private void assertCreateUserSuccess(User user, String newUserId) throws Exception {

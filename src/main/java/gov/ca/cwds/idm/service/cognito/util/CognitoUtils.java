@@ -6,7 +6,9 @@ import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EM
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL_VERIFIED;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.FIRST_NAME;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.LAST_NAME;
+import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.PHONE_NUMBER;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.RACFID_STANDARD;
+import static gov.ca.cwds.idm.service.cognito.util.CognitoPhoneConverter.toCognitoFormat;
 import static gov.ca.cwds.util.Utils.toUpperCase;
 
 import com.amazonaws.services.cognitoidp.model.AttributeType;
@@ -63,6 +65,7 @@ public class CognitoUtils {
             .addAttribute(OFFICE, user.getOfficeId())
             .addAttribute(RACFID_STANDARD, racfid)
             .addAttribute(EMAIL_VERIFIED, TRUE_VALUE)
+            .addAttribute(PHONE_NUMBER, toCognitoFormat(user.getCellPhoneNumber()))
         ;
     return attributesBuilder.build();
   }

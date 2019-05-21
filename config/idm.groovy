@@ -1,5 +1,6 @@
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.*
 import static gov.ca.cwds.idm.service.cognito.attribute.CustomUserAttribute.*
+import static gov.ca.cwds.idm.service.cognito.util.CognitoPhoneConverter.*
 
 import gov.ca.cwds.rest.api.domain.auth.GovernmentEntityType
 import gov.ca.cwds.util.Utils
@@ -23,6 +24,7 @@ result.enabled = cognitoUser.enabled
 result.userCreateDate = cognitoUser.userCreateDate
 result.status = cognitoUser.userStatus
 result.email = cognitoUserAttrValue(EMAIL)
+result.cellPhoneNumber = fromCognitoFormat(cognitoUserAttrValue(PHONE_NUMBER))
 
 if(StringUtils.isNotBlank(cognitoUserAttrValue(IS_LOCKED))) {
     result.locked = cognitoUserAttrValue(IS_LOCKED).toBoolean()

@@ -13,6 +13,7 @@ public class UpdateDifference {
   private final BooleanDiff enabledDiff;
   private final StringDiff phoneNumberDiff;
   private final StringDiff phoneExtensionNumberDiff;
+  private final StringDiff cellPhoneNumberDiff;
   private final StringDiff notesDiff;
   private final StringSetDiff permissionsDiff;
   private final StringSetDiff rolesDiff;
@@ -29,6 +30,9 @@ public class UpdateDifference {
     phoneExtensionNumberDiff =
         createStringDiff(existedUser.getPhoneExtensionNumber(),
             userUpdate.getPhoneExtensionNumber());
+
+    cellPhoneNumberDiff = createStringDiff(existedUser.getCellPhoneNumber(),
+        userUpdate.getCellPhoneNumber());
 
     notesDiff = createStringDiff(existedUser.getNotes(), userUpdate.getNotes());
 
@@ -76,6 +80,10 @@ public class UpdateDifference {
 
   public Optional<StringDiff> getPhoneExtensionNumberDiff() {
     return Optional.ofNullable(phoneExtensionNumberDiff);
+  }
+
+  public Optional<StringDiff> getCellPhoneNumberDiff() {
+    return Optional.ofNullable(cellPhoneNumberDiff);
   }
 
   public Optional<StringDiff> getNotesDiff() {
