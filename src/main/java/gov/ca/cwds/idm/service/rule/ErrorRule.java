@@ -1,14 +1,28 @@
 package gov.ca.cwds.idm.service.rule;
 
 import gov.ca.cwds.idm.exception.IdmException;
+import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
-public interface ErrorRule {
+public class ErrorRule {
 
-  boolean hasError();
+  private BooleanSupplier condition;
+  private Supplier<IdmException> exceptionSupplier;
 
-  IdmException createException();
+  public ErrorRule(BooleanSupplier condition, Supplier<IdmException> exceptionSupplier) {
+    this.condition = condition;
+    this.exceptionSupplier = exceptionSupplier;
+  }
 
-  default void check(){
+  public final boolean hasError() {
+    return condition.getAsBoolean();
+  }
+
+  public final IdmException createException(){
+    return exceptionSupplier.get();
+  }
+
+  public final void check(){
     if(hasError()) {
       throw createException();
     }
