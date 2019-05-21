@@ -25,7 +25,7 @@ class SuperAdminAuthorizer extends AbstractAdminActionsAuthorizer {
   @Override
   public ErrorRuleList getCreateUserRules() {
     return new ErrorRuleList()
-        .addRule(
+        .rule(
             createdUserRolesMayBe(SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER,
                 CALS_EXTERNAL_WORKER));
   }
@@ -33,14 +33,14 @@ class SuperAdminAuthorizer extends AbstractAdminActionsAuthorizer {
   @Override
   public ErrorRuleList getUpdateUserRules(UserUpdate userUpdate) {
     return new ErrorRuleList()
-        .addRule(userAndAdminAreNotTheSameUser())
-        .addRule(cwsWorkerRolesMayBeChangedTo(userUpdate,
+        .rule(userAndAdminAreNotTheSameUser())
+        .rule(cwsWorkerRolesMayBeChangedTo(userUpdate,
             SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER, CALS_EXTERNAL_WORKER))
-        .addRule(officeAdminUserRolesMayBeChangedTo(userUpdate,
+        .rule(officeAdminUserRolesMayBeChangedTo(userUpdate,
             SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER, CALS_EXTERNAL_WORKER))
-        .addRule(countyAdminUserRolesMayBeChangedTo(userUpdate,
+        .rule(countyAdminUserRolesMayBeChangedTo(userUpdate,
             SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER, CALS_EXTERNAL_WORKER))
-        .addRule(stateAdminUserRolesMayBeChangedTo(userUpdate,
+        .rule(stateAdminUserRolesMayBeChangedTo(userUpdate,
             SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER,
             CALS_EXTERNAL_WORKER));
   }

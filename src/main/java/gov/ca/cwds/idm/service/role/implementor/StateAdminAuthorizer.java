@@ -19,13 +19,13 @@ class StateAdminAuthorizer extends AbstractAdminActionsAuthorizer {
   @Override
   public ErrorRuleList getViewUserRules() {
     return new ErrorRuleList()
-        .addRule(userIsNotSuperAdmin(NOT_SUPER_ADMIN_CANNOT_VIEW_USERS_WITH_SUPER_ADMIN_ROLE));
+        .rule(userIsNotSuperAdmin(NOT_SUPER_ADMIN_CANNOT_VIEW_USERS_WITH_SUPER_ADMIN_ROLE));
   }
 
   @Override
   public ErrorRuleList getCreateUserRules() {
     return new ErrorRuleList()
-        .addRule(createdUserRolesMayBe(COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER));
+        .rule(createdUserRolesMayBe(COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER));
   }
 
   @Override
@@ -36,14 +36,14 @@ class StateAdminAuthorizer extends AbstractAdminActionsAuthorizer {
   @Override
   public ErrorRuleList getUpdateUserRules(UserUpdate userUpdate) {
     return new ErrorRuleList()
-        .addRule(userAndAdminAreNotTheSameUser())
-        .addRule(userIsNotSuperAdmin(NOT_SUPER_ADMIN_CANNOT_UPDATE_USERS_WITH_SUPER_ADMIN_ROLE))
-        .addRule(stateAdminUserRolesAreNotChanged(userUpdate))
-        .addRule(calsExternalWorkerRolesAreNotChanged(userUpdate))
-        .addRule(cwsWorkerRolesMayBeChangedTo(userUpdate, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER))
-        .addRule(
+        .rule(userAndAdminAreNotTheSameUser())
+        .rule(userIsNotSuperAdmin(NOT_SUPER_ADMIN_CANNOT_UPDATE_USERS_WITH_SUPER_ADMIN_ROLE))
+        .rule(stateAdminUserRolesAreNotChanged(userUpdate))
+        .rule(calsExternalWorkerRolesAreNotChanged(userUpdate))
+        .rule(cwsWorkerRolesMayBeChangedTo(userUpdate, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER))
+        .rule(
             officeAdminUserRolesMayBeChangedTo(userUpdate, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER))
-        .addRule(
+        .rule(
             countyAdminUserRolesMayBeChangedTo(userUpdate, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER));
   }
 }

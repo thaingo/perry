@@ -24,38 +24,38 @@ class CountyAdminAuthorizer extends AbstractAdminActionsAuthorizer {
   @Override
   public ErrorRuleList getViewUserRules() {
     return new ErrorRuleList()
-        .addRule(adminAndUserAreInTheSameCounty(COUNTY_ADMIN_CANNOT_VIEW_USER_FROM_OTHER_COUNTY,
+        .rule(adminAndUserAreInTheSameCounty(COUNTY_ADMIN_CANNOT_VIEW_USER_FROM_OTHER_COUNTY,
             getUser().getId()))
-        .addRule(userIsNotSuperAdmin(NOT_SUPER_ADMIN_CANNOT_VIEW_USERS_WITH_SUPER_ADMIN_ROLE));
+        .rule(userIsNotSuperAdmin(NOT_SUPER_ADMIN_CANNOT_VIEW_USERS_WITH_SUPER_ADMIN_ROLE));
   }
 
   @Override
   public ErrorRuleList getCreateUserRules() {
     return new ErrorRuleList()
-        .addRule(adminAndUserAreInTheSameCounty(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY,
+        .rule(adminAndUserAreInTheSameCounty(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_COUNTY,
             getUser().getCountyName()))
-        .addRule(createdUserRolesMayBe(OFFICE_ADMIN, CWS_WORKER));
+        .rule(createdUserRolesMayBe(OFFICE_ADMIN, CWS_WORKER));
   }
 
   @Override
   public ErrorRuleList getResendInvitationMessageRules() {
     return new ErrorRuleList()
-        .addRule(adminAndUserAreInTheSameCounty(
+        .rule(adminAndUserAreInTheSameCounty(
             COUNTY_ADMIN_CANNOT_RESEND_INVITATION_FOR_USER_FROM_OTHER_COUNTY, getUser().getId()));
   }
 
   @Override
   public ErrorRuleList getUpdateUserRules(UserUpdate userUpdate) {
     return new ErrorRuleList()
-        .addRule(userAndAdminAreNotTheSameUser())
-        .addRule(adminAndUserAreInTheSameCounty(COUNTY_ADMIN_CANNOT_UPDATE_USER_FROM_OTHER_COUNTY,
+        .rule(userAndAdminAreNotTheSameUser())
+        .rule(adminAndUserAreInTheSameCounty(COUNTY_ADMIN_CANNOT_UPDATE_USER_FROM_OTHER_COUNTY,
             getUser().getId()))
-        .addRule(userIsNotStateAdmin(COUNTY_ADMIN_CANNOT_UPDATE_STATE_ADMIN))
-        .addRule(userIsNotSuperAdmin(NOT_SUPER_ADMIN_CANNOT_UPDATE_USERS_WITH_SUPER_ADMIN_ROLE))
-        .addRule(calsExternalWorkerRolesAreNotChanged(userUpdate))
-        .addRule(cwsWorkerRolesMayBeChangedTo(userUpdate, OFFICE_ADMIN, CWS_WORKER))
-        .addRule(officeAdminUserRolesMayBeChangedTo(userUpdate, OFFICE_ADMIN, CWS_WORKER))
-        .addRule(
+        .rule(userIsNotStateAdmin(COUNTY_ADMIN_CANNOT_UPDATE_STATE_ADMIN))
+        .rule(userIsNotSuperAdmin(NOT_SUPER_ADMIN_CANNOT_UPDATE_USERS_WITH_SUPER_ADMIN_ROLE))
+        .rule(calsExternalWorkerRolesAreNotChanged(userUpdate))
+        .rule(cwsWorkerRolesMayBeChangedTo(userUpdate, OFFICE_ADMIN, CWS_WORKER))
+        .rule(officeAdminUserRolesMayBeChangedTo(userUpdate, OFFICE_ADMIN, CWS_WORKER))
+        .rule(
             countyAdminUserRolesMayBeChangedTo(userUpdate, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER));
   }
 }

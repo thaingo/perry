@@ -25,37 +25,37 @@ class OfficeAdminAuthorizer extends AbstractAdminActionsAuthorizer {
   @Override
   public ErrorRuleList getViewUserRules() {
     return new ErrorRuleList()
-        .addRule(adminAndUserAreInTheSameCounty(
+        .rule(adminAndUserAreInTheSameCounty(
             OFFICE_ADMIN_CANNOT_VIEW_USER_FROM_OTHER_COUNTY, getUser().getId()))
-        .addRule(userIsNotCalsExternalWorker(
+        .rule(userIsNotCalsExternalWorker(
             OFFICE_ADMIN_CANNOT_VIEW_USERS_WITH_CALS_EXTERNAL_WORKER_ROLE))
-        .addRule(userIsNotSuperAdmin(NOT_SUPER_ADMIN_CANNOT_VIEW_USERS_WITH_SUPER_ADMIN_ROLE));
+        .rule(userIsNotSuperAdmin(NOT_SUPER_ADMIN_CANNOT_VIEW_USERS_WITH_SUPER_ADMIN_ROLE));
   }
 
   @Override
   public ErrorRuleList getCreateUserRules() {
     return new ErrorRuleList()
-        .addRule(adminAndUserAreInTheSameOffice(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_OFFICE))
-        .addRule(createdUserRolesMayBe(CWS_WORKER));
+        .rule(adminAndUserAreInTheSameOffice(NOT_AUTHORIZED_TO_ADD_USER_FOR_OTHER_OFFICE))
+        .rule(createdUserRolesMayBe(CWS_WORKER));
   }
 
   @Override
   public ErrorRuleList getUpdateUserRules(UserUpdate userUpdate) {
     return new ErrorRuleList()
-        .addRule(userAndAdminAreNotTheSameUser())
-        .addRule(adminAndUserAreInTheSameOffice(OFFICE_ADMIN_CANNOT_UPDATE_USER_FROM_OTHER_OFFICE))
-        .addRule(userIsNotCountyAdmin(OFFICE_ADMIN_CANNOT_UPDATE_COUNTY_ADMIN))
-        .addRule(userIsNotStateAdmin(OFFICE_ADMIN_CANNOT_UPDATE_STATE_ADMIN))
-        .addRule(userIsNotSuperAdmin(NOT_SUPER_ADMIN_CANNOT_UPDATE_USERS_WITH_SUPER_ADMIN_ROLE))
-        .addRule(calsExternalWorkerRolesAreNotChanged(userUpdate))
-        .addRule(cwsWorkerRolesMayBeChangedTo(userUpdate, CWS_WORKER))
-        .addRule(officeAdminUserRolesMayBeChangedTo(userUpdate, OFFICE_ADMIN, CWS_WORKER));
+        .rule(userAndAdminAreNotTheSameUser())
+        .rule(adminAndUserAreInTheSameOffice(OFFICE_ADMIN_CANNOT_UPDATE_USER_FROM_OTHER_OFFICE))
+        .rule(userIsNotCountyAdmin(OFFICE_ADMIN_CANNOT_UPDATE_COUNTY_ADMIN))
+        .rule(userIsNotStateAdmin(OFFICE_ADMIN_CANNOT_UPDATE_STATE_ADMIN))
+        .rule(userIsNotSuperAdmin(NOT_SUPER_ADMIN_CANNOT_UPDATE_USERS_WITH_SUPER_ADMIN_ROLE))
+        .rule(calsExternalWorkerRolesAreNotChanged(userUpdate))
+        .rule(cwsWorkerRolesMayBeChangedTo(userUpdate, CWS_WORKER))
+        .rule(officeAdminUserRolesMayBeChangedTo(userUpdate, OFFICE_ADMIN, CWS_WORKER));
   }
 
   @Override
   public ErrorRuleList getResendInvitationMessageRules() {
     return new ErrorRuleList()
-        .addRule(adminAndUserAreInTheSameOffice(
+        .rule(adminAndUserAreInTheSameOffice(
             OFFICE_ADMIN_CANNOT_RESEND_INVITATION_FOR_USER_FROM_OTHER_OFFICE));
   }
 }
