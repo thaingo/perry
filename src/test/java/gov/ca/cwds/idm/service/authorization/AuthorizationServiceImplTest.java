@@ -63,11 +63,11 @@ public class AuthorizationServiceImplTest {
   @Before
   public void before() {
     service = new AuthorizationServiceImpl();
-    service.setAdminRoleImplementorFactory(new AdminActionsAuthorizerFactory());
-
+    AdminActionsAuthorizerFactory adminActionsAuthorizerFactory = new AdminActionsAuthorizerFactory();
     ExceptionFactory exceptionFactory = new ExceptionFactory();
     exceptionFactory.setMessagesService(messagesServiceMock);
-    service.setExceptionFactory(exceptionFactory);
+    adminActionsAuthorizerFactory.setExceptionFactory(exceptionFactory);
+    service.setAdminRoleImplementorFactory(adminActionsAuthorizerFactory);
 
     when(messagesServiceMock.getMessages(any(MessageCode.class), ArgumentMatchers.<String>any()))
         .thenReturn(new Messages("techMsg", "userMsg"));

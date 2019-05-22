@@ -7,7 +7,7 @@ public class ErrorRuleList {
 
   private List<ErrorRule> rules = new LinkedList<>();
 
-  public ErrorRuleList rule(ErrorRule rule) {
+  public ErrorRuleList add(ErrorRule rule) {
     rules.add(rule);
     return this;
   }

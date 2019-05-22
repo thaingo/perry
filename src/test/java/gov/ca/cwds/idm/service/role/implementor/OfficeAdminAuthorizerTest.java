@@ -39,11 +39,6 @@ public class OfficeAdminAuthorizerTest extends BaseAuthorizerTest {
     when(getCurrentUserCountyName()).thenReturn(ADMIN_COUNTY);
   }
 
-  @Override
-  protected AbstractAdminActionsAuthorizer getAuthorizer(User user) {
-    return new OfficeAdminAuthorizer(user);
-  }
-
   @Test
   public void canNotViewCalsExternalWorkerTest() {
     assertCanNotView(OFFICE_ADMIN_CANNOT_VIEW_USERS_WITH_CALS_EXTERNAL_WORKER_ROLE,

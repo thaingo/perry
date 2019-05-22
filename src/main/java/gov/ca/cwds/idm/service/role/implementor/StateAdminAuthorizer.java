@@ -12,20 +12,20 @@ import gov.ca.cwds.idm.service.rule.ErrorRuleList;
 
 class StateAdminAuthorizer extends AbstractAdminActionsAuthorizer {
 
-  StateAdminAuthorizer(User user) {
-    super(user);
+  StateAdminAuthorizer(User user, UserUpdate userUpdate) {
+    super(user, userUpdate);
   }
 
   @Override
   public ErrorRuleList getViewUserRules() {
     return new ErrorRuleList()
-        .rule(userIsNotSuperAdmin(NOT_SUPER_ADMIN_CANNOT_VIEW_USERS_WITH_SUPER_ADMIN_ROLE));
+        .add(rules.userIsNotSuperAdmin(NOT_SUPER_ADMIN_CANNOT_VIEW_USERS_WITH_SUPER_ADMIN_ROLE));
   }
 
   @Override
   public ErrorRuleList getCreateUserRules() {
     return new ErrorRuleList()
-        .rule(createdUserRolesMayBe(COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER));
+        .add(rules.createdUserRolesMayBe(COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER));
   }
 
   @Override
@@ -34,16 +34,14 @@ class StateAdminAuthorizer extends AbstractAdminActionsAuthorizer {
   }
 
   @Override
-  public ErrorRuleList getUpdateUserRules(UserUpdate userUpdate) {
+  public ErrorRuleList getUpdateUserRules() {
     return new ErrorRuleList()
-        .rule(userAndAdminAreNotTheSameUser())
-        .rule(userIsNotSuperAdmin(NOT_SUPER_ADMIN_CANNOT_UPDATE_USERS_WITH_SUPER_ADMIN_ROLE))
-        .rule(stateAdminUserRolesAreNotChanged(userUpdate))
-        .rule(calsExternalWorkerRolesAreNotChanged(userUpdate))
-        .rule(cwsWorkerRolesMayBeChangedTo(userUpdate, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER))
-        .rule(
-            officeAdminUserRolesMayBeChangedTo(userUpdate, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER))
-        .rule(
-            countyAdminUserRolesMayBeChangedTo(userUpdate, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER));
+        .add(rules.userAndAdminAreNotTheSameUser())
+        .add(rules.userIsNotSuperAdmin(NOT_SUPER_ADMIN_CANNOT_UPDATE_USERS_WITH_SUPER_ADMIN_ROLE))
+        .add(rules.stateAdminUserRolesCanNotBeChanged())
+        .add(rules.calsExternalWorkerRolesCanNotBeChanged())
+        .add(rules.cwsWorkerRolesMayBeChangedTo(COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER))
+        .add(rules.officeAdminUserRolesMayBeChangedTo(COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER))
+        .add(rules.countyAdminUserRolesMayBeChangedTo(COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER));
   }
 }

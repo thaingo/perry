@@ -59,7 +59,7 @@ public class CwsUserInfoService {
     return cwsUser;
   }
 
-  // just because of codeclimate 25 lines of code allowed rule
+  // just because of codeclimate 25 lines of code allowed add
   private CwsUserInfo getCwsUserInfo(UserId user) {
     boolean socialWorker = isSocialWorker(user);
     Set<StaffAuthorityPrivilege> userAuthPrivs = getStaffAuthorityPriveleges(user);

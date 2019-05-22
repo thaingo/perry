@@ -18,16 +18,11 @@ import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserCounty
 import static gov.ca.cwds.util.Utils.toSet;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-import gov.ca.cwds.idm.dto.User;
 import org.junit.Before;
 import org.junit.Test;
 
 public class StateAdminAuthorizerTest extends BaseAuthorizerTest {
 
-  @Override
-  protected AbstractAdminActionsAuthorizer getAuthorizer(User user) {
-    return new StateAdminAuthorizer(user);
-  }
 
   @Before
   public void before() {

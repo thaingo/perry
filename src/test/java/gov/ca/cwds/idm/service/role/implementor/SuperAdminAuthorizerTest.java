@@ -25,10 +25,6 @@ import org.junit.Test;
 
 public class SuperAdminAuthorizerTest extends BaseAuthorizerTest {
 
-  @Override
-  protected AbstractAdminActionsAuthorizer getAuthorizer(User user) {
-    return new SuperAdminAuthorizer(user);
-  }
 
   @Before
   public void before() {

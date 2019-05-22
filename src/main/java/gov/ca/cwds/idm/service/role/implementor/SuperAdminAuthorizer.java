@@ -13,8 +13,8 @@ import gov.ca.cwds.idm.service.rule.ErrorRuleList;
 
 class SuperAdminAuthorizer extends AbstractAdminActionsAuthorizer {
 
-  SuperAdminAuthorizer(User user) {
-    super(user);
+  SuperAdminAuthorizer(User user, UserUpdate userUpdate) {
+    super(user, userUpdate);
   }
 
   @Override
@@ -25,24 +25,22 @@ class SuperAdminAuthorizer extends AbstractAdminActionsAuthorizer {
   @Override
   public ErrorRuleList getCreateUserRules() {
     return new ErrorRuleList()
-        .rule(
-            createdUserRolesMayBe(SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER,
-                CALS_EXTERNAL_WORKER));
+        .add(rules.createdUserRolesMayBe(
+            SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER, CALS_EXTERNAL_WORKER));
   }
 
   @Override
-  public ErrorRuleList getUpdateUserRules(UserUpdate userUpdate) {
+  public ErrorRuleList getUpdateUserRules() {
     return new ErrorRuleList()
-        .rule(userAndAdminAreNotTheSameUser())
-        .rule(cwsWorkerRolesMayBeChangedTo(userUpdate,
+        .add(rules.userAndAdminAreNotTheSameUser())
+        .add(rules.cwsWorkerRolesMayBeChangedTo(
             SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER, CALS_EXTERNAL_WORKER))
-        .rule(officeAdminUserRolesMayBeChangedTo(userUpdate,
+        .add(rules.officeAdminUserRolesMayBeChangedTo(
             SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER, CALS_EXTERNAL_WORKER))
-        .rule(countyAdminUserRolesMayBeChangedTo(userUpdate,
+        .add(rules.countyAdminUserRolesMayBeChangedTo(
             SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER, CALS_EXTERNAL_WORKER))
-        .rule(stateAdminUserRolesMayBeChangedTo(userUpdate,
-            SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER,
-            CALS_EXTERNAL_WORKER));
+        .add(rules.stateAdminUserRolesMayBeChangedTo(
+            SUPER_ADMIN, STATE_ADMIN, COUNTY_ADMIN, OFFICE_ADMIN, CWS_WORKER, CALS_EXTERNAL_WORKER));
   }
 
   @Override

@@ -33,11 +33,6 @@ public class CountyAdminAuthorizerTest extends BaseAuthorizerTest {
     when(getCurrentUserCountyName()).thenReturn(ADMIN_COUNTY);
   }
 
-  @Override
-  protected AbstractAdminActionsAuthorizer getAuthorizer(User user) {
-    return new CountyAdminAuthorizer(user);
-  }
-
   @Test
   public void canNotViewSuperAdmin() {
     canNotView(superAdmin(), NOT_SUPER_ADMIN_CANNOT_VIEW_USERS_WITH_SUPER_ADMIN_ROLE);

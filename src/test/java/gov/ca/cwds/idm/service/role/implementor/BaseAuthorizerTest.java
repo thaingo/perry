@@ -51,48 +51,50 @@ public abstract class BaseAuthorizerTest {
         .thenReturn(new Messages("techMsg", "userMsg"));
   }
 
-  protected abstract AbstractAdminActionsAuthorizer getAuthorizer(User user);
+  protected AbstractAdminActionsAuthorizer getAuthorizer(User user, UserUpdate userUpdate) {
+    AdminActionsAuthorizerFactory adminActionsAuthorizerFactory = new AdminActionsAuthorizerFactory();
+    adminActionsAuthorizerFactory.setExceptionFactory(exceptionFactory);
+    return adminActionsAuthorizerFactory.getAdminActionsAuthorizer(user, userUpdate);
+  }
 
-  private AbstractAdminActionsAuthorizer getAuthorizerWithExceptionFactory(User user) {
-    AbstractAdminActionsAuthorizer authorizer = getAuthorizer(user);
-    authorizer.setExceptionFactory(exceptionFactory);
-    return authorizer;
+  protected AbstractAdminActionsAuthorizer getAuthorizer(User user) {
+    return getAuthorizer(user, new UserUpdate());
   }
 
   protected void canView(User user) {
-    assertCan(getAuthorizerWithExceptionFactory(user)::checkCanViewUser);
+    assertCan(getAuthorizer(user)::checkCanViewUser);
   }
 
   protected void canNotView(User user, MessageCode errorCode) {
-    assertAuthorizationException(errorCode, getAuthorizerWithExceptionFactory(user)::checkCanViewUser);
+    assertAuthorizationException(errorCode, getAuthorizer(user)::checkCanViewUser);
   }
 
   protected void canCreate(User user) {
-    assertCan(getAuthorizerWithExceptionFactory(user)::checkCanCreateUser);
+    assertCan(getAuthorizer(user)::checkCanCreateUser);
   }
 
   protected void canUpdateToRole(User user, String newRole) {
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setRoles(toSet(newRole));
-    getAuthorizerWithExceptionFactory(user).checkCanUpdateUser(userUpdate);
+    getAuthorizer(user, userUpdate).checkCanUpdateUser();
   }
 
   protected void canNotCreateWithAuthorizationError(User user, MessageCode errorCode) {
     assertAuthorizationException(errorCode,
-        getAuthorizerWithExceptionFactory(user)::checkCanCreateUser);
+        getAuthorizer(user)::checkCanCreateUser);
   }
 
   protected void canNotCreateWithValidationError(User user, MessageCode errorCode) {
     assertValidationException(errorCode,
-        getAuthorizerWithExceptionFactory(user)::checkCanCreateUser);
+        getAuthorizer(user)::checkCanCreateUser);
   }
 
   protected void canUpdate(User user) {
-    assertCanUpdate(getAuthorizerWithExceptionFactory(user)::checkCanUpdateUser);
+    getAuthorizer(user).checkCanUpdateUser();
   }
 
   protected void canNotUpdateWithAuthorizationError(User user, MessageCode errorCode) {
-    assertAuthorizationException(errorCode, getAuthorizerWithExceptionFactory(user)::checkCanUpdateUser);
+    assertAuthorizationException(errorCode, getAuthorizer(user)::checkCanUpdateUser);
   }
 
   protected void canCreateInAnyCountyAndOffice(String userRole) {
@@ -102,13 +104,13 @@ public abstract class BaseAuthorizerTest {
   protected void canNotUpdateWithAuthorizationError(User user, MessageCode errorCode,
       UserUpdate userUpdate) {
     assertAuthorizationException(errorCode,
-        getAuthorizerWithExceptionFactory(user)::checkCanUpdateUser, userUpdate);
+        getAuthorizer(user, userUpdate)::checkCanUpdateUser);
   }
 
   protected void canNotUpdateWithValidationError(User user, MessageCode errorCode,
       UserUpdate userUpdate) {
     assertValidationException(errorCode,
-        getAuthorizerWithExceptionFactory(user)::checkCanUpdateUser, userUpdate);
+        getAuthorizer(user, userUpdate)::checkCanUpdateUser);
   }
 
   protected void canNotUpdateToRoleWithValidationError(User user, MessageCode errorCode,
@@ -126,11 +128,11 @@ public abstract class BaseAuthorizerTest {
   }
 
   protected void assertCanNotResendInvitationMessage(User user, MessageCode errorCode) {
-    assertAuthorizationException(errorCode, getAuthorizerWithExceptionFactory(user)::checkCanResendInvitationMessage);
+    assertAuthorizationException(errorCode, getAuthorizer(user)::checkCanResendInvitationMessage);
   }
 
   protected void assertCanResendInvitationMessage(User user) {
-    assertCan(getAuthorizerWithExceptionFactory(user)::checkCanResendInvitationMessage);
+    assertCan(getAuthorizer(user)::checkCanResendInvitationMessage);
   }
 
   protected void canNotUpdateCalsExternalWorkerRoleInSameOfficeTo(String newUserRole) {
@@ -230,10 +232,6 @@ public abstract class BaseAuthorizerTest {
 
   private void assertCan(Check check) {
     check.check();
-  }
-
-  private void assertCanUpdate(CheckWithUserUpdate check) {
-    check.check(new UserUpdate());
   }
 
   @FunctionalInterface

@@ -1,15 +1,8 @@
 package gov.ca.cwds.idm.service.authorization;
 
-import static gov.ca.cwds.service.messages.MessageCode.ADMIN_CANNOT_UPDATE_HIMSELF;
-import static gov.ca.cwds.util.CurrentAuthenticatedUserUtil.getCurrentUserName;
-
 import gov.ca.cwds.config.api.idm.Roles;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
-import gov.ca.cwds.idm.exception.AdminAuthorizationException;
-import gov.ca.cwds.idm.exception.UserValidationException;
-import gov.ca.cwds.idm.service.exception.ExceptionFactory;
-import gov.ca.cwds.idm.service.role.implementor.AbstractAdminActionsAuthorizer;
 import gov.ca.cwds.idm.service.role.implementor.AdminActionsAuthorizerFactory;
 import gov.ca.cwds.util.Utils;
 import java.util.LinkedList;
@@ -28,8 +21,6 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
   private AdminActionsAuthorizerFactory adminRoleImplementorFactory;
 
-  private ExceptionFactory exceptionFactory;
-
   @Override
   public void checkCanViewUser(User user) {
     getAdminActionsAuthorizer(user).checkCanViewUser();
@@ -42,12 +33,12 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
   @Override
   public void checkCanUpdateUser(User user, UserUpdate updateUserDto) {
-    getAdminActionsAuthorizer(user).checkCanUpdateUser(updateUserDto);
+    getAdminActionsAuthorizer(user, updateUserDto).checkCanUpdateUser();
   }
 
   @Override
   public boolean canUpdateUser(User user, UserUpdate updateUser) {
-    return getAdminActionsAuthorizer(user).canUpdateUser(updateUser);
+    return getAdminActionsAuthorizer(user, updateUser).canUpdateUser();
   }
 
   @Override
@@ -74,10 +65,11 @@ public class AuthorizationServiceImpl implements AuthorizationService {
   }
 
   private AdminActionsAuthorizer getAdminActionsAuthorizer(User user) {
-    AbstractAdminActionsAuthorizer authorizer = adminRoleImplementorFactory
-        .getAdminActionsAuthorizer(user);
-    authorizer.setExceptionFactory(exceptionFactory);
-    return authorizer;
+    return adminRoleImplementorFactory.getAdminActionsAuthorizer(user, new UserUpdate());
+  }
+
+  private AdminActionsAuthorizer getAdminActionsAuthorizer(User user, UserUpdate userUpdate) {
+    return adminRoleImplementorFactory.getAdminActionsAuthorizer(user, userUpdate);
   }
 
   @Override
@@ -87,17 +79,12 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
   @Override
   public void checkCanUnlockUser(User user) {
-    getAdminActionsAuthorizer(user).checkCanUpdateUser(new UserUpdate());
+    getAdminActionsAuthorizer(user).checkCanUpdateUser();
   }
 
   @Autowired
   public void setAdminRoleImplementorFactory(
       AdminActionsAuthorizerFactory adminRoleImplementorFactory) {
     this.adminRoleImplementorFactory = adminRoleImplementorFactory;
-  }
-
-  @Autowired
-  public void setExceptionFactory(ExceptionFactory exceptionFactory) {
-    this.exceptionFactory = exceptionFactory;
   }
 }
