@@ -2,6 +2,7 @@ package gov.ca.cwds.security.realm;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -9,7 +10,7 @@ import java.util.Set;
 
 /** Created by dmitry.rudenko on 6/2/2017. */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PerryAccount {
+public class PerryAccount implements Serializable {
   @JsonProperty private String user;
 
   @JsonProperty("first_name")
