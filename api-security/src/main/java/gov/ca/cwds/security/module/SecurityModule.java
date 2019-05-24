@@ -28,6 +28,7 @@ public class SecurityModule extends AbstractModule {
   private static InjectorProvider injectorProvider;
 
   public SecurityModule(InjectorProvider injector) {
+    injectorProvider = injector;
     authorizers = new HashMap<>();
     staticAuthorizers = new HashSet<>();
     staticAuthorizers.add(DefaultStaticAuthorizer.class);
