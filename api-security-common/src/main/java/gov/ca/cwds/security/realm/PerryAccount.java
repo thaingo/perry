@@ -11,6 +11,8 @@ import java.util.Set;
 /** Created by dmitry.rudenko on 6/2/2017. */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PerryAccount implements Serializable {
+  private static final long serialVersionUID = -6259918229089524089L;
+
   @JsonProperty private String user;
 
   @JsonProperty("first_name")
