@@ -9,7 +9,7 @@ import java.util.Set;
 
 /** Created by dmitry.rudenko on 6/2/2017. */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PerryAccount {
+public class PerryAccount implements Serializable {
   @JsonProperty private String user;
 
   @JsonProperty("first_name")
