@@ -25,6 +25,7 @@ import static gov.ca.cwds.idm.util.TestUtils.asJsonString;
 import static gov.ca.cwds.idm.util.TestUtils.attr;
 import static gov.ca.cwds.idm.util.WithMockCustomUserSecurityContextFactory.ADMIN_ID;
 import static gov.ca.cwds.util.Utils.toSet;
+import static io.dropwizard.testing.FixtureHelpers.fixture;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -162,6 +163,39 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     assertTrue(events.stream().anyMatch(e -> e instanceof CellPhoneChangedEvent));
     verify(auditEventService, times(1))
         .saveAuditEvent(any(UserEnabledStatusChangedEvent.class));
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {STATE_ADMIN})
+  public void testJsonNullIsTreatedAsNoUpdate() throws Exception {
+
+    final String USER_ID = USER_WITH_RACFID_AND_DB_DATA_ID;
+    String updateJson = fixture("fixtures/idm/update-user/cell-phone-null.json");
+
+    NsUser existedNsUser = assertNsUserInDb(USER_ID);
+    LocalDateTime oldLastModifiedTime = existedNsUser.getLastModifiedTime();
+    setDoraSuccess();
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.patch("/idm/users/" + USER_ID)
+                .contentType(JSON_CONTENT_TYPE)
+                .content(updateJson))
+        .andExpect(MockMvcResultMatchers.status().isNoContent())
+        .andReturn();
+
+    verify(spyUserIndexService, times(0)).updateUserInIndex(any(User.class));
+
+    verify(cognito, times(0))
+        .adminUpdateUserAttributes(any(AdminUpdateUserAttributesRequest.class));
+
+    NsUser updatedNsUser =  assertNsUserInDb(USER_ID);
+    LocalDateTime newLastModifiedTime = updatedNsUser.getLastModifiedTime();
+    assertThat(newLastModifiedTime, is(equalTo(oldLastModifiedTime)));
+
+    verifyDoraCalls(0);
+
+    verify(auditEventService, times(0)).saveAuditEvents(any(List.class));
   }
 
   @Test
