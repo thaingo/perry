@@ -1,11 +1,15 @@
 package gov.ca.cwds.idm.service.diff;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.util.Utils;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class UpdateDifference {
 
@@ -43,7 +47,7 @@ public class UpdateDifference {
   }
 
   private StringDiff createStringDiff(String oldValue, String newValue) {
-    return createDiff(oldValue, newValue, StringDiff::new);
+    return createDiff(oldValue, newValue, this::blankToNull, StringDiff::new);
   }
 
   private BooleanDiff createBooleanDiff(Boolean oldValue, Boolean newValue) {
@@ -54,16 +58,24 @@ public class UpdateDifference {
     return createDiff(oldValue, newValue, StringSetDiff::new);
   }
 
-  private <T, R> R createDiff(T oldValue, T newValue, BiFunction<T, T, R> diffConstructor) {
-    if (areNotEqual(oldValue, newValue)) {
-      return diffConstructor.apply(oldValue, newValue);
+  private <T, R> R createDiff(T oldValue, T newValue, Function<T, T> newValueNormalizer,
+      BiFunction<T, T, R> diffConstructor
+      ) {
+    if (newValue == null) {
+      return null;//absence of the field in the input JSON is a sign that field is not edited
+    }
+
+    T normalizedNewValue = newValueNormalizer.apply(newValue);
+
+    if (!Objects.equals(oldValue, normalizedNewValue)) {
+      return diffConstructor.apply(oldValue, normalizedNewValue);
     } else {
       return null;
     }
   }
 
-  private <T> boolean areNotEqual(T oldValue, T newValue) {
-    return newValue != null && !newValue.equals(oldValue);
+  private <T, R> R createDiff(T oldValue, T newValue, BiFunction<T, T, R> diffConstructor) {
+    return createDiff(oldValue, newValue, t -> t, diffConstructor);
   }
 
   public Optional<StringDiff> getEmailDiff() {
@@ -96,5 +108,9 @@ public class UpdateDifference {
 
   public Optional<StringSetDiff> getRolesDiff() {
     return Optional.ofNullable(rolesDiff);
+  }
+
+  private String blankToNull(String str) {
+    return isBlank(str) ? null : str;
   }
 }

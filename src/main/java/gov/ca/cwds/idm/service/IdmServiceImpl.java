@@ -34,6 +34,7 @@ import gov.ca.cwds.idm.dto.UserVerificationResult;
 import gov.ca.cwds.idm.dto.UsersPage;
 import gov.ca.cwds.idm.dto.UsersSearchCriteria;
 import gov.ca.cwds.idm.event.AuditEvent;
+import gov.ca.cwds.idm.event.CellPhoneChangedEvent;
 import gov.ca.cwds.idm.event.EmailChangedEvent;
 import gov.ca.cwds.idm.event.NotesChangedEvent;
 import gov.ca.cwds.idm.event.PermissionsChangedEvent;
@@ -260,20 +261,28 @@ public class IdmServiceImpl implements IdmService {
   private List<AuditEvent> createUserUpdateEvents(UserUpdateRequest userUpdateRequest) {
     User existedUser = userUpdateRequest.getExistedUser();
     UpdateDifference updateDifference = userUpdateRequest.getUpdateDifference();
-    List<AuditEvent> auditEvents = new ArrayList<>(4);
+    List<AuditEvent> auditEvents = new ArrayList<>(5);
+
     updateDifference.getRolesDiff().ifPresent(rolesDiff ->
         auditEvents.add(
             new UserRoleChangedEvent(existedUser, rolesDiff)));
+
     updateDifference.getNotesDiff().ifPresent(notesDiff ->
         auditEvents.add(new NotesChangedEvent(existedUser, notesDiff)));
+
     updateDifference.getPermissionsDiff().ifPresent(permissionsDiff -> {
           List<Permission> permissions = dictionaryProvider.getPermissions();
           auditEvents.add(
               new PermissionsChangedEvent(existedUser, permissionsDiff, permissions));
         }
     );
+
     updateDifference.getEmailDiff().ifPresent(emailDiff ->
         auditEvents.add(new EmailChangedEvent(existedUser, emailDiff))
+    );
+
+    updateDifference.getCellPhoneNumberDiff().ifPresent(cellPhoneNumber ->
+        auditEvents.add(new CellPhoneChangedEvent(existedUser, cellPhoneNumber))
     );
 
     return auditEvents;

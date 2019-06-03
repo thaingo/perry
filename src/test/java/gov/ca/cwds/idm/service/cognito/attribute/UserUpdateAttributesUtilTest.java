@@ -59,6 +59,17 @@ public class UserUpdateAttributesUtilTest {
     assertAttribute(updatedAttributes.get(2), PHONE_NUMBER, "+5556667777");
   }
 
+  @Test
+  public void testNullAttrValue() {
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setCellPhoneNumber("");
+
+    UpdateDifference updateDifference = new UpdateDifference(existedCognitoUser(), userUpdate);
+    List<AttributeType> updatedAttributes = buildUpdatedAttributesList(updateDifference);
+    assertThat(updatedAttributes.size(), is(1));
+    assertAttribute(updatedAttributes.get(0), PHONE_NUMBER, "");
+  }
+
   private void assertAttribute(
       AttributeType attr, UserAttribute userAttribute, String value) {
     assertThat(attr, is(notNullValue()));

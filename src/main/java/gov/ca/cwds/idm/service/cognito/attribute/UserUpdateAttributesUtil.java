@@ -11,6 +11,7 @@ import gov.ca.cwds.idm.service.diff.UpdateDifference;
 import gov.ca.cwds.idm.service.diff.StringDiff;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public class UserUpdateAttributesUtil {
@@ -43,6 +44,8 @@ public class UserUpdateAttributesUtil {
 
   private static void addStringAttribute(UserAttribute userAttribute, String value,
       List<AttributeType> attrs) {
-    attrs.add(new AttributeType().withName(userAttribute.getName()).withValue(value));
+    attrs.add(new AttributeType()
+        .withName(userAttribute.getName())
+        .withValue(Objects.toString(value, "")));//Cognito throws an error if value is null
   }
 }

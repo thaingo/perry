@@ -97,7 +97,7 @@ public class UpdateDifferenceTest {
     assertNoDiffs(updateDifference);
   }
 
-    @Test
+  @Test
   public void testAllChanged() {
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setEmail(NEW_EMAIL);
@@ -120,6 +120,45 @@ public class UpdateDifferenceTest {
     assertStringDiff(updateDifference.getNotesDiff(), EXISTED_NOTES, NEW_NOTES);
     assertStringSetDiff(updateDifference.getRolesDiff(), EXISTED_ROLES, NEW_ROLES);
     assertStringSetDiff(updateDifference.getPermissionsDiff(), EXISTED_PERMISSIONS, NEW_PERMISSIONS);
+  }
+
+  @Test
+  public void testBlankStrings() {
+    assertNoCellPhoneDiff(null, null);
+
+    assertNoCellPhoneDiff("", null);
+    assertNoCellPhoneDiff(" ", null);
+    assertNoCellPhoneDiff(null, "");
+    assertNoCellPhoneDiff(null, " ");
+
+    assertCellPhoneDiff("12234567890", "", null);
+    assertCellPhoneDiff("12234567890", " ", null);
+    assertCellPhoneDiff(" ", "", null);
+    assertCellPhoneDiff("", "", null);
+    assertCellPhoneDiff(" ", " ", null);
+  }
+
+  private void assertNoCellPhoneDiff(String inputOldValue, String inputNewValue) {
+    User user = new User();
+    user.setCellPhoneNumber(inputOldValue);
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setCellPhoneNumber(inputNewValue);
+    UpdateDifference updateDifference = new UpdateDifference(user, userUpdate);
+    assertFalse(updateDifference.getCellPhoneNumberDiff().isPresent());
+  }
+
+  private void assertCellPhoneDiff(String inputOldValue, String inputNewValue,
+      String expectedOutputNewValue) {
+    User user = new User();
+    user.setCellPhoneNumber(inputOldValue);
+
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setCellPhoneNumber(inputNewValue);
+
+    UpdateDifference updateDifference = new UpdateDifference(user, userUpdate);
+
+    assertStringDiff(updateDifference.getCellPhoneNumberDiff(), inputOldValue,
+        expectedOutputNewValue);
   }
 
   private void assertStringDiff(Optional<StringDiff> optDiff, String expectedOldValue,

@@ -61,6 +61,7 @@ import gov.ca.cwds.config.LoggingUserIdFilter;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.event.AuditEvent;
+import gov.ca.cwds.idm.event.CellPhoneChangedEvent;
 import gov.ca.cwds.idm.event.EmailChangedEvent;
 import gov.ca.cwds.idm.event.NotesChangedEvent;
 import gov.ca.cwds.idm.event.PermissionsChangedEvent;
@@ -153,11 +154,12 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     ArgumentCaptor<List<? extends AuditEvent>> captor = ArgumentCaptor.forClass(List.class);
     verify(auditEventService, times(1)).saveAuditEvents(captor.capture());
     List<? extends AuditEvent> events = captor.getValue();
-    assertEquals(4, events.size());
+    assertEquals(5, events.size());
     assertTrue(events.stream().anyMatch(e -> e instanceof UserRoleChangedEvent));
     assertTrue(events.stream().anyMatch(e -> e instanceof PermissionsChangedEvent));
     assertTrue(events.stream().anyMatch(e -> e instanceof EmailChangedEvent));
     assertTrue(events.stream().anyMatch(e -> e instanceof NotesChangedEvent));
+    assertTrue(events.stream().anyMatch(e -> e instanceof CellPhoneChangedEvent));
     verify(auditEventService, times(1))
         .saveAuditEvent(any(UserEnabledStatusChangedEvent.class));
   }
