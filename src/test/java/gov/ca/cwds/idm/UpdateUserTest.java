@@ -202,7 +202,7 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
 
   @Test
   @WithMockCustomUser(roles = {STATE_ADMIN})
-  public void testJsonNullIsTreatedAsNoUpdate() throws Exception {
+  public void testJsonNullIsTreatedAsDelete() throws Exception {
 
     final String USER_ID = NULL_CELL_PHONE_USER_ID;
     String updateJson = fixture("fixtures/idm/update-user/cell-phone-null.json");
@@ -210,6 +210,12 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     NsUser existedNsUser = assertNsUserInDb(USER_ID);
     LocalDateTime oldLastModifiedTime = existedNsUser.getLastModifiedTime();
     setDoraSuccess();
+
+    AdminUpdateUserAttributesRequest updateAttributesRequest =
+        setUpdateUserAttributesRequestAndResult(
+            USER_ID,
+            attr(PHONE_NUMBER, "")
+        );
 
     mockMvc
         .perform(
@@ -219,17 +225,17 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
         .andExpect(MockMvcResultMatchers.status().isNoContent())
         .andReturn();
 
-    verify(cognito, times(0))
-        .adminUpdateUserAttributes(argThat(r -> r.getUsername().equals(NO_EDIT_USER_ID)));
+    verify(cognito, times(1))
+        .adminUpdateUserAttributes(updateAttributesRequest);
 
-    verify(spyUserIndexService, times(0)).updateUserInIndex(any(User.class));
-    verifyDoraCalls(0);
+    verify(spyUserIndexService, times(1)).updateUserInIndex(any(User.class));
+    verifyDoraCalls(1);
 
-    NsUser updatedNsUser =  assertNsUserInDb(USER_ID);
-    LocalDateTime newLastModifiedTime = updatedNsUser.getLastModifiedTime();
-    assertThat(newLastModifiedTime, is(equalTo(oldLastModifiedTime)));
-
-    verify(auditEventService, times(0)).saveAuditEvents(any(List.class));
+    ArgumentCaptor<List<? extends AuditEvent>> captor = ArgumentCaptor.forClass(List.class);
+    verify(auditEventService, times(1)).saveAuditEvents(captor.capture());
+    List<? extends AuditEvent> events = captor.getValue();
+    assertEquals(1, events.size());
+    assertTrue(events.stream().anyMatch(e -> e instanceof CellPhoneChangedEvent));
   }
 
   @Test

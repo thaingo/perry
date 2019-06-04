@@ -24,45 +24,51 @@ public class UpdateDifference {
 
   public UpdateDifference(final User existedUser, final UserUpdate userUpdate) {
     emailDiff = createStringDiff(
-        existedUser.getEmail(),
-        Utils.toLowerCase(userUpdate.getEmail()));
+        existedUser.getEmail(), Utils.toLowerCase(userUpdate.getEmail()),
+        userUpdate.isEmailUpdateRequested());
 
-    enabledDiff = createBooleanDiff(existedUser.getEnabled(), userUpdate.getEnabled());
+    enabledDiff = createBooleanDiff(existedUser.getEnabled(), userUpdate.getEnabled(),
+        userUpdate.isEnabledUpdateRequested());
 
-    phoneNumberDiff = createStringDiff(existedUser.getPhoneNumber(), userUpdate.getPhoneNumber());
+    phoneNumberDiff = createStringDiff(existedUser.getPhoneNumber(), userUpdate.getPhoneNumber(),
+        userUpdate.isPhoneNumberUpdateRequested());
 
     phoneExtensionNumberDiff =
         createStringDiff(existedUser.getPhoneExtensionNumber(),
-            userUpdate.getPhoneExtensionNumber());
+            userUpdate.getPhoneExtensionNumber(),
+            userUpdate.isPhoneNumberUpdateRequested());
 
     cellPhoneNumberDiff = createStringDiff(existedUser.getCellPhoneNumber(),
-        userUpdate.getCellPhoneNumber());
+        userUpdate.getCellPhoneNumber(), userUpdate.isCellPhoneNumberUpdateRequested());
 
-    notesDiff = createStringDiff(existedUser.getNotes(), userUpdate.getNotes());
+    notesDiff = createStringDiff(existedUser.getNotes(), userUpdate.getNotes(),
+        userUpdate.isNotesUpdateRequested());
 
     permissionsDiff = createStringSetDiff(existedUser.getPermissions(),
-        userUpdate.getPermissions());
+        userUpdate.getPermissions(), userUpdate.isPermissionsUpdateRequested());
 
-    rolesDiff = createStringSetDiff(existedUser.getRoles(), userUpdate.getRoles());
+    rolesDiff = createStringSetDiff(existedUser.getRoles(), userUpdate.getRoles(),
+        userUpdate.isRolesUpdateRequested());
   }
 
-  private StringDiff createStringDiff(String oldValue, String newValue) {
-    return createDiff(oldValue, newValue, this::blankToNull, StringDiff::new);
+  private StringDiff createStringDiff(String oldValue, String newValue, boolean updateRequested) {
+    return createDiff(oldValue, newValue, this::blankToNull, StringDiff::new, updateRequested);
   }
 
-  private BooleanDiff createBooleanDiff(Boolean oldValue, Boolean newValue) {
-    return createDiff(oldValue, newValue, BooleanDiff::new);
+  private BooleanDiff createBooleanDiff(Boolean oldValue, Boolean newValue, boolean updateRequested) {
+    return createDiff(oldValue, newValue, BooleanDiff::new, updateRequested);
   }
 
-  private StringSetDiff createStringSetDiff(Set<String> oldValue, Set<String> newValue) {
-    return createDiff(oldValue, newValue, StringSetDiff::new);
+  private StringSetDiff createStringSetDiff(Set<String> oldValue, Set<String> newValue,
+      boolean updateRequested) {
+    return createDiff(oldValue, newValue, StringSetDiff::new, updateRequested);
   }
 
   private <T, R> R createDiff(T oldValue, T newValue, Function<T, T> newValueNormalizer,
-      BiFunction<T, T, R> diffConstructor
+      BiFunction<T, T, R> diffConstructor, boolean updateRequested
       ) {
-    if (newValue == null) {
-      return null;//absence of the field in the input JSON is a sign that field is not edited
+    if (!updateRequested) {
+      return null;
     }
 
     T normalizedNewValue = newValueNormalizer.apply(newValue);
@@ -74,8 +80,9 @@ public class UpdateDifference {
     }
   }
 
-  private <T, R> R createDiff(T oldValue, T newValue, BiFunction<T, T, R> diffConstructor) {
-    return createDiff(oldValue, newValue, t -> t, diffConstructor);
+  private <T, R> R createDiff(T oldValue, T newValue, BiFunction<T, T, R> diffConstructor,
+      boolean updateRequested) {
+    return createDiff(oldValue, newValue, t -> t, diffConstructor, updateRequested);
   }
 
   public Optional<StringDiff> getEmailDiff() {

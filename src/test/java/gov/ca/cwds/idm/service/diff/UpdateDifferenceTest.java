@@ -125,12 +125,11 @@ public class UpdateDifferenceTest {
   @Test
   public void testBlankStrings() {
     assertNoCellPhoneDiff(null, null);
-
-    assertNoCellPhoneDiff("", null);
-    assertNoCellPhoneDiff(" ", null);
     assertNoCellPhoneDiff(null, "");
     assertNoCellPhoneDiff(null, " ");
 
+    assertCellPhoneDiff("", null, null);
+    assertCellPhoneDiff(" ", null, null);
     assertCellPhoneDiff("12234567890", "", null);
     assertCellPhoneDiff("12234567890", " ", null);
     assertCellPhoneDiff(" ", "", null);
