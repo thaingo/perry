@@ -23,50 +23,48 @@ public class UpdateDifference {
   private final StringSetDiff rolesDiff;
 
   public UpdateDifference(final User existedUser, final UserUpdate userUpdate) {
-    emailDiff = createStringDiff(
-        existedUser.getEmail(), Utils.toLowerCase(userUpdate.getEmail()),
-        userUpdate.isEmailUpdateRequested());
+    emailDiff = createStringDiff(userUpdate.isEmailUpdateRequested(),
+        existedUser.getEmail(), Utils.toLowerCase(userUpdate.getEmail()));
 
-    enabledDiff = createBooleanDiff(existedUser.getEnabled(), userUpdate.getEnabled(),
-        userUpdate.isEnabledUpdateRequested());
+    enabledDiff = createBooleanDiff(userUpdate.isEnabledUpdateRequested(),
+        existedUser.getEnabled(), userUpdate.getEnabled());
 
-    phoneNumberDiff = createStringDiff(existedUser.getPhoneNumber(), userUpdate.getPhoneNumber(),
-        userUpdate.isPhoneNumberUpdateRequested());
+    phoneNumberDiff = createStringDiff(userUpdate.isPhoneNumberUpdateRequested(),
+        existedUser.getPhoneNumber(), userUpdate.getPhoneNumber());
 
-    phoneExtensionNumberDiff =
-        createStringDiff(existedUser.getPhoneExtensionNumber(),
-            userUpdate.getPhoneExtensionNumber(),
-            userUpdate.isPhoneNumberUpdateRequested());
+    phoneExtensionNumberDiff = createStringDiff(userUpdate.isPhoneNumberUpdateRequested(),
+            existedUser.getPhoneExtensionNumber(), userUpdate.getPhoneExtensionNumber());
 
-    cellPhoneNumberDiff = createStringDiff(existedUser.getCellPhoneNumber(),
-        userUpdate.getCellPhoneNumber(), userUpdate.isCellPhoneNumberUpdateRequested());
+    cellPhoneNumberDiff = createStringDiff(userUpdate.isCellPhoneNumberUpdateRequested(),
+        existedUser.getCellPhoneNumber(), userUpdate.getCellPhoneNumber());
 
-    notesDiff = createStringDiff(existedUser.getNotes(), userUpdate.getNotes(),
-        userUpdate.isNotesUpdateRequested());
+    notesDiff = createStringDiff(userUpdate.isNotesUpdateRequested(),
+        existedUser.getNotes(), userUpdate.getNotes());
 
-    permissionsDiff = createStringSetDiff(existedUser.getPermissions(),
-        userUpdate.getPermissions(), userUpdate.isPermissionsUpdateRequested());
+    permissionsDiff = createStringSetDiff(userUpdate.isPermissionsUpdateRequested(),
+        existedUser.getPermissions(), userUpdate.getPermissions());
 
-    rolesDiff = createStringSetDiff(existedUser.getRoles(), userUpdate.getRoles(),
-        userUpdate.isRolesUpdateRequested());
+    rolesDiff = createStringSetDiff(userUpdate.isRolesUpdateRequested(),
+        existedUser.getRoles(), userUpdate.getRoles());
   }
 
-  private StringDiff createStringDiff(String oldValue, String newValue, boolean updateRequested) {
-    return createDiff(oldValue, newValue, this::blankToNull, StringDiff::new, updateRequested);
+  private StringDiff createStringDiff(boolean updateRequested, String oldValue, String newValue) {
+    return createDiff(updateRequested, oldValue, newValue, this::blankToNull, StringDiff::new);
   }
 
-  private BooleanDiff createBooleanDiff(Boolean oldValue, Boolean newValue, boolean updateRequested) {
-    return createDiff(oldValue, newValue, BooleanDiff::new, updateRequested);
+  private BooleanDiff createBooleanDiff(boolean updateRequested,
+      Boolean oldValue, Boolean newValue) {
+    return createDiff(updateRequested, oldValue, newValue, BooleanDiff::new);
   }
 
-  private StringSetDiff createStringSetDiff(Set<String> oldValue, Set<String> newValue,
-      boolean updateRequested) {
-    return createDiff(oldValue, newValue, StringSetDiff::new, updateRequested);
+  private StringSetDiff createStringSetDiff(boolean updateRequested,
+      Set<String> oldValue, Set<String> newValue) {
+    return createDiff(updateRequested, oldValue, newValue, StringSetDiff::new);
   }
 
-  private <T, R> R createDiff(T oldValue, T newValue, Function<T, T> newValueNormalizer,
-      BiFunction<T, T, R> diffConstructor, boolean updateRequested
-      ) {
+  private <T, R> R createDiff(boolean updateRequested, T oldValue, T newValue,
+      Function<T, T> newValueNormalizer, BiFunction<T, T, R> diffConstructor) {
+
     if (!updateRequested) {
       return null;
     }
@@ -80,9 +78,9 @@ public class UpdateDifference {
     }
   }
 
-  private <T, R> R createDiff(T oldValue, T newValue, BiFunction<T, T, R> diffConstructor,
-      boolean updateRequested) {
-    return createDiff(oldValue, newValue, t -> t, diffConstructor, updateRequested);
+  private <T, R> R createDiff(boolean updateRequested, T oldValue, T newValue,
+      BiFunction<T, T, R> diffConstructor) {
+    return createDiff(updateRequested, oldValue, newValue, t -> t, diffConstructor);
   }
 
   public Optional<StringDiff> getEmailDiff() {
