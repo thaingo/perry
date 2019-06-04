@@ -1,5 +1,6 @@
 package gov.ca.cwds.idm.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
@@ -13,27 +14,35 @@ public class UserUpdate implements Serializable {
   private static final long serialVersionUID = -5847105938540972160L;
 
   private String email;
+  @JsonIgnore
   private boolean emailUpdateRequested;
 
   private Boolean enabled;
+  @JsonIgnore
   private boolean enabledUpdateRequested;
 
   private String phoneNumber;
+  @JsonIgnore
   private boolean phoneNumberUpdateRequested;
 
   private String phoneExtensionNumber;
+  @JsonIgnore
   private boolean phoneExtensionNumberUpdateRequested;
 
   private String cellPhoneNumber;
+  @JsonIgnore
   private boolean cellPhoneNumberUpdateRequested;
 
   private String notes;
+  @JsonIgnore
   private boolean notesUpdateRequested;
 
   private Set<String> permissions;
+  @JsonIgnore
   private boolean permissionsUpdateRequested;
 
   private Set<String> roles;
+  @JsonIgnore
   private boolean rolesUpdateRequested;
 
   public String getEmail() {
