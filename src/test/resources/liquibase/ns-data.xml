@@ -396,5 +396,37 @@
       <column name="role_key" value="Office-admin"/>
     </insert>
 
+    <insert tableName="user">
+      <column name="id" value="21"/>
+      <column name="username" value="074948e4-20a8-4197-bc45-8dec0c917079"/>
+      <column name="last_login_time" valueDate="2019-06-03 09:19:12"/>
+      <column name="racfid"/>
+      <column name="phone_number" value="2222333444"/>
+      <column name="phone_extension" value="25"/>
+      <column name="last_modified_time" valueDate="2019-03-08"/>
+      <column name="first_name" value="Noah"/>
+      <column name="last_name" value="Editt"/>
+    </insert>
+    <insert tableName="user_role">
+      <column name="user_id" value="21"/>
+      <column name="role_key" value="CWS-worker"/>
+    </insert>
+
+    <insert tableName="user">
+      <column name="id" value="22"/>
+      <column name="username" value="08a9b1c1-36de-4195-b713-6857d477d567"/>
+      <column name="last_login_time" valueDate="2019-06-03 09:19:12"/>
+      <column name="racfid"/>
+      <column name="phone_number" value="2222333444"/>
+      <column name="phone_extension" value="25"/>
+      <column name="last_modified_time" valueDate="2019-03-08"/>
+      <column name="first_name" value="Noah"/>
+      <column name="last_name" value="Cell"/>
+    </insert>
+    <insert tableName="user_role">
+      <column name="user_id" value="22"/>
+      <column name="role_key" value="CWS-worker"/>
+    </insert>
+
   </changeSet>
 </databaseChangeLog>

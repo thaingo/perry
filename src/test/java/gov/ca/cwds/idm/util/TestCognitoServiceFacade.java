@@ -80,6 +80,8 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
   public static final String COUNTY_ADMIN_ID = "c3702f4c113f1d2415447c8bfe8321d8df2d5151";
   public static final String SUPER_ADMIN_ID = "a3427f8e-b080-4f71-9514-840c1fcb505b";
   public static final String OFFICE_ADMIN_ID = "0d2202a2-713b-4b31-b33c-5a629fa4cfd0";
+  public static final String NO_EDIT_USER_ID = "074948e4-20a8-4197-bc45-8dec0c917079";
+  public static final String NULL_CELL_PHONE_USER_ID = "08a9b1c1-36de-4195-b713-6857d477d567";
 
   public static final String USERPOOL = "userpool";
   public static final String COGNITO_USER_STATUS_ON_CREATE = "FORCE_CHANGE_PASSWORD";
@@ -430,6 +432,36 @@ public class TestCognitoServiceFacade extends CognitoServiceFacadeImpl {
         null,
         null,
         null);
+
+    testUser(
+        NULL_CELL_PHONE_USER_ID,
+        Boolean.TRUE,
+        "CONFIRMED",
+        date(2017, 5, 16),
+        date(2019, 3, 8),
+        "nocell@gmail.com",
+        "Noah",
+        "Cell",
+        WithMockCustomUser.COUNTY,
+        null,
+        null,
+        null,
+        "1357986432");
+
+    testUser(
+        NO_EDIT_USER_ID,
+        Boolean.TRUE,
+        "CONFIRMED",
+        date(2017, 5, 16),
+        date(2019, 3, 8),
+        "noedit@gmail.com",
+        "Noah",
+        "Editt",
+        WithMockCustomUser.COUNTY,
+        null,
+        null,
+        null,
+        "1598753214");
 
     setListUsersRequestAndResult("", userWithoutRacfid, userWithRacfid, userWithRacfidAndDbData);
 

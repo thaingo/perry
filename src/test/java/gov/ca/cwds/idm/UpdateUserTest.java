@@ -14,6 +14,8 @@ import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.COUNTY_ADMIN_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.INACTIVE_USER_WITH_ACTIVE_RACFID_IN_CMS;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.INACTIVE_USER_WITH_NO_ACTIVE_RACFID_IN_CMS;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.INACTIVE_USER_WITH_NO_RACFID;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.NO_EDIT_USER_ID;
+import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.NULL_CELL_PHONE_USER_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.OFFICE_ADMIN_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.STATE_ADMIN_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.SUPER_ADMIN_ID;
@@ -37,6 +39,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
@@ -167,9 +170,41 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
 
   @Test
   @WithMockCustomUser(roles = {STATE_ADMIN})
+  public void testEmptyJsonIsTreatedAsNoUpdate() throws Exception {
+
+    final String USER_ID = NO_EDIT_USER_ID;
+    String updateJson = fixture("fixtures/idm/update-user/empty-update.json");
+
+    NsUser existedNsUser = assertNsUserInDb(USER_ID);
+    LocalDateTime oldLastModifiedTime = existedNsUser.getLastModifiedTime();
+    setDoraSuccess();
+
+    mockMvc
+        .perform(
+            MockMvcRequestBuilders.patch("/idm/users/" + USER_ID)
+                .contentType(JSON_CONTENT_TYPE)
+                .content(updateJson))
+        .andExpect(MockMvcResultMatchers.status().isNoContent())
+        .andReturn();
+
+    verify(cognito, times(0))
+        .adminUpdateUserAttributes(argThat(r -> r.getUsername().equals(NO_EDIT_USER_ID)));
+
+    verify(spyUserIndexService, times(0)).updateUserInIndex(any(User.class));
+    verifyDoraCalls(0);
+
+    NsUser updatedNsUser =  assertNsUserInDb(USER_ID);
+    LocalDateTime newLastModifiedTime = updatedNsUser.getLastModifiedTime();
+    assertThat(newLastModifiedTime, is(equalTo(oldLastModifiedTime)));
+
+    verify(auditEventService, times(0)).saveAuditEvents(any(List.class));
+  }
+
+  @Test
+  @WithMockCustomUser(roles = {STATE_ADMIN})
   public void testJsonNullIsTreatedAsNoUpdate() throws Exception {
 
-    final String USER_ID = USER_WITH_RACFID_AND_DB_DATA_ID;
+    final String USER_ID = NULL_CELL_PHONE_USER_ID;
     String updateJson = fixture("fixtures/idm/update-user/cell-phone-null.json");
 
     NsUser existedNsUser = assertNsUserInDb(USER_ID);
@@ -184,16 +219,15 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
         .andExpect(MockMvcResultMatchers.status().isNoContent())
         .andReturn();
 
-    verify(spyUserIndexService, times(0)).updateUserInIndex(any(User.class));
-
     verify(cognito, times(0))
-        .adminUpdateUserAttributes(any(AdminUpdateUserAttributesRequest.class));
+        .adminUpdateUserAttributes(argThat(r -> r.getUsername().equals(NO_EDIT_USER_ID)));
+
+    verify(spyUserIndexService, times(0)).updateUserInIndex(any(User.class));
+    verifyDoraCalls(0);
 
     NsUser updatedNsUser =  assertNsUserInDb(USER_ID);
     LocalDateTime newLastModifiedTime = updatedNsUser.getLastModifiedTime();
     assertThat(newLastModifiedTime, is(equalTo(oldLastModifiedTime)));
-
-    verifyDoraCalls(0);
 
     verify(auditEventService, times(0)).saveAuditEvents(any(List.class));
   }
