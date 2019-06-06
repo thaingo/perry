@@ -257,25 +257,25 @@ public class UserChangeLogEventTest {
 
   @Test
   public void testCellPhoneChangedEvent() {
-    final String NEW_CELL_PHONE = "1234567890";
-    final String OLD_CELL_PHONE = "9876543210";
+    final String OLD_CELL_PHONE = "1234567890";
+    final String NEW_CELL_PHONE = "9876543210";
 
     CellPhoneChangedEvent event =
         new CellPhoneChangedEvent(mockUser(), new StringDiff(OLD_CELL_PHONE, NEW_CELL_PHONE));
     Assert.assertThat(event.getEventType(), is(CellPhoneChangedEvent.EVENT_TYPE_CELL_PHONE_CHANGED));
-    Assert.assertThat(event.getEvent().getOldValue(), is(OLD_CELL_PHONE));
-    Assert.assertThat(event.getEvent().getNewValue(), is(NEW_CELL_PHONE));
+    Assert.assertThat(event.getEvent().getOldValue(), is("(123) 456-7890"));
+    Assert.assertThat(event.getEvent().getNewValue(), is("(987) 654-3210"));
     Assert.assertThat(event.getEvent().getUserRoles(), is("CWS Worker, County Administrator"));
 
     event = new CellPhoneChangedEvent(mockUser(), new StringDiff(null, NEW_CELL_PHONE));
     Assert.assertThat(event.getEventType(), is(CellPhoneChangedEvent.EVENT_TYPE_CELL_PHONE_CHANGED));
     Assert.assertThat(event.getEvent().getOldValue(), is(nullValue()));
-    Assert.assertThat(event.getEvent().getNewValue(), is(NEW_CELL_PHONE));
+    Assert.assertThat(event.getEvent().getNewValue(), is("(987) 654-3210"));
     Assert.assertThat(event.getEvent().getUserRoles(), is("CWS Worker, County Administrator"));
 
     event = new CellPhoneChangedEvent(mockUser(), new StringDiff(OLD_CELL_PHONE, null));
     Assert.assertThat(event.getEventType(), is(CellPhoneChangedEvent.EVENT_TYPE_CELL_PHONE_CHANGED));
-    Assert.assertThat(event.getEvent().getOldValue(), is(OLD_CELL_PHONE));
+    Assert.assertThat(event.getEvent().getOldValue(), is("(123) 456-7890"));
     Assert.assertThat(event.getEvent().getNewValue(), is(nullValue()));
     Assert.assertThat(event.getEvent().getUserRoles(), is("CWS Worker, County Administrator"));
   }
