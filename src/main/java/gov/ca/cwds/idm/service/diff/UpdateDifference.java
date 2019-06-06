@@ -47,7 +47,7 @@ public class UpdateDifference {
   }
 
   private StringDiff createStringDiff(String oldValue, String newValue) {
-    return createDiff(oldValue, newValue, this::blankToNull, StringDiff::new);
+    return createDiff(oldValue, newValue, Utils::blankToNull, StringDiff::new);
   }
 
   private BooleanDiff createBooleanDiff(Boolean oldValue, Boolean newValue) {
@@ -108,9 +108,5 @@ public class UpdateDifference {
 
   public Optional<StringSetDiff> getRolesDiff() {
     return Optional.ofNullable(rolesDiff);
-  }
-
-  private String blankToNull(String str) {
-    return isBlank(str) ? null : str;
   }
 }
