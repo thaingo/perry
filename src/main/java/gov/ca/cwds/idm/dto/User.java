@@ -24,7 +24,7 @@ import org.hibernate.validator.constraints.NotBlank;
 @SuppressFBWarnings("EI_EXPOSE_REP2")
 public class User implements RolesHolder, Serializable {
 
-  private static final long serialVersionUID = -3223381407378606717L;
+  private static final long serialVersionUID = -677475083606595434L;
 
   private String id;
 
@@ -53,6 +53,8 @@ public class User implements RolesHolder, Serializable {
   private String phoneNumber;
 
   private String phoneExtensionNumber;
+
+  private String cellPhoneNumber;
 
   private boolean locked;
 
@@ -250,6 +252,14 @@ public class User implements RolesHolder, Serializable {
 
   public void setPhoneExtensionNumber(String phoneExtensionNumber) {
     this.phoneExtensionNumber = phoneExtensionNumber;
+  }
+
+  public String getCellPhoneNumber() {
+    return cellPhoneNumber;
+  }
+
+  public void setCellPhoneNumber(String cellPhoneNumber) {
+    this.cellPhoneNumber = cellPhoneNumber;
   }
 
   public String getNotes() {

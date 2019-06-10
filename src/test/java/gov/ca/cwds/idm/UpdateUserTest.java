@@ -8,6 +8,7 @@ import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.SUPER_ADMIN;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL_VERIFIED;
+import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.PHONE_NUMBER;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.COUNTY_ADMIN_ID;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.INACTIVE_USER_WITH_ACTIVE_RACFID_IN_CMS;
@@ -60,11 +61,13 @@ import gov.ca.cwds.config.LoggingUserIdFilter;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserUpdate;
 import gov.ca.cwds.idm.event.AuditEvent;
+import gov.ca.cwds.idm.event.CellPhoneChangedEvent;
 import gov.ca.cwds.idm.event.EmailChangedEvent;
 import gov.ca.cwds.idm.event.NotesChangedEvent;
 import gov.ca.cwds.idm.event.PermissionsChangedEvent;
 import gov.ca.cwds.idm.event.UserEnabledStatusChangedEvent;
 import gov.ca.cwds.idm.event.UserRoleChangedEvent;
+import gov.ca.cwds.idm.event.WorkerPhoneChangedEvent;
 import gov.ca.cwds.idm.persistence.ns.OperationType;
 import gov.ca.cwds.idm.persistence.ns.entity.NsUser;
 import gov.ca.cwds.idm.persistence.ns.entity.UserLog;
@@ -93,6 +96,7 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     final String NEW_EMAIL = "error.mail@mail.com";
     final String NEW_PHONE = "6889228010";
     final String NEW_PHONE_EXTENSION = "123";
+    final String NEW_CELL_PHONE = "6668889999";
     final String NEW_NOTES = "New notes text";
 
     NsUser existedNsUser = assertNsUserInDb(USER_NO_RACFID_ID);
@@ -103,6 +107,7 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     userUpdate.setEmail(NEW_EMAIL);
     userUpdate.setPhoneNumber(NEW_PHONE);
     userUpdate.setPhoneExtensionNumber(NEW_PHONE_EXTENSION);
+    userUpdate.setCellPhoneNumber(NEW_CELL_PHONE);
     userUpdate.setPermissions(toSet("RFA-rollout", "Hotline-rollout"));
     userUpdate.setRoles(toSet(OFFICE_ADMIN, CWS_WORKER));
     userUpdate.setNotes(NEW_NOTES);
@@ -111,7 +116,8 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
         setUpdateUserAttributesRequestAndResult(
             USER_NO_RACFID_ID,
             attr(EMAIL, NEW_EMAIL),
-            attr(EMAIL_VERIFIED, "True")
+            attr(EMAIL_VERIFIED, "True"),
+            attr(PHONE_NUMBER, "+" + NEW_CELL_PHONE)
         );
 
     AdminDisableUserRequest disableUserRequest = setDisableUserRequestAndResult(USER_NO_RACFID_ID);
@@ -149,11 +155,13 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
     ArgumentCaptor<List<? extends AuditEvent>> captor = ArgumentCaptor.forClass(List.class);
     verify(auditEventService, times(1)).saveAuditEvents(captor.capture());
     List<? extends AuditEvent> events = captor.getValue();
-    assertEquals(4, events.size());
+    assertEquals(6, events.size());
     assertTrue(events.stream().anyMatch(e -> e instanceof UserRoleChangedEvent));
     assertTrue(events.stream().anyMatch(e -> e instanceof PermissionsChangedEvent));
     assertTrue(events.stream().anyMatch(e -> e instanceof EmailChangedEvent));
     assertTrue(events.stream().anyMatch(e -> e instanceof NotesChangedEvent));
+    assertTrue(events.stream().anyMatch(e -> e instanceof CellPhoneChangedEvent));
+    assertTrue(events.stream().anyMatch(e -> e instanceof WorkerPhoneChangedEvent));
     verify(auditEventService, times(1))
         .saveAuditEvent(any(UserEnabledStatusChangedEvent.class));
   }
@@ -697,6 +705,16 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
 
     assertUpdateBadRequest(USER_NO_RACFID_ID, userUpdate,
         "fixtures/idm/update-user/invalid-phone-number.json");
+  }
+
+  @Test
+  @WithMockCustomUser
+  public void testValidationUpdateInvalidCellPhoneNumber() throws Exception {
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setCellPhoneNumber("123-456-7890");
+
+    assertUpdateBadRequest(USER_NO_RACFID_ID, userUpdate,
+        "fixtures/idm/update-user/invalid-cell-phone-number.json");
   }
 
   @Test

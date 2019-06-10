@@ -5,6 +5,7 @@ import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
+import static gov.ca.cwds.service.messages.MessageCode.INVALID_CELL_PHONE_FORMAT;
 import static gov.ca.cwds.service.messages.MessageCode.INVALID_PHONE_EXTENSION_FORMAT;
 import static gov.ca.cwds.service.messages.MessageCode.INVALID_PHONE_FORMAT;
 import static gov.ca.cwds.service.messages.MessageCode.USER_PHONE_IS_NOT_PROVIDED;
@@ -188,23 +189,109 @@ public class ValidationServiceMockTest {
     canUpdatePhoneExtension("1234567");
   }
 
+  @Test
+  public void canUpdate_emptyCellPhoneNumber() {
+    canUpdateCellPhoneNumber("");
+  }
+
+  @Test
+  public void canUpdate_blankCellPhoneNumber() {
+    canUpdateCellPhoneNumber("   ");
+  }
+
+  @Test
+  public void canUpdate_cellPhoneNumberWithTenChars(){
+    canUpdateCellPhoneNumber("1000000000");
+  }
+
+  @Test
+  public void canNotUpdate_cellPhoneNumberWithNonDigits() {
+    canNotUpdateCellPhoneNumber("1-23456789", INVALID_CELL_PHONE_FORMAT);
+  }
+
+  @Test
+  public void canNotUpdate_cellPhoneNumberWithMoreThenTenChars() {
+    canNotUpdateCellPhoneNumber("12345678901", INVALID_CELL_PHONE_FORMAT);
+  }
+
+  @Test
+  public void canNotUpdate_cellPhoneNumberStartingWithZero(){
+    canNotUpdateCellPhoneNumber("0123456789", INVALID_CELL_PHONE_FORMAT);
+  }
+
+  @Test
+  public void canNotUpdate_cellPhoneNumberWithLessThenTenChars() {
+    canNotUpdateCellPhoneNumber("123456789", INVALID_CELL_PHONE_FORMAT);
+  }
+
+  @Test
+  public void canCreate_emptyCellPhoneNumber() {
+    canCreateCellPhoneNumber("");
+  }
+
+  @Test
+  public void canCreate_blankCellPhoneNumber() {
+    canCreateCellPhoneNumber("   ");
+  }
+
+  @Test
+  public void canCreate_cellPhoneNumberWithTenChars(){
+    canCreateCellPhoneNumber("1000000000");
+  }
+
+  @Test
+  public void canNotCreate_cellPhoneNumberWithNonDigits() {
+    canNotCreateCellPhoneNumber("1-23456789", INVALID_CELL_PHONE_FORMAT);
+  }
+
+  @Test
+  public void canNotCreate_cellPhoneNumberWithMoreThenTenChars() {
+    canNotCreateCellPhoneNumber("12345678901", INVALID_CELL_PHONE_FORMAT);
+  }
+
+  @Test
+  public void canNotCreate_cellPhoneNumberStartingWithZero(){
+    canNotCreateCellPhoneNumber("0123456789", INVALID_CELL_PHONE_FORMAT);
+  }
+
+  @Test
+  public void canNotCreate_ellPhoneNumberWithLessThenTenChars() {
+    canNotCreateCellPhoneNumber("123456789", INVALID_CELL_PHONE_FORMAT);
+  }
+
   private void canNotUpdatePhoneNumber(String newPhoneNumber, MessageCode messageCode) {
-    canNotUpdate(newPhoneNumber, messageCode, service::validatePhoneNumber);
+    validationFails(newPhoneNumber, messageCode, service::validatePhoneNumber);
   }
 
   private void canUpdatePhoneNumber(String newPhoneNumber){
-    canUpdate(newPhoneNumber, service::validatePhoneNumber);
+    validationPasses(newPhoneNumber, service::validatePhoneNumber);
+  }
+
+  private void canNotUpdateCellPhoneNumber(String newPhoneNumber, MessageCode messageCode) {
+    validationFails(newPhoneNumber, messageCode, service::validateCellPhoneNumber);
+  }
+
+  private void canUpdateCellPhoneNumber(String newPhoneNumber){
+    validationPasses(newPhoneNumber, service::validateCellPhoneNumber);
+  }
+
+  private void canNotCreateCellPhoneNumber(String newPhoneNumber, MessageCode messageCode){
+    validationFails(newPhoneNumber, messageCode, service::validateCellPhoneNumber);
+  }
+
+  private void canCreateCellPhoneNumber(String newPhoneNumber){
+    validationPasses(newPhoneNumber, service::validateCellPhoneNumber);
   }
 
   private void canNotUpdatePhoneExtension(String newPhoneExtension, MessageCode messageCode) {
-    canNotUpdate(newPhoneExtension, messageCode, service::validatePhoneExtension);
+    validationFails(newPhoneExtension, messageCode, service::validatePhoneExtension);
   }
 
   private void canUpdatePhoneExtension(String newPhoneExtension){
-    canUpdate(newPhoneExtension, service::validatePhoneExtension);
+    validationPasses(newPhoneExtension, service::validatePhoneExtension);
   }
 
-  private <T> void canNotUpdate(T validatedValue , MessageCode messageCode, Consumer<T> validateMethod) {
+  private <T> void validationFails(T validatedValue , MessageCode messageCode, Consumer<T> validateMethod) {
     try {
       validateMethod.accept(validatedValue);
       fail("UserValidationException should be thrown");
@@ -213,7 +300,7 @@ public class ValidationServiceMockTest {
     }
   }
 
-  private <T> void canUpdate(T validatedValue, Consumer<T> validateMethod) {
+  private <T> void validationPasses(T validatedValue, Consumer<T> validateMethod) {
     try {
       validateMethod.accept(validatedValue);
     } catch (UserValidationException e) {

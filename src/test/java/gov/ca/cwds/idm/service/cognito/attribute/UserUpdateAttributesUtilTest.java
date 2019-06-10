@@ -4,6 +4,7 @@ import static gov.ca.cwds.config.api.idm.Roles.COUNTY_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL_VERIFIED;
+import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.PHONE_NUMBER;
 import static gov.ca.cwds.idm.service.cognito.attribute.UserUpdateAttributesUtil.buildUpdatedAttributesList;
 import static gov.ca.cwds.util.Utils.toSet;
 import static org.hamcrest.Matchers.notNullValue;
@@ -33,6 +34,7 @@ public class UserUpdateAttributesUtilTest {
     userUpdate.setEmail("user@oci.ca.gov");
     userUpdate.setPhoneNumber("1234567890");
     userUpdate.setPhoneExtensionNumber("28");
+    userUpdate.setCellPhoneNumber("2223334444");
     userUpdate.setRoles(toSet("State-admin", "County-admin"));
     userUpdate.setPermissions(toSet("Snapshot-rollout", "Hotline-rollout"));
 
@@ -46,13 +48,26 @@ public class UserUpdateAttributesUtilTest {
 
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setEmail("admin@oci.ca.gov");
+    userUpdate.setCellPhoneNumber("5556667777");
 
     UpdateDifference updateDifference = new UpdateDifference(existedCognitoUser(), userUpdate);
     List<AttributeType> updatedAttributes = buildUpdatedAttributesList(updateDifference);
-    assertThat(updatedAttributes.size(), is(2));
+    assertThat(updatedAttributes.size(), is(3));
 
     assertAttribute(updatedAttributes.get(0), EMAIL, "admin@oci.ca.gov");
     assertAttribute(updatedAttributes.get(1), EMAIL_VERIFIED, "True");
+    assertAttribute(updatedAttributes.get(2), PHONE_NUMBER, "+5556667777");
+  }
+
+  @Test
+  public void testNullAttrValue() {
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setCellPhoneNumber("");
+
+    UpdateDifference updateDifference = new UpdateDifference(existedCognitoUser(), userUpdate);
+    List<AttributeType> updatedAttributes = buildUpdatedAttributesList(updateDifference);
+    assertThat(updatedAttributes.size(), is(1));
+    assertAttribute(updatedAttributes.get(0), PHONE_NUMBER, "");
   }
 
   private void assertAttribute(
@@ -78,6 +93,7 @@ public class UserUpdateAttributesUtilTest {
     user.setEmail("user@oci.ca.gov");
     user.setPhoneNumber("1234567890");
     user.setPhoneExtensionNumber("28");
+    user.setCellPhoneNumber("2223334444");
     user.setRoles(toSet(STATE_ADMIN, COUNTY_ADMIN));
     user.setPermissions(toSet("Snapshot-rollout", "Hotline-rollout"));
     return user;

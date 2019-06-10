@@ -10,6 +10,7 @@ import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EM
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.EMAIL_VERIFIED;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.FIRST_NAME;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.LAST_NAME;
+import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.PHONE_NUMBER;
 import static gov.ca.cwds.idm.service.cognito.attribute.StandardUserAttribute.RACFID_STANDARD;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.USERPOOL;
 import static gov.ca.cwds.idm.util.TestHelper.getTestCognitoProperties;
@@ -155,6 +156,7 @@ public class CognitoServiceFacadeTest {
     user.setEmail("GONZALES@Gmail.com");
     user.setPhoneNumber("1234567890");
     user.setPhoneExtensionNumber("54321");
+    user.setCellPhoneNumber("9876543210");
 
     AdminCreateUserRequest request = getCognitoRequestHelper().getAdminCreateUserRequest(user);
 
@@ -165,7 +167,7 @@ public class CognitoServiceFacadeTest {
 
     List<AttributeType> attrs = request.getUserAttributes();
     assertThat(attrs.isEmpty(), is(false));
-    assertThat(attrs.size(), is(7));
+    assertThat(attrs.size(), is(8));
 
     Map<String, String> attrMap = attrMap(attrs);
 
@@ -176,6 +178,8 @@ public class CognitoServiceFacadeTest {
     assertAttr(attrMap, OFFICE, "Office07IJ");
     assertAttr(attrMap, RACFID_STANDARD, "RUBBLBA");
     assertAttr(attrMap, EMAIL_VERIFIED, "True");
+    assertAttr(attrMap, EMAIL_VERIFIED, "True");
+    assertAttr(attrMap, PHONE_NUMBER, "+9876543210");
   }
 
   @Rule

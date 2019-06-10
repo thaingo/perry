@@ -4,6 +4,7 @@ import static gov.ca.cwds.idm.service.PossibleUserPermissionsService.CANS_PERMIS
 import static gov.ca.cwds.service.messages.MessageCode.ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.COUNTY_NAME_IS_NOT_PROVIDED;
 import static gov.ca.cwds.service.messages.MessageCode.FIRST_NAME_IS_NOT_PROVIDED;
+import static gov.ca.cwds.service.messages.MessageCode.INVALID_CELL_PHONE_FORMAT;
 import static gov.ca.cwds.service.messages.MessageCode.INVALID_PHONE_EXTENSION_FORMAT;
 import static gov.ca.cwds.service.messages.MessageCode.INVALID_PHONE_FORMAT;
 import static gov.ca.cwds.service.messages.MessageCode.LAST_NAME_IS_NOT_PROVIDED;
@@ -50,6 +51,7 @@ public class ValidationServiceImpl implements ValidationService {
     validateFirstNameIsProvided(enrichedUser);
     validateLastNameIsProvided(enrichedUser);
     validateCountyNameIsProvided(enrichedUser);
+    validateCellPhoneNumber(enrichedUser.getCellPhoneNumber());
 
     validateUserRolesExistAtCreate(enrichedUser);
 
@@ -70,6 +72,7 @@ public class ValidationServiceImpl implements ValidationService {
   public void validateUserUpdate(User existedUser, UserUpdate updateUserDto) {
     validatePhoneNumber(updateUserDto.getPhoneNumber());
     validatePhoneExtension(updateUserDto.getPhoneExtensionNumber());
+    validateCellPhoneNumber(updateUserDto.getCellPhoneNumber());
     validateNotAllRolesAreRemovedAtUpdate(updateUserDto);
     validateUpdateByCansPermission(existedUser, updateUserDto);
     validateActivateUser(existedUser, updateUserDto);
@@ -218,6 +221,14 @@ public class ValidationServiceImpl implements ValidationService {
         INVALID_PHONE_EXTENSION_FORMAT);
   }
 
+  void validateCellPhoneNumber(String newPhoneNumber) {
+    validateOptionalStringProperty(
+        newPhoneNumber,
+        PHONE_PATTERN_VALIDATOR,
+        INVALID_CELL_PHONE_FORMAT
+    );
+  }
+
   private void validateRequiredStringProperty(
       String newValue,
       PatternValidator patternValidator,
@@ -238,15 +249,15 @@ public class ValidationServiceImpl implements ValidationService {
   }
 
   private void validateOptionalStringProperty(
-      String value,
+      String newValue,
       PatternValidator patternValidator,
       MessageCode errCode) {
 
-    if (StringUtils.isBlank(value)) {
+    if (StringUtils.isBlank(newValue)) {
       return;
     }
-    if (!patternValidator.isValid(value)) {
-      throwValidationException(errCode, value);
+    if (!patternValidator.isValid(newValue)) {
+      throwValidationException(errCode, newValue);
     }
   }
 
