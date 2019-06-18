@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd
+                        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <changeSet id="user_1" author="dmytro.palczewski">
+        <createTable tableName="user">
+            <column name="id" type="${type.long}" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="username" type="${type.string}(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_login_time" type="${type.timestamp}"/>
+        </createTable>
+
+        <createIndex indexName="user_username_idx" tableName="user" unique="true">
+            <column name="username"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="user_add_last_registration_resubmit_time_column" author="dmytro.palczewski">
+        <addColumn tableName="user">
+            <column name="last_registration_resubmit_time" type="${type.timestamp}"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="add_notes_column" author="dmytro.palczewski">
+        <addColumn tableName="user">
+            <column name="notes" type="${type.string}"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="remove_last_registration_resubmit_time" author="alex.serbin">
+        <dropColumn tableName="user">
+            <column name="last_registration_resubmit_time"/>
+        </dropColumn>
+    </changeSet>
+
+    <changeSet id="migration_from_cognito" author="dmytro.palczewski">
+      <addColumn tableName="user">
+        <column name="racfid" type="${type.string}"/>
+        <column name="phone_number" type="${type.string}"/>
+        <column name="phone_extension" type="${type.string}"/>
+        <column name="last_modified_time" type="${type.timestamp}"/>
+        <column name="first_name" type="${type.string}"/>
+        <column name="last_name" type="${type.string}"/>
+      </addColumn>
+      <createIndex indexName="user_racfid_idx" tableName="user">
+        <column name="racfid"/>
+      </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

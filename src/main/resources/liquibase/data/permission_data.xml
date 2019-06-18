@@ -1,0 +1,100 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+  <changeSet id="permission-data_1" author="dmytro.palczewski">
+    <insert tableName="permission">
+      <column name="name" value="intake-core-user"/>
+    </insert>
+    <insert tableName="permission">
+      <column name="name" value="intake-core-county"/>
+    </insert>
+    <insert tableName="permission">
+      <column name="name" value="cals-core-user"/>
+    </insert>
+    <insert tableName="permission">
+      <column name="name" value="cals-core-county"/>
+    </insert>
+    <insert tableName="permission">
+      <column name="name" value="development-not-in-use"/>
+    </insert>
+  </changeSet>
+
+  <changeSet id="permission-data_2" author="volodymyr.petrusha">
+    <delete tableName="permission">
+        <!-- Delete All records -->
+    </delete>
+    <insert tableName="permission">
+      <column name="name" value="Snapshot-rollout"/>
+    </insert>
+    <insert tableName="permission">
+      <column name="name" value="Hotline-rollout"/>
+    </insert>
+    <insert tableName="permission">
+      <column name="name" value="Facility-search-rollout"/>
+    </insert>
+    <insert tableName="permission">
+      <column name="name" value="RFA-rollout"/>
+    </insert>
+    <insert tableName="permission">
+      <column name="name" value="development-not-in-use"/>
+    </insert>
+  </changeSet>
+
+  <changeSet id="permission-data_2" author="dmytro.sorych">
+    <delete tableName="permission">
+      <where>name='development-not-in-use'</where>>
+    </delete>
+  </changeSet>
+
+  <changeSet id="permission_set_description_values" author="dmytro.palczewski">
+    <validCheckSum>7:69bab46ddc559f63c6356a19b77b0a7f</validCheckSum>
+    <update tableName="permission">
+      <column name="description" value="Snapshot" />
+      <where>name = 'Snapshot-rollout'</where>
+    </update>
+    <update tableName="permission">
+      <column name="description" value="Facility-search" />
+      <where>name = 'Facility-search-rollout'</where>
+    </update>
+    <update tableName="permission">
+      <column name="description" value="Hotline" />
+      <where>name = 'Hotline-rollout'</where>
+    </update>
+    <update tableName="permission">
+      <column name="description" value="RFA" />
+      <where>name = 'RFA-rollout'</where>
+    </update>
+  </changeSet>
+
+  <changeSet id="permission_change_facility_search" author="dmytro.sorych">
+    <update tableName="permission">
+      <column name="description" value="Facility Search &amp; Profile" />
+      <where>name = 'Facility-search-rollout'</where>
+    </update>
+  </changeSet>
+
+  <changeSet id="cans_permission" author="leonid.marushevskiy">
+    <insert tableName="permission">
+      <column name="name" value="CANS-rollout"/>
+      <column name="description" value="CANS" />
+    </insert>
+  </changeSet>
+
+  <changeSet id="hide_some_permissions" author="dmytro.sorych">
+    <update tableName="permission">
+      <column name="hidden" value="true" />
+      <where>name in ('Snapshot-rollout', 'Facility-search-rollout')</where>>
+    </update>
+  </changeSet>
+
+  <changeSet id="unhide_facility_search_permission" author="dmytro.sorych">
+    <update tableName="permission">
+      <column name="hidden" value="false" />
+      <where>name in ('Facility-search-rollout')</where>>
+    </update>
+  </changeSet>
+
+</databaseChangeLog>

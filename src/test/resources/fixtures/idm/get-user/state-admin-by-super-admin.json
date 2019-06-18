@@ -44,8 +44,7 @@
         "CANS-rollout",
         "Facility-search-rollout",
         "Hotline-rollout",
-        "RFA-rollout",
-        "Snapshot-rollout"
+        "RFA-rollout"
       ]
     }
   }
