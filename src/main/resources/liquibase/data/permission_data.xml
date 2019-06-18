@@ -90,4 +90,11 @@
     </update>
   </changeSet>
 
+  <changeSet id="unhide_facility_search_permission" author="dmytro.sorych">
+    <update tableName="permission">
+      <column name="hidden" value="false" />
+      <where>name in ('Facility-search-rollout')</where>>
+    </update>
+  </changeSet>
+
 </databaseChangeLog>
