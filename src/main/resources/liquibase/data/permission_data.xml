@@ -105,4 +105,11 @@
     </insert>
   </changeSet>
 
+  <changeSet id="fix_typo_permission_name" author="dmytro.sorych">
+    <update tableName="permission">
+      <column name="name" value="Facility-search-complaints" />
+      <where>name = 'Facility-search-complains'</where>>
+    </update>
+  </changeSet>
+
 </databaseChangeLog>
