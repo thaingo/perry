@@ -4,7 +4,7 @@ import static gov.ca.cwds.config.api.idm.Roles.CWS_WORKER;
 import static gov.ca.cwds.config.api.idm.Roles.OFFICE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.STATE_ADMIN;
 import static gov.ca.cwds.config.api.idm.Roles.SUPER_ADMIN;
-import static gov.ca.cwds.idm.service.PossibleUserPermissionsService.CANS_PERMISSION_NAME;
+import static gov.ca.cwds.idm.service.PermissionNames.CANS_PERMISSION_NAME;
 import static gov.ca.cwds.idm.util.AssertFixtureUtils.assertExtensible;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.COGNITO_USER_ENABLED_ON_CREATE;
 import static gov.ca.cwds.idm.util.TestCognitoServiceFacade.COGNITO_USER_STATUS_ON_CREATE;
