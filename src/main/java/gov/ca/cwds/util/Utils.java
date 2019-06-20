@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Objects;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.util.StringUtil;
@@ -157,5 +158,9 @@ public class Utils {
 
   public static String blankToNull(String str) {
     return StringUtil.isBlank(str)? null : str;
+  }
+
+  public static String emptyIfNull(String value) {
+    return Objects.toString(value, "");
   }
 }
