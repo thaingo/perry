@@ -3,8 +3,10 @@ package gov.ca.cwds.idm.service.validation;
 import static gov.ca.cwds.idm.service.PermissionNames.CANS_PERMISSION_NAME;
 import static gov.ca.cwds.service.messages.MessageCode.ACTIVE_USER_WITH_RAFCID_EXISTS_IN_IDM;
 import static gov.ca.cwds.service.messages.MessageCode.COUNTY_NAME_IS_NOT_PROVIDED;
+import static gov.ca.cwds.service.messages.MessageCode.EMAIL_IS_NOT_PROVIDED;
 import static gov.ca.cwds.service.messages.MessageCode.FIRST_NAME_IS_NOT_PROVIDED;
 import static gov.ca.cwds.service.messages.MessageCode.INVALID_CELL_PHONE_FORMAT;
+import static gov.ca.cwds.service.messages.MessageCode.INVALID_EMAIL_FORMAT;
 import static gov.ca.cwds.service.messages.MessageCode.INVALID_PHONE_EXTENSION_FORMAT;
 import static gov.ca.cwds.service.messages.MessageCode.INVALID_PHONE_FORMAT;
 import static gov.ca.cwds.service.messages.MessageCode.LAST_NAME_IS_NOT_PROVIDED;
@@ -42,6 +44,7 @@ public class ValidationServiceImpl implements ValidationService {
 
   static final PatternValidator PHONE_PATTERN_VALIDATOR = new PatternValidator("[1-9]\\d{9}");
   static final PatternValidator PHONE_EXTENSION_PATTERN_VALIDATOR = new PatternValidator("\\d{0,7}");
+  static final PatternValidator EMAIL_VALIDATOR = new PatternValidator("^[\\w-_\\.+]*[\\w-_\\.]\\@([\\w]+\\.)+[\\w]+[\\w]$");
 
   private CwsUserInfoService cwsUserInfoService;
 
@@ -77,6 +80,7 @@ public class ValidationServiceImpl implements ValidationService {
 
   @Override
   public void validateUserUpdate(User existedUser, UserUpdate updateUserDto) {
+    validateEmail(updateUserDto.getEmail());
     validatePhoneNumber(updateUserDto.getPhoneNumber());
     validatePhoneExtension(updateUserDto.getPhoneExtensionNumber());
     validateCellPhoneNumber(updateUserDto.getCellPhoneNumber());
@@ -242,6 +246,15 @@ public class ValidationServiceImpl implements ValidationService {
         PHONE_PATTERN_VALIDATOR,
         USER_PHONE_IS_NOT_PROVIDED,
         INVALID_PHONE_FORMAT
+    );
+  }
+
+  private void validateEmail(String email) {
+    validateRequiredStringProperty(
+        email,
+        EMAIL_VALIDATOR,
+        EMAIL_IS_NOT_PROVIDED,
+        INVALID_EMAIL_FORMAT
     );
   }
 

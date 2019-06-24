@@ -1,0 +1,6 @@
+{
+  "status": "BAD_REQUEST",
+  "technical_message": "Email is a required field and cannot be removed during update.",
+  "user_message": "Email address is required in order to save. Please enter an email address and try again.",
+  "error_code": "CAP-074"
+}
