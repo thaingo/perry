@@ -1,0 +1,6 @@
+{
+  "status": "BAD_REQUEST",
+  "technical_message": "Email someInvalidEmail has invalid format.",
+  "user_message": "The email address you entered is in an invalid format. Please enter the email address again.",
+  "error_code": "CAP-075"
+}

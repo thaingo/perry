@@ -849,6 +849,26 @@ public class UpdateUserTest extends BaseIdmIntegrationWithSearchTest {
         "fixtures/idm/update-user/office-admin-upgrade-to-office-admin.json");
   }
 
+  @Test
+  @WithMockCustomUser
+  public void testValidationUpdateInvalidEmail() throws Exception {
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setEmail("someInvalidEmail");
+
+    assertUpdateBadRequest(USER_NO_RACFID_ID, userUpdate,
+        "fixtures/idm/update-user/invalid-email.json");
+  }
+
+  @Test
+  @WithMockCustomUser
+  public void testValidationUpdateNullEmail() throws Exception {
+    UserUpdate userUpdate = new UserUpdate();
+    userUpdate.setEmail("");
+
+    assertUpdateBadRequest(USER_NO_RACFID_ID, userUpdate,
+        "fixtures/idm/update-user/null-email.json");
+  }
+
   private void assertCanUpdatePermissions(String userId, Set<String> permissions) throws Exception{
     UserUpdate userUpdate = new UserUpdate();
     userUpdate.setPermissions(permissions);
