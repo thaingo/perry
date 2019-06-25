@@ -82,7 +82,7 @@ def deployWithSmoke(environment) {
 def deployToStage(environment, version) {
   stage("Deploy to $environment") {
     ws {
-      git branch: "master", credentialsId: githubCredentialsId, url: deAnsibleGithubUrl
+      git branch: "DS-2919-perryfix", credentialsId: githubCredentialsId, url: deAnsibleGithubUrl
       sh ansibleCommand(environment, version)
     }
   }
