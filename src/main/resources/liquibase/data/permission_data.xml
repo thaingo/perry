@@ -97,4 +97,19 @@
     </update>
   </changeSet>
 
+  <changeSet id="SEAR-652" author="dmytro.sorych">
+    <insert tableName="permission">
+      <column name="name" value="Facility-search-complains"/>
+      <column name="description" value="Facility Search: Complaints" />
+      <column name="hidden" value="true" />
+    </insert>
+  </changeSet>
+
+  <changeSet id="fix_typo_permission_name" author="dmytro.sorych">
+    <update tableName="permission">
+      <column name="name" value="Facility-search-complaints" />
+      <where>name = 'Facility-search-complains'</where>>
+    </update>
+  </changeSet>
+
 </databaseChangeLog>

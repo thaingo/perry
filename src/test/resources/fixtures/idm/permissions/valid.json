@@ -8,6 +8,10 @@
     "description": "Facility Search & Profile"
   },
   {
+    "name": "Facility-search-complaints",
+    "description": "Facility Search: Complaints"
+  },
+  {
     "name": "Hotline-rollout",
     "description": "Hotline"
   },
