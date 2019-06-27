@@ -37,7 +37,7 @@ Perry dev mode doesn't require databases running and specific configuration.
 It will listen on 8080 port by default. To change it set HTTP_PORT env variable or change server.http.port option in config/perry-dev.yml. 
 
 ### Running the Application in Cognito MFA mode
-_Make sure you have the Postgres, DB2 containers are running. `docker-compose up postgresql_data cals_db2_data`. Also make sure that all OAuth2.0 as well as db connection properties are specified properly. For more information check Perry Dev Guide._
+_Make sure you have the Postgres, DB2 containers are running. `docker-compose up postgresql_data db2data`. Also make sure that all OAuth2.0 as well as db connection properties are specified properly. For more information check Perry Dev Guide._
 
 `java -jar ./build/libs/perry-<version>.jar -Dspring.profiles.active=cognito,prod,mfa,cognito_refresh -Dspring.config.location=config/perry-prod.yml`
 
