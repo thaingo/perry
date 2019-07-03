@@ -37,7 +37,7 @@ project.ext {
     projectMajorVersion = '4.1.0'
     mainclass = 'gov.ca.cwds.PerryApplication'
     targetDockerHubOrganization = System.env.DOCKERHUB_ORG ?: 'cwds'
-    cwdsModelVersion = '0.11.2_732-RC'
+    cwdsModelVersion = '3.16.0'
     powerMockVersion = "1.7.3"
     hikariCPVersion = "3.3.1"
 
@@ -202,7 +202,7 @@ dependencies {
     testCompile 'org.ow2.asm:asm-all:5.1'
     testCompile group: 'io.dropwizard', name: 'dropwizard-testing', version: '1.0.5'
 
-    testCompile group: 'gov.ca.cwds.cals', name: 'cws-cms-data-model', version: cwdsModelVersion, changing: true
+    testCompile group: 'gov.ca.cwds', name: 'cws-cms-data-model', version: cwdsModelVersion, changing: true
 
     testCompile group: 'org.powermock', name: 'powermock-module-junit4', version: powerMockVersion
     testCompile group: 'org.powermock', name: 'powermock-api-mockito2', version: powerMockVersion
