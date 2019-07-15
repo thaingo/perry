@@ -101,4 +101,3 @@ def integrationTestStage(environment) {
      }
   }
 }
-
