@@ -147,13 +147,16 @@ node('dora-slave') {
                 wait: false 
         }
         stage('Deploy to Pre-int and Integration') {
-            withCredentials([usernameColonPassword(credentialsId: 'fa186416-faac-44c0-a2fa-089aed50ca17', variable: 'jenkinsauth')]) {
-              sh "curl -u $jenkinsauth 'https://jenkins.mgmt.cwds.io/job/PreInt-Integration/job/deploy-perry/buildWithParameters?token=trigger-perry-deploy&version=${newTag}'"
-            }
+            def mgmtJobParams = "version=\"$newTag\""
+            def handle = triggerRemoteJob abortTriggeredJob: true, enhancedLogging: false, job: 'PreInt-Integration/deploy-perry', maxConn: 5, pollInterval: 20, parameters: "${mgmtJobParams}", remoteJenkinsName: "deploy-jenkins", useCrumbCache: true, useJobInfoCache: true
+            echo 'Remote Status: ' + handle.getBuildStatus().toString()
+//            withCredentials([usernameColonPassword(credentialsId: 'fa186416-faac-44c0-a2fa-089aed50ca17', variable: 'jenkinsauth')]) {
+//              sh "curl -u $jenkinsauth 'https://jenkins.mgmt.cwds.io/job/PreInt-Integration/job/deploy-perry/buildWithParameters?token=trigger-perry-deploy&version=${newTag}'"
+//            }
           }
     } catch (Exception e) {
         emailext attachLog: true, body: "Failed: ${e}", recipientProviders: [[$class: 'DevelopersRecipientProvider']],
-                subject: "Perry CI pipeline failed", to: "Leonid.Marushevskiy@osi.ca.gov, Alex.Kuznetsov@osi.ca.gov"
+                subject: "Perry CI pipeline failed", to: "admin@cwds.io"
     } finally {
         publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: 'build/reports/license', reportFiles: 'license-dependency.html', reportName: 'License Report', reportTitles: 'License summary'])
         publishHTML([allowMissing: true, alwaysLinkToLastBuild: true, keepAll: true, reportDir: 'jwt-security/build/reports/tests/', reportFiles: 'index.html', reportName: 'jwt-security Report', reportTitles: 'jwt-security Report'])
