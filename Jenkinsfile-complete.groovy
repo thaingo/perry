@@ -147,7 +147,7 @@ node('dora-slave') {
                 wait: false 
         }
         stage('Deploy to Pre-int and Integration') {
-            def mgmtJobParams = "version=\"$newTag\""
+            def mgmtJobParams = "version=$newTag"
             def handle = triggerRemoteJob abortTriggeredJob: true, enhancedLogging: false, job: 'PreInt-Integration/deploy-perry', maxConn: 5, pollInterval: 20, parameters: "${mgmtJobParams}", remoteJenkinsName: "deploy-jenkins", useCrumbCache: true, useJobInfoCache: true
             echo 'Remote Status: ' + handle.getBuildStatus().toString()
 //            withCredentials([usernameColonPassword(credentialsId: 'fa186416-faac-44c0-a2fa-089aed50ca17', variable: 'jenkinsauth')]) {
