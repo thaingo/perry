@@ -19,4 +19,5 @@ public final class StringSetDiff extends Diff<Set<String>> {
   public Set<String> getNewValue() {
     return unmodifiableSet(newValue);
   }
+
 }
