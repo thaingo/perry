@@ -3,24 +3,27 @@ package gov.ca.cwds.idm.dto;
 import static gov.ca.cwds.config.LoggingRequestIdFilter.REQUEST_ID;
 import static java.util.stream.Collectors.toList;
 
+import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.slf4j.MDC;
+import org.springframework.http.HttpStatus;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+
 import gov.ca.cwds.service.messages.MessageCode;
-import java.io.Serializable;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import org.slf4j.MDC;
-import org.springframework.http.HttpStatus;
 
 @JsonInclude(Include.NON_EMPTY)
 @JsonNaming(PropertyNamingStrategy.SnakeCaseStrategy.class)
 @SuppressWarnings({"squid:S3437"})
-public class IdmApiCustomError  implements Serializable {
+public class IdmApiCustomError implements Serializable {
 
   private static final long serialVersionUID = -7854227531434018227L;
 
@@ -86,8 +89,7 @@ public class IdmApiCustomError  implements Serializable {
     private String errorCode;
     private List<String> causes = new ArrayList<>();
 
-    private IdmApiCustomErrorBuilder() {
-    }
+    private IdmApiCustomErrorBuilder() {}
 
     public static IdmApiCustomErrorBuilder anIdmApiCustomError() {
       return new IdmApiCustomErrorBuilder();
@@ -119,16 +121,18 @@ public class IdmApiCustomError  implements Serializable {
     }
 
     private String getMessageWithCause(Exception e) {
-      String result = e.getMessage();
-      Throwable cause = e.getCause();
+      final StringBuilder buf = new StringBuilder();
+      buf.append(e.getMessage());
+
+      final Throwable cause = e.getCause();
       if (cause != null && cause.getMessage() != null) {
-        result += ": " + cause.getMessage();
+        buf.append(": ").append(cause.getMessage());
       }
-      return result;
+      return buf.toString();
     }
 
     public IdmApiCustomErrorBuilder withCause(Throwable cause) {
-      if(cause != null && cause.getMessage() != null) {
+      if (cause != null && cause.getMessage() != null) {
         this.causes.add(cause.getMessage());
       }
       return this;
@@ -145,4 +149,5 @@ public class IdmApiCustomError  implements Serializable {
       return idmApiCustomError;
     }
   }
+
 }

@@ -1,6 +1,7 @@
 package gov.ca.cwds.idm.persistence.cwscms.entity;
 
 import java.sql.Timestamp;
+
 import javax.persistence.Access;
 import javax.persistence.AccessType;
 import javax.persistence.Column;
@@ -8,6 +9,7 @@ import javax.persistence.DiscriminatorColumn;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.ColumnTransformer;
@@ -16,13 +18,11 @@ import org.hibernate.annotations.Type;
 @Entity
 @DiscriminatorColumn(name = "FKS_META_T")
 @Table(name = "SYS_CD_C")
-public abstract class SystemCodeTable {
-
-  private static final long serialVersionUID = -3979949426929339075L;
+public class SystemCodeTable {
 
   @Id
   @Column(name = "SYS_ID")
-  @Access(AccessType.PROPERTY)//to get id without fetching entire System Code entity
+  @Access(AccessType.PROPERTY) // get id without fetching entire System Code entity.
   private Short systemId;
 
   @Column(name = "CATEGORYID")
