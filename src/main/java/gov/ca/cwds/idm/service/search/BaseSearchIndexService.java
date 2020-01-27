@@ -15,7 +15,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
-public abstract class BaseSearchIndexService {
+public class BaseSearchIndexService {
 
   private static final String DORA_URL = "doraUrl";
   private static final String ES_INDEX_NAME = "esIndexName";

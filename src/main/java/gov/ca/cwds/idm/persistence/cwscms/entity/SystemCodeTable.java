@@ -16,7 +16,7 @@ import org.hibernate.annotations.Type;
 @Entity
 @DiscriminatorColumn(name = "FKS_META_T")
 @Table(name = "SYS_CD_C")
-public abstract class SystemCodeTable {
+public class SystemCodeTable {
 
   private static final long serialVersionUID = -3979949426929339075L;
 

@@ -161,8 +161,8 @@ public class IdmServiceImpl implements IdmService {
   }
 
   @Override
-  public String createUser(User userDto) {
-    userDto = userService.enrichWithCwsData(userDto);
+  public String createUser(User submittedUser) {
+    User userDto = userService.enrichWithCwsData(submittedUser);
     String email = toLowerCase(userDto.getEmail());
     userDto.setEmail(email);
     String racfId = toUpperCase(userDto.getRacfid());
@@ -488,7 +488,8 @@ public class IdmServiceImpl implements IdmService {
         .collect(Collectors.toList());
   }
 
-  static Set<String> transformSearchValues(Set<String> values, StandardUserAttribute searchAttr) {
+  static Set<String> transformSearchValues(final Set<String> searchTerms, StandardUserAttribute searchAttr) {
+    Set<String> values = searchTerms;
     if (searchAttr == RACFID_STANDARD) {
       values = applyFunctionToValues(values, Utils::toUpperCase);
     } else if (searchAttr == EMAIL) {

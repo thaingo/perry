@@ -1,6 +1,6 @@
 package gov.ca.cwds.idm.service.diff;
 
-public abstract class Diff<T> {
+public class Diff<T> {
 
   protected final T oldValue;
   protected final T newValue;
