@@ -119,7 +119,7 @@ public class IdmApiCustomError  implements Serializable {
     }
 
     private String getMessageWithCause(Exception e) {
-      StringBuffer result = new StringBuffer();
+      StringBuilder result = new StringBuilder();
       result.append(e.getMessage());
       Throwable cause = e.getCause();
       if (cause != null && cause.getMessage() != null) {
