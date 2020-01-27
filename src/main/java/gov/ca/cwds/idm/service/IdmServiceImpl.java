@@ -463,8 +463,10 @@ public class IdmServiceImpl implements IdmService {
 
   static Set<String> transformSearchValues(Set<String> values, StandardUserAttribute searchAttr) {
     Set<String> ret = values;
-    if (searchAttr == RACFID_STANDARD || searchAttr == EMAIL) {
+    if (searchAttr == RACFID_STANDARD) {
       ret = applyFunctionToValues(values, Utils::toUpperCase);
+    } else if (searchAttr == EMAIL) {
+      ret = applyFunctionToValues(values, Utils::toLowerCase);
     }
     return ret;
   }
