@@ -43,12 +43,13 @@ public class LoginResource {
       @ApiParam(name = "sp_id", value = "Service provider id")
       @RequestParam(name = "sp_id", required = false) String spId) throws Exception {
     String accessCode = loginService.issueAccessCode(spId);
-    if (StringUtils.isBlank(callback)) {
-      callback = properties.getHomePageUrl();
+    String callbackUrl = callback;
+    if (StringUtils.isBlank(callbackUrl)) {
+      callbackUrl = properties.getHomePageUrl();
     } else {
-      whiteList.validate("callback", callback);
+      whiteList.validate("callback", callbackUrl);
     }
-    String redirectUrl = addAccessCode(callback, accessCode);
+    String redirectUrl = addAccessCode(callbackUrl, accessCode);
     response.sendRedirect(redirectUrl);
   }
 
