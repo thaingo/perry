@@ -17,4 +17,5 @@ public class Diff<T> {
   public T getNewValue() {
     return newValue;
   }
+
 }

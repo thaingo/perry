@@ -3,17 +3,19 @@ package gov.ca.cwds.idm.service.search;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.CREATE;
 import static gov.ca.cwds.idm.persistence.ns.OperationType.UPDATE;
 
-import gov.ca.cwds.idm.persistence.ns.OperationType;
-import gov.ca.cwds.idm.service.cognito.SearchProperties;
-import gov.ca.cwds.idm.service.cognito.SearchProperties.SearchIndexProperties;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+
+import gov.ca.cwds.idm.persistence.ns.OperationType;
+import gov.ca.cwds.idm.service.cognito.SearchProperties;
+import gov.ca.cwds.idm.service.cognito.SearchProperties.SearchIndexProperties;
 
 public class BaseSearchIndexService {
 
@@ -23,6 +25,7 @@ public class BaseSearchIndexService {
   private static final String ID = "id";
 
   private static final String URL_TEMPLATE_ROOT =
+  //@formatter:off
       "{"
           + DORA_URL
           + "}/dora/{"
@@ -32,6 +35,7 @@ public class BaseSearchIndexService {
           + "}/{"
           + ID
           + "}";
+  //@formatter:on
 
   private static final String CREATE_URL_TEMPLATE = URL_TEMPLATE_ROOT + "/_create";
 
@@ -45,9 +49,11 @@ public class BaseSearchIndexService {
     URL_TEMPLATE_MAP.put(UPDATE, UPDATE_URL_TEMPLATE);
   }
 
-  @Autowired protected SearchProperties searchProperties;
+  @Autowired
+  protected SearchProperties searchProperties;
 
-  @Autowired private IndexRestSender restSender;
+  @Autowired
+  private IndexRestSender restSender;
 
   final <T> ResponseEntity<String> sendToIndex(T body, String id, OperationType operation,
       SearchIndexProperties indexProps) {
@@ -71,7 +77,7 @@ public class BaseSearchIndexService {
   }
 
   private HttpHeaders createHeaders() {
-    HttpHeaders headers = new HttpHeaders();
+    final HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
     return headers;
   }
@@ -97,4 +103,5 @@ public class BaseSearchIndexService {
   public void setRestSender(IndexRestSender restSender) {
     this.restSender = restSender;
   }
+
 }

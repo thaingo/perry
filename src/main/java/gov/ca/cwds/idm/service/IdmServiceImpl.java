@@ -25,6 +25,23 @@ import static gov.ca.cwds.util.Utils.toLowerCase;
 import static gov.ca.cwds.util.Utils.toUpperCase;
 import static java.util.stream.Collectors.toSet;
 
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import gov.ca.cwds.idm.dto.RegistrationResubmitResponse;
 import gov.ca.cwds.idm.dto.User;
 import gov.ca.cwds.idm.dto.UserAndOperation;
@@ -63,21 +80,6 @@ import gov.ca.cwds.idm.service.validation.ValidationService;
 import gov.ca.cwds.service.messages.MessageCode;
 import gov.ca.cwds.service.messages.MessagesService;
 import gov.ca.cwds.util.Utils;
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Profile("idm")
@@ -136,8 +138,7 @@ public class IdmServiceImpl implements IdmService {
     authorizeService.checkCanUpdateUser(existedUser, updateUserDto);
     validationService.validateUserUpdate(existedUser, updateUserDto);
 
-    UserUpdateRequest userUpdateRequest =
-        prepareUserUpdateRequest(existedUser, updateUserDto);
+    UserUpdateRequest userUpdateRequest = prepareUserUpdateRequest(existedUser, updateUserDto);
 
     ExecutionStatus updateAttributesStatus = updateUserAttributes(userUpdateRequest);
 
@@ -156,13 +157,13 @@ public class IdmServiceImpl implements IdmService {
       LOGGER.info(messages.getTechMessage(USER_NOTHING_UPDATED, userId));
     }
 
-    handleUpdatePartialSuccess(
-        userId, updateAttributesStatus, updateUserEnabledExecution, doraExecution);
+    handleUpdatePartialSuccess(userId, updateAttributesStatus, updateUserEnabledExecution,
+        doraExecution);
   }
 
   @Override
-  public String createUser(User submittedUser) {
-    User userDto = userService.enrichWithCwsData(submittedUser);
+  public String createUser(User userDto) {
+    userService.enrichWithCwsData(userDto);
     String email = toLowerCase(userDto.getEmail());
     userDto.setEmail(email);
     String racfId = toUpperCase(userDto.getRacfid());
@@ -170,11 +171,14 @@ public class IdmServiceImpl implements IdmService {
     validationService.validateUserCreate(userDto);
     authorizeService.checkCanCreateUser(userDto);
     User createdUser = userService.createUser(userDto);
-    LOGGER.info("New user with username:{} was successfully created in Cognito", createdUser.getId());
+    LOGGER.info("New user with username:{} was successfully created in Cognito",
+        createdUser.getId());
     transactionalUserService.createUserInDbWithInvitationEmail(createdUser);
-    LOGGER.info("New user with username:{} was successfully created in database", createdUser.getId());
+    LOGGER.info("New user with username:{} was successfully created in database",
+        createdUser.getId());
     auditService.saveAuditEvent(new UserCreatedEvent(createdUser));
-    PutInSearchExecution doraExecution = userSearchService.createUserInSearch(createdUser);
+    final PutInSearchExecution<User> doraExecution =
+        userSearchService.createUserInSearch(createdUser);
     handleCreatePartialSuccess(createdUser, doraExecution);
     return createdUser.getId();
   }
@@ -196,13 +200,9 @@ public class IdmServiceImpl implements IdmService {
 
   @Override
   public List<UserAndOperation> getFailedOperations(LocalDateTime lastJobTime) {
-
     deleteProcessedLogs(lastJobTime);
 
-    List<UserIdAndOperation> dbList = userLogService.getUserIdAndOperations(lastJobTime);
-
-    return filterIdAndOperationList(dbList)
-        .stream()
+    return filterIdAndOperationList(userLogService.getUserIdAndOperations(lastJobTime)).stream()
         .map(e -> new UserAndOperation(userService.getUser(e.getId()), e.getOperation()))
         .collect(Collectors.toList());
   }
@@ -235,7 +235,8 @@ public class IdmServiceImpl implements IdmService {
   }
 
   @Override
-  @SuppressWarnings({"squid:S1166"})//Validation exceptions are already logged by ValidationService
+  @SuppressWarnings({"squid:S1166"}) // Validation exceptions are already logged by
+                                     // ValidationService
   public UserVerificationResult verifyIfUserCanBeCreated(String racfId, String email) {
     User userDto = new User();
     userDto.setEmail(toLowerCase(email));
@@ -279,46 +280,42 @@ public class IdmServiceImpl implements IdmService {
       List<AuditEvent> auditEvents) {
     Optional<StringDiff> optPhoneNumberDiff = updateDifference.getPhoneNumberDiff();
     Optional<StringDiff> optExtNumberDiff = updateDifference.getPhoneExtensionNumberDiff();
-    if(optPhoneNumberDiff.isPresent() || optExtNumberDiff.isPresent()) {
-      auditEvents.add(new WorkerPhoneChangedEvent(existedUser, optPhoneNumberDiff, optExtNumberDiff));
+    if (optPhoneNumberDiff.isPresent() || optExtNumberDiff.isPresent()) {
+      auditEvents
+          .add(new WorkerPhoneChangedEvent(existedUser, optPhoneNumberDiff, optExtNumberDiff));
     }
   }
 
   private void addCellPhoneChangedEvent(User existedUser, UpdateDifference updateDifference,
       List<AuditEvent> auditEvents) {
-    updateDifference.getCellPhoneNumberDiff().ifPresent(cellPhoneNumberDiff ->
-        auditEvents.add(new CellPhoneChangedEvent(existedUser, cellPhoneNumberDiff))
-    );
+    updateDifference.getCellPhoneNumberDiff().ifPresent(cellPhoneNumberDiff -> auditEvents
+        .add(new CellPhoneChangedEvent(existedUser, cellPhoneNumberDiff)));
   }
 
   private void addEmailChangedEvent(User existedUser, UpdateDifference updateDifference,
       List<AuditEvent> auditEvents) {
-    updateDifference.getEmailDiff().ifPresent(emailDiff ->
-        auditEvents.add(new EmailChangedEvent(existedUser, emailDiff))
-    );
+    updateDifference.getEmailDiff()
+        .ifPresent(emailDiff -> auditEvents.add(new EmailChangedEvent(existedUser, emailDiff)));
   }
 
   private void addPermissionsChangedEvent(User existedUser, UpdateDifference updateDifference,
       List<AuditEvent> auditEvents) {
     updateDifference.getPermissionsDiff().ifPresent(permissionsDiff -> {
-          List<Permission> permissions = dictionaryProvider.getPermissions();
-          auditEvents.add(
-              new PermissionsChangedEvent(existedUser, permissionsDiff, permissions));
-        }
-    );
+      List<Permission> permissions = dictionaryProvider.getPermissions();
+      auditEvents.add(new PermissionsChangedEvent(existedUser, permissionsDiff, permissions));
+    });
   }
 
   private void addNotesChangedEvent(User existedUser, UpdateDifference updateDifference,
       List<AuditEvent> auditEvents) {
-    updateDifference.getNotesDiff().ifPresent(notesDiff ->
-        auditEvents.add(new NotesChangedEvent(existedUser, notesDiff)));
+    updateDifference.getNotesDiff()
+        .ifPresent(notesDiff -> auditEvents.add(new NotesChangedEvent(existedUser, notesDiff)));
   }
 
   private void addRoleChangedEvent(User existedUser, UpdateDifference updateDifference,
       List<AuditEvent> auditEvents) {
-    updateDifference.getRolesDiff().ifPresent(rolesDiff ->
-        auditEvents.add(
-            new UserRoleChangedEvent(existedUser, rolesDiff)));
+    updateDifference.getRolesDiff()
+        .ifPresent(rolesDiff -> auditEvents.add(new UserRoleChangedEvent(existedUser, rolesDiff)));
   }
 
   private ExecutionStatus updateUserAttributes(UserUpdateRequest userUpdateRequest) {
@@ -331,9 +328,7 @@ public class IdmServiceImpl implements IdmService {
     return updateAttributesStatus;
   }
 
-  private void handleUpdatePartialSuccess(
-      String userId,
-      ExecutionStatus updateAttributesStatus,
+  private void handleUpdatePartialSuccess(String userId, ExecutionStatus updateAttributesStatus,
       OptionalExecution<BooleanDiff, Void> updateUserEnabledExecution,
       PutInSearchExecution<User> doraExecution) {
 
@@ -357,78 +352,60 @@ public class IdmServiceImpl implements IdmService {
     }
 
     if (updateAttributesStatus == SUCCESS && updateEnableStatus == FAIL) { // partial Cognito update
-      handleUpdatePartialSuccessWithCognitoFail(
-          userId, updateEnableException, doraStatus, doraException, logDbStatus, logDbException);
+      handleUpdatePartialSuccessWithCognitoFail(userId, updateEnableException, doraStatus,
+          doraException, logDbStatus, logDbException);
     } else { // no Cognito partial update
-      handleUpdatePartialSuccessNoCognitoFail(
-          userId, doraStatus, doraException, logDbStatus, logDbException);
+      handleUpdatePartialSuccessNoCognitoFail(userId, doraStatus, doraException, logDbStatus,
+          logDbException);
     }
   }
 
-  private void handleUpdatePartialSuccessWithCognitoFail(
-      String userId,
-      Exception updateEnableException,
-      ExecutionStatus doraStatus,
-      Exception doraException,
-      ExecutionStatus logDbStatus,
-      Exception logDbException) {
+  private void handleUpdatePartialSuccessWithCognitoFail(String userId,
+      Exception updateEnableException, ExecutionStatus doraStatus, Exception doraException,
+      ExecutionStatus logDbStatus, Exception logDbException) {
 
     if (doraStatus == SUCCESS) {
       throwPartialSuccessException(userId, UPDATE, USER_PARTIAL_UPDATE, updateEnableException);
 
     } else if (doraStatus == FAIL && logDbStatus == SUCCESS) {
-      throwPartialSuccessException(
-          userId,
-          UPDATE,
-          USER_PARTIAL_UPDATE_AND_SAVE_TO_SEARCH_ERRORS,
-          updateEnableException,
-          doraException);
+      throwPartialSuccessException(userId, UPDATE, USER_PARTIAL_UPDATE_AND_SAVE_TO_SEARCH_ERRORS,
+          updateEnableException, doraException);
 
     } else if (doraStatus == FAIL && logDbStatus == FAIL) {
-      throwPartialSuccessException(
-          userId,
-          UPDATE,
-          USER_PARTIAL_UPDATE_AND_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS,
-          updateEnableException,
-          doraException,
-          logDbException);
+      throwPartialSuccessException(userId, UPDATE,
+          USER_PARTIAL_UPDATE_AND_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS, updateEnableException,
+          doraException, logDbException);
     }
   }
 
-  private void handleUpdatePartialSuccessNoCognitoFail(
-      String userId,
-      ExecutionStatus doraStatus,
-      Exception doraException,
-      ExecutionStatus logDbStatus,
-      Exception logDbException) {
+  private void handleUpdatePartialSuccessNoCognitoFail(String userId, ExecutionStatus doraStatus,
+      Exception doraException, ExecutionStatus logDbStatus, Exception logDbException) {
 
     if (doraStatus == FAIL && logDbStatus == SUCCESS) {
       throwPartialSuccessException(userId, UPDATE, USER_UPDATE_SAVE_TO_SEARCH_ERROR, doraException);
 
     } else if (doraStatus == FAIL && logDbStatus == FAIL) {
-      throwPartialSuccessException(
-          userId, UPDATE, USER_UPDATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS, doraException,
-          logDbException);
+      throwPartialSuccessException(userId, UPDATE, USER_UPDATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS,
+          doraException, logDbException);
     }
   }
 
-  private OptionalExecution<BooleanDiff, Void> executeUpdateEnableStatusOptionally(
-      User existedUser, BooleanDiff enabledDiff) {
+  private OptionalExecution<BooleanDiff, Void> executeUpdateEnableStatusOptionally(User existedUser,
+      BooleanDiff enabledDiff) {
     return new OptionalExecution<BooleanDiff, Void>(enabledDiff) {
 
       @Override
       public Void tryMethod(BooleanDiff enabledDiff) {
-        cognitoServiceFacade
-            .changeUserEnabledStatus(existedUser.getId(), enabledDiff.getNewValue());
-        auditService.saveAuditEvent(
-            new UserEnabledStatusChangedEvent(existedUser, enabledDiff));
+        cognitoServiceFacade.changeUserEnabledStatus(existedUser.getId(),
+            enabledDiff.getNewValue());
+        auditService.saveAuditEvent(new UserEnabledStatusChangedEvent(existedUser, enabledDiff));
         return null;
       }
 
       @Override
       protected void catchMethod(Exception e) {
-        LOGGER.error(
-            messages.getTechMessage(ERROR_UPDATE_USER_ENABLED_STATUS, existedUser.getId()), e);
+        LOGGER.error(messages.getTechMessage(ERROR_UPDATE_USER_ENABLED_STATUS, existedUser.getId()),
+            e);
       }
     };
   }
@@ -442,8 +419,8 @@ public class IdmServiceImpl implements IdmService {
             doraExecution.getException());
       } else { // logging in db failed
         throwPartialSuccessException(user.getId(), CREATE,
-            USER_CREATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS,
-            doraExecution.getException(), dbLogExecution.getException());
+            USER_CREATE_SAVE_TO_SEARCH_AND_DB_LOG_ERRORS, doraExecution.getException(),
+            dbLogExecution.getException());
       }
     }
   }
@@ -461,10 +438,9 @@ public class IdmServiceImpl implements IdmService {
     }
   }
 
-  private void throwPartialSuccessException(
-      String userId, OperationType operationType, MessageCode errorCode, Exception... causes) {
-    throw exceptionFactory.createPartialSuccessException(userId, operationType, errorCode,
-        causes);
+  private void throwPartialSuccessException(String userId, OperationType operationType,
+      MessageCode errorCode, Exception... causes) {
+    throw exceptionFactory.createPartialSuccessException(userId, operationType, errorCode, causes);
   }
 
   private static List<UserIdAndOperation> filterIdAndOperationList(
@@ -481,21 +457,18 @@ public class IdmServiceImpl implements IdmService {
       }
     }
 
-    return idAndOperationMap
-        .entrySet()
-        .stream()
-        .map(e -> new UserIdAndOperation(e.getKey(), e.getValue()))
-        .collect(Collectors.toList());
+    return idAndOperationMap.entrySet().stream()
+        .map(e -> new UserIdAndOperation(e.getKey(), e.getValue())).collect(Collectors.toList());
   }
 
-  static Set<String> transformSearchValues(final Set<String> searchTerms, StandardUserAttribute searchAttr) {
-    Set<String> values = searchTerms;
+  static Set<String> transformSearchValues(Set<String> values, StandardUserAttribute searchAttr) {
+    Set<String> ret = values;
     if (searchAttr == RACFID_STANDARD) {
-      values = applyFunctionToValues(values, Utils::toUpperCase);
+      ret = applyFunctionToValues(values, Utils::toUpperCase);
     } else if (searchAttr == EMAIL) {
-      values = applyFunctionToValues(values, Utils::toLowerCase);
+      ret = applyFunctionToValues(values, Utils::toLowerCase);
     }
-    return values;
+    return ret;
   }
 
   private static Set<String> applyFunctionToValues(Set<String> values,
@@ -520,8 +493,8 @@ public class IdmServiceImpl implements IdmService {
     User existedUser = userUpdateRequest.getExistedUser();
 
     if (optEnabledDiff.isPresent()) {
-      updateUserEnabledExecution = executeUpdateEnableStatusOptionally(existedUser,
-          optEnabledDiff.get());
+      updateUserEnabledExecution =
+          executeUpdateEnableStatusOptionally(existedUser, optEnabledDiff.get());
     } else {
       updateUserEnabledExecution = NoUpdateExecution.INSTANCE;
     }
@@ -534,8 +507,7 @@ public class IdmServiceImpl implements IdmService {
         || updateUserEnabledExecution.getExecutionStatus() == SUCCESS;
   }
 
-  public void setCognitoServiceFacade(
-      CognitoServiceFacade cognitoServiceFacade) {
+  public void setCognitoServiceFacade(CognitoServiceFacade cognitoServiceFacade) {
     this.cognitoServiceFacade = cognitoServiceFacade;
   }
 
