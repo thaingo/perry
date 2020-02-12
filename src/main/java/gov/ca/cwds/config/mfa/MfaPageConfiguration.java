@@ -1,10 +1,5 @@
 package gov.ca.cwds.config.mfa;
 
-import gov.ca.cwds.PerryProperties;
-import gov.ca.cwds.config.LoginServiceValidatorFilter;
-import gov.ca.cwds.service.OauthLogoutHandler;
-import gov.ca.cwds.service.mfa.CognitoResponseService;
-import gov.ca.cwds.web.PerryLogoutSuccessHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -13,6 +8,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -25,6 +21,12 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.context.WebApplicationContext;
 
+import gov.ca.cwds.PerryProperties;
+import gov.ca.cwds.config.LoginServiceValidatorFilter;
+import gov.ca.cwds.service.OauthLogoutHandler;
+import gov.ca.cwds.service.mfa.CognitoResponseService;
+import gov.ca.cwds.web.PerryLogoutSuccessHandler;
+
 @Profile("mfa")
 @Configuration
 @EnableWebSecurity
@@ -33,14 +35,19 @@ public class MfaPageConfiguration extends WebSecurityConfigurerAdapter {
 
   @Autowired
   private PerryProperties properties;
+
   @Autowired
   private MfaAuthenticationProvider authProvider;
+
   @Autowired
   private LoginServiceValidatorFilter loginServiceValidatorFilter;
+
   @Autowired
   private OauthLogoutHandler tokenRevocationLogoutHandler;
+
   @Autowired
   private PerryLogoutSuccessHandler perryLogoutSuccessHandler;
+
   @Autowired
   private CognitoResponseService cognitoResponseService;
 
@@ -51,24 +58,22 @@ public class MfaPageConfiguration extends WebSecurityConfigurerAdapter {
 
   @Override
   protected void configure(HttpSecurity http) throws Exception {
+    //@formatter:off
     http
-        .authorizeRequests()
-        .antMatchers("/authn/login").authenticated()
-        .antMatchers("/**").permitAll()
-        .and()
-        .formLogin()
-        .loginPage(properties.getLoginPageUrl())
-        .usernameParameter("CognitoResponse")
-        .defaultSuccessUrl(properties.getHomePageUrl())
-        .loginProcessingUrl("/login")
-        .failureUrl("/error")
-        .and()
-        .logout()
-        .logoutUrl("/authn/logout").permitAll()
-        .addLogoutHandler(tokenRevocationLogoutHandler)
-        .logoutSuccessHandler(perryLogoutSuccessHandler)
-        .and().csrf().disable()
-        .addFilterBefore(loginServiceValidatorFilter, UsernamePasswordAuthenticationFilter.class);
+      .authorizeRequests().antMatchers("/authn/login").authenticated()
+      .antMatchers(HttpMethod.TRACE, "/**").denyAll()
+      .antMatchers("/**").permitAll()
+      .and()
+      .formLogin().loginPage(properties.getLoginPageUrl()).usernameParameter("CognitoResponse")
+      .defaultSuccessUrl(properties.getHomePageUrl())
+      .loginProcessingUrl("/login")
+      .failureUrl("/error").and().logout()
+      .logoutUrl("/authn/logout").permitAll()
+      .addLogoutHandler(tokenRevocationLogoutHandler)
+      .logoutSuccessHandler(perryLogoutSuccessHandler)
+      .and().csrf().disable()
+      .addFilterBefore(loginServiceValidatorFilter, UsernamePasswordAuthenticationFilter.class);
+    //@formatter:on
   }
 
   @Bean
@@ -81,4 +86,5 @@ public class MfaPageConfiguration extends WebSecurityConfigurerAdapter {
     }
     return new DefaultOAuth2ClientContext();
   }
+
 }

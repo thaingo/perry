@@ -89,6 +89,9 @@ management:
     enabled: false
   ssl:
     enabled: false
+  trace:
+    http:
+      enabled: false
   endpoints:
     enabled: false
     health:
